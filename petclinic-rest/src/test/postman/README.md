@@ -21,7 +21,7 @@ Ensure the following are available:
 
 ```sh
 # Run the application from its root directory
-cd /path/to/spring-petclinic-rest
+cd /path/to/petclinic-rest
 mvn spring-boot:run
 ```
 

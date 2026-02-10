@@ -20,7 +20,7 @@ Ensure you have the following installed:
 - **Spring PetClinic REST API running locally**
     ```sh
     # Navigate to the Spring PetClinic REST project directory and start the application
-    cd /path/to/spring-petclinic-rest
+    cd /path/to/petclinic-rest
     mvn spring-boot:run
     ```
 

@@ -1,6 +1,6 @@
 import { SpringPetclinicAngularPage } from './app.po';
 
-describe('spring-petclinic-angular App', () => {
+describe('petclinic-angular App', () => {
   let page: SpringPetclinicAngularPage;
 
   beforeEach(() => {

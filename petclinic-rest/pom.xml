@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.springframework.samples</groupId>
-    <artifactId>spring-petclinic-rest</artifactId>
+    <artifactId>petclinic-rest</artifactId>
     <version>3.4.3</version>
 
     <description>REST version of the Spring Petclinic sample application</description>
@@ -21,7 +21,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
 
         <!-- SonarQube configuration -->
-        <sonar.organization>spring-petclinic-rest</sonar.organization>
+        <sonar.organization>petclinic-rest</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 

@@ -1,12 +1,12 @@
 # REST version of Spring PetClinic Sample Application (spring-framework-petclinic extension)
 
-[![Java Build Status](https://github.com/spring-petclinic/spring-petclinic-rest/actions/workflows/maven-build-master.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-rest/actions/workflows/maven-build-master.yml)
-[![Docker Build Status](https://github.com/spring-petclinic/spring-petclinic-rest/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-rest/actions/workflows/docker-build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_spring-petclinic-rest&metric=alert_status)](https://sonarcloud.io/dashboard?id=spring-petclinic_spring-petclinic-rest)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_spring-petclinic-rest&metric=coverage)](https://sonarcloud.io/dashboard?id=spring-petclinic_spring-petclinic-rest)
+[![Java Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml)
+[![Docker Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=alert_status)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=coverage)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
 
 This backend version of the Spring Petclinic application only provides a REST API. **There is no UI**.
-The [spring-petclinic-angular project](https://github.com/spring-petclinic/spring-petclinic-angular) is a Angular front-end application which consumes the REST API.
+The [petclinic-angular project](https://github.com/spring-petclinic/petclinic-angular) is a Angular front-end application which consumes the REST API.
 
 ## Understanding the Spring Petclinic application with a few diagrams
 
@@ -20,14 +20,14 @@ The [spring-petclinic-angular project](https://github.com/spring-petclinic/sprin
 
 ### With Maven command line
 ```sh
-git clone https://github.com/spring-petclinic/spring-petclinic-rest.git
-cd spring-petclinic-rest
+git clone https://github.com/spring-petclinic/petclinic-rest.git
+cd petclinic-rest
 ./mvnw spring-boot:run
 ```
 
 ### With Docker
 ```sh
-docker run -p 9966:9966 springcommunity/spring-petclinic-rest
+docker run -p 9966:9966 springcommunity/petclinic-rest
 ```
 
 You can then access petclinic here: [http://localhost:9966/petclinic/](http://localhost:9966/petclinic/)
@@ -93,12 +93,12 @@ API documentation (OAS 3.1) is accessible at: [http://localhost:9966/petclinic/v
 
 ## Screenshot of the Angular client
 
-See its repository here: https://github.com/spring-petclinic/spring-petclinic-angular
+See its repository here: https://github.com/spring-petclinic/petclinic-angular
 
-<img width="1427" alt="spring-petclinic-angular2" src="https://cloud.githubusercontent.com/assets/838318/23263243/f4509c4a-f9dd-11e6-951b-69d0ef72d8bd.png">
+<img width="1427" alt="petclinic-angular2" src="https://cloud.githubusercontent.com/assets/838318/23263243/f4509c4a-f9dd-11e6-951b-69d0ef72d8bd.png">
 
 ## In case you find a bug/suggested improvement for Spring Petclinic
-Our issue tracker is available here: https://github.com/spring-petclinic/spring-petclinic-rest/issues
+Our issue tracker is available here: https://github.com/spring-petclinic/petclinic-rest/issues
 
 ## Database configuration
 
@@ -241,7 +241,7 @@ If m2e is not there, just follow the install process here: http://eclipse.org/m2
 
 1) In the command line
 ```sh
-git clone https://github.com/spring-petclinic/spring-petclinic-rest.git
+git clone https://github.com/spring-petclinic/petclinic-rest.git
 ```
 2) Inside Eclipse
 ```
@@ -259,8 +259,8 @@ File -> Import -> Maven -> Existing Maven project
 
 ## Publishing a Docker image
 
-This application uses [Google Jib](https://github.com/GoogleContainerTools/jib) to build an optimized Docker image into the [Docker Hub](https://cloud.docker.com/u/springcommunity/repository/docker/springcommunity/spring-petclinic-rest/) repository.
-The [pom.xml](pom.xml) has been configured to publish the image with name: `springcommunity/spring-petclinic-rest`
+This application uses [Google Jib](https://github.com/GoogleContainerTools/jib) to build an optimized Docker image into the [Docker Hub](https://cloud.docker.com/u/springcommunity/repository/docker/springcommunity/petclinic-rest/) repository.
+The [pom.xml](pom.xml) has been configured to publish the image with name: `springcommunity/petclinic-rest`
 
 Command line to run:
 ```sh
@@ -300,13 +300,13 @@ This project contains **non-regression tests** for the Petclinic API, built with
 The Spring Petclinic master branch in the main [spring-projects](https://github.com/spring-projects/spring-petclinic)
 GitHub org is the "canonical" implementation, currently based on Spring Boot and Thymeleaf.
 
-This [spring-petclinic-rest](https://github.com/spring-petclinic/spring-petclinic-rest/) project is one of the [several forks](https://spring-petclinic.github.io/docs/forks.html) 
+This [petclinic-rest](https://github.com/spring-petclinic/petclinic-rest/) project is one of the [several forks](https://spring-petclinic.github.io/docs/forks.html) 
 hosted in a special GitHub org: [spring-petclinic](https://github.com/spring-petclinic).
 If you have a special interest in a different technology stack
 that could be used to implement the Pet Clinic then please join the community there.
 
 # Contributing
 
-The [issue tracker](https://github.com/spring-petclinic/spring-petclinic-rest/issues) is the preferred channel for bug reports, features requests and submitting pull requests.
+The [issue tracker](https://github.com/spring-petclinic/petclinic-rest/issues) is the preferred channel for bug reports, features requests and submitting pull requests.
 
-For pull requests, editor preferences are available in the [editor config](https://github.com/spring-petclinic/spring-petclinic-rest/blob/master/.editorconfig) for easy use in common text editors. Read more and download plugins at <http://editorconfig.org>.
+For pull requests, editor preferences are available in the [editor config](https://github.com/spring-petclinic/petclinic-rest/blob/master/.editorconfig) for easy use in common text editors. Read more and download plugins at <http://editorconfig.org>.
