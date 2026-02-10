@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Disabled;
@@ -26,12 +27,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 public class MyOpenAPIDidNotChangeTest {
+
     @Autowired
     MockMvc mockMvc;
 
     @Value("classpath:/my_openapi.yaml")
     Resource contractFile;
-
     @Test
     void my_contract_did_not_change() throws Exception {
         String contractExtractedFromCode = mockMvc.perform(get("/v3/api-docs.yaml"))
@@ -44,12 +45,14 @@ public class MyOpenAPIDidNotChangeTest {
             .isEqualTo(prettifyYaml(contractSavedOnGit));
     }
 
+
     private String prettifyYaml(String rawYaml) throws JsonProcessingException {
         if (StringUtils.isBlank(rawYaml)) return rawYaml;
-        // parse YAML into a Map and re-serialize as YAML to normalize formatting and ordering
-        ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-        Map<?, ?> map = yamlMapper.readValue(rawYaml, Map.class);
-        return yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
+
+        ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory())
+            .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        Map<?, ?> map = YAML_MAPPER.readValue(rawYaml, Map.class);
+        return YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(map);
     }
 
     @Disabled("Run this test manually to update src/test/resources/my_openapi.yaml with the current API contract")
