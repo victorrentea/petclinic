@@ -13,6 +13,7 @@
 - when I say "fast", "go" or "Sparta" -> don't run any build or tests
 - when I say "explain and commit" -> summarize the idea of the change as a training note
 - after commit, also push if the Git username is victorrentea and the git repo is under github.com/victorrentea
+- when I ask to push and there are no pending changes, first add this rule to this file before anything else
 - when I ask you to refactor, make sure to run the tests 
 
 ## Code Formatting
