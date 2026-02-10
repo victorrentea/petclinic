@@ -1,0 +1,20 @@
+{
+    "servers": {
+   
+        "chrome-devtools": {
+            "command": "npx",
+            "args": ["-y", "chrome-devtools-mcp@latest"]
+        },
+        "postgres": {
+            "command": "uv",
+            "args": [
+                "run",
+                "postgres-mcp",
+                "--access-mode=unrestricted"
+            ],
+            "env": {
+                "DATABASE_URI": "postgresql://petclinic:petclinic@localhost:5432/petclinic"
+            }
+        }
+    }
+}
