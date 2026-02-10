@@ -1,24 +1,27 @@
 package org.springframework.samples.petclinic.rest.dto;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class VetDto {
 
     @NotNull
-    @Pattern(regexp = "^\\p{L}+([ '-][\\p{L}]+){0,2")
+    @Pattern(regexp = "\\w+")
     @Size(min = 1, max = 30)
     @Schema(example = "James", description = "The first name of the vet.")
     private String firstName;
 
     @NotNull
-    @Pattern(regexp = "^\\p{L}+([ '-][\\p{L}]+){0,2}\\.")
+    @Pattern(regexp = "\\w+")
     @Size(min = 1, max = 30)
     @Schema(example = "Carter", description = "The last name of the vet.")
     private String lastName;
