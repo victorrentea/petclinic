@@ -13,8 +13,9 @@
 - when I say "fast", "go" or "Sparta" -> don't run any build or tests
 - when I say "explain and commit" -> summarize the idea of the change as a training note
 - after commit, also push if the Git username is victorrentea and the git repo is under github.com/victorrentea
-- when I ask to push and there are no pending changes, first add this rule to this file before anything else
+- when I ask to push and there are no pending changes, commit any pending changes first
 - when I ask you to refactor, make sure to run the tests 
+- when I tell you to remember a certain ground rule, update .githun/copilot-instructions.md or specialized .github/instructions/*.md files with that rule
 
 ## Code Formatting
 - use blank lines to separate logical blocks of code, or given/when/then sections of a @Test
