@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)/scripts"
+PY="$SCRIPT_DIR/check_jacoco_line.py"
+if [ ! -f "$PY" ]; then
+  echo "Missing script: $PY" >&2
+  exit 3
+fi
+exec python3 "$PY" "$@"

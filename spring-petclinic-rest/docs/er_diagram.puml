@@ -1,0 +1,84 @@
+@startuml
+' Petclinic ER diagram (converted from provided image)
+skinparam linetype ortho
+hide circle
+
+entity "visits" as VISITS {
+  * id : serial <<PK>>
+  --
+  pet_id : int <<FK>>
+  visit_date : date
+  description : varchar(255)
+}
+
+entity "pets" as PETS {
+  * id : serial <<PK>>
+  --
+  name : varchar(30)
+  birth_date : date
+  type_id : int <<FK>>
+  owner_id : int <<FK>>
+}
+
+entity "owners" as OWNERS {
+  * id : serial <<PK>>
+  --
+  first_name : varchar(30)
+  last_name  : varchar(30)
+  address    : varchar(255)
+  city       : varchar(80)
+  telephone  : varchar(20)
+}
+
+entity "types" as TYPES {
+  * id : serial <<PK>>
+  --
+  name : varchar(80)
+}
+
+entity "vets" as VETS {
+  * id : serial <<PK>>
+  --
+  first_name : varchar(30)
+  last_name  : varchar(30)
+}
+
+entity "specialties" as SPECIALTIES {
+  * id : serial <<PK>>
+  --
+  name : varchar(80)
+}
+
+entity "vet_specialties" as VET_SPECIALTIES {
+  * vet_id       : int <<FK,PK>>
+  * specialty_id : int <<FK,PK>>
+}
+
+entity "users" as USERS {
+  * username : varchar(20) <<PK>>
+  --
+  password : varchar(20)
+  enabled  : boolean
+}
+
+entity "roles" as ROLES {
+  * id       : serial <<PK>>
+  --
+  username : varchar(20) <<FK>>
+  role     : varchar(20)
+}
+
+' Relationships
+OWNERS ||--o{ PETS : "owner_id"
+TYPES  ||--o{ PETS : "type_id"
+PETS   ||--o{ VISITS : "pet_id"
+
+VETS ||--o{ VET_SPECIALTIES : "vet_id"
+SPECIALTIES ||--o{ VET_SPECIALTIES : "specialty_id"
+
+USERS ||--o{ ROLES : "username"
+
+' spacing helper
+VISITS -[hidden]- VET_SPECIALTIES
+
+@enduml
