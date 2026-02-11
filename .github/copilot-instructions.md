@@ -10,6 +10,7 @@
 - if a task takes you more than 5 seconds in IntelliJ, play a chime after completing it using `afplay /System/Library/Sounds/Glass.aiff`
 - when I ask for pagination, default to server-side pagination
 - if you learn something important about my build environment that can help you later, ask me if I want you to update the  global instructions file, to save time next time
+- the local Angular app runs at http://localhost:4200
 
 ## Victor's Personal Preferences
 - when I say "fast", "go" or "Sparta" -> don't run any build or tests
@@ -87,3 +88,12 @@
 - if >80% of fields of a class require @Getter or @Setter, place it on the class, using eg @Getter(NONE) for those not fields not needing it
 - never use any experimental Lombok feature
 - set lombok.accessors.chain=true in lombok.config
+
+
+# Code Review Rules
+- Prioritize correctness and architectural integrity.
+- Highlight concurrency and transactional issues.
+- Suggest refactorings, not rewrites.
+- Assume Java 21+, Spring Boot 3.
+- Skip basic explanations.
+TODO sa verific ca merge

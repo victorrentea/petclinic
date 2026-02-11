@@ -1,8 +1,10 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -56,16 +58,16 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "name", required = false) String name) {
-        String trimmedName = name == null ? "" : name.trim();
-        List<Owner> owners;
-        if (trimmedName.isEmpty()) {
-            owners = ownerRepository.findAll();
-        } else {
-            owners = ownerRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(trimmedName, trimmedName);
-        }
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String address,
+        @PageableDefault(size = 10, sort = {"lastName", "firstName", "address", "city"}) Pageable pageable
+    ) {
+        String trimmedName = normalizeSearchTerm(name);
+        String trimmedAddress = normalizeSearchTerm(address);
+
+        return ownerRepository.findByNameAndAddress(trimmedName, trimmedAddress, pageable)
+            .map(ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
@@ -148,5 +150,13 @@ public class OwnerRestController {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow();
         Pet pet = owner.getPetById(petId).orElseThrow();
         return petMapper.toPetDto(pet);
+    }
+
+    private String normalizeSearchTerm(String rawTerm) {
+        if (rawTerm == null) {
+            return "";
+        }
+
+        return rawTerm.trim();
     }
 }

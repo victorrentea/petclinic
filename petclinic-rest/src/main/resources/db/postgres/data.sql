@@ -33,6 +33,8 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Jef
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Maria', 'Escobito', '345 Maple St.', 'Madison', '6085557683' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=8);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'David', 'Schroeder', '2749 Blackhawk Trail', 'Madison', '6085559435' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=9);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=10);
+INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Lydia', 'Quark', '42 Kernel Way', 'Madison', '6085559012' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=11);
+INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Oscar', 'Byte', '9 Cache Ct.', 'Monona', '6085553344' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=12);
 
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Leo', '2000-09-07', 1, 1 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=1);
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Basil', '2002-08-06', 6, 2 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=2);

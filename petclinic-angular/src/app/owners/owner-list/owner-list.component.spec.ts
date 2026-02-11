@@ -7,7 +7,8 @@ import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {OwnerService} from '../owner.service';
+import { OwnerPage } from '../owner-page';
+import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -23,7 +24,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
+  getOwners(): Observable<OwnerPage> {
     return of();
   }
 }
@@ -48,6 +49,7 @@ describe('OwnerListComponent', () => {
     pets: null
   };
   let testOwners: Owner[];
+  let testPage: OwnerPage;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -87,11 +89,19 @@ describe('OwnerListComponent', () => {
       }]
     }];
 
+    testPage = {
+      content: testOwners,
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 10
+    };
+
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
     spy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
+      .and.returnValue(of(testPage));
 
   });
 
@@ -122,7 +132,10 @@ describe('OwnerListComponent', () => {
 
     component.searchOnEnter();
 
-    expect(spy).toHaveBeenCalledWith('Ana Maria');
+    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'Ana Maria',
+      address: ''
+    }));
   });
 
   it('queueSearch should debounce and call getOwners with normalized term', fakeAsync(() => {
@@ -131,13 +144,18 @@ describe('OwnerListComponent', () => {
     component.ngOnInit();
     spy.calls.reset();
 
-    component.queueSearch('  Ana   ');
+    component.name = '  Ana   ';
+
+    component.queueSearch();
 
     tick(299);
     expect(spy).not.toHaveBeenCalled();
 
     tick(1);
-    expect(spy).toHaveBeenCalledWith('Ana');
+    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'Ana',
+      address: ''
+    }));
   }));
 
 });

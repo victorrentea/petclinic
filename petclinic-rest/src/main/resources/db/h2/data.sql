@@ -43,7 +43,9 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
 ('Jeff', 'Black', '1450 Oak Blvd.', 'Monona', '6085555387'),
 ('Maria', 'Escobito', '345 Maple St.', 'Madison', '6085557683'),
 ('David', 'Schroeder', '2749 Blackhawk Trail', 'Madison', '6085559435'),
-('Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487');
+('Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487'),
+('Lydia', 'Quark', '42 Kernel Way', 'Madison', '6085559012'),
+('Oscar', 'Byte', '9 Cache Ct.', 'Monona', '6085553344');
 
 -- Insert Pets
 INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES 
