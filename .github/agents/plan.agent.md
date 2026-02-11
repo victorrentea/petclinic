@@ -1,11 +1,11 @@
 ---
-description: 'Architect and planner to create detailed implementation plans.'
-tools: ['web/fetch', 'web/githubRepo', 'read/problems', 'search/usages', 'search', 'todo', 'agent', 'github/github-mcp-server/get_issue', 'github/github-mcp-server/get_issue_comments', 'github/list_issues']
+description: Architect and planner to create detailed implementation plans.
+tools: ['web/fetch', 'web/githubRepo', 'read/problems', 'search/usages', 'search', 'todo', 'agent']
 handoffs:
-- label: Start Implementation
+- label: Start Implementation 
     agent: tdd
     prompt: Now implement the plan outlined above using TDD principles.
-    send: true
+    send: true #automatically send to next agent on user click
 ---
 # Planning Agent
 

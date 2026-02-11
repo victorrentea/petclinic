@@ -8,7 +8,7 @@
 - tell me if my instructions don’t make sense
 
 - if a task takes you more than 5 seconds in IntelliJ, play a chime after completing it using `afplay /System/Library/Sounds/Glass.aiff`
-- if a task involves changing more than 1 file, if there are any pending uncommited changes, ask user if you should commit them first
+- when I ask for pagination, default to server-side pagination
 - if you learn something important about my build environment that can help you later, ask me if I want you to update the  global instructions file, to save time next time
 
 ## Victor's Personal Preferences
