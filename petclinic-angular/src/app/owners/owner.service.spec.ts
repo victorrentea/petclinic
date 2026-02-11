@@ -14,7 +14,7 @@ import {
 
 import { HttpErrorHandler } from '../error.service';
 
-import { OwnerService, PagedResponse } from './owner.service';
+import { OwnerService } from './owner.service';
 import { Owner } from './owner';
 import { Type } from '@angular/core';
 import { defer } from 'rxjs';
@@ -23,7 +23,6 @@ describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
   let ownerService: OwnerService;
   let expectedOwners: Owner[];
-  let expectedPage: PagedResponse<Owner>;
   let httpClientSpy: { get: jasmine.Spy };
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -37,13 +36,6 @@ describe('OwnerService', () => {
       { id: 1, firstName: 'A' },
       { id: 2, firstName: 'B' },
     ] as Owner[];
-    expectedPage = {
-      content: expectedOwners,
-      number: 0,
-      size: 10,
-      totalElements: 2,
-      totalPages: 1
-    } as PagedResponse<Owner>;
     // Inject the http, test controller, and service-under-test
     // as they will be referenced by each test.
     httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
@@ -63,8 +55,8 @@ describe('OwnerService', () => {
     ownerService
       .getOwners()
       .subscribe(
-        (page) =>
-          expect(page.content).toEqual(
+        (owners) =>
+          expect(owners).toEqual(
             expectedOwners,
             'should return expected owners'
           ),
@@ -72,61 +64,47 @@ describe('OwnerService', () => {
       );
 
     // OwnerService should have made one request to GET owners from expected URL
-    const req = httpTestingController.expectOne((request) =>
-      request.url === ownerService.entityUrl
-      && request.params.get('page') === '0'
-      && request.params.get('size') === '10');
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
-    expect(req.request.params.has('sort')).toBe(false);
 
     // Respond with the mock owners
-    req.flush(expectedPage);
+    req.flush(expectedOwners);
   });
 
   it('should include trimmed name in query param', () => {
     ownerService
-      .getOwners({ name: '  Franklin  ' })
+      .getOwners('  Franklin  ')
       .subscribe(
-        (page) =>
-          expect(page.content).toEqual(
+        (owners) =>
+          expect(owners).toEqual(
             expectedOwners,
             'should return expected owners'
           ),
         fail
       );
 
-    const req = httpTestingController.expectOne((request) =>
-      request.url === ownerService.entityUrl
-      && request.params.get('name') === 'Franklin'
-      && request.params.get('page') === '0'
-      && request.params.get('size') === '10');
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?name=Franklin');
     expect(req.request.method).toEqual('GET');
-    expect(req.request.params.has('sort')).toBe(false);
 
-    req.flush(expectedPage);
+    req.flush(expectedOwners);
   });
 
   it('should not include name when blank', () => {
     ownerService
-      .getOwners({ name: '   ' })
+      .getOwners('   ')
       .subscribe(
-        (page) =>
-          expect(page.content).toEqual(
+        (owners) =>
+          expect(owners).toEqual(
             expectedOwners,
             'should return expected owners'
           ),
         fail
       );
 
-    const req = httpTestingController.expectOne((request) =>
-      request.url === ownerService.entityUrl
-      && !request.params.has('name')
-      && request.params.get('page') === '0'
-      && request.params.get('size') === '10');
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
-    expect(req.request.params.has('sort')).toBe(false);
 
-    req.flush(expectedPage);
+    req.flush(expectedOwners);
   });
 
   it('search the owner by id', () => {

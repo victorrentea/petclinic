@@ -7,7 +7,7 @@ import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {OwnerService, PagedResponse} from '../owner.service';
+import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -23,7 +23,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(searchParams?: any): Observable<PagedResponse<Owner>> {
+  getOwners(): Observable<Owner[]> {
     return of();
   }
 }
@@ -48,7 +48,6 @@ describe('OwnerListComponent', () => {
     pets: null
   };
   let testOwners: Owner[];
-  let testPage: PagedResponse<Owner>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -87,19 +86,12 @@ describe('OwnerListComponent', () => {
         visits: null
       }]
     }];
-    testPage = {
-      content: testOwners,
-      number: 0,
-      size: 10,
-      totalElements: 1,
-      totalPages: 1
-    } as PagedResponse<Owner>;
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
     spy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testPage));
+      .and.returnValue(of(testOwners));
 
   });
 
@@ -127,17 +119,10 @@ describe('OwnerListComponent', () => {
     spy.calls.reset();
 
     component.name = '  Ana   Maria  ';
-    component.address = '  Strada   Lunga  ';
 
     component.searchOnEnter();
 
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-      name: 'Ana Maria',
-      address: 'Strada Lunga',
-      page: 0,
-      size: 10,
-      sort: ['firstName,asc', 'lastName,asc']
-    }));
+    expect(spy).toHaveBeenCalledWith('Ana Maria');
   });
 
   it('queueSearch should debounce and call getOwners with normalized term', fakeAsync(() => {
@@ -146,22 +131,13 @@ describe('OwnerListComponent', () => {
     component.ngOnInit();
     spy.calls.reset();
 
-    component.name = '  Ana   ';
-    component.address = '  Calea   Victoriei  ';
-
-    component.queueSearch();
+    component.queueSearch('  Ana   ');
 
     tick(299);
     expect(spy).not.toHaveBeenCalled();
 
     tick(1);
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-      name: 'Ana',
-      address: 'Calea Victoriei',
-      page: 0,
-      size: 10,
-      sort: ['firstName,asc', 'lastName,asc']
-    }));
+    expect(spy).toHaveBeenCalledWith('Ana');
   }));
 
 });

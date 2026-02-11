@@ -1,11 +1,8 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -59,29 +56,16 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public Page<OwnerDto> listOwners(@RequestParam(name = "name", required = false) String name,
-                                     @RequestParam(name = "address", required = false) String address,
-                                     @PageableDefault(size = 10,
-                                         sort = { "firstName", "lastName" },
-                                         direction = Sort.Direction.ASC) Pageable pageable) {
+    public List<OwnerDto> listOwners(@RequestParam(name = "name", required = false) String name) {
         String trimmedName = name == null ? "" : name.trim();
-        String trimmedAddress = address == null ? "" : address.trim();
-        if (trimmedName.isEmpty() && trimmedAddress.isEmpty()) {
-            return ownerRepository.findAll(pageable)
-                .map(ownerMapper::toOwnerDto);
-        }
+        List<Owner> owners;
         if (trimmedName.isEmpty()) {
-            return ownerRepository
-                .findByAddressContainingIgnoreCaseOrCityContainingIgnoreCase(trimmedAddress, trimmedAddress, pageable)
-                .map(ownerMapper::toOwnerDto);
+            owners = ownerRepository.findAll();
+        } else {
+            owners = ownerRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(trimmedName, trimmedName);
         }
-        if (trimmedAddress.isEmpty()) {
-            return ownerRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(trimmedName, trimmedName, pageable)
-                .map(ownerMapper::toOwnerDto);
-        }
-        return ownerRepository.findByNameAndAddressContainingIgnoreCase(trimmedName, trimmedAddress, pageable)
-            .map(ownerMapper::toOwnerDto);
+        return ownerMapper.toOwnerDtoCollection(owners);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

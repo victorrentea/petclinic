@@ -2,32 +2,15 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
-
-export interface PagedResponse<T> {
-  content: T[];
-  number: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-}
-
-export interface OwnerSearchParams {
-  name?: string;
-  address?: string;
-  page?: number;
-  size?: number;
-  sort?: string[];
-}
 
 @Injectable()
 export class OwnerService {
   entityUrl = environment.REST_API_URL + 'owners';
 
   private readonly handlerError: HandleError;
-  private readonly defaultPageSize = 10;
 
   constructor(
     private http: HttpClient,
@@ -36,41 +19,15 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(searchParams: OwnerSearchParams = {}): Observable<PagedResponse<Owner>> {
-    const trimmedName = searchParams.name?.trim();
-    const trimmedAddress = searchParams.address?.trim();
-    const page = searchParams.page ?? 0;
-    const size = searchParams.size ?? this.defaultPageSize;
-    const sortEntries = searchParams.sort ?? [];
-    let params = new HttpParams();
-
+  getOwners(name?: string): Observable<Owner[]> {
+    let url = this.entityUrl;
+    const trimmedName = name?.trim();
     if (trimmedName) {
-      params = params.set('name', trimmedName);
+      url += '?name=' + trimmedName;
     }
-    if (trimmedAddress) {
-      params = params.set('address', trimmedAddress);
-    }
-
-    params = params.set('page', page.toString());
-    params = params.set('size', size.toString());
-
-    sortEntries.forEach((sortEntry) => {
-      params = params.append('sort', sortEntry);
-    });
-
     return this.http
-      .get<PagedResponse<Owner>>(this.entityUrl, { params })
-      .pipe(catchError(this.handlerError('getOwners', this.emptyPage(size))));
-  }
-
-  private emptyPage(size: number): PagedResponse<Owner> {
-    return {
-      content: [],
-      number: 0,
-      size,
-      totalElements: 0,
-      totalPages: 0
-    };
+      .get<Owner[]>(url)
+      .pipe(catchError(this.handlerError('getOwners', [])));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
