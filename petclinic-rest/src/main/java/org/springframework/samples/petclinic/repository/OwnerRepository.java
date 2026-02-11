@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.model.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
@@ -20,7 +19,7 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
         AND (:address IS NULL OR :address = ''
             OR UPPER(owner.address) LIKE UPPER(CONCAT('%', :address, '%')))
         """)
-    Page<Owner> findByNameAndAddress(@Param("name") String name, @Param("address") String address, Pageable pageable);
+    Page<Owner> findByNameAndAddress(String name, String address, Pageable pageable);
 
     Optional<Owner> findById(int id);
 

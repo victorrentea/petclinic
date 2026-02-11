@@ -2,7 +2,6 @@ package org.springframework.samples.petclinic.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.model.Vet;
 
 import java.util.Collection;
@@ -14,7 +13,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
     List<Vet> findAll();
 
     @Query("SELECT v FROM Vet v LEFT JOIN FETCH v.specialties WHERE v.id = :id")
-    Optional<Vet> findById(@Param("id") int id);
+    Optional<Vet> findById(int id);
 
     void save(Vet vet);
 
