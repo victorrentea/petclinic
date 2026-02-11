@@ -2,3 +2,43 @@
 description: Instructions for writing clean Java code
 applyTo: "**/*.java"
 ---
+
+## Clean Java Code
+- don't use deprecated apis
+- always remove unused imports
+- use imports instead of fully qualified class names
+- prefer multiple simpler lines to one complex line
+- use """ text blocks for any DB query having a JOIN or ≥2 WHERE clauses
+- use Java SE APIs over writing custom code
+- never use "this" to reference instance fields
+- consider records instead of classes with final fields
+- add factory methods in records instead of passing null in constructors
+- avoid comments - prefer extracting well-named constants, local variables, methods or classes
+- comments in code should be applied for: cron expressions and regex patterns
+- do not write obvious JavaDoc /** that rephrase code - document the intention, the "why", not implementation details
+- use constants to explain magic numbers and strings, or to avoid repeating the same domain value
+- decompose complex boolean conditions with explanatory variables
+- use descriptive names for classes, methods, and variables
+- avoid else statements when not necessary, unless the if is the last statement of the function
+- avoid meaningless suffixes: *Impl, *Manager, *Creator, *Factory
+- Keep methods small (ideally <=20 lines) and flat (max 3 level of indentation)
+- use Cuard Clauses to return or throw early from a function, to reduce the code indentation.
+- use explicit type for variables instead of `var` if an explanatory name is too long (>3 words)
+- watch out for NullPointerException when the source of data can't be verified (such as coming from a REST payload)
+- avoid checked exceptions; if thrown by library code, rethrow them wrapped in a runtime exception
+- do not create interfaces implemented by a single class; use classes directly
+- create multiple classes only if it decreases complexity and increases readability
+- Avoid getter methods starting with "get"; prefer record convention (e.g., name() not getName())
+- create well-named methods for coarse-grained, cohesive, self-contained logic
+- If a lambda requires multiple statements or braces {}, extract it into a well-named helper method
+- Do not create multiline lambda expressions; prefer method references instead
+- Extract repeated logic into helper methods (DRY principle)
+- Avoid creating empty delegate methods which just call methods without added value
+- extract variables to eliminate duplication
+- prefer enums over plain Strings for finite, well-defined values
+- reuse enum constants as values if possible; enum constants do not have to follow naming conventions
+- use try-with-resources instead of explicitly closing resources
+- to produce a collection, use Stream instead of a 'for' adding to an empty collection
+- prefer .toList() to .collect(Collectors.toList()), if the returned list is not mutated later
+- prefer List.of() over new ArrayList<>()
+- avoid long Stream chains - after 3-4 operators extract a variable or a method

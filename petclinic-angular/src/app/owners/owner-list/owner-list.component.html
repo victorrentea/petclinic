@@ -3,16 +3,15 @@
     <h2>Owners</h2>
 
     <form class="form-horizontal" id="search-owner-form" (ngSubmit)="searchOnEnter()">
-      <div class="form-group">
-        <div class="control-group" id="nameGroup">
-          <label class="col-sm-2 control-label">Name </label>
-          <div class="col-sm-10">
-                 <input class="form-control" size="30" maxlength="80" id="name" name="name" type="text"
-                   [(ngModel)]="name" (input)="queueSearch(($any($event.target)).value)" (blur)="searchOnBlur()"
-                   (keyup.enter)="searchOnEnter()" value=""/>
-            <span class="help-inline"></span>
-          </div>
+      <div class="form-group" id="nameGroup">
+        <label class="owner-search-label" for="name">Name</label>
+        <div class="owner-search-input">
+          <input class="form-control" size="30" maxlength="80" id="name" name="name" type="text"
+                 [(ngModel)]="name" (input)="queueSearch(($any($event.target)).value)" (blur)="searchOnBlur()"
+                 (keyup.enter)="searchOnEnter()" value=""/>
+          <span class="help-inline"></span>
         </div>
+      </div>
     </form>
 
     <div *ngIf="!owners">No owners with name containing "{{name}}"</div>
@@ -36,10 +35,10 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <ul class="list-unstyled">
+              <li *ngFor="let pet of owner.pets">{{ pet.name }}</li>
+            </ul>
+          </td>
         </tr>
         </tbody>
       </table>

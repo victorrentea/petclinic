@@ -2,3 +2,34 @@
 {
 display:none;
 }
+
+#nameGroup {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 0;
+}
+
+.owner-search-label {
+	margin: 0;
+	text-align: left;
+	min-width: 60px;
+}
+
+.owner-search-input {
+	flex: 1;
+}
+
+@media (max-width: 576px) {
+	#nameGroup {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.owner-search-input {
+		width: 100%;
+	}
+}
