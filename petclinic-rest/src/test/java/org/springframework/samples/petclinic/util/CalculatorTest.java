@@ -6,3 +6,7 @@ class CalculatorTest {
 
 
 }
+
+//A codez eu ~ 10-15 min > pauza
+//B codati voi independent individual dupa pauza (10min)
+//C codati voi independent in grupuri in BE/FE ( 2 subgrupe )  dupa pauza (10min)
