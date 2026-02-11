@@ -7,22 +7,51 @@
         <label class="owner-search-label" for="name">Name</label>
         <div class="owner-search-input">
           <input class="form-control" size="30" maxlength="80" id="name" name="name" type="text"
-                 [(ngModel)]="name" (input)="queueSearch(($any($event.target)).value)" (blur)="searchOnBlur()"
+                 [(ngModel)]="name" (input)="queueSearch()" (blur)="searchOnBlur()"
+                 (keyup.enter)="searchOnEnter()" value=""/>
+          <span class="help-inline"></span>
+        </div>
+      </div>
+      <div class="form-group" id="addressGroup">
+        <label class="owner-search-label" for="address">Address</label>
+        <div class="owner-search-input">
+          <input class="form-control" size="30" maxlength="80" id="address" name="address" type="text"
+                 [(ngModel)]="address" (input)="queueSearch()" (blur)="searchOnBlur()"
                  (keyup.enter)="searchOnEnter()" value=""/>
           <span class="help-inline"></span>
         </div>
       </div>
     </form>
 
-    <div *ngIf="!owners">No owners with name containing "{{name}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="owners && owners.length === 0 && name && address">
+      No owners with name containing "{{name}}" and address containing "{{address}}"
+    </div>
+    <div *ngIf="owners && owners.length === 0 && name && !address">No owners with name containing "{{name}}"</div>
+    <div *ngIf="owners && owners.length === 0 && !name && address">No owners with address containing "{{address}}"</div>
+    <div class="table-responsive" id="ownersTable"  *ngIf="owners && owners.length > 0">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
+          <th>
+            <button type="button" class="btn btn-link p-0" (click)="sortBy('name')">
+              Name <span class="sort-indicator">{{ sortIndicator('name') }}</span>
+            </button>
+          </th>
+          <th>
+            <button type="button" class="btn btn-link p-0" (click)="sortBy('address')">
+              Address <span class="sort-indicator">{{ sortIndicator('address') }}</span>
+            </button>
+          </th>
+          <th>
+            <button type="button" class="btn btn-link p-0" (click)="sortBy('city')">
+              City <span class="sort-indicator">{{ sortIndicator('city') }}</span>
+            </button>
+          </th>
+          <th>
+            <button type="button" class="btn btn-link p-0" (click)="sortBy('telephone')">
+              Telephone <span class="sort-indicator">{{ sortIndicator('telephone') }}</span>
+            </button>
+          </th>
           <th>Pets</th>
         </tr>
         </thead>
@@ -42,6 +71,21 @@
         </tr>
         </tbody>
       </table>
+      <div class="row">
+        <div class="col-md-4">
+          <button class="btn btn-default" (click)="previousPage()" [disabled]="pageNumber === 0">Previous</button>
+          <button class="btn btn-default" (click)="nextPage()" [disabled]="pageNumber + 1 >= totalPages">Next</button>
+        </div>
+        <div class="col-md-4 text-center">
+          Page {{ pageNumber + 1 }} of {{ totalPages }} ({{ totalElements }} total)
+        </div>
+        <div class="col-md-4 text-right">
+          <label for="pageSize">Page size</label>
+          <select id="pageSize" class="form-control" [(ngModel)]="pageSize" (ngModelChange)="changePageSize()">
+            <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

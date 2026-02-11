@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -115,9 +117,11 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        OwnerDto[] owners = search("/api/owners");
+        PageResponse<OwnerDto> page = search("/api/owners");
 
-        assertThat(owners)
+        assertThat(page.number).isEqualTo(0);
+        assertThat(page.size).isEqualTo(10);
+        assertThat(page.content)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
             .contains(Assertions.tuple(ownerId, "George", "Franklin"));
     }
@@ -130,29 +134,72 @@ public class OwnerTest {
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        OwnerDto[] owners = search("/api/owners?name=avis");
+        PageResponse<OwnerDto> page = search("/api/owners?name=avis");
 
-        assertThat(owners)
+        assertThat(page.content)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "Davis"))
             .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
     }
 
-    private OwnerDto[] search(String uriTemplate) throws Exception {
+    @Test
+    void getAllWithAddressFilter() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Betty");
+        owner2.setLastName("Davis");
+        owner2.setAddress("Strada Lunga 10");
+        owner2.setCity("Cluj");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        PageResponse<OwnerDto> page = search("/api/owners?address=luj");
+
+        assertThat(page.content)
+            .extracting(OwnerDto::getId, OwnerDto::getCity)
+            .contains(Assertions.tuple(owner2Id, "Cluj"))
+            .doesNotContain(Assertions.tuple(ownerId, "London"));
+    }
+
+    @Test
+    void getAllWithNameAndAddressFilter() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Betty");
+        owner2.setLastName("Davis");
+        owner2.setAddress("Splaiul Unirii 7");
+        owner2.setCity("Bucharest");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        PageResponse<OwnerDto> page = search("/api/owners?name=avis&address=splai");
+
+        assertThat(page.content)
+            .extracting(OwnerDto::getId, OwnerDto::getLastName)
+            .contains(Assertions.tuple(owner2Id, "Davis"))
+            .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
+    }
+
+    private PageResponse<OwnerDto> search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsString();
-        return mapper.readValue(responseJson, OwnerDto[].class);
+        return mapper.readValue(responseJson, new TypeReference<PageResponse<OwnerDto>>() {
+        });
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        OwnerDto[] results = search("/api/owners?name=NonExistent");
+        PageResponse<OwnerDto> results = search("/api/owners?name=NonExistent");
 
-        assertThat(results).isEmpty();
+        assertThat(results.content).isEmpty();
+    }
+
+    static class PageResponse<T> {
+        public List<T> content;
+        public int number;
+        public int size;
+        public long totalElements;
+        public int totalPages;
     }
 
     @Test

@@ -1,21 +1,48 @@
 package org.springframework.samples.petclinic.repository;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.repository.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.model.Owner;
 
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 
     List<Owner> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
 
-    Optional<Owner> findById(int id);
+    Page<Owner> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName,
+                                                                                  String lastName,
+                                                                                  Pageable pageable);
 
-    Owner save(Owner owner);
+    List<Owner> findByAddressContainingIgnoreCaseOrCityContainingIgnoreCase(String address, String city);
 
-    List<Owner> findAll();
+    Page<Owner> findByAddressContainingIgnoreCaseOrCityContainingIgnoreCase(String address,
+                                                                            String city,
+                                                                            Pageable pageable);
 
-    void delete(Owner owner);
+    @Query("""
+        select o
+        from Owner o
+        where (upper(o.firstName) like upper(concat('%', :name, '%'))
+            or upper(o.lastName) like upper(concat('%', :name, '%')))
+            and (upper(o.address) like upper(concat('%', :address, '%'))
+            or upper(o.city) like upper(concat('%', :address, '%')))
+        """)
+    List<Owner> findByNameAndAddressContainingIgnoreCase(@Param("name") String name,
+                                                        @Param("address") String address);
 
+    @Query("""
+        select o
+        from Owner o
+        where (upper(o.firstName) like upper(concat('%', :name, '%'))
+            or upper(o.lastName) like upper(concat('%', :name, '%')))
+            and (upper(o.address) like upper(concat('%', :address, '%'))
+            or upper(o.city) like upper(concat('%', :address, '%')))
+        """)
+    Page<Owner> findByNameAndAddressContainingIgnoreCase(@Param("name") String name,
+                                                        @Param("address") String address,
+                                                        Pageable pageable);
 }
