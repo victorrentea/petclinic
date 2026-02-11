@@ -3,13 +3,15 @@
 - prefer bullet lists, numbered lists, and tables for higher signal / noise ratio
 - avoid long paragraphs of text to protect my flow and save my brain energy
 - I might type incorrect or use incorrect words as I often dictate using a voice-to-text tool 
-- if my prompt is ambiguous or seems wrong, you MUST challenge it!
+- if my prompt is ambiguous or seems wrong, you **MUST** challenge it!
 - ask questions when unclear, flag contradictions, point out mistakes
 - tell me if my instructions don’t make sense
+
 - if a task takes you more than 5 seconds in IntelliJ, play a chime after completing it using `afplay /System/Library/Sounds/Glass.aiff`
-- always run all bash commands in background
 - if a task involves changing more than 1 file, if there are any pending uncommited changes, ask user if you should commit them first
 - if you learn something important about my build environment that can help you later, ask me if I want you to update the  global instructions file, to save time next time
+
+## Victor's Personal Preferences
 - when I say "fast", "go" or "Sparta" -> don't run any build or tests
 - when I say "explain and commit" -> summarize the idea of the change as a training note
 - after commit, also push if the Git username is victorrentea and the git repo is under github.com/victorrentea
@@ -28,6 +30,8 @@
 - Ask before implementing enhancements or optional features
 - Never overengineer; ask about adding optional features or extension points
 - Create new components with minimal business logic and essential fields only
+- avoid repeating expensive calls; apply DRY to repository/service invocations
+- avoid heavy method calls inside ternary operators
 
 ## Clean Java Code
 - don't use deprecated apis

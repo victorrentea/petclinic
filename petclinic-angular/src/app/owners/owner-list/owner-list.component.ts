@@ -2,7 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {Subject} from 'rxjs';
+import {debounceTime, distinctUntilChanged, finalize} from 'rxjs/operators';
 
 @Component({
   selector: 'app-owner-list',
@@ -11,9 +12,9 @@ import { finalize } from 'rxjs/operators';
 })
 export class OwnerListComponent implements OnInit {
   errorMessage: string;
-  lastName: string;
+  name: string;
   owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
+  private readonly searchTerms = new Subject<string>();
   isOwnersDataReceived: boolean = false;
 
   constructor(private router: Router, private ownerService: OwnerService) {
@@ -28,6 +29,11 @@ export class OwnerListComponent implements OnInit {
     ).subscribe(
       owners => this.owners = owners,
       error => this.errorMessage = error as any);
+
+    this.searchTerms.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe((term) => this.executeSearch(term));
   }
 
   onSelect(owner: Owner) {
@@ -38,34 +44,33 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
+  queueSearch(rawTerm: string) {
+    const normalized = this.normalizeSearchTerm(rawTerm);
+    this.searchTerms.next(normalized);
+  }
 
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
+  searchOnBlur() {
+    this.executeSearch(this.normalizeSearchTerm(this.name || ''));
+  }
 
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
+  searchOnEnter() {
+    this.executeSearch(this.normalizeSearchTerm(this.name || ''));
+  }
+
+  private executeSearch(term: string) {
+    this.ownerService.getOwners(term)
+      .subscribe(
+        (owners) => {
+          this.owners = owners;
+        },
+        () => {
+          this.owners = null;
+        }
       );
+  }
 
-      }
+  private normalizeSearchTerm(rawTerm: string): string {
+    return rawTerm.trim().split(' ').filter(Boolean).join(' ');
   }
 
 

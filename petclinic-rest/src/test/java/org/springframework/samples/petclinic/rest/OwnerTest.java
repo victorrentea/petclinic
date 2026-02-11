@@ -1,9 +1,17 @@
 package org.springframework.samples.petclinic.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.transaction.Transactional;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,14 +31,11 @@ import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -118,14 +123,14 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithLastNameFilter() throws Exception {
+    void getAllWithNameFilter() throws Exception {
         // Create another owner with a different last name
         Owner owner2 = TestData.anOwner();
         owner2.setFirstName("Betty");
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        OwnerDto[] owners = search("/api/owners?lastName=Davis");
+        OwnerDto[] owners = search("/api/owners?name=avis");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -144,8 +149,8 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithLastNameFilter_notFound() throws Exception {
-        OwnerDto[] results = search("/api/owners?lastName=NonExistent");
+    void getAllWithNameFilter_notFound() throws Exception {
+        OwnerDto[] results = search("/api/owners?name=NonExistent");
 
         assertThat(results).isEmpty();
     }

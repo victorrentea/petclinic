@@ -19,9 +19,14 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwners(name?: string): Observable<Owner[]> {
+    let url = this.entityUrl;
+    const trimmedName = name?.trim();
+    if (trimmedName) {
+      url += '?name=' + trimmedName;
+    }
     return this.http
-      .get<Owner[]>(this.entityUrl)
+      .get<Owner[]>(url)
       .pipe(catchError(this.handlerError('getOwners', [])));
   }
 
@@ -50,13 +55,4 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
-  }
 }

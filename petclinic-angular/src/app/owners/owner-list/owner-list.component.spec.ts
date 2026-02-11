@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
@@ -113,6 +113,31 @@ describe('OwnerListComponent', () => {
       el = de.nativeElement;
       expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
     });
+  }));
+
+  it('searchOnEnter should normalize and call getOwners', () => {
+    spy.calls.reset();
+
+    component.name = '  Ana   Maria  ';
+
+    component.searchOnEnter();
+
+    expect(spy).toHaveBeenCalledWith('Ana Maria');
+  });
+
+  it('queueSearch should debounce and call getOwners with normalized term', fakeAsync(() => {
+    spy.calls.reset();
+
+    component.ngOnInit();
+    spy.calls.reset();
+
+    component.queueSearch('  Ana   ');
+
+    tick(299);
+    expect(spy).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(spy).toHaveBeenCalledWith('Ana');
   }));
 
 });

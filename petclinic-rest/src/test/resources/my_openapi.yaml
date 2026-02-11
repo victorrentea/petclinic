@@ -1038,7 +1038,7 @@ paths:
       summary: List owners
       operationId: listOwners
       parameters:
-      - name: lastName
+      - name: name
         in: query
         required: false
         schema:

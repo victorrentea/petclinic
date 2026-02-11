@@ -71,6 +71,42 @@ describe('OwnerService', () => {
     req.flush(expectedOwners);
   });
 
+  it('should include trimmed name in query param', () => {
+    ownerService
+      .getOwners('  Franklin  ')
+      .subscribe(
+        (owners) =>
+          expect(owners).toEqual(
+            expectedOwners,
+            'should return expected owners'
+          ),
+        fail
+      );
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?name=Franklin');
+    expect(req.request.method).toEqual('GET');
+
+    req.flush(expectedOwners);
+  });
+
+  it('should not include name when blank', () => {
+    ownerService
+      .getOwners('   ')
+      .subscribe(
+        (owners) =>
+          expect(owners).toEqual(
+            expectedOwners,
+            'should return expected owners'
+          ),
+        fail
+      );
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+
+    req.flush(expectedOwners);
+  });
+
   it('search the owner by id', () => {
     ownerService.getOwnerById(1).subscribe((owners) => {
       expect(owners).toEqual(expectedOwners[0]);
