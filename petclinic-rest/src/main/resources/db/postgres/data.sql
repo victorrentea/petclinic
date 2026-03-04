@@ -55,6 +55,55 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
 
+-- Insert Reviews
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 1, 5, 'Excellent care for my cat Leo! Dr. Carter was very thorough and gentle.', CURRENT_TIMESTAMP - INTERVAL '5 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=1 AND feedback LIKE 'Excellent care for my cat Leo%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 1, 4, 'Very professional and knowledgeable. My pet felt comfortable.', CURRENT_TIMESTAMP - INTERVAL '10 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=1 AND feedback LIKE 'Very professional and knowledgeable%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 1, 5, 'Best vet in town! Highly recommend Dr. Carter.', CURRENT_TIMESTAMP - INTERVAL '15 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=1 AND feedback LIKE 'Best vet in town%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 2, 5, 'Dr. Leary is amazing with radiology. She found the issue right away!', CURRENT_TIMESTAMP - INTERVAL '3 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=2 AND feedback LIKE 'Dr. Leary is amazing%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 2, 4, 'Great experience. Very caring and explained everything clearly.', CURRENT_TIMESTAMP - INTERVAL '8 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=2 AND feedback LIKE 'Great experience%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 3, 5, 'Dr. Douglas performed surgery on my dog and the recovery was perfect!', CURRENT_TIMESTAMP - INTERVAL '2 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=3 AND feedback LIKE 'Dr. Douglas performed surgery%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 3, 5, 'Excellent dentistry work. My pet teeth look great now.', CURRENT_TIMESTAMP - INTERVAL '7 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=3 AND feedback LIKE 'Excellent dentistry work%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 3, 4, 'Very skilled surgeon. I trust her completely with my pets.', CURRENT_TIMESTAMP - INTERVAL '12 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=3 AND feedback LIKE 'Very skilled surgeon%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 3, 5, 'Outstanding care and follow-up after surgery.', CURRENT_TIMESTAMP - INTERVAL '20 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=3 AND feedback LIKE 'Outstanding care and follow-up%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 4, 4, 'Good surgeon, very professional and efficient.', CURRENT_TIMESTAMP - INTERVAL '4 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=4 AND feedback LIKE 'Good surgeon%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 4, 5, 'Dr. Ortega saved my dogs life with emergency surgery. Forever grateful!', CURRENT_TIMESTAMP - INTERVAL '9 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=4 AND feedback LIKE 'Dr. Ortega saved my dogs life%');
+
+INSERT INTO reviews (vet_id, rating, feedback, created_at) 
+SELECT 5, 5, 'Dr. Stevens radiology expertise is top-notch. Highly recommend!', CURRENT_TIMESTAMP - INTERVAL '6 days'
+WHERE NOT EXISTS (SELECT * FROM reviews WHERE vet_id=5 AND feedback LIKE 'Dr. Stevens radiology expertise%');
+
 INSERT INTO users(username, password, enabled) VALUES
 ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE)
 ON CONFLICT (username) DO NOTHING;

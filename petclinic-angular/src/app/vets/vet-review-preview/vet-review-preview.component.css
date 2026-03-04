@@ -1,0 +1,58 @@
+.review-preview {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.review-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  font-size: 18px;
+  color: #ffa500;
+}
+
+.star {
+  line-height: 1;
+}
+
+.rating-value {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
+
+.review-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.view-reviews-link {
+  margin-top: 5px;
+}
+
+.view-reviews-link .btn-link {
+  padding: 0;
+  font-size: 14px;
+}
+
+.no-reviews {
+  text-align: left;
+  padding: 0;
+}
+
+.no-reviews .text-muted {
+  margin: 0;
+  font-size: 14px;
+}

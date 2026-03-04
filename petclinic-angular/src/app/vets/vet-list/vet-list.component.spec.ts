@@ -10,10 +10,23 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Vet} from '../vet';
 import {Observable, of} from 'rxjs/index';
+import {ReviewService} from '../review.service';
+import {ReviewStats} from '../review.model';
 
 class VetServiceStub {
   getVets(): Observable<Vet[]> {
     return of();
+  }
+}
+
+class ReviewServiceStub {
+  getReviewStats(vetId: number): Observable<ReviewStats> {
+    return of({
+      vetId,
+      averageRating: 0,
+      totalReviews: 0,
+      mostRecentReview: null
+    });
   }
 }
 
@@ -29,6 +42,7 @@ describe('VetListComponent', () => {
       imports: [FormsModule],
       providers: [
         {provide: VetService, useClass: VetServiceStub},
+        {provide: ReviewService, useClass: ReviewServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]

@@ -1,0 +1,23 @@
+<div class="review-preview" *ngIf="reviewStats">
+  <!-- Display when reviews exist -->
+  <div *ngIf="hasReviews" class="review-content">
+    <!-- Average Rating with Stars -->
+    <div class="rating-display">
+      <span class="stars">
+        <span *ngFor="let star of renderStars(reviewStats.averageRating)" class="star">{{ star }}</span>
+      </span>
+      <span class="rating-value">{{ reviewStats.averageRating.toFixed(1) }}</span>
+      <span class="review-count">({{ reviewStats.totalReviews }} review<span *ngIf="reviewStats.totalReviews !== 1">s</span>)</span>
+    </div>
+
+    <!-- View Reviews Link -->
+    <div class="view-reviews-link">
+      <a [routerLink]="['/vets', vetId, 'reviews']" class="btn btn-link">View Reviews</a>
+    </div>
+  </div>
+
+  <!-- Display when no reviews exist -->
+  <div *ngIf="!hasReviews" class="no-reviews">
+    <p class="text-muted">No reviews available</p>
+  </div>
+</div>

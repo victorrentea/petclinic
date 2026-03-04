@@ -1,0 +1,60 @@
+<div class="review-details-container">
+  <!-- Header with veterinarian info -->
+  <div class="header">
+    <button class="back-button" (click)="goBack()">
+      ← Back to Veterinarians
+    </button>
+    <h2>Reviews for {{ vetName }}</h2>
+    <div class="vet-info" *ngIf="vet">
+      <p><strong>Specialties:</strong> {{ specialtyNames }}</p>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading" *ngIf="isLoading">
+    <p>Loading reviews...</p>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-message" *ngIf="errorMessage && !isLoading">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && !errorMessage && !hasReviews">
+    <p>No reviews available for this veterinarian yet.</p>
+    <p>Be the first to leave a review!</p>
+  </div>
+
+  <!-- Reviews list -->
+  <div class="reviews-list" *ngIf="!isLoading && !errorMessage && hasReviews">
+    <div class="review-count">
+      <p>{{ reviews.length }} {{ reviews.length === 1 ? 'Review' : 'Reviews' }}</p>
+    </div>
+
+    <div class="review-card" *ngFor="let review of reviews">
+      <!-- Star rating -->
+      <div class="review-rating">
+        <span class="stars">
+          <span *ngFor="let star of renderStars(review.rating)" class="star">{{ star }}</span>
+        </span>
+        <span class="rating-number">({{ review.rating }}/5)</span>
+      </div>
+
+      <!-- Timestamp -->
+      <div class="review-date">
+        <small>{{ formatDate(review.createdAt) }}</small>
+      </div>
+
+      <!-- Feedback text -->
+      <div class="review-feedback" *ngIf="review.feedback">
+        <p>{{ sanitizeFeedback(review.feedback) }}</p>
+      </div>
+
+      <!-- No feedback indicator -->
+      <div class="no-feedback" *ngIf="!review.feedback">
+        <p><em>No written feedback provided</em></p>
+      </div>
+    </div>
+  </div>
+</div>

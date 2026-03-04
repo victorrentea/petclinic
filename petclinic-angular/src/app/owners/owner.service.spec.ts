@@ -120,14 +120,14 @@ describe('OwnerService', () => {
 
   it('search the owner by id', () => {
     ownerService.getOwnerById(1).subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners[0]);
+      expect(owners).toEqual(expectedPage.content[0]);
     });
     const id = '1';
     const req = httpTestingController.expectOne(
       ownerService.entityUrl + '/' + id
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners[0]);
+    req.flush(expectedPage.content[0]);
   });
 
   it('add owner', () => {

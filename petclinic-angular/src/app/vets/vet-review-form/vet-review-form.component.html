@@ -1,0 +1,86 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+    <h2>Submit Review</h2>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage" role="alert">
+      <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-danger" *ngIf="errorMessage" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      {{ errorMessage }}
+    </div>
+
+    <form class="form-horizontal" (ngSubmit)="submitReview()" #reviewForm="ngForm">
+      
+      <!-- Star Rating Selector -->
+      <div class="form-group" [class.has-error]="errorMessage && !validateRating(rating)">
+        <label class="col-sm-2 control-label">Rating <span class="text-danger">*</span></label>
+        <div class="col-sm-10">
+          <div class="star-rating">
+            <span 
+              *ngFor="let star of stars" 
+              class="star" 
+              [class.selected]="star <= rating"
+              [class.clickable]="!isSubmitting"
+              (click)="!isSubmitting && setRating(star)"
+              [attr.aria-label]="'Rate ' + star + ' stars'"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="!isSubmitting && setRating(star)"
+              (keydown.space)="!isSubmitting && setRating(star)">
+              ★
+            </span>
+          </div>
+          <span class="help-block" *ngIf="rating > 0">
+            You selected {{ rating }} star<span *ngIf="rating !== 1">s</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Feedback Textarea -->
+      <div class="form-group" [class.has-error]="isOverLimit">
+        <label for="feedback" class="col-sm-2 control-label">Feedback</label>
+        <div class="col-sm-10">
+          <textarea 
+            id="feedback" 
+            name="feedback" 
+            class="form-control" 
+            rows="5"
+            [(ngModel)]="feedback"
+            [disabled]="isSubmitting"
+            placeholder="Share your experience with this veterinarian (optional)"
+            [maxlength]="MAX_FEEDBACK_LENGTH + 100">
+          </textarea>
+          <span class="help-block" [class.text-danger]="isOverLimit">
+            {{ characterCount }} / {{ MAX_FEEDBACK_LENGTH }} characters
+            <span *ngIf="isOverLimit"> - Feedback is too long</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Submit and Cancel Buttons -->
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <button 
+            type="button" 
+            class="btn btn-default" 
+            (click)="cancel()"
+            [disabled]="isSubmitting">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary" 
+            [disabled]="isSubmitting || rating === 0 || isOverLimit">
+            <span *ngIf="isSubmitting">Submitting...</span>
+            <span *ngIf="!isSubmitting">Submit Review</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

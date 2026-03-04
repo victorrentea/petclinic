@@ -70,6 +70,32 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
 (8, '2013-01-03', 'neutered'),
 (7, '2013-01-04', 'spayed');
 
+-- Insert Reviews
+INSERT INTO reviews (vet_id, rating, feedback, created_at) VALUES
+-- Reviews for James Carter (vet_id = 1)
+(1, 5, 'Excellent care for my cat Leo! Dr. Carter was very thorough and gentle.', CURRENT_TIMESTAMP - INTERVAL '5' DAY),
+(1, 4, 'Very professional and knowledgeable. My pet felt comfortable.', CURRENT_TIMESTAMP - INTERVAL '10' DAY),
+(1, 5, 'Best vet in town! Highly recommend Dr. Carter.', CURRENT_TIMESTAMP - INTERVAL '15' DAY),
+
+-- Reviews for Helen Leary (vet_id = 2)
+(2, 5, 'Dr. Leary is amazing with radiology. She found the issue right away!', CURRENT_TIMESTAMP - INTERVAL '3' DAY),
+(2, 4, 'Great experience. Very caring and explained everything clearly.', CURRENT_TIMESTAMP - INTERVAL '8' DAY),
+
+-- Reviews for Linda Douglas (vet_id = 3)
+(3, 5, 'Dr. Douglas performed surgery on my dog and the recovery was perfect!', CURRENT_TIMESTAMP - INTERVAL '2' DAY),
+(3, 5, 'Excellent dentistry work. My pet teeth look great now.', CURRENT_TIMESTAMP - INTERVAL '7' DAY),
+(3, 4, 'Very skilled surgeon. I trust her completely with my pets.', CURRENT_TIMESTAMP - INTERVAL '12' DAY),
+(3, 5, 'Outstanding care and follow-up after surgery.', CURRENT_TIMESTAMP - INTERVAL '20' DAY),
+
+-- Reviews for Rafael Ortega (vet_id = 4)
+(4, 4, 'Good surgeon, very professional and efficient.', CURRENT_TIMESTAMP - INTERVAL '4' DAY),
+(4, 5, 'Dr. Ortega saved my dogs life with emergency surgery. Forever grateful!', CURRENT_TIMESTAMP - INTERVAL '9' DAY),
+
+-- Reviews for Henry Stevens (vet_id = 5)
+(5, 5, 'Dr. Stevens radiology expertise is top-notch. Highly recommend!', CURRENT_TIMESTAMP - INTERVAL '6' DAY);
+
+-- Sharon Jenkins (vet_id = 6) has no reviews yet
+
 -- Insert Admin User
 INSERT INTO users (username, password, enabled) VALUES
 ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);

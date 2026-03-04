@@ -72,3 +72,15 @@ CREATE TABLE IF NOT EXISTS roles (
   UNIQUE (role, username),
   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  vet_id INTEGER NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  feedback VARCHAR(500),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (vet_id) REFERENCES vets(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_reviews_vet_id ON reviews(vet_id);
+CREATE INDEX idx_reviews_created_at ON reviews(created_at DESC);

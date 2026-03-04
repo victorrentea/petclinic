@@ -1,0 +1,9 @@
+.reviews-cell {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.reviews-cell .btn {
+  white-space: nowrap;
+}

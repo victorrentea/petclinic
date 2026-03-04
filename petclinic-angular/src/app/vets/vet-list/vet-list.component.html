@@ -9,24 +9,43 @@
         <th>Name</th>
         <th>Specialties</th>
         <th></th>
-        <th></th>
+        <th>Reviews</th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let vet of vets">
-        <td>
-          {{ vet.firstName }} {{ vet.lastName }}
-        </td>
-        <td>
-          <div *ngFor="let spec of vet.specialties">
-            {{ spec.name }}
-          </div>
-        </td>
-        <td>
-          <button class="btn btn-default" (click)="editVet(vet)">Edit Vet</button>
-          <button class="btn btn-default" (click)="deleteVet(vet)">Delete Vet</button>
-        </td>
-      </tr>
+      <ng-container *ngFor="let vet of vets">
+        <tr>
+          <td>
+            {{ vet.firstName }} {{ vet.lastName }}
+          </td>
+          <td>
+            <div *ngFor="let spec of vet.specialties">
+              {{ spec.name }}
+            </div>
+          </td>
+          <td>
+            <button class="btn btn-default" (click)="editVet(vet)">Edit Vet</button>
+            <button class="btn btn-default" (click)="deleteVet(vet)">Delete Vet</button>
+          </td>
+          <td>
+            <div class="reviews-cell">
+              <app-vet-review-preview 
+                [vetId]="vet.id" 
+                [reviewStats]="getReviewStats(vet.id)">
+              </app-vet-review-preview>
+              <button class="btn btn-default" (click)="showReviewForm(vet.id)">Submit Review</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="isReviewFormVisible(vet.id)">
+          <td colspan="4">
+            <app-vet-review-form 
+              [vetId]="vet.id" 
+              (reviewSubmitted)="onReviewSubmitted(vet.id)">
+            </app-vet-review-form>
+          </td>
+        </tr>
+      </ng-container>
       </tbody>
     </table>
     <div>
