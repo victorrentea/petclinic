@@ -1,104 +1,27 @@
-# REST version of Spring PetClinic Sample Application (spring-framework-petclinic extension)
+# PetClinic Backend - Spring Boot REST API
 
-[![Java Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml)
-[![Docker Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=alert_status)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=coverage)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
+> **Note**: This is the backend subproject. See [main README](../README.md) for full-stack setup.
 
-This backend version of the Spring Petclinic application only provides a REST API. **There is no UI**.
-The [petclinic-angular project](https://github.com/spring-petclinic/petclinic-angular) is a Angular front-end application which consumes the REST API.
+Spring Boot REST API providing veterinary clinic management endpoints.
 
-## Understanding the Spring Petclinic application with a few diagrams
+## Running Backend
 
-[See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
-
-### Petclinic ER Model
-
-![alt petclinic-ermodel](petclinic-ermodel.png)
-
-## Running Petclinic locally
-
-### With Maven command line
+### Local Development
 ```sh
-git clone https://github.com/spring-petclinic/petclinic-rest.git
-cd petclinic-rest
 ./mvnw spring-boot:run
 ```
 
-### With Docker
-```sh
-docker run -p 9966:9966 springcommunity/petclinic-rest
-```
+Access:
+- API: [http://localhost:8080/](http://localhost:8080/)
+- Health check: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
+- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-You can then access petclinic here: [http://localhost:9966/petclinic/](http://localhost:9966/petclinic/)
+## 📖 API Documentation
 
-There is an actuator health check route as well:
-* [http://localhost:9966/petclinic/actuator/health](http://localhost:9966/petclinic/actuator/health)
+**Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)  
+**OpenAPI spec (OAS 3.1)**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-## 📖 OpenAPI REST API Documentation
-This project provides a RESTful API for managing a veterinary clinic's **owners, pets, veterinarians, visits, and specialties**.
-
-### **Access Swagger UI**
-Swagger UI is available at: [http://localhost:9966/petclinic/swagger-ui.html](http://localhost:9966/petclinic/swagger-ui.html).
-
-API documentation (OAS 3.1) is accessible at: [http://localhost:9966/petclinic/v3/api-docs](http://localhost:9966/petclinic/v3/api-docs).
-
-
-## 📌 API Endpoints Overview
-
-| **Method** | **Endpoint** | **Description** |
-|-----------|------------|----------------|
-| **Owners** |  |  |
-| **GET** | `/api/owners` | Retrieve all pet owners |
-| **GET** | `/api/owners/{ownerId}` | Get a pet owner by ID |
-| **POST** | `/api/owners` | Add a new pet owner |
-| **PUT** | `/api/owners/{ownerId}` | Update an owner’s details |
-| **DELETE** | `/api/owners/{ownerId}` | Delete an owner |
-| **GET** | `/api/owners/{ownerId}/pets/{petId}` | Get a pet by ID (owner’s pet) |
-| **PUT** | `/api/owners/{ownerId}/pets/{petId}` | Update pet details (owner’s pet) |
-| **POST** | `/api/owners/{ownerId}/pets` | Add a new pet to an owner |
-| **POST** | `/api/owners/{ownerId}/pets/{petId}/visits` | Add a vet visit for a pet |
-| **Pets** |  |  |
-| **GET** | `/api/pets` | Retrieve all pets |
-| **GET** | `/api/pets/{petId}` | Get a pet by ID |
-| **PUT** | `/api/pets/{petId}` | Update pet details |
-| **DELETE** | `/api/pets/{petId}` | Delete a pet |
-| **Vets** |  |  |
-| **GET** | `/api/vets` | Retrieve all veterinarians |
-| **GET** | `/api/vets/{vetId}` | Get a vet by ID |
-| **POST** | `/api/vets` | Add a new vet |
-| **PUT** | `/api/vets/{vetId}` | Update vet details |
-| **DELETE** | `/api/vets/{vetId}` | Delete a vet |
-| **Pet Types** |  |  |
-| **GET** | `/api/pettypes` | Retrieve all pet types |
-| **GET** | `/api/pettypes/{petTypeId}` | Get a pet type by ID |
-| **POST** | `/api/pettypes` | Add a new pet type |
-| **PUT** | `/api/pettypes/{petTypeId}` | Update pet type details |
-| **DELETE** | `/api/pettypes/{petTypeId}` | Delete a pet type |
-| **Specialties** |  |  |
-| **GET** | `/api/specialties` | Retrieve all vet specialties |
-| **GET** | `/api/specialties/{specialtyId}` | Get a specialty by ID |
-| **POST** | `/api/specialties` | Add a new specialty |
-| **PUT** | `/api/specialties/{specialtyId}` | Update a specialty |
-| **DELETE** | `/api/specialties/{specialtyId}` | Delete a specialty |
-| **Visits** |  |  |
-| **GET** | `/api/visits` | Retrieve all vet visits |
-| **GET** | `/api/visits/{visitId}` | Get a visit by ID |
-| **POST** | `/api/visits` | Add a new visit |
-| **PUT** | `/api/visits/{visitId}` | Update a visit |
-| **DELETE** | `/api/visits/{visitId}` | Delete a visit |
-| **Users** |  |  |
-| **POST** | `/api/users` | Create a new user |
-
-
-## Screenshot of the Angular client
-
-See its repository here: https://github.com/spring-petclinic/petclinic-angular
-
-<img width="1427" alt="petclinic-angular2" src="https://cloud.githubusercontent.com/assets/838318/23263243/f4509c4a-f9dd-11e6-951b-69d0ef72d8bd.png">
-
-## In case you find a bug/suggested improvement for Spring Petclinic
-Our issue tracker is available here: https://github.com/spring-petclinic/petclinic-rest/issues
+For complete API endpoints overview, see [main README](../README.md#-api-endpoints-overview).
 
 ## Database configuration
 
@@ -135,7 +58,7 @@ The application relies on Spring Boot auto-configuration for JPA; no additional 
    mvn spring-boot:run
    ```
 2. **Open H2 Console in your browser:**
-   - **URL**: http://localhost:9966/petclinic/h2-console
+   - **URL**: http://localhost:8080/h2-console
    - **JDBC URL**: `jdbc:h2:mem:petclinic`
    - **Username**: `sa`
    - **Password**: _(leave blank)_

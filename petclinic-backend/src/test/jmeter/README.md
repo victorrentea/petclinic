@@ -24,7 +24,7 @@ Ensure you have the following installed:
     mvn spring-boot:run
     ```
 
-_(Runs on http://localhost:9966 by default)_
+ure all _(Runs on http://localhost:8080 by default)_
 
 ### Running the Test from CLI
 

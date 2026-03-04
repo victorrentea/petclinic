@@ -24,8 +24,7 @@ Ensure the following are available:
 cd /path/to/petclinic-rest
 mvn spring-boot:run
 ```
-
-_(Runs by default at http://localhost:9966)_
+_(Runs by default at http://localhost:8080)_
 
 ### Running the Test with Newman
 

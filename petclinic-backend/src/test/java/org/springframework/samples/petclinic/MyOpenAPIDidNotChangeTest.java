@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.file.Files;
@@ -31,7 +30,7 @@ public class MyOpenAPIDidNotChangeTest {
     @Autowired
     MockMvc mockMvc;
 
-    @Value("classpath:/my_openapi.yaml")
+    @Value("file:${user.dir}/../openapi.yaml")
     Resource contractFile;
     @Test
     void my_contract_did_not_change() throws Exception {
@@ -55,12 +54,12 @@ public class MyOpenAPIDidNotChangeTest {
         return YAML_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(map);
     }
 
-    @Disabled("Run this test manually to update src/test/resources/my_openapi.yaml with the current API contract")
+    @Disabled("Run this test manually to update ../openapi.yaml with the current API contract")
     @Test
     public void updateStoredOpenApiYaml() throws Exception {
         String yaml = mockMvc.perform(get("/v3/api-docs.yaml")).andReturn().getResponse().getContentAsString();
 
-        Path target = Path.of("src/test/resources/my_openapi.yaml");
+        Path target = Path.of("../openapi.yaml");
         Files.createDirectories(target.getParent());
         Files.writeString(target, yaml, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
