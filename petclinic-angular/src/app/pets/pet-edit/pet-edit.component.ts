@@ -59,13 +59,13 @@ export class PetEditComponent implements OnInit {
     pet.birthDate = moment(pet.birthDate).format('YYYY-MM-DD');
 
     this.petService.updatePet(pet.id.toString(), pet).subscribe(
-      res => this.gotoOwnerDetail(this.currentOwner),
+      res => this.gotoOwnerDetail(),
       error => this.errorMessage = error as any
     );
   }
 
-  gotoOwnerDetail(owner: Owner) {
-    this.router.navigate(['/owners', owner.id]);
+  gotoOwnerDetail() {
+    this.router.navigate(['/owners', this.currentOwner.id]);
   }
 
 }
