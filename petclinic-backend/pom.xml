@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.springframework.samples</groupId>
-    <artifactId>petclinic-rest</artifactId>
+    <artifactId>petclinic-backend</artifactId>
     <version>3.4.3</version>
 
     <description>REST version of the Spring Petclinic sample application</description>
