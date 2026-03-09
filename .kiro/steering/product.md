@@ -4,11 +4,32 @@ inclusion: auto
 
 # Product Overview
 
-Pet Clinic Angular is a veterinary clinic management application built as a frontend client for the Spring PetClinic REST API. It provides a web interface for managing:
+Pet Clinic is a full-stack veterinary clinic management application demonstrating modern enterprise patterns.
 
-- Pet owners and their contact information
-- Pets and their types
-- Veterinarians and their specialties
+## Architecture
+- **Backend**: Spring Boot REST API (Java 21+)
+- **Frontend**: Angular SPA (TypeScript)
+- **Database**: H2 (dev), PostgreSQL (prod)
+
+## Core Features
+- Pet owners and contact information management
+- Pets and pet types
+- Veterinarians and specialties
 - Veterinary visits and appointments
+- Veterinarian reviews with star ratings (1-5) and text feedback
 
-The application demonstrates a typical CRUD-based business application with search, pagination, and form validation capabilities.
+## Key Capabilities
+- CRUD operations with validation
+- Search and pagination (server-side preferred)
+- Form validation
+- XSS protection (OWASP sanitization)
+- Error handling with consistent error responses
+- RESTful API design
+
+## Development Approach
+- Java-first API design (not generated from Swagger)
+- Domain-driven organization
+- Feature module pattern (Angular)
+- Constructor injection for dependencies
+- Transactional integrity where needed
+- Comprehensive testing (unit + integration)

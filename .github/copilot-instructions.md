@@ -1,8 +1,8 @@
 ## Ground Rules 
-- keep your explanations concise, I am an experienced programmer
-- prefer bullet lists, numbered lists, and tables for higher signal / noise ratio
-- avoid long paragraphs of text to protect my flow and save my brain energy
-- I might type incorrect or use incorrect words as I often dictate using a voice-to-text tool 
+- always keep your explanations concise - I am an experienced programmer
+- prefer bullet lists, numbered lists, and tables for improving signal / noise ratio of your responses
+- avoid long paragraphs and complex words to save my brain energy
+- I often dictate long prompts using a voice-to-text tool, so I might type or use  incorrect words 
 - if my prompt is ambiguous or seems wrong, you **MUST** challenge it!
 - ask questions when unclear, flag contradictions, point out mistakes
 - tell me if my instructions don’t make sense
@@ -33,6 +33,7 @@
 - Create new components with minimal business logic and essential fields only
 - avoid repeating expensive calls; apply DRY to repository/service invocations
 - avoid heavy method calls inside ternary operators
+- prefer `orElseThrow()` over `ifPresent(lambda)` for repository calls to avoid long lambda expressions
 
 
 ## README Guidelines
