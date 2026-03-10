@@ -2,36 +2,35 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form class="form-horizontal" id="search-owner-form" (ngSubmit)="searchOnEnter()">
-      <div class="form-group" id="nameGroup">
-        <label class="owner-search-label" for="name">Name</label>
-        <div class="owner-search-input">
-             <input class="form-control" size="30" maxlength="80" id="name" name="name" type="text"
-               [(ngModel)]="name" (input)="queueSearch()" (blur)="searchOnBlur()"
-                 (keyup.enter)="searchOnEnter()" value=""/>
-          <span class="help-inline"></span>
+    <form method="get"
+          class="form-horizontal" id="search-owner-form">
+      <div class="form-group">
+        <div class="control-group" id="lastNameGroup">
+          <label class="col-sm-2 control-label">Last name </label>
+          <div class="col-sm-10">
+            <input class="form-control" size="30"
+                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
+          </div>
         </div>
       </div>
-      <div class="form-group" id="addressGroup">
-        <label class="owner-search-label" for="address">Address</label>
-        <div class="owner-search-input">
-             <input class="form-control" size="30" maxlength="80" id="address" name="address" type="text"
-               [(ngModel)]="address" (input)="queueSearch()" (blur)="searchOnBlur()"
-                 (keyup.enter)="searchOnEnter()" value=""/>
-          <span class="help-inline"></span>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
+            Owner</button>
         </div>
       </div>
+
     </form>
 
-    <div *ngIf="owners && owners.length === 0">No owners found.</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners && owners.length > 0">
+    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
+    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th class="sortable" (click)="sortBy('name')">Name{{ sortIndicator('name') }}</th>
-          <th class="sortable" (click)="sortBy('address')">Address{{ sortIndicator('address') }}</th>
-          <th class="sortable" (click)="sortBy('city')">City{{ sortIndicator('city') }}</th>
-          <th class="sortable" (click)="sortBy('telephone')">Telephone{{ sortIndicator('telephone') }}</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>City</th>
+          <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
@@ -44,29 +43,13 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-            <ul class="list-unstyled">
-              <li *ngFor="let pet of owner.pets">{{ pet.name }}</li>
-            </ul>
-          </td>
+        <tr *ngFor="let pet of owner.pets">
+          {{ pet.name }}
+        </tr>
+        </td>
         </tr>
         </tbody>
       </table>
-      <div class="owners-controls">
-        <div class="owners-pagination">
-          <button class="btn btn-default" (click)="previousPage()" [disabled]="pageIndex === 0">Previous</button>
-          <span>Page {{ pageIndex + 1 }} of {{ totalPages || 1 }}</span>
-          <button class="btn btn-default" (click)="nextPage()" [disabled]="pageIndex + 1 >= totalPages">Next</button>
-        </div>
-        <div class="owners-page-size">
-          <label for="pageSize">Page size</label>
-          <select id="pageSize" class="form-control" [(ngModel)]="pageSize" (change)="changePageSize()">
-            <option [ngValue]="10">10</option>
-            <option [ngValue]="20">20</option>
-            <option [ngValue]="50">50</option>
-          </select>
-          <span>({{ totalElements }} total)</span>
-        </div>
-      </div>
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
