@@ -13,13 +13,13 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 
     @Query("""
         SELECT owner FROM Owner owner
-        WHERE (:name IS NULL OR :name = ''
-            OR UPPER(owner.firstName) LIKE UPPER(CONCAT('%', :name, '%'))
-            OR UPPER(owner.lastName) LIKE UPPER(CONCAT('%', :name, '%')))
-        AND (:address IS NULL OR :address = ''
-            OR UPPER(owner.address) LIKE UPPER(CONCAT('%', :address, '%')))
+        WHERE :search IS NULL OR :search = ''
+            OR UPPER(owner.firstName) LIKE UPPER(CONCAT('%', :search, '%'))
+            OR UPPER(owner.lastName) LIKE UPPER(CONCAT('%', :search, '%'))
+            OR UPPER(owner.address) LIKE UPPER(CONCAT('%', :search, '%'))
+            OR UPPER(owner.city) LIKE UPPER(CONCAT('%', :search, '%'))
         """)
-    Page<Owner> findByNameAndAddress(String name, String address, Pageable pageable);
+    Page<Owner> findBySearch(String search, Pageable pageable);
 
     Optional<Owner> findById(int id);
 

@@ -47,6 +47,11 @@ public class Owner {
     @NotEmpty
     private String city;
 
+    public void getAddressAndCity() {
+        // just to have some code to test
+        System.out.println("Address: " + address + ", City: " + city);
+    }
+
     @NotEmpty
     @Digits(fraction = 0, integer = 10)
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")

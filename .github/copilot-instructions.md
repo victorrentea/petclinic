@@ -20,11 +20,6 @@
 - when I ask you to refactor, make sure to run the tests 
 - when I tell you to remember a certain ground rule, update .githun/copilot-instructions.md or specialized .github/instructions/*.md files with that rule
 
-## Code Formatting
-- use blank lines to separate logical blocks of code, or given/when/then sections of a @Test
-- line length ≤ 120 characters
-- default code style: IntelliJ IDEA Java code style.
-
 ## Keep It Simple (KISS)
 - keep code simple and concise
 - always implement the simplest possible solution
