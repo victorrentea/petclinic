@@ -6,7 +6,7 @@ info:
   termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
   version: "1.0"
 servers:
-- url: http://localhost
+- url: http://localhost:8080
   description: Generated server url
 paths:
   /api/visits/{visitId}:
@@ -1038,7 +1038,7 @@ paths:
       summary: List owners
       operationId: listOwners
       parameters:
-      - name: name
+      - name: lastName
         in: query
         required: false
         schema:

@@ -33,7 +33,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -133,7 +132,7 @@ public class OwnerTest {
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?name=avis");
+        List<OwnerDto> owners = search("/api/owners?lastName=Dav");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -144,14 +143,14 @@ public class OwnerTest {
     @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
-        owner2.setAddress("7 Java Lane");
+        owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?address=java");
+        List<OwnerDto> owners = search("/api/owners?lastName=Java");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getAddress)
-            .contains(Assertions.tuple(owner2Id, "7 Java Lane"));
+            .extracting(OwnerDto::getId, OwnerDto::getLastName)
+            .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -162,14 +161,13 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        JsonNode root = mapper.readTree(responseJson);
-        return mapper.convertValue(root.get("content"), new TypeReference<List<OwnerDto>>() {
+        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
         });
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?name=NonExistent");
+        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
     }

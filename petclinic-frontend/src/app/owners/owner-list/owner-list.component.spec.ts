@@ -1,13 +1,12 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import { OwnerPage } from '../owner-page';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
 import {Observable, of} from 'rxjs';
@@ -24,7 +23,11 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<OwnerPage> {
+  getOwners(): Observable<Owner[]> {
+    return of();
+  }
+
+  searchOwners(lastName: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -34,7 +37,8 @@ describe('OwnerListComponent', () => {
   let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
-  let spy: Spy;
+  let getOwnersSpy: Spy;
+  let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -46,10 +50,9 @@ describe('OwnerListComponent', () => {
     address: '110 W. Liberty St.',
     city: 'Madison',
     telephone: '6085551023',
-    pets: null
+    pets: []
   };
   let testOwners: Owner[];
-  let testPage: OwnerPage;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -71,37 +74,15 @@ describe('OwnerListComponent', () => {
   }));
 
   beforeEach(() => {
-    testOwners = [{
-      id: 1,
-      firstName: 'George',
-      lastName: 'Franklin',
-      address: '110 W. Liberty St.',
-      city: 'Madison',
-      telephone: '6085551023',
-      pets: [{
-        id: 1,
-        name: 'Leo',
-        birthDate: '2010-09-07',
-        type: {id: 1, name: 'cat'},
-        ownerId: null,
-        owner: null,
-        visits: null
-      }]
-    }];
-
-    testPage = {
-      content: testOwners,
-      totalElements: 1,
-      totalPages: 1,
-      number: 0,
-      size: 10
-    };
+    testOwners = [testOwner];
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
-    spy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testPage));
+    getOwnersSpy = spyOn(ownerService, 'getOwners')
+      .and.returnValue(of(testOwners));
+    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
+      .and.returnValue(of(testOwners));
 
   });
 
@@ -111,7 +92,7 @@ describe('OwnerListComponent', () => {
 
   it('should call ngOnInit() method', () => {
     fixture.detectChanges();
-    expect(spy.calls.any()).toBe(true, 'getOwners called');
+    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
   });
 
 
@@ -125,37 +106,24 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchOnEnter should normalize and call getOwners', () => {
-    spy.calls.reset();
+  it('searchByLastName should call getOwners for empty term', () => {
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
 
-    component.name = '  Ana   Maria  ';
+    component.searchByLastName('');
 
-    component.searchOnEnter();
-
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-      name: 'Ana Maria',
-      address: ''
-    }));
+    expect(getOwnersSpy).toHaveBeenCalled();
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
   });
 
-  it('queueSearch should debounce and call getOwners with normalized term', fakeAsync(() => {
-    spy.calls.reset();
+  it('searchByLastName should call searchOwners for non-empty term', () => {
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
 
-    component.ngOnInit();
-    spy.calls.reset();
+    component.searchByLastName('Fr');
 
-    component.name = '  Ana   ';
-
-    component.queueSearch();
-
-    tick(299);
-    expect(spy).not.toHaveBeenCalled();
-
-    tick(1);
-    expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({
-      name: 'Ana',
-      address: ''
-    }));
-  }));
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+    expect(getOwnersSpy).not.toHaveBeenCalled();
+  });
 
 });
