@@ -49,3 +49,4 @@ petclinic-backend/.DS_Store
 petclinic-backend/.tool-versions
 petclinic-backend/.factorypath
 petclinic-backend/src/test/postman/reports/
+__pycache__/**
