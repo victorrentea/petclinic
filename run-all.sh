@@ -1,26 +1,50 @@
 #!/bin/bash
 
-# Function to stop background processes when the script is stopped
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$SCRIPT_DIR/petclinic-backend"
+FRONTEND_DIR="$SCRIPT_DIR/petclinic-frontend"
+BACKEND_PID=""
+FRONTEND_PID=""
+
 cleanup() {
   echo "Stopping backend and frontend..."
-  kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
-  exit
+
+  if [[ -n "$BACKEND_PID" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
+    kill "$BACKEND_PID"
+  fi
+
+  if [[ -n "$FRONTEND_PID" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
+    kill "$FRONTEND_PID"
+  fi
 }
 
-# Trap SIGINT (Ctrl+C) and SIGTERM
-trap cleanup SIGINT SIGTERM
+trap cleanup EXIT SIGINT SIGTERM
+
+if [[ ! -d "$BACKEND_DIR" ]]; then
+  echo "Backend directory not found: $BACKEND_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -d "$FRONTEND_DIR" ]]; then
+  echo "Frontend directory not found: $FRONTEND_DIR" >&2
+  exit 1
+fi
 
 echo "Starting Petclinic Backend (Spring Boot)..."
-cd petclinic-rest
-./mvnw spring-boot:run &
+(
+  cd "$BACKEND_DIR"
+  ./mvnw spring-boot:run
+) &
 BACKEND_PID=$!
-cd ..
 
 echo "Starting Petclinic Frontend (Angular)..."
-cd petclinic-angular
-npm start &
+(
+  cd "$FRONTEND_DIR"
+  npm start
+) &
 FRONTEND_PID=$!
-cd ..
 
 echo "Backend PID: $BACKEND_PID"
 echo "Frontend PID: $FRONTEND_PID"
@@ -28,5 +52,4 @@ echo "Both services are starting. Press Ctrl+C to stop both."
 echo "Frontend: http://localhost:4200/"
 echo "Backend:  http://localhost:8080/"
 
-# Wait for background processes
-wait $BACKEND_PID $FRONTEND_PID
+wait "$BACKEND_PID" "$FRONTEND_PID"
