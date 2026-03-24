@@ -153,6 +153,61 @@ public class OwnerTest {
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
+    @Test
+    void getAllWithUnifiedSearchAcrossOwnerAndPetFields() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Alice");
+        owner2.setLastName("Popescu");
+        owner2.setAddress("Bulevardul Unirii 9");
+        owner2.setCity("Cluj");
+        owner2.setTelephone("0712345678");
+        owner2 = ownerRepository.save(owner2);
+
+        Pet pet = new Pet();
+        pet.setName("Rex");
+        pet.setBirthDate(LocalDate.now());
+        pet.setOwner(owner2);
+        pet.setType(petType);
+        petRepository.save(pet);
+        owner2.addPet(pet);
+
+        List<OwnerDto> ownersByAddress = search("/api/owners?lastName=Unir");
+        List<OwnerDto> ownersByCity = search("/api/owners?lastName=clu");
+        List<OwnerDto> ownersByTelephone = search("/api/owners?lastName=1234");
+        List<OwnerDto> ownersByPetName = search("/api/owners?lastName=ex");
+
+        assertThat(ownersByAddress).extracting(OwnerDto::getId).contains(owner2.getId());
+        assertThat(ownersByCity).extracting(OwnerDto::getId).contains(owner2.getId());
+        assertThat(ownersByTelephone).extracting(OwnerDto::getId).contains(owner2.getId());
+        assertThat(ownersByPetName).extracting(OwnerDto::getId).contains(owner2.getId());
+    }
+
+    @Test
+    void getAllWithUnifiedSearch_isCaseInsensitiveAndMatchesInsideWords() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?lastName=ANKL");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getLastName)
+            .contains(Assertions.tuple(ownerId, "Franklin"));
+    }
+
+    @Test
+    void getAllWithUnifiedSearch_isRomanianDiacriticInsensitive() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Ioan");
+        owner2.setLastName("\u0218erban");
+        owner2.setAddress("Strada Lalelelor");
+        owner2.setCity("Bra\u0219ov");
+        owner2.setTelephone("0700000001");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> ownersByAsciiS = search("/api/owners?lastName=serb");
+        List<OwnerDto> ownersByAsciiCity = search("/api/owners?lastName=bras");
+
+        assertThat(ownersByAsciiS).extracting(OwnerDto::getId).contains(owner2Id);
+        assertThat(ownersByAsciiCity).extracting(OwnerDto::getId).contains(owner2Id);
+    }
+
     private List<OwnerDto> search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())

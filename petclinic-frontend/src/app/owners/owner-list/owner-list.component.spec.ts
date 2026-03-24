@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
@@ -106,24 +106,49 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
+  it('searchByTerm should call getOwners for empty term', () => {
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
+    component.searchByTerm('');
 
     expect(getOwnersSpy).toHaveBeenCalled();
     expect(searchOwnersSpy).not.toHaveBeenCalled();
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('searchByTerm should call searchOwners for non-empty term', () => {
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('Fr');
+    component.searchByTerm('Fr');
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
     expect(getOwnersSpy).not.toHaveBeenCalled();
   });
+
+  it('should trigger search on blur', () => {
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+    component.lastName = 'Fra';
+
+    component.onSearchBlur();
+
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Fra');
+  });
+
+  it('should debounce typing and search after 500ms', fakeAsync(() => {
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+    component.ngOnInit();
+    component.lastName = 'Fr';
+
+    component.onSearchInput();
+    tick(499);
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
+
+    tick(1);
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+    component.ngOnDestroy();
+  }));
 
 });

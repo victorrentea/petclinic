@@ -1,7 +1,9 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
@@ -58,12 +60,41 @@ public class OwnerRestController {
     @GetMapping(produces = "application/json")
     public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
         List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
+        if (lastName != null && !lastName.isBlank()) {
+            String normalizedTerm = normalizeForSearch(lastName);
+            owners = ownerRepository.findAll().stream()
+                .filter(owner -> matchesSearchTerm(owner, normalizedTerm))
+                .toList();
         } else {
             owners = ownerRepository.findAll();
         }
         return ownerMapper.toOwnerDtoCollection(owners);
+    }
+
+    private boolean matchesSearchTerm(Owner owner, String normalizedTerm) {
+        if (matches(owner.getFirstName(), normalizedTerm)
+            || matches(owner.getLastName(), normalizedTerm)
+            || matches(owner.getFirstName() + " " + owner.getLastName(), normalizedTerm)
+            || matches(owner.getAddress(), normalizedTerm)
+            || matches(owner.getCity(), normalizedTerm)
+            || matches(owner.getTelephone(), normalizedTerm)) {
+            return true;
+        }
+        return owner.getPets().stream()
+            .anyMatch(pet -> matches(pet.getName(), normalizedTerm));
+    }
+
+    private boolean matches(String value, String normalizedTerm) {
+        return normalizeForSearch(value).contains(normalizedTerm);
+    }
+
+    private String normalizeForSearch(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+            .replaceAll("\\p{M}+", "");
+        return normalized.toLowerCase(Locale.ROOT).trim();
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
