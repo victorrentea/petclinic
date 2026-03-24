@@ -3,6 +3,11 @@
 ## Objective
 Implement one owner search field that provides predictable, language-tolerant matching and low backend load.
 
+## API Contract Decision
+- The target API contract for unified owner search is `GET /api/owners?q={searchText}`.
+- Use `q` instead of `lastName` because the new search covers more than surname-only matching.
+- If rollout safety requires it, backend may temporarily accept `lastName` as a compatibility alias, but `q` is the documented target contract.
+
 ## Scope
 - One search input in Owners screen.
 - Search with OR across owner fields only:
@@ -16,14 +21,15 @@ Implement one owner search field that provides predictable, language-tolerant ma
 
 ## Functional Requirements
 - Case-insensitive matching.
-- Digit matching supported.
+- Digit matching  eg: "2" should return "1311231255".
 - Diacritic-insensitive matching for Latin scripts (Romanian, French, Turkish, etc.).
 - Substring matching (`%term%` semantics).
 - No search button.
 - Trigger search:
+  - on Enter (immediate), or
   - on blur (immediate), or
   - after 700 ms pause in typing.
-- Deduplicate requests so blur + debounce does not send duplicates for the same normalized term.
+- Deduplicate requests so Enter + blur + debounce do not send duplicates for the same normalized term.
 
 ## Normalization Strategy
 Apply the same logical normalization to both query term and searchable values.
@@ -48,29 +54,36 @@ Steps:
 ## Technical Approach
 
 ### Backend (Spring Boot)
-- Keep current endpoint contract if possible (no OpenAPI change unless explicitly approved).
+- Target contract: `GET /api/owners?q={searchText}`.
+- If temporary compatibility is needed during rollout, backend may also accept `lastName`, but `q` remains the documented contract.
+- Updating `openapi.yaml` for `q` requires explicit human confirmation before the contract file is changed.
 - Implement owner-only OR search logic on normalized values.
 - Ensure `%term%` semantics and stable ordering.
 - Maintain current DTO response shape.
 
 ### Frontend (Angular)
 - Keep one input field.
+- Send the user's search text as query parameter `q`.
 - Build event stream:
+  - Enter key stream with immediate trigger,
   - typing stream with `debounceTime(700)` + `distinctUntilChanged` on normalized term,
   - blur stream with immediate trigger.
 - Merge streams and deduplicate by last emitted normalized term.
+- Enter-triggered search must bypass debounce delay.
+- Enter-triggered search must cancel or supersede any pending debounce for the same normalized term.
 - Use `switchMap` to cancel in-flight stale requests.
 - Remove manual submit button behavior.
 
 ## Acceptance Criteria
 - One visible search field on Owners screen.
-- No search button required.
+- No search button.
+- Pressing Enter triggers immediate search.
 - Search works on owner fields only (no pet-name influence).
 - Case-insensitive + diacritic-insensitive behavior validated.
 - Substring matching works for middle-of-word queries.
 - Digits are searchable.
 - Input empty reloads all owners.
-- No duplicate request for same normalized term when blur and debounce overlap.
+- No duplicate request for same normalized term when Enter, blur, and debounce overlap.
 
 ## Test Plan
 
@@ -84,7 +97,10 @@ Steps:
 
 ### Frontend Unit Tests
 - Debounce fires after 700 ms.
+- Enter fires immediate search.
 - Blur fires immediate search.
+- Enter after typing does not wait for debounce.
+- Enter followed by blur does not duplicate request for same normalized term.
 - Blur after typing does not duplicate request for same normalized term.
 - Empty input fetches full owner list.
 
@@ -107,7 +123,6 @@ Steps:
 
 ## Open Questions (For Review)
 - Minimum character threshold before search (`1` vs `2`) to protect performance?
-- Keep existing query param name vs add dedicated `q`?
 - Do we need paging/sorting stabilization in the same change?
 
 ## Contract Guardrail
