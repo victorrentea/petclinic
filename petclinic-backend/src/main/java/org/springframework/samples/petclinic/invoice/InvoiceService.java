@@ -5,8 +5,7 @@ import java.util.List;
 
 class InvoiceService {
 
-    BigDecimal calculateTotal(List<Item> items) {
-        // TODO
-        return null;
+    BigDecimal total(List<Item> items) {
+        return BigDecimal.ZERO;
     }
 }
