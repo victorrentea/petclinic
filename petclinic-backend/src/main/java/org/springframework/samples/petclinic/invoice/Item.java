@@ -1,0 +1,10 @@
+package org.springframework.samples.petclinic.invoice;
+
+import java.math.BigDecimal;
+
+record Item(
+    String name,
+    BigDecimal price,
+    int quantity,
+    BigDecimal discount
+) {}
