@@ -1,0 +1,32 @@
+@startuml
+' Backend-only view for Add Visit flow
+
+title Add Visit Flow - Backend Only
+
+autonumber
+
+actor "API Client\n<<External Caller>>" as Client
+participant "OwnerRestController\n<<Backend REST Controller>>" as OwnerCtrl
+participant "VisitMapper\n<<Backend Mapper>>" as VisitMapper
+participant "VisitRepository\n<<Backend Repository>>" as VisitRepo
+database "Database\n<<Relational DB>>" as DB
+
+Client -> OwnerCtrl : POST /api/owners/{ownerId}/pets/{petId}/visits\nbody: VisitFieldsDto
+OwnerCtrl -> VisitMapper : toVisit(visitFieldsDto)
+VisitMapper --> OwnerCtrl : Visit (without pet)
+OwnerCtrl -> VisitRepo : save(visit)
+VisitRepo -> DB : INSERT visits(pet_id, visit_date, description)
+DB --> VisitRepo : generated visit id
+VisitRepo --> OwnerCtrl : persisted Visit
+OwnerCtrl --> Client : 201 Created
+
+alt Invalid payload / validation error
+  OwnerCtrl --> Client : 400 Bad Request (ProblemDetail)
+else Missing related resource (contract)
+  OwnerCtrl --> Client : 404 Not Found
+else Unexpected persistence/runtime error
+  OwnerCtrl --> Client : 500 Internal Server Error (ProblemDetail)
+end
+
+@enduml
+

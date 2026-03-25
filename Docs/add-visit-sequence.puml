@@ -1,0 +1,88 @@
+@startuml
+' Add Visit for a pet: Angular -> Spring Boot -> DB
+
+title Add Visit Flow (Pet -> Doctor Visit)
+
+autonumber
+
+actor "User\n<<Actor>>" as User
+participant "PetListComponent\n<<Frontend Component>>" as PetList
+participant "Angular Router\n<<Frontend Router>>" as Router
+participant "VisitAddComponent\n<<Frontend Component>>" as VisitAdd
+participant "PetService\n<<Frontend Service>>" as PetSvc
+participant "OwnerService\n<<Frontend Service>>" as OwnerSvc
+participant "VisitService\n<<Frontend Service>>" as VisitSvc
+participant "PetRestController\n<<Backend REST Controller>>" as PetCtrl
+participant "OwnerRestController\n<<Backend REST Controller>>" as OwnerCtrl
+participant "PetRepository\n<<Backend Repository>>" as PetRepo
+participant "OwnerRepository\n<<Backend Repository>>" as OwnerRepo
+participant "VisitMapper\n<<Backend Mapper>>" as VisitMapper
+participant "VisitRepository\n<<Backend Repository>>" as VisitRepo
+database "Database\n<<Relational DB>>" as DB
+
+== Open Add Visit screen ==
+User -> PetList : Click "Add Visit" on pet row
+PetList -> Router : navigate('/pets/{petId}/visits/add')
+Router -> VisitAdd : ngOnInit()
+
+VisitAdd -> PetSvc : getPetById(petId)
+PetSvc -> PetCtrl : GET /api/pets/{petId}
+PetCtrl -> PetRepo : findById(petId)
+PetRepo -> DB : SELECT pet by id
+DB --> PetRepo : pet row
+PetRepo --> PetCtrl : Pet
+PetCtrl --> PetSvc : PetDto
+PetSvc --> VisitAdd : Pet
+
+VisitAdd -> OwnerSvc : getOwnerById(pet.ownerId)
+OwnerSvc -> OwnerCtrl : GET /api/owners/{ownerId}
+OwnerCtrl -> OwnerRepo : findById(ownerId)
+OwnerRepo -> DB : SELECT owner by id
+DB --> OwnerRepo : owner row
+OwnerRepo --> OwnerCtrl : Owner
+OwnerCtrl --> OwnerSvc : OwnerDto
+OwnerSvc --> VisitAdd : Owner
+
+== Submit Visit ==
+User -> VisitAdd : Fill form + click "Add Visit"
+VisitAdd -> VisitAdd : onSubmit()
+note right of VisitAdd
+  - set visit.id = null
+  - format date to YYYY-MM-DD
+end note
+
+VisitAdd -> VisitSvc : addVisit(visit)
+VisitSvc -> OwnerCtrl : POST /api/owners/{ownerId}/pets/{petId}/visits\nbody: VisitFieldsDto
+
+OwnerCtrl -> VisitMapper : toVisit(visitFieldsDto)
+VisitMapper --> OwnerCtrl : Visit (without pet)
+OwnerCtrl -> OwnerCtrl : create Pet with id = petId\nvisit.setPet(pet)
+OwnerCtrl -> VisitRepo : save(visit)
+VisitRepo -> DB : INSERT into visits (pet_id, visit_date, description)
+DB --> VisitRepo : generated visit id
+VisitRepo --> OwnerCtrl : persisted Visit
+OwnerCtrl --> VisitSvc : 201 Created + Location /api/pets/{petId}/visits/{id}
+VisitSvc --> VisitAdd : success
+VisitAdd -> Router : navigate('/owners/{ownerId}')
+
+alt Validation failure
+  OwnerCtrl --> VisitSvc : 400 Bad Request (ProblemDetail)
+  VisitSvc --> VisitAdd : error callback
+  VisitAdd -> VisitAdd : set errorMessage
+end
+
+alt Missing pet during preload
+  PetCtrl --> PetSvc : 404 Not Found
+  PetSvc --> VisitAdd : error callback
+  VisitAdd -> VisitAdd : set errorMessage
+else Missing owner during preload
+  OwnerCtrl --> OwnerSvc : 404 Not Found
+  OwnerSvc --> VisitAdd : error callback
+  VisitAdd -> VisitAdd : set errorMessage
+else Missing pet/resource on submit
+  OwnerCtrl --> VisitSvc : 404 Not Found
+  VisitSvc --> VisitAdd : error callback
+  VisitAdd -> VisitAdd : set errorMessage
+end
+@enduml
+

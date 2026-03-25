@@ -22,29 +22,29 @@ Replace the dual-field owner search (name and address) with a single unified sea
     - **Validates: Requirements AC2.1, AC2.2, AC2.3, AC2.4**
     - Generate random owners and search terms, verify all matching owners are returned
   
-  - [~] 1.4 Write property test for search precision
+  - [ ] 1.4 Write property test for search precision
     - **Property CP2: Search Precision**
     - **Validates: Requirements AC2.1, AC2.2, AC2.3**
     - Verify all returned owners contain the search term in at least one field
   
-  - [~] 1.5 Write property test for no duplicates
+  - [ ] 1.5 Write property test for no duplicates
     - **Property CP3: No Duplicates**
     - **Validates: Requirements AC2.5**
     - Verify each owner appears at most once regardless of multiple field matches
   
-  - [~] 1.6 Write property test for case insensitivity
+  - [ ] 1.6 Write property test for case insensitivity
     - **Property CP4: Case Insensitivity**
     - **Validates: Requirements AC2.1, AC2.2, AC2.3**
     - Verify search results are identical for lowercase, uppercase, and mixed case
 
 - [ ] 2. Update REST controller to support unified search
-  - [~] 2.1 Modify OwnerRestController.listOwners method
+  - [ ] 2.1 Modify OwnerRestController.listOwners method
     - Add @RequestParam for search parameter (required = false)
     - Call ownerRepository.findBySearch with normalized search term
     - Map results to OwnerDto using ownerMapper
     - _Requirements: AC2.1, AC2.2, AC2.3, AC2.4_
   
-  - [~] 2.2 Write integration tests for REST endpoint
+  - [ ] 2.2 Write integration tests for REST endpoint
     - Test search with various terms matching different fields
     - Test empty search returns all owners
     - Test case insensitivity
@@ -55,7 +55,7 @@ Replace the dual-field owner search (name and address) with a single unified sea
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 4. Update frontend component template
-  - [~] 4.1 Replace dual search fields with single unified field in owner-list.component.html
+  - [ ] 4.1 Replace dual search fields with single unified field in owner-list.component.html
     - Remove separate name and address input fields
     - Add single search input with id="search"
     - Set placeholder to "Search by name, address, or city"
@@ -64,37 +64,37 @@ Replace the dual-field owner search (name and address) with a single unified sea
     - _Requirements: AC1.1, AC1.2, AC1.3_
 
 - [ ] 5. Update frontend component TypeScript
-  - [~] 5.1 Modify owner-list.component.ts
+  - [ ] 5.1 Modify owner-list.component.ts
     - Remove name and address properties
     - Add searchText property
     - Update loadOwners() to pass search parameter instead of name/address
     - Ensure normalizeSearchTerm handles the unified search text
     - _Requirements: AC2.1, AC2.2, AC2.3, AC2.4_
   
-  - [~] 5.2 Update owner.service.ts
+  - [ ] 5.2 Update owner.service.ts
     - Modify getOwners() method signature to accept search parameter
     - Remove name and address parameters
     - Set 'search' query parameter in HttpParams
     - _Requirements: AC2.1, AC2.2, AC2.3, AC2.4_
   
-  - [~] 5.3 Write unit tests for component
+  - [ ] 5.3 Write unit tests for component
     - Test searchText binding and updates
     - Test loadOwners calls service with correct search parameter
     - Test empty search behavior
     - _Requirements: AC1.1, AC2.4, AC3.3_
 
 - [ ] 6. Update frontend to display search results
-  - [~] 6.1 Ensure owner grid displays all matching results
+  - [ ] 6.1 Ensure owner grid displays all matching results
     - Verify existing grid component handles new search results correctly
     - Ensure results update appropriately (on input/submit based on current behavior)
     - _Requirements: AC3.1, AC3.2_
   
-  - [~] 6.2 Add appropriate feedback for empty results
+  - [ ] 6.2 Add appropriate feedback for empty results
     - Display "No owners found" message when search returns no results
     - Ensure message is user-friendly and clearly visible
     - _Requirements: AC3.4_
   
-  - [~] 6.3 Write end-to-end tests for search UI
+  - [ ] 6.3 Write end-to-end tests for search UI
     - Test typing in search field updates results
     - Test empty search shows all owners
     - Test no results shows appropriate message

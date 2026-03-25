@@ -24,6 +24,8 @@ Implement one owner search field that provides predictable, language-tolerant ma
 - Digit matching  eg: "2" should return "1311231255".
 - Diacritic-insensitive matching for Latin scripts (Romanian, French, Turkish, etc.).
 - Substring matching (`%term%` semantics).
+- Minimum search length for filtered search: 2 characters.
+- Maximum search length: 256 characters.
 - No search button.
 - Trigger search:
   - on Enter (immediate), or
@@ -78,6 +80,8 @@ Steps:
 - One visible search field on Owners screen.
 - No search button.
 - Pressing Enter triggers immediate search.
+- Search terms shorter than 2 characters do not trigger filtered search.
+- Search terms longer than 256 characters are rejected consistently by frontend and backend validation.
 - Search works on owner fields only (no pet-name influence).
 - Case-insensitive + diacritic-insensitive behavior validated.
 - Substring matching works for middle-of-word queries.
@@ -94,6 +98,7 @@ Steps:
 - Latin diacritic-insensitive search (RO/FR/TR examples).
 - Substring (`%term%`) behavior.
 - Numeric term behavior.
+- Validation for search term length > 256.
 
 ### Frontend Unit Tests
 - Debounce fires after 700 ms.
@@ -103,8 +108,10 @@ Steps:
 - Enter followed by blur does not duplicate request for same normalized term.
 - Blur after typing does not duplicate request for same normalized term.
 - Empty input fetches full owner list.
+- Input shorter than 2 characters does not trigger filtered search.
+- Input longer than 256 characters is blocked or rejected consistently.
 
-### Optional E2E Smoke
+### MUST E2E Smoke
 - Real UI flow with diacritics and numeric terms.
 
 ## Risks and Mitigations
@@ -122,7 +129,8 @@ Steps:
 4. Release and monitor request volume + response time.
 
 ## Open Questions (For Review)
-- Minimum character threshold before search (`1` vs `2`) to protect performance?
+- Q: Minimum character threshold before search (`1` vs `2`) to protect performance? A: minimum 2 chars 
+- Q: Maximum search length? A: 256 chars.
 - Do we need paging/sorting stabilization in the same change?
 
 ## Contract Guardrail
