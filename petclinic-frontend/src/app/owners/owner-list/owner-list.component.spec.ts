@@ -9,7 +9,8 @@ import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
-import {Observable, of} from 'rxjs';
+import {OwnerPage} from '../owner-page';
+import {Observable, of, Subject, throwError} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
 import {PartsModule} from '../../parts/parts.module';
@@ -23,12 +24,8 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    return of();
+  getOwnersPaged(page: number, size: number, lastName?: string): Observable<OwnerPage> {
+    return of({ owners: [], totalElements: 0, totalPages: 0, currentPage: 0 });
   }
 }
 
@@ -36,9 +33,8 @@ describe('OwnerListComponent', () => {
 
   let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
-  let ownerService = new OwnerServiceStub();
+  let ownerService: OwnerServiceStub;
   let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -66,7 +62,7 @@ describe('OwnerListComponent', () => {
             {path: 'owners/:id/edit', component: OwnerEditComponent}
           ])],
       providers: [
-        {provide: OwnerService, useValue: ownerService},
+        {provide: OwnerService, useClass: OwnerServiceStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
     })
@@ -78,12 +74,9 @@ describe('OwnerListComponent', () => {
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
-    ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
-
+    ownerService = fixture.debugElement.injector.get(OwnerService) as unknown as OwnerServiceStub;
+    getOwnersSpy = spyOn(ownerService, 'getOwnersPaged')
+      .and.returnValue(of({ owners: testOwners, totalElements: 1, totalPages: 1, currentPage: 0 }));
   });
 
   it('should create OwnerListComponent', () => {
@@ -92,63 +85,90 @@ describe('OwnerListComponent', () => {
 
   it('should call ngOnInit() method', () => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwnersPaged called');
   });
 
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
+  it('should show full name after getOwnersPaged observable (async)', waitForAsync(() => {
     fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
       de = fixture.debugElement.query(By.css('.ownerFullName'));
       el = de.nativeElement;
       expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
     });
   }));
 
-  it('searchByTerm should call getOwners for empty term', () => {
+  it('onSearchBlur should call getOwnersPaged with current lastName', () => {
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByTerm('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByTerm should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByTerm('Fr');
-
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('should trigger search on blur', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
     component.lastName = 'Fra';
 
     component.onSearchBlur();
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fra');
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, component.pageSize, 'Fra');
   });
 
-  it('should debounce typing and search after 500ms', fakeAsync(() => {
+  it('onSearchInput should debounce and call getOwnersPaged after 500ms', fakeAsync(() => {
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
     component.ngOnInit();
     component.lastName = 'Fr';
 
     component.onSearchInput();
     tick(499);
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+    expect(getOwnersSpy).not.toHaveBeenCalledWith(0, component.pageSize, 'Fr');
 
     tick(1);
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, component.pageSize, 'Fr');
     component.ngOnDestroy();
+  }));
+
+  // 11.1 — page navigation updates currentPage
+  it('page navigation updates currentPage', () => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+    getOwnersSpy.and.returnValue(of({ owners: testOwners, totalElements: 1, totalPages: 3, currentPage: 2 }));
+
+    component.onPageChange(2);
+
+    // loadPage passes `lastName || undefined`, so empty string becomes undefined
+    expect(getOwnersSpy).toHaveBeenCalledWith(2, component.pageSize, undefined);
+  });
+
+  // 11.1 — search input resets currentPage to 0
+  it('search input resets currentPage to 0', () => {
+    fixture.detectChanges();
+    component.currentPage = 3;
+    getOwnersSpy.calls.reset();
+
+    component.onSearchBlur();
+
+    // loadPage passes `lastName || undefined`, so empty string becomes undefined
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, component.pageSize, undefined);
+  });
+
+  // 11.1 — error state shows banner and restores previous owners
+  it('error state shows banner and restores previous owners', () => {
+    const previousOwners: Owner[] = [testOwner];
+    component.owners = previousOwners;
+    component.previousOwners = previousOwners;
+    getOwnersSpy.and.returnValue(throwError('err'));
+
+    component.loadPage(0, 10, '');
+
+    expect(component.errorMessage).toBe('Failed to load owners. Please try again.');
+    expect(component.owners).toBe(previousOwners);
+  });
+
+  // 11.1 — loading = true during request, false after
+  it('loading is true during request and false after completion', fakeAsync(() => {
+    const subject = new Subject<OwnerPage>();
+    getOwnersSpy.and.returnValue(subject.asObservable());
+
+    component.loadPage(0, 10, '');
+    expect(component.loading).toBe(true);
+
+    subject.next({ owners: testOwners, totalElements: 1, totalPages: 1, currentPage: 0 });
+    subject.complete();
+    expect(component.loading).toBe(false);
   }));
 
 });

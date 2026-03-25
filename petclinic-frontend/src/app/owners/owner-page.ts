@@ -1,9 +1,8 @@
 import { Owner } from './owner';
 
 export interface OwnerPage {
-  content: Owner[];
+  owners: Owner[];
   totalElements: number;
   totalPages: number;
-  number: number;
-  size: number;
+  currentPage: number;
 }

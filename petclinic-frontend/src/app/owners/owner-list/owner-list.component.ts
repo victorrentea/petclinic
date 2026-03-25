@@ -12,31 +12,87 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit, OnDestroy {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
+  errorMessage: string | null = null;
+  lastName: string = '';
+  owners: Owner[] = [];
+
+  // 8.1 — pagination state
+  currentPage = 0;
+  pageSize = 10;
+  totalPages = 0;
+  loading = false;
+  previousOwners: Owner[] | null = null;
+  lastRequest: { page: number; size: number; lastName: string } | null = null;
+
   private readonly searchTerms = new Subject<string>();
   private searchSubscription: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
-  }
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
+    // 8.4 — debounced search resets page to 0
     this.searchSubscription = this.searchTerms.pipe(
       debounceTime(500),
       distinctUntilChanged()
-    ).subscribe((term) => this.searchByTerm(term));
+    ).subscribe((term) => {
+      this.currentPage = 0;
+      this.loadPage(0, this.pageSize, term);
+    });
 
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    // 8.2 — initial load
+    this.loadPage(0, this.pageSize, '');
+  }
+
+  // 8.2 — single unified load method
+  loadPage(page: number, size: number, lastName: string): void {
+    this.loading = true;
+    this.previousOwners = this.owners;
+    this.lastRequest = { page, size, lastName };
+
+    this.ownerService.getOwnersPaged(page, size, lastName || undefined)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe(
+        (result) => {
+          this.owners = result.owners;
+          this.totalPages = result.totalPages;
+          this.currentPage = result.currentPage;
+          this.errorMessage = null;
+        },
+        // 8.3 — error handling
+        () => {
+          this.errorMessage = 'Failed to load owners. Please try again.';
+          this.owners = this.previousOwners ?? [];
+        }
+      );
+  }
+
+  // 8.4
+  onSearchInput() {
+    this.searchTerms.next(this.lastName || '');
+  }
+
+  onSearchBlur() {
+    this.currentPage = 0;
+    this.loadPage(0, this.pageSize, this.lastName || '');
+  }
+
+  // 8.5
+  onPageChange(page: number): void {
+    this.loadPage(page, this.pageSize, this.lastName || '');
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadPage(0, size, this.lastName || '');
+  }
+
+  // 8.6
+  retry(): void {
+    if (this.lastRequest) {
+      this.errorMessage = null;
+      this.loadPage(this.lastRequest.page, this.lastRequest.size, this.lastRequest.lastName);
+    }
   }
 
   onSelect(owner: Owner) {
@@ -47,37 +103,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/owners/add']);
   }
 
-  onSearchInput() {
-    this.searchTerms.next(this.lastName || '');
-  }
-
-  onSearchBlur() {
-    this.searchByTerm(this.lastName || '');
-  }
-
-  searchByTerm(lastName: string) {
-    if (lastName === '') {
-      this.ownerService.getOwners().subscribe((owners) => {
-        this.owners = owners;
-      });
-      return;
-    }
-
-    this.ownerService.searchOwners(lastName).subscribe(
-      (owners) => {
-        this.owners = owners;
-      },
-      () => {
-        this.owners = null;
-      }
-    );
-  }
-
   ngOnDestroy() {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
     this.searchTerms.complete();
   }
-
 }

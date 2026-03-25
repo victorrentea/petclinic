@@ -26,10 +26,15 @@
 - Security off by default (`petclinic.security.enable=false`); roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`.
 - H2 console: http://localhost:8080/h2-console (`jdbc:h2:mem:petclinic`, user `sa`, no password).
 
+## Agent routing
+- For any task involving writing tests, making failing tests pass, or implementing features test-first → delegate to the `tdd` agent.
+- For refactoring existing code without changing behaviour → delegate to the `refactor-guru` agent.
+
 ## Guardrails
 - When changing endpoints, update both tests and `../openapi.yaml` snapshot.
 - Never upgrade libraries or change the Java version without explicit human confirmation.
 - Lombok conventions: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively.
+- DTOs are Java records, not classes. Example: `public record PagedOwnersDto(List<OwnerDto> owners, long totalElements, int totalPages, int currentPage) {}`
 - `@Transactional` only when strictly necessary.
 - Line length ≤ 120 chars.
 

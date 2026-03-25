@@ -6,7 +6,7 @@ info:
   termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
   version: "1.0"
 servers:
-- url: http://localhost:8080
+- url: http://localhost
   description: Generated server url
 paths:
   /api/visits/{visitId}:
@@ -22,14 +22,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -64,14 +64,14 @@ paths:
               $ref: "#/components/schemas/VisitFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -96,14 +96,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -129,14 +129,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -171,14 +171,14 @@ paths:
               $ref: "#/components/schemas/VetDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -203,14 +203,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -236,14 +236,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -278,14 +278,14 @@ paths:
               $ref: "#/components/schemas/SpecialtyDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -310,14 +310,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -343,14 +343,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -385,14 +385,14 @@ paths:
               $ref: "#/components/schemas/PetTypeDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -417,14 +417,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -450,14 +450,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -492,14 +492,14 @@ paths:
               $ref: "#/components/schemas/PetDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -524,14 +524,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -558,14 +558,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -601,14 +601,14 @@ paths:
               $ref: "#/components/schemas/OwnerFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -634,14 +634,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -674,14 +674,14 @@ paths:
           type: integer
           format: int32
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -723,14 +723,14 @@ paths:
               $ref: "#/components/schemas/PetFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -749,14 +749,14 @@ paths:
       - visit-rest-controller
       operationId: listVisits
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -786,14 +786,14 @@ paths:
               $ref: "#/components/schemas/VisitDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -812,14 +812,14 @@ paths:
       - vet-rest-controller
       operationId: listVets
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -849,14 +849,14 @@ paths:
               $ref: "#/components/schemas/VetDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -881,14 +881,14 @@ paths:
               $ref: "#/components/schemas/UserDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -911,14 +911,14 @@ paths:
       - specialty-rest-controller
       operationId: listSpecialties
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -948,14 +948,14 @@ paths:
               $ref: "#/components/schemas/SpecialtyDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -974,14 +974,14 @@ paths:
       - pet-type-rest-controller
       operationId: listPetTypes
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1011,14 +1011,14 @@ paths:
               $ref: "#/components/schemas/PetTypeFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1043,15 +1043,32 @@ paths:
         required: false
         schema:
           type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+          maximum: 100
+          minimum: 1
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1067,9 +1084,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/PagedOwnersDto"
     post:
       tags:
       - owner-rest-controller
@@ -1082,14 +1097,14 @@ paths:
               $ref: "#/components/schemas/OwnerFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1122,14 +1137,14 @@ paths:
               $ref: "#/components/schemas/PetFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1168,14 +1183,14 @@ paths:
               $ref: "#/components/schemas/VisitFieldsDto"
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1194,14 +1209,14 @@ paths:
       - pet-rest-controller
       operationId: listPets
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1226,14 +1241,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1251,14 +1266,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_2
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1276,14 +1291,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_1
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1301,14 +1316,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_3
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1326,14 +1341,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_6
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1351,14 +1366,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_5
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1376,14 +1391,14 @@ paths:
       - root-rest-controller
       operationId: redirectToSwagger_4
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             '*/*':
               schema:
@@ -1743,3 +1758,19 @@ components:
       - lastName
       - pets
       - telephone
+    PagedOwnersDto:
+      type: object
+      properties:
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32

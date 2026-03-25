@@ -54,7 +54,6 @@ class InvoiceServiceTest {
         List<Item> items = List.of(
             new Item("item1", new BigDecimal("10.00"), 1, new BigDecimal("1.50"))
         );
-        service.total(items);
         assertThatThrownBy(() -> service.total(items))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Discount cannot be greater than 100%");
@@ -66,7 +65,6 @@ class InvoiceServiceTest {
         List<Item> items = List.of(
             new Item("item1", new BigDecimal("10.00"), -1, ZERO_DISCOUNT)
         );
-        service.total(items);
         assertThatThrownBy(() -> service.total(items))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Quantity cannot be negative");
@@ -77,11 +75,23 @@ class InvoiceServiceTest {
         List<Item> items = List.of(
             new Item("item1", new BigDecimal("-10.00"), 1, ZERO_DISCOUNT)
         );
-        service.total(items);
         assertThatThrownBy(() -> service.total(items))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Price cannot be negative");
     }
     // ❌ nulls
+    @Test
+    void rejectsNullItemsList() {
+        assertThatThrownBy(() -> service.total(null))
+            .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void rejectsNullItem() {
+        List<Item> items = new java.util.ArrayList<>();
+        items.add(null);
+        assertThatThrownBy(() -> service.total(items))
+            .isInstanceOf(NullPointerException.class);
+    }
 
 }

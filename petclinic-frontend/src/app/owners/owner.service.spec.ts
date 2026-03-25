@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,80 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  it('getOwnersPaged(0, 10) — no lastName — builds URL with page and size only', () => {
+    const mockPage: OwnerPage = {
+      owners: expectedOwners,
+      totalElements: 2,
+      totalPages: 1,
+      currentPage: 0,
+    };
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    ownerService.getOwnersPaged(0, 10).subscribe((page) => {
+      expect(page).toEqual(mockPage);
+    });
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?page=0&size=10'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(mockPage);
+  });
+
+  it('getOwnersPaged(1, 20) — no lastName — builds URL with page=1 and size=20', () => {
+    const mockPage: OwnerPage = {
+      owners: [],
+      totalElements: 2,
+      totalPages: 1,
+      currentPage: 1,
+    };
+
+    ownerService.getOwnersPaged(1, 20).subscribe((page) => {
+      expect(page).toEqual(mockPage);
+    });
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?page=1&size=20'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(mockPage);
+  });
+
+  it('getOwnersPaged(0, 10, "Franklin") — with lastName — appends lastName param', () => {
+    const mockPage: OwnerPage = {
+      owners: [expectedOwners[0]],
+      totalElements: 1,
+      totalPages: 1,
+      currentPage: 0,
+    };
+
+    ownerService.getOwnersPaged(0, 10, 'Franklin').subscribe((page) => {
+      expect(page).toEqual(mockPage);
+    });
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?page=0&size=10&lastName=Franklin'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(mockPage);
+  });
+
+  it('getOwnersPaged(0, 10, "") — empty lastName — does not append lastName param', () => {
+    const mockPage: OwnerPage = {
+      owners: expectedOwners,
+      totalElements: 2,
+      totalPages: 1,
+      currentPage: 0,
+    };
+
+    ownerService.getOwnersPaged(0, 10, '').subscribe((page) => {
+      expect(page).toEqual(mockPage);
+    });
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?page=0&size=10'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(mockPage);
   });
 
   it('search the owner by id', () => {
@@ -129,17 +196,5 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('DELETE');
     expect(req.request.body).toEqual(null);
     req.flush(null);
-  });
-
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
   });
 });

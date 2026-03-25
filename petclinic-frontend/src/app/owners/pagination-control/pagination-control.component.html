@@ -1,0 +1,32 @@
+<div class="row">
+  <div class="col-sm-8">
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 0 || loading">
+          <button class="page-link" (click)="onPageClick(currentPage - 1)"
+                  [disabled]="currentPage === 0 || loading">Previous</button>
+        </li>
+        <li class="page-item" *ngFor="let page of pages"
+            [class.active]="page === currentPage"
+            [class.disabled]="loading">
+          <button class="page-link" (click)="onPageClick(page)"
+                  [disabled]="loading">{{ page + 1 }}</button>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages - 1 || loading">
+          <button class="page-link" (click)="onPageClick(currentPage + 1)"
+                  [disabled]="currentPage === totalPages - 1 || loading">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <div class="col-sm-4">
+    <div class="form-group">
+      <label for="pageSize" class="control-label">Page size:</label>
+      <select id="pageSize" class="form-control" [value]="pageSize" (change)="onPageSizeChange($event)">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  </div>
+</div>

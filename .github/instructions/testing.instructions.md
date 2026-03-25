@@ -1,8 +1,9 @@
 ---
-description: Instructions for writing unit tests in Java or Typescript
+description: Load these instructions only when writing/review unit tests in Java or Typescript
 ---
 
 ## Unit Testing
+- Vreau să vorbești mereu cu mine în limba română când scrii. Mereu. Dacă eu încep în engleză, tot repede în română.
 - use JUnit 5 / Jasmine
 - use package-protected visibility in test classes
 - use AssertJ library instead of JUnit assertions

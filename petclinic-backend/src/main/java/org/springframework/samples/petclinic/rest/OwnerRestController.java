@@ -2,9 +2,10 @@ package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
 import java.text.Normalizer;
-import java.util.List;
 import java.util.Locale;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -18,6 +19,7 @@ import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerFieldsDto;
+import org.springframework.samples.petclinic.rest.dto.PagedOwnersDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
@@ -37,11 +39,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/owners")
 @RequiredArgsConstructor
+@Validated
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
 
@@ -58,34 +63,19 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null && !lastName.isBlank()) {
-            String normalizedTerm = normalizeForSearch(lastName);
-            owners = ownerRepository.findAll().stream()
-                .filter(owner -> matchesSearchTerm(owner, normalizedTerm))
-                .toList();
-        } else {
-            owners = ownerRepository.findAll();
-        }
-        return ownerMapper.toOwnerDtoCollection(owners);
-    }
-
-    private boolean matchesSearchTerm(Owner owner, String normalizedTerm) {
-        if (matches(owner.getFirstName(), normalizedTerm)
-            || matches(owner.getLastName(), normalizedTerm)
-            || matches(owner.getFirstName() + " " + owner.getLastName(), normalizedTerm)
-            || matches(owner.getAddress(), normalizedTerm)
-            || matches(owner.getCity(), normalizedTerm)
-            || matches(owner.getTelephone(), normalizedTerm)) {
-            return true;
-        }
-        return owner.getPets().stream()
-            .anyMatch(pet -> matches(pet.getName(), normalizedTerm));
-    }
-
-    private boolean matches(String value, String normalizedTerm) {
-        return normalizeForSearch(value).contains(normalizedTerm);
+    public ResponseEntity<PagedOwnersDto> listOwners(
+            @RequestParam(required = false) String lastName,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+        String term = normalizeForSearch(lastName);
+        Page<Owner> ownerPage = ownerRepository.findPagedOwners(term, PageRequest.of(page, size));
+        PagedOwnersDto dto = new PagedOwnersDto(
+            ownerMapper.toOwnerDtoCollection(ownerPage.getContent()),
+            ownerPage.getTotalElements(),
+            ownerPage.getTotalPages(),
+            ownerPage.getNumber()
+        );
+        return ResponseEntity.ok(dto);
     }
 
     private String normalizeForSearch(String value) {

@@ -14,11 +14,18 @@
           </div>
         </div>
       </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners matching "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <!-- 9.1 Error banner -->
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+      <button class="btn btn-sm btn-default" (click)="retry()">Retry</button>
+    </div>
+
+    <!-- 9.2 No-results message -->
+    <div *ngIf="owners?.length === 0 && lastName">No owners matching "{{lastName}}"</div>
+
+    <div class="table-responsive" id="ownersTable" *ngIf="owners?.length > 0">
       <table class="table table-striped">
         <thead>
         <tr>
@@ -45,8 +52,20 @@
         </tr>
         </tbody>
       </table>
+
+      <!-- 9.3 Pagination control -->
+      <app-pagination-control
+        *ngIf="owners?.length > 0"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [pageSize]="pageSize"
+        [loading]="loading"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination-control>
+
       <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
     </div>
   </div>
