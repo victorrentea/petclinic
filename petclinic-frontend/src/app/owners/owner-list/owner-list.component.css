@@ -55,6 +55,14 @@ display:none;
 	width: auto;
 }
 
+#ownersTable {
+	margin-bottom: 16px;
+}
+
+.owner-pet + .owner-pet {
+	margin-top: 4px;
+}
+
 @media (max-width: 576px) {
 	#nameGroup {
 		flex-direction: column;

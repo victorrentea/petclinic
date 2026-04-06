@@ -1,5 +1,5 @@
-<div class="row">
-  <div class="col-sm-8">
+<div class="pagination-toolbar">
+  <div class="pagination-toolbar__nav">
     <nav aria-label="Page navigation">
       <ul class="pagination">
         <li class="page-item" [class.disabled]="currentPage === 0 || loading">
@@ -19,9 +19,9 @@
       </ul>
     </nav>
   </div>
-  <div class="col-sm-4">
-    <div class="form-group">
-      <label for="pageSize" class="control-label">Page size:</label>
+  <div class="pagination-toolbar__page-size">
+    <div class="form-group pagination-page-size-group">
+      <label for="pageSize" class="control-label pagination-page-size-group__label">Page size:</label>
       <select id="pageSize" class="form-control" [value]="pageSize" (change)="onPageSizeChange($event)">
         <option value="10">10</option>
         <option value="20">20</option>

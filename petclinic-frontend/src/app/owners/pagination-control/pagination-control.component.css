@@ -1,0 +1,44 @@
+.pagination-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pagination-toolbar__nav {
+  flex: 1 1 auto;
+}
+
+.pagination-toolbar__nav .pagination {
+  margin: 0;
+}
+
+.pagination-toolbar__page-size {
+  flex: 0 0 auto;
+}
+
+.pagination-page-size-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.pagination-page-size-group__label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.pagination-page-size-group .form-control {
+  width: 84px;
+  min-width: 84px;
+}
+
+@media (max-width: 576px) {
+  .pagination-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

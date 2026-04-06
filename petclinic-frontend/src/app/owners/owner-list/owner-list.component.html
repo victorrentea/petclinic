@@ -25,7 +25,8 @@
     <!-- 9.2 No-results message -->
     <div *ngIf="owners?.length === 0 && lastName">No owners matching "{{lastName}}"</div>
 
-    <div class="table-responsive" id="ownersTable" *ngIf="owners?.length > 0">
+    <div *ngIf="owners?.length > 0">
+      <div class="table-responsive" id="ownersTable">
       <table class="table table-striped">
         <thead>
         <tr>
@@ -45,13 +46,12 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets" class="owner-pet">{{ pet.name }}</div>
+          </td>
         </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- 9.3 Pagination control -->
       <app-pagination-control
