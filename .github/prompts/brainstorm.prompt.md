@@ -7,7 +7,9 @@ Use this prompt as a self-contained method registry. Do not depend on external f
 
 Process:
 1) Briefly restate my topic and constraints.
-2) Ask up to 5 clarifying questions.
+2) Ask up to 5 clarifying questions, one at a time.
+   - Ask only the first question, wait for my answer, then ask the next.
+   - Do not ask multiple clarifying questions in a single message.
 3) Then generate a compact elicitation playbook tailored to my case.
 
 Playbook requirements:
