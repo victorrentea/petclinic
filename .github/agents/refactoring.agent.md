@@ -13,7 +13,7 @@ tools: ['insert_edit_into_file', 'replace_string_in_file', 'create_file', 'run_i
 2. Run all tests and check they pass; if tests fail, confirm with the user whether to proceed despite existing failures.
 3. Identify tests covering the files to be changed, using:
    - Reports of code coverage tools like cobertura or jacoco (preferred)
-   - Mutation testing: mutate (temporarily break) the current code behavior , run tests and see which tests are failing. Remember to revert the mutation after running the tests.
+   - Mutation testing: mutate (temporarily break) the current code behavior, run tests and see which tests are failing. Remember to revert the mutation after running the tests.
 4. Present user with a concise plan including:
   - The files you will edit 
   - The refactoring techniques you will use
