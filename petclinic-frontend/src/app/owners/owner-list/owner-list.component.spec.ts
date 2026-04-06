@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
@@ -9,7 +9,7 @@ import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
-import {Observable, of} from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
 import {PartsModule} from '../../parts/parts.module';
@@ -27,7 +27,7 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(query: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -106,24 +106,104 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+  it('should render search input with placeholder and no visible search button', () => {
+    fixture.detectChanges();
 
-    component.searchByLastName('');
+    const input = fixture.debugElement.query(By.css('#owners-search')).nativeElement as HTMLInputElement;
+    const label = fixture.debugElement.query(By.css('label'));
+    const button = fixture.debugElement.query(By.css('button[type="submit"]'));
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+    expect(input.placeholder).toBe('Search...');
+    expect(label).toBeNull();
+    expect(button).toBeNull();
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('should debounce typing for 500ms before searching', fakeAsync(() => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('Fr');
+    component.onSearchTermChange('Fr');
+
+    tick(499);
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
+
+    tick(1);
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
     expect(getOwnersSpy).not.toHaveBeenCalled();
-  });
+  }));
+
+  it('should search immediately on blur and avoid duplicate request when debounce later completes', fakeAsync(() => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+
+    component.onSearchTermChange('Fr');
+    tick(200);
+
+    component.onSearchBlur('Fr');
+
+    expect(searchOwnersSpy).toHaveBeenCalledTimes(1);
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+
+    tick(300);
+
+    expect(searchOwnersSpy).toHaveBeenCalledTimes(1);
+  }));
+
+  it('should reload all owners for empty term', fakeAsync(() => {
+    fixture.detectChanges();
+    component.onSearchTermChange('Fr');
+    tick(500);
+
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+
+    component.onSearchTermChange('');
+    tick(500);
+
+    expect(getOwnersSpy).toHaveBeenCalled();
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
+  }));
+
+  it('should ignore stale search responses', fakeAsync(() => {
+    const franklinOwners = [testOwner];
+    const davisOwners: Owner[] = [{
+      id: 2,
+      firstName: 'Betty',
+      lastName: 'Davis',
+      address: '638 Cardinal Ave.',
+      city: 'Sun Prairie',
+      telephone: '6085551749',
+      pets: []
+    }];
+    const responses: {[key: string]: Subject<Owner[]>} = {
+      Fr: new Subject<Owner[]>(),
+      Dav: new Subject<Owner[]>()
+    };
+
+    getOwnersSpy.and.returnValue(of([]));
+    searchOwnersSpy.and.callFake((term: string) => responses[term].asObservable());
+
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+
+    component.onSearchTermChange('Fr');
+    tick(500);
+    component.onSearchTermChange('Dav');
+    tick(500);
+
+    responses.Fr.next(franklinOwners);
+    fixture.detectChanges();
+    expect(component.owners).toEqual([]);
+
+    responses.Dav.next(davisOwners);
+    fixture.detectChanges();
+
+    expect(searchOwnersSpy.calls.allArgs()).toEqual([['Fr'], ['Dav']]);
+    expect(component.owners).toEqual(davisOwners);
+  }));
 
 });
