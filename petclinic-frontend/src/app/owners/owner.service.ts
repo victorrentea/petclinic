@@ -50,10 +50,10 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(query: string): Observable<Owner[]> {
     let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
+    if (query !== undefined) {
+      url += '?q=' + query;
     }
     return this.http
       .get<Owner[]>(url)

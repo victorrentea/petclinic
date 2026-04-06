@@ -20,6 +20,7 @@ import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,12 +56,13 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
+    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String q) {
+        String searchTerm = q == null ? null : q.trim();
         List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
+        if (StringUtils.hasText(searchTerm)) {
+            owners = ownerRepository.search(searchTerm);
         } else {
-            owners = ownerRepository.findAll();
+            owners = ownerRepository.search("");
         }
         return ownerMapper.toOwnerDtoCollection(owners);
     }
@@ -87,11 +88,7 @@ public class OwnerRestController {
     @PutMapping("/{ownerId}")
     public void updateOwner(@PathVariable int ownerId, @RequestBody @Validated OwnerFieldsDto ownerFieldsDto) {
         Owner currentOwner = ownerRepository.findById(ownerId).orElseThrow();
-        currentOwner.setAddress(ownerFieldsDto.getAddress());
-        currentOwner.setCity(ownerFieldsDto.getCity());
-        currentOwner.setFirstName(ownerFieldsDto.getFirstName());
-        currentOwner.setLastName(ownerFieldsDto.getLastName());
-        currentOwner.setTelephone(ownerFieldsDto.getTelephone());
+        ownerMapper.updateOwner(ownerFieldsDto, currentOwner);
         ownerRepository.save(currentOwner);
     }
 
@@ -110,19 +107,18 @@ public class OwnerRestController {
         pet.setOwner(new Owner().setId(ownerId));
         pet.setType(petTypeRepository.findById(pet.getType().getId()).orElseThrow());
         petRepository.save(pet);
-        UriComponents createdUri = UriComponentsBuilder.newInstance().path("/api/pets/{id}")
-            .buildAndExpand(pet.getId());
-        return ResponseEntity.created(createdUri.toUri()).build();
+        URI createdUri = UriComponentsBuilder.newInstance().path("/api/pets/{id}")
+            .buildAndExpand(pet.getId()).toUri();
+        return ResponseEntity.created(createdUri).build();
     }
 
     @Operation(operationId = "updateOwnersPet", summary = "Update an owner's pet")
     @PutMapping("{ownerId}/pets/{petId}")
     public void updateOwnersPet(@PathVariable int ownerId, @PathVariable int petId, @RequestBody PetFieldsDto petFieldsDto) {
-        Pet currentPet = petRepository.findById(petId).orElseThrow();
-        currentPet.setBirthDate(petFieldsDto.getBirthDate());
-        currentPet.setName(petFieldsDto.getName());
-        currentPet.setType(petMapper.toPetType(petFieldsDto.getType()));
-        currentPet.setType(petTypeRepository.findById(currentPet.getType().getId()).orElseThrow());
+        Pet currentPet = petRepository.findById(petId).orElseThrow()
+            .setBirthDate(petFieldsDto.getBirthDate())
+            .setName(petFieldsDto.getName())
+            .setType(petTypeRepository.findById(petFieldsDto.getType().getId()).orElseThrow());
         petRepository.save(currentPet);
     }
 
@@ -130,9 +126,7 @@ public class OwnerRestController {
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId, @RequestBody VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
-        visit.setPet(pet);
+        visit.setPet(new Pet().setId(petId));
         visitRepository.save(visit);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
