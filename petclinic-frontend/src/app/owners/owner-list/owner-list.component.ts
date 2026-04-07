@@ -50,10 +50,6 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/owners/add']);
   }
 
-  getPetNames(owner: Owner): string {
-    return owner.pets.map((pet) => pet.name).join(', ');
-  }
-
   onSearchTermChange(query: string) {
     this.searchTerms.next(query);
   }

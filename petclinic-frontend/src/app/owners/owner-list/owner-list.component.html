@@ -38,7 +38,11 @@
             <td>{{ owner.address }}</td>
             <td>{{ owner.city }}</td>
             <td>{{ owner.telephone }}</td>
-            <td>{{ getPetNames(owner) }}</td>
+            <td>
+              <ng-container *ngFor="let pet of owner.pets; let last = last">
+                {{ pet.name }}<br *ngIf="!last">
+              </ng-container>
+            </td>
           </tr>
         </tbody>
       </table>

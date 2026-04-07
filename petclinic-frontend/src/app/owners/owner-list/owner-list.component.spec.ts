@@ -206,4 +206,26 @@ describe('OwnerListComponent', () => {
     expect(component.owners).toEqual(davisOwners);
   }));
 
+  it('should render pet names on separate lines in pets column', () => {
+    const ownerWithPets: Owner = {
+      ...testOwner,
+      pets: [
+        {name: 'Max'} as any,
+        {name: 'Samantha'} as any
+      ]
+    };
+
+    getOwnersSpy.and.returnValue(of([ownerWithPets]));
+    searchOwnersSpy.and.returnValue(of([ownerWithPets]));
+
+    fixture.detectChanges();
+
+    const petsCell = fixture.debugElement.query(By.css('tbody tr td:last-child')).nativeElement as HTMLTableCellElement;
+
+    expect(petsCell.textContent).toContain('Max');
+    expect(petsCell.textContent).toContain('Samantha');
+    expect(petsCell.textContent).not.toContain(',');
+    expect(petsCell.innerHTML).toContain('<br');
+  });
+
 });
