@@ -122,6 +122,8 @@ Run `mvn clean install` when:
 - Line length ≤ 120 chars
 - Java 21+, Spring Boot 3
 - Never ask before running tests after refactoring
+- Always use TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
+- Builder chains: one property per line, unless only 2 properties total
 
 ### Task Modifiers
 - "fast", "go", "Sparta" → skip build/tests
