@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import lombok.Builder;
 
 @Builder
-record Item(
+public record Item(
     String name,
     BigDecimal price,
     int quantity,
