@@ -3,8 +3,9 @@ import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+import {OwnerPage, OwnerSearchRequest} from './owner-page';
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +20,31 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwnersPage(request: OwnerSearchRequest): Observable<OwnerPage> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('page', String(request.page));
+    queryParams.set('size', String(request.size));
+    queryParams.set('sort', request.sort);
+    if (request.q) {
+      queryParams.set('q', request.q);
+    }
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(`${this.entityUrl}?${queryParams.toString()}`)
+      .pipe(catchError(this.handlerError('getOwnersPage', {
+        content: [],
+        number: 0,
+        size: request.size,
+        totalElements: 0,
+        totalPages: 0
+      } as OwnerPage)));
+  }
+
+  getOwners(): Observable<Owner[]> {
+    return this.getOwnersPage({page: 0, size: 20, sort: 'id,asc', q: ''})
+      .pipe(
+        map(page => page.content),
+        catchError(this.handlerError('getOwners', []))
+      );
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -51,12 +73,10 @@ export class OwnerService {
   }
 
   searchOwners(query: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (query !== undefined) {
-      url += '?q=' + query;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+    return this.getOwnersPage({page: 0, size: 20, sort: 'id,asc', q: query ?? ''})
+      .pipe(
+        map(page => page.content),
+        catchError(this.handlerError('searchOwners', []))
+      );
   }
 }

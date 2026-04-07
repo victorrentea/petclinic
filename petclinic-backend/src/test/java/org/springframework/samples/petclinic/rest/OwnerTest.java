@@ -29,10 +29,10 @@ import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerPageDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -113,11 +113,12 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        OwnerPageDto ownersPage = search("/api/owners");
 
-        assertThat(owners)
+        assertThat(ownersPage.getContent())
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
             .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+        assertThat(ownersPage.getNumber()).isZero();
     }
 
     @Test
@@ -127,9 +128,9 @@ public class OwnerTest {
             .setFirstName("Betty")
             .setLastName("Davis")).getId();
 
-        List<OwnerDto> owners = search("/api/owners?q=avi");
+        OwnerPageDto ownersPage = search("/api/owners?q=avi");
 
-        assertThat(owners)
+        assertThat(ownersPage.getContent())
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "Davis"))
             .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
@@ -161,22 +162,22 @@ public class OwnerTest {
 
     @Test
     void getAllWithTextFilter_matchesFirstNameContains_caseInsensitive() throws Exception {
-        List<OwnerDto> owners = search("/api/owners?q=EOR");
+        OwnerPageDto ownersPage = search("/api/owners?q=EOR");
 
-        assertThat(owners)
+        assertThat(ownersPage.getContent())
             .extracting(OwnerDto::getId, OwnerDto::getFirstName)
             .contains(Assertions.tuple(ownerId, "George"));
     }
 
     private void assertSearchReturnsOwner(String term, int expectedOwnerId) throws Exception {
-        List<OwnerDto> owners = search("/api/owners?q=" + term);
+        OwnerPageDto ownersPage = search("/api/owners?q=" + term);
 
-        assertThat(owners)
+        assertThat(ownersPage.getContent())
             .extracting(OwnerDto::getId)
             .contains(expectedOwnerId);
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private OwnerPageDto search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -184,15 +185,41 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageDto.class);
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?q=NonExistent");
+        OwnerPageDto results = search("/api/owners?q=NonExistent");
 
-        assertThat(results).isEmpty();
+        assertThat(results.getContent()).isEmpty();
+    }
+
+    @Test
+    void getAll_supportsPaginationMetadata() throws Exception {
+        OwnerPageDto ownersPage = search("/api/owners?page=0&size=10&sort=id,asc&q=ge");
+
+        assertThat(ownersPage.getSize()).isEqualTo(10);
+        assertThat(ownersPage.getNumber()).isZero();
+        assertThat(ownersPage.getTotalElements()).isGreaterThanOrEqualTo(1);
+        assertThat(ownersPage.getTotalPages()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void getAll_withLargeDataset_returnsPageQuickly() throws Exception {
+        for (int i = 0; i < 300; i++) {
+            ownerRepository.save(TestData.anOwner()
+                .setFirstName("Perf" + i)
+                .setLastName("Owner" + i));
+        }
+
+        long startedAt = System.currentTimeMillis();
+        OwnerPageDto ownersPage = search("/api/owners?page=0&size=50&sort=id,asc");
+        long elapsedMillis = System.currentTimeMillis() - startedAt;
+
+        assertThat(ownersPage.getContent().size()).isLessThanOrEqualTo(50);
+        assertThat(ownersPage.getTotalElements()).isGreaterThanOrEqualTo(300);
+        assertThat(elapsedMillis).isLessThan(2000);
     }
 
     @Test

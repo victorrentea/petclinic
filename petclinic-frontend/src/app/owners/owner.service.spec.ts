@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import {OwnerPage} from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -33,6 +34,13 @@ describe('OwnerService', () => {
       pets: []
     }
   ];
+  const expectedOwnerPage: OwnerPage = {
+    content: expectedOwners,
+    number: 0,
+    size: 20,
+    totalElements: 2,
+    totalPages: 1
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -49,13 +57,12 @@ describe('OwnerService', () => {
   });
 
   it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+    ownerService.getOwnersPage({page: 0, size: 20, sort: 'id,asc', q: ''})
+      .subscribe((page) => expect(page).toEqual(expectedOwnerPage), fail);
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?page=0&size=20&sort=id%2Casc');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedOwnerPage);
   });
 
   it('search the owner by id', () => {
@@ -132,14 +139,14 @@ describe('OwnerService', () => {
   });
 
   it('search owners using the q query parameter', () => {
-    ownerService.searchOwners('Mad').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
+    ownerService.getOwnersPage({page: 1, size: 50, sort: 'id,desc', q: 'Mad'}).subscribe((owners) => {
+      expect(owners).toEqual(expectedOwnerPage);
     });
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?q=Mad'
+      ownerService.entityUrl + '?page=1&size=50&sort=id%2Cdesc&q=Mad'
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedOwnerPage);
   });
 });

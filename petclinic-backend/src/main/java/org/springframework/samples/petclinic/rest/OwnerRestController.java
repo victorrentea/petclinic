@@ -3,6 +3,11 @@ package org.springframework.samples.petclinic.rest;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -16,6 +21,7 @@ import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerFieldsDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerPageDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
@@ -31,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +49,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(2, 10, 20, 50);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -56,15 +65,43 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String q) {
-        String searchTerm = q == null ? null : q.trim();
-        List<Owner> owners;
-        if (StringUtils.hasText(searchTerm)) {
-            owners = ownerRepository.search(searchTerm);
-        } else {
-            owners = ownerRepository.search("");
+    public OwnerPageDto listOwners(
+        @RequestParam(name = "q", required = false) String q,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size,
+        @RequestParam(name = "sort", defaultValue = "id,asc") String sort
+    ) {
+        if (page < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page must be >= 0");
         }
-        return ownerMapper.toOwnerDtoCollection(owners);
+        if (!ALLOWED_PAGE_SIZES.contains(size)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "size must be one of: 2, 10, 20, 50");
+        }
+
+        String searchTerm = q == null ? null : q.trim();
+        Sort requestSort = parseSort(sort);
+        Pageable pageable = PageRequest.of(page, size, requestSort);
+        Page<Owner> ownersPage = ownerRepository.search(StringUtils.hasText(searchTerm) ? searchTerm : "", pageable);
+        List<OwnerDto> content = ownerMapper.toOwnerDtoCollection(ownersPage.getContent());
+
+        return new OwnerPageDto()
+            .setContent(content)
+            .setNumber(ownersPage.getNumber())
+            .setSize(ownersPage.getSize())
+            .setTotalElements(ownersPage.getTotalElements())
+            .setTotalPages(ownersPage.getTotalPages());
+    }
+
+    private Sort parseSort(String sort) {
+        String[] tokens = sort.split(",");
+        String property = tokens[0].trim();
+        if (property.isEmpty()) {
+            property = "id";
+        }
+        Sort.Direction direction = tokens.length > 1 && "desc".equalsIgnoreCase(tokens[1].trim())
+            ? Sort.Direction.DESC
+            : Sort.Direction.ASC;
+        return Sort.by(new Sort.Order(direction, property));
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

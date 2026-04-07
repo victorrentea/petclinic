@@ -1,6 +1,9 @@
 <div class="container-fluid">
   <div class="container xd-container">
-    <h2>Owners</h2>
+    <div class="owners-header">
+      <h2>Owners</h2>
+      <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+    </div>
 
     <form method="get"
           (submit)="$event.preventDefault()"
@@ -19,8 +22,8 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners matching "{{query}}"</div>
-    <div class="table-responsive" id="ownersTable" *ngIf="owners">
+    <div *ngIf="isOwnersDataReceived && owners.length === 0">No owners matching "{{query}}"</div>
+    <div class="table-responsive" id="ownersTable" *ngIf="owners.length > 0">
       <table class="table table-striped">
         <thead>
         <tr>
@@ -47,8 +50,48 @@
         </tbody>
       </table>
     </div>
-    <div>
-      <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+    <div class="owners-footer" *ngIf="isOwnersDataReceived">
+      <nav aria-label="Owners pages" *ngIf="totalPages > 1">
+        <ul class="pagination owners-pagination">
+          <li [class.disabled]="page === 0">
+            <a href="#" (click)="$event.preventDefault(); previousPage()" aria-label="Previous page">&laquo;</a>
+          </li>
+          <li
+            *ngFor="let item of pageLinks"
+            [class.active]="item === page"
+            [class.disabled]="item === 'ellipsis'"
+          >
+            <span *ngIf="item === 'ellipsis'">&hellip;</span>
+            <a
+              *ngIf="item !== 'ellipsis'"
+              href="#"
+              (click)="$event.preventDefault(); onPageLinkClick(item)"
+            >{{ item + 1 }}</a>
+          </li>
+          <li [class.disabled]="page >= totalPages - 1">
+            <a href="#" (click)="$event.preventDefault(); nextPage()" aria-label="Next page">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="owners-controls">
+        <div class="owners-page-size">
+          <label for="owners-page-size">Rows:</label>
+          <select
+            id="owners-page-size"
+            class="form-control"
+            [ngModel]="size"
+            (ngModelChange)="onPageSizeChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="owners-pages-total" *ngIf="totalPages > 0">
+          Page {{ page + 1 }} of {{ totalPages }}
+        </div>
+      </div>
     </div>
   </div>
 </div>

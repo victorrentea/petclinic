@@ -34,9 +34,28 @@ display:none;
 .owners-controls {
 	display: flex;
 	align-items: center;
+	justify-content: flex-end;
+	gap: 16px;
+}
+
+.owners-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.owners-header h2 {
+	margin: 0;
+}
+
+.owners-footer {
+	display: flex;
+	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	margin-bottom: 16px;
+	margin-top: 8px;
 }
 
 .owners-pagination {
@@ -53,6 +72,15 @@ display:none;
 
 .owners-page-size .form-control {
 	width: auto;
+}
+
+.owners-pages-total {
+	color: #6e6e6e;
+}
+
+.owners-pagination {
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 @media (max-width: 576px) {
@@ -73,6 +101,16 @@ display:none;
 	}
 
 	.owners-controls {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.owners-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.owners-footer {
 		flex-direction: column;
 		align-items: flex-start;
 	}

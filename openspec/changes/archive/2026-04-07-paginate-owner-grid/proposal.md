@@ -8,7 +8,8 @@ Owner list page becomes slow and hard to navigate as data grows. Pagination impr
 - Update frontend owner grid to request paged data
 - Add pagination controls (page, size selector, next/prev)
 - Preserve filters/search across pages
-- Default page size (e.g., 10/20)
+- Page size selectable by user (10, 20, 50)
+- Display total pages in UI
 
 ## Capabilities
 

@@ -1,0 +1,16 @@
+{
+  "name": "petclinic-qa-playwright",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright end-to-end tests for Petclinic Owners pagination and sorting",
+  "scripts": {
+    "test": "playwright test",
+    "test:owners": "playwright test tests/owners-pagination.spec.js",
+    "test:headed": "playwright test --headed",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
+
