@@ -51,6 +51,22 @@
     </li>
   </ul>
 
+  <form class="navbar-form navbar-right theme-selector" role="form">
+    <label for="theme-select" class="sr-only">Theme</label>
+    <select
+      id="theme-select"
+      class="form-control"
+      [ngModel]="themePreference"
+      (ngModelChange)="onThemePreferenceChange($event)"
+      [ngModelOptions]="{ standalone: true }"
+      aria-label="Theme selector"
+    >
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="system">System</option>
+    </select>
+  </form>
+
   </div>
   </nav>
 </div>

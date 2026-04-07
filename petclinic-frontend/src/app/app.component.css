@@ -14,12 +14,21 @@ div.navbar-header {
   padding: inherit;
 }
 
+.theme-selector {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.theme-selector .form-control {
+  min-width: 110px;
+}
+
 .content-wrapper {
   min-height: calc(100% - 8rem);
 }
 
 .footer-wrapper {
-  background-color: #f8f9fa;
+  background-color: var(--dm-surface, #f8f9fa);
   text-align: center;
   position: fixed;
   bottom: 0;

@@ -2,3 +2,207 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+:root {
+  --dm-bg: #f1f1f1;
+  --dm-surface: #ffffff;
+  --dm-surface-2: #f6f6f6;
+  --dm-text: #34302d;
+  --dm-muted: #6e6e6e;
+  --dm-border: #d0d0d0;
+  --dm-link: #5fa134;
+  --dm-link-hover: #4f8a2e;
+  --dm-accent: #6db33f;
+  --dm-focus: #8ab4f8;
+}
+
+body.theme-light {
+  color-scheme: light;
+}
+
+body.theme-dark {
+  color-scheme: dark;
+  --dm-bg: #121212;
+  --dm-surface: #1b1b1b;
+  --dm-surface-2: #232323;
+  --dm-text: #e6e6e6;
+  --dm-muted: #b7b7b7;
+  --dm-border: #3a3a3a;
+  --dm-link: #8bc34a;
+  --dm-link-hover: #a5d66a;
+  --dm-accent: #6db33f;
+  --dm-focus: #8ab4f8;
+}
+
+body {
+  background-color: var(--dm-bg);
+  color: var(--dm-text);
+}
+
+a {
+  color: var(--dm-link);
+}
+
+a:hover,
+a:focus {
+  color: var(--dm-link-hover);
+}
+
+body.theme-dark .navbar,
+body.theme-dark .navbar-default {
+  background-color: var(--dm-surface);
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .navbar-default .navbar-nav > li > a,
+body.theme-dark .navbar-default .navbar-brand,
+body.theme-dark .navbar-default .navbar-text {
+  color: var(--dm-text);
+}
+
+body.theme-dark .navbar-default .navbar-nav > li > a:hover,
+body.theme-dark .navbar-default .navbar-nav > li > a:focus,
+body.theme-dark .navbar-default .navbar-nav > .active > a,
+body.theme-dark .navbar-default .navbar-nav > .active > a:hover,
+body.theme-dark .navbar-default .navbar-nav > .active > a:focus {
+  background-color: var(--dm-accent);
+  color: #fff;
+}
+
+body.theme-dark .table {
+  color: var(--dm-text);
+}
+
+body.theme-dark .table > thead > tr > th {
+  background-color: var(--dm-surface-2);
+  color: var(--dm-text);
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .table > tbody > tr > td,
+body.theme-dark .table > tbody > tr > th,
+body.theme-dark .table > tfoot > tr > td,
+body.theme-dark .table > tfoot > tr > th {
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #1f1f1f;
+}
+
+body.theme-dark .table-hover > tbody > tr:hover {
+  background-color: #2a2a2a;
+}
+
+body.theme-dark .form-control,
+body.theme-dark .input-group-addon,
+body.theme-dark select,
+body.theme-dark textarea {
+  background-color: var(--dm-surface);
+  color: var(--dm-text);
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .form-control::placeholder {
+  color: var(--dm-muted);
+}
+
+body.theme-dark .form-control:focus {
+  border-color: var(--dm-focus);
+  box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.25);
+}
+
+body.theme-dark .help-block,
+body.theme-dark .text-muted {
+  color: var(--dm-muted);
+}
+
+body.theme-dark .dropdown-menu {
+  background-color: var(--dm-surface);
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .dropdown-menu > li > a {
+  color: var(--dm-text);
+}
+
+body.theme-dark .dropdown-menu > li > a:hover,
+body.theme-dark .dropdown-menu > li > a:focus {
+  background-color: var(--dm-surface-2);
+  color: var(--dm-text);
+}
+
+body.theme-dark .dropdown-menu .divider {
+  background-color: var(--dm-border);
+}
+
+body.theme-dark .alert {
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .alert-success {
+  background-color: rgba(46, 125, 50, 0.25);
+  color: #b9f6ca;
+}
+
+body.theme-dark .alert-info {
+  background-color: rgba(2, 119, 189, 0.25);
+  color: #b3e5fc;
+}
+
+body.theme-dark .alert-warning {
+  background-color: rgba(245, 124, 0, 0.25);
+  color: #ffe0b2;
+}
+
+body.theme-dark .alert-danger {
+  background-color: rgba(198, 40, 40, 0.25);
+  color: #ffcdd2;
+}
+
+body.theme-dark .panel {
+  background-color: var(--dm-surface);
+  border-color: var(--dm-border);
+}
+
+body.theme-dark .panel-heading,
+body.theme-dark .panel-footer {
+  background-color: var(--dm-surface-2);
+  border-color: var(--dm-border);
+  color: var(--dm-text);
+}
+
+body.theme-dark .pagination > li > a,
+body.theme-dark .pagination > li > span {
+  background-color: var(--dm-surface);
+  border-color: var(--dm-border);
+  color: var(--dm-link);
+}
+
+body.theme-dark .pagination > li > a:hover,
+body.theme-dark .pagination > li > span:hover,
+body.theme-dark .pagination > li > a:focus,
+body.theme-dark .pagination > li > span:focus {
+  background-color: var(--dm-surface-2);
+  color: var(--dm-link-hover);
+}
+
+body.theme-dark .pagination > .active > a,
+body.theme-dark .pagination > .active > span,
+body.theme-dark .pagination > .active > a:hover,
+body.theme-dark .pagination > .active > span:hover {
+  background-color: var(--dm-accent);
+  border-color: var(--dm-accent);
+  color: #fff;
+}
+
+/* Fallback for third-party/light-only widgets rendered inside dark mode. */
+body.theme-dark .well,
+body.theme-dark .thumbnail,
+body.theme-dark .list-group-item,
+body.theme-dark .modal-content,
+body.theme-dark .popover,
+body.theme-dark .tooltip-inner {
+  background-color: var(--dm-surface);
+  color: var(--dm-text);
+  border-color: var(--dm-border);
+}
