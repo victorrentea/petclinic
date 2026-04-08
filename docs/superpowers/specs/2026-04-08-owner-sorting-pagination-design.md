@@ -14,14 +14,14 @@ Production target is 100,000+ owners. The current implementation calls `findAll(
 ## API Contract
 
 ```
-GET /api/owners?q=smith&page=0&size=10&sort=firstName,asc&sort=lastName,asc
+GET /api/owners?q=smith&page=0&size=10&sort=name,asc
 ```
 
 **Query params:**
 - `q` — optional search term; replaces the old `lastName` param; searches across firstName, lastName, address, city, telephone, pet names
 - `page` — 0-based page index (Spring default); default `0`
 - `size` — items per page: 10, 20, or 50; default `10`
-- `sort` — Spring standard format e.g. `firstName,asc`; two `sort` params for the Name column
+- `sort` — `name,asc|desc` or `city,asc|desc`. `name` is a logical alias mapped in the controller to `ORDER BY firstName, lastName`.
 
 **Response body** — Spring's standard `Page<OwnerDto>`:
 ```json
@@ -35,8 +35,8 @@ GET /api/owners?q=smith&page=0&size=10&sort=firstName,asc&sort=lastName,asc
 ```
 
 **Sort mappings (frontend → API):**
-- Name column → `sort=firstName,asc&sort=lastName,asc` (direction applied to both; matches display order "George Franklin")
-- City column → `sort=city,asc`
+- Name column → `sort=name,asc` or `sort=name,desc`
+- City column → `sort=city,asc` or `sort=city,desc`
 
 Default sort on first load: Name ascending.
 
@@ -58,34 +58,26 @@ Both DBs expose a function named `unaccent`. The JPQL query uses `FUNCTION('unac
 `OwnerRepository` extends `JpaRepository<Owner, Integer>` and adds:
 
 ```java
-@Query(
-  value = """
-    SELECT DISTINCT o FROM Owner o LEFT JOIN o.pets p
+@Query("""
+    SELECT o FROM Owner o
     WHERE :q IS NULL OR :q = ''
       OR LOWER(FUNCTION('unaccent', o.firstName)) LIKE LOWER(FUNCTION('unaccent', :q))
       OR LOWER(FUNCTION('unaccent', o.lastName))  LIKE LOWER(FUNCTION('unaccent', :q))
       OR LOWER(FUNCTION('unaccent', o.city))       LIKE LOWER(FUNCTION('unaccent', :q))
       OR LOWER(FUNCTION('unaccent', o.address))    LIKE LOWER(FUNCTION('unaccent', :q))
       OR o.telephone                               LIKE :q
-      OR LOWER(FUNCTION('unaccent', p.name))       LIKE LOWER(FUNCTION('unaccent', :q))
-    """,
-  countQuery = """
-    SELECT COUNT(DISTINCT o) FROM Owner o LEFT JOIN o.pets p
-    WHERE :q IS NULL OR :q = ''
-      OR LOWER(FUNCTION('unaccent', o.firstName)) LIKE LOWER(FUNCTION('unaccent', :q))
-      OR LOWER(FUNCTION('unaccent', o.lastName))  LIKE LOWER(FUNCTION('unaccent', :q))
-      OR LOWER(FUNCTION('unaccent', o.city))       LIKE LOWER(FUNCTION('unaccent', :q))
-      OR LOWER(FUNCTION('unaccent', o.address))    LIKE LOWER(FUNCTION('unaccent', :q))
-      OR o.telephone                               LIKE :q
-      OR LOWER(FUNCTION('unaccent', p.name))       LIKE LOWER(FUNCTION('unaccent', :q))
-    """
-)
+      OR EXISTS (
+            SELECT 1 FROM Pet p
+            WHERE p.owner = o
+            AND LOWER(FUNCTION('unaccent', p.name)) LIKE LOWER(FUNCTION('unaccent', :q))
+         )
+    """)
 Page<Owner> findByQuery(@Param("q") String q, Pageable pageable);
 ```
 
-- `LEFT JOIN o.pets p` is for filtering only; pets are still loaded lazily via `@BatchSize(size=10)`
-- `DISTINCT` prevents duplicates when an owner has multiple pets matching the query
-- Separate `countQuery` required — Spring cannot auto-derive count from DISTINCT + JOIN
+- Correlated `EXISTS` subquery for pet name search — preserves row cardinality, no JOIN, no DISTINCT
+- No explicit `countQuery` needed — Spring Data auto-derives it correctly because there's no DISTINCT
+- Pets are still loaded lazily via `@BatchSize(size=10)` after the page is fetched
 - Caller passes `q` pre-wrapped with `%` wildcards: `"%" + term + "%"`. Normalization happens in the DB.
 
 ### Controller
@@ -97,7 +89,12 @@ public Page<OwnerDto> listOwners(
     Pageable pageable)
 ```
 
-Returns `Page<OwnerDto>` (Spring serializes this automatically).
+The controller maps the logical `sort=name` to entity fields before calling the repository:
+```java
+// sort=name,asc → Sort.by("firstName").ascending().and(Sort.by("lastName").ascending())
+```
+
+`sort=city` passes through unchanged. Returns `Page<OwnerDto>` (Spring serializes this automatically).
 
 ### Indexes
 
@@ -105,8 +102,8 @@ Added to `Owner` entity via `@Table(indexes = {...})`:
 
 ```java
 @Table(name = "owners", indexes = {
-    @Index(name = "idx_owner_firstname_lastname", columnList = "first_name, last_name"),
-    @Index(name = "idx_owner_city",               columnList = "city")
+    @Index(name = "idx_owner_name", columnList = "first_name, last_name"),
+    @Index(name = "idx_owner_city", columnList = "city")
 })
 ```
 
