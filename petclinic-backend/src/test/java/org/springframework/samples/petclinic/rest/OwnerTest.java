@@ -133,7 +133,7 @@ public class OwnerTest {
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Dav");
+        List<OwnerDto> owners = search("/api/owners?q=Dav");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -147,28 +147,31 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    private record OwnerPageResult(List<OwnerDto> content, long totalElements, int totalPages, int number, int size) {}
+
+    private OwnerPageResult searchPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+            .andReturn().getResponse().getContentAsString();
+        return mapper.readValue(responseJson, OwnerPageResult.class);
+    }
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+    private List<OwnerDto> search(String uriTemplate) throws Exception {
+        return searchPage(uriTemplate).content();
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerDto> results = search("/api/owners?q=NonExistent");
 
         assertThat(results).isEmpty();
     }
@@ -382,5 +385,85 @@ public class OwnerTest {
 
         JsonNode root = mapper.readTree(json);
         assertThat(root.get("size").asInt()).isLessThanOrEqualTo(50);
+    }
+
+    @Test
+    void listOwners_returnsPaginatedPage() throws Exception {
+        Owner owner2 = new Owner()
+            .setFirstName("Betty").setLastName("Davis")
+            .setAddress("638 Cardinal Ave.").setCity("Sun Prairie")
+            .setTelephone("6085551749");
+        ownerRepository.save(owner2);
+
+        OwnerPageResult page = searchPage("/api/owners?size=1&page=0");
+
+        assertThat(page.size()).isEqualTo(1);
+        assertThat(page.totalElements()).isGreaterThanOrEqualTo(2);
+        assertThat(page.totalPages()).isGreaterThanOrEqualTo(2);
+        assertThat(page.content()).hasSize(1);
+    }
+
+    @Test
+    void listOwners_sortByNameAsc_firstNameAlphabeticalOrder() throws Exception {
+        ownerRepository.save(new Owner()
+            .setFirstName("Zara").setLastName("Zebra")
+            .setAddress("1 A St").setCity("City").setTelephone("1234567890"));
+        ownerRepository.save(new Owner()
+            .setFirstName("Aaron").setLastName("Apple")
+            .setAddress("2 B St").setCity("City").setTelephone("1234567890"));
+
+        OwnerPageResult page = searchPage("/api/owners?sort=name,asc&size=50");
+
+        List<String> firstNames = page.content().stream().map(OwnerDto::getFirstName).toList();
+        assertThat(firstNames).isSortedAccordingTo(String::compareTo);
+    }
+
+    @Test
+    void listOwners_sortByNameDesc_firstNameReverseOrder() throws Exception {
+        ownerRepository.save(new Owner()
+            .setFirstName("Zara").setLastName("Zebra")
+            .setAddress("1 A St").setCity("City").setTelephone("1234567890"));
+        ownerRepository.save(new Owner()
+            .setFirstName("Aaron").setLastName("Apple")
+            .setAddress("2 B St").setCity("City").setTelephone("1234567890"));
+
+        OwnerPageResult page = searchPage("/api/owners?sort=name,desc&size=50");
+
+        List<String> firstNames = page.content().stream().map(OwnerDto::getFirstName).toList();
+        assertThat(firstNames).isSortedAccordingTo((a, b) -> b.compareTo(a));
+    }
+
+    @Test
+    void listOwners_sortByCity_citiesInOrder() throws Exception {
+        ownerRepository.save(new Owner()
+            .setFirstName("A").setLastName("B")
+            .setAddress("1 St").setCity("Zurich").setTelephone("1234567890"));
+        ownerRepository.save(new Owner()
+            .setFirstName("C").setLastName("D")
+            .setAddress("2 St").setCity("Amsterdam").setTelephone("1234567890"));
+
+        OwnerPageResult page = searchPage("/api/owners?sort=city,asc&size=50");
+
+        List<String> cities = page.content().stream().map(OwnerDto::getCity).toList();
+        assertThat(cities).isSortedAccordingTo(String::compareTo);
+    }
+
+    @Test
+    void listOwners_searchByPetName_returnsOwner() throws Exception {
+        // pet "Rosy" belongs to the owner created in @BeforeEach
+        List<OwnerDto> result = search("/api/owners?q=Rosy");
+
+        assertThat(result).extracting(OwnerDto::getFirstName).contains("George");
+    }
+
+    @Test
+    void listOwners_diacriticSearch_matchesAccented() throws Exception {
+        ownerRepository.save(new Owner()
+            .setFirstName("Müller").setLastName("Hans")
+            .setAddress("1 St").setCity("Berlin").setTelephone("1234567890"));
+
+        List<OwnerDto> result = search("/api/owners?q=Muller");
+
+        assertThat(result).extracting(OwnerDto::getFirstName).contains("Müller");
     }
 }
