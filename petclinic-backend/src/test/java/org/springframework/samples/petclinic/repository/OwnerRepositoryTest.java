@@ -108,4 +108,17 @@ class OwnerRepositoryTest {
         var names = page.getContent().stream().map(Owner::getFirstName).toList();
         assertThat(names).isSortedAccordingTo(String::compareTo);
     }
+
+    @Test
+    void findByQuery_filteredQuery_totalElementsIsAccurate() {
+        savedOwner("Betty", "Davis");
+        savedOwner("Betty2", "Davis");
+        savedOwner("George", "Franklin");
+
+        Page<Owner> page = ownerRepository.findByQuery("%Davis%", PageRequest.of(0, 1));
+
+        assertThat(page.getTotalElements()).isGreaterThanOrEqualTo(2);
+        assertThat(page.getTotalPages()).isGreaterThanOrEqualTo(2);
+        assertThat(page.getContent()).hasSize(1); // page size is 1, so only one result
+    }
 }
