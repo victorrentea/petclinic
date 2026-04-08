@@ -15,12 +15,12 @@
           <tr>
             <th style="cursor:pointer" (click)="sortBy('name')">
               Name
-              <span *ngIf="sortColumn === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+              <span *ngIf="sortColumn === 'name'">{{ sortOrder === 'asc' ? '▼' : '▲' }}</span>
             </th>
             <th>Address</th>
             <th style="cursor:pointer" (click)="sortBy('city')">
               City
-              <span *ngIf="sortColumn === 'city'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+              <span *ngIf="sortColumn === 'city'">{{ sortOrder === 'asc' ? '▼' : '▲' }}</span>
             </th>
             <th>Telephone</th>
             <th>Pets</th>
