@@ -18,6 +18,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Digits;
@@ -27,7 +28,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "owners")
+@Table(name = "owners", indexes = {
+    @Index(name = "idx_owner_name", columnList = "first_name, last_name"),
+    @Index(name = "idx_owner_city", columnList = "city")
+})
 @Getter
 @Setter
 public class Owner {
