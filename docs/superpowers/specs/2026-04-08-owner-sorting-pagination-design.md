@@ -163,3 +163,34 @@ interface OwnerPage {
 - Any change to `q`, sort column, sort direction, or page size resets to page 0
 - Page navigation does not reset sort or search
 - All state changes trigger one new API call via reactive stream (debounce on search input, immediate on sort/page changes)
+
+---
+
+## Testing
+
+All features are covered by tests written before implementation (TDD).
+
+### Backend — `OwnerRestControllerTest` (`@SpringBootTest` or `@WebMvcTest`)
+
+- **Pagination:** page 0 vs page 1 return different owners; `totalElements` and `totalPages` are correct
+- **Page size:** requesting `size=10` returns at most 10 owners
+- **Page size cap:** requesting `size=3000000` is clamped to 50 — response contains at most 50 owners
+- **Sort by name asc/desc:** first owner on page 0 changes correctly when direction is flipped
+- **Sort by city asc/desc:** same as above for city
+- **Search `q` — plain match:** filtering by a known last name returns only matching owners
+- **Search `q` — diacritics:** searching `"Müller"` matches an owner stored as `"Muller"` and vice versa
+- **Search `q` — pet name:** searching a pet's name returns the owner of that pet
+- **Search `q` — no match:** returns empty `content` with `totalElements=0`
+- **Search + pagination combined:** correct `totalElements` reflects filtered set, not full table
+
+### Backend — `OwnerRepositoryTest` (`@DataJpaTest`)
+
+- EXISTS subquery does not duplicate owners that have multiple pets matching the query
+- `findByQuery` with null/blank `q` returns all owners (paginated)
+
+### Frontend — `OwnerListComponent` (Jest/Karma unit tests)
+
+- Clicking "Name" header sends `sort=name,asc`; clicking again sends `sort=name,desc`
+- Changing page size resets to page 0
+- Changing search term resets to page 0
+- Paginator prev/next buttons emit correct page numbers
