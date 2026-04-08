@@ -80,6 +80,19 @@ Page<Owner> findByQuery(@Param("q") String q, Pageable pageable);
 - Pets are still loaded lazily via `@BatchSize(size=10)` after the page is fetched
 - Caller passes `q` pre-wrapped with `%` wildcards: `"%" + term + "%"`. Normalization happens in the DB.
 
+### Page size cap (DoS protection)
+
+A `PageableHandlerMethodArgumentResolverCustomizer` bean caps `size` at 50 framework-wide:
+
+```java
+@Bean
+public PageableHandlerMethodArgumentResolverCustomizer pageableCustomizer() {
+    return resolver -> resolver.setMaxPageSize(50);
+}
+```
+
+Any request with `size` above 50 is silently clamped by Spring before reaching the controller. Prevents a malicious `size=3000000` request from loading millions of rows into memory.
+
 ### Controller
 
 `listOwners` signature changes to:
