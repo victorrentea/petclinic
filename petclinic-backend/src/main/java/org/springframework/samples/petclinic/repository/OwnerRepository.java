@@ -11,7 +11,7 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 
     @Query("""
         SELECT o FROM Owner o
-        WHERE :q = ''
+        WHERE (:q IS NULL OR :q = '')
           OR LOWER(FUNCTION('unaccent', o.firstName)) LIKE LOWER(FUNCTION('unaccent', :q))
           OR LOWER(FUNCTION('unaccent', o.lastName))  LIKE LOWER(FUNCTION('unaccent', :q))
           OR LOWER(FUNCTION('unaccent', o.city))       LIKE LOWER(FUNCTION('unaccent', :q))
