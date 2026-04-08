@@ -14,14 +14,14 @@ Production target is 100,000+ owners. The current implementation calls `findAll(
 ## API Contract
 
 ```
-GET /api/owners?q=smith&page=0&size=10&sort=lastName,asc&sort=firstName,asc
+GET /api/owners?q=smith&page=0&size=10&sort=firstName,asc&sort=lastName,asc
 ```
 
 **Query params:**
 - `q` — optional search term; replaces the old `lastName` param; searches across firstName, lastName, address, city, telephone, pet names
 - `page` — 0-based page index (Spring default); default `0`
 - `size` — items per page: 10, 20, or 50; default `10`
-- `sort` — Spring standard format e.g. `lastName,asc`; two `sort` params for the Name column
+- `sort` — Spring standard format e.g. `firstName,asc`; two `sort` params for the Name column
 
 **Response body** — Spring's standard `Page<OwnerDto>`:
 ```json
@@ -35,7 +35,7 @@ GET /api/owners?q=smith&page=0&size=10&sort=lastName,asc&sort=firstName,asc
 ```
 
 **Sort mappings (frontend → API):**
-- Name column → `sort=lastName,asc&sort=firstName,asc` (direction applied to both)
+- Name column → `sort=firstName,asc&sort=lastName,asc` (direction applied to both; matches display order "George Franklin")
 - City column → `sort=city,asc`
 
 Default sort on first load: Name ascending.
@@ -105,7 +105,7 @@ Added to `Owner` entity via `@Table(indexes = {...})`:
 
 ```java
 @Table(name = "owners", indexes = {
-    @Index(name = "idx_owner_lastname_firstname", columnList = "last_name, first_name"),
+    @Index(name = "idx_owner_firstname_lastname", columnList = "first_name, last_name"),
     @Index(name = "idx_owner_city",               columnList = "city")
 })
 ```
