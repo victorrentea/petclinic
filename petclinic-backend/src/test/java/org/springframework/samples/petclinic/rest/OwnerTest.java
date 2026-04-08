@@ -33,6 +33,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -370,5 +371,16 @@ public class OwnerTest {
         assertThat(responseDto.getPets().get(0).getName()).isEqualTo("Rosy");
         assertThat(responseDto.getPets().get(0).getType()).isNotNull();
         assertThat(responseDto.getPets().get(0).getType().getName()).isEqualTo("dog");
+    }
+
+    @Test
+    void listOwners_oversizedPage_isCappedAt50() throws Exception {
+        // When requesting a huge page size
+        String json = mockMvc.perform(get("/api/owners?size=3000000"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        JsonNode root = mapper.readTree(json);
+        assertThat(root.get("size").asInt()).isLessThanOrEqualTo(50);
     }
 }
