@@ -2,57 +2,84 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
+    <div class="form-group">
+      <input class="form-control" type="text" placeholder="Search by name, address, city, phone or pet…"
+             [formControl]="searchControl"/>
+    </div>
 
-    </form>
+    <div *ngIf="isOwnersDataReceived && owners.length === 0">No owners found.</div>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div class="table-responsive" id="ownersTable" *ngIf="owners.length > 0">
       <table class="table table-striped">
         <thead>
-        <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
-        </tr>
+          <tr>
+            <th style="cursor:pointer" (click)="sortBy('name')">
+              Name
+              <span *ngIf="sortColumn === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th>Address</th>
+            <th style="cursor:pointer" (click)="sortBy('city')">
+              City
+              <span *ngIf="sortColumn === 'city'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th>Telephone</th>
+            <th>Pets</th>
+          </tr>
         </thead>
-
         <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
-          <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
-        </tr>
+          <tr *ngFor="let owner of owners">
+            <td class="ownerFullName">
+              <a routerLink="/owners/{{owner.id}}" routerLinkActive="active" (click)="onSelect(owner)">
+                {{ owner.firstName }} {{ owner.lastName }}
+              </a>
+            </td>
+            <td>{{ owner.address }}</td>
+            <td>{{ owner.city }}</td>
+            <td>{{ owner.telephone }}</td>
+            <td>
+              <span *ngFor="let pet of owner.pets; let last = last">
+                {{ pet.name }}<span *ngIf="!last">, </span>
+              </span>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <div>
+
+      <!-- Pagination controls -->
+      <div class="row">
+        <div class="col-sm-4">
+          <label>Page size:
+            <select class="form-control input-sm" style="display:inline-block;width:auto"
+                    [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+              <option *ngFor="let s of pageSizes" [value]="s">{{ s }}</option>
+            </select>
+          </label>
+          <span class="text-muted" style="margin-left:8px">
+            {{ totalElements }} total
+          </span>
+        </div>
+        <div class="col-sm-8 text-right">
+          <ul class="pagination pagination-sm" style="margin:0">
+            <li [class.disabled]="currentPage === 0">
+              <a (click)="goToPage(currentPage - 1)" style="cursor:pointer">&laquo;</a>
+            </li>
+            <li *ngFor="let p of pageNumbers" [class.active]="p === currentPage">
+              <a (click)="goToPage(p)" style="cursor:pointer">{{ p + 1 }}</a>
+            </li>
+            <li [class.disabled]="currentPage === totalPages - 1">
+              <a (click)="goToPage(currentPage + 1)" style="cursor:pointer">&raquo;</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
+    </div>
+
+    <div *ngIf="isOwnersDataReceived && owners.length === 0">
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>
