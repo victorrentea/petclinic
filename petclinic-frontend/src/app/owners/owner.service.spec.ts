@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -49,13 +50,26 @@ describe('OwnerService', () => {
   });
 
   it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+    const mockPage: OwnerPage = {
+      content: expectedOwners,
+      totalElements: 2,
+      totalPages: 1,
+      number: 0,
+      size: 10
+    };
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    ownerService
+      .getOwners({ page: 0, size: 10, sort: 'name', order: 'asc' })
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners), fail);
+
+    const req = httpTestingController.expectOne(r =>
+      r.url.includes('/owners') &&
+      r.params.get('page') === '0' &&
+      r.params.get('size') === '10' &&
+      r.params.get('sort') === 'name,asc'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(mockPage);
   });
 
   it('search the owner by id', () => {
@@ -131,15 +145,21 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
+  it('should call API with pagination and sort params', () => {
+    const mockPage: OwnerPage = {
+      content: [], totalElements: 0, totalPages: 0, number: 0, size: 10
+    };
+
+    ownerService.getOwners({ page: 1, size: 20, sort: 'name', order: 'desc' })
+      .subscribe(page => expect(page).toEqual(mockPage));
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
+      r => r.url.includes('/owners') &&
+           r.params.get('page') === '1' &&
+           r.params.get('size') === '20' &&
+           r.params.get('sort') === 'name,desc'
     );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(mockPage);
   });
+
 });
