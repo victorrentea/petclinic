@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Owner } from './owner';
+import { Owner, OwnerPage } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -19,10 +19,12 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwners(page = 0, size = 20, sort?: string[]): Observable<OwnerPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    sort?.forEach(s => params = params.append('sort', s));
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(catchError(this.handlerError('getOwners', {content: [], totalElements: 0, totalPages: 0, number: 0, size} as OwnerPage)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -50,13 +52,12 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
+  searchOwners(lastName: string, page = 0, size = 20, sort?: string[]): Observable<OwnerPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (lastName) params = params.set('lastName', lastName);
+    sort?.forEach(s => params = params.append('sort', s));
     return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(catchError(this.handlerError('searchOwners', {content: [], totalElements: 0, totalPages: 0, number: 0, size} as OwnerPage)));
   }
 }

@@ -15,21 +15,19 @@
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
+          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find Owner</button>
         </div>
       </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="owners && owners.length === 0">No owners with LastName starting with "{{lastName}}"</div>
+    <div class="table-responsive" id="ownersTable" *ngIf="owners && owners.length > 0">
+      <table class="table table-striped" matSort (matSortChange)="onSortChange($event)">
         <thead>
         <tr>
-          <th>Name</th>
+          <th mat-sort-header="lastName">Name</th>
           <th>Address</th>
-          <th>City</th>
+          <th mat-sort-header="city">City</th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -50,6 +48,15 @@
         </tr>
         </tbody>
       </table>
+
+      <mat-paginator
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

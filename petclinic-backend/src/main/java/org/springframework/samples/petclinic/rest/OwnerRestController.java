@@ -2,7 +2,11 @@ package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -30,8 +34,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
@@ -54,16 +60,23 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("firstName", "lastName", "city");
+
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
-        } else {
-            owners = ownerRepository.findAll();
-        }
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", required = false) String lastName,
+            @PageableDefault(size = 20) Pageable pageable) {
+        pageable.getSort().forEach(order -> {
+            if (!ALLOWED_SORT_FIELDS.contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Sort field '" + order.getProperty() + "' is not allowed. Allowed: " + ALLOWED_SORT_FIELDS);
+            }
+        });
+        Page<Owner> owners = lastName != null
+            ? ownerRepository.findByLastNameStartingWith(lastName, pageable)
+            : ownerRepository.findAll(pageable);
+        return owners.map(ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

@@ -13,6 +13,7 @@ name: java
 - never use "this" to reference instance fields
 - consider records instead of classes with final fields
 - add factory methods in records instead of passing null in constructors
+- use as many emojis in comments you can
 - avoid comments - prefer extracting well-named constants, local variables, methods or classes
 - comments in code should be applied for: cron expressions and regex patterns
 - do not write obvious JavaDoc /** that rephrase code - document the intention, the "why", not implementation details
