@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
@@ -23,11 +23,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
+  getOwners(params: any): Observable<any> {
     return of();
   }
 }
@@ -38,7 +34,6 @@ describe('OwnerListComponent', () => {
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -80,9 +75,13 @@ describe('OwnerListComponent', () => {
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
     getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+      .and.returnValue(of({
+        content: testOwners,
+        totalElements: 1,
+        totalPages: 1,
+        number: 0,
+        size: 10
+      }));
 
   });
 
@@ -106,24 +105,73 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
+  it('searchByLastName should call getOwners', () => {
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
 
     component.searchByLastName('Fr');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    expect(getOwnersSpy).toHaveBeenCalled();
+  });
+
+  it('sortBy name: first click sends name,asc then second click sends name,desc', () => {
+    fixture.detectChanges();
+    // Reset to a different column so first click on 'name' sets asc
+    component.sortColumn = 'city';
+    component.sortOrder = 'asc';
+    getOwnersSpy.calls.reset();
+
+    component.sortBy('name');
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ sort: 'name', order: 'asc' })
+    );
+
+    getOwnersSpy.calls.reset();
+    component.sortBy('name');
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ sort: 'name', order: 'desc' })
+    );
+  });
+
+  it('onPageSizeChange resets to page 0', () => {
+    fixture.detectChanges();
+    component.currentPage = 3;
+    getOwnersSpy.calls.reset();
+
+    component.onPageSizeChange(20);
+
+    expect(component.currentPage).toBe(0);
+    expect(component.pageSize).toBe(20);
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 0, size: 20 })
+    );
+  });
+
+  it('searchControl change resets to page 0', fakeAsync(() => {
+    fixture.detectChanges();
+    component.currentPage = 5;
+    getOwnersSpy.calls.reset();
+
+    component.searchControl.setValue('smith');
+    tick(500); // wait for debounce
+
+    expect(component.currentPage).toBe(0);
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 0, q: 'smith' })
+    );
+  }));
+
+  it('goToPage navigates to correct page', () => {
+    fixture.detectChanges();
+    component.totalPages = 5;
+    component.currentPage = 2;
+    getOwnersSpy.calls.reset();
+
+    component.goToPage(4);
+
+    expect(component.currentPage).toBe(4);
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 4 })
+    );
   });
 
 });
