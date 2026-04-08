@@ -95,7 +95,18 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i);
+    const total = this.totalPages;
+    const current = this.currentPage;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i);
+    }
+    const pages = new Set<number>();
+    pages.add(0);
+    pages.add(total - 1);
+    for (let i = Math.max(0, current - 2); i <= Math.min(total - 1, current + 2); i++) {
+      pages.add(i);
+    }
+    return Array.from(pages).sort((a, b) => a - b);
   }
 
   ngOnDestroy() {

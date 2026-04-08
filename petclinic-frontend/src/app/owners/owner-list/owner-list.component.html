@@ -63,9 +63,14 @@
             <li [class.disabled]="currentPage === 0">
               <a (click)="goToPage(currentPage - 1)" style="cursor:pointer">&laquo;</a>
             </li>
-            <li *ngFor="let p of pageNumbers" [class.active]="p === currentPage">
-              <a (click)="goToPage(p)" style="cursor:pointer">{{ p + 1 }}</a>
-            </li>
+            <ng-container *ngFor="let p of pageNumbers; let i = index">
+              <li class="disabled" *ngIf="i > 0 && p > pageNumbers[i-1] + 1">
+                <a>…</a>
+              </li>
+              <li [class.active]="p === currentPage">
+                <a (click)="goToPage(p)" style="cursor:pointer">{{ p + 1 }}</a>
+              </li>
+            </ng-container>
             <li [class.disabled]="currentPage === totalPages - 1">
               <a (click)="goToPage(currentPage + 1)" style="cursor:pointer">&raquo;</a>
             </li>
