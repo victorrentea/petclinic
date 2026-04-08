@@ -1,3 +1,5 @@
+CREATE ALIAS IF NOT EXISTS UNACCENT FOR "org.springframework.samples.petclinic.util.StringNormalizer.unaccent";
+
 CREATE TABLE IF NOT EXISTS vets (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   first_name VARCHAR(30) NOT NULL,
