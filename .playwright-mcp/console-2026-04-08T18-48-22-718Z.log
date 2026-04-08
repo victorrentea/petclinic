@@ -1,0 +1,6 @@
+[     167ms] [INFO] [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled. @ http://localhost:4200/polyfills.js:6288
+[     305ms] [LOG] Angular is running in development mode. @ http://localhost:4200/vendor.js:83914
+[   37765ms] [INFO] [webpack-dev-server] App updated. Recompiling... @ http://localhost:4200/polyfills.js:6288
+[   40605ms] [INFO] [webpack-dev-server] App updated. Reloading... @ http://localhost:4200/polyfills.js:6288
+[   41088ms] [INFO] [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled. @ http://localhost:4200/polyfills.js:6288
+[   41282ms] [LOG] Angular is running in development mode. @ http://localhost:4200/vendor.js:83914
