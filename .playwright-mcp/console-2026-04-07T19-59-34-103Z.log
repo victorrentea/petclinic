@@ -1,0 +1,31 @@
+[      67ms] [INFO] [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled. @ http://localhost:4200/polyfills.js:6288
+[     129ms] [LOG] Angular is running in development mode. @ http://localhost:4200/vendor.js:83914
+[   34353ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed:  @ http://localhost:4200/polyfills.js:5355
+[   34354ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[   34354ms] [INFO] [webpack-dev-server] Disconnected! @ http://localhost:4200/polyfills.js:6288
+[   34354ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[   35365ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[   35365ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[   35366ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[   37398ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[   37398ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[   37398ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[   41414ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[   41414ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[   41414ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[   49481ms] [INFO] [webpack-dev-server] App updated. Reloading... @ http://localhost:4200/polyfills.js:6288
+[   49559ms] [INFO] [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled. @ http://localhost:4200/polyfills.js:6288
+[   49630ms] [LOG] Angular is running in development mode. @ http://localhost:4200/vendor.js:83914
+[  515241ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed:  @ http://localhost:4200/polyfills.js:5355
+[  515242ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[  515243ms] [INFO] [webpack-dev-server] Disconnected! @ http://localhost:4200/polyfills.js:6288
+[  515243ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[  516287ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[  516288ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[  516288ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[  518311ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[  518311ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[  518312ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288
+[  522353ms] [ERROR] WebSocket connection to 'ws://localhost:4200/ng-cli-ws' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4200/polyfills.js:5355
+[  522353ms] [ERROR] [webpack-dev-server] Event @ http://localhost:4200/polyfills.js:6296
+[  522353ms] [INFO] [webpack-dev-server] Trying to reconnect... @ http://localhost:4200/polyfills.js:6288

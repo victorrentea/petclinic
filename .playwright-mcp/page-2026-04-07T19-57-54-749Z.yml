@@ -1,0 +1,34 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - text:  +
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e30]:
+    - heading "Owners" [level=2] [ref=e31]
+    - textbox "Search by name, address, city, phone or pet…" [ref=e33]

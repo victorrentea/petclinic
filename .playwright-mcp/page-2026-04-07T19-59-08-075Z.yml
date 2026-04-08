@@ -1,0 +1,62 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - text:  +
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e30]:
+    - heading "Edit Owner" [level=2] [ref=e31]
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: First Name
+        - generic [ref=e35]:
+          - textbox "First Name" [ref=e36]: John
+          - generic: 
+      - generic [ref=e37]:
+        - generic [ref=e38]: Last Name
+        - generic [ref=e39]:
+          - textbox "Last Name" [ref=e40]: Playwright
+          - generic: 
+      - generic [ref=e41]:
+        - generic [ref=e42]: Address
+        - generic [ref=e43]:
+          - textbox "Address" [ref=e44]: 123 Test St
+          - generic: 
+      - generic [ref=e45]:
+        - generic [ref=e46]: City
+        - generic [ref=e47]:
+          - textbox "City" [ref=e48]: Testville
+          - generic: 
+      - generic [ref=e49]:
+        - generic [ref=e50]: Telephone
+        - generic [ref=e51]:
+          - textbox "Telephone" [ref=e52]: "1234567890"
+          - generic: 
+      - generic [ref=e54]:
+        - button "Back" [ref=e55] [cursor=pointer]
+        - button "Update Owner" [ref=e56] [cursor=pointer]

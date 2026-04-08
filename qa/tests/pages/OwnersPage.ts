@@ -38,6 +38,12 @@ export class OwnersPage {
     return names;
   }
 
+  async search(query: string) {
+    await this.lastNameInput.waitFor({ state: 'visible' });
+    await this.lastNameInput.clear();
+    await this.lastNameInput.fill(query);
+  }
+
   async searchByLastNamePrefix(prefix: string) {
     await this.lastNameInput.waitFor({ state: 'visible' });
     await this.lastNameInput.clear();

@@ -1,0 +1,52 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - text:  +
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e60]:
+    - heading "Owner Information" [level=2] [ref=e61]
+    - table [ref=e62]:
+      - row "Name John Testuser" [ref=e63]:
+        - rowheader "Name" [ref=e64]
+        - cell "John Testuser" [ref=e65]
+      - row "Address 123 Test St" [ref=e66]:
+        - rowheader "Address" [ref=e67]
+        - cell "123 Test St" [ref=e68]
+      - row "City Testville" [ref=e69]:
+        - rowheader "City" [ref=e70]
+        - cell "Testville" [ref=e71]
+      - row "Telephone 1234567890" [ref=e72]:
+        - rowheader "Telephone" [ref=e73]
+        - cell "1234567890" [ref=e74]
+    - button "Back" [ref=e75] [cursor=pointer]
+    - button "Edit Owner" [ref=e76] [cursor=pointer]
+    - button "Add New Pet" [ref=e77] [cursor=pointer]
+    - heading "Pets and Visits" [level=2] [ref=e78]
+    - table:
+      - row

@@ -14,10 +14,10 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 
 ### Full Stack
 ```sh
-./run-all.sh  # Start both backend (8080) and frontend (4200)
+bash start-backend.sh   # Start backend on :8080
+bash start-frontend.sh  # Start frontend on :4200
+bash start-all.sh       # Start both
 ```
-
-**Note:** `run-all.sh` references old directories (`petclinic-rest`, `petclinic-angular`) instead of current names (`petclinic-backend`, `petclinic-frontend`).
 
 ## Domain Model (ER Model)
 
@@ -36,7 +36,7 @@ Backend exposes REST API at http://localhost:8080/api/
 - Specialties: `/api/specialties`
 - Users: `/api/users`
 
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+OpenAPI docs: http://localhost:8080/swagger-ui.html 
 
 ## Code Preferences
 - Keep explanations concise

@@ -1,0 +1,82 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [expanded] [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - list [ref=e189]:
+            - listitem [ref=e190]:
+              - link "Search" [ref=e191] [cursor=pointer]:
+                - /url: /petclinic/owners
+                - generic [ref=e192]: 
+                - text: Search
+            - listitem [ref=e193]:
+              - link "Add New" [ref=e194] [cursor=pointer]:
+                - /url: /petclinic/owners/add
+                - generic [ref=e195]: +
+                - text: Add New
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e146]:
+    - heading "Owner Information" [level=2] [ref=e147]
+    - table [ref=e148]:
+      - row "Name George Franklin" [ref=e149]:
+        - rowheader "Name" [ref=e150]
+        - cell "George Franklin" [ref=e151]
+      - row "Address 110 W. Liberty St." [ref=e152]:
+        - rowheader "Address" [ref=e153]
+        - cell "110 W. Liberty St." [ref=e154]
+      - row "City Madison" [ref=e155]:
+        - rowheader "City" [ref=e156]
+        - cell "Madison" [ref=e157]
+      - row "Telephone 6085551023" [ref=e158]:
+        - rowheader "Telephone" [ref=e159]
+        - cell "6085551023" [ref=e160]
+    - button "Back" [ref=e161] [cursor=pointer]
+    - button "Edit Owner" [ref=e162] [cursor=pointer]
+    - button "Add New Pet" [ref=e163] [cursor=pointer]
+    - heading "Pets and Visits" [level=2] [ref=e164]
+    - table [ref=e165]:
+      - row "Name Leo Birth Date 2010-09-07 Type cat Edit Pet Delete Pet Add Visit Visit Date Description Actions" [ref=e166]:
+        - table [ref=e168]:
+          - row "Name Leo Birth Date 2010-09-07 Type cat Edit Pet Delete Pet Add Visit Visit Date Description Actions" [ref=e169]:
+            - cell "Name Leo Birth Date 2010-09-07 Type cat Edit Pet Delete Pet Add Visit" [ref=e170]:
+              - generic [ref=e171]:
+                - term [ref=e172]: Name
+                - definition [ref=e173]: Leo
+                - term [ref=e174]: Birth Date
+                - definition [ref=e175]: 2010-09-07
+                - term [ref=e176]: Type
+                - definition [ref=e177]: cat
+                - button "Edit Pet" [ref=e178] [cursor=pointer]
+                - button "Delete Pet" [ref=e179] [cursor=pointer]
+                - button "Add Visit" [ref=e180] [cursor=pointer]
+            - cell "Visit Date Description Actions" [ref=e181]:
+              - table [ref=e183]:
+                - rowgroup [ref=e184]:
+                  - row "Visit Date Description Actions" [ref=e185]:
+                    - columnheader "Visit Date" [ref=e186]
+                    - columnheader "Description" [ref=e187]
+                    - columnheader "Actions" [ref=e188]

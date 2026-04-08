@@ -1,0 +1,94 @@
+<h2>Mobile Navigation Structure</h2>
+<p class="subtitle">How users navigate the app on phones — two patterns to consider</p>
+
+<div class="split">
+
+  <div class="mockup">
+    <div class="mockup-header">Option A — Bottom Tab Bar</div>
+    <div class="mockup-body" style="background:#fafafa;padding:0;border-radius:8px;overflow:hidden;font-family:sans-serif;min-height:420px;display:flex;flex-direction:column;justify-content:space-between;">
+      <!-- Screen content -->
+      <div style="padding:16px;flex:1">
+        <div style="background:#1565C0;color:white;padding:12px 16px;margin:-16px -16px 16px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px;">
+          <span>☰</span> <span>Visits</span>
+        </div>
+        <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12);padding:12px;margin-bottom:10px;">
+          <div style="font-weight:500;font-size:14px">Bella — Golden Retriever</div>
+          <div style="color:#666;font-size:12px;margin-top:2px">Apr 3 · Dr. Martinez · Checkup</div>
+          <div style="margin-top:6px;display:inline-block;background:#E3F2FD;color:#1565C0;font-size:11px;padding:2px 8px;border-radius:12px">Completed</div>
+        </div>
+        <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12);padding:12px;margin-bottom:10px;">
+          <div style="font-weight:500;font-size:14px">Max — Labrador</div>
+          <div style="color:#666;font-size:12px;margin-top:2px">Apr 10 · Dr. Singh · Vaccination</div>
+          <div style="margin-top:6px;display:inline-block;background:#FFF8E1;color:#F57F17;font-size:11px;padding:2px 8px;border-radius:12px">Upcoming</div>
+        </div>
+        <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12);padding:12px;">
+          <div style="font-weight:500;font-size:14px">Luna — Persian Cat</div>
+          <div style="color:#666;font-size:12px;margin-top:2px">Apr 15 · Dr. Chen · Dental</div>
+          <div style="margin-top:6px;display:inline-block;background:#FFF8E1;color:#F57F17;font-size:11px;padding:2px 8px;border-radius:12px">Upcoming</div>
+        </div>
+      </div>
+      <!-- Bottom tab bar -->
+      <div style="background:white;border-top:1px solid #e0e0e0;display:flex;padding:8px 0 4px;">
+        <div style="flex:1;text-align:center;color:#666;font-size:10px">
+          <div style="font-size:20px">🏠</div><div>Home</div>
+        </div>
+        <div style="flex:1;text-align:center;color:#1565C0;font-size:10px;font-weight:600">
+          <div style="font-size:20px">📅</div><div>Visits</div>
+        </div>
+        <div style="flex:1;text-align:center;color:#666;font-size:10px">
+          <div style="font-size:20px">🩺</div><div>Vets</div>
+        </div>
+        <div style="flex:1;text-align:center;color:#666;font-size:10px">
+          <div style="font-size:20px">👤</div><div>Profile</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:#555">
+      <strong>Best for:</strong> 4–5 top-level sections. Always visible, one thumb tap away. Standard on native apps.
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Option B — Hamburger + Sidenav</div>
+    <div class="mockup-body" style="background:#fafafa;padding:0;border-radius:8px;overflow:hidden;font-family:sans-serif;min-height:420px;display:flex;flex-direction:column;">
+      <!-- Toolbar -->
+      <div style="background:#1565C0;color:white;padding:12px 16px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:20px;cursor:pointer">☰</span> <span>PetClinic</span>
+      </div>
+      <!-- Sidenav overlay (shown open) -->
+      <div style="display:flex;flex:1">
+        <div style="width:220px;background:white;box-shadow:2px 0 8px rgba(0,0,0,.15);padding:16px 0;font-size:14px;">
+          <div style="padding:8px 16px;color:#999;font-size:11px;font-weight:600;text-transform:uppercase">Staff</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;background:#E3F2FD;color:#1565C0;font-weight:500"><span>📅</span> Visits</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#333"><span>👥</span> Owners</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#333"><span>🩺</span> Vets</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#333"><span>🐾</span> Pet Types</div>
+          <div style="height:1px;background:#eee;margin:8px 0"></div>
+          <div style="padding:8px 16px;color:#999;font-size:11px;font-weight:600;text-transform:uppercase">My Account</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#333"><span>🐶</span> My Pets</div>
+          <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;color:#333"><span>🚪</span> Logout</div>
+        </div>
+        <div style="flex:1;background:rgba(0,0,0,.3);padding:24px 16px;color:white;font-size:13px">
+          ← Sidenav open; tap outside to close
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:#555">
+      <strong>Best for:</strong> Many nav items, role-based sections. Familiar web pattern; aligns with Angular Material's <code>mat-sidenav</code>.
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px">
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content"><h3>Bottom Tab Bar</h3><p>Native-app feel, always visible, limited to ~5 items</p></div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content"><h3>Hamburger + Sidenav</h3><p>More nav items, role sections, Angular Material native pattern</p></div>
+    </div>
+  </div>
+</div>

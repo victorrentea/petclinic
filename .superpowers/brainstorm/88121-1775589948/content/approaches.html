@@ -1,0 +1,40 @@
+<h2>Mobile Design Approaches</h2>
+<p class="subtitle">Three ways to make PetClinic mobile-responsive — pick your preferred direction</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Progressive Enhancement</h3>
+      <p>Add CSS breakpoints to existing components. Replace the Bootstrap navbar with a hamburger menu on small screens. Tables become scrollable. Minimal code changes — you get 80% of the mobile improvement with 20% of the effort.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Fastest to implement</li><li>No component rewrites</li><li>Low risk</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Scrollable tables are still painful on mobile</li><li>No role-based mobile UX differentiation</li><li>Mediocre mobile experience</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B ★ Recommended</div>
+    <div class="content">
+      <h3>Mobile-First Redesign of Key Screens</h3>
+      <p>Redesign the priority screens (Visits, Vets) with a mobile-first mindset: bottom tab navigation, card-based layouts instead of tables, role-aware nav (staff vs pet owner). Desktop screens stay mostly unchanged; mobile gets purpose-built layouts.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Great mobile UX where it matters most</li><li>Role-based views fit naturally</li><li>Cards scale better than tables</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More work than option A</li><li>Requires new mobile-specific CSS/layout logic</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Angular Material Migration</h3>
+      <p>Replace Bootstrap 3 with Angular Material, which ships with built-in responsive components (mat-table with column hiding, sidenav, bottom-sheet, etc.). Full design system overhaul — best long-term maintainability but the most disruptive.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Best long-term DX and accessibility</li><li>Responsive components out of the box</li><li>Modern design system</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Largest scope — full UI framework swap</li><li>High risk of regressions</li><li>Long implementation time</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

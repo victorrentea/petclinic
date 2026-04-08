@@ -35,6 +35,7 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Dav
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=10);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Lydia', 'Quark', '42 Kernel Way', 'Madison', '6085559012' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=11);
 INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'Oscar', 'Byte', '9 Cache Ct.', 'Monona', '6085553344' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=12);
+INSERT INTO owners (first_name, last_name, address, city, telephone) SELECT 'José', 'Hernández', 'Calle Álvaro Obregón 25', 'México City', '5215553742' WHERE NOT EXISTS (SELECT * FROM owners WHERE id=13);
 
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Leo', '2000-09-07', 1, 1 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=1);
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Basil', '2002-08-06', 6, 2 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=2);
@@ -49,6 +50,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Mulligan', '1997-
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Freddy', '2000-03-09', 5, 9 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=11);
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Lucky', '2000-06-24', 2, 10 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=12);
 INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Sly', '2002-06-08', 1, 10 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=13);
+INSERT INTO pets (name, birth_date, type_id, owner_id) SELECT 'Ñoño', '2019-05-15', 1, 13 WHERE NOT EXISTS (SELECT * FROM pets WHERE id=14);
 
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2010-03-04', 'rabies shot' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=1);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'rabies shot' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=2);

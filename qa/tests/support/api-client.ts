@@ -9,6 +9,14 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnerFieldsDto {
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  telephone: string;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -47,6 +55,20 @@ export class ApiClient {
       return fullName;
     }
     return fullName.substring(firstSpace + 1);
+  }
+
+  async createOwner(owner: OwnerFieldsDto): Promise<number> {
+    const response = await this.client.post('/owners', owner);
+    const location: string = response.headers['location'];
+    return parseInt(location.split('/').pop()!);
+  }
+
+  async updateOwner(id: number, owner: OwnerFieldsDto): Promise<void> {
+    await this.client.put(`/owners/${id}`, owner);
+  }
+
+  async deleteOwner(id: number): Promise<void> {
+    await this.client.delete(`/owners/${id}`);
   }
 
   static choosePrefixFrom(owners: OwnerDto[]): string {

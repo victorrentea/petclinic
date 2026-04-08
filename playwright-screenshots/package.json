@@ -1,0 +1,7 @@
+{
+  "name": "petclinic-screenshots",
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.51.1"
+  }
+}
