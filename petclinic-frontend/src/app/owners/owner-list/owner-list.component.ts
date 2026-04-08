@@ -65,22 +65,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   searchByLastName(term: string) {
-    const params: OwnerListParams = {
-      q: term,
-      page: 0,
-      size: this.pageSize,
-      sort: this.sortColumn,
-      order: this.sortOrder
-    };
-    this.ownerService.getOwners(params).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (page: OwnerPage) => {
-        this.owners = page.content;
-        this.totalPages = page.totalPages;
-        this.totalElements = page.totalElements;
-        this.isOwnersDataReceived = true;
-      },
-      error: err => this.errorMessage = err
-    });
+    this.searchControl.setValue(term, { emitEvent: false });
+    this.currentPage = 0;
+    this.load();
   }
 
   sortBy(column: 'name' | 'city') {
