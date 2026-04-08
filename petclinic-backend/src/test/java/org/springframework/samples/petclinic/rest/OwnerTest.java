@@ -144,14 +144,16 @@ public class OwnerTest {
     @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
-        owner2.setLastName("JavaBeans");
+        owner2.setLastName("Smith");
+        owner2.setAddress("123 Javastreet Ave");
         int owner2Id = ownerRepository.save(owner2).getId();
 
         List<OwnerDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+            .contains(Assertions.tuple(owner2Id, "Smith"))
+            .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
     }
 
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
