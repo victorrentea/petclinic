@@ -6,7 +6,7 @@ info:
   termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
   version: "1.0"
 servers:
-- url: http://localhost:8080
+- url: http://localhost
   description: Generated server url
 paths:
   /api/visits/{visitId}:
@@ -1038,11 +1038,16 @@ paths:
       summary: List owners
       operationId: listOwners
       parameters:
-      - name: lastName
+      - name: q
         in: query
         required: false
         schema:
           type: string
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
       responses:
         "500":
           description: Internal Server Error
@@ -1067,9 +1072,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/PageOwnerDto"
     post:
       tags:
       - owner-rest-controller
@@ -1686,6 +1689,21 @@ components:
           minLength: 1
       required:
       - name
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
     OwnerDto:
       type: object
       properties:
@@ -1743,3 +1761,62 @@ components:
       - lastName
       - pets
       - telephone
+    PageOwnerDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
