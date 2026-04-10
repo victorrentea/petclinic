@@ -1,0 +1,85 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - text:  +
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e30]:
+    - heading "Veterinarians" [level=2] [ref=e31]
+    - table [ref=e32]:
+      - rowgroup [ref=e33]:
+        - row "Name Specialties" [ref=e34]:
+          - columnheader "Name" [ref=e35]
+          - columnheader "Specialties" [ref=e36]
+          - columnheader [ref=e37]
+          - columnheader [ref=e38]
+      - rowgroup [ref=e39]:
+        - row "James Carter Edit Vet Delete Vet" [ref=e40]:
+          - cell "James Carter" [ref=e41]
+          - cell [ref=e42]
+          - cell "Edit Vet Delete Vet" [ref=e43]:
+            - button "Edit Vet" [ref=e44] [cursor=pointer]
+            - button "Delete Vet" [ref=e45] [cursor=pointer]
+        - row "Helen Leary radiology Edit Vet Delete Vet" [ref=e46]:
+          - cell "Helen Leary" [ref=e47]
+          - cell "radiology" [ref=e48]:
+            - generic [ref=e49]: radiology
+          - cell "Edit Vet Delete Vet" [ref=e50]:
+            - button "Edit Vet" [ref=e51] [cursor=pointer]
+            - button "Delete Vet" [ref=e52] [cursor=pointer]
+        - row "Linda Douglas surgery dentistry Edit Vet Delete Vet" [ref=e53]:
+          - cell "Linda Douglas" [ref=e54]
+          - cell "surgery dentistry" [ref=e55]:
+            - generic [ref=e56]: surgery
+            - generic [ref=e57]: dentistry
+          - cell "Edit Vet Delete Vet" [ref=e58]:
+            - button "Edit Vet" [ref=e59] [cursor=pointer]
+            - button "Delete Vet" [ref=e60] [cursor=pointer]
+        - row "Rafael Ortega surgery Edit Vet Delete Vet" [ref=e61]:
+          - cell "Rafael Ortega" [ref=e62]
+          - cell "surgery" [ref=e63]:
+            - generic [ref=e64]: surgery
+          - cell "Edit Vet Delete Vet" [ref=e65]:
+            - button "Edit Vet" [ref=e66] [cursor=pointer]
+            - button "Delete Vet" [ref=e67] [cursor=pointer]
+        - row "Henry Stevens radiology Edit Vet Delete Vet" [ref=e68]:
+          - cell "Henry Stevens" [ref=e69]
+          - cell "radiology" [ref=e70]:
+            - generic [ref=e71]: radiology
+          - cell "Edit Vet Delete Vet" [ref=e72]:
+            - button "Edit Vet" [ref=e73] [cursor=pointer]
+            - button "Delete Vet" [ref=e74] [cursor=pointer]
+        - row "Sharon Jenkins Edit Vet Delete Vet" [ref=e75]:
+          - cell "Sharon Jenkins" [ref=e76]
+          - cell [ref=e77]
+          - cell "Edit Vet Delete Vet" [ref=e78]:
+            - button "Edit Vet" [ref=e79] [cursor=pointer]
+            - button "Delete Vet" [ref=e80] [cursor=pointer]
+    - generic [ref=e81]:
+      - button "Home" [ref=e82] [cursor=pointer]
+      - button "Add Vet" [ref=e83] [cursor=pointer]

@@ -1,0 +1,22 @@
+@startuml C2-Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram - Spring PetClinic
+
+Person(clinicStaff, "Clinic Staff", "Manages owners, pets,\nand vet visits")
+Person(admin, "Admin", "Manages vets, specialties,\nusers, and roles")
+
+System_Boundary(petclinic, "Spring PetClinic") {
+    Container(frontend, "Angular SPA", "Angular 16, TypeScript", "Single-page app served\non localhost:4200")
+    Container(backend, "REST API", "Spring Boot 3.5, Java 21", "Exposes REST endpoints\non localhost:8080")
+}
+
+SystemDb_Ext(db, "Database", "Stores all clinic data:\nowners, pets, vets, visits, users.\nH2 (dev) / PostgreSQL (prod)")
+
+Rel(clinicStaff, frontend, "Uses", "HTTPS / Browser")
+Rel(admin, frontend, "Uses", "HTTPS / Browser")
+Rel(frontend, backend, "API calls", "JSON / HTTP")
+Rel(backend, db, "Reads/writes", "JPA / JDBC")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,19 @@
+@startuml C1-SystemContext
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context - Spring PetClinic
+
+Person(clinicStaff, "Clinic Staff", "Manages owners, pets,\nvisit scheduling, and\npet type catalog")
+Person(admin, "Admin", "Manages vets, specialties,\nusers, and role assignments")
+
+System(petclinic, "Spring PetClinic", "Full-stack veterinary clinic management.\nAngular 16 frontend + Spring Boot 3.5 REST API.")
+
+SystemDb(database, "Relational Database", "Stores owners, pets, visits,\nvets, specialties, users.\nH2 (dev) or PostgreSQL (prod).")
+
+Rel(clinicStaff, petclinic, "Manages owners, pets,\nand vet visits", "HTTPS / Browser")
+Rel(admin, petclinic, "Manages vets, specialties,\nusers, and roles", "HTTPS / Browser")
+
+Rel(petclinic, database, "Reads and writes clinic data", "JPA / JDBC")
+
+SHOW_LEGEND()
+@enduml

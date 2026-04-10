@@ -28,22 +28,21 @@ test.describe('Owners Page', () => {
 
   test('shows all owners on initial load', async ({ page }) => {
     const ownersPage = new OwnersPage(page);
-
-    // Fetch expected owners from API
-    const expectedOwners = await apiClient.fetchOwners();
-    const expectedFullNames = ApiClient.getFullNames(expectedOwners);
-
-    // Open the owners page
     await ownersPage.open();
-
-    // Wait for the expected number of owners
-    await ownersPage.waitForOwnersCount(expectedFullNames.length);
-
-    // Get actual owner names from the page
     const actualFullNames = await ownersPage.getOwnerFullNames();
 
-    // Assert that all expected owners are displayed
-    expect(ApiClient.sorted(actualFullNames)).toEqual(ApiClient.sorted(expectedFullNames));
+    // Fetch ALL owners from API to validate what the UI shows
+    const allOwners = await apiClient.fetchOwners();
+    const allFullNames = ApiClient.getFullNames(allOwners);
+
+    // UI should show a non-empty first page (default size = 10)
+    expect(actualFullNames.length).toBeGreaterThan(0);
+    expect(actualFullNames.length).toBeLessThanOrEqual(10);
+
+    // Every displayed owner must exist in the database
+    for (const name of actualFullNames) {
+      expect(allFullNames).toContain(name);
+    }
   });
 
   test('filters owners by last name prefix', async ({ page }) => {
@@ -66,16 +65,8 @@ test.describe('Owners Page', () => {
     // Get filtered results
     const actualFilteredFullNames = await ownersPage.getOwnerFullNames();
 
-    // Assertions
+    // Search is general-purpose (all fields) — verify UI matches API, not just lastName prefix
     expect(actualFilteredFullNames.length).toBeGreaterThan(0);
-
-    // Verify all results match the prefix
-    for (const fullName of actualFilteredFullNames) {
-      const lastName = ApiClient.extractLastName(fullName);
-      expect(lastName.toLowerCase()).toMatch(new RegExp(`^${prefix.toLowerCase()}`));
-    }
-
-    // Verify exact match with API results
     expect(ApiClient.sorted(actualFilteredFullNames)).toEqual(
       ApiClient.sorted(expectedFilteredFullNames)
     );

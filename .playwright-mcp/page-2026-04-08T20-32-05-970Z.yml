@@ -1,0 +1,46 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: "#"
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Home" [ref=e11] [cursor=pointer]:
+            - /url: /petclinic/welcome
+            - generic [ref=e12]: 
+            - text: Home
+        - listitem [ref=e13]:
+          - button "Owners" [expanded] [ref=e14] [cursor=pointer]:
+            - generic [ref=e15]: 
+            - text: Owners
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - link "Search" [ref=e38] [cursor=pointer]:
+                - /url: /petclinic/owners
+                - generic [ref=e39]: 
+                - text: Search
+            - listitem [ref=e40]:
+              - link "Add New" [ref=e41] [cursor=pointer]:
+                - /url: /petclinic/owners/add
+                - generic [ref=e42]: +
+                - text: Add New
+        - listitem [ref=e17]:
+          - button "Veterinarians" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Veterinarians
+          - text:  +
+        - listitem [ref=e21]:
+          - link "Pet Types" [ref=e22] [cursor=pointer]:
+            - /url: /petclinic/pettypes
+            - generic [ref=e23]: 
+            - text: Pet Types
+        - listitem [ref=e24]:
+          - link "Specialties" [ref=e25] [cursor=pointer]:
+            - /url: /petclinic/specialties
+            - generic [ref=e26]: 
+            - text: Specialties
+  - generic [ref=e28]:
+    - heading "Welcome to Petclinic" [level=1] [ref=e29]
+    - generic [ref=e31]:
+      - heading "Welcome" [level=2] [ref=e32]
+      - img "pets logo" [ref=e35]

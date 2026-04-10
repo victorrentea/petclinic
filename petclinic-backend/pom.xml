@@ -91,6 +91,26 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Structurizr C4 model extraction -->
+        <dependency>
+            <groupId>com.structurizr</groupId>
+            <artifactId>structurizr-core</artifactId>
+            <version>4.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.structurizr</groupId>
+            <artifactId>structurizr-component</artifactId>
+            <version>4.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.structurizr</groupId>
+            <artifactId>structurizr-export</artifactId>
+            <version>4.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Test libs -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

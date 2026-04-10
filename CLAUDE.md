@@ -45,6 +45,8 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - Never ask before running tests after refactoring
 - Always use TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
 - Builder chains: one property per line, unless only 2 properties total
+- Never return `Stream<T>` from methods unless iterating humongous data; return `List` instead
+- Avoid ternary operators unless the entire expression fits in half a line (~60 chars); use if/else otherwise
 
 ## Task Modifiers
 - "fast", "go", "Sparta" → skip build/tests

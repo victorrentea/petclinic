@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
+    "types": ["node"],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -15,6 +16,7 @@
   },
   "include": [
     "tests/**/*",
+    "scripts/**/*",
     "playwright.config.ts"
   ]
 }

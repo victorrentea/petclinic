@@ -71,13 +71,17 @@ public class OwnerRestController {
 
     private static Pageable resolveSort(Pageable pageable) {
         List<Sort.Order> orders = pageable.getSort().stream()
-            .flatMap(order -> "name".equals(order.getProperty())
-                ? Stream.of(
-                    new Sort.Order(order.getDirection(), "firstName"),
-                    new Sort.Order(order.getDirection(), "lastName"))
-                : Stream.of(order))
+            .flatMap(order -> expandProperty(order.getProperty()).stream()
+                .map(prop -> new Sort.Order(order.getDirection(), prop)))
             .toList();
         return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+    }
+
+    private static List<String> expandProperty(String property) {
+        if ("name".equals(property)) {
+            return List.of("firstName", "lastName");
+        }
+        return List.of(property);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

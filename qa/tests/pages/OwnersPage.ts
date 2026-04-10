@@ -48,10 +48,8 @@ export class OwnersPage {
     await this.lastNameInput.waitFor({ state: 'visible' });
     await this.lastNameInput.clear();
     await this.lastNameInput.fill(prefix);
-    await this.lastNameInput.press('Tab');
-
-    await this.findOwnerButton.waitFor({ state: 'visible' });
-    await this.findOwnerButton.click();
+    // Search is reactive with 500ms debounce — wait for results to update
+    await this.page.waitForTimeout(700);
   }
 
   async waitForOwnersCount(expectedCount: number) {

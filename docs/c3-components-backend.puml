@@ -1,0 +1,78 @@
+@startuml
+set separator none
+title PetClinic - Spring Boot API - Components
+
+top to bottom direction
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+Container(PetClinic.AngularSPA, "Angular SPA", $techn="Angular 16", $descr="Single Page App", $tags="", $link="")
+Container(PetClinic.Database, "Database", $techn="H2 / PostgreSQL", $descr="Persistence", $tags="", $link="")
+
+Container_Boundary("PetClinic.SpringBootAPI_boundary", "Spring Boot API", $tags="") {
+  Component(PetClinic.SpringBootAPI.RootRestController, "Root Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetTypeRestController, "Pet Type Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VetRestController, "Vet Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VisitRestController, "Visit Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.SpecialtyRestController, "Specialty Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.UserRestController, "User Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetTypeMapper, "Pet Type Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.UserMapper, "User Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VetMapper, "Vet Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VisitMapper, "Visit Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.SpecialtyMapper, "Specialty Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetMapper, "Pet Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.OwnerMapper, "Owner Mapper", $techn="MapStruct", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VisitRepository, "Visit Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.VetRepository, "Vet Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.UserRepository, "User Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.OwnerRepository, "Owner Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.SpecialtyRepository, "Specialty Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetRepository, "Pet Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetTypeRepository, "Pet Type Repository", $techn="Spring Data JPA", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.PetRestController, "Pet Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+  Component(PetClinic.SpringBootAPI.OwnerRestController, "Owner Rest Controller", $techn="Spring MVC", $descr="", $tags="", $link="")
+}
+
+Rel(PetClinic.SpringBootAPI.PetRestController, PetClinic.SpringBootAPI.PetRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.PetRestController, PetClinic.SpringBootAPI.PetMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.PetRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.OwnerMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.PetMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.PetTypeRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.VisitMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.VisitRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRestController, PetClinic.SpringBootAPI.OwnerRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.PetTypeRestController, PetClinic.SpringBootAPI.PetTypeMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.PetTypeRestController, PetClinic.SpringBootAPI.PetTypeRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VetRestController, PetClinic.SpringBootAPI.SpecialtyMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VetRestController, PetClinic.SpringBootAPI.SpecialtyRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VetRestController, PetClinic.SpringBootAPI.VetRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VetRestController, PetClinic.SpringBootAPI.VetMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VisitRestController, PetClinic.SpringBootAPI.VisitMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VisitRestController, PetClinic.SpringBootAPI.VisitRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.SpecialtyRestController, PetClinic.SpringBootAPI.SpecialtyMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.SpecialtyRestController, PetClinic.SpringBootAPI.SpecialtyRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.UserRestController, PetClinic.SpringBootAPI.UserRepository, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.UserRestController, PetClinic.SpringBootAPI.UserMapper, "", $techn="", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.PetTypeRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.RootRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.OwnerRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VisitRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.SpecialtyRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.VetRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.SpecialtyRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.PetTypeRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.UserRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.VisitRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.UserRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.PetRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.VetRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+Rel(PetClinic.SpringBootAPI.OwnerRepository, PetClinic.Database, "reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.AngularSPA, PetClinic.SpringBootAPI.PetRestController, "calls", $techn="JSON/HTTP", $tags="", $link="")
+
+SHOW_LEGEND(true)
+@enduml

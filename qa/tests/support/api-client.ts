@@ -17,6 +17,12 @@ export interface OwnerFieldsDto {
   telephone: string;
 }
 
+interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -28,15 +34,24 @@ export class ApiClient {
   }
 
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    const response = await this.client.get<PageResponse<OwnerDto>>('/owners', {
+      params: { size: 10000 }
+    });
+    return response.data.content;
+  }
+
+  async fetchOwnersPage(page = 0, size = 10): Promise<OwnerDto[]> {
+    const response = await this.client.get<PageResponse<OwnerDto>>('/owners', {
+      params: { page, size }
+    });
+    return response.data.content;
   }
 
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
+    const response = await this.client.get<PageResponse<OwnerDto>>('/owners', {
+      params: { q: prefix, size: 10000 }
     });
-    return response.data;
+    return response.data.content;
   }
 
   static getFullNames(owners: OwnerDto[]): string[] {

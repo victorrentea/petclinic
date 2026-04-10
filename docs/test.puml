@@ -1,0 +1,4 @@
+@startuml
+Bob -> Alice : hello!
+Alice -> Eve : bye!
+@enduml
