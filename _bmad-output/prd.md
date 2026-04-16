@@ -1,6 +1,6 @@
 ---
 stepsCompleted: [step-01-init]
-inputDocuments: [CLAUDE.md]
+inputDocuments: [AGENTS.md]
 workflowType: 'prd'
 briefCount: 0
 researchCount: 0
