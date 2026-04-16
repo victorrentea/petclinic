@@ -1,9 +1,3 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-
-
 ## Project Overview
 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
@@ -55,6 +49,15 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - Never ask before running tests after refactoring
 - Always use TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
 - Builder chains: one property per line, unless only 2 properties total
+
+## Search Rules
+
+- Search is backend-driven by default. Do not add client-side filtering unless explicitly requested.
+- DRY: Keep matching logic in one layer only; do not duplicate filtering across repository, controller, and frontend.
+- Default to case insensitive, unless requested otherwise.
+- Use `LIKE` instead of 'locate' in JPQL.
+- Acceptance-Test-Drive the implementation: first failing test for search changes should verify the HTTP/API contract and query semantics.
+- For large datasets, use server-side search and pagination, not full frontend filtering.
 
 ## Task Modifiers
 - "fast", "go", "Sparta" → skip build/tests

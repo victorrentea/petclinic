@@ -10,10 +10,9 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
+  errorMessage: string = '';
+  searchText: string = '';
+  owners: Owner[] = [];
   isOwnersDataReceived: boolean = false;
 
   constructor(private router: Router, private ownerService: OwnerService) {
@@ -26,7 +25,9 @@ export class OwnerListComponent implements OnInit {
         this.isOwnersDataReceived = true;
       })
     ).subscribe(
-      owners => this.owners = owners,
+      owners => {
+        this.owners = owners;
+      },
       error => this.errorMessage = error as any);
   }
 
@@ -38,34 +39,21 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
+  onSearchTermChange(searchText: string) {
+    if (!searchText) {
       this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
+        .subscribe(
+          owners => this.owners = owners,
+          error => this.errorMessage = error as any
+        );
+      return;
+    }
 
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
+    this.ownerService.searchOwners(searchText)
+      .subscribe(
+        owners => this.owners = owners,
+        error => this.errorMessage = error as any
       );
-
-      }
   }
 
 

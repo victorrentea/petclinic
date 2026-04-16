@@ -125,14 +125,14 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithNameFilter() throws Exception {
+    void getAllWithTextFilter_onLastName() throws Exception {
         // Create another owner with a different last name
         Owner owner2 = TestData.anOwner();
         owner2.setFirstName("Betty");
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Dav");
+        List<OwnerDto> owners = search("/api/owners?q=Dav");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -141,16 +141,68 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithAddressFilter() throws Exception {
+    void getAllWithTextFilter_onLastNameSecondCase() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void getAllWithTextFilter() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Betty");
+        owner2.setLastName("Davis");
+        owner2.setAddress("22 Main st");
+        owner2.setCity("Seattle");
+        owner2.setTelephone("1234567890");
+        owner2 = ownerRepository.save(owner2);
+
+        List<OwnerDto> byAddress = search("/api/owners?q=Main");
+        List<OwnerDto> byCity = search("/api/owners?q=Seattle");
+
+        assertThat(byAddress)
+            .extracting(OwnerDto::getId)
+            .contains(owner2.getId());
+        assertThat(byCity)
+            .extracting(OwnerDto::getId)
+            .contains(owner2.getId());
+    }
+
+    @Test
+    void getAllWithTextFilter_caseInsensitive() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setAddress("22 Main st");
+        owner2 = ownerRepository.save(owner2);
+
+        List<OwnerDto> matchingCase = search("/api/owners?q=Main");
+        List<OwnerDto> differentCase = search("/api/owners?q=main");
+
+        assertThat(matchingCase)
+            .extracting(OwnerDto::getId)
+            .contains(owner2.getId());
+        assertThat(differentCase)
+            .extracting(OwnerDto::getId)
+            .contains(owner2.getId());
+    }
+
+    @Test
+    void getAllWithEmptyTextFilter_returnsAllOwners() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Betty");
+        owner2.setLastName("Davis");
+        owner2 = ownerRepository.save(owner2);
+
+        List<OwnerDto> owners = search("/api/owners?q=");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId, owner2.getId());
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -166,8 +218,8 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+    void getAllWithTextFilter_notFound() throws Exception {
+        List<OwnerDto> results = search("/api/owners?q=NonExistent");
 
         assertThat(results).isEmpty();
     }

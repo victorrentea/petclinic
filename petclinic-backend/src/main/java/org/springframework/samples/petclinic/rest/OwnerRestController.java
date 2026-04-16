@@ -56,13 +56,9 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
-        } else {
-            owners = ownerRepository.findAll();
-        }
+    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String searchText) {
+        String effectiveSearchText = searchText == null ? "" : searchText;
+        List<Owner> owners = ownerRepository.searchByText(effectiveSearchText);
         return ownerMapper.toOwnerDtoCollection(owners);
     }
 

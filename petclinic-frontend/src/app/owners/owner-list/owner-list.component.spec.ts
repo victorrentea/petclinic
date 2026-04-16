@@ -27,7 +27,7 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(searchText: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -51,6 +51,15 @@ describe('OwnerListComponent', () => {
     city: 'Madison',
     telephone: '6085551023',
     pets: []
+  };
+  const secondTestOwner: Owner = {
+    id: 2,
+    firstName: 'Betty',
+    lastName: 'Davis',
+    address: '22 Main st',
+    city: 'Seattle',
+    telephone: '1234567890',
+    pets: [{ id: 3, name: 'Milo', birthDate: '2024-01-01', type: { id: 1, name: 'cat' }, ownerId: 2, owner: null as unknown as Owner, visits: [] }]
   };
   let testOwners: Owner[];
 
@@ -82,9 +91,14 @@ describe('OwnerListComponent', () => {
     getOwnersSpy = spyOn(ownerService, 'getOwners')
       .and.returnValue(of(testOwners));
     searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+      .and.returnValue(of([]));
 
   });
+
+  function loadComponentWithOwners(owners: Owner[]) {
+    getOwnersSpy.and.returnValue(of(owners));
+    fixture.detectChanges();
+  }
 
   it('should create OwnerListComponent', () => {
     expect(component).toBeTruthy();
@@ -106,24 +120,47 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+  it('calls backend search for non-empty text', () => {
+    loadComponentWithOwners([testOwner, secondTestOwner]);
+    searchOwnersSpy.and.returnValue(of([secondTestOwner]));
 
-    component.searchByLastName('');
+    component.onSearchTermChange('Main');
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Main');
+    expect(component.owners).toEqual([secondTestOwner]);
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('searches on each text change', () => {
+    loadComponentWithOwners([testOwner, secondTestOwner]);
+    searchOwnersSpy.and.returnValue(of([secondTestOwner]));
+
+    component.onSearchTermChange('Mai');
+    component.onSearchTermChange('Main');
+
+    expect(searchOwnersSpy).toHaveBeenCalledTimes(2);
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Mai');
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Main');
+  });
+
+  it('restores all owners when search text is empty', () => {
+    loadComponentWithOwners([testOwner, secondTestOwner]);
+    searchOwnersSpy.and.returnValue(of([secondTestOwner]));
+
+    component.onSearchTermChange('Main');
     getOwnersSpy.calls.reset();
+    component.onSearchTermChange('');
+
+    expect(getOwnersSpy).toHaveBeenCalled();
+    expect(component.owners).toEqual([testOwner, secondTestOwner]);
+  });
+
+  it('does not call backend search for empty text', () => {
+    loadComponentWithOwners([testOwner, secondTestOwner]);
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('Fr');
+    component.onSearchTermChange('');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
   });
 
 });
