@@ -1,8 +1,12 @@
 package org.springframework.samples.petclinic.rest.error;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+import java.net.URI;
+import java.time.Instant;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -13,12 +17,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.net.URI;
-import java.time.Instant;
-import java.util.List;
-import java.util.NoSuchElementException;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Global Exception handler for REST controllers.
