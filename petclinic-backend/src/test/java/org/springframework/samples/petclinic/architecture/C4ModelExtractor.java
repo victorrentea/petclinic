@@ -53,8 +53,13 @@ class C4ModelExtractor {
 
         Workspace workspace = buildWorkspace(classes);
 
+        SoftwareSystem petClinic = workspace.getModel().getSoftwareSystems().stream()
+            .filter(s -> s.getName().equals("PetClinic")).findFirst().orElseThrow();
+        Container backend = petClinic.getContainers().stream()
+            .filter(c -> c.getName().equals("Backend")).findFirst().orElseThrow();
+
         Files.createDirectories(VIEWS_DIR);
-        exportDsl(workspace);
+        exportDsl(workspace, petClinic, backend);
         exportPlantUmlViews(workspace);
 
         assertThat(DOCS_DIR.resolve("C4 model.dsl")).exists();
@@ -90,6 +95,12 @@ class C4ModelExtractor {
         Map<String, Component> componentMap = extractComponents(backend, classes);
         addDependencies(classes, componentMap);
 
+        configureViews(views, petClinic, backend);
+
+        return workspace;
+    }
+
+    private void configureViews(ViewSet views, SoftwareSystem petClinic, Container backend) {
         // Container view: persons + all containers
         ContainerView containerView = views.createContainerView(petClinic, "container-view", "Container view");
         containerView.addAllPeople();
@@ -100,8 +111,6 @@ class C4ModelExtractor {
         ComponentView componentView = views.createComponentView(backend, "component-view", "Component view");
         componentView.addAllComponents();
         componentView.enableAutomaticLayout();
-
-        return workspace;
     }
 
     private Map<String, Component> extractComponents(Container backend, JavaClasses classes) {
@@ -149,7 +158,7 @@ class C4ModelExtractor {
      * Note: structurizr-export 6.1.0 does not include a StructurizrDslExporter,
      * so we hand-craft the DSL output from the workspace model.
      */
-    private void exportDsl(Workspace workspace) throws IOException {
+    private void exportDsl(Workspace workspace, SoftwareSystem petClinic, Container backend) throws IOException {
         Model model = workspace.getModel();
         StringBuilder sb = new StringBuilder();
 
@@ -198,11 +207,11 @@ class C4ModelExtractor {
 
         sb.append("    }\n\n");
         sb.append("    views {\n");
-        sb.append("        container ").append(sanitizeId("PetClinic")).append(" {\n");
+        sb.append("        container ").append(sanitizeId(petClinic.getName())).append(" {\n");
         sb.append("            include *\n");
         sb.append("            autoLayout\n");
         sb.append("        }\n");
-        sb.append("        component ").append(sanitizeId("Backend")).append(" {\n");
+        sb.append("        component ").append(sanitizeId(backend.getName())).append(" {\n");
         sb.append("            include *\n");
         sb.append("            autoLayout\n");
         sb.append("        }\n");
