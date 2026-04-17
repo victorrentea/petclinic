@@ -2,7 +2,14 @@ package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -30,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -42,6 +50,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("firstName", "lastName", "city");
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -56,10 +66,18 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String searchText) {
-        String effectiveSearchText = searchText == null ? "" : searchText;
-        List<Owner> owners = ownerRepository.searchByText(effectiveSearchText);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "q", required = false) String searchText,
+            @PageableDefault(sort = {"firstName", "lastName"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        for (Sort.Order order : pageable.getSort()) {
+            if (!ALLOWED_SORT_FIELDS.contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field: " + order.getProperty());
+            }
+        }
+        String effectiveSearch = searchText == null ? "" : searchText;
+        Page<Owner> ownerPage = ownerRepository.searchByText(effectiveSearch, pageable);
+        List<OwnerDto> content = ownerMapper.toOwnerDtoCollection(ownerPage.getContent());
+        return new PageImpl<>(content, ownerPage.getPageable(), ownerPage.getTotalElements());
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

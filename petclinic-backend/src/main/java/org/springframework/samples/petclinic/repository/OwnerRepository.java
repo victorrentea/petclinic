@@ -3,14 +3,16 @@ package org.springframework.samples.petclinic.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.model.Owner;
 
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends PagingAndSortingRepository<Owner, Integer> {
 
-    @Query("""
+    @Query(value = """
         select distinct o
         from Owner o
           where lower(o.firstName) like concat('%', lower(:searchText), '%')
@@ -18,8 +20,17 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
               or lower(o.address) like concat('%', lower(:searchText), '%')
               or lower(o.city) like concat('%', lower(:searchText), '%')
               or lower(o.telephone) like concat('%', lower(:searchText), '%')
+        """,
+        countQuery = """
+        select count(distinct o)
+        from Owner o
+          where lower(o.firstName) like concat('%', lower(:searchText), '%')
+              or lower(o.lastName) like concat('%', lower(:searchText), '%')
+              or lower(o.address) like concat('%', lower(:searchText), '%')
+              or lower(o.city) like concat('%', lower(:searchText), '%')
+              or lower(o.telephone) like concat('%', lower(:searchText), '%')
         """)
-    List<Owner> searchByText(@Param("searchText") String searchText);
+    Page<Owner> searchByText(@Param("searchText") String searchText, Pageable pageable);
 
     Optional<Owner> findById(int id);
 

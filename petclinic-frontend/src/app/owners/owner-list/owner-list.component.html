@@ -2,49 +2,67 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
+    <form method="get" class="form-horizontal" id="search-owner-form">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
           <label class="col-sm-2 control-label">Search </label>
           <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="searchText" name="searchText" [(ngModel)]="searchText" (ngModelChange)="onSearchTermChange($event)" value=""/> <span class="help-inline"></span>
+            <input class="form-control" size="30" maxlength="80" id="searchText" name="searchText"
+                   [(ngModel)]="searchText" (ngModelChange)="onSearchTermChange($event)" value=""/>
           </div>
         </div>
       </div>
     </form>
 
-    <div *ngIf="owners.length === 0">No owners matching "{{searchText}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="isLoading" class="text-center">
+      <span>Loading...</span>
+    </div>
+
+    <div *ngIf="!isLoading && currentPage && currentPage.content.length === 0">
+      No owners matching "{{searchText}}"
+    </div>
+
+    <div class="table-responsive" id="ownersTable" *ngIf="currentPage && currentPage.content.length > 0">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th style="cursor:pointer" (click)="onSortClick('name')">
+            Name {{sortIndicator('name')}}
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th style="cursor:pointer" (click)="onSortClick('city')">
+            City {{sortIndicator('city')}}
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
-
         <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+        <tr *ngFor="let owner of currentPage.content">
+          <td class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+               (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a>
+          </td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <tr *ngFor="let pet of owner.pets">{{ pet.name }}</tr>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+      <div class="pagination-controls" style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+        <button class="btn btn-default btn-sm" (click)="goToPage(0)" [disabled]="pageIndex === 0">First</button>
+        <button class="btn btn-default btn-sm" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0">Prev</button>
+        <span>Page {{pageIndex + 1}} of {{totalPages}}</span>
+        <button class="btn btn-default btn-sm" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1">Next</button>
+        <button class="btn btn-default btn-sm" (click)="goToPage(totalPages - 1)" [disabled]="pageIndex >= totalPages - 1">Last</button>
+      </div>
+
+      <div style="margin-top:8px;">
+        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
     </div>
   </div>

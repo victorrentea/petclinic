@@ -205,16 +205,76 @@ public class OwnerTest {
             .contains(ownerId, owner2.getId());
     }
 
+    @Test
+    void listOwners_paginationStructure() throws Exception {
+        for (int i = 0; i < 14; i++) {
+            Owner o = TestData.anOwner();
+            o.setFirstName("Alice" + i);
+            ownerRepository.save(o);
+        }
+
+        mockMvc.perform(get("/api/owners?page=0&size=5"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(5))
+            .andExpect(jsonPath("$.totalElements").isNumber())
+            .andExpect(jsonPath("$.totalPages").isNumber())
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.size").value(5));
+    }
+
+    @Test
+    void listOwners_sortByFirstNameAsc() throws Exception {
+        Owner baxter = TestData.anOwner();
+        baxter.setFirstName("Baxter");
+        ownerRepository.save(baxter);
+        Owner adam = TestData.anOwner();
+        adam.setFirstName("Adam");
+        ownerRepository.save(adam);
+
+        String json = mockMvc.perform(get("/api/owners?sort=firstName,asc&size=100"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        assertThat(json.indexOf("\"Adam\"")).isLessThan(json.indexOf("\"Baxter\""));
+    }
+
+    @Test
+    void listOwners_invalidSortField_returns400() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=telephone,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listOwners_searchWithPagination_totalElementsReflectsFilter() throws Exception {
+        Owner smith1 = TestData.anOwner();
+        smith1.setLastName("Smith");
+        ownerRepository.save(smith1);
+        Owner smith2 = TestData.anOwner();
+        smith2.setLastName("Smithson");
+        ownerRepository.save(smith2);
+        Owner jones = TestData.anOwner();
+        jones.setLastName("Jones");
+        ownerRepository.save(jones);
+
+        String json = mockMvc.perform(get("/api/owners?q=smith&page=0&size=10"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        var tree = new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+        assertThat(tree.get("totalElements").asInt()).isGreaterThanOrEqualTo(2);
+    }
+
     private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
+        String urlWithSize = uriTemplate.contains("?") ? uriTemplate + "&size=1000" : uriTemplate + "?size=1000";
+        String responseJson = mockMvc.perform(get(urlWithSize))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        var tree = mapper.readTree(responseJson);
+        return mapper.readValue(tree.get("content").toString(), new TypeReference<List<OwnerDto>>() {});
     }
 
     @Test
