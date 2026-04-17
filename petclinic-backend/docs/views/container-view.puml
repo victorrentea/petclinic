@@ -1,0 +1,62 @@
+@startuml
+title <size:24>Container View: PetClinic</size>\n<size:24>Container view</size>
+
+set separator none
+left to right direction
+skinparam ranksep 20
+skinparam nodesep 5
+hide stereotype
+
+<style>
+  root {
+    BackgroundColor: #ffffff;
+    FontColor: #444444;
+  }
+  // Element
+  .Element-RWxlbWVudA== {
+    BackgroundColor: #ffffff;
+    LineColor: #444444;
+    LineStyle: 0;
+    LineThickness: 2;
+    FontColor: #444444;
+    FontSize: 24;
+    HorizontalAlignment: center;
+    Shadowing: 0;
+    MaximumWidth: 450;
+  }
+  // Relationship
+  .Relationship-UmVsYXRpb25zaGlw {
+    LineThickness: 2;
+    LineStyle: 10-10;
+    LineColor: #444444;
+    FontColor: #444444;
+    FontSize: 24;
+  }
+  // PetClinic
+  .Boundary-UGV0Q2xpbmlj {
+    BackgroundColor: #ffffff;
+    LineColor: #444444;
+    LineStyle: 0;
+    LineThickness: 2;
+    FontColor: #444444;
+    FontSize: 24;
+    HorizontalAlignment: center;
+    Shadowing: 0;
+  }
+</style>
+
+rectangle "==Pet Owner\n<size:16>[Person]</size>\n\nManages their pets and appointments" <<Element-RWxlbWVudA==>> as PetOwner
+rectangle "==Veterinarian\n<size:16>[Person]</size>\n\nProvides veterinary care" <<Element-RWxlbWVudA==>> as Veterinarian
+
+rectangle "PetClinic\n<size:16>[Software System]</size>" <<Boundary-UGV0Q2xpbmlj>> {
+  rectangle "==Frontend\n<size:16>[Container: React]</size>\n\nSingle-page application" <<Element-RWxlbWVudA==>> as PetClinic.Frontend
+  rectangle "==Backend\n<size:16>[Container: Java / Spring Boot]</size>\n\nREST API" <<Element-RWxlbWVudA==>> as PetClinic.Backend
+  rectangle "==Database\n<size:16>[Container: H2 / PostgreSQL]</size>\n\nStores all data" <<Element-RWxlbWVudA==>> as PetClinic.Database
+}
+
+Veterinarian --> PetClinic.Frontend <<Relationship-UmVsYXRpb25zaGlw>> : "Uses"
+PetClinic.Frontend --> PetClinic.Backend <<Relationship-UmVsYXRpb25zaGlw>> : "REST API calls\n<size:16>[HTTPS/JSON]</size>"
+PetClinic.Backend --> PetClinic.Database <<Relationship-UmVsYXRpb25zaGlw>> : "Reads/writes data\n<size:16>[JPA]</size>"
+PetOwner --> PetClinic.Frontend <<Relationship-UmVsYXRpb25zaGlw>> : "Uses"
+
+@enduml
