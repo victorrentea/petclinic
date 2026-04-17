@@ -32,7 +32,7 @@ import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -205,16 +205,29 @@ public class OwnerTest {
             .contains(ownerId, owner2.getId());
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class OwnerPageResult {
+        public List<OwnerDto> content;
+        public long totalElements;
+        public int totalPages;
+        public int number;
+        public int size;
+    }
+
     private List<OwnerDto> search(String uriTemplate) throws Exception {
+        String url = uriTemplate.contains("size=") ? uriTemplate
+            : uriTemplate + (uriTemplate.contains("?") ? "&" : "?") + "size=1000";
+        return searchPage(url).content;
+    }
+
+    private OwnerPageResult searchPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageResult.class);
     }
 
     @Test
@@ -422,5 +435,47 @@ public class OwnerTest {
         assertThat(responseDto.getPets().get(0).getName()).isEqualTo("Rosy");
         assertThat(responseDto.getPets().get(0).getType()).isNotNull();
         assertThat(responseDto.getPets().get(0).getType().getName()).isEqualTo("dog");
+    }
+
+    // --- Pagination & Sorting (tasks 4.1–4.4) ---
+
+    @Test
+    void listOwners_paginationStructureReturned() throws Exception {
+        OwnerPageResult page = searchPage("/api/owners?page=0&size=5");
+
+        assertThat(page.content).isNotNull();
+        assertThat(page.number).isEqualTo(0);
+        assertThat(page.size).isEqualTo(5);
+        assertThat(page.totalElements).isGreaterThanOrEqualTo(1);
+        assertThat(page.totalPages).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void listOwners_sortByFirstNameAsc() throws Exception {
+        Owner z = TestData.anOwner(); z.setFirstName("Zelda"); ownerRepository.save(z);
+        Owner a = TestData.anOwner(); a.setFirstName("Aaron"); ownerRepository.save(a);
+
+        OwnerPageResult page = searchPage("/api/owners?sort=firstName,asc&size=100");
+
+        List<String> firstNames = page.content.stream().map(OwnerDto::getFirstName).toList();
+        assertThat(firstNames).isSortedAccordingTo(String.CASE_INSENSITIVE_ORDER);
+    }
+
+    @Test
+    void listOwners_invalidSortField_returns400() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=telephone,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listOwners_searchWithPagination_totalElementsMatchesFilter() throws Exception {
+        Owner s1 = TestData.anOwner(); s1.setLastName("XyzSmithPaginTest"); ownerRepository.save(s1);
+        Owner s2 = TestData.anOwner(); s2.setLastName("XyzSmithPaginTest2"); ownerRepository.save(s2);
+        Owner other = TestData.anOwner(); other.setLastName("XyzJonesPaginTest"); ownerRepository.save(other);
+
+        OwnerPageResult page = searchPage("/api/owners?q=XyzSmithPaginTest&page=0&size=10");
+
+        assertThat(page.totalElements).isEqualTo(2);
+        assertThat(page.content).hasSize(2);
     }
 }

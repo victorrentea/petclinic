@@ -1,5 +1,7 @@
 # Project Guidelines
 
+> **Architecture reference:** Load `/memories/repo/Architecture.md` for key architectural decisions (e.g., OpenAPI contract direction: Java → YAML, not YAML → Java).
+
 ## Scope
 
 Monorepo with two main applications:

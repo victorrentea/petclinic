@@ -2,7 +2,12 @@ package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -30,8 +35,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
@@ -54,12 +61,22 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("firstName", "lastName", "city");
+
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String searchText) {
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "q", required = false) String searchText,
+            @PageableDefault(sort = {"firstName", "lastName"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        for (Sort.Order order : pageable.getSort()) {
+            if (!ALLOWED_SORT_FIELDS.contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid sort field: " + order.getProperty());
+            }
+        }
         String effectiveSearchText = searchText == null ? "" : searchText;
-        List<Owner> owners = ownerRepository.searchByText(effectiveSearchText);
-        return ownerMapper.toOwnerDtoCollection(owners);
+        return ownerRepository.searchByText(effectiveSearchText, pageable)
+            .map(ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
