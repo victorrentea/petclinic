@@ -1,6 +1,6 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
@@ -120,27 +120,30 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('calls backend search for non-empty text', () => {
+  it('calls backend search for non-empty text', fakeAsync(() => {
     loadComponentWithOwners([testOwner, secondTestOwner]);
     searchOwnersSpy.and.returnValue(of([secondTestOwner]));
 
     component.onSearchTermChange('Main');
+    tick(300);
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Main');
     expect(component.owners).toEqual([secondTestOwner]);
-  });
+  }));
 
-  it('searches on each text change', () => {
+  it('debounces rapid typing - only last term reaches backend', fakeAsync(() => {
     loadComponentWithOwners([testOwner, secondTestOwner]);
     searchOwnersSpy.and.returnValue(of([secondTestOwner]));
 
+    component.onSearchTermChange('M');
+    component.onSearchTermChange('Ma');
     component.onSearchTermChange('Mai');
     component.onSearchTermChange('Main');
+    tick(300);
 
-    expect(searchOwnersSpy).toHaveBeenCalledTimes(2);
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Mai');
+    expect(searchOwnersSpy).toHaveBeenCalledTimes(1);
     expect(searchOwnersSpy).toHaveBeenCalledWith('Main');
-  });
+  }));
 
   it('restores all owners when search text is empty', () => {
     loadComponentWithOwners([testOwner, secondTestOwner]);

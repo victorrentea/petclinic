@@ -15,3 +15,10 @@ npm run e2e                         # Protractor e2e tests
 - Services communicate with backend REST API at http://localhost:8080/api/
 - RxJS for async operations
 
+## Live Search (Search-as-you-type)
+
+- Apply `debounceTime(300)` + `distinctUntilChanged()` + `switchMap()` for any text box that triggers backend calls automatically (no button press).
+- Use a `Subject<string>` in the component to feed the RxJS pipeline.
+- Empty input can bypass debounce for immediate reset.
+- Test with `fakeAsync` + `tick(300)` to assert debounce behavior.
+
