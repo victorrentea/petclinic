@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {OwnerService} from './owner.service';
+import {OwnerPaginationService} from './owner-pagination.service';
 import {OwnerListComponent} from './owner-list/owner-list.component';
 import {OwnerDetailComponent} from './owner-detail/owner-detail.component';
 import {CommonModule} from '@angular/common';
@@ -22,7 +23,7 @@ import {PetsModule} from '../pets/pets.module';
     OwnerEditComponent,
     OwnerAddComponent
   ],
-  providers: [OwnerService]
+  providers: [OwnerService, OwnerPaginationService]
 
 })
 

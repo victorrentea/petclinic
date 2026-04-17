@@ -40,8 +40,8 @@ public class SpecialtyTest {
 
     @BeforeEach
     final void before() {
-        Specialty specialty = new Specialty();
-        specialty.setName("radiology");
+        Specialty specialty = new Specialty()
+            .setName("radiology");
         specialtyRepository.save(specialty);
         specialtyId = specialty.getId();
     }
@@ -87,8 +87,8 @@ public class SpecialtyTest {
 
     @Test
     void create_ok() throws Exception {
-        SpecialtyDto newSpecialty = new SpecialtyDto();
-        newSpecialty.setName("surgery");
+        SpecialtyDto newSpecialty = new SpecialtyDto()
+            .setName("surgery");
 
         mockMvc.perform(post("/api/specialties")
                 .content(mapper.writeValueAsString(newSpecialty))
@@ -98,8 +98,8 @@ public class SpecialtyTest {
 
     @Test
     void create_invalid() throws Exception {
-        SpecialtyDto newSpecialty = new SpecialtyDto();
-        newSpecialty.setName(null); // invalid - null name
+        SpecialtyDto newSpecialty = new SpecialtyDto()
+            .setName(null); // invalid - null name
 
         mockMvc.perform(post("/api/specialties")
                 .content(mapper.writeValueAsString(newSpecialty))

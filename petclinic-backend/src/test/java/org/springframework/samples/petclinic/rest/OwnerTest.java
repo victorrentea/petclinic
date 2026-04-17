@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,12 +29,6 @@ import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.transaction.Transactional;
 
@@ -43,15 +36,7 @@ import jakarta.transaction.Transactional;
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
 @Transactional
-public class OwnerTest {
-
-    @Autowired
-    MockMvc mockMvc;
-
-    ObjectMapper mapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .setDateFormat(new SimpleDateFormat("yyyy-MM-dd"))
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+public class OwnerTest extends OwnerTestBase {
 
     @Autowired
     OwnerRepository ownerRepository;
@@ -68,21 +53,19 @@ public class OwnerTest {
 
     @BeforeEach
     final void before() {
-        Owner owner = TestData.anOwner();
-        owner.setFirstName("George");
-        owner.setLastName("Franklin");
+        Owner owner = TestData.anOwner()
+            .setFirstName("George")
+            .setLastName("Franklin");
         owner = ownerRepository.save(owner);
         ownerId = owner.getId();
 
-        petType = new PetType();
-        petType.setName("dog");
-        petType = petTypeRepository.save(petType);
+        petType = petTypeRepository.save(new PetType().setName("dog"));
 
-        Pet pet = new Pet();
-        pet.setName("Rosy");
-        pet.setBirthDate(LocalDate.now());
-        pet.setOwner(owner);
-        pet.setType(petType);
+        Pet pet = new Pet()
+            .setName("Rosy")
+            .setBirthDate(LocalDate.now())
+            .setOwner(owner)
+            .setType(petType);
         pet = petRepository.save(pet);
         petId = pet.getId();
 
@@ -90,15 +73,6 @@ public class OwnerTest {
         owner.addPet(pet);
     }
 
-    private OwnerDto callGet(int ownerId) throws Exception {
-        String responseJson = mockMvc.perform(get("/api/owners/" + ownerId))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-        return mapper.readValue(responseJson, OwnerDto.class);
-    }
 
     @Test
     void getByIdOk() throws Exception {
@@ -127,9 +101,9 @@ public class OwnerTest {
     @Test
     void getAllWithTextFilter_onLastName() throws Exception {
         // Create another owner with a different last name
-        Owner owner2 = TestData.anOwner();
-        owner2.setFirstName("Betty");
-        owner2.setLastName("Davis");
+        Owner owner2 = TestData.anOwner()
+            .setFirstName("Betty")
+            .setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
         List<OwnerDto> owners = search("/api/owners?q=Dav");
@@ -142,8 +116,8 @@ public class OwnerTest {
 
     @Test
     void getAllWithTextFilter_onLastNameSecondCase() throws Exception {
-        Owner owner2 = TestData.anOwner();
-        owner2.setLastName("JavaBeans");
+        Owner owner2 = TestData.anOwner()
+            .setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
         List<OwnerDto> owners = search("/api/owners?q=Java");
@@ -155,12 +129,12 @@ public class OwnerTest {
 
     @Test
     void getAllWithTextFilter() throws Exception {
-        Owner owner2 = TestData.anOwner();
-        owner2.setFirstName("Betty");
-        owner2.setLastName("Davis");
-        owner2.setAddress("22 Main st");
-        owner2.setCity("Seattle");
-        owner2.setTelephone("1234567890");
+        Owner owner2 = TestData.anOwner()
+            .setFirstName("Betty")
+            .setLastName("Davis")
+            .setAddress("22 Main st")
+            .setCity("Seattle")
+            .setTelephone("1234567890");
         owner2 = ownerRepository.save(owner2);
 
         List<OwnerDto> byAddress = search("/api/owners?q=Main");
@@ -176,8 +150,8 @@ public class OwnerTest {
 
     @Test
     void getAllWithTextFilter_caseInsensitive() throws Exception {
-        Owner owner2 = TestData.anOwner();
-        owner2.setAddress("22 Main st");
+        Owner owner2 = TestData.anOwner()
+            .setAddress("22 Main st");
         owner2 = ownerRepository.save(owner2);
 
         List<OwnerDto> matchingCase = search("/api/owners?q=Main");
@@ -193,9 +167,9 @@ public class OwnerTest {
 
     @Test
     void getAllWithEmptyTextFilter_returnsAllOwners() throws Exception {
-        Owner owner2 = TestData.anOwner();
-        owner2.setFirstName("Betty");
-        owner2.setLastName("Davis");
+        Owner owner2 = TestData.anOwner()
+            .setFirstName("Betty")
+            .setLastName("Davis");
         owner2 = ownerRepository.save(owner2);
 
         List<OwnerDto> owners = search("/api/owners?q=");
@@ -205,30 +179,6 @@ public class OwnerTest {
             .contains(ownerId, owner2.getId());
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    static class OwnerPageResult {
-        public List<OwnerDto> content;
-        public long totalElements;
-        public int totalPages;
-        public int number;
-        public int size;
-    }
-
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String url = uriTemplate.contains("size=") ? uriTemplate
-            : uriTemplate + (uriTemplate.contains("?") ? "&" : "?") + "size=1000";
-        return searchPage(url).content;
-    }
-
-    private OwnerPageResult searchPage(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-        return mapper.readValue(responseJson, OwnerPageResult.class);
-    }
 
     @Test
     void getAllWithTextFilter_notFound() throws Exception {
@@ -239,12 +189,12 @@ public class OwnerTest {
 
     @Test
     void create_ok() throws Exception {
-        OwnerDto newOwner = new OwnerDto();
-        newOwner.setFirstName("Eduardo");
-        newOwner.setLastName("Rodriquez");
-        newOwner.setAddress("2693 Commerce St.");
-        newOwner.setCity("McFarland");
-        newOwner.setTelephone("6085558763");
+        OwnerDto newOwner = new OwnerDto()
+            .setFirstName("Eduardo")
+            .setLastName("Rodriquez")
+            .setAddress("2693 Commerce St.")
+            .setCity("McFarland")
+            .setTelephone("6085558763");
 
         mockMvc.perform(post("/api/owners")
                 .content(mapper.writeValueAsString(newOwner))
@@ -254,12 +204,12 @@ public class OwnerTest {
 
     @Test
     void create_invalid() throws Exception {
-        OwnerDto newOwner = new OwnerDto();
-        // missing firstName - validation error
-        newOwner.setLastName("Rodriquez");
-        newOwner.setAddress("2693 Commerce St.");
-        newOwner.setCity("McFarland");
-        newOwner.setTelephone("6085558763");
+        OwnerDto newOwner = new OwnerDto()
+            // missing firstName - validation error
+            .setLastName("Rodriquez")
+            .setAddress("2693 Commerce St.")
+            .setCity("McFarland")
+            .setTelephone("6085558763");
 
         mockMvc.perform(post("/api/owners")
                 .content(mapper.writeValueAsString(newOwner))
@@ -326,13 +276,13 @@ public class OwnerTest {
 
     @Test
     void createPet_ok() throws Exception {
-        PetDto newPet = new PetDto();
-        newPet.setName("Max");
-        newPet.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        newPet.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+            .setId(petType.getId())
+            .setName(petType.getName());
+        PetDto newPet = new PetDto()
+            .setName("Max")
+            .setBirthDate(LocalDate.now())
+            .setType(typeDto);
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets")
                 .content(mapper.writeValueAsString(newPet))
@@ -342,13 +292,13 @@ public class OwnerTest {
 
     @Test
     void createPet_invalid() throws Exception {
-        PetDto newPet = new PetDto();
-        // missing name - validation error
-        newPet.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        newPet.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+            .setId(petType.getId())
+            .setName(petType.getName());
+        PetDto newPet = new PetDto()
+            // missing name - validation error
+            .setBirthDate(LocalDate.now())
+            .setType(typeDto);
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets")
                 .content(mapper.writeValueAsString(newPet))
@@ -379,14 +329,14 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_ok() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setId(petId);
-        petDto.setName("Rosy Updated");
-        petDto.setBirthDate(LocalDate.of(2020, 1, 15));
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+            .setId(petType.getId())
+            .setName(petType.getName());
+        PetDto petDto = new PetDto()
+            .setId(petId)
+            .setName("Rosy Updated")
+            .setBirthDate(LocalDate.of(2020, 1, 15))
+            .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/" + ownerId + "/pets/" + petId)
                 .content(mapper.writeValueAsString(petDto))
@@ -396,13 +346,13 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_ownerNotFound() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setName("Thor");
-        petDto.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+            .setId(petType.getId())
+            .setName(petType.getName());
+        PetDto petDto = new PetDto()
+            .setName("Thor")
+            .setBirthDate(LocalDate.now())
+            .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/99999/pets/" + petId)
                 .content(mapper.writeValueAsString(petDto))
@@ -412,13 +362,13 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_petNotFound() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setName("Ghost");
-        petDto.setBirthDate(LocalDate.of(2020, 1, 1));
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+            .setId(petType.getId())
+            .setName(petType.getName());
+        PetDto petDto = new PetDto()
+            .setName("Ghost")
+            .setBirthDate(LocalDate.of(2020, 1, 1))
+            .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/" + ownerId + "/pets/99999")
                 .content(mapper.writeValueAsString(petDto))
@@ -452,8 +402,8 @@ public class OwnerTest {
 
     @Test
     void listOwners_sortByFirstNameAsc() throws Exception {
-        Owner z = TestData.anOwner(); z.setFirstName("Zelda"); ownerRepository.save(z);
-        Owner a = TestData.anOwner(); a.setFirstName("Aaron"); ownerRepository.save(a);
+        ownerRepository.save(TestData.anOwner().setFirstName("Zelda"));
+        ownerRepository.save(TestData.anOwner().setFirstName("Aaron"));
 
         OwnerPageResult page = searchPage("/api/owners?sort=firstName,asc&size=100");
 
@@ -468,10 +418,17 @@ public class OwnerTest {
     }
 
     @Test
+    void listOwners_oversizedPage_isCappedAtMax() throws Exception {
+        OwnerPageResult page = searchPage("/api/owners?size=999999");
+
+        assertThat(page.size).isLessThanOrEqualTo(500);
+    }
+
+    @Test
     void listOwners_searchWithPagination_totalElementsMatchesFilter() throws Exception {
-        Owner s1 = TestData.anOwner(); s1.setLastName("XyzSmithPaginTest"); ownerRepository.save(s1);
-        Owner s2 = TestData.anOwner(); s2.setLastName("XyzSmithPaginTest2"); ownerRepository.save(s2);
-        Owner other = TestData.anOwner(); other.setLastName("XyzJonesPaginTest"); ownerRepository.save(other);
+        Owner s1 = TestData.anOwner().setLastName("XyzSmithPaginTest"); ownerRepository.save(s1);
+        Owner s2 = TestData.anOwner().setLastName("XyzSmithPaginTest2"); ownerRepository.save(s2);
+        Owner other = TestData.anOwner().setLastName("XyzJonesPaginTest"); ownerRepository.save(other);
 
         OwnerPageResult page = searchPage("/api/owners?q=XyzSmithPaginTest&page=0&size=10");
 

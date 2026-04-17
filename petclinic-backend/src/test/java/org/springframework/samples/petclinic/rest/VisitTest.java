@@ -67,10 +67,10 @@ public class VisitTest {
         petRepository.save(pet);
         petId = pet.getId();
 
-        Visit visit = new Visit();
-        visit.setPet(pet);
-        visit.setDate(LocalDate.now());
-        visit.setDescription("rabies shot");
+        Visit visit = new Visit()
+            .setPet(pet)
+            .setDate(LocalDate.now())
+            .setDescription("rabies shot");
         visitRepository.save(visit);
         visitId = visit.getId();
     }
@@ -117,10 +117,10 @@ public class VisitTest {
 
     @Test
     void create_ok() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("neutered");
+        VisitDto newVisit = new VisitDto()
+            .setPetId(petId)
+            .setDate(LocalDate.now())
+            .setDescription("neutered");
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -130,10 +130,10 @@ public class VisitTest {
 
     @Test
     void create_invalid() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        // missing description - validation error
+        VisitDto newVisit = new VisitDto()
+            .setPetId(petId)
+            .setDate(LocalDate.now());
+            // missing description - validation error
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -185,10 +185,10 @@ public class VisitTest {
     @Test
     void findVisitsByPetId() {
         // Add a second visit for the same pet
-        Visit visit2 = new Visit();
-        visit2.setPet(petRepository.findById(petId).orElseThrow());
-        visit2.setDate(LocalDate.now().minusDays(1));
-        visit2.setDescription("checkup");
+        Visit visit2 = new Visit()
+            .setPet(petRepository.findById(petId).orElseThrow())
+            .setDate(LocalDate.now().minusDays(1))
+            .setDescription("checkup");
         visitRepository.save(visit2);
 
         // Test repository method findByPetId

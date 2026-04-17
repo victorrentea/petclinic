@@ -71,9 +71,10 @@ public class Owner {
         this.pets = new HashSet<>(pets);
     }
 
-    public void addPet(Pet pet) {
+    public Owner addPet(Pet pet) {
         pets.add(pet);
         pet.setOwner(this);
+        return this;
     }
 
     public Optional<Pet> getPetById(int petId) {

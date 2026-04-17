@@ -28,13 +28,13 @@ public class UserTest {
 
     @Test
     void create_ok() throws Exception {
-        RoleDto roleDto = new RoleDto();
-        roleDto.setName("OWNER_ADMIN");
+        RoleDto roleDto = new RoleDto()
+            .setName("OWNER_ADMIN");
 
-        UserDto newUser = new UserDto();
-        newUser.setUsername("newuser");
-        newUser.setPassword("password123");
-        newUser.setEnabled(true);
+        UserDto newUser = new UserDto()
+            .setUsername("newuser")
+            .setPassword("password123")
+            .setEnabled(true);
         newUser.getRoles().add(roleDto);
 
         mockMvc.perform(post("/api/users")
@@ -45,11 +45,11 @@ public class UserTest {
 
     @Test
     void create_invalid() throws Exception {
-        UserDto newUser = new UserDto();
-        // Empty username - validation error
-        newUser.setUsername("");
-        newUser.setPassword("password123");
-        newUser.setEnabled(true);
+        UserDto newUser = new UserDto()
+            // Empty username - validation error
+            .setUsername("")
+            .setPassword("password123")
+            .setEnabled(true);
 
         mockMvc.perform(post("/api/users")
                 .content(mapper.writeValueAsString(newUser))
@@ -60,11 +60,11 @@ public class UserTest {
     @Test
     void create_noRoles_triggers_server_error() throws Exception {
         // Send roles as null so the service sees user.getRoles() == null and throws
-        UserDto newUser = new UserDto();
-        newUser.setUsername("norolesuser");
-        newUser.setPassword("password123");
-        newUser.setEnabled(true);
-        newUser.setRoles(null);
+        UserDto newUser = new UserDto()
+            .setUsername("norolesuser")
+            .setPassword("password123")
+            .setEnabled(true)
+            .setRoles(null);
 
         mockMvc.perform(post("/api/users")
                 .content(mapper.writeValueAsString(newUser))

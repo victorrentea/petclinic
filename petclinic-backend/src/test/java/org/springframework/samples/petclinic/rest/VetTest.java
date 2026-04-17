@@ -41,9 +41,9 @@ public class VetTest {
 
     @BeforeEach
     final void before() {
-        Vet vet = new Vet();
-        vet.setFirstName("James");
-        vet.setLastName("Carter");
+        Vet vet = new Vet()
+            .setFirstName("James")
+            .setLastName("Carter");
         vetRepository.save(vet);
         vetId = vet.getId();
     }
@@ -90,9 +90,9 @@ public class VetTest {
 
     @Test
     void create_ok() throws Exception {
-        VetDto newVet = new VetDto();
-        newVet.setFirstName("Helen");
-        newVet.setLastName("Leary");
+        VetDto newVet = new VetDto()
+            .setFirstName("Helen")
+            .setLastName("Leary");
 
         mockMvc.perform(post("/api/vets")
                 .content(mapper.writeValueAsString(newVet))
@@ -102,9 +102,9 @@ public class VetTest {
 
     @Test
     void create_invalid() throws Exception {
-        VetDto newVet = new VetDto();
-        newVet.setFirstName(null); // invalid - null firstName
-        newVet.setLastName("Leary");
+        VetDto newVet = new VetDto()
+            .setFirstName(null) // invalid - null firstName
+            .setLastName("Leary");
 
         mockMvc.perform(post("/api/vets")
                 .content(mapper.writeValueAsString(newVet))

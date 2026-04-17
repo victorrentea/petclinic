@@ -2,49 +2,70 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
+    <form method="get" class="form-horizontal" id="search-owner-form">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
           <label class="col-sm-2 control-label">Search </label>
           <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="searchText" name="searchText" [(ngModel)]="searchText" (ngModelChange)="onSearchTermChange($event)" value=""/> <span class="help-inline"></span>
+            <input class="form-control" size="30" maxlength="80" id="searchText" name="searchText"
+                   [(ngModel)]="searchText" (ngModelChange)="onSearchTermChange($event)" value=""/>
           </div>
         </div>
       </div>
     </form>
 
-    <div *ngIf="owners.length === 0">No owners matching "{{searchText}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="isLoading" class="text-muted" style="margin-bottom:8px;">
+      <span class="glyphicon glyphicon-refresh"></span> Loading...
+    </div>
+
+    <div *ngIf="!isLoading && owners.length === 0">No owners matching "{{searchText}}"</div>
+    <div class="table-responsive" id="ownersTable" *ngIf="owners">
+      <table class="table table-striped owners-table">
+        <colgroup>
+          <col style="width:22%">
+          <col style="width:30%">
+          <col style="width:16%">
+          <col style="width:16%">
+          <col style="width:16%">
+        </colgroup>
         <thead>
         <tr>
-          <th>Name</th>
+          <th style="cursor:pointer;user-select:none" (click)="onSortColumn('name')">
+            Name <span class="sort-indicator">{{ sortColumn === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '\u00a0' }}</span>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th style="cursor:pointer;user-select:none" (click)="onSortColumn('city')">
+            City <span class="sort-indicator">{{ sortColumn === 'city' ? (sortDir === 'asc' ? '↑' : '↓') : '\u00a0' }}</span>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
-
         <tbody>
         <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+          <td class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+               (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a>
+          </td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <span *ngFor="let pet of owner.pets">{{ pet.name }} </span>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;margin-bottom:4px;">
+        <button class="btn btn-default btn-sm" (click)="addOwner()">Add Owner</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-default btn-sm" [disabled]="isFirstPage" (click)="goToPage(0)">« First</button>
+          <button class="btn btn-default btn-sm" [disabled]="isFirstPage" (click)="goToPage(currentPageNumber - 1)">‹ Prev</button>
+          <span style="min-width:110px;text-align:center;display:inline-block;">Page {{ currentPageNumber + 1 }} of {{ totalPages }}</span>
+          <button class="btn btn-default btn-sm" [disabled]="isLastPage" (click)="goToPage(currentPageNumber + 1)">Next ›</button>
+          <button class="btn btn-default btn-sm" [disabled]="isLastPage" (click)="goToPage(totalPages - 1)">Last »</button>
+        </div>
       </div>
     </div>
   </div>

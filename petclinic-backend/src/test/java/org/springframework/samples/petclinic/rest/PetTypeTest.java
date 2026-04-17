@@ -101,8 +101,8 @@ public class PetTypeTest {
     @Test
     @WithMockUser(roles = "VET_ADMIN")
     void createPetType_ok() throws Exception {
-        PetTypeDto newPetType = new PetTypeDto();
-        newPetType.setName("rabbit");
+        PetTypeDto newPetType = new PetTypeDto()
+            .setName("rabbit");
 
         String locationHeader = mockMvc.perform(post("/api/pettypes")
                 .content(mapper.writeValueAsString(newPetType))
@@ -121,8 +121,8 @@ public class PetTypeTest {
     @Test
     @WithMockUser(roles = "VET_ADMIN")
     void createPetType_invalid() throws Exception {
-        PetTypeDto newPetType = new PetTypeDto();
-        newPetType.setName(""); // invalid - empty name
+        PetTypeDto newPetType = new PetTypeDto()
+            .setName(""); // invalid - empty name
 
         mockMvc.perform(post("/api/pettypes")
                 .content(mapper.writeValueAsString(newPetType))

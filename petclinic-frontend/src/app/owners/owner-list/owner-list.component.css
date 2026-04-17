@@ -3,6 +3,15 @@
 display:none;
 }
 
+.owners-table {
+  table-layout: fixed;
+}
+
+.sort-indicator {
+  display: inline-block;
+  width: 1em;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;
