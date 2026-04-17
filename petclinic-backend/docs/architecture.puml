@@ -1,0 +1,21 @@
+@startuml
+
+[Model] <<..model>>
+[Repository] <<..repository>>
+[DTO] <<..rest.dto>>
+[REST Error] <<..rest.error>>
+[Mapper] <<..mapper>>
+[REST] <<..rest>>
+[Invoice] <<..invoice>>
+[Security] <<..security>>
+[Util] <<..util>>
+
+[Repository] --> [Model]
+[Mapper] --> [Model]
+[Mapper] --> [DTO]
+[REST] --> [Model]
+[REST] --> [Repository]
+[REST] --> [Mapper]
+[REST] --> [DTO]
+
+@enduml
