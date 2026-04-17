@@ -9,8 +9,8 @@ Monorepo with two main applications:
 - `petclinic-frontend/`: Angular 16 SPA
 
 This root file contains defaults for the whole workspace. Area-specific details live in:
-- `petclinic-backend/AGENTS.md`
-- `petclinic-frontend/AGENTS.md`
+- `petclinic-backend/AGENTS.md` — including `petclinic-backend/TESTING.md`
+- `petclinic-frontend/AGENTS.md` — including `petclinic-frontend/TESTING.md`
 
 ## Build And Test
 
@@ -56,27 +56,9 @@ See:
 - Follow TDD strictly: write a failing test first, confirm failure, then implement.
 - Do not ask for permission before running tests after refactoring.
 
-Testing style notes for Java/TypeScript unit tests are documented in:
-- `.github/instructions/testing.instructions.md`
 
 ## Search Rules
 
-- Implement search behavior in backend by default.
-- Keep matching logic in one layer (no duplicated filtering logic across layers).
-- Default matching is case-insensitive unless explicitly requested otherwise.
-- Use `LIKE` in JPQL queries, not `locate`.
-- Implement search behavior in backend by default.
-- Keep matching logic in one layer (no duplicated filtering logic across layers).
-- Default matching is case-insensitive unless explicitly requested otherwise.
-- Use `LIKE` in JPQL queries, not `locate`.
-- Implement search behavior in backend by default.
-- Keep matching logic in one layer (no duplicated filtering logic across layers).
-- Default matching is case-insensitive unless explicitly requested otherwise.
-- Use `LIKE` in JPQL queries, not `locate`.
-- Implement search behavior in backend by default.
-- Keep matching logic in one layer (no duplicated filtering logic across layers).
-- Default matching is case-insensitive unless explicitly requested otherwise.
-- Use `LIKE` in JPQL queries, not `locate`.
 - Implement search behavior in backend by default.
 - Keep matching logic in one layer (no duplicated filtering logic across layers).
 - Default matching is case-insensitive unless explicitly requested otherwise.

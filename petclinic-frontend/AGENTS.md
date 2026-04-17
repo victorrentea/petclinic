@@ -20,5 +20,8 @@ npm run e2e                         # Protractor e2e tests
 - Apply `debounceTime(300)` + `distinctUntilChanged()` + `switchMap()` for any text box that triggers backend calls automatically (no button press).
 - Use a `Subject<string>` in the component to feed the RxJS pipeline.
 - Empty input can bypass debounce for immediate reset.
-- Test with `fakeAsync` + `tick(300)` to assert debounce behavior.
+
+## Testing
+
+See **[TESTING.md](./TESTING.md)** for full testing conventions (Jasmine, TestBed, HttpTestingController, debounce testing).
 

@@ -53,3 +53,6 @@ Response ← Controller ← Mapper (Entity→DTO) ← Service ← Repository
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
 - Default user: `admin`/`admin`
 
+## Testing
+
+See **[TESTING.md](./TESTING.md)** for full testing conventions (style, Spring Boot integration tests, Cucumber/BDD).
