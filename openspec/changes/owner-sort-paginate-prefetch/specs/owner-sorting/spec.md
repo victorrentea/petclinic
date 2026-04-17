@@ -5,7 +5,11 @@ The owners table SHALL display sort indicators on the Name and City column heade
 
 #### Scenario: Default sort on page load
 - **WHEN** user navigates to the owners list for the first time
-- **THEN** the Name column shows the ASC sort indicator and owners are ordered by firstName then lastName ascending
+- **THEN** the Name column shows the ASC sort indicator (↑) immediately on first render, before any user interaction, and owners are ordered by firstName then lastName ascending; City column shows no indicator
+
+#### Scenario: Sort indicator signals clickability
+- **WHEN** the owners list is first displayed
+- **THEN** both the Name and City column headers SHALL be visually styled to suggest they are interactive (e.g., cursor pointer, hover effect), even if not currently sorted by that column
 
 #### Scenario: Click active sort column to reverse direction
 - **WHEN** user clicks the currently active sort column header

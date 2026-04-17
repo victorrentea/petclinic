@@ -9,8 +9,8 @@ Users in distant geographies (e.g., Thailand connecting to EU servers) experienc
 - Frontend calculates page size dynamically from the available viewport height (no scrollbar)
 - On resize (debounced), the frontend resets to page 1 and clears the page cache
 - Frontend pre-fetches next and previous pages immediately after rendering the current page; pages beyond ±1 from current are evicted from cache
-- Pagination controls show: current page number, total pages, previous/next buttons
-- Sortable column headers show sort direction indicator; clicking toggles ASC → DESC → ASC
+- Pagination controls show: First, Prev, current page number / total pages, Next, Last buttons; First and Last are always visible so the user can jump directly to either end
+- Sortable column headers show sort direction indicator; the Name column shows ↑ immediately on first render (default sort) to signal the feature is available; clicking toggles ASC → DESC → ASC
 
 ## Capabilities
 

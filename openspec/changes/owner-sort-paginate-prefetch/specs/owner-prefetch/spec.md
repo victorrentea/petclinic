@@ -9,7 +9,11 @@ The frontend SHALL calculate the number of rows per page based on the available 
 
 #### Scenario: Resize triggers recalculation
 - **WHEN** the browser window is resized
-- **THEN** the resize event is debounced (400 ms), after which page size is recalculated, the cache is cleared, and the list resets to page 0 with the new size
+- **THEN** the resize event is debounced (1000 ms), after which page size is recalculated, the cache is cleared, and the list resets to page 0 with the new size
+
+#### Scenario: Pre-fetch triggered after resize reset
+- **WHEN** a resize causes reset to page 0
+- **THEN** after page 0 is loaded and displayed, the frontend immediately pre-fetches page 1 in the background (page −1 does not exist, so only next is pre-fetched)
 
 #### Scenario: Very small viewport clamped
 - **WHEN** the available height would yield fewer than 5 rows
@@ -60,16 +64,24 @@ The frontend SHALL discard in-flight pre-fetch responses that were initiated bef
 - **THEN** the response of the in-flight request is ignored and the cache is not updated with stale data
 
 ### Requirement: Pagination controls displayed
-The owners list SHALL display the current page number (1-based for display), total pages, and enabled/disabled prev/next buttons.
+The owners list SHALL display: a First-page button, a Prev button, the current page number (1-based) and total pages, a Next button, and a Last-page button. First and Last buttons SHALL always be visible so the user can jump directly to either end.
 
-#### Scenario: First page disables Prev button
+#### Scenario: First page disables First and Prev buttons
 - **WHEN** user is on page 1 (index 0)
-- **THEN** the Prev button is disabled
+- **THEN** both the First and Prev buttons are disabled
 
-#### Scenario: Last page disables Next button
+#### Scenario: Last page disables Next and Last buttons
 - **WHEN** user is on the last page
-- **THEN** the Next button is disabled
+- **THEN** both the Next and Last buttons are disabled
 
 #### Scenario: Page indicator shows correct values
 - **WHEN** viewing page 3 of 7
 - **THEN** pagination control shows "Page 3 of 7"
+
+#### Scenario: First button jumps to page 1
+- **WHEN** user is on any page other than the first and clicks First
+- **THEN** the list navigates to page 1
+
+#### Scenario: Last button jumps to final page
+- **WHEN** user is on any page other than the last and clicks Last
+- **THEN** the list navigates to the last page

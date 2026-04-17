@@ -1,15 +1,13 @@
-## 1. API Contract (openapi.yaml)
+## 1. Backend — API Contract (Java-first)
 
-- [ ] 1.1 Add `page`, `size`, `sort` query parameters to `GET /owners` in `openapi.yaml`
-- [ ] 1.2 Change `GET /owners` response schema from `array of OwnerDto` to an inline page object schema (`content`, `totalElements`, `totalPages`, `number`, `size`)
-- [ ] 1.3 Run `./mvnw clean install` to regenerate backend DTOs and verify build passes
-- [ ] 1.4 Update `MyOpenAPIDidNotChangeTest` baseline so the contract test passes with the new schema
+- [ ] 1.1 Update `OwnerRestController` and DTOs in Java to reflect new endpoint signature (page params, `Page<OwnerDto>` response)
+- [ ] 1.2 Start the app (or run `./mvnw spring-boot:run`) so springdoc regenerates the OpenAPI YAML
+- [ ] 1.3 Sync the generated YAML into the committed `openapi.yaml` so `MyOpenAPIDidNotChangeTest` passes
 
 ## 2. Backend — Repository
 
 - [ ] 2.1 Change `OwnerRepository` to extend `PagingAndSortingRepository<Owner, Integer>` (keep existing custom query)
-- [ ] 2.2 Add a `searchByText(String searchText, Pageable pageable)` method with `@Query` (same JPQL as existing, Pageable applied automatically by Spring Data)
-- [ ] 2.3 Keep the existing `searchByText(String)` method or remove it if no other callers remain
+- [ ] 2.2 Replace `searchByText(String searchText)` with `searchByText(String searchText, Pageable pageable)` — same JPQL, Pageable applied automatically by Spring Data; delete the old signature entirely
 
 ## 3. Backend — Controller & Sorting Validation
 
@@ -38,7 +36,7 @@
 - [ ] 6.1 Inject `OwnerPaginationService` into `OwnerListComponent`; remove direct `OwnerService` pagination calls from component
 - [ ] 6.2 Add `calculatePageSize()` method: measure available table body height, divide by row height constant (41px), clamp to minimum 5
 - [ ] 6.3 Call `calculatePageSize()` on init before first request
-- [ ] 6.4 Add `@HostListener('window:resize')` with 400ms debounce: recalculate size, clear cache, reset to page 0
+- [ ] 6.4 Add `@HostListener('window:resize')` with 1000ms debounce: recalculate size, clear cache, reset to page 0
 - [ ] 6.5 Add sort state (`sortColumn: 'name' | 'city'`, `sortDir: 'asc' | 'desc'`) to component; wire column header click to toggle sort and reset to page 0
 
 ## 7. Frontend — Template

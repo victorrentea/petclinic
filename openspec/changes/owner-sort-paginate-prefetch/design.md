@@ -22,35 +22,35 @@ The backend uses a custom JPQL `@Query` on `OwnerRepository` (which extends `Rep
 
 ## Decisions
 
-### D1: Spring Data Pageable for backend pagination
+### D1: Response shape change — breaking API (most critical)
 
-Pass `Pageable` as a parameter to the existing `@Query` method. Spring Data JPA supports `Pageable` on `@Query` methods and automatically applies `LIMIT`/`OFFSET` and wraps the result in `Page<T>`. The repository will extend `PagingAndSortingRepository<Owner, Integer>` (instead of bare `Repository`) to get access to pageable infrastructure.
+The `GET /owners` response changes from `array of OwnerDto` to an inline page object schema with `content`, `totalElements`, `totalPages`, `number`, `size`. This is a **breaking** API change that affects every layer simultaneously — backend, openapi.yaml, and frontend must move together. The frontend's existing `OwnerPage` interface already matches this shape. Since both backend and frontend live in this monorepo and are deployed together, no versioning or compatibility shim is needed.
 
-_Alternative considered:_ Manual `LIMIT`/`OFFSET` in raw JPQL — rejected: verbose, error-prone, no `totalElements` count without a second query.
+### D2: Sort field whitelist (security-critical)
 
-### D2: Response shape change in openapi.yaml (breaking)
-
-The `GET /owners` response changes from `array of OwnerDto` to an inline page object schema with `content`, `totalElements`, `totalPages`, `number`, `size`. This is a **breaking** API change. The frontend's existing `OwnerPage` interface already matches this shape. Since both backend and frontend live in this monorepo and are deployed together, no versioning or compatibility shim is needed.
-
-### D3: Sort parameter mapping
-
-The frontend sends `sort=firstName,asc` and `sort=lastName,asc` (Spring-style multi-value sort params). The Name column sorts by `firstName` first, then `lastName`. Allowed sort fields are `firstName`, `lastName`, `city` — the backend must validate or whitelist these to prevent JPQL injection via sort field names.
+Allowed sort fields are `firstName`, `lastName`, `city` — the backend must validate and reject anything else with HTTP 400 to prevent JPQL injection via sort field names. The frontend sends Spring-style multi-value sort params (e.g., `sort=firstName,asc&sort=lastName,asc`). The Name column always sends both `firstName` and `lastName` in the same direction.
 
 _Alternative considered:_ A single `sortBy=name|city` param mapped server-side — rejected: non-standard, loses Spring `Pageable` auto-binding.
 
-### D4: OwnerPaginationService on the frontend
+### D3: Spring Data Pageable for backend pagination
+
+Pass `Pageable` as a parameter to the existing `@Query` method, replacing the old `searchByText(String)` signature entirely — no overload is kept. Spring Data JPA supports `Pageable` on `@Query` methods and automatically applies `LIMIT`/`OFFSET` and wraps the result in `Page<T>`. The repository will extend `PagingAndSortingRepository<Owner, Integer>` (instead of bare `Repository`) to get access to pageable infrastructure.
+
+_Alternative considered:_ Manual `LIMIT`/`OFFSET` in raw JPQL — rejected: verbose, error-prone, no `totalElements` count without a second query.
+
+### D4: Stale response discard via generation counter
+
+On each cache-invalidating event (resize, sort change, search change), the service increments a `generation` counter. Any in-flight pre-fetch response belonging to a previous generation is silently discarded. Without this, a slow pre-fetch response arriving after a resize would corrupt the new cache with wrong-sized data.
+
+### D5: OwnerPaginationService on the frontend
 
 All cache, pre-fetch, resize, and sort/filter state lives in a new `OwnerPaginationService`. `OwnerListComponent` only subscribes to the service's `currentPage$` observable and dispatches user actions (next, prev, sort click, search input). This keeps the component thin and the logic independently testable.
 
 The cache key is `{ page, size, sort, q }` serialized as a string. Any change to sort, q, or size clears the entire cache and resets to page 0.
 
-### D5: Viewport-based page size calculation
+### D6: Viewport-based page size calculation (least critical)
 
-On init and on window resize (debounced 400ms), the component measures the available table body height (viewport height minus header/footer/search bar/table header heights) and divides by a fixed row height constant (e.g., 41px). The result is sent as the `size` param. Minimum page size is capped at 5 to avoid a degenerate tiny viewport.
-
-### D6: Pre-fetch timing
-
-Immediately after setting `currentPage$`, the service fires background requests for `page+1` and `page-1` (if within bounds and not already cached). These requests are fire-and-forget — errors are swallowed silently (pre-fetch is best-effort). Pages beyond current±1 are removed from the cache map on each navigation.
+On init and on window resize (debounced 1000ms), the component measures the available table body height (viewport height minus header/footer/search bar/table header heights) and divides by a fixed row height constant (e.g., 41px). The result is sent as the `size` param. Minimum page size is capped at 5 to avoid a degenerate tiny viewport.
 
 ## Risks / Trade-offs
 
@@ -64,11 +64,11 @@ Immediately after setting `currentPage$`, the service fires background requests 
 
 ## Migration Plan
 
-1. Update `openapi.yaml` — change `GET /owners` response schema and add `page`, `size`, `sort` params
-2. Run `mvn clean install` to regenerate DTOs
-3. Update backend: repository, service, controller
-4. Update frontend: `OwnerService`, create `OwnerPaginationService`, update `OwnerListComponent` and template
-5. Deploy backend and frontend together (same monorepo pipeline)
+1. Update Java code (controller, DTOs, repository) to implement paginated, sorted response
+2. Start the app — springdoc regenerates the OpenAPI YAML from Java annotations
+3. Sync the generated YAML back into the committed `openapi.yaml`
+4. `MyOpenAPIDidNotChangeTest` will pass once the committed YAML matches the live app output
+5. Update the Angular frontend
 
 No database migrations required — sorting and pagination are query-time operations only.
 
