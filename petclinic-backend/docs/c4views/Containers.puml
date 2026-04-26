@@ -1,0 +1,32 @@
+@startuml
+title <size:24>Container View: PetClinic Backend</size>\n<size:24>Containers inside the PetClinic system</size>
+
+set separator none
+top to bottom direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+
+Person(Owner, "Owner", $descr="Pet owner using the clinic system", $tags="", $link="")
+Person(Veterinarian, "Veterinarian", $descr="Clinic staff managing pets and visits", $tags="", $link="")
+
+System_Boundary("PetClinicBackend_boundary", "PetClinic Backend", $tags="") {
+  Container(PetClinicBackend.RESTAPI, "REST API", $techn="Spring Boot / Java", $descr="Handles HTTP requests and business logic", $tags="", $link="")
+  Container(PetClinicBackend.Database, "Database", $techn="H2 (dev) / PostgreSQL (prod)", $descr="Persists all clinic data", $tags="", $link="")
+}
+
+Rel(Owner, PetClinicBackend.RESTAPI, "Uses", $techn="HTTPS / REST", $tags="", $link="")
+Rel(Veterinarian, PetClinicBackend.RESTAPI, "Uses", $techn="HTTPS / REST", $tags="", $link="")
+Rel(PetClinicBackend.RESTAPI, PetClinicBackend.Database, "Reads and writes", $techn="JPA / SQL", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

@@ -1,0 +1,29 @@
+{
+  "name": "qa",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for PetClinic Owners page.",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:with-apps": "ts-node scripts/start-apps.ts",
+    "test:docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit",
+    "start:apps": "ts-node scripts/start-apps.ts",
+    "show-report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.5.2",
+    "axios": "^1.14.0",
+    "concurrently": "^9.2.1",
+    "tree-kill": "^1.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2",
+    "wait-on": "^9.0.4"
+  }
+}
