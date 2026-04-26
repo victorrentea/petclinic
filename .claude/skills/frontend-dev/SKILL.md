@@ -42,6 +42,15 @@ You are a frontend developer working on **PetClinic**, a veterinary clinic manag
 
 **Only touch files under `petclinic-frontend/src/`.** Do not modify backend files.
 
+**Before writing any file:** Read one existing feature module end-to-end to calibrate conventions.
+For example, read these files in full:
+- `petclinic-frontend/src/app/owners/owners.module.ts`
+- `petclinic-frontend/src/app/owners/owner.service.ts`
+- `petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts`
+- `petclinic-frontend/src/app/owners/owner-list/owner-list.component.html`
+
+Then follow the patterns you observe there, supplemented by the conventions below.
+
 ---
 
 ### Stack
@@ -63,7 +72,7 @@ petclinic-frontend/src/app/<entity>/
     <entity>-list.component.ts
     <entity>-list.component.html
     <entity>-list.component.css
-  <entity>-detail/   (same structure)
+  <entity>-detail/   (same structure — omit if the entity has no detail page)
   <entity>-add/      (same structure)
   <entity>-edit/     (same structure)
 ```
@@ -77,6 +86,8 @@ petclinic-frontend/src/app/<entity>/
 @Injectable()
 export class EntityService {
   entityUrl = environment.REST_API_URL + 'entities';
+  // Note: environment.REST_API_URL already contains the full base (e.g. 'http://localhost:8080/api/')
+  // Append only the resource name: 'owners', 'vets', 'pets', etc.
   private readonly handlerError: HandleError;
 
   constructor(private http: HttpClient, private httpErrorHandler: HttpErrorHandler) {
@@ -98,8 +109,8 @@ export class EntityService {
       .pipe(catchError(this.handlerError('add', entity)));
   }
 
-  update(id: string, entity: Entity): Observable<Entity> {
-    return this.http.put<Entity>(`${this.entityUrl}/${id}`, entity)
+  update(id: string, entity: Entity): Observable<{}> {
+    return this.http.put<{}>(`${this.entityUrl}/${id}`, entity)
       .pipe(catchError(this.handlerError('update', entity)));
   }
 
@@ -244,6 +255,25 @@ export class EntitiesRoutingModule {}
 ```
 - Always `forChild()`, never `forRoot()` in feature modules
 - Route order matters: `/add` must come before `/:id`
+- Class name: use `<Entity>sRoutingModule` (plural, possessive — e.g., `OwnersRoutingModule`, `VetsRoutingModule`)
+
+---
+
+### Feature module wiring
+The feature module must import the routing module:
+```ts
+@NgModule({
+  declarations: [EntityListComponent, EntityAddComponent, EntityEditComponent, EntityDetailComponent],
+  imports: [CommonModule, FormsModule, EntitiesRoutingModule],
+  providers: [EntityService]
+})
+export class EntitiesModule {}
+```
+Import this module in `app.module.ts`:
+```ts
+import { EntitiesModule } from './entities/entities.module';
+// add EntitiesModule to the imports array
+```
 
 ---
 
