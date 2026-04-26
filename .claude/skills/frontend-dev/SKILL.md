@@ -3,8 +3,8 @@ name: frontend-dev
 description: >
   Angular frontend developer for the PetClinic project.
   Auto-trigger when: user asks for frontend, Angular, UI, component, template, service,
-  module, routing, CSS work, or references files under petclinic-frontend/. Spawns an
-  isolated subagent with full Angular 16 + Bootstrap 3 conventions for this project.
+  module, routing, CSS work, references files under petclinic-frontend/, or uses /frontend-dev.
+  Spawns an isolated subagent with full Angular 16 + Bootstrap 3 conventions for this project.
 ---
 
 # Frontend Developer Agent
