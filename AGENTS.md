@@ -40,10 +40,10 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+
 ## Shared Development Notes
 
 - `CLAUDE.md` points here for repository-wide context.
-- `.github/copilot-instructions.md` contains shared unit-test conventions.
 
 ### Task Modifiers
 
