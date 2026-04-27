@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Pull latest AI skills",
+      "type": "shell",
+      "command": "git -C /Users/victorrentea/workspace/ai-central-clone pull --ff-only --quiet",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      }
+    }
+  ]
+}
