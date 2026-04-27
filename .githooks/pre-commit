@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+echo "[pre-commit] Regenerating C4 model DSL..."
+cd "$ROOT/petclinic-backend"
+mvn -q test -Dtest=C4ModelExtractor
+
+git add "$ROOT/petclinic-backend/docs/C4 model.dsl"
+echo "[pre-commit] C4 model DSL updated and staged."

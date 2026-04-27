@@ -1,8 +1,8 @@
 @startuml
-title <size:24>Container View: PetClinic Backend</size>\n<size:24>Containers inside the PetClinic system</size>
+title <size:24>Container View: PetClinic</size>\n<size:24>Containers inside PetClinic</size>
 
 set separator none
-top to bottom direction
+left to right direction
 
 <style>
   root {
@@ -15,17 +15,19 @@ top to bottom direction
 !include <C4/C4_Context>
 !include <C4/C4_Container>
 
-Person(Owner, "Owner", $descr="Pet owner using the clinic system", $tags="", $link="")
-Person(Veterinarian, "Veterinarian", $descr="Clinic staff managing pets and visits", $tags="", $link="")
+Person(PetOwner, "Pet Owner", $descr="Manages their pets and appointments", $tags="", $link="")
+Person(Veterinarian, "Veterinarian", $descr="Provides veterinary care", $tags="", $link="")
 
-System_Boundary("PetClinicBackend_boundary", "PetClinic Backend", $tags="") {
-  Container(PetClinicBackend.RESTAPI, "REST API", $techn="Spring Boot / Java", $descr="Handles HTTP requests and business logic", $tags="", $link="")
-  Container(PetClinicBackend.Database, "Database", $techn="H2 (dev) / PostgreSQL (prod)", $descr="Persists all clinic data", $tags="", $link="")
+System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
+  Container(PetClinic.Frontend, "Frontend", $techn="React", $descr="Single-page application", $tags="", $link="")
+  Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API", $tags="", $link="")
+  Container(PetClinic.Database, "Database", $techn="H2 / PostgreSQL", $descr="Stores all data", $tags="", $link="")
 }
 
-Rel(Owner, PetClinicBackend.RESTAPI, "Uses", $techn="HTTPS / REST", $tags="", $link="")
-Rel(Veterinarian, PetClinicBackend.RESTAPI, "Uses", $techn="HTTPS / REST", $tags="", $link="")
-Rel(PetClinicBackend.RESTAPI, PetClinicBackend.Database, "Reads and writes", $techn="JPA / SQL", $tags="", $link="")
+Rel(Veterinarian, PetClinic.Frontend, "Uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Frontend, PetClinic.Backend, "REST API calls", $techn="HTTPS/JSON", $tags="", $link="")
+Rel(PetClinic.Backend, PetClinic.Database, "Reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetOwner, PetClinic.Frontend, "Uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

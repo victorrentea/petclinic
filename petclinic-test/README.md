@@ -1,32 +1,25 @@
-# QA E2E Tests (Playwright)
+# PetClinic E2E Tests (Playwright)
 
-Playwright E2E test suite for the PetClinic Owners page.
+TypeScript/Playwright tests for the Owners page.
 
-**Note:** This project has been migrated from Java Selenium to TypeScript Playwright.
-
-## Prerequisites
-- Node.js 18+
-- Chrome browser (for local runs)
-- Docker & Docker Compose (for Docker runs - optional)
-- Frontend at `http://localhost:4200`
-- Backend at `http://localhost:8080`
-
-## Quick Start
+## Setup (once)
 
 ```sh
-# Install dependencies
 npm install
 npx playwright install chromium
-
-# Run tests (apps must be running)
-npm test
-
-# Or run with UI mode
-npm run test:ui
 ```
 
-For detailed documentation, see [README.playwright.md](README.playwright.md)
+## Run
 
-## What the Tests Verify
-- All owners are displayed on initial page load
-- Search filters owners by last name prefix correctly
+Apps must be running first (`../start-all.sh`), then:
+
+```sh
+npm test              # headless
+npm run test:ui       # interactive
+npm run test:headed   # visible browser
+npm run test:debug    # step-through
+npm run show-report   # HTML report
+npm run test:docker   # fully isolated in Docker
+```
+
+> Override frontend URL: `BASE_URL=http://... npx playwright test`
