@@ -132,7 +132,7 @@ public class OwnerTest {
         owner2.setLastName("Davis");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Dav");
+        List<OwnerDto> owners = search("/api/owners?query=Dav");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -146,7 +146,7 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?query=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
@@ -167,7 +167,7 @@ public class OwnerTest {
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerDto> results = search("/api/owners?query=NonExistent");
 
         assertThat(results).isEmpty();
     }

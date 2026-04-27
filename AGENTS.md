@@ -95,6 +95,10 @@ Focus views (RepositoryFocus, MapperFocus) show only a component plus its direct
 - Services communicate with backend REST API
 - RxJS for async operations
 
+## Production Data Facts
+
+- **~10,000 owners** in the Production database — keep this in mind when writing queries (avoid full-table scans, cartesian joins, or missing indexes).
+
 ## Domain Model (ER Model)
 
 Core entities and relationships:
@@ -136,6 +140,7 @@ Run `mvn clean install` when:
 - Java 21+, Spring Boot 3
 - Never ask before running tests after refactoring
 - Always use TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
+- Minimum changes: make the smallest, cleanest diff possible — remove dead code, avoid unrelated refactors
 - Builder chains: always one property per line ≥ 3 in chain
 
 ### Task Modifiers

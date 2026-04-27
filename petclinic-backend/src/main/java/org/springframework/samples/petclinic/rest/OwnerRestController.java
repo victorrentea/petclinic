@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
+import java.text.Normalizer;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -56,14 +57,20 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
+    public List<OwnerDto> listOwners(@RequestParam(name = "query", required = false) String query) {
         List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
+        if (query != null && !query.isBlank()) {
+            owners = ownerRepository.searchOwners(normalizeQuery(query));
         } else {
             owners = ownerRepository.findAll();
         }
         return ownerMapper.toOwnerDtoCollection(owners);
+    }
+
+    private String normalizeQuery(String query) {
+        // Strip combining diacritical marks so "t" matches "ț", "a" matches "ă", etc.
+        String nfd = Normalizer.normalize(query, Normalizer.Form.NFD);
+        return nfd.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
