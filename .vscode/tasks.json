@@ -4,7 +4,7 @@
     {
       "label": "Pull latest AI skills",
       "type": "shell",
-      "command": "git -C /Users/victorrentea/workspace/ai-central-clone pull --ff-only --quiet",
+      "command": "git -C \"$AI_CENTRAL_PATH\" pull --ff-only --quiet && ln -sfn \"$AI_CENTRAL_PATH/skills\" \"${workspaceFolder}/.github/skills\"",
       "runOptions": {
         "runOn": "folderOpen"
       },

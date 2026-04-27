@@ -5445,3 +5445,4 @@ __pycache__/**
 /qa/node_modules/.package-lock.json
 /qa/test-results/screenshots/filters_owners_by_last_name_prefix_2026-04-06T19-07-55-694Z.png
 /qa/test-results/screenshots/shows_all_owners_on_initial_load_2026-04-06T19-07-55-564Z.png
+.github/skills
