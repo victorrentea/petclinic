@@ -6,9 +6,7 @@ import java.util.List;
 public class InvoiceService {
 
     public BigDecimal calculateTotal(List<Item> items) {
-        return items.stream()
-            .map(item -> item.price().subtract(item.discount())
-                .multiply(BigDecimal.valueOf(item.quantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return null;
     }
 }
