@@ -12,8 +12,9 @@ Full-stack PetClinic application with:
 
 ## Area-Specific Guidance
 
-- See `backend.md` for backend commands, architecture, code generation, database/security notes, and Java/Spring conventions.
-- See `frontend.md` for frontend commands, Angular/Playwright architecture, and UI testing guidance.
+- See `petclinic-backend/AGENTS.md` for backend commands, architecture, code generation, database/security notes, and Java/Spring conventions.
+- See `petclinic-frontend/AGENTS.md` for frontend commands and Angular guidance.
+- See `petclinic-test/AGENTS.md` for Playwright E2E guidance.
 
 ## Common Commands
 
