@@ -3,6 +3,30 @@
 display:none;
 }
 
+/* ── Top controls row: search group + Add Owner button ── */
+.owner-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+/*
+ * Width matches the Name column so the right edge of the search field
+ * aligns with the left edge of the Address column.
+ * Adjust the pixel value to match your data's typical name-column width.
+ */
+.owner-search-group {
+	width: 260px;
+	flex-shrink: 0;
+}
+
+/* ── Table: pin the Name column to the same width ── */
+.col-name {
+	width: 260px;
+}
+
+/* ── Legacy grid helpers (kept for reference) ── */
 #nameGroup {
 	display: flex;
 	align-items: center;
@@ -29,14 +53,6 @@ display:none;
 
 .owner-search-input {
 	flex: 1;
-}
-
-.owners-controls {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 16px;
 }
 
 .owners-pagination {
@@ -72,8 +88,17 @@ display:none;
 		width: 100%;
 	}
 
-	.owners-controls {
+	.owner-controls {
 		flex-direction: column;
 		align-items: flex-start;
 	}
+
+	.owner-search-group {
+		width: 100%;
+	}
+
+	.col-name {
+		width: auto;
+	}
 }
+

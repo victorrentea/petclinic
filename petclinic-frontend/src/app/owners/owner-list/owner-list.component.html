@@ -2,16 +2,19 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <div class="input-group" style="max-width: 500px; margin-bottom: 16px;">
-      <input class="form-control"
-             type="text"
-             placeholder="Search by name, city, address, phone or pet…"
-             [(ngModel)]="query"
-             (ngModelChange)="onQueryChange($event)"
-             name="query"/>
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button" (click)="clearSearch()">Clear</button>
-      </span>
+    <div class="owner-controls">
+      <div class="input-group owner-search-group">
+        <input class="form-control"
+               type="text"
+               placeholder="Search by name, city, address, phone or pet…"
+               [(ngModel)]="query"
+               (ngModelChange)="onQueryChange($event)"
+               name="query"/>
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" (click)="clearSearch()">Clear</button>
+        </span>
+      </div>
+      <button *ngIf="isOwnersDataReceived" class="btn btn-default" type="button" (click)="addOwner()">Add Owner</button>
     </div>
 
     <div *ngIf="isOwnersDataReceived && owners?.length === 0">No owners found for "{{query}}"</div>
@@ -19,7 +22,7 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th class="col-name">Name</th>
           <th>Address</th>
           <th>City</th>
           <th>Telephone</th>
@@ -39,12 +42,6 @@
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
-    </div>
-    <div *ngIf="isOwnersDataReceived && (!owners || owners.length === 0) && !query">
-      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>

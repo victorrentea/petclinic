@@ -131,4 +131,27 @@ describe('OwnerListComponent', () => {
     expect(searchOwnersSpy).toHaveBeenCalledWith('');
   }));
 
+  it('should show Add Owner button in the top controls once data is received', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(300);
+    fixture.detectChanges();
+
+    const controlsEl = fixture.debugElement.query(By.css('.owner-controls'));
+    expect(controlsEl).toBeTruthy('owner-controls container should exist');
+
+    const addBtn = controlsEl.queryAll(By.css('button'))
+      .find(b => b.nativeElement.textContent.trim() === 'Add Owner');
+    expect(addBtn).toBeTruthy('Add Owner button should be inside .owner-controls');
+  }));
+
+  it('should render exactly one Add Owner button in the entire page', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(300);
+    fixture.detectChanges();
+
+    const allAddBtns = fixture.debugElement.queryAll(By.css('button'))
+      .filter(b => b.nativeElement.textContent.trim() === 'Add Owner');
+    expect(allAddBtns.length).toBe(1, 'only one Add Owner button should exist');
+  }));
+
 });

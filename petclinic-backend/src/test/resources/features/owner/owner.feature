@@ -1,126 +1,127 @@
-Feature: Owner REST API
+Feature: Owner Management
+  As a clinic administrator
+  I want to manage owners and their pets
+  So that the clinic can keep track of patients and their owners
 
   Background:
-    Given a test owner "George" "Franklin" exists with a pet "Rosy" of type "dog"
+    Given a owner "George Franklin" exists with address "Baker St 221B" city "London" telephone "1234567890"
+    And that owner has a pet "Rosy" of type "dog"
 
-  # ── GET /api/owners/{id} ───────────────────────────────────────────────────
+  # ─── GET owner by ID ───────────────────────────────────────────────────────
 
-  Scenario: Get owner by ID - found
-    When I request the test owner by ID
-    Then the response status is 200
-    And the owner firstName is "George"
-    And the owner lastName is "Franklin"
+  Scenario: Retrieve an existing owner by ID
+    When I request the owner by ID
+    Then the response contains owner first name "George" and last name "Franklin"
 
-  Scenario: Get owner by ID - not found
-    When I get owner with ID 99999
+  Scenario: Retrieve a non-existing owner returns 404
+    When I request owner with ID 99999
     Then the response status is 404
 
-  # ── GET /api/owners ────────────────────────────────────────────────────────
+  # ─── LIST / SEARCH owners ──────────────────────────────────────────────────
 
-  Scenario: List all owners
-    When I get all owners
-    Then the response status is 200
-    And the response contains the test owner
+  Scenario: List all owners includes the created owner
+    When I request all owners
+    And the owner list contains "George" "Franklin"
 
-  Scenario: Filter owners by last name - match
-    Given another owner "Betty" "DavXYZ" exists
-    When I search owners with query "DavXYZ"
-    Then the response status is 200
-    And the response contains owner with lastName "DavXYZ"
-    And the response does not contain the test owner
+  Scenario: Filter owners by last name returns matching owner
+    Given another owner "Betty Davis" exists
+    When I search owners with query "Dav"
+    And the owner list contains "Betty" "Davis"
+    And the owner list does not contain last name "Franklin"
 
-  Scenario: Filter owners by address or city
-    Given another owner "John" "JavaBeans" exists
-    When I search owners with query "JavaBeans"
-    Then the response status is 200
-    And the response contains owner with lastName "JavaBeans"
+  Scenario Outline: Filter owners by <field> substring returns matching owner
+    Given another owner "<name>" with address "<address>" exists
+    When I search owners with query "<query>"
+    And the owner list contains "<firstName>" "<lastName>"
 
-  Scenario: Filter owners - no match
-    When I search owners with query "ZZZNonExistentZZZ"
-    Then the response status is 200
-    And the response is an empty list
+    Examples:
+      | field     | name          | address      | query    | firstName | lastName  |
+      | last name | Joe JavaBeans | Oak Street 5 | Bean     | Joe       | JavaBeans |
+      | address   | Joe Smith     | JavaLane 1   | JavaLane | Joe       | Smith     |
 
-  # ── POST /api/owners ───────────────────────────────────────────────────────
+  Scenario: Filter owners with no match returns empty list
+    When I search owners with query "NonExistent"
+    And the owner list is empty
 
-  Scenario: Create owner - valid
-    When I create a valid owner
+  # ─── CREATE owner ──────────────────────────────────────────────────────────
+
+  Scenario: Create a valid owner
+    When I create an owner with first name "Eduardo" last name "Rodriquez" address "2693 Commerce St." city "McFarland" telephone "6085558763"
     Then the response status is 201
 
-  Scenario: Create owner - invalid missing firstName
-    When I create an owner without firstName
+  Scenario: Create an owner without first name is rejected
+    When I create an owner without a first name last name "Rodriquez" address "2693 Commerce St." city "McFarland" telephone "6085558763"
     Then the response status is 400
 
-  # ── PUT /api/owners/{id} ──────────────────────────────────────────────────
+  # ─── UPDATE owner ──────────────────────────────────────────────────────────
 
-  Scenario: Update owner - with body ID
-    When I update the test owner firstName to "GeorgeI" with body ID
+  Scenario: Update an owner with an ID in the request body
+    When I update the owner setting first name to "GeorgeI" with the owner ID in the body
     Then the response status is 2xx
-    And the test owner firstName is now "GeorgeI"
+    And the owner's first name is now "GeorgeI"
 
-  Scenario: Update owner - without body ID
-    When I update the test owner firstName to "GeorgeII" without body ID
+  Scenario: Update an owner without an ID in the request body
+    When I update the owner setting first name to "GeorgeII" without the owner ID in the body
     Then the response status is 2xx
-    And the test owner firstName is now "GeorgeII"
+    And the owner's first name is now "GeorgeII"
 
-  Scenario: Update owner - invalid empty firstName
-    When I update the test owner with empty firstName
+  Scenario: Update an owner with an empty first name is rejected
+    When I update the owner setting first name to ""
     Then the response status is 4xx
 
-  # ── DELETE /api/owners/{id} ───────────────────────────────────────────────
+  # ─── DELETE owner ──────────────────────────────────────────────────────────
 
-  Scenario: Delete owner - found
-    When I delete the test owner
+  Scenario: Delete an existing owner
+    When I delete the owner
     Then the response status is 2xx
-    And requesting the test owner returns 404
+    And requesting the owner by ID returns 404
 
-  Scenario: Delete owner - not found
+  Scenario: Delete a non-existing owner returns 4xx
     When I delete owner with ID 9999
     Then the response status is 4xx
 
-  # ── POST /api/owners/{id}/pets ────────────────────────────────────────────
+  # ─── CREATE pet ────────────────────────────────────────────────────────────
 
-  Scenario: Add pet to owner - valid
-    When I add a pet "Max" to the test owner
+  Scenario: Add a valid pet to an owner
+    When I add a pet named "Max" of the existing type to the owner
     Then the response status is 201
 
-  Scenario: Add pet to owner - invalid missing name
-    When I add a nameless pet to the test owner
+  Scenario: Add a pet without a name is rejected
+    When I add a pet without a name of the existing type to the owner
     Then the response status is 400
 
-  # ── GET /api/owners/{id}/pets/{petId} ─────────────────────────────────────
+  # ─── GET owner's pet ───────────────────────────────────────────────────────
 
-  Scenario: Get owner pet - found
-    When I get the test pet of the test owner
-    Then the response status is 200
-    And the response pet name is "Rosy"
+  Scenario: Retrieve an existing pet of an owner
+    When I request the owner's pet
+    And the pet name is "Rosy"
 
-  Scenario: Get owner pet - owner not found
-    When I get the test pet of owner with ID 99999
+  Scenario: Retrieve a pet for a non-existing owner returns 404
+    When I request pet of owner with ID 99999
     Then the response status is 404
 
-  Scenario: Get owner pet - pet not found
-    When I get pet with ID 99999 of the test owner
+  Scenario: Retrieve a non-existing pet of an owner returns 404
+    When I request pet with ID 99999 of the owner
     Then the response status is 404
 
-  # ── PUT /api/owners/{id}/pets/{petId} ─────────────────────────────────────
+  # ─── UPDATE owner's pet ────────────────────────────────────────────────────
 
-  Scenario: Update owner pet - ok
-    When I update the test owner's test pet name to "Rosy Updated"
+  Scenario: Update an existing pet of an owner
+    When I update the owner's pet name to "Rosy Updated"
     Then the response status is 2xx
 
-  Scenario: Update owner pet - owner not found returns 2xx
-    When I update the test pet for owner with ID 99999
+  Scenario: Update a pet with a non-existing owner still succeeds
+    When I update pet with owner ID 99999 setting name to "Thor"
     Then the response status is 2xx
 
-  Scenario: Update owner pet - pet not found returns 404
-    When I update pet with ID 99999 for the test owner
+  Scenario: Update a non-existing pet of an owner returns 404
+    When I update pet with ID 99999 of the owner setting name to "Ghost"
     Then the response status is 404
 
-  # ── Owner response includes pets ──────────────────────────────────────────
+  # ─── Owner details include pets ────────────────────────────────────────────
 
-  Scenario: Get owner includes pets with type populated
-    When I request the test owner by ID
-    Then the response status is 200
-    And the response includes 1 pet named "Rosy" with type "dog"
+  Scenario: Owner details include pets with their type
+    When I request the owner by ID
+    And the owner has 1 pet
+    And the first pet is named "Rosy" with type "dog"
 
-e
