@@ -1,5 +1,5 @@
 @startuml
-title <size:24>Component View: PetClinic - Backend</size>\n<size:24>Component view</size>
+title <size:24>Component View: PetClinic - Backend</size>\n<size:24>Repository layer dependencies</size>
 
 set separator none
 left to right direction
@@ -61,19 +61,12 @@ rectangle "PetClinic\n<size:16>[Software System]</size>" <<Boundary-UGV0Q2xpbmlj
     rectangle "==REST Layer\n<size:16>[Component: Spring MVC]</size>\n\nHTTP endpoints, DTOs, error handlers" <<Element-RWxlbWVudA==>> as PetClinic.Backend.RESTLayer
     rectangle "==Domain Model\n<size:16>[Component: JPA]</size>\n\nJPA entities" <<Element-RWxlbWVudA==>> as PetClinic.Backend.DomainModel
     rectangle "==Repository Layer\n<size:16>[Component: Spring Data]</size>\n\nSpring Data JPA repositories" <<Element-RWxlbWVudA==>> as PetClinic.Backend.RepositoryLayer
-    rectangle "==Mapper Layer\n<size:16>[Component: MapStruct]</size>\n\nMapStruct mappers" <<Element-RWxlbWVudA==>> as PetClinic.Backend.MapperLayer
-    rectangle "==Security\n<size:16>[Component: Spring Security]</size>\n\nSpring Security configuration" <<Element-RWxlbWVudA==>> as PetClinic.Backend.Security
-    rectangle "==Invoice\n<size:16>[Component: Java]</size>\n\nInvoice processing logic" <<Element-RWxlbWVudA==>> as PetClinic.Backend.Invoice
-    rectangle "==Utilities\n<size:16>[Component: Java]</size>\n\nCross-cutting utilities" <<Element-RWxlbWVudA==>> as PetClinic.Backend.Utilities
   }
 
 }
 
-PetClinic.Backend.MapperLayer --> PetClinic.Backend.DomainModel <<Relationship-UmVsYXRpb25zaGlw>> : ""
-PetClinic.Backend.MapperLayer --> PetClinic.Backend.RESTLayer <<Relationship-UmVsYXRpb25zaGlw>> : ""
 PetClinic.Backend.RepositoryLayer --> PetClinic.Backend.DomainModel <<Relationship-UmVsYXRpb25zaGlw>> : ""
 PetClinic.Backend.RESTLayer --> PetClinic.Backend.DomainModel <<Relationship-UmVsYXRpb25zaGlw>> : ""
 PetClinic.Backend.RESTLayer --> PetClinic.Backend.RepositoryLayer <<Relationship-UmVsYXRpb25zaGlw>> : ""
-PetClinic.Backend.RESTLayer --> PetClinic.Backend.MapperLayer <<Relationship-UmVsYXRpb25zaGlw>> : ""
 
 @enduml

@@ -27,11 +27,9 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 )
 class ArchitectureTest {
 
-    private static final java.net.URL DIAGRAM = diagramUrl();
-
-    private static java.net.URL diagramUrl() {
+    private static java.net.URL url(String first) {
         try {
-            return Paths.get("docs/architecture.puml").toUri().toURL();
+            return Paths.get(first).toUri().toURL();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -40,7 +38,8 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule adheresToDiagram =
         classes().should(adhereToPlantUmlDiagram(
-            DIAGRAM,
-            consideringOnlyDependenciesInAnyPackage("org.springframework.samples.petclinic..")
+            url("docs/architecture.puml"),
+            consideringOnlyDependenciesInAnyPackage(
+                "..petclinic..")
         ));
 }

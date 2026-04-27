@@ -65,6 +65,7 @@ class C4ModelExtractor {
         assertThat(DOCS_DIR.resolve("C4 model.dsl")).exists();
         assertThat(VIEWS_DIR.resolve("container-view.puml")).exists();
         assertThat(VIEWS_DIR.resolve("component-view.puml")).exists();
+        assertThat(VIEWS_DIR.resolve("repository-layer-view.puml")).exists();
     }
 
     private Workspace buildWorkspace(JavaClasses classes) {
@@ -111,6 +112,16 @@ class C4ModelExtractor {
         ComponentView componentView = views.createComponentView(backend, "component-view", "Component view");
         componentView.addAllComponents();
         componentView.enableAutomaticLayout();
+
+        // Repository layer focused view: repo layer + direct neighbours (callers and callees)
+        backend.getComponents().stream()
+            .filter(c -> c.getName().equals("Repository Layer"))
+            .findFirst()
+            .ifPresent(repoLayer -> {
+                ComponentView repoView = views.createComponentView(backend, "repository-layer-view", "Repository layer dependencies");
+                repoView.addNearestNeighbours(repoLayer);
+                repoView.enableAutomaticLayout();
+            });
     }
 
     private Map<String, Component> extractComponents(Container backend, JavaClasses classes) {
@@ -215,6 +226,13 @@ class C4ModelExtractor {
         sb.append("            include *\n");
         sb.append("            autoLayout\n");
         sb.append("        }\n");
+
+        sb.append("        component ").append(sanitizeId(backend.getName()))
+          .append(" \"repository-layer-view\" \"Repository layer dependencies\" {\n");
+        sb.append("            include ->").append(sanitizeId("Repository Layer")).append("->\n");
+        sb.append("            autoLayout\n");
+        sb.append("        }\n");
+
         sb.append("    }\n");
         sb.append("}\n");
 

@@ -23,13 +23,9 @@ import static java.nio.charset.Charset.defaultCharset;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@SpringBootTest
 @AutoConfigureMockMvc
+@SpringBootTest
 public class MyOpenAPIDidNotChangeTest {
-
-    @Autowired
-    MockMvc mockMvc;
-
     @Value("file:${user.dir}/../openapi.yaml")
     Resource contractFile;
     @Test
@@ -44,6 +40,8 @@ public class MyOpenAPIDidNotChangeTest {
             .isEqualTo(prettifyYaml(contractSavedOnGit));
     }
 
+    @Autowired
+    MockMvc mockMvc;
 
     private String prettifyYaml(String rawYaml) throws JsonProcessingException {
         if (StringUtils.isBlank(rawYaml)) return rawYaml;
