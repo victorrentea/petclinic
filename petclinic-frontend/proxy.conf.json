@@ -1,0 +1,8 @@
+{
+  "/v1/traces": {
+    "target": "http://localhost:4318",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
