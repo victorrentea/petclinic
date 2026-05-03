@@ -5454,6 +5454,8 @@ __pycache__/**
 .github/skills
 petclinic-backend/.jqwik-database
 
-
 # git worktrees
 .worktrees/
+
+# Local OpenTelemetry agent cache
+petclinic-backend/.tools/

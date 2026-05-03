@@ -1,0 +1,17 @@
+services:
+  lgtm:
+    image: grafana/otel-lgtm:0.8.1
+    container_name: petclinic-lgtm
+    environment:
+      ENABLE_LOGS_OTELCOL: "true"
+    ports:
+      - "3300:3000"   # Grafana UI (host 3300 → container 3000; 3000 conflicted)
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - ./observability/otelcol-config.yaml:/otel-lgtm/otelcol-config.yaml:ro
+      - lgtm-data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+volumes:
+  lgtm-data:

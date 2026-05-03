@@ -278,6 +278,69 @@ cd petclinic-backend
 mvn compile jib:build -Djib.to.auth.username=xxx -Djib.to.auth.password=xxx
 ```
 
+## Observability (optional)
+
+Local Grafana LGTM (metrics + logs + traces) plus zero-code OpenTelemetry
+instrumentation for both backend and frontend, queryable from Claude Code via
+`mcp-grafana`.
+
+### 1. Start the stack
+
+```sh
+./start-observability.sh         # Grafana at http://localhost:3300 (admin/admin)
+./start-database.sh              # if not already running
+./start-backend.sh               # auto-downloads the OTel Java agent on first run
+( cd petclinic-frontend && npm start )
+```
+
+### 2. Use the app, then explore
+
+Open http://localhost:4200, browse around. Then in Grafana:
+- **Explore → Tempo** — distributed traces (browser → backend → JDBC)
+- **Explore → Loki** — backend logs (with `trace_id` for correlation)
+- **Explore → Prometheus (Mimir)** — JVM, HTTP, and `postgresql_*` metrics
+
+### 3. Install `mcp-grafana` and query from Claude Code
+
+```sh
+brew install mcp-grafana
+# or
+go install github.com/grafana/mcp-grafana/cmd/mcp-grafana@latest
+```
+
+The repo's `.mcp.json` registers it automatically when you open Claude Code in
+this directory. Then ask things like:
+
+- "What's the average latency of `GET /api/owners` in the last 10 minutes?"
+- "Show me logs from traces that hit `OwnerController.findById`."
+- "What's the requests-per-second on the backend right now?"
+
+### Limitations
+
+- **IntelliJ play button** on `@SpringBootApplication` does NOT attach the
+  OTel agent — it bypasses `start-backend.sh`. To use observability from
+  IntelliJ, either run via `./mvnw spring-boot:run` from the terminal, or set
+  the following in your Run Configuration's "VM options":
+  ```
+  -javaagent:./.tools/opentelemetry-javaagent.jar
+  -Dotel.service.name=petclinic-backend
+  -Dotel.exporter.otlp.endpoint=http://localhost:4318
+  -Dotel.exporter.otlp.protocol=http/protobuf
+  ```
+- Frontend instrumentation works only with `npm start` (dev). Production
+  builds skip the dev-server proxy.
+- Default credentials (`admin/admin`) are local-demo only. Never publish.
+- The host port for Grafana is **3300** (not 3000) because port 3000 was
+  already taken on the dev machine; container internal port is unchanged.
+- The stack is **opt-in** — it's not part of `start-all.sh`. Students without
+  Docker can ignore everything in this section.
+
+### Stop
+
+```sh
+./stop-observability.sh
+```
+
 ## Development
 
 ### Generated Code (Backend)
