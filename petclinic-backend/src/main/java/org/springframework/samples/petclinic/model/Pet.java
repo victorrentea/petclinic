@@ -40,7 +40,7 @@ public class Pet {
     private String name;
 
     @Column(name = "birth_date", columnDefinition = "DATE")
-    @PastOrPresent(message = "{pet.birthDate.notInFuture}")
+    @PastOrPresent(message = "Birth date must not be in the future")
     private LocalDate birthDate;
 
     @ManyToOne

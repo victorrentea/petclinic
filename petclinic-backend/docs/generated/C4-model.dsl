@@ -24,9 +24,6 @@ workspace "PetClinic" "Veterinary practice management system" {
                 invoice = component "Invoice" "Invoice processing logic" "Java" {
                     tags "Invoice"
                 }
-                utilities = component "Utilities" "Cross-cutting utilities" "Java" {
-                    tags "Utilities"
-                }
             }
             database = container "Database" "Stores all data" "H2 / PostgreSQL"
         }
@@ -37,9 +34,9 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
-        mapper_layer -> domain_model ""
-        mapper_layer -> rest_layer ""
         repository_layer -> domain_model ""
+        mapper_layer -> rest_layer ""
+        mapper_layer -> domain_model ""
         rest_layer -> domain_model ""
         rest_layer -> mapper_layer ""
         rest_layer -> repository_layer ""

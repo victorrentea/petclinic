@@ -3,9 +3,9 @@ set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
 
-echo "[pre-commit] Regenerating C4 model DSL..."
+echo "[pre-commit] Regenerating architecture artifacts..."
 cd "$ROOT/petclinic-backend"
-mvn -q test -Dtest=C4ModelExtractor
+mvn -q test -Dtest=C4ModelExtractor,DomainModelExtractor
 
-git add "$ROOT/petclinic-backend/docs/C4 model.dsl"
-echo "[pre-commit] C4 model DSL updated and staged."
+git add "$ROOT/petclinic-backend/docs/generated"
+echo "[pre-commit] C4 model DSL and domain model diagram updated and staged."

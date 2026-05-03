@@ -24,7 +24,7 @@ public class PetDto {
 
     @NotNull
     @Valid
-    @PastOrPresent(message = "{pet.birthDate.notInFuture}")
+    @PastOrPresent(message = "Birth date must not be in the future")
     @Schema(example = "2010-09-07")
     private LocalDate birthDate;
 

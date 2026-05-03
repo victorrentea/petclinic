@@ -1,4 +1,4 @@
 # Require Elders review for manual architecture diagram updates.
 # Note: team format is @org/team-slug.
-/petclinic-backend/docs/architecture.puml @victorrentea/elders
+/petclinic-backend/docs/packages.puml @victorrentea/elders
 

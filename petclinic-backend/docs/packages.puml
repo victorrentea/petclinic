@@ -1,5 +1,8 @@
 @startuml
 
+title Logical Architecture
+caption All lines are ArchUnit-tested to be reflected in code.
+
 [Model] <<..model>>
 [Repository] <<..repository>>
 [DTO] <<..rest.dto>>

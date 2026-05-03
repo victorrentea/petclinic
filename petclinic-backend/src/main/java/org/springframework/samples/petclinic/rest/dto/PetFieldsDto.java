@@ -19,7 +19,7 @@ public class PetFieldsDto {
     @NotNull
     @Valid
     @Schema(example = "2010-09-07", description = "The date of birth of the pet.")
-    @PastOrPresent(message = "{pet.birthDate.notInFuture}")
+    @PastOrPresent(message = "Birth date must not be in the future")
     private LocalDate birthDate;
 
     @NotNull

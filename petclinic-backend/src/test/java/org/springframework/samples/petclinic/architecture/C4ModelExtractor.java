@@ -43,10 +43,12 @@ class C4ModelExtractor {
 
     // Components that get a dedicated focused view showing their nearest neighbours
     private static final List<String> FOCUSED_VIEWS = List.of("Repository Layer", "Mapper Layer");
+
     // ─────────────────────────────────────────────────────────────────────────
 
-    private static final Path DOCS_DIR  = Paths.get("docs");
-    private static final Path VIEWS_DIR = DOCS_DIR.resolve("c4views");
+    private static final Path DOCS_DIR      = Paths.get("docs");
+    private static final Path GENERATED_DIR = DOCS_DIR.resolve("generated");
+    private static final Path VIEWS_DIR     = GENERATED_DIR.resolve("c4views");
 
     @Test
     void generateC4Model() throws IOException {
@@ -61,7 +63,7 @@ class C4ModelExtractor {
         exportDsl(workspace);
         exportDiagrams(workspace);
 
-        assertThat(DOCS_DIR.resolve("C4 model.dsl")).exists();
+        assertThat(GENERATED_DIR.resolve("C4-model.dsl")).exists();
         assertThat(VIEWS_DIR).isNotEmptyDirectory();
     }
 
@@ -270,7 +272,7 @@ class C4ModelExtractor {
         }
         sb.append("        }\n    }\n}\n");
 
-        Files.writeString(DOCS_DIR.resolve("C4 model.dsl"), sb.toString());
+        Files.writeString(GENERATED_DIR.resolve("C4-model.dsl"), sb.toString());
     }
 
     private void exportDiagrams(Workspace workspace) throws IOException {
