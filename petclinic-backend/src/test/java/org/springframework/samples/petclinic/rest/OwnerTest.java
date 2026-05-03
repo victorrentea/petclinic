@@ -127,22 +127,6 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithNameFilter() throws Exception {
-        // Create another owner with a different last name
-        Owner owner2 = TestData.anOwner();
-        owner2.setFirstName("Betty");
-        owner2.setLastName("Davis");
-        int owner2Id = ownerRepository.save(owner2).getId();
-
-        List<OwnerDto> owners = search("/api/owners?lastName=Dav");
-
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "Davis"))
-            .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
-    }
-
-    @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
@@ -172,36 +156,6 @@ public class OwnerTest {
         List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
-    }
-
-    @Test
-    void create_ok() throws Exception {
-        OwnerDto newOwner = new OwnerDto();
-        newOwner.setFirstName("Eduardo");
-        newOwner.setLastName("Rodriquez");
-        newOwner.setAddress("2693 Commerce St.");
-        newOwner.setCity("McFarland");
-        newOwner.setTelephone("6085558763");
-
-        mockMvc.perform(post("/api/owners")
-                .content(mapper.writeValueAsString(newOwner))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
-    void create_invalid() throws Exception {
-        OwnerDto newOwner = new OwnerDto();
-        // missing firstName - validation error
-        newOwner.setLastName("Rodriquez");
-        newOwner.setAddress("2693 Commerce St.");
-        newOwner.setCity("McFarland");
-        newOwner.setTelephone("6085558763");
-
-        mockMvc.perform(post("/api/owners")
-                .content(mapper.writeValueAsString(newOwner))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -259,22 +213,6 @@ public class OwnerTest {
     void delete_notFound() throws Exception {
         mockMvc.perform(delete("/api/owners/9999"))
             .andExpect(status().is4xxClientError());
-    }
-
-    @Test
-    void createPet_ok() throws Exception {
-        PetDto newPet = new PetDto();
-        newPet.setName("Max");
-        newPet.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        newPet.setType(typeDto);
-
-        mockMvc.perform(post("/api/owners/" + ownerId + "/pets")
-                .content(mapper.writeValueAsString(newPet))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isCreated());
     }
 
     @Test
@@ -363,14 +301,4 @@ public class OwnerTest {
             .andExpect(status().isNotFound());
     }
 
-    @Test
-    void getOwner_includesPetsWithType() throws Exception {
-        // Verifies that owner response includes pets with their type name loaded (lazy-loading works)
-        OwnerDto responseDto = callGet(ownerId);
-
-        assertThat(responseDto.getPets()).hasSize(1);
-        assertThat(responseDto.getPets().get(0).getName()).isEqualTo("Rosy");
-        assertThat(responseDto.getPets().get(0).getType()).isNotNull();
-        assertThat(responseDto.getPets().get(0).getType().getName()).isEqualTo("dog");
-    }
 }

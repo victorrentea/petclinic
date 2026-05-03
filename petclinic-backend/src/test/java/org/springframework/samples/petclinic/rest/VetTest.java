@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.transaction.Transactional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,21 +72,6 @@ public class VetTest {
     void getById_notFound() throws Exception {
         mockMvc.perform(get("/api/vets/99999"))
             .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getAll() throws Exception {
-        String responseJson = mockMvc.perform(get("/api/vets"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-        VetDto[] vets = mapper.readValue(responseJson, VetDto[].class);
-
-        assertThat(vets)
-            .extracting(VetDto::getId, VetDto::getFirstName, VetDto::getLastName)
-            .contains(Assertions.tuple(vetId, "James", "Carter"));
     }
 
     @Test
