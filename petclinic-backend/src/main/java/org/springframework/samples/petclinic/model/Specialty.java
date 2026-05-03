@@ -16,4 +16,6 @@ public class Specialty {
 
     private String name;
 
+    private String description;
+
 }
