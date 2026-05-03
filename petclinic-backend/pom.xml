@@ -17,13 +17,11 @@
     </parent>
 
     <properties>
+        <java.version>21</java.version>
+
         <!-- Third-party libraries -->
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-
-        <!-- SonarQube configuration -->
-        <sonar.organization>petclinic-rest</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>

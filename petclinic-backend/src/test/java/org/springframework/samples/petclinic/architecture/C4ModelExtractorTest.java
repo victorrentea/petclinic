@@ -65,7 +65,7 @@ class C4ModelExtractorTest {
         exportDsl(workspace);
         exportDiagrams(workspace);
 
-        assertThat(GENERATED_DIR.resolve("C4-model.dsl")).exists();
+        assertThat(GENERATED_DIR.resolve("C4.dsl")).exists();
         assertThat(VIEWS_DIR).isNotEmptyDirectory();
     }
 
@@ -274,7 +274,7 @@ class C4ModelExtractorTest {
         }
         sb.append("        }\n    }\n}\n");
 
-        Files.writeString(GENERATED_DIR.resolve("C4-model.dsl"), sb.toString());
+        Files.writeString(GENERATED_DIR.resolve("C4.dsl"), sb.toString());
     }
 
     private void exportDiagrams(Workspace workspace) throws IOException {
