@@ -25,7 +25,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DomainModelExtractor {
+class DomainModelExtractorTest {
 
     private static final String BASE_PKG          = "org.springframework.samples.petclinic";
     private static final String DOMAIN_MODEL_PKG  = BASE_PKG + ".model";

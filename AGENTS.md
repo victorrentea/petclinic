@@ -76,8 +76,9 @@ Architecture diagrams live in `petclinic-backend/docs/`:
 
 **Architecture tests** (`src/test/java/.../architecture/`):
 - `ArchitectureTest` — ArchUnit enforces that actual code matches `packages.puml`, plus a bidirectional check that diagram packages = code subpackages
-- `C4ModelExtractor` — generates `docs/generated/C4-model.dsl` with 5 C4 views (SystemContext, Containers, Components, RepositoryFocus, MapperFocus) and renders them under `docs/generated/c4views/`
-- `DomainModelExtractor` — reads JPA annotations on classes in the `model` package and emits a UML class diagram with cardinalities and merged bidirectional associations at `docs/generated/DomainModel.{puml,png}`
+- `C4ModelExtractorTest` — generates `docs/generated/C4-model.dsl` with 5 C4 views (SystemContext, Containers, Components, RepositoryFocus, MapperFocus) and renders them under `docs/generated/c4views/`
+- `DomainModelExtractorTest` — reads JPA annotations on classes in the `model` package and emits a UML class diagram with cardinalities and merged bidirectional associations at `docs/generated/DomainModel.{puml,png}`
+- `DomainModelDiagramExtractorTest` — alternative domain-model diagram generator under `petclinic-backend/docs/views/`
 
 The C4 DSL can be rendered at [structurizr.com](https://structurizr.com) or with the Structurizr CLI.
 Focus views (RepositoryFocus, MapperFocus) show only a component plus its direct incoming and outgoing dependencies.

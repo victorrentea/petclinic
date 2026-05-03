@@ -30,7 +30,6 @@ class Role {
 class Specialty {
   id : Integer
   name : String
-  description : String
 }
 class User {
   username : String

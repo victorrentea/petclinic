@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DomainModelDiagramExtractor {
+class DomainModelDiagramExtractorTest {
 
     private static final String BASE_PKG = "org.springframework.samples.petclinic";
     private static final Path VIEWS_DIR = Paths.get("docs/views");

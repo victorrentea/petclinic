@@ -24,7 +24,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class C4ModelExtractor {
+class C4ModelExtractorTest {
 
     // ── Project-specific config ───────────────────────────────────────────────
     private static final String BASE_PKG       = "org.springframework.samples.petclinic";
