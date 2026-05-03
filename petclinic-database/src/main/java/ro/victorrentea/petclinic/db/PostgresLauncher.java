@@ -6,12 +6,43 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class PostgresLauncher {
 
     static final String DB_USER = "petclinic";
     static final String DB_PASSWORD = "petclinic";
     static final String DB_NAME = "petclinic";
+
+    public static void main(String[] args) throws Exception {
+        Path dataDir = Path.of("data").toAbsolutePath();
+        Path marker  = Path.of(".bootstrapped").toAbsolutePath();
+
+        EmbeddedPostgres pg = EmbeddedPostgres.builder()
+                .setPort(5432)
+                .setDataDirectory(dataDir)
+                .setCleanDataDirectory(false)
+                .start();
+
+        if (!Files.exists(marker)) {
+            bootstrap(pg);
+            Files.writeString(marker, "ok\n");
+            System.out.println("Bootstrap complete: created role + database '" + DB_NAME + "'");
+        }
+
+        System.out.println("Postgres started:");
+        System.out.println("  JDBC URL: jdbc:postgresql://localhost:" + pg.getPort()
+                + "/" + DB_NAME + " (user: " + DB_USER + ", password: " + DB_PASSWORD + ")");
+        System.out.println("  Data dir: " + dataDir);
+        System.out.println("Press Ctrl+C to stop.");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try { pg.close(); } catch (Exception ignored) {}
+        }));
+
+        Thread.currentThread().join();
+    }
 
     public static void bootstrap(EmbeddedPostgres pg) throws Exception {
         DataSource superuser = pg.getPostgresDatabase();
