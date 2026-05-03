@@ -1572,6 +1572,23 @@ components:
           description: The ID of the pet.
           example: 1
           minimum: 0
+        petName:
+          type: string
+          description: Name of the pet (server-populated).
+          readOnly: true
+        ownerId:
+          type: integer
+          format: int32
+          description: ID of the owner of the pet (server-populated).
+          readOnly: true
+        ownerFirstName:
+          type: string
+          description: First name of the owner (server-populated).
+          readOnly: true
+        ownerLastName:
+          type: string
+          description: Last name of the owner (server-populated).
+          readOnly: true
       required:
       - description
       - id
