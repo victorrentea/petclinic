@@ -9,6 +9,17 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface VisitDto {
+  id: number;
+  date: string;
+  description: string;
+  petId: number;
+  petName?: string;
+  ownerId?: number;
+  ownerFirstName?: string;
+  ownerLastName?: string;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -31,6 +42,11 @@ export class ApiClient {
     return response.data;
   }
 
+  async fetchVisits(): Promise<VisitDto[]> {
+    const response = await this.client.get<VisitDto[]>('/visits');
+    return response.data;
+  }
+
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
       .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
@@ -39,6 +55,10 @@ export class ApiClient {
 
   static sorted(values: string[]): string[] {
     return [...values].sort();
+  }
+
+  static sortedByDate<T extends { date: string }>(rows: T[]): T[] {
+    return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
 
   static extractLastName(fullName: string): string {
