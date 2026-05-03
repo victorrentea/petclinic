@@ -25,7 +25,7 @@ public class VisitRestController {
 
     @GetMapping
     public List<VisitDto> listVisits() {
-        List<Visit> visits = visitRepository.findAll();
+        List<Visit> visits = visitRepository.findAllWithPetAndOwner();
         return visitMapper.toVisitsDto(visits);
     }
 
