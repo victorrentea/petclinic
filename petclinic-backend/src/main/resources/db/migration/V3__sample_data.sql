@@ -89,27 +89,27 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Rocky',   DATE '2020-11-27', 2, 27);
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
-  (14, DATE '2025-11-12', 'vaccin antirabic'),
-  (15, DATE '2025-12-03', 'consult anual'),
-  (16, DATE '2026-01-15', 'deparazitare interna'),
-  (17, DATE '2026-02-20', 'taiat cioc si gheare'),
-  (18, DATE '2026-03-05', 'vaccin trivalent'),
-  (19, DATE '2026-03-18', 'operatie picior posterior'),
-  (20, DATE '2026-04-02', 'control general'),
-  (21, DATE '2026-04-10', 'sterilizare'),
-  (22, DATE '2025-10-22', 'control piele si scuame'),
-  (23, DATE '2025-11-30', 'vaccin trivalent'),
-  (24, DATE '2026-02-14', 'verificare habitat'),
-  (25, DATE '2026-03-22', 'tratament alergie'),
-  (26, DATE '2026-04-15', 'control'),
-  (27, DATE '2026-04-20', 'examen dentar'),
-  (28, DATE '2026-04-25', 'vaccin antirabic'),
-  (29, DATE '2026-04-28', 'potcoavit'),
-  (30, DATE '2026-05-01', 'control penaj'),
-  (31, DATE '2026-05-02', 'rana la laba anterioara'),
-  (14, DATE '2026-05-02', 'control follow-up post-vaccin'),
-  (19, DATE '2026-05-03', 'scoatere fire chirurgicale'),
-  (1,  DATE '2026-05-03', 'control general anual');
+  (14, DATE '2025-11-12', 'rabies vaccine'),
+  (15, DATE '2025-12-03', 'annual checkup'),
+  (16, DATE '2026-01-15', 'internal deworming'),
+  (17, DATE '2026-02-20', 'beak and nail trim'),
+  (18, DATE '2026-03-05', 'trivalent vaccine'),
+  (19, DATE '2026-03-18', 'hind leg surgery'),
+  (20, DATE '2026-04-02', 'general checkup'),
+  (21, DATE '2026-04-10', 'spay/neuter'),
+  (22, DATE '2025-10-22', 'skin and scale check'),
+  (23, DATE '2025-11-30', 'trivalent vaccine'),
+  (24, DATE '2026-02-14', 'habitat check'),
+  (25, DATE '2026-03-22', 'allergy treatment'),
+  (26, DATE '2026-04-15', 'checkup'),
+  (27, DATE '2026-04-20', 'dental exam'),
+  (28, DATE '2026-04-25', 'rabies vaccine'),
+  (29, DATE '2026-04-28', 'horseshoeing'),
+  (30, DATE '2026-05-01', 'plumage check'),
+  (31, DATE '2026-05-02', 'wound on front paw'),
+  (14, DATE '2026-05-02', 'post-vaccine follow-up'),
+  (19, DATE '2026-05-03', 'surgical suture removal'),
+  (1,  DATE '2026-05-03', 'annual general checkup');
 
 INSERT INTO users (username, password, enabled) VALUES
   ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
