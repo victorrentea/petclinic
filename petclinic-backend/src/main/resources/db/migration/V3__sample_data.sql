@@ -8,7 +8,9 @@ INSERT INTO vets (first_name, last_name) VALUES
 
 INSERT INTO specialties (name) VALUES ('radiology'), ('surgery'), ('dentistry');
 
-INSERT INTO vet_specialties (vet_id, specialty_id) VALUES
+-- Pairs preserved from upstream petclinic data; column order matches
+-- the original ON CONFLICT (specialty_id, vet_id) hint.
+INSERT INTO vet_specialties (specialty_id, vet_id) VALUES
   (1, 2), (2, 3), (3, 3), (2, 4), (1, 5);
 
 INSERT INTO types (name) VALUES
