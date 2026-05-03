@@ -164,7 +164,7 @@ class C4ModelExtractor {
                 .findFirst()
                 .ifPresent(comp -> {
                     ComponentView focusView = views.createComponentView(backend,
-                        id(focusedName) + "_focus", focusedName + " — nearest neighbours");
+                        focusedName.toLowerCase().replace(' ', '-'), focusedName + " — nearest neighbours");
                     focusView.addNearestNeighbours(comp);
                     focusView.enableAutomaticLayout();
                 });
