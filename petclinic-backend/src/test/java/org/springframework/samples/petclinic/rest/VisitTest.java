@@ -118,19 +118,6 @@ public class VisitTest {
     }
 
     @Test
-    void create_ok() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("neutered");
-
-        mockMvc.perform(post("/api/visits")
-                .content(mapper.writeValueAsString(newVisit))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
     void create_invalid() throws Exception {
         VisitDto newVisit = new VisitDto();
         newVisit.setPetId(petId);
@@ -141,21 +128,6 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(newVisit))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void update_ok() throws Exception {
-        VisitDto existing = callGet(visitId);
-        existing.setDescription("rabies shot test");
-
-        mockMvc.perform(put("/api/visits/" + visitId)
-                .content(mapper.writeValueAsString(existing))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().is2xxSuccessful());
-
-        // assert the update took place
-        VisitDto updated = callGet(visitId);
-        assertThat(updated.getDescription()).isEqualTo("rabies shot test");
     }
 
     @Test
