@@ -5453,3 +5453,6 @@ __pycache__/**
 /qa/test-results/screenshots/shows_all_owners_on_initial_load_2026-04-06T19-07-55-564Z.png
 .github/skills
 petclinic-backend/.jqwik-database
+
+# Local OpenTelemetry agent cache
+petclinic-backend/.tools/
