@@ -873,6 +873,7 @@ paths:
     post:
       tags:
       - user-rest-controller
+      summary: Create a user
       operationId: addUser
       requestBody:
         content:
@@ -1040,9 +1041,34 @@ paths:
       parameters:
       - name: query
         in: query
+        description: Free-text owner search query.
         required: false
         schema:
           type: string
+      - name: page
+        in: query
+        description: Zero-based owner page index.
+        schema:
+          type: string
+          minimum: 0
+      - name: size
+        in: query
+        description: Owner page size.
+        schema:
+          type: string
+          enum:
+          - "10"
+          - "20"
+      - name: sort
+        in: query
+        description: Owner sort field and direction.
+        schema:
+          type: string
+          enum:
+          - "name,asc"
+          - "name,desc"
+          - "city,asc"
+          - "city,desc"
       responses:
         "400":
           description: Bad Request
@@ -1067,9 +1093,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
     post:
       tags:
       - owner-rest-controller
@@ -1743,3 +1767,31 @@ components:
       - lastName
       - pets
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The owners on the requested page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
+          description: The total number of owners that match the current query.
+          example: 10
+        totalPages:
+          type: integer
+          format: int32
+          description: The total number of pages for the current query and page size.
+          example: 1
+        number:
+          type: integer
+          format: int32
+          description: The zero-based page index of the returned content.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: The requested page size.
+          example: 10

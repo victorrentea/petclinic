@@ -58,17 +58,37 @@ display:none;
 .owners-pagination {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 4px;
+	margin: 0;
 }
 
 .owners-page-size {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	margin-bottom: 0;
 }
 
-.owners-page-size .form-control {
-	width: auto;
+.owners-page-size label {
+	margin: 0;
+	white-space: nowrap;
+}
+
+.owners-table-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 16px;
+	margin-top: 16px;
+}
+
+.owners-page-size-select {
+	width: 80px;
+	min-width: 80px;
+}
+
+.owners-pagination .btn {
+	margin: 0;
 }
 
 @media (max-width: 576px) {
@@ -100,5 +120,9 @@ display:none;
 	.col-name {
 		width: auto;
 	}
-}
 
+	.owners-table-toolbar {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

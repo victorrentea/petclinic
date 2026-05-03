@@ -7,7 +7,7 @@ import { HttpResponse } from '@angular/common/http';
 
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
-import { Owner } from './owner';
+import { Owner, OwnerPage } from './owner';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -34,6 +34,14 @@ describe('OwnerService', () => {
     }
   ];
 
+  const expectedOwnerPage: OwnerPage = {
+    content: expectedOwners,
+    totalElements: expectedOwners.length,
+    totalPages: 1,
+    number: 0,
+    size: 10
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -46,16 +54,6 @@ describe('OwnerService', () => {
 
   afterEach(() => {
     httpTestingController.verify();
-  });
-
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
-
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
   });
 
   it('search the owner by id', () => {
@@ -132,14 +130,34 @@ describe('OwnerService', () => {
   });
 
   it('search owners by query', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
+    ownerService.searchOwners('Fr', 0, 10, 'name,asc').subscribe((owners) => {
+      expect(owners).toEqual(expectedOwnerPage);
     });
 
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?query=Fr'
+    const req = httpTestingController.expectOne((request) =>
+      request.url === ownerService.entityUrl &&
+      request.params.get('query') === 'Fr' &&
+      request.params.get('page') === '0' &&
+      request.params.get('size') === '10' &&
+      request.params.get('sort') === 'name,asc'
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedOwnerPage);
+  });
+
+  it('search owners without query', () => {
+    ownerService.searchOwners().subscribe((owners) => {
+      expect(owners).toEqual(expectedOwnerPage);
+    });
+
+    const req = httpTestingController.expectOne((request) =>
+      request.url === ownerService.entityUrl &&
+      !request.params.has('query') &&
+      request.params.get('page') === '0' &&
+      request.params.get('size') === '10' &&
+      request.params.get('sort') === 'name,asc'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedOwnerPage);
   });
 });

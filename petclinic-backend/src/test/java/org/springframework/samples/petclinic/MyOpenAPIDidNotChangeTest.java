@@ -11,7 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
+import org.springframework.samples.petclinic.mapper.OwnerMapper;
+import org.springframework.samples.petclinic.mapper.PetMapper;
+import org.springframework.samples.petclinic.mapper.PetTypeMapper;
+import org.springframework.samples.petclinic.mapper.SpecialtyMapper;
+import org.springframework.samples.petclinic.mapper.UserMapper;
+import org.springframework.samples.petclinic.mapper.VetMapper;
+import org.springframework.samples.petclinic.mapper.VisitMapper;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.file.Files;
@@ -21,6 +31,7 @@ import java.util.Map;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
@@ -64,5 +75,50 @@ public class MyOpenAPIDidNotChangeTest {
         Files.writeString(target, yaml, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         System.out.println("WROTE " + target.toAbsolutePath());
+    }
+
+    @TestConfiguration
+    static class MapperTestConfiguration {
+        @Bean
+        @Primary
+        OwnerMapper ownerMapper() {
+            return mock(OwnerMapper.class);
+        }
+
+        @Bean
+        @Primary
+        PetMapper petMapper() {
+            return mock(PetMapper.class);
+        }
+
+        @Bean
+        @Primary
+        PetTypeMapper petTypeMapper() {
+            return mock(PetTypeMapper.class);
+        }
+
+        @Bean
+        @Primary
+        SpecialtyMapper specialtyMapper() {
+            return mock(SpecialtyMapper.class);
+        }
+
+        @Bean
+        @Primary
+        UserMapper userMapper() {
+            return mock(UserMapper.class);
+        }
+
+        @Bean
+        @Primary
+        VetMapper vetMapper() {
+            return mock(VetMapper.class);
+        }
+
+        @Bean
+        @Primary
+        VisitMapper visitMapper() {
+            return mock(VisitMapper.class);
+        }
     }
 }

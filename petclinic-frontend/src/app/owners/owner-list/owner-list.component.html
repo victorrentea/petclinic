@@ -8,7 +8,7 @@
                type="text"
                placeholder="Search by name, city, address, phone or pet…"
                [(ngModel)]="query"
-               (ngModelChange)="onQueryChange($event)"
+               (ngModelChange)="onQueryChange()"
                name="query"/>
         <span class="input-group-btn">
           <button class="btn btn-default" type="button" (click)="clearSearch()">Clear</button>
@@ -22,9 +22,21 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th class="col-name">Name</th>
+          <th class="col-name">
+            <button class="btn btn-link" type="button" (click)="toggleSort('name')">
+              Name
+              <span *ngIf="sort === 'name,asc'">↑</span>
+              <span *ngIf="sort === 'name,desc'">↓</span>
+            </button>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th>
+            <button class="btn btn-link" type="button" (click)="toggleSort('city')">
+              City
+              <span *ngIf="sort === 'city,asc'">↑</span>
+              <span *ngIf="sort === 'city,desc'">↓</span>
+            </button>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -42,6 +54,22 @@
         </tr>
         </tbody>
       </table>
+      <div class="owners-table-toolbar">
+        <div class="owners-page-size">
+          <label for="ownerPageSize">Rows per page</label>
+          <select id="ownerPageSize"
+                  [(ngModel)]="size"
+                  (ngModelChange)="onSizeChange()"
+                  class="form-control input-sm owners-page-size-select">
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+          </select>
+        </div>
+        <div class="pagination owners-pagination">
+          <button *ngFor="let p of pageNumbers" type="button" class="btn btn-default"
+                  (click)="goToPage(p)" [class.active]="p === page">{{ p + 1 }}</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

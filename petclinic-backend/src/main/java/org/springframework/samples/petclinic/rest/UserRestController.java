@@ -1,7 +1,5 @@
 package org.springframework.samples.petclinic.rest;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.UserMapper;
@@ -20,10 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.ADMIN)")
-public class UserRestController {
+public class UserRestController implements UserRestApi {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Override
     @PostMapping
     @Transactional
     public ResponseEntity<UserDto> addUser(@RequestBody @Validated UserDto userDto) {

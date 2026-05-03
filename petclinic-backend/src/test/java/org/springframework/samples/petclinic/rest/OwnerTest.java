@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +30,6 @@ import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -44,6 +41,12 @@ import jakarta.transaction.Transactional;
 @WithMockUser(roles = "OWNER_ADMIN")
 @Transactional
 public class OwnerTest {
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int LARGE_PAGE_SIZE = 20;
+    private static final int MIN_LARGE_DATASET_SIZE = 1000;
+    private static final String SORT_QUERY = "sort-bucket";
+    private static final String FILTER_QUERY = "filter-bucket";
 
     @Autowired
     MockMvc mockMvc;
@@ -117,59 +120,134 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
-
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-            .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.content[*].id").value(org.hamcrest.Matchers.hasItem(ownerId)))
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.size").value(DEFAULT_PAGE_SIZE));
     }
 
     @Test
     void getAllWithNameFilter() throws Exception {
-        // Create another owner with a different last name
         Owner owner2 = TestData.anOwner();
         owner2.setFirstName("Betty");
         owner2.setLastName("Davis");
+        owner2.setAddress(FILTER_QUERY);
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?query=Dav");
-
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "Davis"))
-            .doesNotContain(Assertions.tuple(ownerId, "Franklin"));
+        mockMvc.perform(get("/api/owners").param("query", FILTER_QUERY))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.content[*].id").value(org.hamcrest.Matchers.hasItem(owner2Id)))
+            .andExpect(jsonPath("$.content[*].id").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.hasItem(ownerId))))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
+        owner2.setAddress(FILTER_QUERY);
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?query=Java");
-
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "JavaBeans"));
-    }
-
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
+        mockMvc.perform(get("/api/owners").param("query", FILTER_QUERY))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+            .andExpect(jsonPath("$.content[*].id").value(org.hamcrest.Matchers.hasItem(owner2Id)));
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?query=NonExistent");
+        mockMvc.perform(get("/api/owners").param("query", "NonExistent"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.content").isEmpty())
+            .andExpect(jsonPath("$.totalElements").value(0));
+    }
 
-        assertThat(results).isEmpty();
+    @Test
+    void getAllWithNameSortAscending() throws Exception {
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("Amy")
+            .setLastName("Able")
+            .setAddress(SORT_QUERY));
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("Zoe")
+            .setLastName("Zimmer")
+            .setAddress(SORT_QUERY));
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("George")
+            .setLastName("Franklin")
+            .setAddress(SORT_QUERY));
+
+        mockMvc.perform(get("/api/owners")
+                .param("query", SORT_QUERY)
+                .param("sort", "name,asc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].lastName").value("Able"))
+            .andExpect(jsonPath("$.content[1].lastName").value("Franklin"))
+            .andExpect(jsonPath("$.content[2].lastName").value("Zimmer"));
+    }
+
+    @Test
+    void getAllWithCitySortDescending() throws Exception {
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("Amy")
+            .setLastName("Able")
+            .setCity("Amsterdam")
+            .setAddress(SORT_QUERY));
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("Zoe")
+            .setLastName("Zimmer")
+            .setCity("Zurich")
+            .setAddress(SORT_QUERY));
+        ownerRepository.save(TestData.anOwner()
+            .setFirstName("George")
+            .setLastName("Franklin")
+            .setCity("London")
+            .setAddress(SORT_QUERY));
+
+        mockMvc.perform(get("/api/owners")
+                .param("query", SORT_QUERY)
+                .param("sort", "city,desc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].city").value("Zurich"))
+            .andExpect(jsonPath("$.content[1].city").value("London"))
+            .andExpect(jsonPath("$.content[2].city").value("Amsterdam"));
+    }
+
+    @Test
+    void getAllWithLargePageSize() throws Exception {
+        for (int i = 0; i < LARGE_PAGE_SIZE; i++) {
+            ownerRepository.save(TestData.anOwner()
+                .setFirstName("Owner" + i)
+                .setLastName("Last" + i));
+        }
+
+        mockMvc.perform(get("/api/owners").param("size", String.valueOf(LARGE_PAGE_SIZE)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.size").value(LARGE_PAGE_SIZE))
+            .andExpect(jsonPath("$.content.length()").value(LARGE_PAGE_SIZE));
+    }
+
+    @Test
+    void getAllWithInvalidSort() throws Exception {
+        mockMvc.perform(get("/api/owners").param("sort", "telephone,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllWithInvalidPageSize() throws Exception {
+        mockMvc.perform(get("/api/owners").param("size", "15"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAllIncludesLargeSeedDataset() throws Exception {
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(org.hamcrest.Matchers.greaterThanOrEqualTo(MIN_LARGE_DATASET_SIZE)));
     }
 
     @Test

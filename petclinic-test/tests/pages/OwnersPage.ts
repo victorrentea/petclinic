@@ -3,27 +3,28 @@ import { Page, Locator } from '@playwright/test';
 export class OwnersPage {
   readonly page: Page;
   readonly pageTitle: Locator;
-  readonly lastNameInput: Locator;
-  readonly findOwnerButton: Locator;
+  readonly searchInput: Locator;
   readonly ownerNameCells: Locator;
   readonly ownersTable: Locator;
+  readonly pageSizeSelect: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h2:has-text("Owners")');
-    this.lastNameInput = page.locator('#lastName');
-    this.findOwnerButton = page.locator('#search-owner-form button[type="submit"]');
+    this.searchInput = page.getByPlaceholder('Search by name, city, address, phone or pet…');
     this.ownerNameCells = page.locator('#ownersTable td.ownerFullName');
     this.ownersTable = page.locator('#ownersTable');
+    this.pageSizeSelect = page.locator('#ownerPageSize');
   }
 
-  async open() {
-    await this.page.goto('/owners');
+  async open(queryString: string = '') {
+    const url = queryString ? `/owners?${queryString}` : '/owners';
+    await this.page.goto(url);
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async getOwnerFullNames(): Promise<string[]> {
-    await this.page.waitForSelector('#ownersTable td.ownerFullName, #lastName', { timeout: 10000 });
+    await this.page.waitForSelector('#ownersTable td.ownerFullName, input[name="query"]', { timeout: 10000 });
 
     const elements = await this.ownerNameCells.all();
     const names: string[] = [];
@@ -38,14 +39,30 @@ export class OwnersPage {
     return names;
   }
 
-  async searchByLastNamePrefix(prefix: string) {
-    await this.lastNameInput.waitFor({ state: 'visible' });
-    await this.lastNameInput.clear();
-    await this.lastNameInput.fill(prefix);
-    await this.lastNameInput.press('Tab');
+  async search(query: string) {
+    await this.searchInput.waitFor({ state: 'visible' });
+    await this.searchInput.fill(query);
+  }
 
-    await this.findOwnerButton.waitFor({ state: 'visible' });
-    await this.findOwnerButton.click();
+  async clickPage(pageNumber: number) {
+    await this.page.locator('.pagination button', { hasText: `${pageNumber}` }).click();
+  }
+
+  async changeRowsPerPage(size: number) {
+    await this.pageSizeSelect.selectOption(`${size}`);
+  }
+
+  async toggleSort(columnName: 'Name' | 'City') {
+    await this.page.locator('th button', { hasText: columnName }).click();
+  }
+
+  async getPaginationLabels(): Promise<string[]> {
+    const labels = await this.page.locator('.pagination button').allTextContents();
+    return labels.map(label => label.trim()).filter(label => label.length > 0);
+  }
+
+  async getRowsPerPageValue(): Promise<string> {
+    return this.pageSizeSelect.inputValue();
   }
 
   async waitForOwnersCount(expectedCount: number) {

@@ -1,8 +1,9 @@
 package org.springframework.samples.petclinic.repository;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -18,13 +19,13 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
         "UPPER(o.address) LIKE UPPER(CONCAT('%', :query, '%')) OR " +
         "o.telephone LIKE CONCAT('%', :query, '%') OR " +
         "EXISTS (SELECT p FROM Pet p WHERE p.owner = o AND UPPER(p.name) LIKE UPPER(CONCAT('%', :query, '%')))")
-    List<Owner> searchOwners(@Param("query") String query);
+    Page<Owner> searchOwners(@Param("query") String query, Pageable pageable);
 
     Optional<Owner> findById(int id);
 
     Owner save(Owner owner);
 
-    List<Owner> findAll();
+    Page<Owner> findAll(Pageable pageable);
 
     void delete(Owner owner);
 

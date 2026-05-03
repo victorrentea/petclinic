@@ -47,6 +47,33 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
 ('Lydia', 'Quark', '42 Kernel Way', 'Madison', '6085559012'),
 ('Oscar', 'Byte', '9 Cache Ct.', 'Monona', '6085553344');
 
+-- Insert pagination dummy owners for local H2 browsing
+INSERT INTO owners (first_name, last_name, address, city, telephone)
+SELECT
+    CASE MOD(x, 10)
+        WHEN 0 THEN 'Avery'
+        WHEN 1 THEN 'Blake'
+        WHEN 2 THEN 'Casey'
+        WHEN 3 THEN 'Dakota'
+        WHEN 4 THEN 'Emerson'
+        WHEN 5 THEN 'Finley'
+        WHEN 6 THEN 'Hayden'
+        WHEN 7 THEN 'Jordan'
+        WHEN 8 THEN 'Parker'
+        ELSE 'Rowan'
+    END,
+    'Random' || RIGHT('0000' || CAST(x AS VARCHAR), 4),
+    CAST(1000 + x AS VARCHAR) || ' Pagination Ave.',
+    CASE MOD(x, 5)
+        WHEN 0 THEN 'Madison'
+        WHEN 1 THEN 'Monona'
+        WHEN 2 THEN 'Sun Prairie'
+        WHEN 3 THEN 'Waunakee'
+        ELSE 'Windsor'
+    END,
+    '700' || RIGHT('0000000' || CAST(x AS VARCHAR), 7)
+FROM SYSTEM_RANGE(1, 1000);
+
 -- Insert Pets
 INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES 
 ('Leo', '2010-09-07', 1, 1),
