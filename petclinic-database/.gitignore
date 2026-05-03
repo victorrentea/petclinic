@@ -1,3 +1,4 @@
 target/
 data/
 .bootstrapped
+dependency-reduced-pom.xml

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "petclinic-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport", "stdio",
+        "--dsn", "postgres://petclinic:petclinic@localhost:5432/petclinic"
+      ]
+    }
+  }
+}
