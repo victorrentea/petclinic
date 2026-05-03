@@ -34,34 +34,34 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
-        repository_layer -> domain_model ""
         mapper_layer -> rest_layer ""
         mapper_layer -> domain_model ""
+        repository_layer -> domain_model ""
         rest_layer -> domain_model ""
         rest_layer -> mapper_layer ""
         rest_layer -> repository_layer ""
     }
 
     views {
-        systemContext petclinic "SystemContext" "Who uses PetClinic" {
+        systemContext petclinic "C1-Context" "Who uses PetClinic" {
             include *
             autoLayout
         }
-        container petclinic "Containers" "Containers inside PetClinic" {
+        container petclinic "C2-Containers" "Containers inside PetClinic" {
             include *
             autoLayout
         }
-        component backend "Components" "All components inside Backend" {
+        component backend "C3-Components-All" "All components inside Backend" {
             include *
             autoLayout
         }
-        component backend "repository_layer_focus" "Repository Layer — nearest neighbours" {
+        component backend "C3-Repository" "Repository Layer — nearest neighbours" {
             include rest_layer
             include domain_model
             include repository_layer
             autoLayout
         }
-        component backend "mapper_layer_focus" "Mapper Layer — nearest neighbours" {
+        component backend "C3-Mapper" "Mapper Layer — nearest neighbours" {
             include rest_layer
             include domain_model
             include mapper_layer

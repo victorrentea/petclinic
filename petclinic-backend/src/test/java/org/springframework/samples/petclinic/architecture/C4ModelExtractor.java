@@ -10,6 +10,8 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
 import org.junit.jupiter.api.Test;
 
@@ -145,16 +147,16 @@ class C4ModelExtractor {
     }
 
     private void configureViews(ViewSet views, SoftwareSystem petClinic, Container backend) {
-        SystemContextView ctxView = views.createSystemContextView(petClinic, "SystemContext", "Who uses " + WORKSPACE_NAME);
+        SystemContextView ctxView = views.createSystemContextView(petClinic, "C1-Context", "Who uses " + WORKSPACE_NAME);
         ctxView.addAllElements();
         ctxView.enableAutomaticLayout();
 
-        ContainerView containerView = views.createContainerView(petClinic, "Containers", "Containers inside " + WORKSPACE_NAME);
+        ContainerView containerView = views.createContainerView(petClinic, "C2-Containers", "Containers inside " + WORKSPACE_NAME);
         containerView.addAllPeople();
         containerView.addAllContainers();
         containerView.enableAutomaticLayout();
 
-        ComponentView componentView = views.createComponentView(backend, "Components", "All components inside Backend");
+        ComponentView componentView = views.createComponentView(backend, "C3-Components-All", "All components inside Backend");
         componentView.addAllComponents();
         componentView.enableAutomaticLayout();
 
@@ -164,7 +166,7 @@ class C4ModelExtractor {
                 .findFirst()
                 .ifPresent(comp -> {
                     ComponentView focusView = views.createComponentView(backend,
-                        focusedName.toLowerCase().replace(' ', '-'), focusedName + " — nearest neighbours");
+                        "C3-" + focusedName.split(" ")[0], focusedName + " — nearest neighbours");
                     focusView.addNearestNeighbours(comp);
                     focusView.enableAutomaticLayout();
                 });
@@ -276,11 +278,12 @@ class C4ModelExtractor {
     }
 
     private void exportDiagrams(Workspace workspace) throws IOException {
+        FileFormatOption svg = new FileFormatOption(FileFormat.SVG);
         for (Diagram diagram : new C4PlantUMLExporter().export(workspace)) {
             String puml = diagram.getDefinition();
             Files.writeString(VIEWS_DIR.resolve(diagram.getKey() + ".puml"), puml);
-            try (OutputStream os = Files.newOutputStream(VIEWS_DIR.resolve(diagram.getKey() + ".png"))) {
-                new SourceStringReader(puml).outputImage(os);
+            try (OutputStream os = Files.newOutputStream(VIEWS_DIR.resolve(diagram.getKey() + ".svg"))) {
+                new SourceStringReader(puml).outputImage(os, svg);
             }
         }
     }
