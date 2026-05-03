@@ -78,7 +78,6 @@ Architecture diagrams live in `petclinic-backend/docs/`:
 - `ArchitectureTest` — ArchUnit enforces that actual code matches `packages.puml`, plus a bidirectional check that diagram packages = code subpackages
 - `C4ModelExtractorTest` — generates `docs/generated/C4-model.dsl` with 5 C4 views (SystemContext, Containers, Components, RepositoryFocus, MapperFocus) and renders them under `docs/generated/c4views/`
 - `DomainModelExtractorTest` — reads JPA annotations on classes in the `model` package and emits a UML class diagram with cardinalities and merged bidirectional associations at `docs/generated/DomainModel.{puml,png}`
-- `DomainModelDiagramExtractorTest` — alternative domain-model diagram generator under `petclinic-backend/docs/views/`
 - **CI:** `.github/workflows/architecture.yml` runs `./mvnw test` on every push to main and every PR. Test failures (e.g., `packages.puml` drift) fail the build. Drift in `docs/generated/` is auto-committed back to the branch with `[skip ci]`; fork PRs fail with an actionable message because the workflow has no write access.
 
 The C4 DSL can be rendered at [structurizr.com](https://structurizr.com) or with the Structurizr CLI.
