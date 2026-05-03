@@ -11,6 +11,7 @@ caption All lines are ArchUnit-tested to be reflected in code.
 [REST] <<..rest>>
 [Invoice] <<..invoice>>
 [Security] <<..security>>
+[Ghost] <<..ghost>>
 
 [Repository] --> [Model]
 [Mapper] --> [Model]
