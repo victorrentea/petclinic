@@ -1,0 +1,59 @@
+name: Architecture Drift Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # On pull_request events, head_ref is the PR's source branch.
+          # On push events, ref_name is the pushed branch (main).
+          ref: ${{ github.head_ref || github.ref_name }}
+          # fetch-depth: 0 ensures we have enough history to push back without rejection.
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run backend tests
+        working-directory: petclinic-backend
+        run: ./mvnw test
+
+      - name: Detect drift in generated diagrams
+        id: drift
+        run: |
+          if git diff --quiet petclinic-backend/docs/generated; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true"  >> "$GITHUB_OUTPUT"
+            git --no-pager diff --stat petclinic-backend/docs/generated
+          fi
+
+      - name: Fail fork PRs that have drift
+        if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
+        run: |
+          echo "::error::Generated diagrams under petclinic-backend/docs/generated are out of date."
+          echo "::error::Run 'cd petclinic-backend && ./mvnw test -Dtest=C4ModelExtractor,DomainModelExtractor' locally and push the regenerated files."
+          exit 1
+
+      - name: Auto-commit regenerated diagrams
+        if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork != true
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add petclinic-backend/docs/generated
+          git commit -m 'chore(arch): regenerate architecture diagrams [skip ci]'
+          git push
