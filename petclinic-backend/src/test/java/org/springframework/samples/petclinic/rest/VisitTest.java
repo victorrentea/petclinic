@@ -118,6 +118,31 @@ public class VisitTest {
     }
 
     @Test
+    void getAll_returnsEnrichedFields() throws Exception {
+        String responseJson = mockMvc.perform(get("/api/visits"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
+
+        VisitDto created = java.util.Arrays.stream(visits)
+            .filter(v -> v.getId() == visitId)
+            .findFirst()
+            .orElseThrow();
+
+        Owner owner = ownerRepository.findById(petRepository.findById(petId).orElseThrow().getOwner().getId())
+            .orElseThrow();
+        Pet pet = petRepository.findById(petId).orElseThrow();
+
+        assertThat(created.getPetName()).isEqualTo(pet.getName());
+        assertThat(created.getOwnerId()).isEqualTo(owner.getId());
+        assertThat(created.getOwnerFirstName()).isEqualTo(owner.getFirstName());
+        assertThat(created.getOwnerLastName()).isEqualTo(owner.getLastName());
+    }
+
+    @Test
     void create_ok() throws Exception {
         VisitDto newVisit = new VisitDto();
         newVisit.setPetId(petId);

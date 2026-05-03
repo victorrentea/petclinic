@@ -10,7 +10,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = PetMapper.class)
 public interface VisitMapper {
+
     @Mapping(source = "petId", target = "pet.id")
+    @Mapping(target = "pet.name", ignore = true)
+    @Mapping(target = "pet.owner", ignore = true)
     Visit toVisit(VisitDto visitDto);
 
     @Mapping(target = "id", ignore = true)
@@ -18,8 +21,11 @@ public interface VisitMapper {
     Visit toVisit(VisitFieldsDto visitFieldsDto);
 
     @Mapping(source = "pet.id", target = "petId")
+    @Mapping(source = "pet.name", target = "petName")
+    @Mapping(source = "pet.owner.id", target = "ownerId")
+    @Mapping(source = "pet.owner.firstName", target = "ownerFirstName")
+    @Mapping(source = "pet.owner.lastName", target = "ownerLastName")
     VisitDto toVisitDto(Visit visit);
 
     List<VisitDto> toVisitsDto(List<Visit> visits);
-
 }

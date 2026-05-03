@@ -1,5 +1,5 @@
 @startuml
-title <size:24>Component View: PetClinic - Backend</size>\n<size:24>Mapper Layer — nearest neighbours</size>
+title <size:24>Component View: PetClinic - Backend</size>\n<size:24>Repository Layer — nearest neighbours</size>
 
 set separator none
 left to right direction
@@ -19,15 +19,14 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container_Boundary("PetClinic.Backend_boundary", "Backend", $tags="") {
     Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="HTTP endpoints, DTOs, error handlers", $tags="", $link="")
     Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="JPA entities", $tags="", $link="")
-    Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="MapStruct", $descr="MapStruct mappers", $tags="", $link="")
+    Component(PetClinic.Backend.RepositoryLayer, "Repository Layer", $techn="Spring Data", $descr="Spring Data JPA repositories", $tags="", $link="")
   }
 
 }
 
-Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
-Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.RESTLayer, "", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
-Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.MapperLayer, "", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes
