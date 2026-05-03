@@ -1,0 +1,37 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+    <h2>Visits</h2>
+
+    <div *ngIf="isDataReceived && visits.length === 0" class="no-visits">
+      No visits found.
+    </div>
+
+    <div class="table-responsive" id="visitsTable" *ngIf="visits.length > 0">
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Pet</th>
+          <th>Owner</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let visit of visits">
+          <td class="visit-date">{{ visit.date }}</td>
+          <td class="visit-description">{{ visit.description }}</td>
+          <td class="visit-pet">{{ visit.petName }}</td>
+          <td class="visit-owner">
+            <a class="owner-link" [routerLink]="'/owners/' + visit.ownerId">
+              {{ visit.ownerFirstName }} {{ visit.ownerLastName }}
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <div>
+        <button *ngIf="isDataReceived" class="btn btn-default" (click)="addVisit()">Add Visit</button>
+      </div>
+    </div>
+  </div>
+</div>
