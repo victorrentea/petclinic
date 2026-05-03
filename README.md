@@ -170,6 +170,15 @@ API documentation (OAS 3.1): [http://localhost:8080/v3/api-docs](http://localhos
 | **Users** |  |  |
 | **POST** | `/api/users` | Create a new user |
 
+### API First
+
+The backend follows the [API First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach: the OpenAPI spec at [`petclinic-backend/src/main/resources/openapi.yml`](petclinic-backend/src/main/resources/openapi.yml) is the source of truth. Build-time code generation produces:
+
+- DTO classes under `org.springframework.samples.petclinic.rest.dto`
+- API template interfaces that controllers implement
+
+Generated code lives in `target/generated-sources/`; controllers wire concrete behaviour onto the generated interfaces.
+
 ### Database Configuration
 
 **H2 (Default)**
@@ -223,13 +232,12 @@ jmeter -n -t src/test/jmeter/petclinic-jmeter-crud-benchmark.jmx \
   -Jthreads=100 -Jduration=600 -l results/petclinic-test-results.jtl
 ```
 
-**API Tests (Postman + Newman)**:
-```sh
-cd petclinic-backend
-./postman-tests.sh
-```
+**Architecture Tests** (`./mvnw test` covers them by default):
+- `ArchitectureTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
+- `C4ModelExtractorTest` — regenerates `petclinic-backend/docs/generated/C4.dsl` and the C4 PlantUML/SVG views
+- `DomainModelExtractorTest` — regenerates `petclinic-backend/docs/generated/DomainModel.{puml,png}` from JPA annotations
 
-See [petclinic-backend/README.md](petclinic-backend/readme.md) for detailed backend documentation.
+CI (`.github/workflows/architecture.yml`) auto-commits drift in `docs/generated/` back to the branch with `[skip ci]`; failures in `packages.puml` (hand-edited) fail the build.
 
 ## Frontend (Angular SPA)
 

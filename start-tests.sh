@@ -29,10 +29,10 @@ echo "✅ Backend is running on port 8080"
 echo "✅ Frontend is running on port 4200"
 echo ""
 
-# Run tests from petclinic-test directory
-cd petclinic-test
+# Run tests from petclinic-ui-test directory
+cd petclinic-ui-test
 SKIP_SERVER_START=true npm test
 
 echo ""
-echo "📸 Screenshots saved to: petclinic-test/test-results/screenshots/"
-echo "📊 To view HTML report: cd petclinic-test && npm run show-report"
+echo "📸 Screenshots saved to: petclinic-ui-test/test-results/screenshots/"
+echo "📊 To view HTML report: cd petclinic-ui-test && npm run show-report"
