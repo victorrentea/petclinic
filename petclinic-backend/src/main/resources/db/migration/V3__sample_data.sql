@@ -51,6 +51,66 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
   (8, DATE '2009-06-04', 'neutered'),
   (7, DATE '2008-09-04', 'spayed');
 
+INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
+  ('Andrei',   'Popescu',   'Str. Mihai Viteazu 12',     'Bucuresti',    '0721111001'),
+  ('Maria',    'Ionescu',   'Str. Memorandumului 5',     'Cluj-Napoca',  '0721111002'),
+  ('George',   'Pop',       'Bd. Revolutiei 22',         'Timisoara',    '0721111003'),
+  ('Elena',    'Stan',      'Str. Lascar Catargi 8',     'Iasi',         '0721111004'),
+  ('Mihai',    'Dumitru',   'Str. Republicii 41',        'Brasov',       '0721111005'),
+  ('Ioana',    'Marin',     'Bd. Tomis 110',             'Constanta',    '0721111006'),
+  ('Radu',     'Tudor',     'Str. Cetatii 17',           'Sibiu',        '0721111007'),
+  ('Cristina', 'Vasile',    'Str. Republicii 3',         'Oradea',       '0721111008'),
+  ('Alex',     'Munteanu',  'Str. Domneasca 50',         'Galati',       '0721111009'),
+  ('Diana',    'Stoica',    'Bd. Republicii 88',         'Pitesti',      '0721111010'),
+  ('Bogdan',   'Radu',      'Str. Unirii 14',            'Craiova',      '0721111011'),
+  ('Ana',      'Florescu',  'Bd. Independentei 27',      'Ploiesti',     '0721111012'),
+  ('Vlad',     'Nistor',    'Str. Eminescu 9',           'Arad',         '0721111013'),
+  ('Laura',    'Mihai',     'Str. Marasesti 33',         'Bacau',        '0721111014'),
+  ('Tudor',    'Cristea',   'Str. Stefan cel Mare 21',   'Suceava',      '0721111015');
+
+INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
+  ('Rex',     DATE '2020-05-12', 2, 13),
+  ('Mia',     DATE '2019-08-03', 1, 14),
+  ('Buddy',   DATE '2021-02-18', 2, 14),
+  ('Coco',    DATE '2022-06-25', 5, 15),
+  ('Luna',    DATE '2018-11-10', 1, 16),
+  ('Bella',   DATE '2017-04-07', 2, 17),
+  ('Charlie', DATE '2023-01-30', 6, 17),
+  ('Toby',    DATE '2020-09-14', 2, 18),
+  ('Ziggy',   DATE '2021-07-22', 3, 19),
+  ('Misty',   DATE '2019-03-15', 1, 20),
+  ('Oscar',   DATE '2022-10-05', 4, 21),
+  ('Daisy',   DATE '2018-06-20', 2, 22),
+  ('Milo',    DATE '2021-12-01', 1, 23),
+  ('Pepper',  DATE '2024-02-11', 6, 23),
+  ('Shadow',  DATE '2019-09-09', 1, 24),
+  ('Spirit',  DATE '2015-05-05', 7, 25),
+  ('Tweety',  DATE '2023-08-19', 5, 26),
+  ('Rocky',   DATE '2020-11-27', 2, 27);
+
+INSERT INTO visits (pet_id, visit_date, description) VALUES
+  (14, DATE '2025-11-12', 'vaccin antirabic'),
+  (15, DATE '2025-12-03', 'consult anual'),
+  (16, DATE '2026-01-15', 'deparazitare interna'),
+  (17, DATE '2026-02-20', 'taiat cioc si gheare'),
+  (18, DATE '2026-03-05', 'vaccin trivalent'),
+  (19, DATE '2026-03-18', 'operatie picior posterior'),
+  (20, DATE '2026-04-02', 'control general'),
+  (21, DATE '2026-04-10', 'sterilizare'),
+  (22, DATE '2025-10-22', 'control piele si scuame'),
+  (23, DATE '2025-11-30', 'vaccin trivalent'),
+  (24, DATE '2026-02-14', 'verificare habitat'),
+  (25, DATE '2026-03-22', 'tratament alergie'),
+  (26, DATE '2026-04-15', 'control'),
+  (27, DATE '2026-04-20', 'examen dentar'),
+  (28, DATE '2026-04-25', 'vaccin antirabic'),
+  (29, DATE '2026-04-28', 'potcoavit'),
+  (30, DATE '2026-05-01', 'control penaj'),
+  (31, DATE '2026-05-02', 'rana la laba anterioara'),
+  (14, DATE '2026-05-02', 'control follow-up post-vaccin'),
+  (19, DATE '2026-05-03', 'scoatere fire chirurgicale'),
+  (1,  DATE '2026-05-03', 'control general anual');
+
 INSERT INTO users (username, password, enabled) VALUES
   ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
 
