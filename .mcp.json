@@ -8,6 +8,14 @@
         "--transport", "stdio",
         "--dsn", "postgres://petclinic:petclinic@localhost:5432/petclinic"
       ]
+    },
+    "grafana": {
+      "command": "mcp-grafana",
+      "env": {
+        "GRAFANA_URL": "http://localhost:3300",
+        "GRAFANA_USERNAME": "admin",
+        "GRAFANA_PASSWORD": "admin"
+      }
     }
   }
 }
