@@ -36,6 +36,10 @@
             <artifactId>embedded-postgres</artifactId>
             <version>2.0.7</version>
         </dependency>
+        <dependency>
+            <groupId>io.zonky.test.postgres</groupId>
+            <artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
