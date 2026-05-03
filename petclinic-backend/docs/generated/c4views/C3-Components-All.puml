@@ -27,12 +27,12 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
 
 }
 
+Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.RESTLayer, "", $techn="", $tags="", $link="")
-Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
-Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.MapperLayer, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.MapperLayer, "", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes
