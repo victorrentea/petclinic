@@ -37,8 +37,18 @@ class InvoiceServiceTest {
 
     @Test
     void multipleItems_sum() {
-        Item a = Item.builder().name("A").price(new BigDecimal("10")).quantity(2).discount(new BigDecimal("1")).build();
-        Item b = Item.builder().name("B").price(new BigDecimal("5.50")).quantity(4).discount(BigDecimal.ZERO).build();
+        Item a = Item.builder()
+            .name("A")
+            .price(new BigDecimal("10"))
+            .quantity(2)
+            .discount(new BigDecimal("1"))
+            .build();
+        Item b = Item.builder()
+            .name("B")
+            .price(new BigDecimal("5.50"))
+            .quantity(4)
+            .discount(BigDecimal.ZERO)
+            .build();
 
         BigDecimal total = service.calculateTotal(List.of(a, b));
 
