@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.mapper.PetMapper;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.repository.PetRepository;
-import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
