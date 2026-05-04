@@ -10,4 +10,8 @@ public record Item(
     BigDecimal price,
     int quantity,
     BigDecimal discount
-) {}
+) {
+    public BigDecimal lineTotal() {
+        return null;
+    }
+}
