@@ -46,36 +46,25 @@ test.describe('Owners Page', () => {
     expect(ApiClient.sorted(actualFullNames)).toEqual(ApiClient.sorted(expectedFullNames));
   });
 
-  test('filters owners by last name prefix', async ({ page }) => {
-    // Fetch all owners and choose a prefix
+  test('filters owners by substring across multiple fields', async ({ page }) => {
     const allOwners = await apiClient.fetchOwners();
-    const prefix = ApiClient.choosePrefixFrom(allOwners);
+    const query = ApiClient.choosePrefixFrom(allOwners); // a 2-letter substring drawn from real data
 
-    // Fetch filtered owners from API
-    const expectedFilteredOwners = await apiClient.fetchOwnersByPrefix(prefix);
+    const expectedFilteredOwners = await apiClient.fetchOwnersByQuery(query);
     const expectedFilteredFullNames = ApiClient.getFullNames(expectedFilteredOwners);
 
-    // Open the owners page
     const ownersPage = new OwnersPage(page);
     await ownersPage.open();
 
-    // Perform search
-    await ownersPage.searchByLastNamePrefix(prefix);
+    await ownersPage.search(query);
     await ownersPage.waitForOwnersCount(expectedFilteredFullNames.length);
 
-    // Get filtered results
     const actualFilteredFullNames = await ownersPage.getOwnerFullNames();
 
-    // Assertions
     expect(actualFilteredFullNames.length).toBeGreaterThan(0);
-
-    // Verify all results match the prefix
-    for (const fullName of actualFilteredFullNames) {
-      const lastName = ApiClient.extractLastName(fullName);
-      expect(lastName.toLowerCase()).toMatch(new RegExp(`^${prefix.toLowerCase()}`));
-    }
-
-    // Verify exact match with API results
+    // Substring match anywhere in the full name OR any other displayed field; we only
+    // assert exact equivalence with the API's filtered set, since the regex `^prefix`
+    // check no longer holds (matches can come from address/city/phone, not just lastName).
     expect(ApiClient.sorted(actualFilteredFullNames)).toEqual(
       ApiClient.sorted(expectedFilteredFullNames)
     );

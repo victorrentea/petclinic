@@ -127,16 +127,27 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithAddressFilter() throws Exception {
+    void getAllWithLastNameSubstring() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?q=java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void getAllWithMultiFieldFilter() throws Exception {
+        // The default fixture owner (George Franklin) has city = "London" via TestData.anOwner().
+        // A query that does not match any name but matches the city should still return him.
+        List<OwnerDto> owners = search("/api/owners?q=lond");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getFirstName, OwnerDto::getLastName)
+            .contains(Assertions.tuple("George", "Franklin"));
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -152,8 +163,8 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+    void getAllWithFilter_notFound() throws Exception {
+        List<OwnerDto> results = search("/api/owners?q=NonExistent");
 
         assertThat(results).isEmpty();
     }

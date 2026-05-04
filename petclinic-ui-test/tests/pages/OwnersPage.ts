@@ -3,16 +3,14 @@ import { Page, Locator } from '@playwright/test';
 export class OwnersPage {
   readonly page: Page;
   readonly pageTitle: Locator;
-  readonly lastNameInput: Locator;
-  readonly findOwnerButton: Locator;
+  readonly searchInput: Locator;
   readonly ownerNameCells: Locator;
   readonly ownersTable: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.pageTitle = page.locator('h2:has-text("Owners")');
-    this.lastNameInput = page.locator('#lastName');
-    this.findOwnerButton = page.locator('#search-owner-form button[type="submit"]');
+    this.searchInput = page.locator('#ownerSearch');
     this.ownerNameCells = page.locator('#ownersTable td.ownerFullName');
     this.ownersTable = page.locator('#ownersTable');
   }
@@ -23,29 +21,24 @@ export class OwnersPage {
   }
 
   async getOwnerFullNames(): Promise<string[]> {
-    await this.page.waitForSelector('#ownersTable td.ownerFullName, #lastName', { timeout: 10000 });
-
+    await this.page.waitForSelector('#ownersTable td.ownerFullName, #ownerSearch', { timeout: 10000 });
     const elements = await this.ownerNameCells.all();
     const names: string[] = [];
-
     for (const element of elements) {
       const text = await element.textContent();
       if (text && text.trim()) {
         names.push(text.trim());
       }
     }
-
     return names;
   }
 
-  async searchByLastNamePrefix(prefix: string) {
-    await this.lastNameInput.waitFor({ state: 'visible' });
-    await this.lastNameInput.clear();
-    await this.lastNameInput.fill(prefix);
-    await this.lastNameInput.press('Tab');
-
-    await this.findOwnerButton.waitFor({ state: 'visible' });
-    await this.findOwnerButton.click();
+  async search(query: string) {
+    await this.searchInput.waitFor({ state: 'visible' });
+    await this.searchInput.clear();
+    await this.searchInput.fill(query);
+    // Wait past the 300 ms debounce so the request fires and the table updates.
+    await this.page.waitForTimeout(400);
   }
 
   async waitForOwnersCount(expectedCount: number) {
