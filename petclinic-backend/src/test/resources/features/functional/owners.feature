@@ -5,13 +5,13 @@ Feature: Owner management
     Then the response status is 201
     And the owner is searchable by last name "Rodriquez"
 
-  Scenario: Search owners by last name
+  Scenario: Search owners by substring across fields
     Given the following owners exist:
       | firstName | lastName  |
       | George    | Franklin  |
       | Betty     | Davis     |
       | Harold    | Davis     |
-    When I GET "/api/owners?lastName=Dav"
+    When I GET "/api/owners?q=Dav"
     Then the response status is 200
     And the response JSON array has size 2
     And every item in the response has "lastName" equal to "Davis"

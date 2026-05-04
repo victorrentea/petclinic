@@ -49,7 +49,7 @@ public class OwnerSteps {
     public void theOwnerIsSearchableByLastName(String lastName) {
         var response = RestAssured.given()
             .baseUri(http.baseUri())
-            .get("/api/owners?lastName=" + lastName);
+            .get("/api/owners?q=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
         List<String> lastNames = response.jsonPath().getList("lastName", String.class);
         assertThat(lastNames).contains(lastName);
