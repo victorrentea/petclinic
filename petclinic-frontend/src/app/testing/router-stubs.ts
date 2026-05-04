@@ -4,7 +4,8 @@ export {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router'
 import {Component, Directive, HostListener, Injectable, Input} from '@angular/core';
 import {NavigationExtras} from '@angular/router';
 // Only implements params and part of snapshot.params
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
+import {convertToParamMap} from '@angular/router';
 
 @Directive({
   selector: '[appRouterLink]',
@@ -52,6 +53,8 @@ export class ActivatedRouteStub {
   // ActivatedRoute.snapshot.params
   get snapshot() {
     this.testParams = {id: 1};
-    return {params: this.testParams};
+    return {params: this.testParams, queryParams: {}};
   }
+
+  queryParamMap = of(convertToParamMap({}));
 }
