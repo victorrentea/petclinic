@@ -3,6 +3,29 @@ set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
 
+echo "[pre-commit] Checking line length (max 120) on staged Java files..."
+violations=$(git -C "$ROOT" diff --cached --unified=0 --diff-filter=AM -- '*.java' | awk '
+  /^diff --git / {
+    file = $0
+    sub(/^diff --git a\//, "", file)
+    sub(/ b\/.*$/, "", file)
+    next
+  }
+  /^\+\+\+/ { next }
+  /^\+/ {
+    line = substr($0, 2)
+    if (length(line) > 120) {
+      printf "  %s: %d chars: %s\n", file, length(line), line
+      found = 1
+    }
+  }
+  END { exit found ? 1 : 0 }
+') || {
+  echo "[pre-commit] FAILED: staged lines over 120 characters:"
+  echo "$violations"
+  exit 1
+}
+
 echo "[pre-commit] Regenerating architecture artifacts..."
 cd "$ROOT/petclinic-backend"
 mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest
