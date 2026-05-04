@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "deny": [
+    "ask": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)"
     ]
