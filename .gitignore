@@ -1,67 +1,65 @@
-/.DS_Store
-/.idea
+# OS / IDE (apply to any module)
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+.java-version
+.tool-versions
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Maven / Java build output (any module)
+target/
+**/.jqwik-database
+
+# petclinic-backend top-level generated/ (NOT docs/generated which is committed)
+petclinic-backend/generated/
+
+# Node (any module)
+node_modules/
+
+# git worktrees
+.worktrees/
 
 # petclinic-database (embedded Postgres)
-petclinic-database/target/
 petclinic-database/data/
-petclinic-database/.bootstrapped
 petclinic-database/dependency-reduced-pom.xml
 
-# petclinic-angular
+# petclinic-ui-test (Playwright)
+petclinic-ui-test/test-results/
+petclinic-ui-test/playwright-report/
+petclinic-ui-test/playwright/.cache/
+
+# petclinic-frontend (Angular)
 petclinic-frontend/dist
 petclinic-frontend/tmp
 petclinic-frontend/out-tsc
-petclinic-frontend/node_modules
-petclinic-frontend/.idea
-petclinic-frontend/.project
-petclinic-frontend/.classpath
 petclinic-frontend/.angular
-petclinic-frontend/.c9/
-petclinic-angular/*.launch
-petclinic-frontend/.settings/
-petclinic-angular/*.sublime-workspace
-petclinic-frontend/.vscode/*
-!petclinic-frontend/.vscode/settings.json
-!petclinic-frontend/.vscode/tasks.json
-!petclinic-frontend/.vscode/launch.json
-!petclinic-frontend/.vscode/extensions.json
 petclinic-frontend/.angular/cache
 petclinic-frontend/.sass-cache
+petclinic-frontend/.c9/
 petclinic-frontend/connect.lock
 petclinic-frontend/coverage
 petclinic-frontend/libpeerconnection.log
 petclinic-frontend/npm-debug.log
 petclinic-frontend/testem.log
 petclinic-frontend/typings
-petclinic-angular/e2e/*.js
-petclinic-angular/e2e/*.map
-petclinic-frontend/.DS_Store
-petclinic-frontend/Thumbs.db
-petclinic-angular/*.iml
 
 # petclinic-backend
-petclinic-backend/target
-petclinic-backend/.settings/*
-petclinic-backend/.classpath
-petclinic-backend/.project
-petclinic-backend/.idea
-petclinic-backend/*.iml
-petclinic-backend/generated/
-petclinic-backend/.java-version
-petclinic-backend/.DS_Store
-petclinic-backend/.tool-versions
-petclinic-backend/.factorypath
 petclinic-backend/src/test/postman/reports/
-__pycache__/**
-/qa/node_modules
-/qa/test-results/screenshots/filters_owners_by_last_name_prefix_2026-04-06T19-07-55-694Z.png
-/qa/test-results/screenshots/shows_all_owners_on_initial_load_2026-04-06T19-07-55-564Z.png
-.github/skills
-petclinic-backend/.jqwik-database
-
-# git worktrees
-.worktrees/
-
-# Local OpenTelemetry agent cache
 petclinic-backend/.tools/
+
+# qa
+/qa/test-results/screenshots/
+
+# misc
+__pycache__/
+.github/skills
 /.playwright-mcp

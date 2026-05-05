@@ -17,7 +17,7 @@ public class PostgresLauncher {
 
     public static void main(String[] args) throws Exception {
         Path dataDir = Path.of("data").toAbsolutePath();
-        Path marker  = Path.of(".bootstrapped").toAbsolutePath();
+        boolean firstRun = !Files.exists(dataDir.resolve("PG_VERSION"));
 
         EmbeddedPostgres pg = EmbeddedPostgres.builder()
                 .setPort(5432)
@@ -25,9 +25,8 @@ public class PostgresLauncher {
                 .setCleanDataDirectory(false)
                 .start();
 
-        if (!Files.exists(marker)) {
+        if (firstRun) {
             bootstrap(pg);
-            Files.writeString(marker, "ok\n");
             System.out.println("Bootstrap complete: created role + database '" + DB_NAME + "'");
         }
 

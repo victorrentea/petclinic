@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
-public class MyOpenAPIDidNotChangeTest {
+public class OpenApiInSyncTest {
     @Value("file:${user.dir}/../openapi.yaml")
     Resource contractFile;
     @Test
