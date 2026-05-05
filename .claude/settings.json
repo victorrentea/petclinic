@@ -4,7 +4,24 @@
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
       "Bash(git add .githooks*)",
-      "Edit(.githooks/*)"
+      "Edit(.githooks/*)",
+      "Edit(petclinic-backend/docs/*)",
+      "Edit(openapi.yaml)",
+      "Write(openapi.yaml)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -q 'db/migration/.*[.]sql' && /Users/victorrentea/workspace/petclinic/scripts/dump-schema.sh 2>/dev/null || true",
+            "statusMessage": "Updating db.sql schema dump..."
+          }
+        ]
+      }
     ]
   }
 }

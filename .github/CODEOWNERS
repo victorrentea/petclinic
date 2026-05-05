@@ -1,6 +1,9 @@
 # Files mirrored from .claude/settings.json "ask" rules — any PR touching these requires Elders approval.
 # Note: team format is @org/team-slug.
 
+# API contract (Claude must ask before editing)
+/openapi.yaml @victorrentea/elders
+
 # Git hooks (Claude must ask before editing)
 /.githooks/ @victorrentea/elders
 
@@ -10,4 +13,5 @@
 # Meta-protection: the rules themselves require approval to change
 /.github/CODEOWNERS @victorrentea/elders
 /.claude/settings.json @victorrentea/elders
+/petclinic-backend/pom.xml @victorrentea/elders
 
