@@ -6,51 +6,6 @@ caption Generated from JPA annotations
 hide empty members
 skinparam classAttributeIconSize 0
 
-class Owner {
-  id : Integer
-  firstName : String
-  lastName : String
-  address : String
-  city : String
-  telephone : String
-}
-class Pet {
-  id : Integer
-  name : String
-  birthDate : LocalDate
-}
-class PetType {
-  id : Integer
-  name : String
-}
-class Role {
-  id : Integer
-  name : String
-}
-class Specialty {
-  id : Integer
-  name : String
-}
-class User {
-  username : String
-  password : String
-  enabled : Boolean
-}
-class Vet {
-  id : Integer
-  firstName : String
-  lastName : String
-}
-class Visit {
-  id : Integer
-  date : LocalDate
-  description : String
-}
 
-PetType "1" -- "0..*" Pet : type
-Owner "1" -- "0..*" Pet : owner
-User "1" -- "0..*" Role : user
-Vet "0..*" -- "0..*" Specialty : specialties
-Pet "1" -- "0..*" Visit : pet
 
 @enduml

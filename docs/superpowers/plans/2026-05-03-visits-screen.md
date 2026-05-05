@@ -209,9 +209,9 @@ package org.springframework.samples.petclinic.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.samples.petclinic.model.Visit;
-import org.springframework.samples.petclinic.rest.dto.VisitDto;
-import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
+import model.ro.victorrentea.petclinic.Visit;
+import dto.rest.ro.victorrentea.petclinic.VisitDto;
+import dto.rest.ro.victorrentea.petclinic.VisitFieldsDto;
 
 import java.util.List;
 
@@ -282,7 +282,7 @@ package org.springframework.samples.petclinic.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import org.springframework.samples.petclinic.model.Visit;
+import model.ro.victorrentea.petclinic.Visit;
 
 import java.util.List;
 import java.util.Optional;
