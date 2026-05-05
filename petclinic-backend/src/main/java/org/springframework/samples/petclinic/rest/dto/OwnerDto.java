@@ -7,13 +7,25 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class OwnerDto {
+
+    public OwnerDto(Integer id, String firstName, String lastName, String address, String city, String telephone) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.city = city;
+        this.telephone = telephone;
+    }
+
     @Min(0)
     @Nullable
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the pet owner.")

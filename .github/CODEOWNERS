@@ -1,4 +1,13 @@
-# Require Elders review for manual architecture diagram updates.
+# Files mirrored from .claude/settings.json "ask" rules — any PR touching these requires Elders approval.
 # Note: team format is @org/team-slug.
-/petclinic-backend/docs/packages.puml @victorrentea/elders
+
+# Git hooks (Claude must ask before editing)
+/.githooks/ @victorrentea/elders
+
+# Architecture docs (Claude must ask before editing)
+/petclinic-backend/docs/ @victorrentea/elders
+
+# Meta-protection: the rules themselves require approval to change
+/.github/CODEOWNERS @victorrentea/elders
+/.claude/settings.json @victorrentea/elders
 

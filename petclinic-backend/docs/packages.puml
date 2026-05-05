@@ -13,6 +13,7 @@ caption All lines are ArchUnit-tested to be reflected in code.
 [Security] <<..security>>
 
 [Repository] --> [Model]
+[Repository] --> [DTO]
 [Mapper] --> [Model]
 [Mapper] --> [DTO]
 [REST] --> [Model]

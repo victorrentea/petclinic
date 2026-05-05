@@ -1,8 +1,11 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
@@ -16,6 +19,7 @@ import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerFieldsDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerPageDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
@@ -54,11 +58,28 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners — paginated and sorted")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "q", required = false) String q) {
-        List<Owner> owners = (q != null) ? ownerRepository.search(q) : ownerRepository.findAll();
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "NAME") OwnerSortField sort,
+            @RequestParam(name = "direction", defaultValue = "ASC") Sort.Direction direction) {
+
+        Pageable pageable = PageRequest.of(page, size, sort.toSort(direction));
+
+        Page<OwnerDto> ownerPage = (q != null)
+            ? ownerRepository.search(q, pageable)
+            : ownerRepository.findAll(pageable);
+
+        OwnerPageDto result = new OwnerPageDto();
+        result.setContent(ownerPage.getContent());
+        result.setTotalElements(ownerPage.getTotalElements());
+        result.setTotalPages(ownerPage.getTotalPages());
+        result.setNumber(ownerPage.getNumber());
+        result.setSize(ownerPage.getSize());
+        return result;
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
