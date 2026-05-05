@@ -19,9 +19,6 @@ Thumbs.db
 target/
 **/.jqwik-database
 
-# petclinic-backend top-level generated/ (NOT docs/generated which is committed)
-petclinic-backend/generated/
-
 # Node (any module)
 node_modules/
 
