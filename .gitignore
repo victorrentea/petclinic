@@ -1,3 +1,7 @@
+# Secrets (defense-in-depth; gitleaks is the primary guard in pre-commit)
+*.env
+!**/.env.example
+
 # OS / IDE (apply to any module)
 .DS_Store
 Thumbs.db

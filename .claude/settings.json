@@ -7,7 +7,9 @@
       "Edit(.githooks/*)",
       "Edit(petclinic-backend/docs/*)",
       "Edit(openapi.yaml)",
-      "Write(openapi.yaml)"
+      "Write(openapi.yaml)",
+      "Edit(.github/workflows/*)",
+      "Write(.github/workflows/*)"
     ]
   }
 }

@@ -3,6 +3,20 @@ set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
 
+# ── Secrets scan (gitleaks) ────────────────────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] Scanning staged changes for secrets (gitleaks)..."
+  if ! gitleaks protect --staged --redact --no-banner; then
+    echo ""
+    echo "[pre-commit] ❌ Secrets detected in staged changes — commit blocked."
+    echo "[pre-commit]    Remove the secret, rotate it if it was real, then re-stage."
+    exit 1
+  fi
+else
+  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secret scan."
+  echo "[pre-commit]    Install with: brew install gitleaks"
+fi
+
 echo "[pre-commit] Regenerating architecture artifacts..."
 cd "$ROOT/petclinic-backend"
 mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest
