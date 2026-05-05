@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git commit --no-verify*)",
+      "Bash(git push --no-verify*)",
+      "Bash(git add .githooks*)",
+      "Edit(.githooks/*)",
+      "Edit(petclinic-backend/docs/*)",
+      "Edit(openapi.yaml)",
+      "Write(openapi.yaml)"
+    ]
+  }
+}

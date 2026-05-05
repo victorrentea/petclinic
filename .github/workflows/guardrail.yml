@@ -1,4 +1,4 @@
-name: Architecture Drift Check
+name: Guardrail Drift Check
 
 on:
   push:
@@ -28,32 +28,43 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Install PostgreSQL 16 client (pg_dump for DbSchemaSyncTest)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+          pg_dump --version
+
       - name: Run backend tests
         working-directory: petclinic-backend
         run: ./mvnw test
 
-      - name: Detect drift in generated diagrams
+      - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated; then
+          if git diff --quiet petclinic-backend/docs/generated db.sql; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated
+            git --no-pager diff --stat petclinic-backend/docs/generated db.sql
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated diagrams under petclinic-backend/docs/generated are out of date."
-          echo "::error::Run 'cd petclinic-backend && ./mvnw test -Dtest=C4ModelExtractor,DomainModelExtractor' locally and push the regenerated files."
+          echo "::error::Generated artifacts (docs/generated/ or db.sql) are out of date."
+          echo "::error::Run 'cd petclinic-backend && ./mvnw test' locally and push the regenerated files."
           exit 1
 
-      - name: Auto-commit regenerated diagrams
+      - name: Auto-commit regenerated artifacts
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork != true
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated
-          git commit -m 'chore(arch): regenerate architecture diagrams [skip ci]'
+          git add petclinic-backend/docs/generated db.sql
+          git commit -m 'chore(guardrail): regenerate diagrams and db.sql [skip ci]'
           git push

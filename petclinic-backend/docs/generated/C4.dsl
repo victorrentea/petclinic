@@ -5,7 +5,23 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian = person "Veterinarian" "Provides veterinary care"
         petclinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "React"
-            backend = container "Backend" "REST API" "Java / Spring Boot"
+            backend = container "Backend" "REST API" "Java / Spring Boot" {
+                rest_layer = component "REST Layer" "HTTP endpoints, DTOs, error handlers" "Spring MVC" {
+                    tags "REST Layer"
+                }
+                domain_model = component "Domain Model" "JPA entities" "JPA" {
+                    tags "Domain Model"
+                }
+                repository_layer = component "Repository Layer" "Spring Data JPA repositories" "Spring Data" {
+                    tags "Repository Layer"
+                }
+                mapper_layer = component "Mapper Layer" "MapStruct mappers" "MapStruct" {
+                    tags "Mapper Layer"
+                }
+                security = component "Security" "Spring Security configuration" "Spring Security" {
+                    tags "Security"
+                }
+            }
             database = container "Database" "Stores all data" "H2 / PostgreSQL"
         }
 
@@ -15,6 +31,12 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
+        rest_layer -> repository_layer ""
+        rest_layer -> mapper_layer ""
+        rest_layer -> domain_model ""
+        repository_layer -> domain_model ""
+        mapper_layer -> domain_model ""
+        mapper_layer -> rest_layer ""
     }
 
     views {
@@ -28,6 +50,18 @@ workspace "PetClinic" "Veterinary practice management system" {
         }
         component backend "C3-Components-All" "All components inside Backend" {
             include *
+            autoLayout
+        }
+        component backend "C3-Repository" "Repository Layer — nearest neighbours" {
+            include rest_layer
+            include domain_model
+            include repository_layer
+            autoLayout
+        }
+        component backend "C3-Mapper" "Mapper Layer — nearest neighbours" {
+            include rest_layer
+            include domain_model
+            include mapper_layer
             autoLayout
         }
 

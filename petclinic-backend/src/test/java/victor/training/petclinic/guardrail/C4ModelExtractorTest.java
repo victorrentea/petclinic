@@ -1,4 +1,4 @@
-package victor.training.petclinic.architecture;
+package victor.training.petclinic.guardrail;
 
 import com.structurizr.Workspace;
 import com.structurizr.export.Diagram;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class C4ModelExtractorTest {
 
     // ── Project-specific config ───────────────────────────────────────────────
-    private static final String BASE_PKG       = "org.springframework.samples.petclinic";
+    private static final String BASE_PKG       = "victor.training.petclinic";
     private static final String WORKSPACE_NAME = "PetClinic";
     private static final String WORKSPACE_DESC = "Veterinary practice management system";
 

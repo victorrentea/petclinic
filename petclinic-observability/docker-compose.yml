@@ -9,7 +9,7 @@ services:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
     volumes:
-      - ./observability/otelcol-config.yaml:/otel-lgtm/otelcol-config.yaml:ro
+      - ./otelcol-config.yaml:/otel-lgtm/otelcol-config.yaml:ro
       - lgtm-data:/data
     extra_hosts:
       - "host.docker.internal:host-gateway"

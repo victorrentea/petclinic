@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/petclinic-observability"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "❌ Docker not found. Install Docker Desktop or Colima first." >&2

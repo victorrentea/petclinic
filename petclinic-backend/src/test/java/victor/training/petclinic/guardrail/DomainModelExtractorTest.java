@@ -1,4 +1,4 @@
-package victor.training.petclinic.architecture;
+package victor.training.petclinic.guardrail;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DomainModelExtractorTest {
 
-    private static final String BASE_PKG          = "org.springframework.samples.petclinic";
+    private static final String BASE_PKG          = "victor.training.petclinic";
     private static final String DOMAIN_MODEL_PKG  = BASE_PKG + ".model";
     private static final Path   GENERATED_DIR     = Paths.get("docs/generated");
 

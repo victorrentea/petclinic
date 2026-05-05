@@ -9,7 +9,6 @@ caption All lines are ArchUnit-tested to be reflected in code.
 [REST Error] <<..rest.error>>
 [Mapper] <<..mapper>>
 [REST] <<..rest>>
-[Invoice] <<..invoice>>
 [Security] <<..security>>
 
 [Repository] --> [Model]

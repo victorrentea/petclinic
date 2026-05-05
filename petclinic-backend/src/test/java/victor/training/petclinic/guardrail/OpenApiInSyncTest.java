@@ -1,4 +1,4 @@
-package victor.training.petclinic;
+package victor.training.petclinic.guardrail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

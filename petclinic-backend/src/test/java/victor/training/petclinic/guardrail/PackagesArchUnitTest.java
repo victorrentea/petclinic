@@ -1,4 +1,4 @@
-package victor.training.petclinic.architecture;
+package victor.training.petclinic.guardrail;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
@@ -22,13 +22,13 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AnalyzeClasses(
-    packages = "org.springframework.samples.petclinic",
+    packages = "victor.training.petclinic",
     importOptions = ImportOption.DoNotIncludeTests.class
 )
-class ArchitectureTest {
+class PackagesArchUnitTest {
 
     private static final Path DIAGRAM = Paths.get("docs/packages.puml");
-    private static final Path SOURCE_ROOT = Paths.get("src/main/java/org/springframework/samples/petclinic");
+    private static final Path SOURCE_ROOT = Paths.get("src/main/java/victor/training/petclinic");
 
     private static java.net.URL url(Path path) {
         try {
@@ -51,7 +51,7 @@ class ArchitectureTest {
         Set<String> codePackages = listCodePackages();
 
         assertThat(diagramPackages)
-            .as("packages.puml stereotypes must match the actual subpackages of org.springframework.samples.petclinic exactly")
+            .as("packages.puml stereotypes must match the actual subpackages of victor.training.petclinic exactly")
             .isEqualTo(codePackages);
     }
 
@@ -71,7 +71,7 @@ class ArchitectureTest {
         try (Stream<Path> paths = Files.walk(SOURCE_ROOT)) {
             paths.filter(Files::isDirectory)
                 .filter(dir -> !dir.equals(SOURCE_ROOT))
-                .filter(ArchitectureTest::containsJavaFile)
+                .filter(PackagesArchUnitTest::containsJavaFile)
                 .forEach(dir -> result.add(SOURCE_ROOT.relativize(dir).toString().replace('/', '.')));
         }
         return result;

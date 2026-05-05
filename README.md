@@ -174,7 +174,7 @@ API documentation (OAS 3.1): [http://localhost:8080/v3/api-docs](http://localhos
 
 The backend follows the [API First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach: the OpenAPI spec at [`petclinic-backend/src/main/resources/openapi.yml`](petclinic-backend/src/main/resources/openapi.yml) is the source of truth. Build-time code generation produces:
 
-- DTO classes under `org.springframework.samples.petclinic.rest.dto`
+- DTO classes under `victor.training.petclinic.rest.dto`
 - API template interfaces that controllers implement
 
 Generated code lives in `target/generated-sources/`; controllers wire concrete behaviour onto the generated interfaces.
@@ -232,8 +232,8 @@ jmeter -n -t src/test/jmeter/petclinic-jmeter-crud-benchmark.jmx \
   -Jthreads=100 -Jduration=600 -l results/petclinic-test-results.jtl
 ```
 
-**Architecture Tests** (`./mvnw test` covers them by default):
-- `ArchitectureTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
+**Guardrail Tests** (`./mvnw test` covers them by default):
+- `PackagesArchUnitTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
 - `C4ModelExtractorTest` — regenerates `petclinic-backend/docs/generated/C4.dsl` and the C4 PlantUML/SVG views
 - `DomainModelExtractorTest` — regenerates `petclinic-backend/docs/generated/DomainModel.{puml,png}` from JPA annotations
 
@@ -349,8 +349,8 @@ Some backend classes are generated during build time:
 
 | Package | Tool |
 |---------|------|
-| `org.springframework.samples.petclinic.mapper` | MapStruct |
-| `org.springframework.samples.petclinic.rest.dto` | OpenAPI Generator |
+| `victor.training.petclinic.mapper` | MapStruct |
+| `victor.training.petclinic.rest.dto` | OpenAPI Generator |
 
 Run to generate:
 ```sh
