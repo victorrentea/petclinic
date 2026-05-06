@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.rest.dto;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.validation.Valid;

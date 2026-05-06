@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.model.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
-    List<Owner> findByLastNameStartingWith(String lastName);
 
     @Query("""
         SELECT o FROM Owner o

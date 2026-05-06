@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.samples.petclinic.model.Vet;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
