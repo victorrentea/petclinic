@@ -131,13 +131,13 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by query (multi-field substring)', () => {
+  it('search owners by last name prefix', () => {
     ownerService.searchOwners('Fr').subscribe((owners) => {
       expect(owners).toEqual(expectedOwners);
     });
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?q=Fr'
+      ownerService.entityUrl + '?lastName=Fr'
     );
     expect(req.request.method).toEqual('GET');
     req.flush(expectedOwners);
