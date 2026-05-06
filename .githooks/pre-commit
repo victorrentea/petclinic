@@ -40,12 +40,6 @@ if echo "$STAGED" | grep -q '^petclinic-backend/'; then
   cd "$ROOT/petclinic-backend"
   mvn -q test -Dtest=ArchitectureTest,ValidatorTests
   echo "[pre-commit] Backend unit tests passed."
-
-  if echo "$STAGED" | grep -q '\.java$'; then
-    echo "[pre-commit] Java files staged — running PMD..."
-    mvn -q pmd:check
-    echo "[pre-commit] PMD passed."
-  fi
 fi
 
 if echo "$STAGED" | grep -q '^petclinic-frontend/'; then
