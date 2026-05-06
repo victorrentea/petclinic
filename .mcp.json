@@ -10,8 +10,7 @@
       ]
     },
     "grafana": {
-      "command": "/opt/homebrew/bin/uvx",
-      "args": ["mcp-grafana"],
+      "command": "mcp-grafana",
       "env": {
         "GRAFANA_URL": "http://localhost:3300",
         "GRAFANA_USERNAME": "admin",

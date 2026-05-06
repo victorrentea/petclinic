@@ -30,13 +30,6 @@ class ArchitectureTest {
     private static final Path DIAGRAM = Paths.get("docs/packages.puml");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java/org/springframework/samples/petclinic");
 
-    @ArchTest
-    static final ArchRule adheresToDiagram =
-        classes().should(adhereToPlantUmlDiagram(
-            url(DIAGRAM),
-            consideringOnlyDependenciesInAnyPackage("..petclinic..")
-        ));
-
     private static java.net.URL url(Path path) {
         try {
             return path.toUri().toURL();
@@ -44,6 +37,13 @@ class ArchitectureTest {
             throw new RuntimeException(e);
         }
     }
+
+    @ArchTest
+    static final ArchRule adheresToDiagram =
+        classes().should(adhereToPlantUmlDiagram(
+            url(DIAGRAM),
+            consideringOnlyDependenciesInAnyPackage("..petclinic..")
+        ));
 
     @Test
     void diagramPackagesMatchCodePackages() throws IOException {

@@ -38,10 +38,6 @@ export class ActivatedRouteStub {
   private subject = new BehaviorSubject(this.testParams);
   params = this.subject.asObservable();
 
-  // Query params subject (used by owner-list)
-  private queryParamsSubject = new BehaviorSubject<{ [key: string]: string }>({});
-  queryParams = this.queryParamsSubject.asObservable();
-
   // Test parameters
   // tslint:disable-next-line:variable-name
   private _testParams: {};
@@ -52,10 +48,6 @@ export class ActivatedRouteStub {
   set testParams(params: {}) {
     this._testParams = params;
     this.subject.next(params);
-  }
-
-  setQueryParams(params: { [key: string]: string }) {
-    this.queryParamsSubject.next(params);
   }
 
   // ActivatedRoute.snapshot.params

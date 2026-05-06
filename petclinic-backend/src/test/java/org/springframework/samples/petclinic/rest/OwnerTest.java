@@ -28,7 +28,6 @@ import org.springframework.samples.petclinic.repository.OwnerRepository;
 import org.springframework.samples.petclinic.repository.PetRepository;
 import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
-import org.springframework.samples.petclinic.rest.dto.OwnerPageDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -120,9 +119,9 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        OwnerPageDto page = searchPaged("/api/owners?size=100");
+        List<OwnerDto> owners = search("/api/owners");
 
-        assertThat(page.getContent())
+        assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
             .contains(Assertions.tuple(ownerId, "George", "Franklin"));
     }
@@ -133,9 +132,9 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        OwnerPageDto page = searchPaged("/api/owners?q=java&size=100");
+        List<OwnerDto> owners = search("/api/owners?q=java");
 
-        assertThat(page.getContent())
+        assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
@@ -144,9 +143,9 @@ public class OwnerTest {
     void getAllWithMultiFieldFilter() throws Exception {
         // The default fixture owner (George Franklin) has city = "London" via TestData.anOwner().
         // A query that does not match any name but matches the city should still return him.
-        OwnerPageDto page = searchPaged("/api/owners?q=lond&size=100");
+        List<OwnerDto> owners = search("/api/owners?q=lond");
 
-        assertThat(page.getContent())
+        assertThat(owners)
             .extracting(OwnerDto::getFirstName, OwnerDto::getLastName)
             .contains(Assertions.tuple("George", "Franklin"));
     }
@@ -163,22 +162,11 @@ public class OwnerTest {
         });
     }
 
-    private OwnerPageDto searchPaged(String url) throws Exception {
-        String responseJson = mockMvc.perform(get(url))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-        return mapper.readValue(responseJson, OwnerPageDto.class);
-    }
-
     @Test
     void getAllWithFilter_notFound() throws Exception {
-        OwnerPageDto page = searchPaged("/api/owners?q=NonExistent");
+        List<OwnerDto> results = search("/api/owners?q=NonExistent");
 
-        assertThat(page.getContent()).isEmpty();
-        assertThat(page.getTotalElements()).isEqualTo(0);
+        assertThat(results).isEmpty();
     }
 
     @Test
@@ -322,78 +310,6 @@ public class OwnerTest {
                 .content(mapper.writeValueAsString(petDto))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void listPaged_defaultPagination() throws Exception {
-        OwnerPageDto page = searchPaged("/api/owners");
-
-        assertThat(page.getNumber()).isEqualTo(0);
-        assertThat(page.getSize()).isEqualTo(10);
-        assertThat(page.getContent()).isNotEmpty();
-        assertThat(page.getTotalElements()).isGreaterThan(0);
-        assertThat(page.getTotalPages()).isGreaterThanOrEqualTo(1);
-    }
-
-    @Test
-    void listPaged_explicitPageAndSize() throws Exception {
-        OwnerPageDto page = searchPaged("/api/owners?page=0&size=2");
-
-        assertThat(page.getNumber()).isEqualTo(0);
-        assertThat(page.getSize()).isEqualTo(2);
-        assertThat(page.getContent().size()).isLessThanOrEqualTo(2);
-    }
-
-    @Test
-    void listPaged_sortByName() throws Exception {
-        Owner ownerA = TestData.anOwner();
-        ownerA.setFirstName("Aaron");
-        ownerA.setLastName("Aardvark");
-        ownerA.setCity("Alpha");
-        ownerRepository.save(ownerA);
-
-        Owner ownerZ = TestData.anOwner();
-        ownerZ.setFirstName("Zack");
-        ownerZ.setLastName("Zephyr");
-        ownerZ.setCity("Zeta");
-        ownerRepository.save(ownerZ);
-
-        OwnerPageDto page = searchPaged("/api/owners?sort=name&direction=asc&size=100");
-
-        List<String> fullNames = page.getContent().stream()
-            .map(o -> o.getFirstName() + " " + o.getLastName())
-            .toList();
-        assertThat(fullNames).isSortedAccordingTo(String.CASE_INSENSITIVE_ORDER);
-    }
-
-    @Test
-    void listPaged_sortByCity() throws Exception {
-        Owner ownerA = TestData.anOwner();
-        ownerA.setCity("Amsterdam");
-        ownerRepository.save(ownerA);
-
-        Owner ownerZ = TestData.anOwner();
-        ownerZ.setCity("Zurich");
-        ownerRepository.save(ownerZ);
-
-        OwnerPageDto page = searchPaged("/api/owners?sort=city&direction=asc&size=100");
-
-        List<String> cities = page.getContent().stream()
-            .map(OwnerDto::getCity)
-            .toList();
-        assertThat(cities).isSortedAccordingTo(String.CASE_INSENSITIVE_ORDER);
-    }
-
-    @Test
-    void listPaged_invalidDirection_returns400() throws Exception {
-        mockMvc.perform(get("/api/owners?direction=sideways"))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void listPaged_invalidSort_returns400() throws Exception {
-        mockMvc.perform(get("/api/owners?sort=invalid"))
-            .andExpect(status().isBadRequest());
     }
 
 }

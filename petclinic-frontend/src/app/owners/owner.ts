@@ -9,11 +9,3 @@ export interface Owner {
   telephone: string;
   pets: Pet[];
 }
-
-export interface OwnerPage {
-  content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;  // current page (0-based)
-  size: number;
-}

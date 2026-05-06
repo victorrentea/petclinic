@@ -48,6 +48,9 @@ if echo "$STAGED" | grep -q '^petclinic-backend/'; then
   fi
 fi
 
-# Frontend Karma/Chrome tests are intentionally NOT run here — they take too
-# long for a pre-commit hook. Run them manually with `npm run test-headless`
-# in petclinic-frontend/ before pushing.
+if echo "$STAGED" | grep -q '^petclinic-frontend/'; then
+  echo "[pre-commit] Frontend changes detected — running unit tests..."
+  cd "$ROOT/petclinic-frontend"
+  npm run test-headless
+  echo "[pre-commit] Frontend unit tests passed."
+fi
