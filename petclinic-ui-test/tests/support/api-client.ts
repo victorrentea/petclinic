@@ -35,9 +35,9 @@ export class ApiClient {
     return response.data;
   }
 
-  async fetchOwnersByQuery(query: string): Promise<OwnerDto[]> {
+  async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
     const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { q: query }
+      params: { lastName: prefix }
     });
     return response.data;
   }
