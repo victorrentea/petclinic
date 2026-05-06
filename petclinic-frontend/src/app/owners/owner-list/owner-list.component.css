@@ -39,20 +39,41 @@ display:none;
 	margin-bottom: 16px;
 }
 
-.owners-pagination {
-	display: flex;
-	align-items: center;
-	gap: 12px;
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
-.owners-page-size {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.owners-page-size .form-control {
-	width: auto;
+.pagination-controls ul.pagination {
+  margin: 0;
+}
+
+.pagination-controls ul.pagination li.disabled a {
+  cursor: default;
+  color: #bbb;
+  background-color: #f5f5f5;
+}
+
+.pagination-controls label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.record-info {
+  color: #555;
+  white-space: nowrap;
+}
+
+.page-size-select {
+  width: auto;
 }
 
 @media (max-width: 576px) {

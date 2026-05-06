@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { OwnerService } from '../owner.service';
-import { Owner } from '../owner';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { OwnerService } from '../owner.service';
+import { Owner, OwnerPage } from '../owner';
 
 @Component({
   selector: 'app-owner-list',
@@ -13,13 +13,19 @@ import { debounceTime, distinctUntilChanged, skip, switchMap } from 'rxjs/operat
 })
 export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string;
-  owners: Owner[];
-  isOwnersDataReceived: boolean = false;
+  ownerPage: OwnerPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 10 };
+  isOwnersDataReceived = false;
+
+  q = '';
+  page = 0;
+  size = 10;
+  sort = 'name';
+  direction = 'asc';
 
   readonly searchControl = new FormControl('');
-  private searchSubject = new Subject<string>();
+  pageWindowNumbers: number[] = [];
+
   private subscription: Subscription;
-  private updatingUrl = false;
 
   constructor(
     private router: Router,
@@ -28,53 +34,110 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const initialQ = (this.route.snapshot.queryParams['q'] ?? '').trim();
-    if (initialQ) {
-      this.searchControl.setValue(initialQ, { emitEvent: false });
-    }
+    // Drive everything from queryParams via switchMap
+    this.subscription = this.route.queryParams.pipe(
+      switchMap(params => {
+        this.q = (params['q'] ?? '').trim();
+        this.page = +params['page'] || 0;
+        this.size = +params['size'] || 10;
+        this.sort = params['sort'] || 'name';
+        this.direction = params['direction'] || 'asc';
 
-    this.subscription = this.searchSubject.pipe(
-      switchMap(q => q ? this.ownerService.searchOwners(q) : this.ownerService.getOwners())
+        // Sync search input without triggering valueChanges → debounce cycle
+        if (this.searchControl.value !== this.q) {
+          this.searchControl.setValue(this.q, { emitEvent: false });
+        }
+
+        return this.ownerService.getOwnersPaged(this.q, this.page, this.size, this.sort, this.direction);
+      })
     ).subscribe(
-      owners => {
-        this.owners = owners;
+      page => {
+        this.ownerPage = page;
         this.isOwnersDataReceived = true;
+        this.buildPageWindow();
       },
       error => this.errorMessage = error as any
     );
 
+    // Search input debounce → navigate with page reset
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
-    ).subscribe(q => this.runSearch(q ?? ''));
+    ).subscribe(q => this.navigateTo({ q: q ?? '', page: 0 }));
+  }
 
-    this.runSearch(initialQ);
+  // ---- Navigation helpers ----
 
-    this.route.queryParamMap.pipe(skip(1)).subscribe(params => {
-      if (this.updatingUrl) {
-        return;
-      }
-      const q = (params.get('q') ?? '').trim();
-      this.searchControl.setValue(q, { emitEvent: false });
-      this.runSearch(q);
+  private navigateTo(overrides: Partial<{ q: string; page: number; size: number; sort: string; direction: string }>,
+                     replaceUrl = true) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        q: overrides.q ?? this.q,
+        page: overrides.page ?? this.page,
+        size: overrides.size ?? this.size,
+        sort: overrides.sort ?? this.sort,
+        direction: overrides.direction ?? this.direction
+      },
+      replaceUrl
     });
   }
 
-  private runSearch(q: string) {
-    const trimmed = q.trim();
-    this.updatingUrl = true;
-    this.router.navigate(['/owners'], {
-      queryParams: { q: trimmed || null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    }).finally(() => { this.updatingUrl = false; });
-
-    this.searchSubject.next(trimmed);
+  goToPage(p: number) {
+    this.navigateTo({ page: p }, false);
   }
 
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
-    this.searchSubject.complete();
+  onSizeChange(newSize: number) {
+    this.navigateTo({ size: newSize, page: 0 });
+  }
+
+  onSortHeader(column: string) {
+    if (this.sort === column) {
+      this.navigateTo({ direction: this.direction === 'asc' ? 'desc' : 'asc' });
+    } else {
+      this.navigateTo({ sort: column, direction: 'asc' });
+    }
+  }
+
+  // ---- Pagination ----
+
+  get isFirstPage(): boolean {
+    return this.page === 0;
+  }
+
+  get isLastPage(): boolean {
+    return this.page >= this.ownerPage.totalPages - 1;
+  }
+
+  get recordStart(): number {
+    return this.ownerPage.totalElements === 0 ? 0 : this.page * this.size + 1;
+  }
+
+  get recordEnd(): number {
+    return Math.min((this.page + 1) * this.size, this.ownerPage.totalElements);
+  }
+
+  private buildPageWindow() {
+    const total = this.ownerPage.totalPages;
+    if (total === 0) {
+      this.pageWindowNumbers = [];
+      return;
+    }
+    const windowSize = 5;
+    let start = Math.max(0, this.page - Math.floor(windowSize / 2));
+    let end = start + windowSize - 1;
+    if (end >= total) {
+      end = total - 1;
+      start = Math.max(0, end - windowSize + 1);
+    }
+    this.pageWindowNumbers = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  // ---- UI helpers ----
+
+  sortIcon(column: string): string {
+    if (this.sort !== column) return '';
+    return this.direction === 'asc' ? '🔼' : '🔽';
   }
 
   onSelect(owner: Owner) {
@@ -83,5 +146,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   addOwner() {
     this.router.navigate(['/owners/add']);
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 }

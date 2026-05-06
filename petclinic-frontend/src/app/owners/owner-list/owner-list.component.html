@@ -16,39 +16,80 @@
       </div>
     </form>
 
-    <div *ngIf="!owners || owners.length === 0">
+    <div *ngIf="isOwnersDataReceived && ownerPage.content.length === 0">
       No owners match "{{ searchControl.value }}"
     </div>
-    <div class="table-responsive" id="ownersTable" *ngIf="owners && owners.length > 0">
+
+    <div class="table-responsive" id="ownersTable" *ngIf="ownerPage.content.length > 0">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th class="sortable-header" (click)="onSortHeader('name')" style="cursor:pointer">
+            Name {{ sortIcon('name') }}
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th class="sortable-header" (click)="onSortHeader('city')" style="cursor:pointer">
+            City {{ sortIcon('city') }}
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+        <tr *ngFor="let owner of ownerPage.content">
+          <td class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+               (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a>
+          </td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-            <tr *ngFor="let pet of owner.pets">
-              {{ pet.name }}
-            </tr>
+            <span *ngFor="let pet of owner.pets">{{ pet.name }} </span>
           </td>
         </tr>
         </tbody>
       </table>
     </div>
-    <div>
-      <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+    <!-- Table footer row: Add Owner left, pagination right -->
+    <div *ngIf="isOwnersDataReceived" class="table-footer">
+
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+      <div *ngIf="ownerPage.totalPages > 0" class="pagination-controls">
+        <span *ngIf="ownerPage.totalElements > 0" class="record-info">
+          Records {{ recordStart }}-{{ recordEnd }} of {{ ownerPage.totalElements }}
+        </span>
+
+        <label for="pageSizeSelect">Rows per page:</label>
+        <select id="pageSizeSelect" class="form-control input-sm page-size-select"
+                [ngModel]="size"
+                (ngModelChange)="onSizeChange($event)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+        </select>
+
+        <ul class="pagination">
+          <li [class.disabled]="isFirstPage">
+            <a (click)="!isFirstPage && goToPage(0)" style="cursor:pointer">First</a>
+          </li>
+          <li [class.disabled]="isFirstPage">
+            <a (click)="!isFirstPage && goToPage(page - 1)" style="cursor:pointer">Prev</a>
+          </li>
+          <li *ngFor="let p of pageWindowNumbers" [class.active]="p === page">
+            <a (click)="goToPage(p)" style="cursor:pointer">{{ p + 1 }}</a>
+          </li>
+          <li [class.disabled]="isLastPage">
+            <a (click)="!isLastPage && goToPage(page + 1)" style="cursor:pointer">Next</a>
+          </li>
+          <li [class.disabled]="isLastPage">
+            <a (click)="!isLastPage && goToPage(ownerPage.totalPages - 1)" style="cursor:pointer">Last</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>

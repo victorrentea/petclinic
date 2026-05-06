@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Owner } from './owner';
+import { Owner, OwnerPage } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+const EMPTY_PAGE: OwnerPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 10 };
 
 @Injectable()
 export class OwnerService {
@@ -58,5 +60,21 @@ export class OwnerService {
     return this.http
       .get<Owner[]>(url)
       .pipe(catchError(this.handlerError('searchOwners', [])));
+  }
+
+  getOwnersPaged(
+    q: string, page: number, size: number, sort: string, direction: string
+  ): Observable<OwnerPage> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+    if (q) {
+      params = params.set('q', q);
+    }
+    return this.http
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(catchError(this.handlerError('getOwnersPaged', EMPTY_PAGE)));
   }
 }
