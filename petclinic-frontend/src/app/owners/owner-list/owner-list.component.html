@@ -2,24 +2,28 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form id="search-owner-form">
+    <form method="get"
+          id="search-owner-form">
       <div class="form-group">
-        <div class="control-group" id="searchGroup">
-          <label class="control-label" for="ownerSearch">Search </label>
+        <div class="control-group" id="lastNameGroup">
+          <label class="control-label">Last name </label>
           <div>
-            <input class="form-control" size="30" maxlength="80"
-                   id="ownerSearch" name="q"
-                   [formControl]="searchControl"
-                   placeholder="Type to search by name, city, address, phone…"/>
+            <input class="form-control" size="30"
+                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
           </div>
         </div>
       </div>
+      <div class="form-group">
+        <div>
+          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
+            Owner</button>
+        </div>
+      </div>
+
     </form>
 
-    <div *ngIf="!owners || owners.length === 0">
-      No owners match "{{ searchControl.value }}"
-    </div>
-    <div class="table-responsive" id="ownersTable" *ngIf="owners && owners.length > 0">
+    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
+    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
       <table class="table table-striped">
         <thead>
         <tr>
@@ -39,16 +43,16 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-            <tr *ngFor="let pet of owner.pets">
-              {{ pet.name }}
-            </tr>
-          </td>
+        <tr *ngFor="let pet of owner.pets">
+          {{ pet.name }}
+        </tr>
+        </td>
         </tr>
         </tbody>
       </table>
-    </div>
-    <div>
-      <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <div>
+        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      </div>
     </div>
   </div>
 </div>
