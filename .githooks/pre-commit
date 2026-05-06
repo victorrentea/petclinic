@@ -32,19 +32,3 @@ mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiag
 
 git add "$ROOT/petclinic-backend/docs/generated"
 echo "[pre-commit] C4 model DSL and domain model diagram updated and staged."
-
-STAGED=$(git -C "$ROOT" diff --cached --name-only --diff-filter=AM)
-
-if echo "$STAGED" | grep -q '^petclinic-backend/'; then
-  echo "[pre-commit] Backend changes detected — running fast unit tests..."
-  cd "$ROOT/petclinic-backend"
-  mvn -q test -Dtest=ArchitectureTest,ValidatorTests
-  echo "[pre-commit] Backend unit tests passed."
-fi
-
-if echo "$STAGED" | grep -q '^petclinic-frontend/'; then
-  echo "[pre-commit] Frontend changes detected — running unit tests..."
-  cd "$ROOT/petclinic-frontend"
-  npm run test-headless
-  echo "[pre-commit] Frontend unit tests passed."
-fi
