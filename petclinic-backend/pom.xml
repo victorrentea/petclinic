@@ -22,6 +22,7 @@
         <!-- Third-party libraries -->
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <gatling.version>3.13.1</gatling.version>
     </properties>
 
     <dependencies>
@@ -90,6 +91,13 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Test libs -->
@@ -227,6 +235,14 @@
                             <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>${gatling.version}</version>
+                <configuration>
+                    <simulationClass>org.springframework.samples.petclinic.gatling.OwnerSearchSimulation</simulationClass>
                 </configuration>
             </plugin>
         </plugins>

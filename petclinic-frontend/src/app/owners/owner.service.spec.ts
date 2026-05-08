@@ -55,6 +55,7 @@ describe('OwnerService', () => {
 
     const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
+    expect(req.request.params.keys().length).toBe(0);
     req.flush(expectedOwners);
   });
 
@@ -131,15 +132,39 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
+  it('search owners with q parameter', () => {
+    ownerService.getOwners('Fr').subscribe((owners) => {
       expect(owners).toEqual(expectedOwners);
     });
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
+      ownerService.entityUrl + '?q=Fr'
     );
     expect(req.request.method).toEqual('GET');
+    expect(req.request.params.has('q')).toBe(true);
+    expect(req.request.params.get('q')).toBe('Fr');
+    req.flush(expectedOwners);
+  });
+
+  it('getOwners without q parameter should not include q in request', () => {
+    ownerService.getOwners().subscribe((owners) => {
+      expect(owners).toEqual(expectedOwners);
+    });
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+    expect(req.request.params.has('q')).toBe(false);
+    req.flush(expectedOwners);
+  });
+
+  it('getOwners with empty string should not include q in request', () => {
+    ownerService.getOwners('').subscribe((owners) => {
+      expect(owners).toEqual(expectedOwners);
+    });
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+    expect(req.request.params.has('q')).toBe(false);
     req.flush(expectedOwners);
   });
 });

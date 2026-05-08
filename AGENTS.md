@@ -84,9 +84,7 @@ The C4 DSL can be rendered at [structurizr.com](https://structurizr.com) or with
 Focus views (RepositoryFocus, MapperFocus) show only a component plus its direct incoming and outgoing dependencies.
 
 ### Database
-- **Default:** H2 in-memory (auto-populated)
-  - Console: http://localhost:8080/h2-console (`jdbc:h2:mem:petclinic`, user: `sa`, no password)
-- **Alternative:** PostgreSQL via `spring.profiles.active=postgres` + `docker-compose --profile postgres up`
+- **PostgreSQL** via `docker-compose --profile postgres up`
 
 ### Security
 - Disabled by default

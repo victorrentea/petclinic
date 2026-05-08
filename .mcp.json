@@ -16,6 +16,13 @@
         "GRAFANA_USERNAME": "admin",
         "GRAFANA_PASSWORD": "admin"
       }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp"
+      ]
     }
   }
 }

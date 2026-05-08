@@ -23,11 +23,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
+  getOwners(q?: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -38,7 +34,6 @@ describe('OwnerListComponent', () => {
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -81,8 +76,6 @@ describe('OwnerListComponent', () => {
     ownerService = fixture.debugElement.injector.get(OwnerService);
     getOwnersSpy = spyOn(ownerService, 'getOwners')
       .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
 
   });
 
@@ -90,9 +83,14 @@ describe('OwnerListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call ngOnInit() method', () => {
+  it('should call ngOnInit() method', (done) => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    
+    // Wait for debounce and initial load
+    setTimeout(() => {
+      expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+      done();
+    }, 500);
   });
 
 
@@ -106,24 +104,32 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
+  it('onSearchInput should trigger search with debounce', (done) => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
+    component.onSearchInput('Franklin');
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+    // Should not call immediately (debounced)
+    expect(getOwnersSpy.calls.count()).toBe(0);
+
+    // Wait for debounce time (400ms) + buffer
+    setTimeout(() => {
+      expect(getOwnersSpy).toHaveBeenCalledWith('Franklin');
+      done();
+    }, 500);
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('onSearchInput should call getOwners with undefined for empty term', (done) => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('Fr');
+    component.onSearchInput('');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    setTimeout(() => {
+      expect(getOwnersSpy).toHaveBeenCalledWith(undefined);
+      done();
+    }, 500);
   });
 
 });

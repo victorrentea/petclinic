@@ -63,7 +63,7 @@ The backend follows Spring Boot layered architecture with clear separation of co
 - **Spring Boot**: Application framework
 - **Spring Data JPA**: Database access and ORM
 - **Hibernate**: JPA implementation
-- **PostgreSQL/H2**: Database (PostgreSQL for production, H2 for testing)
+- **PostgreSQL**: Database
 - **Lombok**: Reduces boilerplate code with annotations
 - **MapStruct**: Type-safe bean mapping
 - **Jakarta Validation**: Bean validation annotations
@@ -873,21 +873,6 @@ CREATE INDEX idx_reviews_vet_id ON reviews(vet_id);
 CREATE INDEX idx_reviews_created_at ON reviews(created_at DESC);
 ```
 
-**DDL (H2 for testing)**:
-```sql
-CREATE TABLE reviews (
-    id INTEGER AUTO_INCREMENT PRIMARY KEY,
-    vet_id INTEGER NOT NULL,
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    feedback VARCHAR(500),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (vet_id) REFERENCES vets(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_reviews_vet_id ON reviews(vet_id);
-CREATE INDEX idx_reviews_created_at ON reviews(created_at DESC);
-```
-
 #### Database Migration
 
 **Migration File**: `src/main/resources/db/migration/V{version}__add_reviews_table.sql`
@@ -919,8 +904,7 @@ The Review entity represents a single user review of a veterinarian.
 - `@PrePersist`: Automatically sets createdAt before insert
 
 **Storage**:
-- PostgreSQL database (production)
-- H2 database (testing)
+- PostgreSQL database
 - Indexed on `vet_id` for efficient queries
 - Indexed on `created_at` for sorting
 
@@ -1257,7 +1241,7 @@ const review = fc.record({
 Backend unit tests will use JUnit 5, Mockito, and AssertJ for testing individual components in isolation.
 
 **Repository Tests**:
-- Test custom queries with in-memory H2 database
+- Test custom queries with embedded PostgreSQL database
 - Verify sorting and filtering logic
 - Test aggregation queries (average rating, count)
 
@@ -1335,7 +1319,7 @@ class ReviewServiceTest {
 
 #### Integration Testing
 
-Integration tests will use Spring Boot Test with TestContainers for PostgreSQL or in-memory H2 database.
+Integration tests will use Spring Boot Test with TestContainers for PostgreSQL.
 
 **REST API Integration Tests**:
 - Test full request-response cycle
@@ -1566,7 +1550,7 @@ static Stream<String> maliciousInputs() {
 
 #### Repository Testing
 
-Repository tests will use `@DataJpaTest` with H2 in-memory database for fast, isolated testing.
+Repository tests will use `@DataJpaTest` with embedded PostgreSQL database for fast, isolated testing.
 
 **Example Repository Test**:
 ```java

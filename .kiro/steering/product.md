@@ -11,6 +11,14 @@ Pet Clinic is a full-stack veterinary clinic management application demonstratin
 - **Frontend**: Angular SPA (TypeScript)
 - **Database**: H2 (dev), PostgreSQL (prod)
 
+## User Personas
+
+- **Receptionist** — Front-desk staff who manage day-to-day operations: registering new owners and pets, scheduling visits, and looking up owner information quickly during phone calls or walk-ins. Values speed and ease of use.
+
+- **Administrator** — Clinic manager responsible for maintaining reference data (pet types, veterinarian specialties) and managing user accounts. Needs oversight of the full system.
+
+- **Veterinarian** — Medical staff who consult patient (pet) history, record visit notes and diagnoses, and review their own schedule. Primarily a read-heavy user focused on clinical information.
+
 ## Core Features
 - Pet owners and contact information management
 - Pets and pet types

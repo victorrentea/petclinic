@@ -30,7 +30,7 @@ This implementation plan breaks down the veterinarian review feature into increm
     - _Requirements: 2.1, 2.4, 2.7, 2.9_
   
   - [ ]* 2.3 Write repository tests
-    - Test custom queries with H2 in-memory database
+    - Test custom queries with embedded PostgreSQL database
     - Test sorting and filtering logic
     - Test aggregation queries (average rating, count)
     - _Requirements: 2.1, 2.4, 2.7, 2.9_

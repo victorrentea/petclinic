@@ -1,10 +1,15 @@
 package org.springframework.samples.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.samples.petclinic.mapper.PetMapper;
 import org.springframework.samples.petclinic.mapper.VisitMapper;
 import org.springframework.samples.petclinic.model.Owner;
@@ -56,14 +61,23 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
-        } else {
-            owners = ownerRepository.findAll();
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "q", required = false) String q,
+            @PageableDefault(size = 10, sort = {"firstName", "lastName"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        String normalizedSearchTerm = normalizeSearchTerm(q);
+        return ownerRepository.findBySearch(normalizedSearchTerm, pageable)
+            .map(ownerMapper::toOwnerDto);
+    }
+
+    private String normalizeSearchTerm(String term) {
+        if (term == null) {
+            return null;
         }
-        return ownerMapper.toOwnerDtoCollection(owners);
+        String trimmed = term.trim();
+        if (trimmed.length() > 255) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search term must not exceed 255 characters");
+        }
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

@@ -1,11 +1,11 @@
 # Embedded Postgres + Flyway + MCP for PetClinic Workshop
 
 **Date:** 2026-05-03
-**Goal:** Replace the dual H2/Postgres-via-Docker setup with a single embedded Postgres started by a sibling Java project, managed by Flyway migrations, and queryable via the dbhub MCP server. Designed so workshop students can run the full stack without Docker.
+**Goal:** Replace the Postgres-via-Docker setup with a single embedded Postgres started by a sibling Java project, managed by Flyway migrations, and queryable via the dbhub MCP server. Designed so workshop students can run the full stack without Docker.
 
 ## Motivation
 
-The current `petclinic-backend/` ships with two database options selectable via Spring profiles: H2 (default, in-memory) and Postgres (via `docker-compose --profile postgres`). For a workshop demo where students should query the running database via an LLM (using the dbhub MCP server, which does not support H2), the Docker route is the only viable option — but several students don't have Docker Desktop installed.
+The current `petclinic-backend/` ships with Postgres (via `docker-compose --profile postgres`). For a workshop demo where students should query the running database via an LLM (using the dbhub MCP server), the Docker route is the only viable option — but several students don't have Docker Desktop installed.
 
 The replacement: a tiny standalone Java project (`petclinic-database`) that uses `io.zonky.test:embedded-postgres` to download and launch a real Postgres binary as a subprocess on `localhost:5432`. The backend connects to it like any external Postgres. The dbhub MCP server, configured at the project root, also connects to it.
 
@@ -85,13 +85,10 @@ Then writes `data/.bootstrapped`. Subsequent runs skip the bootstrap; the role a
 
 | File / config | Reason |
 |---|---|
-| `src/main/resources/application-h2.properties` | No more H2 |
 | `src/main/resources/application-postgres.properties` | Single target now, settings move to `application.properties` |
-| `src/main/resources/db/h2/` | No more H2 |
 | `src/main/resources/db/postgres/` | Replaced by Flyway migrations under `db/migration/` |
 | `petclinic-backend/docker-compose.yml` | Misleading; Docker path is gone |
-| `pom.xml` dep `com.h2database:h2` | Unused |
-| `application.properties`: `spring.profiles.active=h2`, `spring.sql.init.*` | Replaced by Flyway |
+| `application.properties`: `spring.sql.init.*` | Replaced by Flyway |
 
 ### Added
 
@@ -235,4 +232,4 @@ End-to-end test: open `http://localhost:4200`, browse owners. Then in Claude Cod
 3. `./start-backend.sh` starts cleanly: Flyway runs V1, V2, V3; Hibernate validates schema; app reaches "Started" log line.
 4. `http://localhost:4200` loads, shows owners and pets.
 5. From `claude` opened at `petclinic-clone/` root, the `petclinic-db` MCP server is listed and a query like "list all vets" returns rows.
-6. No references to H2 or `docker-compose` remain in the repo (except possibly in archived docs/READMEs).
+6. No references to docker-compose remain in the repo (except possibly in archived docs/READMEs).

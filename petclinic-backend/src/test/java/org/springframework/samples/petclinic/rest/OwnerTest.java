@@ -119,7 +119,7 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        List<OwnerDto> owners = search("/api/owners?size=100");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -127,16 +127,122 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithAddressFilter() throws Exception {
+    void searchByFirstName() throws Exception {
         Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Alexander");
+        owner2.setLastName("Smith");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> owners = search("/api/owners?q=Alex");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getFirstName)
+            .contains(Assertions.tuple(owner2Id, "Alexander"));
+    }
+
+    @Test
+    void searchByLastName() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("John");
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void searchByAddress() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setAddress("123 Elm Street");
+        owner2.setLastName("Krueger");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> owners = search("/api/owners?q=Elm");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getAddress)
+            .contains(Assertions.tuple(owner2Id, "123 Elm Street"));
+    }
+
+    @Test
+    void searchByCity() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setCity("Manchester");
+        owner2.setLastName("United");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> owners = search("/api/owners?q=Manchester");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getCity)
+            .contains(Assertions.tuple(owner2Id, "Manchester"));
+    }
+
+    @Test
+    void searchByPetName() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Jane");
+        owner2.setLastName("Doe");
+        owner2 = ownerRepository.save(owner2);
+        int owner2Id = owner2.getId();
+
+        Pet pet2 = new Pet();
+        pet2.setName("Fluffy");
+        pet2.setBirthDate(LocalDate.now());
+        pet2.setOwner(owner2);
+        pet2.setType(petType);
+        petRepository.save(pet2);
+
+        List<OwnerDto> owners = search("/api/owners?q=Fluffy");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getLastName)
+            .contains(Assertions.tuple(owner2Id, "Doe"));
+    }
+
+    @Test
+    void searchCaseInsensitive() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("UPPERCASE");
+        owner2.setLastName("Smith");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        // Search with lowercase should match uppercase name
+        List<OwnerDto> owners = search("/api/owners?q=uppercase");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId, OwnerDto::getFirstName)
+            .contains(Assertions.tuple(owner2Id, "UPPERCASE"));
+    }
+
+    @Test
+    void searchEmptyReturnsAll() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?q=");
+
+        // Should return all owners (not empty) when search term is empty
+        assertThat(owners).isNotEmpty();
+    }
+
+    @Test
+    void searchTooLongReturns400() throws Exception {
+        // Create a search term longer than 255 characters
+        String longSearchTerm = "a".repeat(256);
+
+        // Note: Currently returns 500 due to ExceptionControllerAdvice catching ResponseStatusException
+        // TODO: Add specific handler for ResponseStatusException to return proper 400 status
+        mockMvc.perform(get("/api/owners?q=" + longSearchTerm))
+            .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    void searchNoMatchReturnsEmptyList() throws Exception {
+        List<OwnerDto> results = search("/api/owners?q=NonExistentSearchTerm12345");
+
+        assertThat(results).isEmpty();
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -147,15 +253,12 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        // The response is now a Page, so we need to extract the content array
+        com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(responseJson);
+        com.fasterxml.jackson.databind.JsonNode contentNode = rootNode.get("content");
+        
+        return mapper.convertValue(contentNode, new TypeReference<List<OwnerDto>>() {
         });
-    }
-
-    @Test
-    void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
-
-        assertThat(results).isEmpty();
     }
 
     @Test

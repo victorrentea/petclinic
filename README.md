@@ -130,7 +130,7 @@ cd petclinic-backend
 - Spring Boot 3.x
 - Spring Data JPA
 - OpenAPI 3.1 / Swagger
-- H2 (default) or PostgreSQL
+- PostgreSQL
 - MapStruct for DTO mapping
 
 ### 📖 OpenAPI REST API Documentation
@@ -180,13 +180,6 @@ The backend follows the [API First](https://swagger.io/resources/articles/adopti
 Generated code lives in `target/generated-sources/`; controllers wire concrete behaviour onto the generated interfaces.
 
 ### Database Configuration
-
-**H2 (Default)**
-- In-memory, auto-populated at startup
-- H2 Console: http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:mem:petclinic`
-  - Username: `sa`
-  - Password: _(blank)_
 
 **PostgreSQL**
 ```properties

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the dual H2/Docker-Postgres setup with a sibling `petclinic-database` Maven project that launches `io.zonky.test:embedded-postgres` on `localhost:5432`, plus Flyway-managed migrations in the backend, plus a project-root `.mcp.json` so dbhub can query the live database from Claude Code.
+**Goal:** Replace the dual Docker-Postgres setup with a sibling `petclinic-database` Maven project that launches `io.zonky.test:embedded-postgres` on `localhost:5432`, plus Flyway-managed migrations in the backend, plus a project-root `.mcp.json` so dbhub can query the live database from Claude Code.
 
 **Architecture:** Three-process workshop setup. (1) `petclinic-database` is an independent Maven project: a single `PostgresLauncher` main class downloads/launches a real Postgres binary, bootstraps the `petclinic` user+database on first run, then blocks. (2) `petclinic-backend` is reduced to a single connection target; Flyway owns the schema (V1 core domain, V2 vet+security, V3 sample data); Hibernate `ddl-auto=none`. (3) `.mcp.json` at the repo root wires dbhub via `npx`; opening Claude Code from `petclinic-clone/` auto-loads it.
 
@@ -32,15 +32,12 @@
 - `start-database.sh` (repo root)
 
 **Modify:**
-- `petclinic-backend/pom.xml` (remove h2, add flyway)
+- `petclinic-backend/pom.xml` (add flyway)
 - `petclinic-backend/src/main/resources/application.properties` (single profile-free config)
 - `.gitignore` (add `petclinic-database/data/`, `petclinic-database/.bootstrapped`, `petclinic-database/target/`)
 
 **Delete:**
-- `petclinic-backend/src/main/resources/application-h2.properties`
 - `petclinic-backend/src/main/resources/application-postgres.properties`
-- `petclinic-backend/src/main/resources/db/h2/schema.sql`
-- `petclinic-backend/src/main/resources/db/h2/data.sql`
 - `petclinic-backend/src/main/resources/db/postgres/schema.sql`
 - `petclinic-backend/src/main/resources/db/postgres/data.sql`
 - `petclinic-backend/src/main/resources/db/postgres/petclinic_db_setup_postgres.txt`
@@ -428,24 +425,12 @@ git commit -m "chore: ignore petclinic-database build and data dirs"
 
 ---
 
-## Task 6: Backend `pom.xml` — drop H2, add Flyway
+## Task 6: Backend `pom.xml` — add Flyway
 
 **Files:**
-- Modify: `petclinic-backend/pom.xml:66-70` (remove H2 block)
 - Modify: `petclinic-backend/pom.xml` (insert Flyway deps adjacent to postgresql)
 
-- [ ] **Step 1: Remove the H2 dependency block**
-
-Delete lines:
-```xml
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-```
-
-- [ ] **Step 2: Add Flyway deps right after the postgresql dependency**
+- [ ] **Step 1: Add Flyway deps right after the postgresql dependency**
 
 Insert immediately after the `org.postgresql:postgresql` block:
 ```xml
@@ -459,7 +444,7 @@ Insert immediately after the `org.postgresql:postgresql` block:
         </dependency>
 ```
 
-- [ ] **Step 3: Verify the project still compiles**
+- [ ] **Step 2: Verify the project still compiles**
 
 ```
 cd ~/workspace/petclinic-clone/petclinic-backend
@@ -467,12 +452,12 @@ cd ~/workspace/petclinic-clone/petclinic-backend
 ```
 Expected: BUILD SUCCESS.
 
-- [ ] **Step 4: Commit (do NOT yet run the app — config still references H2)**
+- [ ] **Step 3: Commit (do NOT yet run the app — config still references PostgreSQL)**
 
 ```bash
 cd ~/workspace/petclinic-clone
 git add petclinic-backend/pom.xml
-git commit -m "build(backend): drop H2, add flyway-core and flyway-database-postgresql"
+git commit -m "build(backend): add flyway-core and flyway-database-postgresql"
 ```
 
 ---
@@ -522,9 +507,7 @@ git commit -m "config(backend): single profile-free application.properties for e
 ## Task 8: Delete obsolete profile properties and DB folders
 
 **Files:**
-- Delete: `petclinic-backend/src/main/resources/application-h2.properties`
 - Delete: `petclinic-backend/src/main/resources/application-postgres.properties`
-- Delete: `petclinic-backend/src/main/resources/db/h2/` (entire folder)
 - Delete: `petclinic-backend/src/main/resources/db/postgres/` (entire folder, including `petclinic_db_setup_postgres.txt`)
 - Delete: `petclinic-backend/docker-compose.yml`
 
@@ -532,9 +515,7 @@ git commit -m "config(backend): single profile-free application.properties for e
 
 ```bash
 cd ~/workspace/petclinic-clone
-git rm petclinic-backend/src/main/resources/application-h2.properties
 git rm petclinic-backend/src/main/resources/application-postgres.properties
-git rm -r petclinic-backend/src/main/resources/db/h2
 git rm -r petclinic-backend/src/main/resources/db/postgres
 git rm petclinic-backend/docker-compose.yml
 ```
@@ -549,7 +530,7 @@ Expected: empty (or `ls` reports nothing).
 - [ ] **Step 3: Commit**
 
 ```bash
-git commit -m "chore(backend): drop H2/Postgres-Docker scaffolding"
+git commit -m "chore(backend): drop Postgres-Docker scaffolding"
 ```
 
 ---

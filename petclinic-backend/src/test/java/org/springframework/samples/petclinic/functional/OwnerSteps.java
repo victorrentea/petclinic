@@ -49,10 +49,48 @@ public class OwnerSteps {
     public void theOwnerIsSearchableByLastName(String lastName) {
         var response = RestAssured.given()
             .baseUri(http.baseUri())
-            .get("/api/owners?lastName=" + lastName);
+            .get("/api/owners?q=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
-        List<String> lastNames = response.jsonPath().getList("lastName", String.class);
+        List<String> lastNames = response.jsonPath().getList("content.lastName", String.class);
         assertThat(lastNames).contains(lastName);
+    }
+
+    @Given("an owner {string} at {string}, {string} with a pet {string}")
+    public void anOwnerAtWithAPet(String fullName, String address, String city, String petName) {
+        String[] parts = fullName.split(" ", 2);
+        Integer ownerId = jdbc.queryForObject(
+            "INSERT INTO owners (first_name, last_name, address, city, telephone)" +
+                " VALUES (?, ?, ?, ?, '0000000000') RETURNING id",
+            Integer.class, parts[0], parts[1], address, city);
+        Integer typeId = jdbc.queryForObject(
+            "SELECT id FROM types WHERE name = ?", Integer.class, "dog");
+        jdbc.update(
+            "INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES (?, DATE '2020-01-01', ?, ?)",
+            petName, typeId, ownerId);
+        http.rememberId("owner:" + fullName, ownerId);
+    }
+
+    @When("I search owners for {string}")
+    public void iSearchOwnersFor(String searchTerm) {
+        http.setLastResponse(RestAssured.given()
+            .baseUri(http.baseUri())
+            .get("/api/owners?q=" + searchTerm));
+    }
+
+    @Then("the search finds the owner")
+    public void theSearchFindsTheOwner() {
+        var response = http.getLastResponse();
+        assertThat(response.statusCode()).isEqualTo(200);
+        List<Object> content = response.jsonPath().getList("content");
+        assertThat(content).isNotEmpty();
+    }
+
+    @Then("the search returns nothing")
+    public void theSearchReturnsNothing() {
+        var response = http.getLastResponse();
+        assertThat(response.statusCode()).isEqualTo(200);
+        List<Object> content = response.jsonPath().getList("content");
+        assertThat(content).isEmpty();
     }
 
     @Given("the following owners exist:")

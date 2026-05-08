@@ -13,7 +13,12 @@
         "list_console_messages",
         "list_network_requests",
         "get_network_request",
-        "take_screenshot"
+        "take_screenshot",
+        "new_page",
+        "new_page",
+        "click",
+        "fill",
+        "wait_for"
       ]
     },
     "github": {

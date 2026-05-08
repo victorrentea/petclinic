@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, inject, DestroyRef} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {Subject} from 'rxjs';
+import {debounceTime, distinctUntilChanged, switchMap, finalize} from 'rxjs/operators';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-owner-list',
@@ -11,23 +13,43 @@ import { finalize } from 'rxjs/operators';
 })
 export class OwnerListComponent implements OnInit {
   errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
+  searchText: string = '';
+  owners: Owner[] = [];
+  isLoading: boolean = false;
   isOwnersDataReceived: boolean = false;
+
+  private searchSubject = new Subject<string>();
+  private destroyRef = inject(DestroyRef);
 
   constructor(private router: Router, private ownerService: OwnerService) {
 
   }
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(term => {
+        this.isLoading = true;
+        return this.ownerService.getOwners(term || undefined).pipe(
+          finalize(() => {
+            this.isLoading = false;
+            this.isOwnersDataReceived = true;
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: owners => {
+        this.owners = owners;
+      },
+      error: () => {
+        this.owners = [];
+      }
+    });
+
+    // Load all owners on init
+    this.searchSubject.next('');
   }
 
   onSelect(owner: Owner) {
@@ -38,35 +60,7 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
-
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
-      );
-
-      }
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
   }
-
-
 }

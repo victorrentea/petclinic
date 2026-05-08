@@ -1,4 +1,16 @@
 services:
+  postgres:
+    image: postgres:15
+    container_name: petclinic-postgres
+    environment:
+      POSTGRES_DB: petclinic
+      POSTGRES_USER: petclinic
+      POSTGRES_PASSWORD: petclinic
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   lgtm:
     image: grafana/otel-lgtm:0.8.1
     container_name: petclinic-lgtm
@@ -13,5 +25,7 @@ services:
       - lgtm-data:/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
 volumes:
+  postgres-data:
   lgtm-data:

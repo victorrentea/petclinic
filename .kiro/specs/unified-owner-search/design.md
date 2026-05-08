@@ -10,28 +10,29 @@
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  owner-list.component.html                             │ │
 │  │  - Single search input field                           │ │
-│  │  - Placeholder: "Search by name, address, or city"     │ │
+│  │  - Placeholder: "Search by name, address, city,        │ │
+│  │    telephone, or pet name"                             │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  owner-list.component.ts                               │ │
-│  │  - searchText: string (replaces name & address)        │ │
-│  │  - Calls ownerService.getOwners({search: searchText})  │ │
+│  │  - searchText: string                                  │ │
+│  │  - Calls ownerService.getOwners(searchText)            │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                               │
-                              │ HTTP GET /api/owners?search={text}
+                              │ HTTP GET /api/owners?q={text}
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    Backend (Spring Boot)                     │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  OwnerRestController                                   │ │
-│  │  - listOwners(@RequestParam search)                    │ │
-│  │  - Calls ownerRepository.findBySearch(search)          │ │
+│  │  - listOwners(@RequestParam q)                         │ │
+│  │  - Calls ownerRepository.findBySearch(q)               │ │
 │  └────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  OwnerRepository                                       │ │
-│  │  - findBySearch(String search, Pageable)              │ │
-│  │  - JPQL query with OR conditions                       │ │
+│  │  - findBySearch(String q, Pageable)                    │ │
+│  │  - JPQL query with EXISTS for pet names                │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                               │
@@ -39,20 +40,26 @@
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       Database                               │
-│  SELECT * FROM owner WHERE                                   │
-│    UPPER(first_name) LIKE UPPER('%search%') OR              │
-│    UPPER(last_name) LIKE UPPER('%search%') OR               │
-│    UPPER(address) LIKE UPPER('%search%') OR                 │
-│    UPPER(city) LIKE UPPER('%search%')                       │
+│  SELECT o.* FROM owners o                                   │
+│  WHERE                                                       │
+│    UPPER(o.first_name) LIKE UPPER('%term%') OR              │
+│    UPPER(o.last_name)  LIKE UPPER('%term%') OR              │
+│    UPPER(o.address)    LIKE UPPER('%term%') OR              │
+│    UPPER(o.city)       LIKE UPPER('%term%') OR              │
+│    UPPER(o.telephone)  LIKE UPPER('%term%') OR              │
+│    EXISTS (                                                  │
+│      SELECT 1 FROM pets p WHERE p.owner_id = o.id           │
+│        AND UPPER(p.name) LIKE UPPER('%term%')               │
+│    )                                                         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Data Flow
 
 1. User types in unified search field
-2. Frontend debounces input (300ms) and sends request to backend
-3. Backend receives single `search` parameter
-4. Repository executes JPQL query with OR conditions across name, address, and city
+2. Frontend debounces input (400ms) and sends request to backend
+3. Backend receives single `q` parameter
+4. Repository executes JPQL query with EXISTS subquery for pet name matching, avoiding cardinality explosion
 5. Results returned to frontend and displayed in grid
 
 ## Low-Level Design
@@ -73,66 +80,59 @@
 
 <!-- AFTER: Single unified field -->
 <div class="form-group" id="searchGroup">
-  <label for="search">Search</label>
-  <input id="search" 
-         placeholder="Search by name, address, or city"
-         [(ngModel)]="searchText" 
-         (input)="queueSearch()" 
-         (blur)="searchOnBlur()"
-         (keyup.enter)="searchOnEnter()" />
+  <input id="search"
+         placeholder="Search by name, address, city, telephone, or pet name"
+         maxlength="255"
+         [(ngModel)]="searchText"
+         (input)="onSearchInput($event.target.value)" />
 </div>
 ```
 
 #### owner-list.component.ts
 ```typescript
 export class OwnerListComponent implements OnInit {
-  // REMOVE: name: string; address: string;
-  // ADD:
-  searchText: string;
+  searchText: string = '';
+  isLoading: boolean = false;
+  owners: Owner[] = [];
 
-  private loadOwners() {
-    const normalizedSearch = this.normalizeSearchTerm(this.searchText || '');
-    const sortParams = this.buildSortParams();
+  private searchSubject = new Subject<string>();
+  private destroyRef = inject(DestroyRef);  // Angular 16+
 
-    this.ownerService.getOwners({
-      search: normalizedSearch,  // Changed from name/address to search
-      page: this.pageIndex,
-      size: this.pageSize,
-      sort: sortParams
-    }).pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      (page) => {
-        this.owners = page.content;
-        this.totalElements = page.totalElements;
-        this.totalPages = page.totalPages;
+  ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      tap(() => this.isLoading = true),
+      switchMap(term => this.ownerService.getOwners(term || undefined)),
+      finalize(() => this.isLoading = false),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: owners => {
+        this.owners = owners;
       },
-      () => {
-        this.owners = null;
+      error: () => {
+        this.owners = [];
       }
-    );
+    });
+
+    // Load all owners on init
+    this.searchSubject.next('');
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
   }
 }
 ```
 
 #### owner.service.ts
 ```typescript
-getOwners(params: {
-  search?: string;  // Changed from name/address
-  page?: number;
-  size?: number;
-  sort?: string[];
-}): Observable<OwnerPage> {
+getOwners(q?: string): Observable<Owner[]> {
   let httpParams = new HttpParams();
-  
-  if (params.search) {
-    httpParams = httpParams.set('search', params.search);
+  if (q) {
+    httpParams = httpParams.set('q', q);
   }
-  // ... rest of params
-  
-  return this.http.get<OwnerPage>('/api/owners', { params: httpParams });
+  return this.http.get<Owner[]>('/api/owners', { params: httpParams });
 }
 ```
 
@@ -142,13 +142,19 @@ getOwners(params: {
 ```java
 @GetMapping(produces = "application/json")
 public Page<OwnerDto> listOwners(
-    @RequestParam(required = false) String search,  // Changed from name/address
-    @PageableDefault(size = 10, sort = {"lastName", "firstName", "address", "city"}) Pageable pageable
+    @RequestParam(required = false) String q,
+    @PageableDefault(size = 10, sort = {"firstName", "lastName"}, direction = Sort.Direction.ASC) Pageable pageable
 ) {
-    String trimmedSearch = normalizeSearchTerm(search);
+    String normalized = normalizeSearchTerm(q);
     
-    return ownerRepository.findBySearch(trimmedSearch, pageable)
+    return ownerRepository.findBySearch(normalized, pageable)
         .map(ownerMapper::toOwnerDto);
+}
+
+private String normalizeSearchTerm(String term) {
+    if (term == null) return null;
+    String trimmed = term.trim();
+    return trimmed.isEmpty() ? null : trimmed;
 }
 ```
 
@@ -156,18 +162,24 @@ public Page<OwnerDto> listOwners(
 ```java
 @Query("""
     SELECT owner FROM Owner owner
-    WHERE :search IS NULL OR :search = ''
-        OR UPPER(owner.firstName) LIKE UPPER(CONCAT('%', :search, '%'))
-        OR UPPER(owner.lastName) LIKE UPPER(CONCAT('%', :search, '%'))
-        OR UPPER(owner.address) LIKE UPPER(CONCAT('%', :search, '%'))
-        OR UPPER(owner.city) LIKE UPPER(CONCAT('%', :search, '%'))
+    WHERE :q IS NULL OR :q = ''
+        OR UPPER(owner.firstName) LIKE UPPER(CONCAT('%', :q, '%'))
+        OR UPPER(owner.lastName)  LIKE UPPER(CONCAT('%', :q, '%'))
+        OR UPPER(owner.address)   LIKE UPPER(CONCAT('%', :q, '%'))
+        OR UPPER(owner.city)      LIKE UPPER(CONCAT('%', :q, '%'))
+        OR UPPER(owner.telephone) LIKE UPPER(CONCAT('%', :q, '%'))
+        OR EXISTS (
+            SELECT 1 FROM Pet pet
+            WHERE pet.owner = owner
+              AND UPPER(pet.name) LIKE UPPER(CONCAT('%', :q, '%'))
+        )
     """)
-Page<Owner> findBySearch(String search, Pageable pageable);
+Page<Owner> findBySearch(@Param("q") String q, Pageable pageable);
 ```
 
 ### Algorithm: Search Query Construction
 
-**Input:** `search` - user's search text (String)
+**Input:** `q` - user's search text (String)
 
 **Output:** Page of Owner entities matching the search criteria
 
@@ -180,8 +192,10 @@ Page<Owner> findBySearch(String search, Pageable pageable);
    - lastName (case-insensitive)
    - address (case-insensitive)
    - city (case-insensitive)
-5. Use OR logic - owner matches if ANY field contains the search term
-6. Return distinct owners (no duplicates)
+   - telephone (case-insensitive)
+   - any of the owner's pet names (case-insensitive, via EXISTS subquery)
+5. Use OR logic - owner matches if ANY field (including any pet name) contains the search term
+6. No DISTINCT needed — EXISTS returns each owner at most once regardless of how many pets match
 7. Apply pagination and sorting
 
 **Complexity:**
@@ -215,30 +229,30 @@ Note: LIKE with leading wildcard (`%search%`) cannot use indexes efficiently. Fo
 
 ### Test 1: Search Completeness Property
 ```typescript
-// Property: If search term is substring of any owner field, owner must be in results
+// Property: If search term is substring of any owner field or pet name, owner must be in results
 property('search returns all matching owners', 
   fc.record({
     owners: fc.array(fc.record({
       firstName: fc.string(),
       lastName: fc.string(),
       address: fc.string(),
-      city: fc.string()
+      city: fc.string(),
+      telephone: fc.string(),
+      pets: fc.array(fc.record({ name: fc.string() }))
     })),
     searchTerm: fc.string()
   }),
   ({owners, searchTerm}) => {
-    // Setup: Insert owners into test database
     const inserted = insertOwners(owners);
-    
-    // Execute: Search
     const results = searchOwners(searchTerm);
     
-    // Verify: All owners containing searchTerm are in results
     const expected = inserted.filter(o => 
       containsIgnoreCase(o.firstName, searchTerm) ||
       containsIgnoreCase(o.lastName, searchTerm) ||
       containsIgnoreCase(o.address, searchTerm) ||
-      containsIgnoreCase(o.city, searchTerm)
+      containsIgnoreCase(o.city, searchTerm) ||
+      containsIgnoreCase(o.telephone, searchTerm) ||
+      o.pets.some(p => containsIgnoreCase(p.name, searchTerm))
     );
     
     return expected.every(e => results.some(r => r.id === e.id));
@@ -248,14 +262,16 @@ property('search returns all matching owners',
 
 ### Test 2: Search Precision Property
 ```typescript
-// Property: All returned owners must match the search term
+// Property: All returned owners must match the search term in at least one field or pet name
 property('search returns only matching owners',
   fc.record({
     owners: fc.array(fc.record({
       firstName: fc.string(),
       lastName: fc.string(),
       address: fc.string(),
-      city: fc.string()
+      city: fc.string(),
+      telephone: fc.string(),
+      pets: fc.array(fc.record({ name: fc.string() }))
     })),
     searchTerm: fc.string().filter(s => s.length > 0)
   }),
@@ -263,12 +279,13 @@ property('search returns only matching owners',
     const inserted = insertOwners(owners);
     const results = searchOwners(searchTerm);
     
-    // Verify: Every result matches search term in at least one field
     return results.every(r => 
       containsIgnoreCase(r.firstName, searchTerm) ||
       containsIgnoreCase(r.lastName, searchTerm) ||
       containsIgnoreCase(r.address, searchTerm) ||
-      containsIgnoreCase(r.city, searchTerm)
+      containsIgnoreCase(r.city, searchTerm) ||
+      containsIgnoreCase(r.telephone, searchTerm) ||
+      r.pets.some(p => containsIgnoreCase(p.name, searchTerm))
     );
   }
 );
@@ -276,14 +293,16 @@ property('search returns only matching owners',
 
 ### Test 3: No Duplicates Property
 ```typescript
-// Property: Each owner appears at most once in results
+// Property: Each owner appears at most once in results, even if multiple pets match
 property('search returns no duplicate owners',
   fc.record({
     owners: fc.array(fc.record({
       firstName: fc.string(),
       lastName: fc.string(),
       address: fc.string(),
-      city: fc.string()
+      city: fc.string(),
+      telephone: fc.string(),
+      pets: fc.array(fc.record({ name: fc.string() }))
     })),
     searchTerm: fc.string()
   }),
@@ -291,35 +310,34 @@ property('search returns no duplicate owners',
     const inserted = insertOwners(owners);
     const results = searchOwners(searchTerm);
     
-    // Verify: No duplicate IDs
     const ids = results.map(r => r.id);
-    const uniqueIds = new Set(ids);
-    return ids.length === uniqueIds.size;
+    return ids.length === new Set(ids).size;
   }
 );
 ```
 
 ### Test 4: Case Insensitivity Property
 ```typescript
-// Property: Search is case-insensitive
+// Property: Search is case-insensitive across all fields including pet names
 property('search is case insensitive',
   fc.record({
     owners: fc.array(fc.record({
       firstName: fc.string(),
       lastName: fc.string(),
       address: fc.string(),
-      city: fc.string()
+      city: fc.string(),
+      telephone: fc.string(),
+      pets: fc.array(fc.record({ name: fc.string() }))
     })),
     searchTerm: fc.string().filter(s => s.length > 0)
   }),
   ({owners, searchTerm}) => {
     const inserted = insertOwners(owners);
     
-    const resultsLower = searchOwners(searchTerm.toLowerCase());
-    const resultsUpper = searchOwners(searchTerm.toUpperCase());
+    const resultsLower    = searchOwners(searchTerm.toLowerCase());
+    const resultsUpper    = searchOwners(searchTerm.toUpperCase());
     const resultsOriginal = searchOwners(searchTerm);
     
-    // Verify: All three searches return same results
     return sameResults(resultsLower, resultsUpper) &&
            sameResults(resultsUpper, resultsOriginal);
   }
@@ -330,43 +348,25 @@ property('search is case insensitive',
 
 ### Backward Compatibility
 
-**Option 1: Deprecation Period (Recommended)**
-- Keep both old API (`name`, `address` params) and new API (`search` param)
-- If `search` is provided, use new logic
-- If `name` or `address` provided, use old logic
-- Log deprecation warnings for old params
-- Remove old params in next major version
-
-**Option 2: Immediate Migration**
-- Replace old params with new param immediately
-- Update all clients simultaneously
-- Higher risk but simpler codebase
-
-**Recommendation:** Use Option 1 for safer rollout.
+The implementation uses **immediate migration** — the `?q=` parameter replaces the old `lastName` filter. No deprecation period. The endpoint remains `GET /api/owners`, maintaining backward compatibility for clients that don't provide any query parameter (they get all owners).
 
 ### Implementation Approach
 
 **Phase 1: Backend**
-1. Add new `findBySearch` method to repository
-2. Update controller to accept `search` parameter
-3. Keep old parameters for backward compatibility
-4. Add integration tests
+1. Add new `findBySearch` method to repository with EXISTS subquery for pet names
+2. Update controller to accept `q` parameter and remove old `lastName` parameter
+3. Add integration tests
 
 **Phase 2: Frontend**
 1. Update component template (single search field)
 2. Update component TypeScript (single searchText property)
-3. Update service to send `search` parameter
+3. Update service to send `q` parameter
 4. Add unit tests
 
 **Phase 3: Testing**
 1. Run property-based tests
 2. Manual testing of search functionality
-3. Performance testing with large datasets
-
-**Phase 4: Cleanup (Future)**
-1. Remove deprecated `name` and `address` parameters
-2. Remove old repository method
-3. Update API documentation
+3. Performance testing with large datasets (Gatling simulation)
 
 ## Error Handling
 
