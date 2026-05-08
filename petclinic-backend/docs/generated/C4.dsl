@@ -21,6 +21,9 @@ workspace "PetClinic" "Veterinary practice management system" {
                 security = component "Security" "Spring Security configuration" "Spring Security" {
                     tags "Security"
                 }
+                invoice = component "Invoice" "Invoice processing logic" "Java" {
+                    tags "Invoice"
+                }
             }
             database = container "Database" "Stores all data" "H2 / PostgreSQL"
         }
@@ -32,11 +35,11 @@ workspace "PetClinic" "Veterinary practice management system" {
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
         repository_layer -> domain_model ""
+        mapper_layer -> domain_model ""
+        mapper_layer -> rest_layer ""
         rest_layer -> domain_model ""
         rest_layer -> mapper_layer ""
         rest_layer -> repository_layer ""
-        mapper_layer -> domain_model ""
-        mapper_layer -> rest_layer ""
     }
 
     views {
