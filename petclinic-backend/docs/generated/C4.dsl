@@ -4,7 +4,7 @@ workspace "PetClinic" "Veterinary practice management system" {
         pet_owner = person "Pet Owner" "Manages their pets and appointments"
         veterinarian = person "Veterinarian" "Provides veterinary care"
         petclinic = softwareSystem "PetClinic" "Veterinary practice management system" {
-            frontend = container "Frontend" "Single-page application" "React"
+            frontend = container "Frontend" "Single-page application" "Angular"
             backend = container "Backend" "REST API" "Java / Spring Boot" {
                 rest_layer = component "REST Layer" "HTTP endpoints, DTOs, error handlers" "Spring MVC" {
                     tags "REST Layer"
@@ -22,7 +22,7 @@ workspace "PetClinic" "Veterinary practice management system" {
                     tags "Security"
                 }
             }
-            database = container "Database" "Stores all data" "H2 / PostgreSQL"
+            database = container "Database" "Stores all data" "PostgreSQL"
         }
 
         pet_owner -> petclinic "Manages pets and visits"
@@ -31,12 +31,12 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
-        repository_layer -> domain_model ""
         rest_layer -> mapper_layer ""
         rest_layer -> repository_layer ""
         rest_layer -> domain_model ""
-        mapper_layer -> rest_layer ""
+        repository_layer -> domain_model ""
         mapper_layer -> domain_model ""
+        mapper_layer -> rest_layer ""
     }
 
     views {

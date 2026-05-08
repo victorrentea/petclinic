@@ -80,9 +80,9 @@ class C4ModelExtractorTest {
         petOwner.uses(petClinic,     "Manages pets and visits");
         veterinarian.uses(petClinic, "Manages appointments and records");
 
-        Container frontend = petClinic.addContainer("Frontend", "Single-page application", "React");
+        Container frontend = petClinic.addContainer("Frontend", "Single-page application", "Angular");
         Container backend  = petClinic.addContainer("Backend",  "REST API",                "Java / Spring Boot");
-        Container database = petClinic.addContainer("Database", "Stores all data",         "H2 / PostgreSQL");
+        Container database = petClinic.addContainer("Database", "Stores all data",         "PostgreSQL");
 
         petOwner.uses(frontend,     "Uses");
         veterinarian.uses(frontend, "Uses");

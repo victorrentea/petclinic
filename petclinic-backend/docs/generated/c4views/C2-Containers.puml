@@ -19,9 +19,9 @@ Person(PetOwner, "Pet Owner", $descr="Manages their pets and appointments", $tag
 Person(Veterinarian, "Veterinarian", $descr="Provides veterinary care", $tags="", $link="")
 
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
-  Container(PetClinic.Frontend, "Frontend", $techn="React", $descr="Single-page application", $tags="", $link="")
+  Container(PetClinic.Frontend, "Frontend", $techn="Angular", $descr="Single-page application", $tags="", $link="")
   Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API", $tags="", $link="")
-  Container(PetClinic.Database, "Database", $techn="H2 / PostgreSQL", $descr="Stores all data", $tags="", $link="")
+  Container(PetClinic.Database, "Database", $techn="PostgreSQL", $descr="Stores all data", $tags="", $link="")
 }
 
 Rel(Veterinarian, PetClinic.Frontend, "Uses", $techn="", $tags="", $link="")
