@@ -34,7 +34,7 @@
 **Modify:**
 - `petclinic-backend/pom.xml` (remove h2, add flyway)
 - `petclinic-backend/src/main/resources/application.properties` (single profile-free config)
-- `.gitignore` (add `petclinic-database/data/`, `petclinic-database/.bootstrapped`, `petclinic-database/target/`)
+- `.gitignore` (add `petclinic-database/data/`, `petclinic-database/target/`)
 
 **Delete:**
 - `petclinic-backend/src/main/resources/application-h2.properties`
@@ -151,7 +151,6 @@
 ```
 target/
 data/
-.bootstrapped
 ```
 
 - [ ] **Step 3: Verify the empty project builds**
@@ -303,7 +302,7 @@ git commit -m "feat(database): bootstrap petclinic role and database on launch"
 
 The main method:
 - starts Postgres on port 5432 with data dir `./data` (relative to current working directory)
-- runs bootstrap once (skipped if `./.bootstrapped` exists)
+- runs bootstrap once on a fresh cluster (skipped if `data/PG_VERSION` already exists)
 - prints connection info
 - blocks until interrupted
 
@@ -314,7 +313,7 @@ Append inside the class (before the helpers, after `bootstrap`):
 ```java
     public static void main(String[] args) throws Exception {
         Path dataDir = Path.of("data").toAbsolutePath();
-        Path marker  = Path.of(".bootstrapped").toAbsolutePath();
+        boolean firstRun = !Files.exists(dataDir.resolve("PG_VERSION"));
 
         EmbeddedPostgres pg = EmbeddedPostgres.builder()
                 .setPort(5432)
@@ -322,9 +321,8 @@ Append inside the class (before the helpers, after `bootstrap`):
                 .setCleanDataDirectory(false)
                 .start();
 
-        if (!Files.exists(marker)) {
+        if (firstRun) {
             bootstrap(pg);
-            Files.writeString(marker, "ok\n");
             System.out.println("Bootstrap complete: created role + database '" + DB_NAME + "'");
         }
 
@@ -408,7 +406,6 @@ git commit -m "feat(database): main launcher with persistent data dir on port 54
 # petclinic-database (embedded Postgres)
 petclinic-database/target/
 petclinic-database/data/
-petclinic-database/.bootstrapped
 ```
 
 - [ ] **Step 2: Verify ignore works**
@@ -750,7 +747,7 @@ This is the integration test for everything from Tasks 6–11.
 
 ```bash
 cd ~/workspace/petclinic-clone
-rm -rf petclinic-database/data petclinic-database/.bootstrapped
+rm -rf petclinic-database/data
 ```
 
 - [ ] **Step 2: Start the database in one terminal**

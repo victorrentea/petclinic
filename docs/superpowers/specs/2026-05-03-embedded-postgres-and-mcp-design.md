@@ -69,13 +69,13 @@ public class PostgresLauncher {
 - `maven-shade-plugin` to produce `petclinic-database.jar` with `Main-Class: ro.victorrentea.petclinic.db.PostgresLauncher`
 
 **First-run bootstrap:**
-On first start, zonky creates a Postgres cluster with default superuser `postgres` and default database `postgres`. To match the credentials the backend expects (user `petclinic`, password `petclinic`, database `petclinic`), the launcher checks for marker file `data/.bootstrapped`; if absent, it opens a JDBC connection via `pg.getPostgresDatabase()` (the default-superuser DataSource) and executes:
+On first start, zonky creates a Postgres cluster with default superuser `postgres` and default database `postgres`. To match the credentials the backend expects (user `petclinic`, password `petclinic`, database `petclinic`), the launcher detects first run by the absence of `data/PG_VERSION` (Postgres writes this file when initializing a fresh cluster). If the cluster is fresh, it opens a JDBC connection via `pg.getPostgresDatabase()` (the default-superuser DataSource) and executes:
 ```sql
 CREATE USER petclinic WITH PASSWORD 'petclinic';
 CREATE DATABASE petclinic OWNER petclinic;
 GRANT ALL PRIVILEGES ON DATABASE petclinic TO petclinic;
 ```
-Then writes `data/.bootstrapped`. Subsequent runs skip the bootstrap; the role and database persist in the data directory.
+Subsequent runs skip the bootstrap; the role and database persist in the data directory.
 
 **`.gitignore`** addition: `petclinic-database/data/`
 
