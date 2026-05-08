@@ -55,4 +55,6 @@ public class OwnerDto {
         pets.add(petsItem);
         return this;
     }
+
+    private int shoeSize;
 }
