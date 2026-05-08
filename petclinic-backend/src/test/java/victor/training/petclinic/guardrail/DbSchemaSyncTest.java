@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -50,12 +51,26 @@ class DbSchemaSyncTest {
             assertThat(exit).as("pg_dump exit").isZero();
 
             String dump = Files.readString(output, StandardCharsets.UTF_8);
-            assertThat(dump)
+            String cleaned = stripNoise(dump);
+            Files.writeString(output, cleaned, StandardCharsets.UTF_8);
+
+            assertThat(cleaned)
                     .contains("CREATE TABLE")
                     .containsIgnoringCase("owners")
                     .containsIgnoringCase("pets")
                     .containsIgnoringCase("vets");
         }
+    }
+
+    private static String stripNoise(String dump) {
+        String filtered = dump.lines()
+                .filter(line -> !line.startsWith("SET "))
+                .filter(line -> !line.startsWith("SELECT pg_catalog.set_config"))
+                .filter(line -> !line.startsWith("--"))
+                .filter(line -> !line.startsWith("\\restrict"))
+                .filter(line -> !line.startsWith("\\unrestrict"))
+                .collect(Collectors.joining("\n"));
+        return filtered.replaceAll("(?m)(^[ \\t]*\\n){2,}", "\n").strip() + "\n";
     }
 
     private static Path projectRoot() {
