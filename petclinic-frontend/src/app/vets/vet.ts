@@ -1,8 +1,3 @@
-import {Specialty} from '../specialties/specialty';
+import { components } from '../generated/api-types';
 
-export interface Vet {
-  id: number;
-  firstName: string;
-  lastName: string;
-  specialties: Specialty[];
-}
+export type Vet = components['schemas']['VetDto'];

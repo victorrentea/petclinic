@@ -1,11 +1,7 @@
-import {Pet} from '../pets/pet';
+import { components } from '../generated/api-types';
+import { Pet } from '../pets/pet';
 
-export interface Owner {
+export type Owner = Omit<components['schemas']['OwnerDto'], 'id' | 'pets'> & {
   id: number;
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  telephone: string;
   pets: Pet[];
-}
+};

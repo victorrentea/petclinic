@@ -1,4 +1,3 @@
-export interface Specialty {
-  id: number;
-  name: string;
-}
+import { components } from '../generated/api-types';
+
+export type Specialty = components['schemas']['SpecialtyDto'];

@@ -1,4 +1,3 @@
-export interface PetType {
-  id: number;
-  name: string;
-}
+import { components } from '../generated/api-types';
+
+export type PetType = components['schemas']['PetTypeDto'];

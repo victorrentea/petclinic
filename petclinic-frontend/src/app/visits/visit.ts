@@ -1,13 +1,8 @@
-import {Pet} from '../pets/pet';
+import { components } from '../generated/api-types';
+import { Pet } from '../pets/pet';
 
-export interface Visit {
-  id: number;
+export type Visit = Omit<components['schemas']['VisitDto'], 'date' | 'petId'> & {
   date: string;
-  description: string;
-  pet: Pet;
   petId?: number;
-  petName?: string;
-  ownerId?: number;
-  ownerFirstName?: string;
-  ownerLastName?: string;
-}
+  pet: Pet;
+};

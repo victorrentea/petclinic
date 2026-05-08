@@ -5,6 +5,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "generate:api": "openapi-typescript ../openapi.yaml -o src/app/generated/api-types.ts",
+    "prebuild": "npm run generate:api",
     "build": "ng build",
     "test": "ng test",
     "test-headless": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI",
@@ -67,6 +69,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
+    "openapi-typescript": "^6.7.6",
     "protractor": "~7.0.0",
     "source-map-explorer": "^1.5.0",
     "ts-node": "~4.1.0",
