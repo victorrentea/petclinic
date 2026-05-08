@@ -12,3 +12,7 @@
 /.github/CODEOWNERS              @victorrentea/elders
 /openapi.yaml                    @victorrentea/elders
 /.github/workflows/guardrail.yml @victorrentea/elders
+
+# Elders must also review dependency manifests — guards against unreviewed upgrades / supply-chain risk.
+**/pom.xml                       @victorrentea/elders
+/petclinic-frontend/package.json @victorrentea/elders
