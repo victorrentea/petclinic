@@ -1,4 +1,14 @@
 # Require Elders review for manual architecture diagram updates.
 # Note: team format is @org/team-slug.
+
+# A PR touching this path must be approved by a member of this group.
+# Works in GitHub, GitLab, BitBucket ...
+
 /petclinic-backend/docs/packages.puml @victorrentea/elders
 
+# Elders must also review changes to Claude settings, code ownership, the API contract, and the guardrail workflow.
+/.claude/settings.json           @victorrentea/elders
+/.claude/settings.local.json     @victorrentea/elders
+/.github/CODEOWNERS              @victorrentea/elders
+/openapi.yaml                    @victorrentea/elders
+/.github/workflows/guardrail.yml @victorrentea/elders
