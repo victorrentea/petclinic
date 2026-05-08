@@ -1,6 +1,7 @@
 package victor.training.petclinic.guardrail;
 
 import com.tngtech.archunit.core.importer.ImportOption;
+import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
@@ -23,9 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AnalyzeClasses(
     packages = "victor.training.petclinic",
-    importOptions = ImportOption.DoNotIncludeTests.class
+    importOptions = DoNotIncludeTests.class
 )
-class PackagesArchUnitTest {
+class PackagesArchTest {
 
     private static final Path DIAGRAM = Paths.get("docs/packages.puml");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java/victor/training/petclinic");
@@ -71,7 +72,7 @@ class PackagesArchUnitTest {
         try (Stream<Path> paths = Files.walk(SOURCE_ROOT)) {
             paths.filter(Files::isDirectory)
                 .filter(dir -> !dir.equals(SOURCE_ROOT))
-                .filter(PackagesArchUnitTest::containsJavaFile)
+                .filter(PackagesArchTest::containsJavaFile)
                 .forEach(dir -> result.add(SOURCE_ROOT.relativize(dir).toString().replace('/', '.')));
         }
         return result;

@@ -20,18 +20,19 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
+import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
 @SpringBootTest
-@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
-public class OpenApiExtractorTest {
+@AutoConfigureEmbeddedDatabase(provider = ZONKY)
+public class OpenApiSyncTest {
     @Value("file:${user.dir}/../openapi.yaml")
     Resource contractFile;
     @Test
-    void my_contract_did_not_change() throws Exception {
+    void contractInCode_inSyncWith_contractOnGit() throws Exception {
         String contractExtractedFromCode = mockMvc.perform(get("/v3/api-docs.yaml"))
             .andReturn().getResponse().getContentAsString();
 
