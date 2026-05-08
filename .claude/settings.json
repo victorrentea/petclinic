@@ -9,7 +9,9 @@
       "Edit(openapi.yaml)",
       "Write(openapi.yaml)",
       "Edit(.github/workflows/*)",
-      "Write(.github/workflows/*)"
+      "Write(.github/workflows/*)",
+      "Edit(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
+      "Write(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)"
     ]
   }
 }
