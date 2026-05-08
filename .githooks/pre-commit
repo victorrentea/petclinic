@@ -17,9 +17,9 @@ else
   echo "[pre-commit]    Install with: brew install gitleaks"
 fi
 
-echo "[pre-commit] Regenerating architecture artifacts..."
+echo "[pre-commit] Regenerating architecture artifacts and verifying OpenAPI sync..."
 cd "$ROOT/petclinic-backend"
-mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest
+mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest,OpenApiSyncTest
 
 git add "$ROOT/petclinic-backend/docs/generated"
 echo "[pre-commit] C4 model DSL and domain model diagram updated and staged."
