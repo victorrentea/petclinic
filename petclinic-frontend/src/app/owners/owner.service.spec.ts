@@ -8,6 +8,8 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
+import { OwnerSummary } from './owner-summary';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -56,7 +58,7 @@ describe('OwnerService', () => {
     const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
     expect(req.request.params.keys().length).toBe(0);
-    req.flush(expectedOwners);
+    req.flush({ content: expectedOwners });
   });
 
   it('search the owner by id', () => {
@@ -143,7 +145,7 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('GET');
     expect(req.request.params.has('q')).toBe(true);
     expect(req.request.params.get('q')).toBe('Fr');
-    req.flush(expectedOwners);
+    req.flush({ content: expectedOwners });
   });
 
   it('getOwners without q parameter should not include q in request', () => {
@@ -154,7 +156,7 @@ describe('OwnerService', () => {
     const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
     expect(req.request.params.has('q')).toBe(false);
-    req.flush(expectedOwners);
+    req.flush({ content: expectedOwners });
   });
 
   it('getOwners with empty string should not include q in request', () => {
@@ -165,6 +167,75 @@ describe('OwnerService', () => {
     const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
     expect(req.request.params.has('q')).toBe(false);
-    req.flush(expectedOwners);
+    req.flush({ content: expectedOwners });
+  });
+
+  describe('getOwnerPage', () => {
+    const mockOwnerPage: OwnerPage = {
+      content: [
+        {
+          id: 1,
+          displayName: 'George Franklin',
+          address: '110 W. Liberty St.',
+          city: 'Madison',
+          telephone: '6085551023',
+          pets: [{ id: 1, name: 'Leo' }],
+        },
+      ],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 10,
+    };
+
+    it('should call GET /api/owners with page, size, and sort params', () => {
+      ownerService
+        .getOwnerPage({ page: 0, size: 10, sort: 'name,asc' })
+        .subscribe((page) => {
+          expect(page).toEqual(mockOwnerPage);
+        });
+
+      const req = httpTestingController.expectOne(
+        (r) => r.url === ownerService.entityUrl
+      );
+      expect(req.request.method).toEqual('GET');
+      expect(req.request.params.get('page')).toBe('0');
+      expect(req.request.params.get('size')).toBe('10');
+      expect(req.request.params.get('sort')).toBe('name,asc');
+      expect(req.request.params.has('q')).toBe(false);
+      req.flush(mockOwnerPage);
+    });
+
+    it('should include q param when provided', () => {
+      ownerService
+        .getOwnerPage({ page: 1, size: 25, sort: 'city,desc', q: 'Frank' })
+        .subscribe((page) => {
+          expect(page).toEqual(mockOwnerPage);
+        });
+
+      const req = httpTestingController.expectOne(
+        (r) => r.url === ownerService.entityUrl
+      );
+      expect(req.request.method).toEqual('GET');
+      expect(req.request.params.get('page')).toBe('1');
+      expect(req.request.params.get('size')).toBe('25');
+      expect(req.request.params.get('sort')).toBe('city,desc');
+      expect(req.request.params.get('q')).toBe('Frank');
+      req.flush(mockOwnerPage);
+    });
+
+    it('should not include q param when q is empty string', () => {
+      ownerService
+        .getOwnerPage({ page: 0, size: 10, sort: 'name,asc', q: '' })
+        .subscribe((page) => {
+          expect(page).toEqual(mockOwnerPage);
+        });
+
+      const req = httpTestingController.expectOne(
+        (r) => r.url === ownerService.entityUrl
+      );
+      expect(req.request.params.has('q')).toBe(false);
+      req.flush(mockOwnerPage);
+    });
   });
 });

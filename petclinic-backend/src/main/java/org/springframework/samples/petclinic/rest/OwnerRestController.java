@@ -3,12 +3,14 @@ package org.springframework.samples.petclinic.rest;
 import java.net.URI;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
+import org.springframework.samples.petclinic.mapper.OwnerSummaryMapper;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.samples.petclinic.mapper.PetMapper;
 import org.springframework.samples.petclinic.mapper.VisitMapper;
@@ -21,6 +23,7 @@ import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.repository.VisitRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerFieldsDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerSummaryDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
@@ -54,6 +57,7 @@ public class OwnerRestController {
     private final PetTypeRepository petTypeRepository;
 
     private final OwnerMapper ownerMapper;
+    private final OwnerSummaryMapper ownerSummaryMapper;
 
     private final PetMapper petMapper;
 
@@ -61,12 +65,13 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public Page<OwnerDto> listOwners(
+    public Page<OwnerSummaryDto> listOwners(
             @RequestParam(name = "q", required = false) String q,
             @PageableDefault(size = 10, sort = {"firstName", "lastName"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        Pageable translated = translateSort(pageable);
         String normalizedSearchTerm = normalizeSearchTerm(q);
-        return ownerRepository.findBySearch(normalizedSearchTerm, pageable)
-            .map(ownerMapper::toOwnerDto);
+        return ownerRepository.findBySearch(normalizedSearchTerm, translated)
+            .map(ownerSummaryMapper::toSummaryDto);
     }
 
     private String normalizeSearchTerm(String term) {
@@ -78,6 +83,27 @@ public class OwnerRestController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search term must not exceed 255 characters");
         }
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    Pageable translateSort(Pageable pageable) {
+        Sort sort = pageable.getSort();
+        if (sort.isUnsorted()) {
+            Sort defaultSort = Sort.by(Sort.Direction.ASC, "firstName")
+                .and(Sort.by(Sort.Direction.ASC, "lastName"));
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), defaultSort);
+        }
+
+        Sort translatedSort = Sort.unsorted();
+        for (Sort.Order order : sort) {
+            if ("name".equals(order.getProperty())) {
+                translatedSort = translatedSort
+                    .and(Sort.by(order.getDirection(), "firstName"))
+                    .and(Sort.by(order.getDirection(), "lastName"));
+            } else {
+                translatedSort = translatedSort.and(Sort.by(order.getDirection(), order.getProperty()));
+            }
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), translatedSort);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

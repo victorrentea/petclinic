@@ -8,6 +8,7 @@ import {OwnerAddComponent} from './owner-add/owner-add.component';
 import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
 import {PetsModule} from '../pets/pets.module';
+import {PaginationToolbarComponent} from './pagination-toolbar/pagination-toolbar.component';
 
 @NgModule({
   imports: [
@@ -20,7 +21,8 @@ import {PetsModule} from '../pets/pets.module';
     OwnerListComponent,
     OwnerDetailComponent,
     OwnerEditComponent,
-    OwnerAddComponent
+    OwnerAddComponent,
+    PaginationToolbarComponent
   ],
   providers: [OwnerService]
 

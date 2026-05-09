@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Post-Task Review",
+  "description": "After every spec task completes (requirements, design, or coding), automatically triggers a review sub-agent to criticize and review the work produced in that phase.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task just completed. Please invoke a sub-agent (general-task-execution) to perform a thorough critical review of the work done so far. The reviewer should:\n\n1. Read the spec files in .kiro/specs/ for the current feature (requirements.md, design.md, tasks.md) to understand context.\n2. Review any files that were created or modified as part of this task.\n3. Provide constructive criticism covering: correctness, completeness, consistency with requirements/design, code quality, potential issues, and missed edge cases.\n4. Summarize findings and suggest improvements if any.\n\nUse invokeSubAgent with name \"general-task-execution\" to delegate this review work."
+  }
+}

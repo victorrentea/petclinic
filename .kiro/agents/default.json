@@ -1,0 +1,13 @@
+{
+  "name": "default",
+  "description": "Default petclinic agent — rings a bell when the assistant finishes a turn (waiting for input or approval).",
+  "tools": ["read", "write", "shell"],
+  "hooks": {
+    "stop": [
+      {
+        "command": "afplay /System/Library/Sounds/Glass.aiff",
+        "timeout_ms": 3000
+      }
+    ]
+  }
+}

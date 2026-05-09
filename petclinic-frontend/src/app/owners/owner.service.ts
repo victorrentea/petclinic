@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -55,5 +56,16 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
+  }
+
+  getOwnerPage(params: { page: number; size: number; sort: string; q?: string }): Observable<OwnerPage> {
+    let httpParams = new HttpParams()
+      .set('page', params.page.toString())
+      .set('size', params.size.toString())
+      .set('sort', params.sort);
+    if (params.q) {
+      httpParams = httpParams.set('q', params.q);
+    }
+    return this.http.get<OwnerPage>(this.entityUrl, { params: httpParams });
   }
 }

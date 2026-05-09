@@ -28,6 +28,7 @@ import org.springframework.samples.petclinic.repository.OwnerRepository;
 import org.springframework.samples.petclinic.repository.PetRepository;
 import org.springframework.samples.petclinic.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerSummaryDto;
 import org.springframework.samples.petclinic.rest.dto.PetDto;
 import org.springframework.samples.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -119,11 +120,11 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners?size=100");
+        List<OwnerSummaryDto> owners = search("/api/owners?size=100");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-            .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::displayName)
+            .contains(Assertions.tuple(ownerId, "George Franklin"));
     }
 
     @Test
@@ -133,11 +134,11 @@ public class OwnerTest {
         owner2.setLastName("Smith");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?q=Alex");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=Alex");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName)
-            .contains(Assertions.tuple(owner2Id, "Alexander"));
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::displayName)
+            .contains(Assertions.tuple(owner2Id, "Alexander Smith"));
     }
 
     @Test
@@ -147,11 +148,11 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?q=Java");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::displayName)
+            .contains(Assertions.tuple(owner2Id, "John JavaBeans"));
     }
 
     @Test
@@ -161,10 +162,10 @@ public class OwnerTest {
         owner2.setLastName("Krueger");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?q=Elm");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=Elm");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getAddress)
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::address)
             .contains(Assertions.tuple(owner2Id, "123 Elm Street"));
     }
 
@@ -175,10 +176,10 @@ public class OwnerTest {
         owner2.setLastName("United");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?q=Manchester");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=Manchester");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getCity)
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::city)
             .contains(Assertions.tuple(owner2Id, "Manchester"));
     }
 
@@ -197,11 +198,11 @@ public class OwnerTest {
         pet2.setType(petType);
         petRepository.save(pet2);
 
-        List<OwnerDto> owners = search("/api/owners?q=Fluffy");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=Fluffy");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "Doe"));
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::displayName)
+            .contains(Assertions.tuple(owner2Id, "Jane Doe"));
     }
 
     @Test
@@ -212,16 +213,16 @@ public class OwnerTest {
         int owner2Id = ownerRepository.save(owner2).getId();
 
         // Search with lowercase should match uppercase name
-        List<OwnerDto> owners = search("/api/owners?q=uppercase");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=uppercase");
 
         assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName)
-            .contains(Assertions.tuple(owner2Id, "UPPERCASE"));
+            .extracting(OwnerSummaryDto::id, OwnerSummaryDto::displayName)
+            .contains(Assertions.tuple(owner2Id, "UPPERCASE Smith"));
     }
 
     @Test
     void searchEmptyReturnsAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners?q=");
+        List<OwnerSummaryDto> owners = search("/api/owners?q=");
 
         // Should return all owners (not empty) when search term is empty
         assertThat(owners).isNotEmpty();
@@ -240,12 +241,12 @@ public class OwnerTest {
 
     @Test
     void searchNoMatchReturnsEmptyList() throws Exception {
-        List<OwnerDto> results = search("/api/owners?q=NonExistentSearchTerm12345");
+        List<OwnerSummaryDto> results = search("/api/owners?q=NonExistentSearchTerm12345");
 
         assertThat(results).isEmpty();
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private List<OwnerSummaryDto> search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -257,7 +258,7 @@ public class OwnerTest {
         com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(responseJson);
         com.fasterxml.jackson.databind.JsonNode contentNode = rootNode.get("content");
         
-        return mapper.convertValue(contentNode, new TypeReference<List<OwnerDto>>() {
+        return mapper.convertValue(contentNode, new TypeReference<List<OwnerSummaryDto>>() {
         });
     }
 
