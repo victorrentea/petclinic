@@ -35,8 +35,8 @@ workspace "PetClinic" "Veterinary practice management system" {
         rest_layer -> mapper_layer ""
         rest_layer -> domain_model ""
         repository_layer -> domain_model ""
-        mapper_layer -> rest_layer ""
         mapper_layer -> domain_model ""
+        mapper_layer -> rest_layer ""
     }
 
     views {
