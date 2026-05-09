@@ -57,6 +57,10 @@ petclinic-frontend/typings
 petclinic-backend/src/test/postman/reports/
 petclinic-backend/.tools/
 
+# Generated diagram renders — sources (.puml/.dsl) are tracked; renders viewed via PlantUML proxy URLs (see docs/generated/INDEX.md)
+petclinic-backend/docs/generated/**/*.svg
+petclinic-backend/docs/generated/**/*.png
+
 # qa
 /qa/test-results/screenshots/
 

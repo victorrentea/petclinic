@@ -8,11 +8,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import net.sourceforge.plantuml.SourceStringReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -83,14 +81,9 @@ class DomainModelExtractorTest {
         sb.append("\n@enduml\n");
 
         Files.createDirectories(GENERATED_DIR);
-        String puml = sb.toString();
-        Files.writeString(GENERATED_DIR.resolve("DomainModel.puml"), puml);
-        try (OutputStream os = Files.newOutputStream(GENERATED_DIR.resolve("DomainModel.png"))) {
-            new SourceStringReader(puml).outputImage(os);
-        }
+        Files.writeString(GENERATED_DIR.resolve("DomainModel.puml"), sb.toString());
 
         assertThat(GENERATED_DIR.resolve("DomainModel.puml")).exists();
-        assertThat(GENERATED_DIR.resolve("DomainModel.png")).exists();
     }
 
     private List<Association> collectAssociations(List<Class<?>> entities) {

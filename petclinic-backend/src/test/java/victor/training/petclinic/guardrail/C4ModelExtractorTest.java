@@ -10,13 +10,9 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.SourceStringReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -278,13 +274,8 @@ class C4ModelExtractorTest {
     }
 
     private void exportDiagrams(Workspace workspace) throws IOException {
-        FileFormatOption svg = new FileFormatOption(FileFormat.SVG);
         for (Diagram diagram : new C4PlantUMLExporter().export(workspace)) {
-            String puml = diagram.getDefinition();
-            Files.writeString(VIEWS_DIR.resolve(diagram.getKey() + ".puml"), puml);
-            try (OutputStream os = Files.newOutputStream(VIEWS_DIR.resolve(diagram.getKey() + ".svg"))) {
-                new SourceStringReader(puml).outputImage(os, svg);
-            }
+            Files.writeString(VIEWS_DIR.resolve(diagram.getKey() + ".puml"), diagram.getDefinition());
         }
     }
 
