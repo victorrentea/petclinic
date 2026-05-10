@@ -23,5 +23,17 @@
       "Edit(petclinic-frontend/package.json)",
       "Write(petclinic-frontend/package.json)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check-coverage.sh"
+          }
+        ]
+      }
+    ]
   }
 }
