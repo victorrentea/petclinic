@@ -11,10 +11,12 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "types": ["node"]
   },
   "include": [
     "tests/**/*",
+    "features/**/*",
     "playwright.config.ts"
   ]
 }
