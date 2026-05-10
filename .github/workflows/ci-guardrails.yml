@@ -28,6 +28,17 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: petclinic-frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: petclinic-frontend
+        run: npm ci
+
       - name: Install PostgreSQL 16 client (pg_dump for DbSchemaSyncTest)
         run: |
           sudo install -d /usr/share/postgresql-common/pgdg
@@ -43,21 +54,25 @@ jobs:
         working-directory: petclinic-backend
         run: ./mvnw test
 
+      - name: Regenerate TS types from openapi.yaml
+        working-directory: petclinic-frontend
+        run: npm run generate:api --silent
+
       - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated db.sql; then
+          if git diff --quiet petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated db.sql
+            git --no-pager diff --stat petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated artifacts (docs/generated/ or db.sql) are out of date."
-          echo "::error::Run 'cd petclinic-backend && ./mvnw test' locally and push the regenerated files."
+          echo "::error::Generated artifacts (docs/generated/, db.sql, or api-types.ts) are out of date."
+          echo "::error::Run 'cd petclinic-backend && ./mvnw test' and 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated files."
           exit 1
 
       - name: Auto-commit regenerated artifacts
@@ -65,6 +80,6 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated db.sql
-          git commit -m 'chore(guardrail): regenerate diagrams and db.sql [skip ci]'
+          git add petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts
+          git commit -m 'chore(guardrail): regenerate diagrams, db.sql, and api-types.ts [skip ci]'
           git push

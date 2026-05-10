@@ -23,3 +23,14 @@ mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiag
 
 git add "$ROOT/petclinic-backend/docs/generated"
 echo "[pre-commit] C4 model DSL and domain model diagram updated and staged."
+
+# ── Frontend: regenerate TS types from openapi.yaml ────────────────────────
+if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
+  echo "[pre-commit] Regenerating TS types from openapi.yaml..."
+  npm --prefix "$ROOT/petclinic-frontend" run generate:api --silent
+  git add "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"
+  echo "[pre-commit] api-types.ts regenerated and staged."
+else
+  echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
+  echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
+fi

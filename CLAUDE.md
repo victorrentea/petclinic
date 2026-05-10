@@ -85,7 +85,7 @@ Architecture diagrams live in `petclinic-backend/docs/`:
 - `DomainModelExtractorTest` — reads JPA annotations on classes in the `model` package and emits a UML class diagram with cardinalities and merged bidirectional associations at `docs/generated/DomainModel.puml`
 - `DbSchemaSyncTest` — boots embedded Postgres, runs Flyway migrations, dumps the schema with `pg_dump` to **`db.sql`** at project root; this snapshot is **kept in sync** with the migrations under `src/main/resources/db/migration/`
 - `OpenApiInSyncTest` — boots the app and asserts that **`openapi.yaml`** at project root matches the live `/v3/api-docs.yaml`; this contract file is **kept in sync** with the running controllers
-- **CI:** `.github/workflows/guardrail.yml` runs `./mvnw test` on every push to main and every PR. Test failures (e.g., `packages.puml` drift, contract drift) fail the build. Drift in `docs/generated/` and `db.sql` is auto-committed back to the branch with `[skip ci]`; fork PRs fail with an actionable message because the workflow has no write access.
+- **CI:** `.github/workflows/ci-guardrails.yml` runs `./mvnw test` on every push to main and every PR. Test failures (e.g., `packages.puml` drift, contract drift) fail the build. Drift in `docs/generated/` and `db.sql` is auto-committed back to the branch with `[skip ci]`; fork PRs fail with an actionable message because the workflow has no write access.
 
 The C4 DSL can be rendered at [structurizr.com](https://structurizr.com) or with the Structurizr CLI.
 Focus views (RepositoryFocus, MapperFocus) show only a component plus its direct incoming and outgoing dependencies.
