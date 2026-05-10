@@ -12,6 +12,7 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 
 ## Common Commands
 
+
 ### Full Stack
 Each script is foreground; run them in separate terminals.
 ```sh
