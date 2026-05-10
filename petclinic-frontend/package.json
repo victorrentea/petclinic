@@ -7,7 +7,8 @@
     "start": "ng serve",
     "generate:api": "openapi-typescript ../openapi.yaml -o src/app/generated/api-types.ts",
     "prebuild": "npm run generate:api",
-    "build": "ng build",
+    "build": "bash scripts/build-strict.sh",
+    "build:raw": "ng build",
     "test": "ng test",
     "test-headless": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI",
     "lint": "ng lint",
@@ -43,6 +44,7 @@
     "zone.js": "~0.13.1"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^16.0.1",
     "@angular-devkit/build-angular": "^16.2.16",
     "@angular-eslint/builder": "^16.1.0",
     "@angular-eslint/eslint-plugin": "^16.1.0",

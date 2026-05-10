@@ -54,9 +54,17 @@ jobs:
         working-directory: petclinic-backend
         run: ./mvnw test
 
+      - name: Verify Javadoc
+        working-directory: petclinic-backend
+        run: ./mvnw -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
+
       - name: Regenerate TS types from openapi.yaml
         working-directory: petclinic-frontend
         run: npm run generate:api --silent
+
+      - name: Strict frontend build (fails on any webpack warning)
+        working-directory: petclinic-frontend
+        run: npm run build
 
       - name: Detect drift in regenerated artifacts
         id: drift

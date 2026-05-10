@@ -14,6 +14,7 @@ Legend: ✅ in place · 🚧 planned · 💡 considered, not scheduled
 | **`OpenApiSyncTest`** | REST API contract | Boots app, diffs `/v3/api-docs.yaml` against the committed `openapi.yaml` at repo root |
 | **`JpaSchemaValidateTest`** | Entity ↔ migration drift | Activates "test" profile → `application-test.properties` sets `spring.jpa.hibernate.ddl-auto=validate` → Hibernate fails Spring context refresh if any `@Entity` column is missing from the Flyway-migrated schema. Sentinel test in `guardrail/` shares Spring TestContext cache with `OpenApiSyncTest` (both annotated `@ActiveProfiles("test")`) |
 | **TS ↔ OpenAPI sync** | Frontend stale generated types | Pre-commit and CI both run `npm run generate:api`; resulting `petclinic-frontend/src/app/generated/api-types.ts` is auto-staged locally and auto-committed by CI on drift, matching the C4/db.sql pattern |
+| **Build hygiene** | Silent webpack/Javadoc warnings | Frontend `npm run build` fails on any webpack `Warning:` (custom-webpack + `scripts/build-strict.sh`; the lone protobufjs transitive-dep warning is suppressed at source via `ignoreWarnings`). CI also runs `mvn javadoc:javadoc -Dmaven.javadoc.failOnError=true` |
 | **`DbSchemaSyncTest`** | Database schema | Boots embedded Postgres, runs Flyway migrations, dumps schema with `pg_dump` to `db.sql`; commit-blocked if drift |
 | **`C4ModelExtractorTest`** | C4 architecture documentation | Regenerates `docs/generated/C4.dsl` + per-view `*.puml` from code; CI auto-commits any drift |
 | **`DomainModelExtractorTest`** | Domain model documentation | Regenerates `docs/generated/DomainModel.puml` from JPA annotations |
@@ -29,7 +30,6 @@ Legend: ✅ in place · 🚧 planned · 💡 considered, not scheduled
 
 | # | Guardrail | What it protects | Approach |
 |---|---|---|---|
-| **C** | Build-hygiene fail-on-warnings | Silent quality regression | Treat any frontend "Compiled with problems" as an error; fail Maven on Javadoc errors and Spring config-properties metadata mismatches |
 | **D** | Dependency upgrade discipline | Drive-by upgrades / supply-chain risk | Renovate (or Dependabot) with batched weekly minor-upgrade PRs; OWASP/Snyk dependency-check workflow surfacing known CVEs (informational, not blocking initially) |
 
 ---
@@ -42,6 +42,7 @@ These were on the table during the same brainstorm but parked for later:
 - **Endpoint and capability allow-list.** ArchUnit rule disallowing `@RequestMapping`/`@GetMapping` outside `rest/`, and forbidding `Runtime.exec` / `System.getenv` outside an explicit allow-list.
 - **Logging / observability invariants.** Each REST controller method logs entry+exit (or is wrapped by an aspect that does); no log line includes user PII.
 - **Performance / N+1 drift.** Smoke tests asserting SQL statement counts under a threshold for high-traffic endpoints.
+- **Spring `@ConfigurationProperties` / `@Value` strict mode.** Considered as part of guardrail C; dropped because Spring does not ship a built-in build-time check for undeclared `@Value` references and an ad-hoc rule is fragile.
 
 ---
 
