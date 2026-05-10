@@ -15,6 +15,7 @@ Legend: ✅ in place · 🚧 planned · 💡 considered, not scheduled
 | **`JpaSchemaValidateTest`** | Entity ↔ migration drift | Activates "test" profile → `application-test.properties` sets `spring.jpa.hibernate.ddl-auto=validate` → Hibernate fails Spring context refresh if any `@Entity` column is missing from the Flyway-migrated schema. Sentinel test in `guardrail/` shares Spring TestContext cache with `OpenApiSyncTest` (both annotated `@ActiveProfiles("test")`) |
 | **TS ↔ OpenAPI sync** | Frontend stale generated types | Pre-commit and CI both run `npm run generate:api`; resulting `petclinic-frontend/src/app/generated/api-types.ts` is auto-staged locally and auto-committed by CI on drift, matching the C4/db.sql pattern |
 | **Build hygiene** | Silent webpack/Javadoc warnings | Frontend `npm run build` fails on any webpack `Warning:` (custom-webpack + `scripts/build-strict.sh`; the lone protobufjs transitive-dep warning is suppressed at source via `ignoreWarnings`). CI also runs `mvn javadoc:javadoc -Dmaven.javadoc.failOnError=true` |
+| **Dependency upgrade discipline** | Drive-by upgrades / known-CVE deps | Dependabot opens weekly batched (minor+patch) PRs per ecosystem (`/petclinic-backend`, `/petclinic-database`, `/petclinic-frontend`, `/`); major upgrades arrive as separate PRs. CVEs surface as GitHub Dependabot security alerts (built-in for public repos) |
 | **`DbSchemaSyncTest`** | Database schema | Boots embedded Postgres, runs Flyway migrations, dumps schema with `pg_dump` to `db.sql`; commit-blocked if drift |
 | **`C4ModelExtractorTest`** | C4 architecture documentation | Regenerates `docs/generated/C4.dsl` + per-view `*.puml` from code; CI auto-commits any drift |
 | **`DomainModelExtractorTest`** | Domain model documentation | Regenerates `docs/generated/DomainModel.puml` from JPA annotations |
@@ -28,9 +29,7 @@ Legend: ✅ in place · 🚧 planned · 💡 considered, not scheduled
 
 ## 🚧 Planned (in scope for the current guardrails initiative)
 
-| # | Guardrail | What it protects | Approach |
-|---|---|---|---|
-| **D** | Dependency upgrade discipline | Drive-by upgrades / supply-chain risk | Renovate (or Dependabot) with batched weekly minor-upgrade PRs; OWASP/Snyk dependency-check workflow surfacing known CVEs (informational, not blocking initially) |
+_All planned guardrails landed. New ideas live in 💡 below._
 
 ---
 
