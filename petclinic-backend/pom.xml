@@ -118,7 +118,7 @@
         <dependency>
             <groupId>io.zonky.test.postgres</groupId>
             <artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
-            <version>16.2.0</version>
+            <version>18.3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
