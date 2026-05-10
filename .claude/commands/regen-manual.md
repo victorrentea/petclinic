@@ -17,7 +17,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health
 
 If either returns anything other than `200`, abort with this message and STOP:
 
-> Cannot regenerate the manual: the application stack is not running. Start it with `./run-all.sh` and try again.
+> Cannot regenerate the manual: the application stack is not running. Start it with `./start-database.sh`, `./start-backend.sh`, and `./start-frontend.sh` (each in its own terminal) and try again.
 
 ## Step 1 — Load the baseline
 

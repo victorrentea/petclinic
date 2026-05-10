@@ -13,8 +13,13 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 ## Common Commands
 
 ### Full Stack
+Each script is foreground; run them in separate terminals.
 ```sh
-./run-all.sh  # Start both backend (8080) and frontend (4200)
+./install-all.sh           # one-time: mvn install + npm install for all modules
+./start-database.sh        # embedded Postgres on localhost:5432
+./start-backend.sh         # Spring Boot on localhost:8080
+./start-frontend.sh        # Angular dev server on localhost:4200
+./start-observability.sh   # optional: observability stack
 ```
 
 ### Backend (petclinic-backend/)
@@ -24,8 +29,6 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 ./mvnw clean install                # Build + generate code (MapStruct, OpenAPI)
 ./postman-tests.sh                  # API tests (Newman)
 ```
-
-**Note:** The script `run-all.sh` references old directories (`petclinic-rest`, `petclinic-angular`) instead of current names (`petclinic-backend`, `petclinic-frontend`).
 
 ### Frontend (petclinic-frontend/)
 ```sh
