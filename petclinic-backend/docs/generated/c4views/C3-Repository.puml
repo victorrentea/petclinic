@@ -24,8 +24,8 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
 
 }
 
-Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)

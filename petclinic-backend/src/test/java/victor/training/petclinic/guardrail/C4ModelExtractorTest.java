@@ -127,18 +127,19 @@ class C4ModelExtractorTest {
         for (ComponentGroup group : GROUPS) {
             for (String pkg : group.packages()) packageToGroup.put(pkg, group.name());
         }
-        Set<String> added = new HashSet<>();
+        Set<String> edges = new TreeSet<>();
         for (JavaClass javaClass : classes) {
             String sourceGroup = packageToGroup.get(javaClass.getPackageName());
             if (sourceGroup == null) continue;
-            Component sourceComp = componentMap.get(sourceGroup);
             for (Dependency dep : javaClass.getDirectDependenciesFromSelf()) {
                 String targetGroup = packageToGroup.get(dep.getTargetClass().getPackageName());
                 if (targetGroup == null || targetGroup.equals(sourceGroup)) continue;
-                if (added.add(sourceGroup + "->" + targetGroup)) {
-                    sourceComp.uses(componentMap.get(targetGroup), "");
-                }
+                edges.add(sourceGroup + "->" + targetGroup);
             }
+        }
+        for (String edge : edges) {
+            String[] parts = edge.split("->", 2);
+            componentMap.get(parts[0]).uses(componentMap.get(parts[1]), "");
         }
     }
 
