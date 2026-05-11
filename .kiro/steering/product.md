@@ -9,7 +9,7 @@ Pet Clinic is a full-stack veterinary clinic management application demonstratin
 ## Architecture
 - **Backend**: Spring Boot REST API (Java 21+)
 - **Frontend**: Angular SPA (TypeScript)
-- **Database**: H2 (dev), PostgreSQL (prod)
+- **Database**: Embedded PostgreSQL (Java jar for dev, in-process for tests)
 
 ## Core Features
 - Pet owners and contact information management

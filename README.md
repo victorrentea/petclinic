@@ -130,7 +130,7 @@ cd petclinic-backend
 - Spring Boot 3.x
 - Spring Data JPA
 - OpenAPI 3.1 / Swagger
-- H2 (default) or PostgreSQL
+- PostgreSQL (embedded or standalone)
 - MapStruct for DTO mapping
 
 ### 📖 OpenAPI REST API Documentation
@@ -181,21 +181,12 @@ Generated code lives in `target/generated-sources/`; controllers wire concrete b
 
 ### Database Configuration
 
-**H2 (Default)**
-- In-memory, auto-populated at startup
-- H2 Console: http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:mem:petclinic`
-  - Username: `sa`
-  - Password: _(blank)_
-
-**PostgreSQL**
-```properties
-spring.profiles.active=postgres
-```
+**Dev:** Embedded PostgreSQL (Java jar) — start it with:
 ```sh
-docker run -e POSTGRES_USER=petclinic -e POSTGRES_PASSWORD=petclinic \
-  -e POSTGRES_DB=petclinic -p 5432:5432 postgres:16.3
+./start-database.sh   # launches embedded Postgres on localhost:5432
 ```
+
+**Tests** use an embedded PostgreSQL that starts automatically — no setup needed.
 
 Or use docker-compose:
 ```sh
