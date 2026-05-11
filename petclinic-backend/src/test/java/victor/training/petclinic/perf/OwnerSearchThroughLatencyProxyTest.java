@@ -4,6 +4,7 @@ import com.github.noconnor.junitperf.JUnitPerfInterceptor;
 import com.github.noconnor.junitperf.JUnitPerfTest;
 import com.github.noconnor.junitperf.JUnitPerfTestRequirement;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,12 +19,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Boots the app against the local dev Postgres reached through {@link NetworkLatencyProxy}. */
+/** Boots the app against the local dev Postgres reached through {@link NetworkLatencyProxy}.
+ *  Skipped on machines without a Postgres on localhost:5432 (e.g. CI). */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(JUnitPerfInterceptor.class)
+@EnabledIf("devPostgresReachable")
 class OwnerSearchThroughLatencyProxyTest {
   private static final int PROXY_PORT = 15432;
+
+  @SuppressWarnings("unused")
+  static boolean devPostgresReachable() {
+    try (var s = new java.net.Socket("localhost", 5432)) {
+      return true;
+    } catch (java.io.IOException e) {
+      return false;
+    }
+  }
 
   @DynamicPropertySource
   static void datasource(DynamicPropertyRegistry r) throws java.io.IOException {
