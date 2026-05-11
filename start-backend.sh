@@ -28,14 +28,14 @@ fi
 
 OTEL_JVM_ARGS=""
 if [[ -f "$AGENT_JAR" ]]; then
-  OTEL_JVM_ARGS="-javaagent:$AGENT_JAR \
--Dotel.service.name=petclinic-backend \
--Dotel.exporter.otlp.endpoint=http://localhost:4318 \
--Dotel.exporter.otlp.protocol=http/protobuf \
--Dotel.logs.exporter=otlp \
--Dotel.metrics.exporter=otlp \
--Dotel.traces.exporter=otlp \
--Dotel.resource.attributes=deployment.environment=local"
+  export OTEL_SERVICE_NAME=petclinic-backend
+  export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+  export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+  export OTEL_LOGS_EXPORTER=otlp
+  export OTEL_METRICS_EXPORTER=otlp
+  export OTEL_TRACES_EXPORTER=otlp
+  export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
+  OTEL_JVM_ARGS="-javaagent:$AGENT_JAR"
 fi
 
 echo "🚀 Starting Petclinic Backend (Spring Boot)..."
