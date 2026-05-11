@@ -10,7 +10,8 @@
       ]
     },
     "grafana": {
-      "command": "mcp-grafana",
+      "command": "uvx",
+      "args": ["mcp-grafana"],
       "env": {
         "GRAFANA_URL": "http://localhost:3300",
         "GRAFANA_USERNAME": "admin",
