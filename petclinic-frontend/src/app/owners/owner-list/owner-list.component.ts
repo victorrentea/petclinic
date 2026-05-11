@@ -18,7 +18,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   isOwnersDataReceived: boolean = false;
 
   currentPage: number = 0;
-  pageSize: number = 20;
+  pageSize: number = 10;
   sortField: SortField = 'name';
   sortDir: SortDir = 'asc';
 

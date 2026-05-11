@@ -120,7 +120,7 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        OwnerPageDto page = searchPaged("/api/owners");
+        OwnerPageDto page = searchPaged("/api/owners?q=Franklin&size=10");
 
         assertThat(page.getContent())
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)

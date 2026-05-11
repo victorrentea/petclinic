@@ -66,7 +66,7 @@ public class OwnerRestController {
     public ResponseEntity<OwnerPageDto> listOwners(
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") String sort,
             @RequestParam(defaultValue = "asc") String dir) {
         if (!ALLOWED_SIZES.contains(size)) {
