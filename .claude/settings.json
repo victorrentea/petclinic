@@ -12,6 +12,8 @@
       "Write(.github/workflows/*)",
       "Edit(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
       "Write(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
+      "Edit(petclinic-backend/.coverage-baseline)",
+      "Write(petclinic-backend/.coverage-baseline)",
       "Edit(.github/CODEOWNERS)",
       "Write(.github/CODEOWNERS)",
       "Edit(.claude/settings.json)",
@@ -30,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/check-coverage.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-coverage.sh\""
           }
         ]
       }

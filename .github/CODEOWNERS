@@ -16,3 +16,6 @@
 # Elders must also review dependency manifests — guards against unreviewed upgrades / supply-chain risk.
 **/pom.xml                       @victorrentea/elders
 /petclinic-frontend/package.json @victorrentea/elders
+
+# Coverage baseline drops should be a deliberate, reviewed decision.
+/petclinic-backend/.coverage-baseline @victorrentea/elders
