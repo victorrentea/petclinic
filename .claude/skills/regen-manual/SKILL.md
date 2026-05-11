@@ -1,5 +1,9 @@
 ---
-description: Regenerate docs/manual/manual.md by crawling the running PetClinic UI in a browser. Diff-based — uses the prior manual as a checklist and only updates what changed.
+name: regen-manual
+description: >
+  Regenerate docs/manual/manual.md by crawling the running PetClinic UI in a browser.
+  Diff-based — uses the prior manual as a checklist and only updates what changed.
+  INVOKE ONLY when the user explicitly types /regen-manual. Do NOT auto-trigger from context.
 ---
 
 # Regenerate the user manual
@@ -55,12 +59,12 @@ For each feature area:
 
 For each feature area in route order, walk the happy path: list → detail → create → edit. Aim for 3–5 screenshots per feature, ~30–50 total.
 
-Use `chrome-devtools-mcp` tools:
+Use Playwright MCP tools:
 
-- `mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page` to open `http://localhost:4200/<route>`
-- `mcp__plugin_chrome-devtools-mcp_chrome-devtools__resize_page` to set viewport to **1280×800**
-- `mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__click`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill_form` to drive the UI
-- `mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot` with `fullPage: true` and `format: "png"` to capture
+- `mcp__playwright__browser_navigate` to open `http://localhost:4200/<route>`
+- `mcp__playwright__browser_resize` to set viewport to **1280×800**
+- `mcp__playwright__browser_click`, `mcp__playwright__browser_type`, `mcp__playwright__browser_fill_form` to drive the UI
+- `mcp__playwright__browser_take_screenshot` with `fullPage: true` and `type: "png"` to capture
 
 Save each screenshot to `docs/manual/screenshots/<feature>-<state>.png`. Naming: lowercase, hyphenated, descriptive of the state (`owners-list.png`, `owners-create.png`, `owners-detail.png`, `pets-add-to-owner.png`, `visits-add.png`, etc.).
 
