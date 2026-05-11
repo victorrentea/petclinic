@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-class DbSchemaSyncTest {
+class DbSchemaExtractorTest {
 
     @Test
     void generatesDbSqlFromMigrations() throws Exception {

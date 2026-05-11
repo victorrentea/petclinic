@@ -14,8 +14,6 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 
     Owner save(Owner owner);
 
-    List<Owner> findAll();
-
     void delete(Owner owner);
 
 }

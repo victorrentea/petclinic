@@ -56,13 +56,8 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
-        } else {
-            owners = ownerRepository.findAll();
-        }
+    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
+        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
         return ownerMapper.toOwnerDtoCollection(owners);
     }
 
@@ -117,12 +112,12 @@ public class OwnerRestController {
 
     @Operation(operationId = "updateOwnersPet", summary = "Update an owner's pet")
     @PutMapping("{ownerId}/pets/{petId}")
-    public void updateOwnersPet(@PathVariable int ownerId, @PathVariable int petId, @RequestBody PetFieldsDto petFieldsDto) {
+    @Transactional
+    public void updateOwnersPet(@PathVariable int ownerId, @PathVariable int petId, @RequestBody @Validated PetFieldsDto petFieldsDto) {
         Pet currentPet = petRepository.findById(petId).orElseThrow();
         currentPet.setBirthDate(petFieldsDto.getBirthDate());
         currentPet.setName(petFieldsDto.getName());
-        currentPet.setType(petMapper.toPetType(petFieldsDto.getType()));
-        currentPet.setType(petTypeRepository.findById(currentPet.getType().getId()).orElseThrow());
+        currentPet.setType(petTypeRepository.findById(petFieldsDto.getType().getId()).orElseThrow());
         petRepository.save(currentPet);
     }
 
@@ -130,9 +125,7 @@ public class OwnerRestController {
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId, @RequestBody VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
-        visit.setPet(pet);
+        visit.setPet(new Pet().setId(petId));
         visitRepository.save(visit);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")

@@ -14,20 +14,20 @@ import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZO
  * context refresh throw if any @Entity column does not exist in the
  * Flyway-migrated schema.
  *
- * Annotation set is intentionally identical to OpenApiSyncTest (including
+ * Annotation set is intentionally identical to OpenApiExtractorTest (including
  * @ActiveProfiles("test")) so that Spring's TestContext cache reuses the
  * same ApplicationContext between the two tests.
  *
  * Caveats: Hibernate validate is one-directional (entity → DB). It is
  * lax on column precision, varchar length, and nullability. The reverse
  * direction (DB column without entity field) is partially covered by
- * DbSchemaSyncTest.
+ * DbSchemaExtractorTest.
  */
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
 @ActiveProfiles("test")
-class JpaSchemaValidateTest {
+class JpaMatchesSchemaTest {
 
     @Test
     void contextLoads_meaningSchemaMatchesEntities() {

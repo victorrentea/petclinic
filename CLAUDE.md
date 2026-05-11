@@ -84,8 +84,8 @@ Architecture diagrams live in `petclinic-backend/docs/`:
 - `PackagesArchUnitTest` — ArchUnit enforces that actual code matches `packages.puml`, plus a bidirectional check that diagram packages = code subpackages
 - `C4ModelExtractorTest` — generates `docs/generated/C4.dsl` and per-view `docs/generated/c4views/*.puml` for 5 C4 views (SystemContext, Containers, Components, RepositoryFocus, MapperFocus)
 - `DomainModelExtractorTest` — reads JPA annotations on classes in the `model` package and emits a UML class diagram with cardinalities and merged bidirectional associations at `docs/generated/DomainModel.puml`
-- `DbSchemaSyncTest` — boots embedded Postgres, runs Flyway migrations, dumps the schema with `pg_dump` to **`db.sql`** at project root; this snapshot is **kept in sync** with the migrations under `src/main/resources/db/migration/`
-- `OpenApiInSyncTest` — boots the app and asserts that **`openapi.yaml`** at project root matches the live `/v3/api-docs.yaml`; this contract file is **kept in sync** with the running controllers
+- `DbSchemaExtractorTest` — boots embedded Postgres, runs Flyway migrations, dumps the schema with `pg_dump` to **`db.sql`** at project root; always regenerates, never asserts
+- `OpenApiExtractorTest` — boots the app and writes **`openapi.yaml`** at project root from the live `/v3/api-docs.yaml`; always regenerates, never asserts
 - **CI:** `.github/workflows/ci-guardrails.yml` runs `./mvnw test` on every push to main and every PR. Test failures (e.g., `packages.puml` drift, contract drift) fail the build. Drift in `docs/generated/` and `db.sql` is auto-committed back to the branch with `[skip ci]`; fork PRs fail with an actionable message because the workflow has no write access.
 
 The C4 DSL can be rendered at [structurizr.com](https://structurizr.com) or with the Structurizr CLI.
