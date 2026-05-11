@@ -14,7 +14,7 @@ BASELINE="$BACKEND/.coverage-baseline"
 
 if [[ -n "$(find "$BACKEND/src" -name '*.java' -newer "$JACOCO_CSV" -print -quit 2>/dev/null)" ]]; then
     cat <<'JSON'
-{"decision":"block","reason":"JaCoCo coverage data is stale: .java sources were edited since the last test run. Run `cd petclinic-backend && ./mvnw test` to refresh coverage, then stop. (If you intentionally don't want to verify coverage this turn, say so and I will let you stop.)"}
+{"decision":"block","reason":"event:jacoco_stale\ncause:java_sources_newer_than_jacoco_csv\nfix:cd petclinic-backend && ./mvnw test\nopt_out:say_skip_coverage_this_turn"}
 JSON
     exit 0
 fi
@@ -42,5 +42,5 @@ CUR_PCT=$(awk "BEGIN {printf \"%.2f\", $CURRENT*100}")
 DELTA_PP=$(awk "BEGIN {printf \"%.2f\", ($PREVIOUS-$CURRENT)*100}")
 
 cat <<JSON
-{"decision":"block","reason":"JaCoCo line coverage dropped from ${PREV_PCT}% to ${CUR_PCT}% (-${DELTA_PP}pp; ${MISSED} lines missed). Add tests to bring it back up before stopping. If the drop is intentional, edit petclinic-backend/.coverage-baseline to ${CURRENT}."}
+{"decision":"block","reason":"event:jacoco_drop\nprev:${PREV_PCT}%\ncurr:${CUR_PCT}%\ndelta:-${DELTA_PP}pp\nmissed:${MISSED}\nfix:add_tests|set petclinic-backend/.coverage-baseline=${CURRENT}"}
 JSON
