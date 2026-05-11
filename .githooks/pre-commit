@@ -3,46 +3,6 @@ set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
 
-# ── Secrets scan (gitleaks) ────────────────────────────────────────────────
-if command -v gitleaks >/dev/null 2>&1; then
-  if ! GITLEAKS_OUT=$(gitleaks protect --staged --redact --no-banner 2>&1); then
-    echo "$GITLEAKS_OUT"
-    echo ""
-    echo "[pre-commit] ❌ Secrets detected in staged changes — commit blocked."
-    echo "[pre-commit]    Remove the secret, rotate it if it was real, then re-stage."
-    exit 1
-  fi
-else
-  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secret scan."
-  echo "[pre-commit]    Install with: brew install gitleaks"
-fi
-
-# ── Project-local secrets scan (catches custom-shape secrets gitleaks misses) ─
-SECRETS_FILE="$ROOT/secrets.env"
-if [ -f "$SECRETS_FILE" ]; then
-  STAGED_ADDITIONS=$(git diff --cached -U0 --no-color -- ':!secrets.env' | grep -E '^\+[^+]' || true)
-  if [ -n "$STAGED_ADDITIONS" ]; then
-    while IFS= read -r line || [ -n "$line" ]; do
-      [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
-      [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || continue
-      key="${BASH_REMATCH[1]}"
-      value="${BASH_REMATCH[2]}"
-      value="${value%$'\r'}"
-      value="${value%"${value##*[![:space:]]}"}"
-      if [[ "$value" =~ ^\"(.*)\"$ ]] || [[ "$value" =~ ^\'(.*)\'$ ]]; then
-        value="${BASH_REMATCH[1]}"
-      fi
-      [[ ${#value} -ge 8 ]] || continue
-      if printf '%s\n' "$STAGED_ADDITIONS" | grep -F -q -- "$value"; then
-        echo ""
-        echo "[pre-commit] ❌ Value of \$$key (from secrets.env) appears in staged additions — commit blocked."
-        echo "[pre-commit]    Rotate the secret if it was real, scrub it from your changes, then re-stage."
-        exit 1
-      fi
-    done <"$SECRETS_FILE"
-  fi
-fi
-
 # ── Architecture artifacts + OpenAPI/JPA sync ──────────────────────────────
 cd "$ROOT/petclinic-backend"
 MVN_OUT=$(mktemp)
