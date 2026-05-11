@@ -72,6 +72,9 @@ public class OwnerRestController {
         if (!ALLOWED_SIZES.contains(size)) {
             return ResponseEntity.badRequest().build();
         }
+        if (!dir.equalsIgnoreCase("asc") && !dir.equalsIgnoreCase("desc")) {
+            return ResponseEntity.badRequest().build();
+        }
         Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
         // sort=name → firstName, lastName (matches displayed "First Last" order)
         // sort=city → city, firstName, lastName
