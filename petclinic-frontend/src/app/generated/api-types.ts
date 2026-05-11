@@ -64,7 +64,10 @@ export interface paths {
     post: operations["addPetType"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description Returns a paginated list of pet owners. Optionally filter by a free-text search term that matches first name, last name, or city (case-insensitive, partial match). Example: GET /api/owners?q=davis&page=0&size=10&sort=NAME&dir=ASC
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -339,9 +342,15 @@ export interface components {
       /** @description The pets owned by this individual including any booked vet visits. */
       pets: readonly components["schemas"]["PetDto"][];
     };
+    /** @description A single page of owner search results. */
     OwnerPageDto: {
+      /** @description The owners on this page. */
       content?: components["schemas"]["OwnerDto"][];
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description Total number of owners matching the search criteria across all pages.
+       * @example 42
+       */
       totalElements?: number;
     };
   };
@@ -1303,14 +1312,37 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description Returns a paginated list of pet owners. Optionally filter by a free-text search term that matches first name, last name, or city (case-insensitive, partial match). Example: GET /api/owners?q=davis&page=0&size=10&sort=NAME&dir=ASC
+   */
   listOwners: {
     parameters: {
       query?: {
+        /**
+         * @description Free-text filter on first name, last name, or city (partial, case-insensitive). Omit to return all owners.
+         * @example Davis
+         */
         q?: string;
+        /**
+         * @description Zero-based page index.
+         * @example 0
+         */
         page?: number;
+        /**
+         * @description Page size. Allowed values: 5, 10, 20.
+         * @example 10
+         */
         size?: number;
+        /**
+         * @description Sort field. NAME = sort by first+last name; CITY = sort by city then name.
+         * @example NAME
+         */
         sort?: "NAME" | "CITY";
+        /**
+         * @description Sort direction: ASC or DESC.
+         * @example ASC
+         */
         dir?: "ASC" | "DESC";
       };
     };
