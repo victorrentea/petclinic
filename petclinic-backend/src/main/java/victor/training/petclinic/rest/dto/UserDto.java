@@ -29,4 +29,3 @@ public class UserDto {
     @Schema(description = "The roles of an user")
     private List<@Valid RoleDto> roles = new ArrayList<>();
 }
-
