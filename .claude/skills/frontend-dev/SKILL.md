@@ -284,5 +284,10 @@ import { EntitiesModule } from './entities/entities.module';
 
 ---
 
+### Grid UX rules
+- **Sorted column shows a directional arrow** — ascending sort → arrow up (`glyphicon-arrow-up`), descending → arrow down (`glyphicon-arrow-down`). Arrow is shown only on the active sort column.
+- Clicking a column header toggles direction (asc → desc → asc). Clicking a different column resets to asc.
+- Sort triggers a server re-fetch (not client-side sort).
+
 ### Do not run tests unless explicitly asked.
 Return your output as file-by-file code blocks, clearly labelled with the file path.
