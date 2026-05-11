@@ -73,8 +73,11 @@ public class OwnerRestController {
             return ResponseEntity.badRequest().build();
         }
         Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        String sortProperty = "city".equalsIgnoreCase(sort) ? "city" : "lastName";
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty, "firstName"));
+        // sort=name → firstName, lastName (matches displayed "First Last" order)
+        // sort=city → city, firstName, lastName
+        PageRequest pageable = "city".equalsIgnoreCase(sort)
+            ? PageRequest.of(page, size, Sort.by(direction, "city").and(Sort.by("firstName", "lastName")))
+            : PageRequest.of(page, size, Sort.by(direction, "firstName", "lastName"));
 
         Page<Owner> ownerPage = ownerRepository.search(q, pageable);
 

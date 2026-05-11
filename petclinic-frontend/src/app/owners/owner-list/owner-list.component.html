@@ -58,32 +58,32 @@
           </tr>
         </tbody>
       </table>
+    </div>
 
-      <!-- Pagination controls -->
-      <div class="row">
-        <div class="col-sm-4">
-          <label>
-            Rows per page:
-            <select class="form-control input-sm" style="display:inline-block;width:auto"
-                    [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
-              <option [value]="5">5</option>
-              <option [value]="10">10</option>
-              <option [value]="20">20</option>
-            </select>
-          </label>
-        </div>
-        <div class="col-sm-4 text-center" style="padding-top:6px">
-          Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total)
-        </div>
-        <div class="col-sm-4 text-right">
-          <button class="btn btn-default btn-sm" (click)="prevPage()" [disabled]="currentPage === 0">
-            <span class="glyphicon glyphicon-chevron-left"></span> Prev
-          </button>
-          <button class="btn btn-default btn-sm" (click)="nextPage()"
-                  [disabled]="(currentPage + 1) * pageSize >= totalElements">
-            Next <span class="glyphicon glyphicon-chevron-right"></span>
-          </button>
-        </div>
+    <!-- Pagination controls — outside table-responsive to avoid horizontal scrollbar -->
+    <div *ngIf="owners.length > 0" class="row" style="margin-top:8px">
+      <div class="col-sm-4">
+        <label>
+          Rows per page:
+          <select class="form-control input-sm" style="display:inline-block;width:auto"
+                  [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+          </select>
+        </label>
+      </div>
+      <div class="col-sm-4 text-center" style="padding-top:6px">
+        Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total)
+      </div>
+      <div class="col-sm-4 text-right">
+        <button class="btn btn-default btn-sm" (click)="prevPage()" [disabled]="currentPage === 0">
+          <span class="glyphicon glyphicon-chevron-left"></span> Prev
+        </button>
+        <button class="btn btn-default btn-sm" (click)="nextPage()"
+                [disabled]="(currentPage + 1) * pageSize >= totalElements">
+          Next <span class="glyphicon glyphicon-chevron-right"></span>
+        </button>
       </div>
     </div>
 
