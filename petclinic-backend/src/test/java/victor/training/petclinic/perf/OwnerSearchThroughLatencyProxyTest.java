@@ -39,7 +39,7 @@ class OwnerSearchThroughLatencyProxyTest {
 
   @DynamicPropertySource
   static void datasource(DynamicPropertyRegistry r) throws java.io.IOException {
-    new NetworkLatencyProxy("localhost", 5432, PROXY_PORT, 3).start();
+    new NetworkLatencyProxy("localhost", 5432, PROXY_PORT, 2).start();
     r.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:" + PROXY_PORT + "/petclinic");
   }
 
