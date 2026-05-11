@@ -80,7 +80,7 @@
         <button class="btn btn-default btn-sm" (click)="prevPage()" [disabled]="currentPage === 0">
           <span class="glyphicon glyphicon-chevron-left"></span> Prev
         </button>
-        <button class="btn btn-default btn-sm" (click)="nextPage()"
+        <button class="btn btn-default btn-sm" style="margin-left:4px" (click)="nextPage()"
                 [disabled]="(currentPage + 1) * pageSize >= totalElements">
           Next <span class="glyphicon glyphicon-chevron-right"></span>
         </button>
