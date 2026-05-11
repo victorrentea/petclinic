@@ -40,7 +40,7 @@ class DomainModelExtractorTest {
         List<Class<?>> entities = classes.stream()
             .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
             .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
-            .map(JavaClass::reflect)
+            .<Class<?>>map(JavaClass::reflect)
             .sorted(Comparator.comparing(Class::getSimpleName))
             .toList();
 
