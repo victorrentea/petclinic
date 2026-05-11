@@ -36,6 +36,15 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-push-coverage.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-skill-apply.sh\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -54,6 +63,15 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-spotless.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-skill-handler.sh\""
           }
         ]
       }
