@@ -150,6 +150,16 @@ Run `mvn clean install` when:
 - Always use TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
 - Builder chains: one property per line, unless only 2 properties total
 
+### Pagination & Search Patterns
+- **EXISTS subquery, not LEFT JOIN + DISTINCT** — joining Owner→pets returns one row per pet; DISTINCT breaks LIMIT/OFFSET pagination (wrong counts). Use `EXISTS (SELECT 1 FROM Pet p WHERE p.owner = o AND ...)`.
+- **`ILIKE` + pg_trgm GIN** — plain GIN index on the column is enough; no expression index on `LOWER(col)` needed. `ILIKE '%q%'` is accelerated directly.
+- **Sort "Name" = firstName first** — the column displays "First Last", so sort must match: `Sort.by(dir, "firstName", "lastName")`.
+- **Reuse `Sort.Direction` from Spring Data** — don't invent a `SortDir` enum; it already exists.
+- **Small domain enums belong inside the controller** — e.g., `enum SortField { NAME, CITY }` as an inner enum, not a separate file.
+- **`MethodArgumentTypeMismatchException` → 400** — add an `@ExceptionHandler` in `@RestControllerAdvice`; without it, invalid enum params return 500.
+- **Never run partial `mvn test -Dtest=X` before committing** — it overwrites `jacoco.csv` with low partial coverage, blocking the coverage hook.
+- **Flyway migrations with Postgres extensions must be graceful** — wrap in `DO $$ BEGIN ... EXCEPTION WHEN OTHERS THEN RAISE NOTICE ...; END; $$` so Zonky embedded Postgres (no pg_trgm) doesn't break the test suite.
+
 ### Task Modifiers
 - "fast", "go", "Sparta" → skip build/tests
 - "explain and commit" → summarize change as training note
