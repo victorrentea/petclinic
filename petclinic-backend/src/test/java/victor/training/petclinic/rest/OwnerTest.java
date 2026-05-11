@@ -147,6 +147,12 @@ public class OwnerTest {
     }
 
     @Test
+    void search_invalidDir_returns400() throws Exception {
+        mockMvc.perform(get("/api/owners?q=&dir=KAKAMAKA"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void search_byQ_notFound() throws Exception {
         OwnerPageDto page = searchPaged("/api/owners?q=ZxqNonExistentZxq");
 
