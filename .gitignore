@@ -69,3 +69,4 @@ __pycache__/
 .github/skills
 /.playwright-mcp
 /petclinic-database/.bootstrapped
+.claude/settings.local.json
