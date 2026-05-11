@@ -52,7 +52,6 @@ public class Pet {
     private Owner owner;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
-    @BatchSize(size = 10)
     private Set<Visit> visits = new HashSet<>();
 
     public List<Visit> getVisitsSortedByDate() {
