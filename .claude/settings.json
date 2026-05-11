@@ -26,6 +26,9 @@
       "Write(petclinic-frontend/package.json)"
     ]
   },
+  "enabledPlugins": {
+    "chrome-devtools-mcp@claude-plugins-official": true
+  },
   "hooks": {
     "PreToolUse": [
       {
