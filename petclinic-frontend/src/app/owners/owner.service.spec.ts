@@ -131,15 +131,15 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
+  it('search owners paged', () => {
+    const page = { content: expectedOwners, totalElements: expectedOwners.length };
+    ownerService.searchOwnersPaged('Fr', 0, 20, 'name', 'asc').subscribe(result => {
+      expect(result.content).toEqual(expectedOwners);
     });
 
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
+    const req = httpTestingController.expectOne(r => r.url === ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expect(req.request.params.get('q')).toEqual('Fr');
+    req.flush(page);
   });
 });

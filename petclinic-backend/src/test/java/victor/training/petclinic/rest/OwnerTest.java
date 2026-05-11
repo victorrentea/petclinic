@@ -37,6 +37,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 
 import jakarta.transaction.Transactional;
 
@@ -119,43 +120,48 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        OwnerPageDto page = searchPaged("/api/owners");
 
-        assertThat(owners)
+        assertThat(page.getContent())
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
             .contains(Assertions.tuple(ownerId, "George", "Franklin"));
     }
 
     @Test
-    void getAllWithAddressFilter() throws Exception {
+    void search_byQ_returnsPaginatedResponse() throws Exception {
         Owner owner2 = TestData.anOwner();
-        owner2.setLastName("JavaBeans");
-        int owner2Id = ownerRepository.save(owner2).getId();
+        owner2.setLastName("Zxqunique");
+        ownerRepository.save(owner2);
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        OwnerPageDto page = searchPaged("/api/owners?q=Zxqunique&page=0&size=10");
 
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
-            .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).getLastName()).isEqualTo("Zxqunique");
+        assertThat(page.getTotalElements()).isEqualTo(1);
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    @Test
+    void search_invalidSize_returns400() throws Exception {
+        mockMvc.perform(get("/api/owners?q=&size=7"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void search_byQ_notFound() throws Exception {
+        OwnerPageDto page = searchPaged("/api/owners?q=ZxqNonExistentZxq");
+
+        assertThat(page.getContent()).isEmpty();
+        assertThat(page.getTotalElements()).isEqualTo(0);
+    }
+
+    private OwnerPageDto searchPaged(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
-    }
-
-    @Test
-    void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
-
-        assertThat(results).isEmpty();
+        return mapper.readValue(responseJson, OwnerPageDto.class);
     }
 
     @Test

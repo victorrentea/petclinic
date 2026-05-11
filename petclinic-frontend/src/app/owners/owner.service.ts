@@ -2,9 +2,17 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+export interface OwnerPage {
+  content: Owner[];
+  totalElements: number;
+}
+
+export type SortField = 'name' | 'city';
+export type SortDir = 'asc' | 'desc';
 
 @Injectable()
 export class OwnerService {
@@ -17,6 +25,25 @@ export class OwnerService {
     private httpErrorHandler: HttpErrorHandler
   ) {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
+  }
+
+  searchOwnersPaged(
+    q: string,
+    page: number,
+    size: number,
+    sort: SortField,
+    dir: SortDir
+  ): Observable<OwnerPage> {
+    const params = new HttpParams()
+      .set('q', q)
+      .set('page', String(page))
+      .set('size', String(size))
+      .set('sort', sort)
+      .set('dir', dir);
+    const emptyPage: OwnerPage = { content: [], totalElements: 0 };
+    return this.http
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(catchError(this.handlerError('searchOwnersPaged', emptyPage)));
   }
 
   getOwners(): Observable<Owner[]> {
@@ -50,13 +77,4 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
-  }
 }

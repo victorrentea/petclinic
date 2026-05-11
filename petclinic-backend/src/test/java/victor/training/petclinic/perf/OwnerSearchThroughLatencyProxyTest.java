@@ -51,6 +51,6 @@ class OwnerSearchThroughLatencyProxyTest {
   void ownerSearchThroughProxy() throws Exception {
     mockMvc.perform(get("/api/owners"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(10))));
+        .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(10))));
   }
 }

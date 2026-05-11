@@ -2,7 +2,11 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +20,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -54,16 +59,29 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
+    private static final Set<Integer> ALLOWED_SIZES = Set.of(5, 10, 20);
+
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", required = false) String lastName) {
-        List<Owner> owners;
-        if (lastName != null) {
-            owners = ownerRepository.findByLastNameStartingWith(lastName);
-        } else {
-            owners = ownerRepository.findAll();
+    public ResponseEntity<OwnerPageDto> listOwners(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String dir) {
+        if (!ALLOWED_SIZES.contains(size)) {
+            return ResponseEntity.badRequest().build();
         }
-        return ownerMapper.toOwnerDtoCollection(owners);
+        Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        String sortProperty = "city".equalsIgnoreCase(sort) ? "city" : "lastName";
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty, "firstName"));
+
+        Page<Owner> ownerPage = ownerRepository.search(q, pageable);
+
+        OwnerPageDto result = new OwnerPageDto();
+        result.setContent(ownerMapper.toOwnerDtoCollection(ownerPage.getContent()));
+        result.setTotalElements(ownerPage.getTotalElements());
+        return ResponseEntity.ok(result);
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

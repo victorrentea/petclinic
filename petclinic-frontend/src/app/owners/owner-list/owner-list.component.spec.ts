@@ -27,8 +27,8 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    return of();
+  searchOwnersPaged(q: string, page: number, size: number, sort: string, dir: string): Observable<{content: Owner[], totalElements: number}> {
+    return of({ content: [], totalElements: 0 });
   }
 }
 
@@ -81,8 +81,8 @@ describe('OwnerListComponent', () => {
     ownerService = fixture.debugElement.injector.get(OwnerService);
     getOwnersSpy = spyOn(ownerService, 'getOwners')
       .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+    searchOwnersSpy = spyOn(ownerService, 'searchOwnersPaged')
+      .and.returnValue(of({ content: testOwners, totalElements: testOwners.length }));
 
   });
 
@@ -92,7 +92,7 @@ describe('OwnerListComponent', () => {
 
   it('should call ngOnInit() method', () => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    expect(searchOwnersSpy.calls.any()).toBe(true, 'searchOwnersPaged called');
   });
 
 
@@ -106,24 +106,13 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
+  it('onSearchEnter should call searchOwnersPaged', () => {
+    fixture.detectChanges();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
+    component.onSearchEnter();
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('Fr');
-
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    expect(searchOwnersSpy).toHaveBeenCalled();
   });
 
 });

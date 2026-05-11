@@ -339,6 +339,11 @@ export interface components {
       /** @description The pets owned by this individual including any booked vet visits. */
       pets: readonly components["schemas"]["PetDto"][];
     };
+    OwnerPageDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      /** Format: int64 */
+      totalElements?: number;
+    };
   };
   responses: never;
   parameters: never;
@@ -1302,14 +1307,18 @@ export interface operations {
   listOwners: {
     parameters: {
       query?: {
-        lastName?: string;
+        q?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
+        dir?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */
