@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+
 CREATE TABLE public.flyway_schema_history (
     installed_rank integer NOT NULL,
     version character varying(50),
@@ -165,6 +167,18 @@ ALTER TABLE ONLY public.visits
     ADD CONSTRAINT visits_pkey PRIMARY KEY (id);
 
 CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
+
+CREATE INDEX idx_owners_address_trgm ON public.owners USING gin (address public.gin_trgm_ops);
+
+CREATE INDEX idx_owners_city_trgm ON public.owners USING gin (city public.gin_trgm_ops);
+
+CREATE INDEX idx_owners_first_name_trgm ON public.owners USING gin (first_name public.gin_trgm_ops);
+
+CREATE INDEX idx_owners_last_name_trgm ON public.owners USING gin (last_name public.gin_trgm_ops);
+
+CREATE INDEX idx_owners_telephone_trgm ON public.owners USING gin (telephone public.gin_trgm_ops);
+
+CREATE INDEX idx_pets_name_trgm ON public.pets USING gin (name public.gin_trgm_ops);
 
 CREATE INDEX owners_last_name_idx ON public.owners USING btree (last_name);
 

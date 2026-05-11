@@ -41,6 +41,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -65,7 +66,20 @@ public class OwnerRestController {
 
     private static final Set<Integer> ALLOWED_SIZES = Set.of(5, 10, 20);
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(
+        operationId = "listOwners",
+        summary = "List owners",
+        description = """
+            Returns a paginated list of pet owners. Optionally filter by a free-text search term \
+            that matches first name, last name, or city (case-insensitive, partial match). \
+            Example: GET /api/owners?q=davis&page=0&size=10&sort=NAME&dir=ASC\
+            """
+    )
+    @Parameter(name = "q",    description = "Free-text filter on first name, last name, or city (partial, case-insensitive). Omit to return all owners.", example = "Davis")
+    @Parameter(name = "page", description = "Zero-based page index.", example = "0")
+    @Parameter(name = "size", description = "Page size. Allowed values: 5, 10, 20.", example = "10")
+    @Parameter(name = "sort", description = "Sort field. NAME = sort by first+last name; CITY = sort by city then name.", example = "NAME")
+    @Parameter(name = "dir",  description = "Sort direction: ASC or DESC.", example = "ASC")
     @GetMapping(produces = "application/json")
     public ResponseEntity<OwnerPageDto> listOwners(
             @RequestParam(required = false) String q,
@@ -78,9 +92,12 @@ public class OwnerRestController {
         }
         // sort=NAME → firstName, lastName (matches displayed "First Last" order)
         // sort=CITY → city, firstName, lastName
-        PageRequest pageable = sort == SortField.CITY
-            ? PageRequest.of(page, size, Sort.by(dir, "city").and(Sort.by("firstName", "lastName")))
-            : PageRequest.of(page, size, Sort.by(dir, "firstName", "lastName"));
+        PageRequest pageable;
+        if (sort == SortField.CITY) {
+            pageable = PageRequest.of(page, size, Sort.by(dir, "city").and(Sort.by("firstName", "lastName")));
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(dir, "firstName", "lastName"));
+        }
 
         Page<Owner> ownerPage = ownerRepository.search(q, pageable);
 

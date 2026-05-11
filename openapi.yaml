@@ -6,7 +6,7 @@ info:
   termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
   version: "1.0"
 servers:
-- url: http://localhost:8080
+- url: http://localhost
   description: Generated server url
 paths:
   /api/visits/{visitId}:
@@ -1036,29 +1036,41 @@ paths:
       tags:
       - owner-rest-controller
       summary: List owners
+      description: "Returns a paginated list of pet owners. Optionally filter by a\
+        \ free-text search term that matches first name, last name, or city (case-insensitive,\
+        \ partial match). Example: GET /api/owners?q=davis&page=0&size=10&sort=NAME&dir=ASC"
       operationId: listOwners
       parameters:
       - name: q
         in: query
+        description: "Free-text filter on first name, last name, or city (partial,\
+          \ case-insensitive). Omit to return all owners."
         required: false
         schema:
           type: string
+        example: Davis
       - name: page
         in: query
+        description: Zero-based page index.
         required: false
         schema:
           type: integer
           format: int32
           default: 0
+        example: 0
       - name: size
         in: query
+        description: "Page size. Allowed values: 5, 10, 20."
         required: false
         schema:
           type: integer
           format: int32
           default: 10
+        example: 10
       - name: sort
         in: query
+        description: Sort field. NAME = sort by first+last name; CITY = sort by city
+          then name.
         required: false
         schema:
           type: string
@@ -1066,8 +1078,10 @@ paths:
           enum:
           - NAME
           - CITY
+        example: NAME
       - name: dir
         in: query
+        description: "Sort direction: ASC or DESC."
         required: false
         schema:
           type: string
@@ -1075,6 +1089,7 @@ paths:
           enum:
           - ASC
           - DESC
+        example: ASC
       responses:
         "400":
           description: Bad Request
@@ -1792,11 +1807,16 @@ components:
       - telephone
     OwnerPageDto:
       type: object
+      description: A single page of owner search results.
       properties:
         content:
           type: array
+          description: The owners on this page.
           items:
             $ref: "#/components/schemas/OwnerDto"
         totalElements:
           type: integer
           format: int64
+          description: Total number of owners matching the search criteria across
+            all pages.
+          example: 42

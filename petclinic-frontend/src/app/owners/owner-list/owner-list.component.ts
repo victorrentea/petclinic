@@ -24,6 +24,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
   private subscription = new Subscription();
+  private fetchSubscription: Subscription | null = null;
 
   constructor(private router: Router, private ownerService: OwnerService) {}
 
@@ -44,11 +45,13 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.fetchSubscription?.unsubscribe();
   }
 
   private fetchPage() {
     this.isOwnersDataReceived = false;
-    this.ownerService
+    this.fetchSubscription?.unsubscribe();
+    this.fetchSubscription = this.ownerService
       .searchOwnersPaged(this.searchTerm, this.currentPage, this.pageSize, this.sortField, this.sortDir)
       .subscribe(page => {
         this.handlePage(page);
