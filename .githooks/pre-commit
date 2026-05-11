@@ -5,8 +5,8 @@ ROOT="$(git rev-parse --show-toplevel)"
 
 # ── Secrets scan (gitleaks) ────────────────────────────────────────────────
 if command -v gitleaks >/dev/null 2>&1; then
-  echo "[pre-commit] Scanning staged changes for secrets (gitleaks)..."
-  if ! gitleaks protect --staged --redact --no-banner; then
+  if ! GITLEAKS_OUT=$(gitleaks protect --staged --redact --no-banner 2>&1); then
+    echo "$GITLEAKS_OUT"
     echo ""
     echo "[pre-commit] ❌ Secrets detected in staged changes — commit blocked."
     echo "[pre-commit]    Remove the secret, rotate it if it was real, then re-stage."
@@ -20,7 +20,6 @@ fi
 # ── Project-local secrets scan (catches custom-shape secrets gitleaks misses) ─
 SECRETS_FILE="$ROOT/secrets.env"
 if [ -f "$SECRETS_FILE" ]; then
-  echo "[pre-commit] Scanning staged additions for values declared in secrets.env..."
   STAGED_ADDITIONS=$(git diff --cached -U0 --no-color -- ':!secrets.env' | grep -E '^\+[^+]' || true)
   if [ -n "$STAGED_ADDITIONS" ]; then
     while IFS= read -r line || [ -n "$line" ]; do
@@ -44,19 +43,26 @@ if [ -f "$SECRETS_FILE" ]; then
   fi
 fi
 
-echo "[pre-commit] Regenerating architecture artifacts and verifying OpenAPI sync..."
+# ── Architecture artifacts + OpenAPI/JPA sync ──────────────────────────────
 cd "$ROOT/petclinic-backend"
-mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest,OpenApiSyncTest,JpaSchemaValidateTest
-
+MVN_OUT=$(mktemp)
+trap 'rm -f "$MVN_OUT" "$NPM_OUT"' EXIT
+if ! mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DomainModelDiagramExtractorTest,OpenApiSyncTest,JpaSchemaValidateTest >"$MVN_OUT" 2>&1; then
+  cat "$MVN_OUT"
+  echo "[pre-commit] ❌ Architecture / OpenAPI / JPA guardrail tests failed — commit blocked."
+  exit 1
+fi
 git add "$ROOT/petclinic-backend/docs/generated"
-echo "[pre-commit] C4 model DSL and domain model diagram updated and staged."
 
 # ── Frontend: regenerate TS types from openapi.yaml ────────────────────────
 if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
-  echo "[pre-commit] Regenerating TS types from openapi.yaml..."
-  npm --prefix "$ROOT/petclinic-frontend" run generate:api --silent
+  NPM_OUT=$(mktemp)
+  if ! npm --prefix "$ROOT/petclinic-frontend" run generate:api --silent >"$NPM_OUT" 2>&1; then
+    cat "$NPM_OUT"
+    echo "[pre-commit] ❌ TS-types regeneration failed — commit blocked."
+    exit 1
+  fi
   git add "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"
-  echo "[pre-commit] api-types.ts regenerated and staged."
 else
   echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
   echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
