@@ -1310,8 +1310,8 @@ export interface operations {
         q?: string;
         page?: number;
         size?: number;
-        sort?: string;
-        dir?: string;
+        sort?: "NAME" | "CITY";
+        dir?: "ASC" | "DESC";
       };
     };
     responses: {

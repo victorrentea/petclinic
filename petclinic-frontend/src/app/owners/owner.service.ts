@@ -11,8 +11,8 @@ export interface OwnerPage {
   totalElements: number;
 }
 
-export type SortField = 'name' | 'city';
-export type SortDir = 'asc' | 'desc';
+export type SortField = 'NAME' | 'CITY';
+export type SortDir = 'ASC' | 'DESC';
 
 @Injectable()
 export class OwnerService {

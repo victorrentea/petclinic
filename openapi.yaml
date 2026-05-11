@@ -1062,13 +1062,19 @@ paths:
         required: false
         schema:
           type: string
-          default: name
+          default: NAME
+          enum:
+          - NAME
+          - CITY
       - name: dir
         in: query
         required: false
         schema:
           type: string
-          default: asc
+          default: ASC
+          enum:
+          - ASC
+          - DESC
       responses:
         "400":
           description: Bad Request

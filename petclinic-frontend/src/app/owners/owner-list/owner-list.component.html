@@ -21,19 +21,19 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th (click)="onSortChange('name')" style="cursor:pointer">
+            <th (click)="onSortChange('NAME')" style="cursor:pointer">
               Name
-              <span *ngIf="sortField === 'name'" class="glyphicon"
-                    [class.glyphicon-arrow-up]="sortDir === 'asc'"
-                    [class.glyphicon-arrow-down]="sortDir === 'desc'">
+              <span *ngIf="sortField === 'NAME'" class="glyphicon"
+                    [class.glyphicon-arrow-up]="sortDir === 'ASC'"
+                    [class.glyphicon-arrow-down]="sortDir === 'DESC'">
               </span>
             </th>
             <th>Address</th>
-            <th (click)="onSortChange('city')" style="cursor:pointer">
+            <th (click)="onSortChange('CITY')" style="cursor:pointer">
               City
-              <span *ngIf="sortField === 'city'" class="glyphicon"
-                    [class.glyphicon-arrow-up]="sortDir === 'asc'"
-                    [class.glyphicon-arrow-down]="sortDir === 'desc'">
+              <span *ngIf="sortField === 'CITY'" class="glyphicon"
+                    [class.glyphicon-arrow-up]="sortDir === 'ASC'"
+                    [class.glyphicon-arrow-down]="sortDir === 'DESC'">
               </span>
             </th>
             <th>Telephone</th>

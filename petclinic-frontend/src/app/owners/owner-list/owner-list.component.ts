@@ -19,8 +19,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   currentPage: number = 0;
   pageSize: number = 10;
-  sortField: SortField = 'name';
-  sortDir: SortDir = 'asc';
+  sortField: SortField = 'NAME';
+  sortDir: SortDir = 'ASC';
 
   private searchSubject = new Subject<string>();
   private subscription = new Subscription();
@@ -77,10 +77,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   onSortChange(field: SortField) {
     if (this.sortField === field) {
-      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+      this.sortDir = this.sortDir === 'ASC' ? 'DESC' : 'ASC';
     } else {
       this.sortField = field;
-      this.sortDir = 'asc';
+      this.sortDir = 'ASC';
     }
     this.currentPage = 0;
     this.fetchPage();
