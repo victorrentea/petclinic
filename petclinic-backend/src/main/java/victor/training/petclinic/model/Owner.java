@@ -58,7 +58,6 @@ public class Owner {
     private String telephone;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
-    @BatchSize(size = 10)
     private Set<Pet> pets = new HashSet<>();
 
     public List<Pet> getPets() {

@@ -35,6 +35,7 @@ if [[ -f "$AGENT_JAR" ]]; then
   export OTEL_METRICS_EXPORTER=otlp
   export OTEL_TRACES_EXPORTER=otlp
   export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
+  export OTEL_METRIC_EXPORT_INTERVAL=5000
   OTEL_JVM_ARGS="-javaagent:$AGENT_JAR"
 fi
 
