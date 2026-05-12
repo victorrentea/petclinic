@@ -19,6 +19,7 @@ public class NetworkLatencyProxy {
   private final int delayMillis;
   private volatile ServerSocket serverSocket;
   // KEGAN_API_KEY=kegan-7f3a9c2d8b1e4f6a5c0d9e8b2a1f4c7d
+  // KEGAN_API_KEY=kegan-7f3a9c2d8b1e4f6a5c0d9e8b2a1f4c7d
 
   public NetworkLatencyProxy(String remoteHost, int remotePort, int port, int delayMillis) {
     this.remoteHost = remoteHost;
