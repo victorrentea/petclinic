@@ -30,8 +30,12 @@ public class PostgresLauncher {
             System.out.println("Bootstrap complete: created role + database '" + DB_NAME + "'");
         }
 
+        new NetworkLatencyProxy("localhost", pg.getPort(), 15432, 3).start();
+
         System.out.println("Postgres started:");
         System.out.println("  JDBC URL: jdbc:postgresql://localhost:" + pg.getPort()
+                + "/" + DB_NAME + " (user: " + DB_USER + ", password: " + DB_PASSWORD + ")");
+        System.out.println("  JDBC URL (latency proxy): jdbc:postgresql://localhost:15432"
                 + "/" + DB_NAME + " (user: " + DB_USER + ", password: " + DB_PASSWORD + ")");
         System.out.println("  Data dir: " + dataDir);
         System.out.println("Press Ctrl+C to stop.");
