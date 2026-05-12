@@ -27,3 +27,13 @@ else
   echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
   echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
 fi
+
+# ── Secrets scan ───────────────────────────────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks protect --staged --redact -q 2>&1; then
+    echo "[pre-commit] ❌ gitleaks detected secrets in staged files — commit blocked."
+    exit 1
+  fi
+else
+  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secrets scan. Install: brew install gitleaks"
+fi
