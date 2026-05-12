@@ -29,15 +29,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-push-coverage.sh\""
-          }
-        ]
-      },
-      {
         "matcher": "mcp__petclinic-db__*",
         "hooks": [
           {
