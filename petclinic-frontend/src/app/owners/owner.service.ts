@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -50,13 +50,10 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
+  searchOwners(query: string): Observable<Owner[]> {
+    const params = query ? new HttpParams().set('query', query) : undefined;
     return this.http
-      .get<Owner[]>(url)
+      .get<Owner[]>(this.entityUrl, { params })
       .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

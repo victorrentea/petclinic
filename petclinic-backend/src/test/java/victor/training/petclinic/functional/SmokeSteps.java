@@ -17,6 +17,11 @@ public class SmokeSteps {
         http.setLastResponse(RestAssured.given().baseUri(http.baseUri()).get(path));
     }
 
+    @When("I DELETE {string}")
+    public void iDelete(String path) {
+        http.setLastResponse(RestAssured.given().baseUri(http.baseUri()).delete(path));
+    }
+
     @Then("the response status is {int}")
     public void theResponseStatusIs(int expected) {
         assertThat(http.getLastResponse().statusCode()).isEqualTo(expected);
@@ -26,5 +31,10 @@ public class SmokeSteps {
     public void theResponseJsonArrayContainsAnItemWithFieldEqualTo(String field, String value) {
         var values = http.getLastResponse().jsonPath().getList(field, String.class);
         assertThat(values).contains(value);
+    }
+
+    @Then("the response JSON array has size {int}")
+    public void theResponseJsonArrayHasSize(int expected) {
+        assertThat(http.getLastResponse().jsonPath().getList("$")).hasSize(expected);
     }
 }

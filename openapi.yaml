@@ -28,18 +28,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -70,18 +70,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -102,18 +102,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/vets/{vetId}:
@@ -135,18 +135,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -177,18 +177,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -209,18 +209,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/specialties/{specialtyId}:
@@ -242,18 +242,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -284,18 +284,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -316,18 +316,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/pettypes/{petTypeId}:
@@ -349,18 +349,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -391,18 +391,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -423,18 +423,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/pets/{petId}:
@@ -456,18 +456,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -498,18 +498,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -530,18 +530,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/owners/{ownerId}:
@@ -564,18 +564,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -607,18 +607,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -640,18 +640,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/owners/{ownerId}/pets/{petId}:
@@ -680,18 +680,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -729,18 +729,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/visits:
@@ -755,18 +755,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -792,18 +792,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/vets:
@@ -818,18 +818,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -855,18 +855,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/users:
@@ -887,18 +887,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -917,18 +917,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -954,18 +954,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/pettypes:
@@ -980,18 +980,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -1017,18 +1017,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/owners:
@@ -1038,7 +1038,7 @@ paths:
       summary: List owners
       operationId: listOwners
       parameters:
-      - name: lastName
+      - name: query
         in: query
         required: false
         schema:
@@ -1051,18 +1051,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -1089,18 +1089,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/owners/{ownerId}/pets:
@@ -1129,18 +1129,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/owners/{ownerId}/pets/{petId}/visits:
@@ -1175,18 +1175,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
   /api/pets:
@@ -1201,18 +1201,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
           content:
@@ -1233,18 +1233,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     put:
@@ -1258,18 +1258,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     post:
@@ -1283,18 +1283,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     delete:
@@ -1308,18 +1308,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     options:
@@ -1333,18 +1333,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     head:
@@ -1358,18 +1358,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
     patch:
@@ -1383,18 +1383,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                type: string
         "500":
           description: Internal Server Error
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                type: string
         "200":
           description: OK
 components:

@@ -20,6 +20,7 @@ import {DummyComponent} from '../../testing/dummy.component';
 import {OwnerAddComponent} from '../owner-add/owner-add.component';
 import {OwnerEditComponent} from '../owner-edit/owner-edit.component';
 import Spy = jasmine.Spy;
+import { Subject } from 'rxjs';
 
 
 class OwnerServiceStub {
@@ -27,7 +28,7 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(query: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -37,10 +38,11 @@ describe('OwnerListComponent', () => {
   let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
   let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
+  let searchOwnersSubject: Subject<Owner[]>;
+  let secondSearchOwnersSubject: Subject<Owner[]>;
 
 
   const testOwner: Owner = {
@@ -75,14 +77,21 @@ describe('OwnerListComponent', () => {
 
   beforeEach(() => {
     testOwners = [testOwner];
+    searchOwnersSubject = new Subject<Owner[]>();
+    secondSearchOwnersSubject = new Subject<Owner[]>();
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
     searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+      .and.callFake((query: string) => {
+        if (query === '') {
+          return of(testOwners);
+        }
+        return query === 'Geo'
+          ? searchOwnersSubject.asObservable()
+          : secondSearchOwnersSubject.asObservable();
+      });
 
   });
 
@@ -92,7 +101,7 @@ describe('OwnerListComponent', () => {
 
   it('should call ngOnInit() method', () => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    expect(searchOwnersSpy).toHaveBeenCalledWith('');
   });
 
 
@@ -106,24 +115,29 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
+  it('onSearchTermChange should call searchOwners for each typed term', () => {
+    fixture.detectChanges();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('Fr');
+    component.onSearchTermChange('Fr');
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+  });
+
+  it('should keep only the latest in-flight search result', () => {
+    fixture.detectChanges();
+    component.onSearchTermChange('Geo');
+    component.onSearchTermChange('Geor');
+
+    secondSearchOwnersSubject.next([{
+      ...testOwner,
+      firstName: 'Georgette'
+    }]);
+    secondSearchOwnersSubject.complete();
+    searchOwnersSubject.next([testOwner]);
+    searchOwnersSubject.complete();
+
+    expect(component.owners.map(owner => owner.firstName)).toEqual(['Georgette']);
   });
 
 });
