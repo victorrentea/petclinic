@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +19,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -30,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -56,9 +61,32 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "query", defaultValue = "") String query) {
-        List<Owner> owners = ownerRepository.searchByVisibleContent(query);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+        @RequestParam(name = "query", defaultValue = "") String query,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "5") int size,
+        @RequestParam(name = "sortField", defaultValue = "name") String sortField,
+        @RequestParam(name = "sortDirection", defaultValue = "asc") String sortDirection
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size, ownerSort(sortField, sortDirection));
+        Page<Owner> ownersPage = ownerRepository.searchByVisibleContent(query, pageRequest);
+
+        OwnerPageDto response = new OwnerPageDto();
+        response.setContent(ownerMapper.toOwnerDtoCollection(ownersPage.getContent()));
+        response.setTotalElements(ownersPage.getTotalElements());
+        response.setTotalPages(ownersPage.getTotalPages());
+        response.setNumber(ownersPage.getNumber());
+        response.setSize(ownersPage.getSize());
+        return response;
+    }
+
+    private Sort ownerSort(String sortField, String sortDirection) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return switch (sortField) {
+            case "name" -> Sort.by(direction, "lastName", "firstName", "id");
+            case "city" -> Sort.by(direction, "city", "lastName", "firstName", "id");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported sortField: " + sortField);
+        };
     }
 
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")

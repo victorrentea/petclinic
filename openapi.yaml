@@ -1044,6 +1044,38 @@ paths:
         schema:
           type: string
           default: ""
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 5
+          minimum: 1
+      - name: sortField
+        in: query
+        required: false
+        schema:
+          type: string
+          default: name
+          enum:
+          - name
+          - city
+      - name: sortDirection
+        in: query
+        required: false
+        schema:
+          type: string
+          default: asc
+          enum:
+          - asc
+          - desc
       responses:
         "400":
           description: Bad Request
@@ -1068,9 +1100,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
     post:
       tags:
       - owner-rest-controller
@@ -1761,3 +1791,22 @@ components:
       - lastName
       - pets
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
