@@ -1,0 +1,8 @@
+.pet-info.dl-horizontal dt {
+  text-align: left;
+  width: 100px;
+}
+
+.pet-info.dl-horizontal dd {
+  margin-left: 130px;
+}

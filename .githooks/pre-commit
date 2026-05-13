@@ -3,6 +3,36 @@ set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
 
+# ── Secrets scan (fast, runs first) ────────────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks protect --staged --redact --source "$ROOT" 2>&1; then
+    echo "[pre-commit] ❌ gitleaks detected secrets in staged files — commit blocked."
+    exit 1
+  fi
+else
+  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secrets scan. Install: brew install gitleaks"
+fi
+
+# ── secrets.env value leak check ───────────────────────────────────────────
+SECRETS_FILE="$ROOT/secrets.env"
+if [ -f "$SECRETS_FILE" ]; then
+  STAGED_DIFF=$(git diff --cached --no-color -U0)
+  if [ -n "$STAGED_DIFF" ]; then
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+      [[ "$key" =~ ^[[:space:]]*# ]] && continue
+      [ -z "$key" ] && continue
+      value="${value%$'\r'}"
+      value="${value#\"}"; value="${value%\"}"
+      value="${value#\'}"; value="${value%\'}"
+      [ -z "$value" ] && continue
+      if printf '%s\n' "$STAGED_DIFF" | grep -qF -- "$value"; then
+        echo "[pre-commit] ❌ Staged content contains the value of '$key' from secrets.env — commit blocked."
+        exit 1
+      fi
+    done < "$SECRETS_FILE"
+  fi
+fi
+
 # ── Architecture artifacts + OpenAPI/JPA sync ──────────────────────────────
 cd "$ROOT/petclinic-backend"
 MVN_OUT=$(mktemp)
@@ -26,14 +56,4 @@ if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules
 else
   echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
   echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
-fi
-
-# ── Secrets scan ───────────────────────────────────────────────────────────
-if command -v gitleaks >/dev/null 2>&1; then
-  if ! gitleaks protect --staged --redact -q 2>&1; then
-    echo "[pre-commit] ❌ gitleaks detected secrets in staged files — commit blocked."
-    exit 1
-  fi
-else
-  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secrets scan. Install: brew install gitleaks"
 fi

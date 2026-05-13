@@ -39,7 +39,5 @@ src/app/<entity>/
 - `errorMessage: string` field on every component that calls a service
 - Bootstrap 3 only — no Bootstrap 4/5 classes
 - Use `glyphicon` for icons
-- `switchMap` for search inputs — cancels in-flight requests on new emissions
-- `debounceTime(300)` for live search debounce
-- Sort and pagination changes trigger server re-fetch (not client-side sort)
-- Enum param values sent uppercase to match backend (`ASC`/`DESC`, `NAME`/`CITY`)
+
+For paginated/sortable/searchable list pages, see the `grid` skill.

@@ -64,10 +64,6 @@ Guardrail tests also keep `db.sql` and `openapi.yaml` in sync with the running c
 - Small domain enums belong inside the controller as inner enums, not separate files
 - `@ExceptionHandler(MethodArgumentTypeMismatchException.class)` → 400 in `@RestControllerAdvice`
 
-## Pagination & Search Patterns
+## Pagination & Search
 
-- **EXISTS subquery, not LEFT JOIN + DISTINCT** — DISTINCT breaks LIMIT/OFFSET pagination (wrong counts)
-- **`ILIKE` + pg_trgm GIN** — plain GIN index accelerates `ILIKE '%q%'` directly; no `LOWER(col)` expression index needed
-- **Sort by display order** — "Name" column shows "First Last", so sort by `firstName, lastName`
-- **Flyway migrations with Postgres extensions** — wrap in `DO $$ BEGIN ... EXCEPTION WHEN OTHERS THEN RAISE NOTICE ...; END; $$` so Zonky (no pg_trgm) doesn't break tests
-- **Never run partial `mvn test -Dtest=X` before committing** — overwrites `jacoco.csv` with partial coverage, blocking the coverage hook
+For paginated/sortable/searchable list endpoints, see the `grid` skill.

@@ -4,7 +4,7 @@
     <h2>Owner Information</h2>
 
 
-    <table class="table table-striped">
+    <table class="table table-striped owner-info-table">
       <tr>
         <th>Name</th>
         <td><b class="ownerFullName">{{ owner.firstName }} {{ owner.lastName }}</b></td>
@@ -23,7 +23,6 @@
       </tr>
     </table>
 
-    <button class="btn btn-default" (click)="gotoOwnersList()">Back</button>
     <button class="btn btn-default" (click)="editOwner()">Edit Owner</button>
     <button class="btn btn-default" (click)="addPet(owner)">Add New Pet</button>
 
@@ -37,5 +36,7 @@
         <app-pet-list *ngFor="let pet of owner.pets" [pet]="pet"></app-pet-list>
       </tr>
     </table>
+
+    <button class="btn btn-default" (click)="gotoOwnersList()">Back</button>
   </div>
 </div>

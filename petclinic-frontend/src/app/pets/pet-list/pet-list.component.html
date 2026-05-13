@@ -1,20 +1,21 @@
 <table [hidden]="deleteSuccess" class="table table-striped">
   <tr>
     <td valign="top">
-      <dl class="dl-horizontal">
+      <dl class="dl-horizontal pet-info">
         <dt>Name</dt>
         <dd>{{ pet.name }}</dd>
         <dt>Birth Date</dt>
         <dd>{{ pet.birthDate }}</dd>
         <dt>Type</dt>
         <dd *ngIf="!deleteSuccess">{{ pet.type.name }}</dd>
-        <button class="btn btn-default" (click)="editPet(pet)">Edit Pet</button>
-        <button class="btn btn-default" (click)="deletePet(pet)">Delete Pet</button>
-        <button class="btn btn-default" (click)="addVisit(pet)">Add Visit</button>
-
       </dl>
+      <button class="btn btn-default" (click)="editPet(pet)">Edit Pet</button>
+      <button class="btn btn-default" (click)="deletePet(pet)">Delete Pet</button>
     </td>
     <td valign="top">
+      <div class="text-right" style="margin-bottom: 8px">
+        <button class="btn btn-default" (click)="addVisit(pet)">Add Visit</button>
+      </div>
       <app-visit-list [visits]="pet.visits"></app-visit-list>
     </td>
   </tr>
