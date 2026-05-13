@@ -19,3 +19,5 @@ After every `git push`:
 
 - Always use **TDD**: write a failing test first, confirm it fails, then implement.
 - Auto-push after commit if git username is `victorrentea` and repo is `github.com/victorrentea/*`.
+- Keep explanations concise and avoid psycho-fancy fluff.
+- Challenge ambiguous or wrong prompts.
