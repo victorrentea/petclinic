@@ -3,10 +3,6 @@
 This file contains **repository-specific instructions** for coding agents working in this repo.
 For general project documentation, commands, setup, and architecture overview, see `README.md` and `GUARDRAILS.md`.
 
-## Subfolder-specific instructions
-
-- Backend-specific rules live in `petclinic-backend/AGENTS.md`.
-
 ## CI workflow
 
 After every `git push`:
