@@ -1302,7 +1302,7 @@ export interface operations {
   listOwners: {
     parameters: {
       query?: {
-        lastName?: string;
+        query?: string;
       };
     };
     responses: {
