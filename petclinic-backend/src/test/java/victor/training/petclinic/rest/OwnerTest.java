@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import victor.training.petclinic.model.Owner;
@@ -24,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
 @Transactional
+@ExtendWith(OutputCaptureExtension.class)
 class OwnerTest {
     @Autowired
     MockMvc mockMvc;
@@ -88,6 +92,22 @@ class OwnerTest {
         mockMvc.perform(get("/api/owners")
                 .param("sortField", "telephone"))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listOwners_doesNotFallBackToInMemoryPagination(CapturedOutput output) throws Exception {
+        ownerRepository.save(owner("Amy", "Zeal", "warning-a", "Zurich", "1111111111"));
+        ownerRepository.save(owner("Bob", "Able", "warning-b", "Athens", "2222222222"));
+
+        mockMvc.perform(get("/api/owners")
+                .param("query", "warning-")
+                .param("page", "0")
+                .param("size", "1")
+                .param("sortField", "name")
+                .param("sortDirection", "asc"))
+            .andExpect(status().isOk());
+
+        assertThat(output).doesNotContain("HHH90003004");
     }
 
     private Owner owner(String firstName, String lastName, String address, String city, String telephone) {

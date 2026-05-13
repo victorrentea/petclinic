@@ -1,6 +1,9 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -69,14 +72,20 @@ public class OwnerRestController {
         @RequestParam(name = "sortDirection", defaultValue = "asc") String sortDirection
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, ownerSort(sortField, sortDirection));
-        Page<Owner> ownersPage = ownerRepository.searchByVisibleContent(query, pageRequest);
+        Page<Integer> ownerIdsPage = ownerRepository.searchOwnerIdsByVisibleContent(query, pageRequest);
+        List<Integer> ownerIds = ownerIdsPage.getContent();
+        Map<Integer, Owner> ownersById = ownerIds.isEmpty() ? Map.of() : ownerRepository.findByIdInWithPets(ownerIds).stream()
+            .collect(java.util.stream.Collectors.toMap(Owner::getId, Function.identity()));
+        List<Owner> owners = ownerIds.stream()
+            .map(ownersById::get)
+            .toList();
 
         OwnerPageDto response = new OwnerPageDto();
-        response.setContent(ownerMapper.toOwnerDtoCollection(ownersPage.getContent()));
-        response.setTotalElements(ownersPage.getTotalElements());
-        response.setTotalPages(ownersPage.getTotalPages());
-        response.setNumber(ownersPage.getNumber());
-        response.setSize(ownersPage.getSize());
+        response.setContent(ownerMapper.toOwnerDtoCollection(owners));
+        response.setTotalElements(ownerIdsPage.getTotalElements());
+        response.setTotalPages(ownerIdsPage.getTotalPages());
+        response.setNumber(ownerIdsPage.getNumber());
+        response.setSize(ownerIdsPage.getSize());
         return response;
     }
 

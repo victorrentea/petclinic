@@ -1,5 +1,6 @@
 package victor.training.petclinic.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,30 +12,45 @@ import org.springframework.data.repository.query.Param;
 import victor.training.petclinic.model.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
-    @EntityGraph(attributePaths = {"pets", "pets.type"})
     @Query(value = """
-        select distinct o
+        select o.id
         from Owner o
-        left join o.pets p
-        where :query = ''
-           or lower(concat(concat(o.firstName, ' '), o.lastName)) like lower(concat('%', :query, '%'))
-           or lower(o.address) like lower(concat('%', :query, '%'))
-           or lower(o.city) like lower(concat('%', :query, '%'))
-           or lower(o.telephone) like lower(concat('%', :query, '%'))
-           or lower(p.name) like lower(concat('%', :query, '%'))
+        where o.id in (
+            select distinct owner.id
+            from Owner owner
+            left join owner.pets pet
+            where :query = ''
+               or lower(concat(concat(owner.firstName, ' '), owner.lastName)) like lower(concat('%', :query, '%'))
+               or lower(owner.address) like lower(concat('%', :query, '%'))
+               or lower(owner.city) like lower(concat('%', :query, '%'))
+               or lower(owner.telephone) like lower(concat('%', :query, '%'))
+               or lower(pet.name) like lower(concat('%', :query, '%'))
+        )
         """,
         countQuery = """
-        select count(distinct o.id)
+        select count(o.id)
         from Owner o
-        left join o.pets p
-        where :query = ''
-           or lower(concat(concat(o.firstName, ' '), o.lastName)) like lower(concat('%', :query, '%'))
-           or lower(o.address) like lower(concat('%', :query, '%'))
-           or lower(o.city) like lower(concat('%', :query, '%'))
-           or lower(o.telephone) like lower(concat('%', :query, '%'))
-           or lower(p.name) like lower(concat('%', :query, '%'))
+        where o.id in (
+            select distinct owner.id
+            from Owner owner
+            left join owner.pets pet
+            where :query = ''
+               or lower(concat(concat(owner.firstName, ' '), owner.lastName)) like lower(concat('%', :query, '%'))
+               or lower(owner.address) like lower(concat('%', :query, '%'))
+               or lower(owner.city) like lower(concat('%', :query, '%'))
+               or lower(owner.telephone) like lower(concat('%', :query, '%'))
+               or lower(pet.name) like lower(concat('%', :query, '%'))
+        )
         """)
-    Page<Owner> searchByVisibleContent(@Param("query") String query, Pageable pageable);
+    Page<Integer> searchOwnerIdsByVisibleContent(@Param("query") String query, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"pets", "pets.type"})
+    @Query("""
+        select distinct o
+        from Owner o
+        where o.id in :ownerIds
+        """)
+    List<Owner> findByIdInWithPets(@Param("ownerIds") List<Integer> ownerIds);
 
     Optional<Owner> findById(int id);
 
