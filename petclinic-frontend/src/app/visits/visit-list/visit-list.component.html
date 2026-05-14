@@ -3,12 +3,14 @@
   <tr>
     <th>Visit Date</th>
     <th>Description</th>
+    <th>Veterinarian</th>
     <th>Actions</th>
   </tr>
   </thead>
   <tr *ngFor="let visit of visits">
     <td>{{ visit.date }}</td>
     <td>{{ visit.description }}</td>
+    <td class="visit-vet">{{ visit.vetName }}</td>
     <td>
       <button class="btn btn-default" (click)="editVisit(visit)">Edit Visit</button>
       <button class="btn btn-default" (click)="deleteVisit(visit)">Delete Visit</button>
@@ -16,7 +18,9 @@
   </tr>
 </table>
 
-
+<div *ngIf="petId">
+  <button class="btn btn-default" (click)="addVisit()">Add Visit</button>
+</div>
 
 
 

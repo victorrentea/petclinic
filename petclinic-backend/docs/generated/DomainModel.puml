@@ -52,5 +52,6 @@ Owner "1" -- "0..*" Pet : owner
 User "1" -- "0..*" Role : user
 Vet "0..*" -- "0..*" Specialty : specialties
 Pet "1" -- "0..*" Visit : pet
+Vet "1" -- "0..*" Visit : vet
 
 @enduml

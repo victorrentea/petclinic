@@ -12,6 +12,7 @@ import {Visit} from '../visit';
 import {Pet} from '../../pets/pet';
 import {Observable, of} from 'rxjs';
 import Spy = jasmine.Spy;
+import {By} from '@angular/platform-browser';
 
 class VisitServiceStub {
   deleteVisit(visitId: string): Observable<number> {
@@ -66,6 +67,12 @@ describe('VisitListComponent', () => {
       id: 1,
       date: '2016-09-07',
       description: '',
+      pet: testPet,
+      vetName: 'James Carter'
+    }, {
+      id: 2,
+      date: '2017-09-07',
+      description: 'legacy',
       pet: testPet
     }];
 
@@ -87,6 +94,38 @@ describe('VisitListComponent', () => {
     fixture.detectChanges();
     component.deleteVisit(component.visits[0]);
     expect(spy.calls.any()).toBe(true, 'deleteVisit called');
+  });
+
+  it('renders veterinarian name and Unassigned fallback', () => {
+    fixture.detectChanges();
+
+    const vetCells = fixture.debugElement.queryAll(By.css('.visit-vet'));
+
+    expect(vetCells[0].nativeElement.textContent).toContain('James Carter');
+    expect(vetCells[1].nativeElement.textContent).toContain('Unassigned');
+  });
+
+  it('should render Add Visit button when petId is provided', () => {
+    component.petId = 1;
+    fixture.detectChanges();
+
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const addVisitButton = buttons.find(b => b.nativeElement.textContent.trim() === 'Add Visit');
+    expect(addVisitButton).toBeTruthy('Add Visit button should be present');
+  });
+
+  it('should navigate to add visit route when Add Visit button is clicked', () => {
+    const router = fixture.debugElement.injector.get(Router);
+    const navigateSpy = spyOn(router, 'navigate');
+
+    component.petId = 42;
+    fixture.detectChanges();
+
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const addVisitButton = buttons.find(b => b.nativeElement.textContent.trim() === 'Add Visit');
+    addVisitButton.nativeElement.click();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/pets', 42, 'visits', 'add']);
   });
 
 });

@@ -24,7 +24,7 @@ describe('VisitsPageComponent', () => {
   const visits: Visit[] = [
     {
       id: 1, date: '2024-01-15', description: 'rabies shot', pet: null as any,
-      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
+      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin', vetName: 'James Carter',
     },
     {
       id: 2, date: '2025-06-04', description: 'checkup', pet: null as any,
@@ -32,7 +32,7 @@ describe('VisitsPageComponent', () => {
     },
     {
       id: 3, date: '2023-09-10', description: 'spayed', pet: null as any,
-      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
+      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin', vetName: 'Helen Leary',
     },
   ];
 
@@ -94,6 +94,18 @@ describe('VisitsPageComponent', () => {
       expect(links.length).toBe(visits.length);
       expect(links[0].attributes['ng-reflect-router-link'] || links[0].nativeElement.getAttribute('href'))
         .toContain('/owners/');
+    });
+  }));
+
+  it('renders veterinarian name with fallback', waitForAsync(() => {
+    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      const vetCells = fixture.debugElement.queryAll(By.css('.visit-vet'));
+      const vetTexts = vetCells.map(cell => cell.nativeElement.textContent.trim());
+      expect(vetTexts).toContain('James Carter');
+      expect(vetTexts).toContain('Unassigned');
     });
   }));
 });

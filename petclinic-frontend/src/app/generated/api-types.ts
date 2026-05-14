@@ -120,6 +120,12 @@ export interface components {
        * @example rabies shot
        */
       description: string;
+      /**
+       * Format: int32
+       * @description The ID of the veterinarian assigned to the visit.
+       * @example 1
+       */
+      vetId: number;
     };
     SpecialtyDto: {
       /**
@@ -229,6 +235,14 @@ export interface components {
       ownerFirstName?: string;
       /** @description Last name of the owner (server-populated). */
       ownerLastName?: string;
+      /**
+       * Format: int32
+       * @description The ID of the veterinarian assigned to the visit.
+       * @example 1
+       */
+      vetId?: number;
+      /** @description Name of the veterinarian assigned to the visit (server-populated). */
+      vetName?: string;
     };
     OwnerFieldsDto: {
       /**

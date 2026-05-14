@@ -10,16 +10,35 @@ import {Router} from '@angular/router';
 })
 export class VisitListComponent implements OnInit {
 
-  @Input() visits: Visit[];
+  @Input() petId: number;
+
+  private _visits: Visit[];
   responseStatus: number;
   noVisits = false;
   errorMessage: string;
 
   constructor(private router: Router, private visitService: VisitService) {
-    this.visits = [];
+    this._visits = [];
+  }
+
+  @Input()
+  set visits(visits: Visit[]) {
+    this._visits = (visits || []).map(visit => ({
+      ...visit,
+      vetName: visit.vetName || 'Unassigned'
+    }));
+    this.noVisits = this._visits.length === 0;
+  }
+
+  get visits(): Visit[] {
+    return this._visits;
   }
 
   ngOnInit() {
+  }
+
+  addVisit() {
+    this.router.navigate(['/pets', this.petId, 'visits', 'add']);
   }
 
   editVisit(visit: Visit) {
@@ -30,8 +49,7 @@ export class VisitListComponent implements OnInit {
     this.visitService.deleteVisit(visit.id.toString()).subscribe(
       response => {
         this.responseStatus = response;
-        console.log('delete success');
-        this.visits.splice(this.visits.indexOf(visit), 1 );
+        this._visits.splice(this._visits.indexOf(visit), 1 );
         if (this.visits.length === 0) {
             this.noVisits = true;
           }

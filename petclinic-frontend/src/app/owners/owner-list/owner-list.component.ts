@@ -3,7 +3,7 @@ import { OwnerService } from '../owner.service';
 import { Owner } from '../owner';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-owner-list',
@@ -24,7 +24,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.searchTerms$.pipe(
       distinctUntilChanged(),
-      switchMap(searchTerm => this.ownerService.searchOwners(searchTerm)),
+      switchMap(searchTerm => this.ownerService.searchOwners(searchTerm).pipe(
+        map(page => page.content)
+      )),
       takeUntil(this.destroy$)
     ).subscribe(
       owners => {

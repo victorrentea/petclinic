@@ -20,7 +20,12 @@ export class VisitsPageComponent implements OnInit {
     this.visitService.getVisits()
       .pipe(finalize(() => { this.isDataReceived = true; }))
       .subscribe(
-        visits => this.visits = [...visits].sort((a, b) => b.date.localeCompare(a.date)),
+        visits => this.visits = [...visits]
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .map(visit => ({
+            ...visit,
+            vetName: visit.vetName || 'Unassigned'
+          })),
         error => this.errorMessage = error as any,
       );
   }

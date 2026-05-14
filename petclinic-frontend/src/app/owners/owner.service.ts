@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -50,10 +51,11 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(query: string): Observable<Owner[]> {
+  searchOwners(query: string): Observable<OwnerPage> {
     const params = query ? new HttpParams().set('query', query) : undefined;
+    const emptyPage: OwnerPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 0 };
     return this.http
-      .get<Owner[]>(this.entityUrl, { params })
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(catchError(this.handlerError('searchOwners', emptyPage)));
   }
 }

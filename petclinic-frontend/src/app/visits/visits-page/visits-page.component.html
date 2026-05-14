@@ -12,6 +12,7 @@
         <tr>
           <th>Date</th>
           <th>Description</th>
+          <th>Veterinarian</th>
           <th>Pet</th>
           <th>Owner</th>
         </tr>
@@ -20,6 +21,7 @@
         <tr *ngFor="let visit of visits">
           <td class="visit-date">{{ visit.date }}</td>
           <td class="visit-description">{{ visit.description }}</td>
+          <td class="visit-vet">{{ visit.vetName }}</td>
           <td class="visit-pet">{{ visit.petName }}</td>
           <td class="visit-owner">
             <a class="owner-link" [routerLink]="'/owners/' + visit.ownerId">
