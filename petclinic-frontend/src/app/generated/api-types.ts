@@ -238,7 +238,6 @@ export interface components {
       /**
        * Format: int32
        * @description The ID of the veterinarian assigned to the visit.
-       * @example 1
        */
       vetId?: number;
       /** @description Name of the veterinarian assigned to the visit (server-populated). */
@@ -1330,8 +1329,8 @@ export interface operations {
         query?: string;
         page?: number;
         size?: number;
-        sortField?: "name" | "city";
-        sortDirection?: "asc" | "desc";
+        sortField?: string;
+        sortDirection?: string;
       };
     };
     responses: {

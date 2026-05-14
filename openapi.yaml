@@ -1049,33 +1049,27 @@ paths:
         required: false
         schema:
           type: integer
+          format: int32
           default: 0
-          minimum: 0
       - name: size
         in: query
         required: false
         schema:
           type: integer
+          format: int32
           default: 5
-          minimum: 1
       - name: sortField
         in: query
         required: false
         schema:
           type: string
           default: name
-          enum:
-          - name
-          - city
       - name: sortDirection
         in: query
         required: false
         schema:
           type: string
           default: asc
-          enum:
-          - asc
-          - desc
       responses:
         "400":
           description: Bad Request
@@ -1631,8 +1625,6 @@ components:
           type: integer
           format: int32
           description: The ID of the veterinarian assigned to the visit.
-          example: 1
-          minimum: 0
         vetName:
           type: string
           description: Name of the veterinarian assigned to the visit (server-populated).
