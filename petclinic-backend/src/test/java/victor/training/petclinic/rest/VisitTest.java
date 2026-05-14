@@ -15,10 +15,12 @@ import org.springframework.http.MediaType;
 import victor.training.petclinic.model.Owner;
 import victor.training.petclinic.model.Pet;
 import victor.training.petclinic.model.PetType;
+import victor.training.petclinic.model.Vet;
 import victor.training.petclinic.model.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -30,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -56,8 +59,11 @@ public class VisitTest {
 
     int visitId;
     int petId;
+    int vetId;
     @Autowired
     private PetTypeRepository petTypeRepository;
+    @Autowired
+    private VetRepository vetRepository;
 
     @BeforeEach
     final void before() {
@@ -68,8 +74,15 @@ public class VisitTest {
         petRepository.save(pet);
         petId = pet.getId();
 
+        Vet vet = new Vet();
+        vet.setFirstName("James");
+        vet.setLastName("Carter");
+        vetRepository.save(vet);
+        vetId = vet.getId();
+
         Visit visit = new Visit();
         visit.setPet(pet);
+        visit.setVet(vet);
         visit.setDate(LocalDate.now());
         visit.setDescription("rabies shot");
         visitRepository.save(visit);
@@ -93,6 +106,8 @@ public class VisitTest {
         assertThat(responseDto.getId()).isEqualTo(visitId);
         assertThat(responseDto.getDescription()).isEqualTo("rabies shot");
         assertThat(responseDto.getPetId()).isEqualTo(petId);
+        assertThat(responseDto.getVetId()).isEqualTo(vetId);
+        assertThat(responseDto.getVetName()).isEqualTo("James Carter");
     }
 
     @Test
@@ -139,6 +154,45 @@ public class VisitTest {
         assertThat(created.getOwnerId()).isEqualTo(owner.getId());
         assertThat(created.getOwnerFirstName()).isEqualTo(owner.getFirstName());
         assertThat(created.getOwnerLastName()).isEqualTo(owner.getLastName());
+        assertThat(created.getVetId()).isEqualTo(vetId);
+        assertThat(created.getVetName()).isEqualTo("James Carter");
+    }
+
+    @Test
+    void getById_withoutVet_keepsLegacyVisitReadable() throws Exception {
+        Visit legacyVisit = new Visit();
+        legacyVisit.setPet(petRepository.findById(petId).orElseThrow());
+        legacyVisit.setDate(LocalDate.now().minusDays(2));
+        legacyVisit.setDescription("legacy");
+        visitRepository.save(legacyVisit);
+
+        VisitDto responseDto = callGet(legacyVisit.getId());
+
+        assertThat(responseDto.getVetId()).isNull();
+        assertThat(responseDto.getVetName()).isNull();
+    }
+
+    @Test
+    void create_ok_persistsVet() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setVetId(vetId);
+        newVisit.setDate(LocalDate.now().plusDays(1));
+        newVisit.setDescription("checkup");
+
+        String location = mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(header().exists("Location"))
+            .andReturn()
+            .getResponse()
+            .getHeader("Location");
+
+        int createdVisitId = Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
+        Visit createdVisit = visitRepository.findById(createdVisitId).orElseThrow();
+        assertThat(createdVisit.getVet()).isNotNull();
+        assertThat(createdVisit.getVet().getId()).isEqualTo(vetId);
     }
 
     @Test
@@ -163,6 +217,26 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(existing))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void update_ok_changesVet() throws Exception {
+        Vet replacementVet = new Vet();
+        replacementVet.setFirstName("Helen");
+        replacementVet.setLastName("Leary");
+        vetRepository.save(replacementVet);
+
+        VisitDto existing = callGet(visitId);
+        existing.setVetId(replacementVet.getId());
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(existing))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        Visit updatedVisit = visitRepository.findById(visitId).orElseThrow();
+        assertThat(updatedVisit.getVet()).isNotNull();
+        assertThat(updatedVisit.getVet().getId()).isEqualTo(replacementVet.getId());
     }
 
     @Test

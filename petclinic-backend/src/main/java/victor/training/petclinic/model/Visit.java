@@ -26,4 +26,8 @@ public class Visit {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
+
 }

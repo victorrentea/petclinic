@@ -28,6 +28,11 @@ public class VetSteps {
         insertVet(fullName, specialty1, specialty2);
     }
 
+    @Given("a veterinarian {string}")
+    public void aVeterinarian(String fullName) {
+        insertVet(fullName);
+    }
+
     private void insertVet(String fullName, String... specialties) {
         String[] parts = fullName.split(" ", 2);
         Integer vetId = jdbc.queryForObject(

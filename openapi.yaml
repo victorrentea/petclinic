@@ -1462,8 +1462,15 @@ components:
           example: rabies shot
           maxLength: 255
           minLength: 1
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the veterinarian assigned to the visit.
+          example: 1
+          minimum: 0
       required:
       - description
+      - vetId
     SpecialtyDto:
       type: object
       properties:
@@ -1619,6 +1626,16 @@ components:
         ownerLastName:
           type: string
           description: Last name of the owner (server-populated).
+          readOnly: true
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the veterinarian assigned to the visit.
+          example: 1
+          minimum: 0
+        vetName:
+          type: string
+          description: Name of the veterinarian assigned to the visit (server-populated).
           readOnly: true
       required:
       - description

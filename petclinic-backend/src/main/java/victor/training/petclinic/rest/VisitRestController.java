@@ -2,9 +2,13 @@ package victor.training.petclinic.rest;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.model.Vet;
 import victor.training.petclinic.model.Visit;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -22,6 +26,7 @@ import java.util.List;
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final VetRepository vetRepository;
 
     @GetMapping
     public List<VisitDto> listVisits() {
@@ -38,6 +43,7 @@ public class VisitRestController {
     @PostMapping
     public ResponseEntity<Void> addVisit(@RequestBody @Validated VisitDto visitDto) {
         Visit visit = visitMapper.toVisit(visitDto);
+        visit.setVet(requireVet(visitDto.getVetId()));
         visitRepository.save(visit);
         return ResponseEntity.created(UriComponentsBuilder.fromPath("/api/visits/{id}")
                         .buildAndExpand(visit.getId()).toUri())
@@ -49,6 +55,7 @@ public class VisitRestController {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
+        currentVisit.setVet(requireVet(visitDto.getVetId()));
         visitRepository.save(currentVisit);
     }
 
@@ -57,5 +64,13 @@ public class VisitRestController {
     public void deleteVisit(@PathVariable int visitId) {
         Visit visit = visitRepository.findById(visitId).orElseThrow();
         visitRepository.delete(visit);
+    }
+
+    private Vet requireVet(Integer vetId) {
+        if (vetId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "vetId is required");
+        }
+        return vetRepository.findById(vetId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vet not found"));
     }
 }
