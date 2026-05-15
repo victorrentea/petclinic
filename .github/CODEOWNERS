@@ -4,18 +4,21 @@
 # A PR touching this path must be approved by a member of this group.
 # Works in GitHub, GitLab, BitBucket ...
 
-/petclinic-backend/docs/packages.puml @victorrentea/elders
-
-# Elders must also review changes to Claude settings, code ownership, the API contract, and the guardrail workflow.
+# GIT + Agent Settings
+/.github/CODEOWNERS              @victorrentea/elders
 /.claude/settings.json           @victorrentea/elders
 /.claude/settings.local.json     @victorrentea/elders
-/.github/CODEOWNERS              @victorrentea/elders
-/openapi.yaml                    @victorrentea/elders
-/.github/workflows/ci-guardrails.yml @victorrentea/elders
 
-# Elders must also review dependency manifests — guards against unreviewed upgrades / supply-chain risk.
+# Contracts
+/openapi.yaml                    @victorrentea/elders
+
+# Architecture
+/petclinic-backend/docs/packages.puml @victorrentea/elders
+/petclinic-backend/docs/c4.dsl @victorrentea/elders
+
+# Dependencies
 **/pom.xml                       @victorrentea/elders
 /petclinic-frontend/package.json @victorrentea/elders
 
-# Coverage baseline drops should be a deliberate, reviewed decision.
-/petclinic-backend/.coverage-baseline @victorrentea/elders
+# GI Guards
+/.github/workflows/ci-guardrails.yml @victorrentea/elders
