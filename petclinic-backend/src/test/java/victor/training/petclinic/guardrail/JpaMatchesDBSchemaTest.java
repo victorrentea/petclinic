@@ -27,7 +27,7 @@ import static io.zonky.test.db.AutoConfigureEmbeddedDatabase.DatabaseProvider.ZO
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
 @ActiveProfiles("test")
-class JpaMatchesSchemaTest {
+class JpaMatchesDBSchemaTest {
 
     @Test
     void contextLoads_meaningSchemaMatchesEntities() {
