@@ -17,9 +17,9 @@ left to right direction
 
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container_Boundary("PetClinic.Backend_boundary", "Backend", $tags="") {
-    Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="HTTP endpoints, DTOs, error handlers\n[rest.**]", $tags="", $link="")
-    Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="JPA entities\n[model]", $tags="", $link="")
-    Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="MapStruct", $descr="MapStruct mappers\n[mapper]", $tags="", $link="")
+    Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="[rest.**] HTTP endpoints, DTOs, error handlers", $tags="", $link="")
+    Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="[model] JPA entities", $tags="", $link="")
+    Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="MapStruct", $descr="[mapper] MapStruct mappers", $tags="", $link="")
   }
 
 }

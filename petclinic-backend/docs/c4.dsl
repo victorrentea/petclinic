@@ -7,27 +7,27 @@ workspace "PetClinic" "Veterinary practice management system" {
         petClinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "Angular"
             backend = container "Backend" "REST API" "Java / Spring Boot" {
-                restLayer = component "REST Layer" "HTTP endpoints, DTOs, error handlers\n[rest.**]" "Spring MVC" {
+                restLayer = component "REST Layer" "[rest.**] HTTP endpoints, DTOs, error handlers" "Spring MVC" {
                     properties {
                         "package" "rest.**"
                     }
                 }
-                domainModel = component "Domain Model" "JPA entities\n[model]" "JPA" {
+                domainModel = component "Domain Model" "[model] JPA entities" "JPA" {
                     properties {
                         "package" "model"
                     }
                 }
-                repositoryLayer = component "Repository Layer" "Spring Data JPA repositories\n[repository]" "Spring Data" {
+                repositoryLayer = component "Repository Layer" "[repository] Spring Data JPA repositories" "Spring Data" {
                     properties {
                         "package" "repository"
                     }
                 }
-                mapperLayer = component "Mapper Layer" "MapStruct mappers\n[mapper]" "MapStruct" {
+                mapperLayer = component "Mapper Layer" "[mapper] MapStruct mappers" "MapStruct" {
                     properties {
                         "package" "mapper"
                     }
                 }
-                security = component "Security" "Spring Security configuration\n[security]" "Spring Security" {
+                security = component "Security" "[security] Spring Security configuration" "Spring Security" {
                     properties {
                         "package" "security"
                     }
