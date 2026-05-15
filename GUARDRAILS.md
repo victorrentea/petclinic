@@ -11,7 +11,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `JpaSchemaValidateTest` | Entity ↔ migration drift | Test profile sets `ddl-auto=validate`; Hibernate fails context refresh on schema mismatch |
 | `DbSchemaSyncTest` | DB schema | Boots Postgres, runs Flyway, dumps to `db.sql`; fails on drift |
 | TS ↔ OpenAPI sync | Stale generated frontend types | `npm run generate:api` runs in pre-commit + CI; `api-types.ts` auto-staged / auto-committed on drift |
-| `C4ModelExtractorTest` | C4 architecture diagrams | Regenerates `docs/generated/C4.dsl` + per-view `*.puml` from code |
+| `C3ArchTest` | C4 architecture drift | Parses hand-written `docs/c4.dsl`; asserts every code package is mapped to a component and component-to-component dependencies match the code; re-exports `*.puml` views |
 | `DomainModelExtractorTest` | Domain class diagram | Regenerates `docs/generated/DomainModel.puml` from JPA annotations |
 | Build hygiene | Webpack & Javadoc warnings | `npm run build` fails on any webpack `Warning:` (custom-webpack + `scripts/build-strict.sh`); CI runs `mvn javadoc:javadoc -Dmaven.javadoc.failOnError=true` |
 | Dependency discipline | Drive-by upgrades / known CVEs | Dependabot opens weekly batched (minor+patch) PRs per ecosystem; CVEs surface as Dependabot security alerts |

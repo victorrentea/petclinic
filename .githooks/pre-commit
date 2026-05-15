@@ -53,7 +53,7 @@ TESTS=(
   PackagesArchTest
   DbSchemaExtractorTest
   JpaMatchesDBSchemaTest
-  C4ModelExtractorTest
+  C3ArchTest
 )
 TESTS_CSV=$(IFS=,; echo "${TESTS[*]}")
 if ! mvn -q test -Dtest="$TESTS_CSV" >"$MVN_OUT" 2>&1; then

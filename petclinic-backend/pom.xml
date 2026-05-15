@@ -181,21 +181,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.structurizr</groupId>
+            <artifactId>structurizr-dsl</artifactId>
+            <version>6.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.sourceforge.plantuml</groupId>
             <artifactId>plantuml</artifactId>
             <version>1.2024.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.structurizr</groupId>
-            <artifactId>structurizr-core</artifactId>
-            <version>6.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.structurizr</groupId>
-            <artifactId>structurizr-export</artifactId>
-            <version>6.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
