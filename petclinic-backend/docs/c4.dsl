@@ -7,31 +7,11 @@ workspace "PetClinic" "Veterinary practice management system" {
         petClinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "Angular"
             backend = container "Backend" "REST API" "Java / Spring Boot" {
-                restLayer = component "REST Layer" "[rest.**] HTTP endpoints, DTOs, error handlers" "Spring MVC" {
-                    properties {
-                        "package" "rest.**"
-                    }
-                }
-                domainModel = component "Domain Model" "[model] JPA entities" "JPA" {
-                    properties {
-                        "package" "model"
-                    }
-                }
-                repositoryLayer = component "Repository Layer" "[repository] Spring Data JPA repositories" "Spring Data" {
-                    properties {
-                        "package" "repository"
-                    }
-                }
-                mapperLayer = component "Mapper Layer" "[mapper] MapStruct mappers" "MapStruct" {
-                    properties {
-                        "package" "mapper"
-                    }
-                }
-                security = component "Security" "[security] Spring Security configuration" "Spring Security" {
-                    properties {
-                        "package" "security"
-                    }
-                }
+                restLayer = component "REST Layer" "[rest.**] HTTP endpoints, DTOs, error handlers" "Spring MVC" "pkg:rest.**"
+                domainModel = component "Domain Model" "[model] JPA entities" "JPA" "pkg:model"
+                repositoryLayer = component "Repository Layer" "[repository] Spring Data JPA repositories" "Spring Data" "pkg:repository"
+                mapperLayer = component "Mapper Layer" "[mapper] MapStruct mappers" "MapStruct" "pkg:mapper"
+                security = component "Security" "[security] Spring Security configuration" "Spring Security" "pkg:security"
             }
             database = container "Database" "Stores all data" "PostgreSQL"
         }

@@ -51,11 +51,15 @@ class C3ArchTest {
 
         patternByComponent = new LinkedHashMap<>();
         for (Component comp : backend.getComponents()) {
-            String pattern = comp.getProperties().get("package");
+            String pattern = comp.getTagsAsSet().stream()
+                .filter(t -> t.startsWith("pkg:"))
+                .map(t -> t.substring(4).trim())
+                .findFirst()
+                .orElse(null);
             assertThat(pattern)
-                .as("Component '%s' must declare a `properties { \"package\" \"...\" }` block in the DSL", comp.getName())
+                .as("Component '%s' must declare a `pkg:<pattern>` tag in the DSL", comp.getName())
                 .isNotBlank();
-            patternByComponent.put(comp, pattern.trim());
+            patternByComponent.put(comp, pattern);
         }
 
         classes = new ClassFileImporter()
