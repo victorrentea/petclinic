@@ -47,9 +47,18 @@ fi
 cd "$ROOT/petclinic-backend"
 MVN_OUT=$(mktemp)
 trap 'rm -f "$MVN_OUT" "$NPM_OUT"' EXIT
-if ! mvn -q test -Dtest=C4ModelExtractorTest,DomainModelExtractorTest,DbSchemaExtractorTest,OpenApiExtractorTest,JpaMatchesSchemaTest,PackagesArchTest >"$MVN_OUT" 2>&1; then
+TESTS=(
+  OpenApiExtractorTest
+  DomainModelExtractorTest
+  PackagesArchTest
+  DbSchemaExtractorTest
+  JpaMatchesDBSchemaTest
+  C3ArchTest
+)
+TESTS_CSV=$(IFS=,; echo "${TESTS[*]}")
+if ! mvn -q test -Dtest="$TESTS_CSV" >"$MVN_OUT" 2>&1; then
   cat "$MVN_OUT"
-  echo "[pre-commit] ❌ Architecture / OpenAPI / JPA guardrail tests failed — commit blocked."
+  echo "[pre-commit] ❌ Guardrail tests failed — commit blocked."
   exit 1
 fi
 git add "$ROOT/petclinic-backend/docs/generated" "$ROOT/openapi.yaml" "$ROOT/db.sql"

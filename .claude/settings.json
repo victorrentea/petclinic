@@ -44,11 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-spotless.sh\""
-          },
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-java-fqcn-check.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-java-edit.sh\""
           }
         ]
       }
