@@ -29,7 +29,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__petclinic-db__*",
+        "matcher": "mcp__postgres-db__*",
         "hooks": [
           {
             "type": "command",

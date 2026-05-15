@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "petclinic-db": {
+    "postgres-db": {
       "command": "npx",
       "args": [
         "-y",
