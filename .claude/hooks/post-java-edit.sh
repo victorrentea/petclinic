@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
-# PostToolUse hook: warns Claude when fully-qualified class names appear in Java code bodies
+# PostToolUse hook: runs after editing a Java file.
+#   1. Spotless: format the file via spotless:apply
+#   2. FQCN check: warn Claude when fully-qualified class names appear in code
 set -uo pipefail
 
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))" 2>/dev/null || true)
 
 printf '%s' "$FILE" | grep -qE '\.java$' || exit 0
+
+# ── 1. Spotless ───────────────────────────────────────────────────────────────
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+OUTPUT=$(cd "$REPO_ROOT/petclinic-backend" && ./mvnw spotless:apply -q 2>&1)
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo "$OUTPUT"
+    exit $STATUS
+fi
+
+# ── 2. FQCN check ─────────────────────────────────────────────────────────────
 [[ -f "$FILE" ]] || exit 0
 
-# Find FQCNs (e.g. java.util.List) not on import/package/comment lines
 FQCNS=$(grep -nE '[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+\.[A-Z][a-zA-Z0-9]*' "$FILE" \
     | grep -vE '^[0-9]+:[[:space:]]*(import |package |//|\*)' \
     2>/dev/null || true)
