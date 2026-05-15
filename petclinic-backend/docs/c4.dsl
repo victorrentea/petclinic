@@ -7,34 +7,29 @@ workspace "PetClinic" "Veterinary practice management system" {
         petClinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "Angular"
             backend = container "Backend" "REST API" "Java / Spring Boot" {
-                restLayer = component "REST Layer" "HTTP endpoints, DTOs, error handlers" "Spring MVC" {
-                    tags "REST Layer"
+                restLayer = component "REST Layer" "HTTP endpoints, DTOs, error handlers\n[rest.**]" "Spring MVC" {
                     properties {
-                        "packages" "rest, rest.dto, rest.error"
+                        "package" "rest.**"
                     }
                 }
-                domainModel = component "Domain Model" "JPA entities" "JPA" {
-                    tags "Domain Model"
+                domainModel = component "Domain Model" "JPA entities\n[model]" "JPA" {
                     properties {
-                        "packages" "model"
+                        "package" "model"
                     }
                 }
-                repositoryLayer = component "Repository Layer" "Spring Data JPA repositories" "Spring Data" {
-                    tags "Repository Layer"
+                repositoryLayer = component "Repository Layer" "Spring Data JPA repositories\n[repository]" "Spring Data" {
                     properties {
-                        "packages" "repository"
+                        "package" "repository"
                     }
                 }
-                mapperLayer = component "Mapper Layer" "MapStruct mappers" "MapStruct" {
-                    tags "Mapper Layer"
+                mapperLayer = component "Mapper Layer" "MapStruct mappers\n[mapper]" "MapStruct" {
                     properties {
-                        "packages" "mapper"
+                        "package" "mapper"
                     }
                 }
-                security = component "Security" "Spring Security configuration" "Spring Security" {
-                    tags "Security"
+                security = component "Security" "Spring Security configuration\n[security]" "Spring Security" {
                     properties {
-                        "packages" "security"
+                        "package" "security"
                     }
                 }
             }
@@ -78,44 +73,5 @@ workspace "PetClinic" "Veterinary practice management system" {
             autoLayout
         }
 
-        styles {
-            element "Person" {
-                shape Person
-                background "#08427b"
-                color "#ffffff"
-            }
-            element "Software System" {
-                background "#1168bd"
-                color "#ffffff"
-            }
-            element "Container" {
-                background "#438dd5"
-                color "#ffffff"
-            }
-            element "Component" {
-                background "#85bbf0"
-                color "#000000"
-            }
-            element "REST Layer" {
-                background "#1168bd"
-                color "#ffffff"
-            }
-            element "Domain Model" {
-                background "#999999"
-                color "#ffffff"
-            }
-            element "Repository Layer" {
-                background "#e8a838"
-                color "#ffffff"
-            }
-            element "Mapper Layer" {
-                background "#4caf50"
-                color "#ffffff"
-            }
-            element "Security" {
-                background "#888888"
-                color "#ffffff"
-            }
-        }
     }
 }

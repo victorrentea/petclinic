@@ -36,7 +36,7 @@ class C3ArchTest {
 
     private static Workspace workspace;
     private static Container backend;
-    private static Map<String, Component> componentByPackage;
+    private static Map<Component, String> patternByComponent;
     private static JavaClasses classes;
 
     @BeforeAll
@@ -49,19 +49,13 @@ class C3ArchTest {
         backend = petClinic.getContainerWithName(BACKEND_CONTAINER);
         assertThat(backend).as("DSL must declare a '%s' container", BACKEND_CONTAINER).isNotNull();
 
-        componentByPackage = new LinkedHashMap<>();
+        patternByComponent = new LinkedHashMap<>();
         for (Component comp : backend.getComponents()) {
-            String packagesProp = comp.getProperties().get("packages");
-            assertThat(packagesProp)
-                .as("Component '%s' must declare a 'packages' property in the DSL", comp.getName())
+            String pattern = comp.getProperties().get("package");
+            assertThat(pattern)
+                .as("Component '%s' must declare a `properties { \"package\" \"...\" }` block in the DSL", comp.getName())
                 .isNotBlank();
-            for (String pkg : packagesProp.split(",")) {
-                String fullPkg = BASE_PKG + "." + pkg.trim();
-                Component prev = componentByPackage.put(fullPkg, comp);
-                assertThat(prev)
-                    .as("Package '%s' is mapped to both '%s' and '%s'", fullPkg, prev == null ? "" : prev.getName(), comp.getName())
-                    .isNull();
-            }
+            patternByComponent.put(comp, pattern.trim());
         }
 
         classes = new ClassFileImporter()
@@ -69,34 +63,50 @@ class C3ArchTest {
             .importPackages(BASE_PKG);
     }
 
-    @Test
-    void everyCodePackageIsMappedToAComponent() {
-        Set<String> codePackages = new TreeSet<>();
-        for (JavaClass jc : classes) {
-            if (jc.getPackageName().startsWith(BASE_PKG) && !jc.getPackageName().equals(BASE_PKG)) {
-                codePackages.add(jc.getPackageName());
+    private static Component resolveComponent(String fullyQualifiedPackage) {
+        if (!fullyQualifiedPackage.startsWith(BASE_PKG + ".")) return null;
+        String relative = fullyQualifiedPackage.substring(BASE_PKG.length() + 1);
+        Component best = null;
+        int bestLen = -1;
+        for (Map.Entry<Component, String> e : patternByComponent.entrySet()) {
+            String pattern = e.getValue();
+            String prefix = pattern.endsWith(".**") ? pattern.substring(0, pattern.length() - 3) : pattern;
+            boolean matches = pattern.endsWith(".**")
+                ? relative.equals(prefix) || relative.startsWith(prefix + ".")
+                : relative.equals(prefix);
+            if (matches && prefix.length() > bestLen) {
+                best = e.getKey();
+                bestLen = prefix.length();
             }
         }
+        return best;
+    }
+
+    @Test
+    void everyCodePackageIsMappedToAComponent() {
         Set<String> orphans = new TreeSet<>();
-        for (String pkg : codePackages) {
-            if (!componentByPackage.containsKey(pkg)) orphans.add(pkg);
+        for (JavaClass jc : classes) {
+            String pkg = jc.getPackageName();
+            if (!pkg.startsWith(BASE_PKG) || pkg.equals(BASE_PKG)) continue;
+            if (resolveComponent(pkg) == null) orphans.add(pkg);
         }
         assertThat(orphans)
-            .as("Code packages not declared on any component in %s — add them to a `properties { packages \"...\" }`", DSL_FILE)
+            .as("Code packages not matched by any component's `package` pattern in %s", DSL_FILE)
             .isEmpty();
     }
 
     @Test
-    void everyDeclaredComponentPackageExistsInCode() {
+    void everyDeclaredComponentPatternMatchesAtLeastOneCodePackage() {
         Set<String> codePackages = new TreeSet<>();
         for (JavaClass jc : classes) codePackages.add(jc.getPackageName());
 
         Set<String> phantom = new TreeSet<>();
-        for (String pkg : componentByPackage.keySet()) {
-            if (!codePackages.contains(pkg)) phantom.add(pkg);
+        for (Map.Entry<Component, String> e : patternByComponent.entrySet()) {
+            boolean hasMatch = codePackages.stream().anyMatch(p -> resolveComponent(p) == e.getKey());
+            if (!hasMatch) phantom.add(e.getKey().getName() + " (" + e.getValue() + ")");
         }
         assertThat(phantom)
-            .as("Packages declared in %s but absent from the codebase — remove them or create the package", DSL_FILE)
+            .as("Components declared in %s but no code package matches their `package` pattern", DSL_FILE)
             .isEmpty();
     }
 
@@ -111,10 +121,10 @@ class C3ArchTest {
 
         Set<String> actualEdges = new TreeSet<>();
         for (JavaClass jc : classes) {
-            Component srcComp = componentByPackage.get(jc.getPackageName());
+            Component srcComp = resolveComponent(jc.getPackageName());
             if (srcComp == null) continue;
             for (Dependency dep : jc.getDirectDependenciesFromSelf()) {
-                Component dstComp = componentByPackage.get(dep.getTargetClass().getPackageName());
+                Component dstComp = resolveComponent(dep.getTargetClass().getPackageName());
                 if (dstComp == null || dstComp == srcComp) continue;
                 actualEdges.add(srcComp.getName() + " -> " + dstComp.getName());
             }
