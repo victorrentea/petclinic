@@ -70,3 +70,4 @@ __pycache__/
 /.playwright-mcp
 /petclinic-database/.bootstrapped
 .claude/settings.local.json
+test-results/.last-run.json
