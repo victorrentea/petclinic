@@ -1,0 +1,56 @@
+name: SonarCloud
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Disabling shallow clone is recommended for accurate SCM blame info.
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: petclinic-frontend/package-lock.json
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Backend tests + JaCoCo report
+        working-directory: petclinic-backend
+        run: ./mvnw -B -ntp test
+
+      - name: Install frontend dependencies
+        working-directory: petclinic-frontend
+        run: npm ci
+
+      - name: Frontend tests with coverage
+        working-directory: petclinic-frontend
+        run: npx ng test --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
