@@ -62,4 +62,18 @@ if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
   exit 1
 fi
 
+# ── Spectral lint of the freshly regenerated openapi.yaml ──────────────────
+if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules/@stoplight/spectral-cli" ]; then
+  SPECTRAL_OUT=$(mktemp)
+  trap 'rm -f "$MVN_OUT" "$SPECTRAL_OUT"' EXIT
+  if ! npm --prefix "$ROOT/petclinic-frontend" run lint:openapi --silent >"$SPECTRAL_OUT" 2>&1; then
+    cat "$SPECTRAL_OUT"
+    echo "[pre-push] ❌ Spectral found errors in openapi.yaml — push blocked."
+    exit 1
+  fi
+else
+  echo "[pre-push] ⚠️  Spectral CLI missing — skipping OpenAPI lint."
+  echo "[pre-push]    Install with: cd petclinic-frontend && npm install"
+fi
+
 echo "[pre-push] ✓ Guardrails passed."
