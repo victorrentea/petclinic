@@ -1,11 +1,15 @@
 {
   "permissions": {
-    "ask": [
+    "deny": [
       "Bash(git commit --no-verify*)",
-      "Bash(git push --no-verify*)",
-      "Bash(git add .githooks*)",
+      "Bash(git push --no-verify*)"
+    ],
+    "ask": [
+      "Edit(.claude/settings.json)",
+      "Write(.claude/settings.json)",
       "Edit(.githooks/*)",
       "Write(.githooks/*)",
+      "Bash(git add .githooks*)",
       "Edit(openapi.yaml)",
       "Write(openapi.yaml)",
       "Edit(petclinic-backend/docs/*)",
@@ -17,8 +21,6 @@
       "Write(petclinic-backend/.coverage-baseline)",
       "Edit(.github/CODEOWNERS)",
       "Write(.github/CODEOWNERS)",
-      "Edit(.claude/settings.json)",
-      "Write(.claude/settings.json)",
       "Edit(.claude/settings.local.json)",
       "Write(.claude/settings.local.json)",
       "Edit(**/pom.xml)",
