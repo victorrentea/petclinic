@@ -20,5 +20,5 @@
 **/pom.xml                       @victorrentea/elders
 /petclinic-frontend/package.json @victorrentea/elders
 
-# GI Guards
+# CI Guards
 /.github/workflows/ci.yml @victorrentea/elders
