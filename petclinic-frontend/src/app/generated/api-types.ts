@@ -243,7 +243,7 @@ export interface components {
       lastName: string;
       /**
        * @description The postal address of the pet owner.
-       * @example 110
+       * @example 110 W. Liberty St.
        */
       address: string;
       /**
@@ -323,7 +323,7 @@ export interface components {
       lastName: string;
       /**
        * @description The postal address of the pet owner.
-       * @example 110
+       * @example 110 W. Liberty St.
        */
       address: string;
       /**

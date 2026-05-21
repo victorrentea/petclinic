@@ -20,20 +20,18 @@ public class OwnerDto {
     private Integer id;
 
     @NotNull
-    @Pattern(regexp = "^\\p{L}+([ '-]\\p{L}+){0,2}$")
     @Size(min = 1, max = 30)
     @Schema(example = "George", description = "The first name of the pet owner.")
     private String firstName;
 
     @NotNull
-    @Pattern(regexp = "^\\p{L}+([ '-]\\p{L}+){0,2}\\.?$")
     @Size(min = 1, max = 30)
     @Schema(example = "Franklin", description = "The last name of the pet owner.")
     private String lastName;
 
     @NotNull
     @Size(min = 1, max = 255)
-    @Schema(example = "110 W. Liberty St.", description = "The postal address of the pet owner.")
+    @Schema(example = "\"110 W. Liberty St.\"", description = "The postal address of the pet owner.")
     private String address;
 
     @NotNull
@@ -44,7 +42,7 @@ public class OwnerDto {
     @NotNull
     @Pattern(regexp = "^[0-9]*$")
     @Size(min = 1, max = 20)
-    @Schema(example = "6085551023", description = "The telephone number of the pet owner.")
+    @Schema(example = "\"6085551023\"", description = "The telephone number of the pet owner.")
     private String telephone;
 
     @Valid

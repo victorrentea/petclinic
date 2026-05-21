@@ -1603,18 +1603,16 @@ components:
           example: George
           maxLength: 30
           minLength: 1
-          pattern: "^\\p{L}+([ '-]\\p{L}+){0,2}$"
         lastName:
           type: string
           description: The last name of the pet owner.
           example: Franklin
           maxLength: 30
           minLength: 1
-          pattern: "^\\p{L}+([ '-]\\p{L}+){0,2}\\.?$"
         address:
           type: string
           description: The postal address of the pet owner.
-          example: 110
+          example: 110 W. Liberty St.
           maxLength: 255
           minLength: 1
         city:
@@ -1626,7 +1624,7 @@ components:
         telephone:
           type: string
           description: The telephone number of the pet owner.
-          example: 6085551023
+          example: "6085551023"
           maxLength: 20
           minLength: 1
           pattern: "^[0-9]*$"
@@ -1720,18 +1718,16 @@ components:
           example: George
           maxLength: 30
           minLength: 1
-          pattern: "^\\p{L}+([ '-]\\p{L}+){0,2}$"
         lastName:
           type: string
           description: The last name of the pet owner.
           example: Franklin
           maxLength: 30
           minLength: 1
-          pattern: "^\\p{L}+([ '-]\\p{L}+){0,2}\\.?$"
         address:
           type: string
           description: The postal address of the pet owner.
-          example: 110
+          example: 110 W. Liberty St.
           maxLength: 255
           minLength: 1
         city:
@@ -1743,7 +1739,7 @@ components:
         telephone:
           type: string
           description: The telephone number of the pet owner.
-          example: 6085551023
+          example: "6085551023"
           maxLength: 20
           minLength: 1
           pattern: "^[0-9]*$"
