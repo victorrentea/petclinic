@@ -1,6 +1,7 @@
 /* tslint:disable:no-unused-variable */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import {WelcomeComponent} from './welcome.component';
 
@@ -10,7 +11,8 @@ describe('WelcomeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [WelcomeComponent]
+      declarations: [WelcomeComponent],
+      imports: [HttpClientTestingModule]
     })
       .compileComponents();
   }));
