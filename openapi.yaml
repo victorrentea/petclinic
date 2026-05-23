@@ -257,6 +257,38 @@ paths:
       summary: Create an owner
       tags:
       - owner-rest-controller
+  /api/owners/count:
+    get:
+      operationId: countOwners
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+          description: OK
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Bad Request
+        "404":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: Not Found
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Internal Server Error
+      summary: Count owners
+      tags:
+      - owner-rest-controller
   /api/owners/{ownerId}:
     delete:
       operationId: deleteOwner

@@ -118,6 +118,15 @@ public class OwnerTest {
     }
 
     @Test
+    void count_returnsOwnerCount() throws Exception {
+        long before = ownerRepository.count();
+
+        mockMvc.perform(get("/api/owners/count"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(String.valueOf(before)));
+    }
+
+    @Test
     void getAll() throws Exception {
         List<OwnerDto> owners = search("/api/owners");
 

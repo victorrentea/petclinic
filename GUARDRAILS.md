@@ -9,7 +9,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `PackagesArchUnitTest` | Logical architecture | ArchUnit asserts package deps match `petclinic-backend/docs/packages.puml` |
 | `OpenApiSyncTest` | REST API contract | Diffs live `/v3/api-docs.yaml` against committed `openapi.yaml` |
 | `JpaSchemaValidateTest` | Entity ↔ migration drift | Test profile sets `ddl-auto=validate`; Hibernate fails context refresh on schema mismatch |
-| `DbSchemaSyncTest` | DB schema | Boots Postgres, runs Flyway, dumps to `db.sql`; fails on drift |
+| `DbSchemaSyncTest` | DB schema | Boots Postgres, runs Flyway, dumps to `DB.sql`; fails on drift |
 | TS ↔ OpenAPI sync | Stale generated frontend types | `npm run generate:api` runs in pre-commit + CI; `api-types.ts` auto-staged / auto-committed on drift |
 | `C3ArchTest` | C4 architecture drift | Parses hand-written `docs/c4.dsl`; asserts every code package is mapped to a component and component-to-component dependencies match the code; re-exports `*.puml` views |
 | `DomainModelExtractorTest` | Domain class diagram | Regenerates `docs/generated/DomainModel.puml` from JPA annotations |

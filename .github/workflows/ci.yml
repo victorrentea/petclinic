@@ -71,6 +71,10 @@ jobs:
         working-directory: petclinic-frontend
         run: npm run generate:api --silent
 
+      - name: Run frontend tests (Karma + ChromeHeadlessCI)
+        working-directory: petclinic-frontend
+        run: npm run test-headless -- --code-coverage
+
       - name: Strict frontend build (fails on any webpack warning)
         working-directory: petclinic-frontend
         run: npm run build
@@ -78,17 +82,17 @@ jobs:
       - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts; then
+          if git diff --quiet petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts
+            git --no-pager diff --stat petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated artifacts (docs/generated/, db.sql, or api-types.ts) are out of date."
+          echo "::error::Generated artifacts (docs/generated/, DB.sql, or api-types.ts) are out of date."
           echo "::error::Run 'cd petclinic-backend && ./mvnw test' and 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated files."
           exit 1
 
@@ -97,8 +101,8 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated db.sql petclinic-frontend/src/app/generated/api-types.ts
-          git commit -m 'chore(guardrail): regenerate diagrams, db.sql, and api-types.ts [skip ci]'
+          git add petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts
+          git commit -m 'chore(guardrail): regenerate diagrams, DB.sql, and api-types.ts [skip ci]'
           git push
 
       - name: SonarCloud Scan

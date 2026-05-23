@@ -1,10 +1,10 @@
 ---
-description: Regenerate docs/manual/manual.md by crawling the running PetClinic UI in a browser. Diff-based — uses the prior manual as a checklist and only updates what changed.
+description: Regenerate user-manual/manual.md by crawling the running PetClinic UI in a browser. Diff-based — uses the prior manual as a checklist and only updates what changed.
 ---
 
 # Regenerate the user manual
 
-You are regenerating the end-user manual for the PetClinic application. Output: `docs/manual/manual.md` plus screenshots under `docs/manual/screenshots/`.
+You are regenerating the end-user manual for the PetClinic application. Output: `user-manual/manual.md` plus screenshots under `user-manual/screenshots/`.
 
 ## Pre-flight (abort if either fails)
 
@@ -21,7 +21,7 @@ If either returns anything other than `200`, abort with this message and STOP:
 
 ## Step 1 — Load the baseline
 
-Read `docs/manual/manual.md`. Extract:
+Read `user-manual/manual.md`. Extract:
 
 - **Documented sections** — every `## <Feature name>` heading and its subsection structure.
 - **Screenshot inventory** — every `screenshots/<file>.png` path referenced.
@@ -47,7 +47,7 @@ For each feature area:
 |---|---|---|
 | yes | yes | Visit, compare current screen vs prior screenshot. Unchanged → keep prose and screenshot verbatim. Changed → update prose, replace screenshot. |
 | no | yes | New feature — write fresh section, capture screenshots. |
-| yes | no | Removed feature — delete section, delete orphan screenshots from `docs/manual/screenshots/`. |
+| yes | no | Removed feature — delete section, delete orphan screenshots from `user-manual/screenshots/`. |
 
 "Visually unchanged" means layout, labels, and visible controls match. Differences in seeded data (different owner names, different list ordering) do NOT count as changes.
 
@@ -62,7 +62,7 @@ Use `chrome-devtools-mcp` tools:
 - `mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__click`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill`, `mcp__plugin_chrome-devtools-mcp_chrome-devtools__fill_form` to drive the UI
 - `mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot` with `fullPage: true` and `format: "png"` to capture
 
-Save each screenshot to `docs/manual/screenshots/<feature>-<state>.png`. Naming: lowercase, hyphenated, descriptive of the state (`owners-list.png`, `owners-create.png`, `owners-detail.png`, `pets-add-to-owner.png`, `visits-add.png`, etc.).
+Save each screenshot to `user-manual/screenshots/<feature>-<state>.png`. Naming: lowercase, hyphenated, descriptive of the state (`owners-list.png`, `owners-create.png`, `owners-detail.png`, `pets-add-to-owner.png`, `visits-add.png`, etc.).
 
 If you create new owners/pets/visits while crawling for screenshots, that test data persists in the running database. That is acceptable — the manual is a screenshot artifact, not a state-restoring test.
 
@@ -94,10 +94,10 @@ Top of `manual.md` must contain:
 
 ## Step 6 — Clean up orphans
 
-Delete any file in `docs/manual/screenshots/` that is not referenced from the regenerated `manual.md`. Use:
+Delete any file in `user-manual/screenshots/` that is not referenced from the regenerated `manual.md`. Use:
 
 ```bash
-git status docs/manual/screenshots/
+git status user-manual/screenshots/
 ```
 
 to confirm only intended additions/deletions are present.

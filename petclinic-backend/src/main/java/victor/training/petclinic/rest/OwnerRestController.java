@@ -61,6 +61,13 @@ public class OwnerRestController {
         return ownerMapper.toOwnerDtoCollection(owners);
     }
 
+    @Operation(operationId = "countOwners", summary = "Count owners")
+    @GetMapping("/count")
+    @PreAuthorize("permitAll()")
+    public long countOwners() {
+        return ownerRepository.count();
+    }
+
     @Operation(operationId = "getOwner", summary = "Get an owner by ID")
     @GetMapping("/{ownerId}")
     public OwnerDto getOwner(@PathVariable int ownerId) {

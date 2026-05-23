@@ -20,6 +20,10 @@ export interface paths {
     /** Create an owner */
     post: operations["addOwner"];
   };
+  "/api/owners/count": {
+    /** Count owners */
+    get: operations["countOwners"];
+  };
   "/api/owners/{ownerId}": {
     /** Get an owner by ID */
     get: operations["getOwner"];
@@ -580,6 +584,35 @@ export interface operations {
       /** @description OK */
       200: {
         content: never;
+      };
+      /** @description Bad Request */
+      400: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
+    };
+  };
+  /** Count owners */
+  countOwners: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "*/*": number;
+        };
       };
       /** @description Bad Request */
       400: {

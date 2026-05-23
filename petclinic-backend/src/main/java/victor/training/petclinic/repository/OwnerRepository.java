@@ -16,4 +16,6 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 
     void delete(Owner owner);
 
+    long count();
+
 }

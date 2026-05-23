@@ -34,7 +34,15 @@ body, html {
   margin: 0 auto;
 }
 
+.welcome-image {
+  transform: scale(2);
+  transform-origin: center top;
+  margin-top: 2rem;
+  margin-bottom: 6rem;
+}
+
 .title {
   text-align: center;
   padding-top: 2rem;
+  font-size: 2em;
 }

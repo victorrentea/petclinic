@@ -11,6 +11,7 @@
 
 # Contracts
 /openapi.yaml                    @victorrentea/elders
+/DB.sql                          @victorrentea/elders
 
 # Architecture
 /petclinic-backend/docs/packages.puml @victorrentea/elders
