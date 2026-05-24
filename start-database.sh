@@ -10,6 +10,11 @@ if [[ ! -f "$JAR" ]]; then
   (cd "$DB_DIR" && mvn -q -DskipTests package)
 fi
 
+if [[ -d "$DB_DIR/data" ]]; then
+  echo "🧹 Wiping existing data dir: $DB_DIR/data"
+  rm -rf "$DB_DIR/data"
+fi
+
 echo "🐘 Starting embedded Postgres on localhost:5432..."
 echo "Data dir: $DB_DIR/data"
 echo ""
