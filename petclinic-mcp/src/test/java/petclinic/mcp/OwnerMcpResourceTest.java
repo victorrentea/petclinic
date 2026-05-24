@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-class MeResourceTest {
+class OwnerMcpResourceTest {
 
-    @Autowired MeResource meResource;
+    @Autowired OwnerMcpResource ownerMcpResource;
     @Autowired OwnerRepository ownerRepository;
     @Autowired PetRepository petRepository;
 
@@ -38,7 +38,7 @@ class MeResourceTest {
         ron.addPet(pet);
         ownerRepository.save(ron);
 
-        String profile = meResource.profileFor("Weasley_TST");
+        String profile = ownerMcpResource.profileFor(ron.getId());
 
         assertThat(profile)
             .contains("Ronald Weasley_TST")
@@ -47,8 +47,8 @@ class MeResourceTest {
     }
 
     @Test
-    void unknown_lastname_throws() {
-        assertThatThrownBy(() -> meResource.profileFor("ZZZ_NoSuchOwner_ZZZ"))
+    void unknown_id_throws() {
+        assertThatThrownBy(() -> ownerMcpResource.profileFor(999_999))
             .isInstanceOf(IllegalStateException.class);
     }
 }

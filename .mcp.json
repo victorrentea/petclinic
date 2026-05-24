@@ -4,7 +4,7 @@
       "type": "sse",
       "url": "http://localhost:8090/sse",
       "headers": {
-        "Authorization": "Basic V2Vhc2xleTpzM2NyZXQ="
+        "X-API-Key": "demo-key-1"
       }
     },
     "postgres-db": {

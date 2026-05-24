@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "victor.training.petclinic.repository")
 @EntityScan(basePackages = "victor.training.petclinic.model")
-public class PetClinicMcpApplication {
+public class McpApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PetClinicMcpApplication.class, args);
+        SpringApplication.run(McpApplication.class, args);
     }
 }

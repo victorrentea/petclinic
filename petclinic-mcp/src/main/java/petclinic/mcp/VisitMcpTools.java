@@ -21,13 +21,13 @@ import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
 @Component
-public class VisitTools {
+public class VisitMcpTools {
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
 
-    public VisitTools(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
+    public VisitMcpTools(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
@@ -39,11 +39,15 @@ public class VisitTools {
 
     @McpTool(
         name = "list_visits",
-        description = "List veterinary visits for every pet of a given owner."
+        description = "List veterinary visits for every pet of the authenticated owner."
     )
     @Transactional(readOnly = true)
-    public List<VisitView> listVisits(
-            @McpToolParam(description = "Owner ID", required = true) int ownerId) {
+    public List<VisitView> listVisits() {
+        return listVisitsFor(McpSecurity.currentOwnerId());
+    }
+
+    @Transactional(readOnly = true)
+    List<VisitView> listVisitsFor(int ownerId) {
         Owner owner = ownerRepository.findById(ownerId)
             .orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
         List<VisitView> result = new ArrayList<>();
@@ -57,16 +61,20 @@ public class VisitTools {
 
     @McpTool(
         name = "create_visit",
-        description = "Create a new vet visit for a pet. Asks the user (via elicitation) to confirm before writing."
+        description = "Create a new vet visit for one of the authenticated owner's pets. "
+            + "Asks the user (via elicitation) to confirm before writing."
     )
     @Transactional
     public String createVisit(
             McpSyncRequestContext context,
-            @McpToolParam(description = "Owner ID", required = true) int ownerId,
-            @McpToolParam(description = "Pet ID (must belong to the given owner)", required = true) int petId,
+            @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
             @McpToolParam(description = "Visit date (yyyy-MM-dd); defaults to today if omitted", required = false) String date,
             @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
+        return createVisitFor(McpSecurity.currentOwnerId(), context, petId, date, description);
+    }
 
+    @Transactional
+    String createVisitFor(int ownerId, McpSyncRequestContext context, int petId, String date, String description) {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
         if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
@@ -79,7 +87,7 @@ public class VisitTools {
             visitDate = LocalDate.parse(date);
         }
 
-        if (context.elicitEnabled()) {
+        if (context != null && context.elicitEnabled()) {
             String prompt = "Create visit for pet '" + pet.getName() + "' on " + visitDate
                 + " — \"" + description + "\"? Set confirmed=true to proceed.";
             StructuredElicitResult<VisitConfirmation> elicit =

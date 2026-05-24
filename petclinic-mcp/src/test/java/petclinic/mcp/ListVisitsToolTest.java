@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class ListVisitsToolTest {
 
-    @Autowired VisitTools visitTools;
+    @Autowired VisitMcpTools visitTools;
     @Autowired OwnerRepository ownerRepository;
     @Autowired PetRepository petRepository;
     @Autowired VisitRepository visitRepository;
@@ -49,10 +49,10 @@ class ListVisitsToolTest {
         visit.setDescription("Annual checkup");
         visitRepository.save(visit);
 
-        List<VisitTools.VisitView> visits = visitTools.listVisits(owner.getId());
+        List<VisitMcpTools.VisitView> visits = visitTools.listVisitsFor(owner.getId());
 
         assertThat(visits)
-            .extracting(VisitTools.VisitView::description)
+            .extracting(VisitMcpTools.VisitView::description)
             .contains("Annual checkup");
     }
 }
