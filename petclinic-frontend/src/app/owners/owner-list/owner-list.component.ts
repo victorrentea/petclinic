@@ -1,33 +1,44 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
+export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string;
-  lastName: string;
+  searchControl = new FormControl('');
   owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
   isOwnersDataReceived: boolean = false;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  private subscription: Subscription;
 
-  }
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
+    this.subscription = this.searchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      map(value => (value || '').trim()),
+      distinctUntilChanged(),
+      switchMap(value => this.ownerService.searchOwners(value))
+    ).subscribe({
+      next: owners => {
+        this.owners = owners;
         this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+      },
+      error: error => this.errorMessage = error
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   onSelect(owner: Owner) {
@@ -37,36 +48,4 @@ export class OwnerListComponent implements OnInit {
   addOwner() {
     this.router.navigate(['/owners/add']);
   }
-
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
-
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
-      );
-
-      }
-  }
-
-
 }

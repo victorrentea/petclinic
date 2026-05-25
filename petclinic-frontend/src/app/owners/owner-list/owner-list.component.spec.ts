@@ -1,13 +1,13 @@
 /* tslint:disable:no-unused-variable */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick, waitForAsync} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
 import {OwnerListComponent} from './owner-list.component';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import { OwnerService } from '../owner.service';
+import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -27,7 +27,7 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(search: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -37,7 +37,6 @@ describe('OwnerListComponent', () => {
   let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
   let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
@@ -58,7 +57,7 @@ describe('OwnerListComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DummyComponent],
       schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
+      imports: [CommonModule, ReactiveFormsModule, PartsModule, OwnersModule,
         RouterTestingModule.withRoutes(
           [{path: 'owners', component: OwnerListComponent},
             {path: 'owners/add', component: OwnerAddComponent},
@@ -79,51 +78,39 @@ describe('OwnerListComponent', () => {
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
     searchOwnersSpy = spyOn(ownerService, 'searchOwners')
       .and.returnValue(of(testOwners));
-
   });
 
   it('should create OwnerListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call ngOnInit() method', () => {
+  it('should call searchOwners on init with empty string', fakeAsync(() => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
-  });
-
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
-    fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
-      de = fixture.debugElement.query(By.css('.ownerFullName'));
-      el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
-    });
+    tick(300);
+    expect(searchOwnersSpy).toHaveBeenCalledWith('');
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
+  it('should call searchOwners after debounce when search value changes', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(300);
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('Fr');
+    component.searchControl.setValue('Fr');
+    tick(300);
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
-  });
+  }));
+
+  it('should show full name after searchOwners returns results', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(300);
+    fixture.detectChanges();
+
+    de = fixture.debugElement.query(By.css('.ownerFullName'));
+    el = de.nativeElement;
+    expect(el.innerText).toBe((testOwner.firstName + ' ' + testOwner.lastName));
+  }));
 
 });

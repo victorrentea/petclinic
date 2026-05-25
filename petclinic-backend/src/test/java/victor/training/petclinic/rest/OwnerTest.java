@@ -141,11 +141,50 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?search=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void searchParam_byLastName() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?search=Franklin");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId);
+    }
+
+    @Test
+    void searchParam_byPetName() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?search=Rosy");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId);
+    }
+
+    @Test
+    void searchParam_trimmed() throws Exception {
+        String responseJson = mockMvc.perform(get("/api/owners").param("search", "  Franklin  "))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        List<OwnerDto> owners = mapper.readValue(responseJson, new TypeReference<>() {});
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId);
+    }
+
+    @Test
+    void searchParam_emptyReturnsAll() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?search=");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId);
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -162,7 +201,7 @@ public class OwnerTest {
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerDto> results = search("/api/owners?search=NonExistent");
 
         assertThat(results).isEmpty();
     }
