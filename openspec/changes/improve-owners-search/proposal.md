@@ -8,7 +8,7 @@ The current owners search only supports prefix matching on `lastName`, making it
 - Backend: replace prefix query with a JPQL `LIKE '%...%'` query across `firstName`, `lastName`, `address`, `city`, `telephone`, and pet `name` (via `LEFT JOIN`)
 - Search string trimmed in controller before querying
 - Frontend: remove "Find Owner" button; search triggers live on input with 300ms debounce
-- UI text updates: label `Last name` → `Search`; descriptive placeholder; updated no-results message
+- UI copy: label `Last name` → `Search`; descriptive placeholder; updated no-results message
 
 ## Capabilities
 
@@ -21,7 +21,7 @@ The current owners search only supports prefix matching on `lastName`, making it
 ## Impact
 
 - `OwnerRepository`: new custom JPQL query method replacing `findByLastNameStartingWith`
-- `OwnerRestController`: rename param `?lastName=` → `?search=`, trim input, call new repository method
+- `OwnerRestController`: new `?search=` param, trim input, call new repository method
 - `OwnerMapper` / DTOs: no change
 - Frontend `owners-list` component: debounced input, remove search button, update labels
 - API consumers: only the Angular frontend uses this endpoint; no backwards compatibility needed
