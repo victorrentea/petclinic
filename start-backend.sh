@@ -51,7 +51,7 @@ echo ""
 
 cd "$BACKEND_DIR"
 if [[ -n "$OTEL_JVM_ARGS" ]]; then
-  ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="$OTEL_JVM_ARGS"
+  mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="$OTEL_JVM_ARGS"
 else
-  ./mvnw spring-boot:run
+  mvn clean spring-boot:run
 fi

@@ -11,7 +11,7 @@ printf '%s' "$FILE" | grep -qE '\.java$' || exit 0
 
 # ── 1. Spotless ───────────────────────────────────────────────────────────────
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OUTPUT=$(cd "$REPO_ROOT/petclinic-backend" && ./mvnw spotless:apply -q 2>&1)
+OUTPUT=$(cd "$REPO_ROOT/petclinic-backend" && mvn spotless:apply -q 2>&1)
 STATUS=$?
 if [ $STATUS -ne 0 ]; then
     echo "$OUTPUT"

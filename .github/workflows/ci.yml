@@ -61,11 +61,11 @@ jobs:
 
       - name: Run backend tests (+ JaCoCo report)
         working-directory: petclinic-backend
-        run: ./mvnw -B -ntp test
+        run: mvn -B -ntp test
 
       - name: Verify Javadoc
         working-directory: petclinic-backend
-        run: ./mvnw -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
+        run: mvn -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
 
       - name: Regenerate TS types from openapi.yaml
         working-directory: petclinic-frontend
@@ -93,7 +93,7 @@ jobs:
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
           echo "::error::Generated artifacts (docs/generated/, DB.sql, or api-types.ts) are out of date."
-          echo "::error::Run 'cd petclinic-backend && ./mvnw test' and 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated files."
+          echo "::error::Run 'cd petclinic-backend && mvn test' and 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated files."
           exit 1
 
       - name: Auto-commit regenerated artifacts
