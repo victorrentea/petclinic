@@ -15,5 +15,8 @@ echo "==> npm install: petclinic-frontend"
 echo "==> npm install: petclinic-ui-test"
 (cd "$ROOT/petclinic-ui-test" && npm install)
 
+echo "==> Configuring git hooks"
+git -C "$ROOT" config core.hooksPath hooks
+
 echo ""
 echo "All dependencies installed."

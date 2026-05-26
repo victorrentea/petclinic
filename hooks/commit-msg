@@ -1,0 +1,23 @@
+#!/bin/sh
+# Validates that the commit message starts with a JIRA ticket in square brackets
+# e.g. [PROJ-123] Some message
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Allow merge commits and fixup/squash commits
+case "$COMMIT_MSG" in
+  Merge*|Revert*|fixup\!*|squash\!*) exit 0 ;;
+esac
+
+JIRA_PATTERN='^\[[A-Z][A-Z0-9]+-[0-9]+\]'
+
+if ! echo "$COMMIT_MSG" | grep -qE "$JIRA_PATTERN"; then
+  echo ""
+  echo "ERROR: Commit message must start with a JIRA ticket in square brackets."
+  echo "       Example: [PROJ-123] Describe what you did"
+  echo ""
+  echo "       Your message was: $COMMIT_MSG"
+  echo ""
+  exit 1
+fi

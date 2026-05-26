@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "petclinic-mcp": {
+      "type": "remote",
+      "url": "http://localhost:8090/sse",
+      "headers": {
+        "X-API-Key": "demo-key-1"
+      }
+    }
+  }
+}
