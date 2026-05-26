@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """Generate a 2D code-city treemap of the backend Java sources.
 
-Complexity per file = sum of leading whitespace characters across lines
-(tabs expanded to 4 spaces). Idea from *Building Evolutionary Architectures*.
 Size per file = LOC (non-blank lines).
+Color per file = cyclomatic-approx (decision points: if/for/while/case/catch/&&/||/?).
+Idea from *Building Evolutionary Architectures*.
+
+Run from anywhere:
+    python3 petclinic-backend/src/test/py/build.py
+
+Writes to petclinic-backend/docs/CodeCity.html.
 """
 from __future__ import annotations
 
@@ -11,9 +16,10 @@ import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]  # petclinic-backend/
+# src/test/py/build.py -> parents[3] = petclinic-backend/
+ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "src" / "main" / "java"
-OUT = Path(__file__).resolve().parent / "index.html"
+OUT = ROOT / "docs" / "CodeCity.html"
 
 BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 LINE_COMMENT = re.compile(r"//[^\n]*")
@@ -58,11 +64,11 @@ def build_tree() -> dict:
             if pkg not in kids:
                 kids[pkg] = {"name": pkg, "children": {}}
             node = kids[pkg]
-        loc, ws = measure(java)
+        loc, cc = measure(java)
         node["children"][parts[-1]] = {
             "name": parts[-1],
             "loc": loc,
-            "complexity": ws,
+            "complexity": cc,
             "path": str(java),
         }
 
@@ -140,8 +146,6 @@ document.querySelectorAll('input[name="mode"]').forEach(r => {
 const titleH = d => Math.max(14, 22 - d.depth * 2);
 
 function shelfPack(items, w, h) {
-  // Shelf bin-packing: tallest-first, fill rows left-to-right.
-  // items: [{idx, side}]; positions returned indexed by original idx.
   const sorted = items.slice().sort((a, b) => b.side - a.side);
   const positions = new Array(items.length);
   let x = 0, y = 0, rowH = 0;
@@ -155,8 +159,6 @@ function shelfPack(items, w, h) {
 }
 
 function applyUniformLayout(root) {
-  // Each class becomes a square with area ∝ LOC, packed inside its package
-  // (only pure-leaf packages — mixed parents keep d3.treemap layout).
   root.eachAfter(node => {
     if (!node.children) return;
     if (!node.children.every(c => !c.children)) return;
@@ -168,7 +170,7 @@ function applyUniformLayout(root) {
     if (w <= 0 || h <= 0) return;
 
     const totalLoc = d3.sum(node.children, c => Math.max(1, c.data.loc || 1));
-    let unit = Math.sqrt((w * h * 0.85) / totalLoc); // px per √loc
+    let unit = Math.sqrt((w * h * 0.85) / totalLoc);
     let result;
     for (let i = 0; i < 40; i++) {
       const items = node.children.map((c, idx) => ({
@@ -213,7 +215,6 @@ function render() {
   const maxC = d3.max(root.leaves(), d => d.data.complexity) || 1;
   const color = d3.scaleSequential(t => d3.interpolateRgb("#ffffff", "#ff2020")(t)).domain([0, maxC]);
 
-  // package frames (depth-aware: brighter and thicker for outer packages)
   const internals = root.descendants().filter(d => d.depth > 0 && d.children);
   const pkgColor = depth => d3.interpolateRgb("#f0c674", "#7aa2f7")(Math.min(1, (depth - 1) / 4));
 
@@ -224,7 +225,6 @@ function render() {
     .attr("stroke", d => pkgColor(d.depth))
     .attr("stroke-width", d => Math.max(1, 4 - d.depth));
 
-  // package title bars (colored strip at top with the package name in dark text)
   svg.selectAll("rect.pkg-title").data(internals).join("rect")
     .attr("class", "pkg-title")
     .attr("x", d => d.x0).attr("y", d => d.y0)
@@ -236,9 +236,15 @@ function render() {
     .attr("x", d => d.x0 + 5)
     .attr("y", d => d.y0 + Math.max(10, 16 - d.depth * 2))
     .attr("font-size", d => Math.max(9, 13 - d.depth))
-    .text(d => (d.x1 - d.x0 > 50 ? d.data.name : ""));
+    .text(d => {
+      const w = d.x1 - d.x0;
+      if (w <= 50) return "";
+      if (w < 180) return d.data.name;
+      const loc = d3.sum(d.leaves(), n => n.data.loc || 0);
+      const cc = d3.sum(d.leaves(), n => n.data.complexity || 0);
+      return `${d.data.name}  ·  ${loc} loc  ·  cc ${cc}`;
+    });
 
-  // leaves (classes)
   svg.selectAll("rect.leaf").data(root.leaves()).join("rect")
     .attr("class", "leaf")
     .attr("x", d => d.x0).attr("y", d => d.y0)
@@ -253,7 +259,6 @@ function render() {
     .on("mouseleave", () => tip.style("opacity", 0))
     .on("click", (ev, d) => {
       if (!d.data.path) return;
-      // Try IntelliJ built-in HTTP server first (port 63342), fall back to idea:// URL scheme.
       const url = "http://localhost:63342/api/file/" + encodeURI(d.data.path);
       fetch(url, { mode: "no-cors" }).catch(() => {});
       window.location.href = "idea://open?file=" + encodeURIComponent(d.data.path) + "&line=1";
@@ -281,6 +286,7 @@ window.addEventListener("resize", render);
 def main() -> None:
     tree = build_tree()
     html = HTML.replace("__DATA__", json.dumps(tree))
+    OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
     leaves = []
 
