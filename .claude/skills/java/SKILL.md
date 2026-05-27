@@ -1,11 +1,10 @@
 ---
 name: java
-description: Apply Java/Spring Boot code preferences for the PetClinic backend. Load ONLY when reading or writing files matching **/*.java. Do NOT load for Kotlin, Groovy, XML, properties, YAML, SQL, or any non-.java file — even inside petclinic-backend/.
+description: Apply Java/Spring Boot code preferences for backend.
+paths: "**/*.java"
 ---
 
 # Java Code Preferences
-
-Scope: this skill applies **only** to `**/*.java` files. Skip it for all other file types.
 
 - Constructor injection for production, `@Autowired` only in tests
 - `@Transactional` only when strictly necessary
