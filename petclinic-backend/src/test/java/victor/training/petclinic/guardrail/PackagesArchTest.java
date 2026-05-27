@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.tngtech.archunit.library.plantuml.rules.PlantUmlArchCondition.Configuration.consideringOnlyDependenciesInAnyPackage;
@@ -30,18 +31,10 @@ class PackagesArchTest {
     private static final Path DIAGRAM = Paths.get("docs/packages.puml");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java/victor/training/petclinic");
 
-    private static java.net.URL url(Path path) {
-        try {
-            return path.toUri().toURL();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @ArchTest
     static final ArchRule adheresToDiagram =
         classes().should(adhereToPlantUmlDiagram(
-            url(DIAGRAM),
+            DIAGRAM,
             consideringOnlyDependenciesInAnyPackage("..petclinic..")
         ));
 
@@ -67,14 +60,13 @@ class PackagesArchTest {
     }
 
     private static Set<String> listCodePackages() throws IOException {
-        Set<String> result = new TreeSet<>();
         try (Stream<Path> paths = Files.walk(SOURCE_ROOT)) {
-            paths.filter(Files::isDirectory)
+            return paths.filter(Files::isDirectory)
                 .filter(dir -> !dir.equals(SOURCE_ROOT))
                 .filter(PackagesArchTest::containsJavaFile)
-                .forEach(dir -> result.add(SOURCE_ROOT.relativize(dir).toString().replace('/', '.')));
+                .map(dir -> SOURCE_ROOT.relativize(dir).toString().replace('/', '.'))
+                .collect(Collectors.toCollection(TreeSet::new));
         }
-        return result;
     }
 
     private static boolean containsJavaFile(Path dir) {
