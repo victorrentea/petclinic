@@ -25,6 +25,7 @@ done
 
 if [ "$needs_check" -eq 0 ]; then
   echo "[pre-push] ✓ No backend / OpenAPI / schema changes — skipping guardrail tests."
+  echo "✅ pre-push"
   exit 0
 fi
 
@@ -77,3 +78,4 @@ else
 fi
 
 echo "[pre-push] ✓ Guardrails passed."
+echo "✅ pre-push"
