@@ -13,7 +13,7 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-// Reuses entities (victor.training.petclinic.model) and JPA repos (victor.training.petclinic.repository)
+// Reuses entities (victor.training.petclinic.model) and JPA repos (victor.training.petclinic.repository).
 // from petclinic-backend; everything else (controllers, mappers, security) is ignored by component scan.
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "victor.training.petclinic.repository")
@@ -23,8 +23,8 @@ public class McpApplication {
         SpringApplication.run(McpApplication.class, args);
     }
 
-    // Workaround for JDK/macOS bug where setSoLinger(false, -1) throws EINVAL,
-    // making Tomcat drop accepted connections (Acceptor closeSocket path). Null the
+    // Workaround for JDK/macOS bug where setSoLinger(false, -1) throws EINVAL.
+    // making Tomcat drop accepted connections (Acceptor closeSocket path). Null the.
     // SocketProperties linger fields so setProperties() skips the setSoLinger call.
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> disableSoLinger() {
