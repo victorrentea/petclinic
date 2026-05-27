@@ -1,6 +1,6 @@
 package victor.training.petclinic.guardrail;
 
-import com.structurizr.Workspace;
+import com.structurizr.Workspace; // ⚠️ Requires JDK 21
 import com.structurizr.dsl.StructurizrDslParser;
 import com.structurizr.export.Diagram;
 import com.structurizr.export.plantuml.C4PlantUMLExporter;
