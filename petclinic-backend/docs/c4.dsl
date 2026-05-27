@@ -23,12 +23,12 @@ workspace "PetClinic" "Veterinary practice management system" {
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
 
-        restLayer -> mapperLayer ""
-        restLayer -> domainModel ""
-        restLayer -> repositoryLayer ""
-        mapperLayer -> restLayer ""
-        mapperLayer -> domainModel ""
-        repositoryLayer -> domainModel ""
+        restLayer -> mapperLayer "uses"
+        restLayer -> domainModel "uses"
+        restLayer -> repositoryLayer "uses"
+        mapperLayer -> restLayer "uses"
+        mapperLayer -> domainModel "uses"
+        repositoryLayer -> domainModel "uses"
     }
 
     views {

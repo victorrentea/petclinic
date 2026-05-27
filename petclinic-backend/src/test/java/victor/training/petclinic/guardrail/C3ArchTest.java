@@ -13,10 +13,14 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.SourceStringReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -140,7 +145,7 @@ class C3ArchTest {
         phantomInDsl.removeAll(actualEdges);
 
         assertThat(missingInDsl)
-            .as("Code has component dependencies not declared in %s — add them as `src -> dst \"\"`", DSL_FILE)
+            .as("Code has component dependencies not declared in %s — add them as `src -> dst \"uses\"`", DSL_FILE)
             .isEmpty();
         assertThat(phantomInDsl)
             .as("DSL declares component dependencies absent from the code — remove them from %s", DSL_FILE)
@@ -150,8 +155,22 @@ class C3ArchTest {
     @Test
     void exportPlantUmlDiagrams() throws Exception {
         Files.createDirectories(VIEWS_DIR);
+        Pattern emptyRelLabel = Pattern.compile("Rel\\([^,\\n]+,[^,\\n]+,\\s*\"\"");
         for (Diagram diagram : new C4PlantUMLExporter().export(workspace)) {
-            Files.writeString(VIEWS_DIR.resolve(diagram.getKey() + ".puml"), diagram.getDefinition());
+            String definition = diagram.getDefinition();
+            assertThat(emptyRelLabel.matcher(definition).find())
+                .as("Diagram '%s' contains Rel(src, dst, \"\", ...) with an empty-string label. "
+                    + "IntelliJ's bundled PlantUML 1.2026.2 crashes rendering empty Rel labels "
+                    + "(IllegalArgumentException in XDimension2D). Give every component edge in %s "
+                    + "a non-empty description, e.g. `src -> dst \"uses\"`.",
+                    diagram.getKey(), DSL_FILE)
+                .isFalse();
+            Files.writeString(VIEWS_DIR.resolve(diagram.getKey() + ".puml"), definition);
+
+            SourceStringReader reader = new SourceStringReader(definition);
+            try (OutputStream png = Files.newOutputStream(VIEWS_DIR.resolve(diagram.getKey() + ".png"))) {
+                reader.outputImage(png, new FileFormatOption(FileFormat.PNG));
+            }
         }
         assertThat(VIEWS_DIR).isNotEmptyDirectory();
     }
