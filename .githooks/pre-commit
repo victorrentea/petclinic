@@ -60,3 +60,5 @@ if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
     echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
   fi
 fi
+
+echo "✅ pre-commit"
