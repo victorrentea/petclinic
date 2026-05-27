@@ -115,7 +115,7 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - Never ask before running tests after refactoring
 - Builder chains: one property per line, unless only 2 properties total
 
-### CI Monitoring
+### Monitor CI after push
 After `git push`: run `gh run watch --exit-status $(gh run list --limit 1 --json databaseId -q '.[0].databaseId')` in background. On failure, investigate with `gh run view --log-failed` and fix if related to current task.
 
 ## Task Modifiers
