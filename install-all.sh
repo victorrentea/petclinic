@@ -3,6 +3,9 @@ set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
+echo "==> git: enabling project hooks (.githooks/)"
+git -C "$ROOT" config core.hooksPath .githooks
+
 echo "==> mvn install: petclinic-database"
 (cd "$ROOT/petclinic-database" && mvn install -DskipTests)
 

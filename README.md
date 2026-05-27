@@ -103,6 +103,27 @@ VISITS -[hidden]- VET_SPECIALTIES
 @enduml
 ```
 
+## Setup (one-time per clone)
+
+```sh
+./install-all.sh
+```
+
+Installs all maven/npm dependencies **and** points git at `.githooks/`
+(`git config core.hooksPath .githooks`) so the project's hooks run for
+everyone — not just the original author.
+
+The active hooks (read them — they're short shell scripts):
+
+- `.githooks/pre-commit` — gitleaks secrets scan, custom `secrets.env` value
+  scan, and TypeScript types regen when `openapi.yaml` is staged.
+- `.githooks/pre-push` — when backend / `openapi.yaml` / `db.sql` changed:
+  runs the 6 architecture/extractor guardrail tests, checks generated
+  artifacts haven't drifted, and lints `openapi.yaml` with Spectral.
+
+To bypass once: `git commit --no-verify` / `git push --no-verify`. To
+disable persistently: `git config --unset core.hooksPath`.
+
 ## Quick Start - Run Full Stack
 
 ```sh
