@@ -70,7 +70,13 @@ public class VisitMcpTools {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
         if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
-            throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
+            throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId+ " your pets are :" +
+                petRepository.findAll().stream()
+                    .filter(p -> p.getOwner() != null && p.getOwner().getId() == ownerId)
+                    .map(Pet::getId)
+                    .toList()
+
+                );
         }
         LocalDate visitDate = LocalDate.parse(date);
         requireFutureDate(visitDate);

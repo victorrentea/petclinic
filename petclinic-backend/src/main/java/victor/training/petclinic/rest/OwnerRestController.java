@@ -1,9 +1,33 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Locale;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
 import victor.training.petclinic.mapper.VisitMapper;
@@ -19,23 +43,6 @@ import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import io.swagger.v3.oas.annotations.Operation;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/owners")
@@ -56,9 +63,31 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @PageableDefault(size = 10) Pageable pageable) {
+
+        Pageable expanded = expandSort(pageable);
+        Page<Owner> page = ownerRepository.findByLastNameStartingWith(lastName, expanded);
+        return page.map(ownerMapper::toOwnerDto);
+    }
+
+    private static Pageable expandSort(Pageable pageable) {
+        SortColumn column;
+        Sort.Direction direction;
+        if (pageable.getSort().isUnsorted()) {
+            column = SortColumn.NAME;
+            direction = Sort.Direction.ASC;
+        } else {
+            Sort.Order first = pageable.getSort().iterator().next();
+            try {
+                column = SortColumn.fromClient(first.getProperty());
+            } catch (IllegalArgumentException ex) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+            }
+            direction = first.getDirection();
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), column.expand(direction));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
@@ -146,5 +175,33 @@ public class OwnerRestController {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow();
         Pet pet = owner.getPetById(petId).orElseThrow();
         return petMapper.toPetDto(pet);
+    }
+
+    public enum SortColumn {
+        NAME("lastName", "firstName"),
+        ADDRESS("address", "lastName", "firstName"),
+        CITY("city", "lastName", "firstName");
+
+        private final String[] properties;
+
+        SortColumn(String... properties) {
+            this.properties = properties;
+        }
+
+        public Sort expand(Sort.Direction direction) {
+            return Sort.by(direction, properties).and(Sort.by(Sort.Direction.ASC, "id"));
+        }
+
+        public static SortColumn fromClient(String column) {
+            if (column == null) {
+                throw new IllegalArgumentException("Sort column is required");
+            }
+            try {
+                return SortColumn.valueOf(column.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException(
+                    "Unsupported sort column: '" + column + "'. Allowed: name, address, city");
+            }
+        }
     }
 }

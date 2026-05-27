@@ -7,15 +7,7 @@
         "X-API-Key": "demo-key-1"
       }
     },
-    "postgres-db": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@bytebase/dbhub",
-        "--transport", "stdio",
-        "--dsn", "postgres://petclinic:petclinic@localhost:5432/petclinic"
-      ]
-    },
+
     "grafana": {
       "command": "uvx",
       "args": ["mcp-grafana"],
@@ -30,13 +22,8 @@
       "args": [
         "@playwright/mcp@latest",
         "--output-dir", "/tmp/playwright",
-        "--save-session",
-        "--save-trace"
+        "--save-session"
       ]
-    },
-    "context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp"
     }
   }
 }

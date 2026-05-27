@@ -9,6 +9,14 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnersPage {
+  content: OwnerDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export interface VisitDto {
   id: number;
   date: string;
@@ -19,6 +27,8 @@ export interface VisitDto {
   ownerFirstName?: string;
   ownerLastName?: string;
 }
+
+const LARGE_PAGE_SIZE = 1000;
 
 export class ApiClient {
   private client: AxiosInstance;
@@ -31,14 +41,26 @@ export class ApiClient {
   }
 
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    const response = await this.client.get<OwnersPage>('/owners', {
+      params: { size: LARGE_PAGE_SIZE }
+    });
+    return response.data.content;
   }
 
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
+    const response = await this.client.get<OwnersPage>('/owners', {
+      params: { lastName: prefix, size: LARGE_PAGE_SIZE }
     });
+    return response.data.content;
+  }
+
+  async fetchOwnersPage(params: {
+    lastName?: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  }): Promise<OwnersPage> {
+    const response = await this.client.get<OwnersPage>('/owners', { params });
     return response.data;
   }
 
@@ -49,8 +71,8 @@ export class ApiClient {
 
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
-      .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
-      .filter(name => name.length > 0);
+      .map(owner => `${owner.lastName}, ${owner.firstName}`.trim())
+      .filter(name => name.length > 0 && name !== ',');
   }
 
   static sorted(values: string[]): string[] {
@@ -62,6 +84,10 @@ export class ApiClient {
   }
 
   static extractLastName(fullName: string): string {
+    const commaIdx = fullName.indexOf(',');
+    if (commaIdx > 0) {
+      return fullName.substring(0, commaIdx).trim();
+    }
     const firstSpace = fullName.indexOf(' ');
     if (firstSpace < 0 || firstSpace === fullName.length - 1) {
       return fullName;

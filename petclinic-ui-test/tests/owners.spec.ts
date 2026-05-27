@@ -33,8 +33,9 @@ test.describe('Owners Page', () => {
     const expectedOwners = await apiClient.fetchOwners();
     const expectedFullNames = ApiClient.getFullNames(expectedOwners);
 
-    // Open the owners page
-    await ownersPage.open();
+    // Open the owners page with a large page so all owners fit on screen
+    await page.goto('/owners?size=1000');
+    await ownersPage.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
 
     // Wait for the expected number of owners
     await ownersPage.waitForOwnersCount(expectedFullNames.length);
@@ -55,11 +56,12 @@ test.describe('Owners Page', () => {
     const expectedFilteredOwners = await apiClient.fetchOwnersByPrefix(prefix);
     const expectedFilteredFullNames = ApiClient.getFullNames(expectedFilteredOwners);
 
-    // Open the owners page
-    const ownersPage = new OwnersPage(page);
-    await ownersPage.open();
+    // Open the owners page with a large page so all matches fit on screen
+    await page.goto('/owners?size=1000');
+    await new OwnersPage(page).pageTitle.waitFor({ state: 'visible', timeout: 10000 });
 
     // Perform search
+    const ownersPage = new OwnersPage(page);
     await ownersPage.searchByLastNamePrefix(prefix);
     await ownersPage.waitForOwnersCount(expectedFilteredFullNames.length);
 

@@ -2,56 +2,67 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
+    <form method="get" id="search-owner-form" class="form-group">
+      <div class="input-group" id="lastNameGroup">
+        <input class="form-control" placeholder="last name"
+               maxlength="80" id="lastName" name="lastName"
+               [ngModel]="lastName"
+               (ngModelChange)="searchByLastName($event)"/>
+        <span class="input-group-btn">
+          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find Owner</button>
+        </span>
       </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="initialLoadDone && owners.length === 0 && !loading">
+      No owners with LastName starting with "{{lastName}}"
+    </div>
+
+    <div class="table-responsive owners-table-wrapper" id="ownersTable" *ngIf="initialLoadDone || loading">
+      <div class="owners-loading-overlay" *ngIf="loading" aria-live="polite" aria-busy="true">
+        <span class="owners-spinner" aria-label="Loading owners"></span>
+      </div>
+      <table class="table table-striped" matSort
+             [matSortActive]="matSortActive"
+             [matSortDirection]="matSortDirection"
+             matSortDisableClear
+             (matSortChange)="onSortChange($event)"
+             [class.loading]="loading">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
+          <th mat-sort-header="name">Lastname, Firstname</th>
+          <th mat-sort-header="address">Address</th>
+          <th mat-sort-header="city">City</th>
           <th>Pets</th>
         </tr>
         </thead>
 
         <tbody>
         <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+          <td class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+               (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a>
+          </td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <ng-container *ngFor="let pet of owner.pets; let last = last">{{ pet.name }}<ng-container *ngIf="!last">, </ng-container></ng-container>
+          </td>
         </tr>
         </tbody>
       </table>
+
+      <mat-paginator
+        [length]="totalElements"
+        [pageSize]="size"
+        [pageIndex]="page"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPageChange($event)"
+        aria-label="Select page of owners">
+      </mat-paginator>
+
       <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
     </div>
   </div>

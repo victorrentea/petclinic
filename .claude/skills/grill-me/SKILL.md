@@ -7,4 +7,6 @@ Interview me relentlessly about every aspect of this plan until we reach a share
 
 Ask the questions one at a time.
 
+Whenever you offer me options, prefix each one with a short key (a letter `a)`, `b)`, `c)` … or a number `1)`, `2)`, `3)` …) so I can answer with a single keystroke. Mark the recommended option, e.g. `b) ... (recommended)`. Accept the bare key as my answer.
+
 If a question can be answered by exploring the codebase, explore the codebase instead.

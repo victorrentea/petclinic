@@ -11,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +36,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.transaction.Transactional;
+
+// FQCN usages below keep these imports referenced even if a formatter prunes unused ones:
+// - Matchers.lessThanOrEqualTo (line ~155), Comparator.naturalOrder (line ~182), JsonNode (line ~206).
 
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -136,6 +142,53 @@ public class OwnerTest {
     }
 
     @Test
+    void getAll_returnsPageEnvelope() throws Exception {
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.totalElements").isNumber())
+            .andExpect(jsonPath("$.totalPages").isNumber())
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.size").value(10));
+    }
+
+    @Test
+    void getAll_pageAndSizeAreHonored() throws Exception {
+        mockMvc.perform(get("/api/owners?page=1&size=3"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.number").value(1))
+            .andExpect(jsonPath("$.size").value(3))
+            .andExpect(jsonPath("$.content.length()").value(Matchers.lessThanOrEqualTo(3)));
+    }
+
+    @Test
+    void getAll_rejectsUnsortableColumn() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=pets,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getAll_sortByNameAsc_returnsRowsOrderedByLastNameThenFirstName() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?sort=name,asc&size=100");
+
+        assertThat(owners).isSortedAccordingTo((a, b) -> {
+            int byLast = a.getLastName().compareTo(b.getLastName());
+            if (byLast != 0) return byLast;
+            int byFirst = a.getFirstName().compareTo(b.getFirstName());
+            if (byFirst != 0) return byFirst;
+            return Integer.compare(a.getId(), b.getId());
+        });
+    }
+
+    @Test
+    void getAll_sortByCityAsc_primaryColumnIsCity() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?sort=city,asc&size=100");
+
+        assertThat(owners).extracting(OwnerDto::getCity)
+            .isSortedAccordingTo(Comparator.naturalOrder());
+    }
+
+    @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
@@ -156,8 +209,9 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        JsonNode root = mapper.readTree(responseJson);
+        return mapper.readerFor(new TypeReference<List<OwnerDto>>() {
+        }).readValue(root.get("content"));
     }
 
     @Test
