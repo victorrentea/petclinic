@@ -10,7 +10,6 @@ Full-stack veterinary clinic management application with:
 - **Frontend**: Angular SPA
 
 [See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
-joc ATATT3xFfGN0aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdefABCDEF_aBcDeFgH
 
 ## Architecture Overview
 
@@ -18,91 +17,9 @@ This is a full-stack implementation with clear separation:
 - `petclinic-backend/` - Spring Boot REST API
 - `petclinic-frontend/` - Angular client
 
-### Petclinic ER Model
+### Domain model
 
-```plantuml
-@startuml
-' Derived from current JPA entities under src/main/java/.../model
-skinparam linetype ortho
-hide circle
-
-entity "owners" as OWNERS {
-  * id : INTEGER <<PK>>
-  --
-  first_name : VARCHAR
-  last_name : VARCHAR
-  address : VARCHAR
-  city : VARCHAR
-  telephone : VARCHAR
-}
-
-entity "pets" as PETS {
-  * id : INTEGER <<PK>>
-  --
-  name : VARCHAR
-  birth_date : DATE
-  type_id : INTEGER <<FK>>
-  owner_id : INTEGER <<FK>>
-}
-
-entity "types" as TYPES {
-  * id : INTEGER <<PK>>
-  --
-  name : VARCHAR
-}
-
-entity "visits" as VISITS {
-  * id : INTEGER <<PK>>
-  --
-  visit_date : DATE
-  description : VARCHAR
-  pet_id : INTEGER <<FK>>
-}
-
-entity "vets" as VETS {
-  * id : INTEGER <<PK>>
-  --
-  first_name : VARCHAR
-  last_name : VARCHAR
-}
-
-entity "specialties" as SPECIALTIES {
-  * id : INTEGER <<PK>>
-  --
-  name : VARCHAR
-}
-
-entity "vet_specialties" as VET_SPECIALTIES {
-  * vet_id : INTEGER <<FK,PK>>
-  * specialty_id : INTEGER <<FK,PK>>
-}
-
-entity "users" as USERS {
-  * username : VARCHAR <<PK>>
-  --
-  password : VARCHAR
-  enabled : BOOLEAN
-}
-
-entity "roles" as ROLES {
-  * id : INTEGER <<PK>>
-  --
-  username : VARCHAR <<FK>>
-  role : VARCHAR
-}
-
-OWNERS ||--o{ PETS : owner_id
-TYPES ||--o{ PETS : type_id
-PETS ||--o{ VISITS : pet_id
-
-VETS ||--o{ VET_SPECIALTIES : vet_id
-SPECIALTIES ||--o{ VET_SPECIALTIES : specialty_id
-
-USERS ||--o{ ROLES : username
-
-VISITS -[hidden]- VET_SPECIALTIES
-@enduml
-```
+Auto-generated from JPA annotations by `DomainModelExtractorTest`. Source: [`petclinic-backend/docs/generated/DomainModel.puml`](petclinic-backend/docs/generated/DomainModel.puml).
 
 ## Setup (one-time per clone)
 
@@ -159,38 +76,9 @@ cd petclinic-backend
 
 API documentation (OAS 3.1): [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-### 📌 API Endpoints Overview
+### API endpoints
 
-| **Method** | **Endpoint** | **Description** |
-|-----------|------------|----------------|
-| **Owners** |  |  |
-| **GET** | `/api/owners` | Retrieve all pet owners |
-| **GET** | `/api/owners/{ownerId}` | Get a pet owner by ID |
-| **POST** | `/api/owners` | Add a new pet owner |
-| **PUT** | `/api/owners/{ownerId}` | Update an owner's details |
-| **DELETE** | `/api/owners/{ownerId}` | Delete an owner |
-| **Pets** |  |  |
-| **GET** | `/api/pets` | Retrieve all pets |
-| **GET** | `/api/pets/{petId}` | Get a pet by ID |
-| **PUT** | `/api/pets/{petId}` | Update pet details |
-| **DELETE** | `/api/pets/{petId}` | Delete a pet |
-| **Vets** |  |  |
-| **GET** | `/api/vets` | Retrieve all veterinarians |
-| **GET** | `/api/vets/{vetId}` | Get a vet by ID |
-| **POST** | `/api/vets` | Add a new vet |
-| **PUT** | `/api/vets/{vetId}` | Update vet details |
-| **DELETE** | `/api/vets/{vetId}` | Delete a vet |
-| **Pet Types** |  |  |
-| **GET** | `/api/pettypes` | Retrieve all pet types |
-| **POST** | `/api/pettypes` | Add a new pet type |
-| **Specialties** |  |  |
-| **GET** | `/api/specialties` | Retrieve all vet specialties |
-| **POST** | `/api/specialties` | Add a new specialty |
-| **Visits** |  |  |
-| **GET** | `/api/visits` | Retrieve all vet visits |
-| **POST** | `/api/visits` | Add a new visit |
-| **Users** |  |  |
-| **POST** | `/api/users` | Create a new user |
+Browse the live endpoint catalogue in Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
 
 ### API First
 
