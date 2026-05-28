@@ -10,6 +10,7 @@ Full-stack veterinary clinic management application with:
 - **Frontend**: Angular SPA
 
 [See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
+joc ATATT3xFfGN0aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdefABCDEF_aBcDeFgH
 
 ## Architecture Overview
 
