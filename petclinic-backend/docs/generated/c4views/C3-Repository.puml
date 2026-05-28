@@ -28,6 +28,7 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.RESTLayer, "uses (DTO projection)", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
 

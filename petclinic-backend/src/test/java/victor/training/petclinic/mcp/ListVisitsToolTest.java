@@ -3,6 +3,7 @@ package victor.training.petclinic.mcp;
 import java.time.LocalDate;
 import java.util.List;
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import victor.training.petclinic.repository.VisitRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @Transactional
 class ListVisitsToolTest {
 

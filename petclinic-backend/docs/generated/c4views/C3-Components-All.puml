@@ -33,6 +33,7 @@ Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.RepositoryLayer, "uses", $tec
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.RESTLayer, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.RESTLayer, "uses (DTO projection)", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
 

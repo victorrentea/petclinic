@@ -30,6 +30,7 @@ workspace "PetClinic" "Veterinary practice management system" {
         mapperLayer -> restLayer "uses"
         mapperLayer -> domainModel "uses"
         repositoryLayer -> domainModel "uses"
+        repositoryLayer -> restLayer "uses (DTO projection)"
         mcp -> domainModel "uses"
         mcp -> repositoryLayer "uses"
     }
