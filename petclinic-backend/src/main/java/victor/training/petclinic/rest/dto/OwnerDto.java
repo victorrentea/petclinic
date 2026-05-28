@@ -53,17 +53,4 @@ public class OwnerDto {
         pets.add(petsItem);
         return this;
     }
-
-    // JPQL constructor projection: fills scalar fields only; pets stays empty (avoids fetching them).
-    public OwnerDto(Integer id, String firstName, String lastName, String address, String city, String telephone) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.city = city;
-        this.telephone = telephone;
-    }
-
-    public OwnerDto() {
-    }
 }

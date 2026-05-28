@@ -13,7 +13,6 @@ caption All lines are ArchUnit-tested to be reflected in code.
 [MCP] <<..mcp>>
 
 [Repository] --> [Model]
-[Repository] --> [DTO]
 [Mapper] --> [Model]
 [Mapper] --> [DTO]
 [REST] --> [Model]

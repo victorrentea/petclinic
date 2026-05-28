@@ -57,7 +57,8 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
     public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        return ownerRepository.findDtosByLastNameStartingWith(lastName);
+        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
+        return ownerMapper.toOwnerDtoCollection(owners);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

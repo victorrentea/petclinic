@@ -1,7 +1,6 @@
 package victor.training.petclinic.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -147,20 +146,6 @@ public class OwnerTest {
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
-    }
-
-    @Test
-    void findDtosByLastNamePrefix_returnsScalarsAndNoPets() {
-        List<OwnerDto> dtos = ownerRepository.findDtosByLastNameStartingWith("Frank");
-
-        assertThat(dtos)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-            .contains(Assertions.tuple(ownerId, "George", "Franklin"));
-        assertThat(dtos)
-            .filteredOn(d -> d.getId() == ownerId)
-            .singleElement()
-            .extracting(OwnerDto::getPets, list(PetDto.class))
-            .isEmpty();
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
