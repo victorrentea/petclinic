@@ -18,7 +18,7 @@ This is a full-stack implementation with clear separation:
 - `petclinic-frontend/` - Angular client
 
 ### Domain model
-ATATT3xFfGN0aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdefABCDEF_aBcDeFgH
+JIRA_TOKEN=ATATT3xFfGN0aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdefABCDEF_aBcDeFgH
 Auto-generated from JPA annotations by `DomainModelExtractorTest`. Source: [`petclinic-backend/docs/generated/DomainModel.puml`](petclinic-backend/docs/generated/DomainModel.puml).
 
 ## Setup (one-time per clone)
