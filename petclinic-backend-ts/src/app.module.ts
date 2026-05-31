@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerModule } from 'nestjs-pino';
 
 import { buildTypeOrmModuleOptions } from './config/typeorm.config';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
@@ -34,6 +35,13 @@ import { McpModule } from './mcp/mcp.module';
  */
 @Module({
   imports: [
+    // Structured logging via Pino. OpenTelemetry's pino instrumentation
+    // (loaded by the auto-instrumentations register hook) bridges these log
+    // records to the OTLP logs pipeline → Grafana Loki when
+    // OTEL_LOGS_EXPORTER=otlp, and stamps each line with the active trace id.
+    LoggerModule.forRoot({
+      pinoHttp: { autoLogging: true },
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       useFactory: () => buildTypeOrmModuleOptions(),

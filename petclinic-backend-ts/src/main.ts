@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Logger as PinoLogger } from 'nestjs-pino';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { CORS_ORIGIN, getPort, OPENAPI_INFO } from './config/app-config';
@@ -29,7 +30,10 @@ import { validationExceptionFactory } from './common/all-exceptions.filter';
  * root '/' redirect and the MCP root paths remain reachable.
  */
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  // bufferLogs so early framework logs are replayed through Pino once the
+  // app-level logger is installed below.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(PinoLogger));
 
   // CORS configuration for the Angular dev server.
   app.enableCors({
