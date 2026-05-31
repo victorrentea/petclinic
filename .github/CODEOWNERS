@@ -1,4 +1,4 @@
-# Require Elders review for manual architecture diagram updates.
+# Require Elders review for sensitive files.
 # Note: team format is @org/team-slug.
 
 # A PR touching this path must be approved by a member of this group.
@@ -11,20 +11,12 @@
 
 # Contracts
 /openapi.yaml                    @victorrentea/elders
-/DB.sql                          @victorrentea/elders
 
-# Flyway incremental migrations — must be reviewed even when DB.sql doesn't drift.
-# DB.sql is a regenerated schema snapshot, so destructive runtime ops
-# (DELETE / TRUNCATE / DROP+re-CREATE that ends in an identical shape)
-# wouldn't change it and the /DB.sql owners rule above would miss them.
-/petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
-
-# Architecture
-/petclinic-backend/docs/packages.puml @victorrentea/elders
-/petclinic-backend/docs/c4model.dsl @victorrentea/elders
+# Schema migrations — TypeORM migrations own the database schema and seed data.
+/petclinic-backend-ts/src/migrations/ @victorrentea/elders
 
 # Dependencies
-**/pom.xml                       @victorrentea/elders
+/petclinic-backend-ts/package.json @victorrentea/elders
 /petclinic-frontend/package.json @victorrentea/elders
 
 # CI Guards

@@ -14,12 +14,10 @@
       "Bash(git add .githooks*)",
       "Edit(.github/workflows/*)",
       "Write(.github/workflows/*)",
-      "Edit(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
-      "Write(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
+      "Edit(petclinic-backend-ts/src/migrations/*)",
+      "Write(petclinic-backend-ts/src/migrations/*)",
       "Edit(.github/CODEOWNERS)",
       "Write(.github/CODEOWNERS)",
-      "Edit(**/pom.xml)",
-      "Write(**/pom.xml)",
       "Edit(**/package.json)",
       "Write(**/package.json)"
     ]
@@ -46,17 +44,6 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-mcp-db-ratelimit.sh\""
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-java-edit.sh\""
           }
         ]
       }

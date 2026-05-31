@@ -6,7 +6,7 @@ REMOTE="$1"
 
 ZERO=0000000000000000000000000000000000000000
 
-# ── Path gating: skip unless pushed commits touch backend / OpenAPI / schema ─
+# ── Path gating: skip unless pushed commits touch backend / frontend / OpenAPI ─
 needs_check=0
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$ZERO" ] && continue  # branch deletion — nothing to verify
@@ -17,56 +17,37 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
   fi
 
-  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|db\.sql$)'; then
+  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend-ts/|petclinic-frontend/|openapi\.yaml$)'; then
     needs_check=1
     break
   fi
 done
 
 if [ "$needs_check" -eq 0 ]; then
-  echo "[pre-push] ✓ No backend / OpenAPI / schema changes — skipping guardrail tests."
+  echo "[pre-push] ✓ No backend / frontend / OpenAPI changes — skipping guardrail checks."
   echo "✅ pre-push"
   exit 0
 fi
 
-# ── Architecture artifacts + OpenAPI/JPA sync ──────────────────────────────
-cd "$ROOT/petclinic-backend"
-MVN_OUT=$(mktemp)
-trap 'rm -f "$MVN_OUT"' EXIT
-TESTS=(
-  OpenApiExtractorTest
-  PackagesArchTest
-  C3ArchTest
-  DomainModelExtractorTest
-  DbSchemaExtractorTest
-  JpaMatchesDBSchemaTest
-)
-TESTS_CSV=$(IFS=,; echo "${TESTS[*]}")
-echo "[pre-push] Running guardrail tests (this may take ~20s)…"
-if ! mvn -q test -Dtest="$TESTS_CSV" >"$MVN_OUT" 2>&1; then
-  cat "$MVN_OUT"
-  echo "[pre-push] ❌ Guardrail tests failed — push blocked."
-  exit 1
+# ── Backend: type-check via the production build ───────────────────────────
+if [ -d "$ROOT/petclinic-backend-ts/node_modules" ]; then
+  BE_OUT=$(mktemp)
+  trap 'rm -f "$BE_OUT" "${SPECTRAL_OUT:-}" "${BUILD_OUT:-}"' EXIT
+  echo "[pre-push] Building the backend (nest build)…"
+  if ! npm --prefix "$ROOT/petclinic-backend-ts" run build --silent >"$BE_OUT" 2>&1; then
+    tail -200 "$BE_OUT"
+    echo "[pre-push] ❌ Backend build failed — push blocked."
+    exit 1
+  fi
+else
+  echo "[pre-push] ⚠️  petclinic-backend-ts/node_modules missing — skipping backend build."
+  echo "[pre-push]    Install with: cd petclinic-backend-ts && npm install"
 fi
 
-# ── Drift detection: regenerated artifacts must match HEAD ─────────────────
-DRIFT_PATHS=(
-  "$ROOT/petclinic-backend/docs/generated"
-  "$ROOT/openapi.yaml"
-  "$ROOT/db.sql"
-)
-if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
-  echo "[pre-push] ❌ Generated artifacts drifted from committed state:"
-  git diff --stat HEAD -- "${DRIFT_PATHS[@]}"
-  echo ""
-  echo "[pre-push]    Commit the regenerated files and push again."
-  exit 1
-fi
-
-# ── Spectral lint of the freshly regenerated openapi.yaml ──────────────────
+# ── Spectral lint of the committed openapi.yaml ────────────────────────────
 if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules/@stoplight/spectral-cli" ]; then
   SPECTRAL_OUT=$(mktemp)
-  trap 'rm -f "$MVN_OUT" "$SPECTRAL_OUT" "${BUILD_OUT:-}"' EXIT
+  trap 'rm -f "${BE_OUT:-}" "$SPECTRAL_OUT" "${BUILD_OUT:-}"' EXIT
   if ! npm --prefix "$ROOT/petclinic-frontend" run lint:openapi --silent >"$SPECTRAL_OUT" 2>&1; then
     cat "$SPECTRAL_OUT"
     echo "[pre-push] ❌ Spectral found errors in openapi.yaml — push blocked."
@@ -74,17 +55,16 @@ if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules
   fi
 else
   echo "[pre-push] ⚠️  Spectral CLI missing — skipping OpenAPI lint."
-  echo "[pre-push]    Install with: cd petclinic-frontend && npm install"
 fi
 
 # ── Frontend chain: openapi.yaml → api-types.ts → ng build ─────────────────
-# Regenerates api-types.ts from the freshly-extracted openapi.yaml, then ng build.
-# Any field add/rename on the Java side surfaces here as a TS error against stale
-# frontend usages of the old type — push blocked.
+# Regenerates api-types.ts from openapi.yaml then runs ng build. A field
+# add/rename in the API surfaces here as a TS error against stale frontend
+# usages of the old type — push blocked.
 if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
   BUILD_OUT=$(mktemp)
-  trap 'rm -f "$MVN_OUT" "$SPECTRAL_OUT" "$BUILD_OUT"' EXIT
-  echo "[pre-push] Running npm run build (regenerates api-types.ts, then ng build)…"
+  trap 'rm -f "${BE_OUT:-}" "${SPECTRAL_OUT:-}" "$BUILD_OUT"' EXIT
+  echo "[pre-push] Running frontend build (regenerates api-types.ts, then ng build)…"
   if ! npm --prefix "$ROOT/petclinic-frontend" run build --silent >"$BUILD_OUT" 2>&1; then
     tail -200 "$BUILD_OUT"
     echo "[pre-push] ❌ Frontend build failed against regenerated api-types.ts — push blocked."
@@ -98,7 +78,6 @@ if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules
   fi
 else
   echo "[pre-push] ⚠️  npm or petclinic-frontend/node_modules missing — skipping api-types regen + ng build."
-  echo "[pre-push]    Install with: cd petclinic-frontend && npm install"
 fi
 
 echo "[pre-push] ✓ Guardrails passed."

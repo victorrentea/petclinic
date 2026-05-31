@@ -46,8 +46,7 @@ Apply a minimal, targeted fix. Constraints:
 
 - Never push to main with `--force`.
 - Never skip hooks (`--no-verify`).
-- Do NOT touch generated artifacts: `DB.sql`, `openapi.yaml`,
-  `petclinic-backend/docs/generated/**`,
+- Do NOT touch generated artifacts: `openapi.yaml`,
   `petclinic-frontend/src/app/generated/api-types.ts`.
 - If multiple things are broken, fix the most fundamental one per iteration.
 

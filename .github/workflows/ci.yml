@@ -19,23 +19,14 @@ jobs:
           # On pull_request events, head_ref is the PR's source branch.
           # On push events, ref_name is the pushed branch (main).
           ref: ${{ github.head_ref || github.ref_name }}
-          # fetch-depth: 0 ensures we have enough history to push back without rejection
-          # and gives SonarCloud accurate SCM blame info.
+          # fetch-depth: 0 lets us push regenerated artifacts back without
+          # rejection and gives SonarCloud accurate SCM blame info.
           fetch-depth: 0
-
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: petclinic-frontend/package-lock.json
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
@@ -44,28 +35,23 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
+      # ── Backend (NestJS + TypeORM) ──────────────────────────────────────
+      - name: Install backend dependencies
+        working-directory: petclinic-backend-ts
+        run: npm ci
+
+      - name: Build backend (nest build)
+        working-directory: petclinic-backend-ts
+        run: npm run build
+
+      - name: Run backend unit tests
+        working-directory: petclinic-backend-ts
+        run: npm test
+
+      # ── Frontend (Angular) ──────────────────────────────────────────────
       - name: Install frontend dependencies
         working-directory: petclinic-frontend
         run: npm ci
-
-      - name: Install PostgreSQL 16 client (pg_dump for DbSchemaSyncTest)
-        run: |
-          sudo install -d /usr/share/postgresql-common/pgdg
-          sudo curl -fsS -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
-            https://www.postgresql.org/media/keys/ACCC4CF8.asc
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
-            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-16
-          pg_dump --version
-
-      - name: Run backend tests (+ JaCoCo report)
-        working-directory: petclinic-backend
-        run: mvn -B -ntp test
-
-      - name: Verify Javadoc
-        working-directory: petclinic-backend
-        run: mvn -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
 
       - name: Regenerate TS types from openapi.yaml
         working-directory: petclinic-frontend
@@ -79,21 +65,22 @@ jobs:
         working-directory: petclinic-frontend
         run: npm run build
 
+      # ── Drift detection: regenerated api-types.ts must match HEAD ────────
       - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts; then
+          if git diff --quiet petclinic-frontend/src/app/generated/api-types.ts; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts
+            git --no-pager diff --stat petclinic-frontend/src/app/generated/api-types.ts
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated artifacts (docs/generated/, DB.sql, or api-types.ts) are out of date."
-          echo "::error::Run 'cd petclinic-backend && mvn test' and 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated files."
+          echo "::error::api-types.ts is out of date."
+          echo "::error::Run 'cd petclinic-frontend && npm run generate:api' locally and push the regenerated file."
           exit 1
 
       - name: Auto-commit regenerated artifacts
@@ -101,10 +88,11 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated DB.sql petclinic-frontend/src/app/generated/api-types.ts
-          git commit -m 'chore(guardrail): regenerate diagrams, DB.sql, and api-types.ts [skip ci]'
+          git add petclinic-frontend/src/app/generated/api-types.ts
+          git commit -m 'chore(guardrail): regenerate api-types.ts [skip ci]'
           git push
 
+      # ── SonarCloud ──────────────────────────────────────────────────────
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
         env:
