@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -68,7 +68,16 @@ async function bootstrap(): Promise<void> {
     yamlDocumentUrl: 'v3/api-docs.yaml',
   });
 
-  await app.listen(getPort());
+  const port = getPort();
+  await app.listen(port);
+
+  // Announce the port on successful startup so it is obvious which backend the
+  // Angular frontend (http://localhost:4200 → REST_API_URL :8080) is talking to.
+  Logger.log(
+    `✅ Petclinic TS backend (NestJS) started on http://localhost:${port}`,
+    'Bootstrap',
+  );
+  Logger.log(`   Swagger UI: http://localhost:${port}/swagger-ui`, 'Bootstrap');
 }
 
 void bootstrap();
