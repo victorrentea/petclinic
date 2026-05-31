@@ -12,6 +12,22 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      # Postgres for the backend e2e suite. setup-test-db.ts connects to this
+      # `petclinic` database to create the isolated `petclinic_test` DB.
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: petclinic
+          POSTGRES_USER: petclinic
+          POSTGRES_PASSWORD: petclinic
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U petclinic -d petclinic"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,6 +63,15 @@ jobs:
       - name: Run backend unit tests
         working-directory: petclinic-backend-ts
         run: npm test
+
+      - name: Run backend e2e tests (isolated petclinic_test DB)
+        working-directory: petclinic-backend-ts
+        run: npm run test:e2e
+        env:
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_USER: petclinic
+          DB_PASS: petclinic
 
       # ── Frontend (Angular) ──────────────────────────────────────────────
       - name: Install frontend dependencies
