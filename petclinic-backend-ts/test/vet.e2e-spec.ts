@@ -56,13 +56,10 @@ describe('VetController (e2e)', () => {
     await http().get('/api/vets/99999').expect(404);
   });
 
-  // Expects 201. Currently fails: VetDto.id carries @Min(0) WITHOUT @IsOptional,
-  // so an absent id on create validates as null -> "Id must not be less than 0"
-  // -> 400. Marked it.failing: flips to a pass once VetDto.id is made
-  // @IsOptional on create. (Known defect — see task report.)
-  it.failing('create_ok (201)', async () => {
-    // it.failing requires the body to throw; throw the skip marker when no DB.
-    if (!available) throw new Error('skipped: no DB');
+  // VetDto.id is read-only (@IsOptional), so a create body without an id is
+  // accepted and the new vet gets a DB-generated id.
+  it('create_ok (201)', async () => {
+    if (!available) return;
     const res = await http()
       .post('/api/vets')
       .send({ firstName: 'Helen', lastName: 'Leary', specialties: [] })

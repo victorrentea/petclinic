@@ -127,15 +127,11 @@ describe('OwnerController (e2e)', () => {
     await http().put(`/api/owners/${ownerId}`).send(existing).expect(400);
   });
 
-  // The setup creates a pet for the owner. deleteOwner loads the owner WITHOUT
-  // its pets, so TypeORM's cascade has nothing to remove and the owner delete
-  // hits the pets.owner_id FK -> 500. Marked it.failing: it flips to a pass once
-  // the controller is fixed to load+cascade (or hard-delete) the pets. (Known
-  // defect — see task report.)
-  it.failing('delete_ok (cascades owner+pet)', async () => {
-    // it.failing requires the body to throw; when the DB is absent we throw the
-    // skip marker so the test stays consistent (no DB == cannot verify).
-    if (!available) throw new Error('skipped: no DB');
+  // deleteOwner loads the owner together with its pets (and their visits) and
+  // removes them bottom-up before deleting the owner, so deleting an owner that
+  // still has a pet cascades cleanly.
+  it('delete_ok (cascades owner+pet)', async () => {
+    if (!available) return;
     await http().delete(`/api/owners/${ownerId}`).expect(200);
     await http().get(`/api/owners/${ownerId}`).expect(404);
   });
