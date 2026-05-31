@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDefined, IsOptional, Length, Matches, Min } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.VisitDto.
+ * Data transfer object for a visit.
  *
- * Java LocalDate -> ISO 'YYYY-MM-DD' string. The Java DTO has no @PastOrPresent
- * on `date` here (unlike PetDto), so we only enforce ISO date syntax when present.
+ * The date is an ISO 'YYYY-MM-DD' string. Unlike PetDto, `date` is not required
+ * to be past-or-present here, so we only enforce ISO date syntax when present.
  */
 export class VisitDto {
   @IsOptional()

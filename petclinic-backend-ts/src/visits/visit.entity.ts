@@ -2,20 +2,18 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { Pet } from '../pets/pet.entity';
 
 /**
- * Ported from victor.training.petclinic.model.Visit.
- * @Table(name = "visits")
+ * Visit entity, mapped to the "visits" table.
  *
- * Java `LocalDate date = LocalDate.now()` -> TS `string` ('YYYY-MM-DD') backed by
- * a TypeORM 'date' column. The default-to-today behaviour is reproduced via
- * `Visit.create()` / `ensureDate()` (TypeORM cannot run a Java-style field
- * initializer). See CONVENTIONS.md "Dates".
+ * The `date` is a `string` ('YYYY-MM-DD') backed by a TypeORM 'date' column.
+ * It defaults to today when none is supplied, via `Visit.create()` /
+ * `ensureDate()`. See CONVENTIONS.md "Dates".
  */
 @Entity({ name: 'visits' })
 export class Visit {
   @PrimaryGeneratedColumn('identity', { generatedIdentity: 'BY DEFAULT' })
   id!: number;
 
-  /** Java LocalDate -> ISO 'YYYY-MM-DD' string, stored in a DATE column. */
+  /** ISO 'YYYY-MM-DD' string, stored in a DATE column. */
   @Column({ name: 'visit_date', type: 'date', nullable: true })
   date?: string;
 
@@ -27,8 +25,7 @@ export class Visit {
   pet?: Pet;
 
   /**
-   * Mirrors the Java field initializer `LocalDate date = LocalDate.now()`:
-   * a freshly-created Visit defaults its date to today when none is supplied.
+   * Creates a Visit whose date defaults to today when none is supplied.
    */
   static create(): Visit {
     const visit = new Visit();

@@ -18,7 +18,7 @@ Cucumber) test in `petclinic-ui-test/`.**
 
 ## Project context (always assume)
 
-- Backend: Spring Boot, `http://localhost:8080`, REST API at `/api/...`
+- Backend: NestJS, `http://localhost:8080`, REST API at `/api/...`
 - Frontend: Angular 16, `http://localhost:4200`
 - Test project: `petclinic-ui-test/` (Playwright + TypeScript; Cucumber wired in via `cucumber.js`)
 - Tests live under `petclinic-ui-test/tests/` (`*.spec.ts`) and Cucumber features under `petclinic-ui-test/features/`
@@ -33,7 +33,7 @@ curl -s http://localhost:4200 -o /dev/null -w "frontend:%{http_code}\n"
 curl -s http://localhost:8080/api/owners -o /dev/null -w "backend:%{http_code}\n"
 ```
 
-If either is down, instruct the user to run `./start-backend.sh` and
+If either is down, instruct the user to run `./start-backend-ts.sh` and
 `./start-frontend.sh` from the project root and stop.
 
 ## How to translate a feature into a test

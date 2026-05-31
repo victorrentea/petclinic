@@ -11,28 +11,23 @@ import { AuthenticatedPrincipal } from './authenticated-principal';
 import { PERMIT_ALL_KEY, ROLES_KEY } from './roles.decorator';
 
 /**
- * Global authorization guard, mirroring the combination of Spring Security's
- * filter chain + method-level @PreAuthorize in the Java backend.
+ * Global authorization guard.
  *
  * Behaviour (in order):
  *   1. Security DISABLED (PETCLINIC_SECURITY_ENABLE != true, the default) ->
- *      permit everything. Mirrors DisableSecurityConfig's
- *      `anyRequest().permitAll()`.
+ *      permit everything.
  *   2. @PermitAll() on the handler/class -> permit without authentication.
- *      Mirrors @PreAuthorize("permitAll()").
  *   3. Otherwise authenticate via HTTP Basic (passport 'basic' strategy). A
- *      failed/absent authentication yields 401. Mirrors `.httpBasic(...)` +
- *      `anyRequest().authenticated()`.
+ *      failed/absent authentication yields 401.
  *   4. If @Roles(...) is present, require the authenticated principal to hold at
- *      least one of those roles (hasRole / hasAnyRole). Otherwise just being
- *      authenticated suffices. A role mismatch yields 403.
+ *      least one of those roles. Otherwise just being authenticated suffices.
+ *      A role mismatch yields 403.
  *
  * Extends AuthGuard('basic') so it can drive Passport authentication itself; we
  * only invoke that step when security is on and the route is not @PermitAll.
  *
  * Method-level metadata overrides class-level metadata (NestJS reflector
- * getAllAndOverride), matching how a method @PreAuthorize overrides the
- * class-level one in Spring.
+ * getAllAndOverride).
  */
 @Injectable()
 export class RolesGuard extends AuthGuard('basic') {
@@ -41,7 +36,7 @@ export class RolesGuard extends AuthGuard('basic') {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // 1. Security disabled -> permit all (DisableSecurityConfig).
+    // 1. Security disabled -> permit all.
     if (!isSecurityEnabled()) {
       return true;
     }

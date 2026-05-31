@@ -7,12 +7,12 @@ import { SetMetadata } from '@nestjs/common';
 export const PERMIT_ALL_KEY = 'permitAll';
 
 /**
- * Mirrors Spring's @PreAuthorize("permitAll()").
+ * Marks a handler (or controller) as publicly reachable.
  *
  * Applied at the method level to override a class-level @Roles(...) guard so the
  * endpoint is reachable without authentication, even when
  * PETCLINIC_SECURITY_ENABLE=true. The RolesGuard must short-circuit (allow) when
- * this metadata is present, exactly like Spring's permitAll().
+ * this metadata is present.
  */
 export const PermitAll = (): MethodDecorator & ClassDecorator =>
   SetMetadata(PERMIT_ALL_KEY, true);

@@ -5,11 +5,10 @@ import { Specialty } from '../specialties/specialty.entity';
 import { VetController } from './vet.controller';
 
 /**
- * Vets feature module (ported from victor.training.petclinic VetRestController).
+ * Vets feature module.
  *
  * Registers both Vet and Specialty so the controller can inject both
- * repositories directly (no service layer), mirroring the Java controller which
- * depends on VetRepository + SpecialtyRepository.
+ * repositories directly (no service layer).
  *
  * Mappers are stateless functions (see vet.mapper.ts) and need no providers.
  */

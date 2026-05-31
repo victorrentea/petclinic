@@ -6,13 +6,12 @@ import { McpAuthenticatedRequest } from './api-key.middleware';
 import { PermitAll } from '../common/security/permit-all.decorator';
 
 /**
- * HTTP entry points for the MCP server, mirroring the Spring AI SSE endpoints:
+ * HTTP entry points for the MCP server:
  *   - GET  /sse            — open the SSE stream
  *   - POST /mcp/messages   — JSON-RPC message channel (sessionId in query)
  *
  * Auth is handled entirely by ApiKeyMiddleware (X-API-Key), NOT by the /api
- * RolesGuard — Java scoped a dedicated SecurityFilterChain to /sse + /mcp/**.
- * `@PermitAll` keeps the RolesGuard from also gating these routes.
+ * RolesGuard. `@PermitAll` keeps the RolesGuard from also gating these routes.
  *
  * Excluded from Swagger (SSE/JSON-RPC, not part of the REST contract).
  */

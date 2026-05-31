@@ -4,21 +4,18 @@ import { OwnerFieldsDto } from './dto/owner-fields.dto';
 import { toPetDto } from '../pets/pet.mapper';
 
 /**
- * Ported from victor.training.petclinic.mapper.OwnerMapper (MapStruct,
- * `uses = PetMapper.class`).
+ * Maps Owner entities to/from their DTOs (delegates pet mapping to pet.mapper).
  *
- * STATELESS plain functions (no Nest DI, no @Injectable) mirroring MapStruct's
- * stateless nature and avoiding circular DI between the Owner/Pet/Visit mappers.
- * Controllers import these functions directly. Pet mapping is delegated to
- * src/pets/pet.mapper.ts (the `uses = PetMapper.class` equivalent).
+ * Stateless plain functions (no Nest DI, no @Injectable), which avoids circular
+ * DI between the Owner/Pet/Visit mappers. Controllers import them directly. Pet
+ * mapping is delegated to src/pets/pet.mapper.ts.
  */
 
 /**
- * Mirrors `OwnerDto toOwnerDto(Owner)`.
+ * Maps an Owner entity to an OwnerDto.
  *
  * Pets are emitted sorted by name ASCENDING (case-insensitive) via
- * Owner.getPets(), matching Java's PropertyComparator output; each pet is
- * mapped through PetMapper.toPetDto.
+ * Owner.getPets(); each pet is mapped through pet.mapper's toPetDto.
  */
 export function toOwnerDto(owner: Owner): OwnerDto {
   const dto = new OwnerDto();
@@ -39,9 +36,7 @@ export function toOwnerDto(owner: Owner): OwnerDto {
 }
 
 /**
- * Mirrors `Owner toOwner(OwnerFieldsDto)`:
- *   @Mapping(target = "id", ignore = true)
- *   @Mapping(target = "pets", ignore = true)
+ * Maps an OwnerFieldsDto to an Owner entity, leaving id and pets unset.
  */
 export function toOwner(ownerFieldsDto: OwnerFieldsDto): Owner {
   const owner = new Owner();
@@ -53,7 +48,7 @@ export function toOwner(ownerFieldsDto: OwnerFieldsDto): Owner {
   return owner;
 }
 
-/** Mirrors `List<OwnerDto> toOwnerDtoCollection(List<Owner>)`. */
+/** Maps a list of Owner entities to a list of OwnerDto. */
 export function toOwnerDtoCollection(owners: Owner[]): OwnerDto[] {
   return owners.map((owner) => toOwnerDto(owner));
 }

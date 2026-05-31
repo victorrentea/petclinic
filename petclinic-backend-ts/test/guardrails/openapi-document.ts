@@ -1,11 +1,10 @@
 /**
  * Offline OpenAPI document builder shared by the generate + diff guardrail.
  *
- * Mirrors the Java `OpenApiExtractorTest`, which boots the Spring context and
- * fetches `GET /v3/api-docs.yaml`. Here we boot the real NestJS `AppModule` and
- * run `SwaggerModule.createDocument` exactly as `src/main.ts` does — so the
- * emitted document is what the live `/v3/api-docs.yaml` endpoint would serve —
- * but WITHOUT opening a Postgres connection.
+ * Boots the real NestJS `AppModule` and runs `SwaggerModule.createDocument`
+ * exactly as `src/main.ts` does — so the emitted document is what the live
+ * `/v3/api-docs.yaml` endpoint would serve — but WITHOUT opening a Postgres
+ * connection.
  *
  * The no-DB trick: TypeORM only needs a live connection to *run queries*. The
  * OpenAPI document is derived purely from the controllers, their route

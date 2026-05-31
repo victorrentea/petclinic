@@ -4,7 +4,7 @@ import { IsDefined, IsOptional, Length, Matches, Min, ValidateNested } from 'cla
 import { PetDto } from '../../pets/dto/pet.dto';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.OwnerDto.
+ * Data transfer object for an owner.
  */
 export class OwnerDto {
   @IsOptional()
@@ -33,7 +33,7 @@ export class OwnerDto {
   city!: string;
 
   // class-validator emits constraints in reverse declaration order, so declare Length before
-  // Matches to reproduce Java's emitted Pattern-then-Size order for telephone.
+  // Matches to emit the pattern message before the size message for telephone.
   @IsDefined({ message: 'must not be null' })
   @Length(1, 20, { message: 'size must be between 1 and 20' })
   @Matches(/^[0-9]*$/, { message: 'must match "^[0-9]*$"' })

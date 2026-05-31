@@ -13,7 +13,7 @@ import {
 import { savePet, savePetType, saveOwner } from './fixtures';
 
 /**
- * Ported from victor.training.petclinic.rest.PetTest.
+ * End-to-end tests for the pets endpoints.
  */
 describe('PetController (e2e)', () => {
   let app: INestApplication;

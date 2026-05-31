@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, Length } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.PetTypeFieldsDto.
+ * Mutable fields accepted when creating or updating a pet type.
  */
 export class PetTypeFieldsDto {
   @IsDefined({ message: 'must not be null' })

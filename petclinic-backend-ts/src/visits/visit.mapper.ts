@@ -4,22 +4,18 @@ import { VisitDto } from './dto/visit.dto';
 import { VisitFieldsDto } from './dto/visit-fields.dto';
 
 /**
- * Ported from victor.training.petclinic.mapper.VisitMapper (MapStruct).
+ * Maps Visit entities to/from their DTOs.
  *
- * STATELESS plain functions (no Nest DI, no @Injectable) mirroring MapStruct's
- * stateless nature and avoiding circular DI between the Owner/Pet/Visit mappers.
- * Controllers import these functions directly.
+ * Stateless plain functions (no Nest DI, no @Injectable), which avoids circular
+ * DI between the Owner/Pet/Visit mappers. Controllers import them directly.
  */
 
 /**
- * Mirrors `Visit toVisit(VisitDto)`:
- *   @Mapping(source = "petId", target = "pet.id")
- *   @Mapping(target = "pet.name", ignore = true)
- *   @Mapping(target = "pet.owner", ignore = true)
+ * Maps a VisitDto to a Visit entity. The `petId` becomes a pet stub carrying
+ * only the id.
  *
- * The Visit's `date` defaults to today when the DTO omits it, reproducing the
- * Java entity field initializer `LocalDate date = LocalDate.now()` (see
- * Visit.create / CONVENTIONS "Dates").
+ * The Visit's `date` defaults to today when the DTO omits it (see Visit.create
+ * / CONVENTIONS "Dates").
  */
 export function toVisit(visitDto: VisitDto): Visit {
   const visit = Visit.create();
@@ -34,9 +30,7 @@ export function toVisit(visitDto: VisitDto): Visit {
 }
 
 /**
- * Mirrors `Visit toVisit(VisitFieldsDto)`:
- *   @Mapping(target = "id", ignore = true)
- *   @Mapping(target = "pet", ignore = true)
+ * Maps a VisitFieldsDto to a Visit entity, leaving id and pet unset.
  */
 export function toVisitFromFields(visitFieldsDto: VisitFieldsDto): Visit {
   const visit = Visit.create();
@@ -48,12 +42,8 @@ export function toVisitFromFields(visitFieldsDto: VisitFieldsDto): Visit {
 }
 
 /**
- * Mirrors `VisitDto toVisitDto(Visit)`:
- *   @Mapping(source = "pet.id", target = "petId")
- *   @Mapping(source = "pet.name", target = "petName")
- *   @Mapping(source = "pet.owner.id", target = "ownerId")
- *   @Mapping(source = "pet.owner.firstName", target = "ownerFirstName")
- *   @Mapping(source = "pet.owner.lastName", target = "ownerLastName")
+ * Maps a Visit entity to a VisitDto, flattening the pet and its owner into the
+ * denormalized petId/petName/ownerId/ownerFirstName/ownerLastName fields.
  */
 export function toVisitDto(visit: Visit): VisitDto {
   const dto = new VisitDto();
@@ -74,7 +64,7 @@ export function toVisitDto(visit: Visit): VisitDto {
   return dto;
 }
 
-/** Mirrors `List<VisitDto> toVisitsDto(List<Visit>)`. */
+/** Maps a list of Visit entities to a list of VisitDto. */
 export function toVisitsDto(visits: Visit[]): VisitDto[] {
   return visits.map((visit) => toVisitDto(visit));
 }

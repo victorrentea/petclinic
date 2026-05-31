@@ -1,0 +1,29 @@
+# PostgreSQL for local development.
+# Schema + seed data are created by the backend's TypeORM migrations
+# (./start-backend-ts.sh runs `npm run migration:run`), so this is a plain,
+# empty Postgres instance.
+#
+#   ./start-database.sh        # start (foreground, tails logs)
+#   docker compose up -d db    # start detached
+#   docker compose down        # stop (keeps data in the named volume)
+#   docker compose down -v     # stop and WIPE all data
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: petclinic-db
+    environment:
+      POSTGRES_DB: petclinic
+      POSTGRES_USER: petclinic
+      POSTGRES_PASSWORD: petclinic
+    ports:
+      - "5432:5432"
+    volumes:
+      - petclinic-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U petclinic -d petclinic"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  petclinic-db-data:

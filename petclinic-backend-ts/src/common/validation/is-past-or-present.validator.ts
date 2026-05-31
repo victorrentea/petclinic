@@ -7,12 +7,12 @@ import {
 } from 'class-validator';
 
 /**
- * Mirrors jakarta.validation @PastOrPresent for our ISO date string fields.
+ * Validates that an ISO date string field is today or in the past.
  *
- * Dates are represented as 'YYYY-MM-DD' strings (Java LocalDate). A value is
- * valid when it is null/undefined (nullability is governed separately by
- * @IsDefined/@IsNotEmpty) OR a syntactically valid date that is today or in
- * the past — never in the future.
+ * Dates are represented as 'YYYY-MM-DD' strings. A value is valid when it is
+ * null/undefined (nullability is governed separately by @IsDefined/@IsNotEmpty)
+ * OR a syntactically valid date that is today or in the past — never in the
+ * future.
  */
 @ValidatorConstraint({ name: 'isPastOrPresent', async: false })
 export class IsPastOrPresentConstraint implements ValidatorConstraintInterface {
@@ -41,7 +41,8 @@ export class IsPastOrPresentConstraint implements ValidatorConstraintInterface {
 }
 
 /**
- * @PastOrPresent equivalent. Usage: `@IsPastOrPresent({ message: '...' })`.
+ * Property decorator asserting the value is today or in the past.
+ * Usage: `@IsPastOrPresent({ message: '...' })`.
  */
 export function IsPastOrPresent(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string): void {

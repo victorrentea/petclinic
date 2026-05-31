@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsOptional, Length, Min } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.SpecialtyDto.
+ * Data transfer object for a specialty.
  */
 export class SpecialtyDto {
   @IsOptional()

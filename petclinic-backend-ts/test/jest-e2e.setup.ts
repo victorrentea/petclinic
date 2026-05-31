@@ -5,19 +5,16 @@ import 'reflect-metadata';
 /**
  * TEST-ONLY SHIM — does NOT touch any production source file.
  *
- * The ported JPA entities (Owner#pets, Pet#visits, Vet#specialties, User#roles)
- * keep the Java-style relation field initializers `= []`. TypeORM 0.3.x's
- * EntityMetadataValidator rejects these with InitializedRelationError ("Array
- * initializations are not allowed in entity relations ..."), which makes
- * DataSource.initialize() throw before any query can run — i.e. the app cannot
- * boot against Postgres as-is.
+ * The entities (Owner#pets, Pet#visits, Vet#specialties, User#roles) keep the
+ * relation field initializers `= []`. TypeORM 0.3.x's EntityMetadataValidator
+ * rejects these with InitializedRelationError ("Array initializations are not
+ * allowed in entity relations ..."), which makes DataSource.initialize() throw
+ * before any query can run — i.e. the app cannot boot against Postgres as-is.
  *
- * Fixing the entities (dropping the `= []` initializers) is the Integration
- * phase's responsibility — those files are outside this (test) module's scope.
  * To let the e2e suite actually exercise the controllers in the meantime, we
- * neutralize ONLY this one over-eager metadata check, exactly as a future
- * `transformOptions`/entity change would. All other TypeORM validations stay
- * active. If/when the entities are fixed, this shim becomes a harmless no-op.
+ * neutralize ONLY this one over-eager metadata check. All other TypeORM
+ * validations stay active. If/when the entities are fixed, this shim becomes a
+ * harmless no-op.
  *
  * Tracked as a blocking integration note (see the task report).
  */

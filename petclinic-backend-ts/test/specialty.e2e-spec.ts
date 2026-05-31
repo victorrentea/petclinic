@@ -13,7 +13,7 @@ import {
 import { saveSpecialty } from './fixtures';
 
 /**
- * Ported from victor.training.petclinic.rest.SpecialtyTest.
+ * End-to-end tests for the specialties endpoints.
  */
 describe('SpecialtyController (e2e)', () => {
   let app: INestApplication;

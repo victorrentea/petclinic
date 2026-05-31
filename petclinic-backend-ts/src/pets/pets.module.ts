@@ -7,10 +7,10 @@ import { Owner } from '../owners/owner.entity';
 import { PetController } from './pet.controller';
 
 /**
- * Pets feature module — ported from the Spring Boot Pet domain.
+ * Pets feature module.
  *
  * Registers the entities touched by the Pet controller/mapper so the TypeORM
- * repositories can be injected directly (no service layer, mirroring Java).
+ * repositories can be injected directly (no service layer).
  * Mappers are stateless functions and are NOT providers.
  */
 @Module({

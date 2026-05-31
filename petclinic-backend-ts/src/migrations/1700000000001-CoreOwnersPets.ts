@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Ported from Flyway V1__core_owners_pets.sql.
- * Table and column names are kept IDENTICAL to the Java backend (snake_case).
+ * Creates the core owners and pets schema.
+ * Table and column names use snake_case.
  */
 export class CoreOwnersPets1700000000001 implements MigrationInterface {
   name = 'CoreOwnersPets1700000000001';

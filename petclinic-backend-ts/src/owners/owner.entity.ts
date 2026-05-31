@@ -2,8 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Pet } from '../pets/pet.entity';
 
 /**
- * Ported from victor.training.petclinic.model.Owner.
- * @Table(name = "owners")
+ * Owner entity, mapped to the "owners" table.
  */
 @Entity({ name: 'owners' })
 export class Owner {
@@ -25,13 +24,11 @@ export class Owner {
   @Column({ type: 'text', nullable: true })
   telephone?: string;
 
-  // Java: @OneToMany(cascade = ALL, mappedBy = "owner", fetch = LAZY)
   @OneToMany(() => Pet, (pet) => pet.owner, { cascade: true })
   pets!: Pet[];
 
   /**
-   * Mirrors Java Owner.getPets(): an unmodifiable view of the pets sorted by
-   * name ASCENDING (case-insensitive, like Spring's PropertyComparator).
+   * Returns this owner's pets sorted by name ASCENDING (case-insensitive).
    */
   getPets(): Pet[] {
     return [...(this.pets ?? [])].sort((a, b) => {
@@ -43,13 +40,13 @@ export class Owner {
     });
   }
 
-  /** Mirrors Java Owner.addPet(): adds the pet and back-links it to this owner. */
+  /** Adds the pet and back-links it to this owner. */
   addPet(pet: Pet): void {
     (this.pets ??= []).push(pet);
     pet.owner = this;
   }
 
-  /** Mirrors Java Owner.getPetById(): finds an owned pet by id, if present. */
+  /** Finds an owned pet by id, if present. */
   getPetById(petId: number): Pet | undefined {
     return (this.pets ?? []).find((p) => p.id === petId);
   }

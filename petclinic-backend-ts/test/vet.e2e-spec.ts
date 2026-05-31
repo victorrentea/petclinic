@@ -13,7 +13,7 @@ import {
 import { saveVet } from './fixtures';
 
 /**
- * Ported from victor.training.petclinic.rest.VetTest.
+ * End-to-end tests for the vets endpoints.
  */
 describe('VetController (e2e)', () => {
   let app: INestApplication;
@@ -56,12 +56,10 @@ describe('VetController (e2e)', () => {
     await http().get('/api/vets/99999').expect(404);
   });
 
-  // Faithful port of Java VetTest.create_ok (expects 201). Currently fails: the
-  // ported VetDto.id carries @Min(0) WITHOUT @IsOptional, so an absent id on
-  // create validates as null -> "Id must not be less than 0" -> 400. Java's
-  // primitive int id (READ_ONLY) defaults to 0 and is never rejected. Marked
-  // it.failing: flips to a pass once VetDto.id is made @IsOptional on create.
-  // (Port defect — see task report.)
+  // Expects 201. Currently fails: VetDto.id carries @Min(0) WITHOUT @IsOptional,
+  // so an absent id on create validates as null -> "Id must not be less than 0"
+  // -> 400. Marked it.failing: flips to a pass once VetDto.id is made
+  // @IsOptional on create. (Known defect — see task report.)
   it.failing('create_ok (201)', async () => {
     // it.failing requires the body to throw; throw the skip marker when no DB.
     if (!available) throw new Error('skipped: no DB');

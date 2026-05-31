@@ -24,7 +24,7 @@ import {
 } from './tools/visit.tools';
 import { McpAuthenticatedRequest } from './api-key.middleware';
 
-/** spring.ai.mcp.server.name / .version from application.properties. */
+/** The MCP server name / version advertised to clients. */
 const MCP_SERVER_NAME = 'petclinic-mcp';
 const MCP_SERVER_VERSION = '0.0.1';
 
@@ -32,17 +32,14 @@ const MCP_SERVER_VERSION = '0.0.1';
 const MESSAGES_PATH = '/mcp/messages';
 
 /**
- * Ported from the Spring AI MCP server (spring.ai.mcp.server.* +
- * OwnerMcpResource + VisitMcpTools). A single {@link McpServer} named
- * 'petclinic-mcp' v0.0.1 exposing:
+ * The MCP server, wiring the owner resource and visit tools. A single
+ * {@link McpServer} named 'petclinic-mcp' v0.0.1 exposing:
  *   - GET /sse — opens an SSE stream (one transport per connection)
  *   - POST /mcp/messages?sessionId=... — JSON-RPC messages for that stream
  *
- * Per-connection owner identity: Spring derived the caller from the
- * SecurityContext on every request. Over SSE the X-API-Key only rides the
- * initial GET /sse, so we remember `sessionId -> ownerId` and resolve it inside
- * tool/resource callbacks via `extra.sessionId` (mirroring
- * McpSecurity.currentOwnerId()).
+ * Per-connection owner identity: over SSE the X-API-Key only rides the initial
+ * GET /sse, so we remember `sessionId -> ownerId` and resolve it inside
+ * tool/resource callbacks via `extra.sessionId`.
  */
 @Injectable()
 export class McpServerService implements OnModuleInit {
@@ -87,7 +84,7 @@ export class McpServerService implements OnModuleInit {
     return ownerId;
   }
 
-  // ----- Resource: me://profile (OwnerMcpResource) -----------------------
+  // ----- Resource: me://profile -------------------------------------------
 
   private registerOwnerResource(): void {
     this.server.registerResource(
@@ -104,7 +101,7 @@ export class McpServerService implements OnModuleInit {
     );
   }
 
-  // ----- Tools: list_visits / create_visit / cancel_visit (VisitMcpTools) -
+  // ----- Tools: list_visits / create_visit / cancel_visit -----------------
 
   private registerVisitTools(): void {
     this.server.registerTool(
@@ -174,11 +171,10 @@ export class McpServerService implements OnModuleInit {
   }
 
   /**
-   * Builds the elicitation bridge for create_visit. Mirrors
-   * McpSyncRequestContext: `elicitEnabled()` checks the client's declared
-   * elicitation capability; `elicitPhone()` sends an `elicitation/create`
-   * request (single string field `phone`) routed to the current connection via
-   * `relatedRequestId`.
+   * Builds the elicitation bridge for create_visit. `elicitEnabled()` checks the
+   * client's declared elicitation capability; `elicitPhone()` sends an
+   * `elicitation/create` request (single string field `phone`) routed to the
+   * current connection via `relatedRequestId`.
    */
   private elicitContext(
     requestId: string | number,
@@ -217,7 +213,7 @@ export class McpServerService implements OnModuleInit {
     };
   }
 
-  // ----- SSE transport plumbing (mirrors spring.ai.mcp SSE endpoints) ------
+  // ----- SSE transport plumbing -------------------------------------------
 
   /**
    * GET /sse — opens a new SSE stream. The owner id (resolved by

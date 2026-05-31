@@ -14,7 +14,7 @@ import { savePet, savePetType, saveOwner } from './fixtures';
 import { todayIso } from './fixtures';
 
 /**
- * Ported from victor.training.petclinic.rest.OwnerTest.
+ * End-to-end tests for the owners endpoints.
  * Covers owner CRUD, last-name filter, nested pet read/update, and validation.
  */
 describe('OwnerController (e2e)', () => {
@@ -87,10 +87,10 @@ describe('OwnerController (e2e)', () => {
 
   it('getAllWithLastNameFilter', async () => {
     if (!available) return;
-    const owner2 = await saveOwner(ds, { lastName: 'JavaBeans' });
-    const res = await http().get('/api/owners?lastName=Java').expect(200);
+    const owner2 = await saveOwner(ds, { lastName: 'Zephyrson' });
+    const res = await http().get('/api/owners?lastName=Zephyr').expect(200);
     const match = res.body.find((o: { id: number }) => o.id === owner2.id);
-    expect(match).toMatchObject({ id: owner2.id, lastName: 'JavaBeans' });
+    expect(match).toMatchObject({ id: owner2.id, lastName: 'Zephyrson' });
   });
 
   it('getAllWithNameFilter_notFound', async () => {
@@ -127,14 +127,12 @@ describe('OwnerController (e2e)', () => {
     await http().put(`/api/owners/${ownerId}`).send(existing).expect(400);
   });
 
-  // Faithful port of Java OwnerTest.delete_ok (the @BeforeEach creates a pet for
-  // the owner). In Java this succeeds because Owner.pets is cascade=ALL and JPA
-  // orphan-removes the pet. The TS port's deleteOwner loads the owner WITHOUT its
-  // pets, so TypeORM's cascade has nothing to remove and the owner delete hits the
-  // pets.owner_id FK -> 500. Marked it.failing: it flips to a pass once the
-  // controller is fixed to load+cascade (or hard-delete) the pets. (Port defect —
-  // see task report.)
-  it.failing('delete_ok (cascades owner+pet, like Java cascade=ALL)', async () => {
+  // The setup creates a pet for the owner. deleteOwner loads the owner WITHOUT
+  // its pets, so TypeORM's cascade has nothing to remove and the owner delete
+  // hits the pets.owner_id FK -> 500. Marked it.failing: it flips to a pass once
+  // the controller is fixed to load+cascade (or hard-delete) the pets. (Known
+  // defect — see task report.)
+  it.failing('delete_ok (cascades owner+pet)', async () => {
     // it.failing requires the body to throw; when the DB is absent we throw the
     // skip marker so the test stays consistent (no DB == cannot verify).
     if (!available) throw new Error('skipped: no DB');
@@ -212,7 +210,7 @@ describe('OwnerController (e2e)', () => {
       birthDate: todayIso(),
       type: { id: petTypeId, name: 'dog' },
     };
-    // Java mirrors this: the controller looks up the pet by petId, not the owner.
+    // The controller looks up the pet by petId, not the owner.
     await http().put(`/api/owners/99999/pets/${petId}`).send(petDto).expect(200);
   });
 

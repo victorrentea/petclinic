@@ -19,20 +19,18 @@ import { RolesGuard } from './security/roles.guard';
 import { McpModule } from './mcp/mcp.module';
 
 /**
- * Root application module — mirrors the Java backend wiring.
+ * Root application module wiring.
  *
- *  - ConfigModule (global): env-driven configuration (application.properties).
+ *  - ConfigModule (global): env-driven configuration.
  *  - TypeOrmModule.forRootAsync: single Postgres connection, synchronize:false,
  *    autoLoadEntities so every feature module's forFeature entities are picked up.
  *  - Every per-domain feature module (no service layer — controllers inject the
  *    TypeORM repositories directly).
- *  - SecurityModule + global RolesGuard (APP_GUARD): mirrors the Spring Security
- *    filter chain + method-level @PreAuthorize. Permit-all by default; role checks
- *    only enforced when PETCLINIC_SECURITY_ENABLE=true.
- *  - McpModule: the Spring AI MCP SSE server, served at root paths (/sse,
+ *  - SecurityModule + global RolesGuard (APP_GUARD): permit-all by default; role
+ *    checks only enforced when PETCLINIC_SECURITY_ENABLE=true.
+ *  - McpModule: the MCP SSE server, served at root paths (/sse,
  *    /mcp/messages) guarded by its own X-API-Key middleware.
- *  - AllExceptionsFilter (APP_FILTER): the global RFC-7807 ProblemDetail handler,
- *    mirroring ExceptionControllerAdvice.
+ *  - AllExceptionsFilter (APP_FILTER): the global RFC-7807 ProblemDetail handler.
  */
 @Module({
   imports: [
@@ -40,7 +38,7 @@ import { McpModule } from './mcp/mcp.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => buildTypeOrmModuleOptions(),
     }),
-    // Feature modules (mirror the Java rest/* controllers).
+    // Feature modules (one per REST domain).
     OwnersModule,
     PetsModule,
     PetTypesModule,
@@ -54,9 +52,9 @@ import { McpModule } from './mcp/mcp.module';
     McpModule,
   ],
   providers: [
-    // Global RFC-7807 exception filter (mirrors ExceptionControllerAdvice).
+    // Global RFC-7807 exception filter.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
-    // Global authorization guard (mirrors Spring Security + @PreAuthorize).
+    // Global authorization guard.
     // No-ops when PETCLINIC_SECURITY_ENABLE != true (default), so it is safe
     // to register globally; honors @PermitAll on the MCP controller.
     { provide: APP_GUARD, useClass: RolesGuard },

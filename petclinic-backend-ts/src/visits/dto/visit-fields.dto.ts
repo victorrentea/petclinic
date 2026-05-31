@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDefined, IsOptional, Length, Matches } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.VisitFieldsDto.
+ * Mutable fields accepted when creating or updating a visit.
  *
- * Java LocalDate -> ISO 'YYYY-MM-DD' string (nullable).
+ * The date is a nullable ISO 'YYYY-MM-DD' string.
  */
 export class VisitFieldsDto {
   @IsOptional()

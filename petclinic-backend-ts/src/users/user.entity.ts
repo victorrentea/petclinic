@@ -2,11 +2,10 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Role } from './role.entity';
 
 /**
- * Ported from victor.training.petclinic.model.User.
- * @Table(name = "users")
+ * User entity, mapped to the "users" table.
  *
  * PK is `username` (a plain string, NOT generated).
- * Roles: @OneToMany(cascade = ALL, mappedBy = "user", fetch = EAGER).
+ * Roles are a one-to-many with cascade-all and eager loading.
  */
 @Entity({ name: 'users' })
 export class User {
@@ -19,13 +18,11 @@ export class User {
   @Column({ type: 'boolean', nullable: true })
   enabled?: boolean;
 
-  // Java: @OneToMany(cascade = ALL, mappedBy = "user", fetch = EAGER)
   @OneToMany(() => Role, (role) => role.user, { cascade: true, eager: true })
   roles?: Role[];
 
   /**
-   * Mirrors Java User.addRole(String): lazily initializes the role set and
-   * appends a new Role with the given name.
+   * Lazily initializes the role list and appends a new Role with the given name.
    */
   addRole(roleName: string): void {
     if (!this.roles) {

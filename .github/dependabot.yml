@@ -1,7 +1,7 @@
 version: 2
 updates:
-  - package-ecosystem: "maven"
-    directory: "/petclinic-backend"
+  - package-ecosystem: "npm"
+    directory: "/petclinic-backend-ts"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -15,26 +15,6 @@ updates:
     open-pull-requests-limit: 5
     groups:
       backend-minor-patch:
-        patterns: ["*"]
-        update-types:
-          - "minor"
-          - "patch"
-
-  - package-ecosystem: "maven"
-    directory: "/petclinic-database"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Etc/UTC"
-    labels:
-      - "dependencies"
-      - "database"
-    reviewers:
-      - "victorrentea"
-    open-pull-requests-limit: 5
-    groups:
-      database-minor-patch:
         patterns: ["*"]
         update-types:
           - "minor"

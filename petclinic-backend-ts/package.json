@@ -1,7 +1,7 @@
 {
   "name": "petclinic-backend-ts",
   "version": "1.0.0",
-  "description": "PetClinic backend ported from Spring Boot to NestJS 10 + TypeORM 0.3 + PostgreSQL",
+  "description": "PetClinic backend — NestJS 10 + TypeORM 0.3 + PostgreSQL",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -34,6 +34,8 @@
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/swagger": "^7.4.2",
     "@nestjs/typeorm": "^10.0.2",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.76.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

@@ -1,28 +1,22 @@
 /**
  * Schema / entity sync guardrail.
  *
- * TS equivalent of the Java `JpaMatchesDBSchemaTest` + `DbSchemaExtractorTest`
- * pair. The Java tests boot Postgres, run the migrations, set Hibernate
- * `ddl-auto=validate`, and fail the Spring context refresh on any entity ↔
- * schema drift.
- *
- * We deliberately do NOT need a live database here. TypeORM collects every
- * `@Entity` / `@Column` / `@JoinColumn` / `@JoinTable` declaration into the
- * global `getMetadataArgsStorage()` the moment the entity modules are imported
+ * Asserts the entity metadata matches the schema declared by the migrations,
+ * without needing a live database. TypeORM collects every `@Entity` /
+ * `@Column` / `@JoinColumn` / `@JoinTable` declaration into the global
+ * `getMetadataArgsStorage()` the moment the entity modules are imported
  * (decorator side-effects) — no `DataSource.initialize()` / no connection. We
  * cross-check that metadata against the table & column names declared in the
- * committed TypeORM migrations (the single source of truth for the schema,
- * ported 1:1 from the Java Flyway SQL).
+ * committed TypeORM migrations (the single source of truth for the schema).
  *
  * This catches the realistic drift:
  *   - an entity table/column the migrations never create, and
  *   - a migrated table that has no owning entity.
  *
- * Caveat (documented in GUARDRAILS.md): like Hibernate `validate`, this check
- * is lax on column *types*, *length* and *nullability* — it only asserts the
- * set of table and column NAMES line up. A type/length regression is not
- * caught here (it would surface at runtime against the real Postgres, exactly
- * as in the Java app).
+ * Caveat (documented in GUARDRAILS.md): this check is lax on column *types*,
+ * *length* and *nullability* — it only asserts the set of table and column
+ * NAMES line up. A type/length regression is not caught here (it would surface
+ * at runtime against the real Postgres).
  */
 import 'reflect-metadata';
 import { readFileSync } from 'fs';

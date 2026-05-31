@@ -4,7 +4,7 @@ import { IsBoolean, IsDefined, IsOptional, Length, ValidateNested } from 'class-
 import { RoleDto } from './role.dto';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.UserDto.
+ * Data transfer object for a user.
  */
 export class UserDto {
   @IsDefined({ message: 'must not be null' })

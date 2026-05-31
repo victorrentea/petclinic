@@ -1,24 +1,24 @@
-# Spring PetClinic - Full Stack Application
-
-[![Java Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/maven-build-master.yml)
-[![Docker Build Status](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml/badge.svg)](https://github.com/spring-petclinic/petclinic-rest/actions/workflows/docker-build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=alert_status)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=spring-petclinic_petclinic-rest&metric=coverage)](https://sonarcloud.io/dashboard?id=spring-petclinic_petclinic-rest)
+# PetClinic - Full Stack Application
 
 Full-stack veterinary clinic management application with:
-- **Backend**: Spring Boot REST API (Java 21)
-- **Frontend**: Angular SPA
-
-[See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
+- **Backend**: NestJS 10 REST API (TypeScript, TypeORM, PostgreSQL)
+- **Frontend**: Angular 16 SPA
 
 ## Architecture Overview
 
 This is a full-stack implementation with clear separation:
-- `petclinic-backend/` - Spring Boot REST API
+- `petclinic-backend-ts/` - NestJS REST API + MCP server (the only backend)
 - `petclinic-frontend/` - Angular client
+- `petclinic-observability/` - Grafana LGTM observability stack
+- `petclinic-ui-test/` - Playwright end-to-end tests
 
 ### Domain model
-Auto-generated from JPA annotations by `DomainModelExtractorTest`. Source: [`petclinic-backend/docs/generated/DomainModel.puml`](petclinic-backend/docs/generated/DomainModel.puml).
+
+Core entities and relationships:
+- **Owner** 1→N **Pet** N→1 **PetType**
+- **Pet** 1→N **Visit**
+- **Vet** N→N **Specialty** (via the `vet_specialties` join table)
+- **User** 1→N **Role**
 
 ## Setup (one-time per clone)
 
@@ -26,7 +26,7 @@ Auto-generated from JPA annotations by `DomainModelExtractorTest`. Source: [`pet
 ./install-all.sh
 ```
 
-Installs all maven/npm dependencies **and** points git at `.githooks/`
+Installs all npm dependencies **and** points git at `.githooks/`
 (`git config core.hooksPath .githooks`) so the project's hooks run for
 everyone — not just the original author.
 
@@ -34,8 +34,8 @@ The active hooks (read them — they're short shell scripts):
 
 - `.githooks/pre-commit` — gitleaks secrets scan, custom `secrets.env` value
   scan, and TypeScript types regen when `openapi.yaml` is staged.
-- `.githooks/pre-push` — when backend / `openapi.yaml` / `db.sql` changed:
-  runs the 6 architecture/extractor guardrail tests, checks generated
+- `.githooks/pre-push` — when the backend / `openapi.yaml` changed: runs the
+  guardrail tests (schema/entity sync + OpenAPI sync), checks generated
   artifacts haven't drifted, and lints `openapi.yaml` with Spectral.
 
 To bypass once: `git commit --no-verify` / `git push --no-verify`. To
@@ -43,101 +43,93 @@ disable persistently: `git config --unset core.hooksPath`.
 
 ## Quick Start - Run Full Stack
 
+Each script is foreground; run them in separate terminals:
+
 ```sh
-./run-all.sh
+./start-database.sh        # PostgreSQL via Docker Compose on localhost:5432
+./start-backend-ts.sh      # NestJS backend on localhost:8080
+./start-frontend.sh        # Angular dev server on localhost:4200
 ```
 
 Then access:
 - **Frontend**: http://localhost:4200
-- **Backend API**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Backend API**: http://localhost:8080/api
+- **Swagger UI**: http://localhost:8080/swagger-ui
 
-## Backend (Spring Boot REST API)
+## Backend (NestJS REST API)
 
-Located in `petclinic-backend/`
+Located in `petclinic-backend-ts/`
 
 ### Run Backend Only
 
 ```sh
-cd petclinic-backend
-./mvnw spring-boot:run
+./start-backend-ts.sh
+```
+
+This builds the project, runs the TypeORM migrations (schema + seed data), and
+boots NestJS on port 8080. For iterative development:
+
+```sh
+cd petclinic-backend-ts
+npm run start:dev          # watch mode
 ```
 
 ### Backend Tech Stack
-- Java 21
-- Spring Boot 3.x
-- Spring Data JPA
-- OpenAPI 3.1 / Swagger
-- PostgreSQL (embedded or standalone)
-- MapStruct for DTO mapping
+- NestJS 10
+- TypeORM 0.3
+- PostgreSQL
+- TypeScript (strict mode)
+- OpenAPI / Swagger (`@nestjs/swagger`)
+- An MCP server exposed over SSE at `/sse`
 
-### 📖 OpenAPI REST API Documentation
+### REST API Documentation
 
-API documentation (OAS 3.1): [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+Browse the live endpoint catalogue in Swagger UI:
+[http://localhost:8080/swagger-ui](http://localhost:8080/swagger-ui).
 
-### API endpoints
-
-Browse the live endpoint catalogue in Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
-
-### API First
-
-The backend follows the [API First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach: the OpenAPI spec at [`petclinic-backend/src/main/resources/openapi.yml`](petclinic-backend/src/main/resources/openapi.yml) is the source of truth. Build-time code generation produces:
-
-- DTO classes under `victor.training.petclinic.rest.dto`
-- API template interfaces that controllers implement
-
-Generated code lives in `target/generated-sources/`; controllers wire concrete behaviour onto the generated interfaces.
+The committed `openapi.yaml` at the project root is generated output (kept in
+sync by the OpenAPI guardrail) and drives the frontend's TypeScript type
+generation.
 
 ### Database Configuration
 
-**Dev:** Embedded PostgreSQL (Java jar) — start it with:
+**Dev:** PostgreSQL via Docker Compose — start it with:
+
 ```sh
-./start-database.sh   # launches embedded Postgres on localhost:5432
+./start-database.sh        # PostgreSQL on localhost:5432
 ```
 
-**Tests** use an embedded PostgreSQL that starts automatically — no setup needed.
+The schema is owned by TypeORM migrations under `src/migrations/`
+(`synchronize: false` — never auto-DDL) and seeded with sample data. Apply them
+with:
 
-Or use docker-compose:
 ```sh
-cd petclinic-backend
-docker-compose --profile postgres up
+cd petclinic-backend-ts
+npm run migration:run      # idempotent; start-backend-ts.sh runs this for you
 ```
 
 ### Security Configuration
 
-Basic authentication is **disabled by default**. To enable:
+HTTP Basic authentication is **disabled by default** (permit all). To enable:
 
-```properties
-petclinic.security.enable=true
+```sh
+PETCLINIC_SECURITY_ENABLE=true
 ```
 
-**Roles**:
-- `OWNER_ADMIN` → Owner, Pet, PetType, Visit endpoints
-- `VET_ADMIN` → PetType, Specialty, Vet endpoints
-- `ADMIN` → User management
+Role-based access is enforced by a `@Roles()` decorator + `RolesGuard`. Roles:
+- `ROLE_OWNER_ADMIN` → Owner, Pet, PetType, Visit endpoints
+- `ROLE_VET_ADMIN` → PetType, Specialty, Vet endpoints
+- `ROLE_ADMIN` → User management
 
 Default user: `admin` / `admin`
 
 ### Testing
 
-**Unit Tests**:
 ```sh
-cd petclinic-backend
-./mvnw test
+cd petclinic-backend-ts
+npm test                   # Jest unit tests
+npm run test:e2e           # Jest e2e tests
 ```
-
-**Performance Tests (JMeter)**:
-```sh
-jmeter -n -t src/test/jmeter/petclinic-jmeter-crud-benchmark.jmx \
-  -Jthreads=100 -Jduration=600 -l results/petclinic-test-results.jtl
-```
-
-**Guardrail Tests** (`./mvnw test` covers them by default):
-- `PackagesArchUnitTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
-- `C4ModelExtractorTest` — regenerates `petclinic-backend/docs/generated/C4.dsl` and the C4 PlantUML/SVG views
-- `DomainModelExtractorTest` — regenerates `petclinic-backend/docs/generated/DomainModel.{puml,png}` from JPA annotations
-
-CI (`.github/workflows/architecture.yml`) auto-commits drift in `docs/generated/` back to the branch with `[skip ci]`; failures in `packages.puml` (hand-edited) fail the build.
 
 ## Frontend (Angular SPA)
 
@@ -151,7 +143,8 @@ npm install
 npm start
 ```
 
-Frontend runs at: http://localhost:4200
+Frontend runs at http://localhost:4200 and talks to the backend at
+http://localhost:8080/api.
 
 ### Frontend Tech Stack
 - Angular 16
@@ -163,42 +156,29 @@ Frontend runs at: http://localhost:4200
 - Node.js 16+
 - npm
 
-<img width="1427" alt="petclinic-angular2" src="https://cloud.githubusercontent.com/assets/838318/23263243/f4509c4a-f9dd-11e6-951b-69d0ef72d8bd.png">
-
-## Docker Support
-
-**Backend**:
-```sh
-docker run -p 8080:8080 springcommunity/petclinic-rest
-```
-
-**Build with Jib**:
-```sh
-cd petclinic-backend
-mvn compile jib:build -Djib.to.auth.username=xxx -Djib.to.auth.password=xxx
-```
-
 ## Observability (optional)
 
 Local Grafana LGTM (metrics + logs + traces) plus zero-code OpenTelemetry
-instrumentation for both backend and frontend, queryable from Claude Code via
-`mcp-grafana`.
+auto-instrumentation, queryable from Claude Code via `mcp-grafana`.
 
 ### 1. Start the stack
 
 ```sh
 ./start-observability.sh         # Grafana at http://localhost:3300 (admin/admin)
 ./start-database.sh              # if not already running
-./start-backend.sh               # auto-downloads the OTel Java agent on first run
+./start-backend-ts.sh
 ( cd petclinic-frontend && npm start )
 ```
+
+The backend exports OpenTelemetry traces/metrics/logs to the LGTM stack over
+OTLP on `:4318`.
 
 ### 2. Use the app, then explore
 
 Open http://localhost:4200, browse around. Then in Grafana:
-- **Explore → Tempo** — distributed traces (browser → backend → JDBC)
+- **Explore → Tempo** — distributed traces (browser → backend → DB)
 - **Explore → Loki** — backend logs (with `trace_id` for correlation)
-- **Explore → Prometheus (Mimir)** — JVM, HTTP, and `postgresql_*` metrics
+- **Explore → Prometheus (Mimir)** — HTTP and runtime metrics
 
 ### 3. Install `mcp-grafana` and query from Claude Code
 
@@ -212,73 +192,46 @@ The repo's `.mcp.json` registers it automatically when you open Claude Code in
 this directory. Then ask things like:
 
 - "What's the average latency of `GET /api/owners` in the last 10 minutes?"
-- "Show me logs from traces that hit `OwnerController.findById`."
+- "Show me logs from traces that hit the owners controller."
 - "What's the requests-per-second on the backend right now?"
 
 ### Limitations
 
-- **IntelliJ play button** on `@SpringBootApplication` does NOT attach the
-  OTel agent — it bypasses `start-backend.sh`. To use observability from
-  IntelliJ, either run via `./mvnw spring-boot:run` from the terminal, or set
-  the following in your Run Configuration's "VM options":
-  ```
-  -javaagent:./.tools/opentelemetry-javaagent.jar
-  -Dotel.service.name=petclinic-backend
-  -Dotel.exporter.otlp.endpoint=http://localhost:4318
-  -Dotel.exporter.otlp.protocol=http/protobuf
-  ```
 - Frontend instrumentation works only with `npm start` (dev). Production
   builds skip the dev-server proxy.
 - Default credentials (`admin/admin`) are local-demo only. Never publish.
 - The host port for Grafana is **3300** (not 3000) because port 3000 was
   already taken on the dev machine; container internal port is unchanged.
-- The stack is **opt-in** — it's not part of `start-all.sh`. Students without
+- The stack is **opt-in** — it's not started by default. Students without
   Docker can ignore everything in this section.
 
 ### Stop
 
+Press `Ctrl+C` in the `./start-observability.sh` terminal — it tears the stack
+down on exit.
+
+## End-to-End Tests
+
+Playwright tests live in `petclinic-ui-test/`. With the backend and frontend
+running:
+
 ```sh
-./stop-observability.sh
+./start-ui-tests.sh
 ```
 
 ## Development
-
-### Generated Code (Backend)
-
-Some backend classes are generated during build time:
-
-| Package | Tool |
-|---------|------|
-| `victor.training.petclinic.mapper` | MapStruct |
-| `victor.training.petclinic.rest.dto` | OpenAPI Generator |
-
-Run to generate:
-```sh
-cd petclinic-backend
-mvn clean install
-```
 
 ### Looking for Something Specific?
 
 | Component | Location |
 |-----------|----------|
-| Backend REST controllers | [petclinic-backend/src/main/java/.../rest](petclinic-backend/src/main/java/org/springframework/samples/petclinic/rest) |
-| Backend repositories | [petclinic-backend/src/main/java/.../repository](petclinic-backend/src/main/java/org/springframework/samples/petclinic/repository) |
-| Backend domain model | [petclinic-backend/src/main/java/.../model](petclinic-backend/src/main/java/org/springframework/samples/petclinic/model) |
+| Backend REST controllers | [petclinic-backend-ts/src/&lt;domain&gt;/*.controller.ts](petclinic-backend-ts/src) |
+| Backend entities | [petclinic-backend-ts/src/&lt;domain&gt;/*.entity.ts](petclinic-backend-ts/src) |
+| Backend mappers | [petclinic-backend-ts/src/&lt;domain&gt;/*.mapper.ts](petclinic-backend-ts/src) |
+| Backend migrations | [petclinic-backend-ts/src/migrations](petclinic-backend-ts/src/migrations) |
 | Frontend components | [petclinic-frontend/src/app](petclinic-frontend/src/app) |
-| OpenAPI spec | [petclinic-backend/src/main/resources/openapi.yml](petclinic-backend/src/main/resources/openapi.yml) |
-
-## Related Projects
-
-The Spring Petclinic master branch in the main [spring-projects](https://github.com/spring-projects/spring-petclinic)
-GitHub org is the "canonical" implementation, currently based on Spring Boot and Thymeleaf.
-
-This project is one of the [several forks](https://spring-petclinic.github.io/docs/forks.html) 
-hosted in a special GitHub org: [spring-petclinic](https://github.com/spring-petclinic).
+| OpenAPI spec (generated) | [openapi.yaml](openapi.yaml) |
 
 ## Contributing
 
-The [issue tracker](https://github.com/spring-petclinic/petclinic-rest/issues) is the preferred channel for bug reports, features requests and submitting pull requests.
-
 For pull requests, editor preferences are available in [.editorconfig](.editorconfig).
-

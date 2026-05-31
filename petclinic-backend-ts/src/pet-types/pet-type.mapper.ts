@@ -3,20 +3,20 @@ import { PetTypeDto } from './dto/pet-type.dto';
 import { PetTypeFieldsDto } from './dto/pet-type-fields.dto';
 
 /**
- * Ported from victor.training.petclinic.mapper.PetTypeMapper (MapStruct).
+ * Maps PetType entities to/from their DTOs.
  *
- * STATELESS plain functions — no Nest DI, no @Injectable — mirroring
- * MapStruct's stateless mappers. Controllers import these directly.
+ * Stateless plain functions — no Nest DI, no @Injectable. Controllers import
+ * these directly.
  */
 
-/** MapStruct: toPetType — `id` is ignored (left undefined for INSERT). */
+/** Maps fields to a PetType — `id` is left undefined for INSERT. */
 export function toPetType(fieldsDto: PetTypeFieldsDto): PetType {
   const petType = new PetType();
   petType.name = fieldsDto.name;
   return petType;
 }
 
-/** MapStruct: toPetTypeDto. */
+/** Maps a PetType entity to a PetTypeDto. */
 export function toPetTypeDto(petType: PetType): PetTypeDto {
   const dto = new PetTypeDto();
   dto.id = petType.id;
@@ -24,14 +24,14 @@ export function toPetTypeDto(petType: PetType): PetTypeDto {
   return dto;
 }
 
-/** MapStruct: toPetTypeFieldsDto. */
+/** Maps a PetType entity to a PetTypeFieldsDto. */
 export function toPetTypeFieldsDto(petType: PetType): PetTypeFieldsDto {
   const dto = new PetTypeFieldsDto();
   dto.name = petType.name ?? '';
   return dto;
 }
 
-/** MapStruct: toPetTypeDtos. */
+/** Maps a list of PetType entities to a list of PetTypeDto. */
 export function toPetTypeDtos(petTypes: PetType[]): PetTypeDto[] {
   return petTypes.map(toPetTypeDto);
 }

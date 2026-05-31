@@ -11,11 +11,9 @@ import { AppDataSource } from '../src/data-source';
 /**
  * Shared e2e test harness.
  *
- * The Java tests use an embedded Postgres (io.zonky) spun up in-process per
- * SpringBootTest. Node has no equivalent zero-setup embedded Postgres, so these
- * e2e tests point at a real Postgres via the standard DB_* env vars (defaults:
- * localhost:5432 / petclinic / petclinic / petclinic — same as start-database.sh
- * and the Java backend).
+ * These e2e tests point at a real Postgres via the standard DB_* env vars
+ * (defaults: localhost:5432 / petclinic / petclinic / petclinic — same as
+ * start-database.sh).
  *
  *   DB_HOST   (default localhost)
  *   DB_PORT   (default 5432)
@@ -32,8 +30,7 @@ import { AppDataSource } from '../src/data-source';
  * validationExceptionFactory + the RFC-7807 AllExceptionsFilter), so the wire
  * behaviour (status codes, Location headers, ProblemDetail bodies) matches the
  * running server. Security stays permit-all (PETCLINIC_SECURITY_ENABLE unset),
- * which mirrors the Java tests where @WithMockUser is a no-op because security
- * is disabled by default.
+ * so no authentication is required.
  */
 
 let cachedAvailability: boolean | null = null;
@@ -111,9 +108,8 @@ export function getDataSource(): DataSource {
 
 /**
  * Truncates every mutable table between tests so each test starts from a clean,
- * deterministic state (mirroring the per-test @Transactional rollback in the
- * Java tests). Identity sequences are restarted so freshly inserted rows get low
- * ids. The order respects FKs; CASCADE covers join tables.
+ * deterministic state. Identity sequences are restarted so freshly inserted rows
+ * get low ids. The order respects FKs; CASCADE covers join tables.
  */
 export async function cleanDatabase(): Promise<void> {
   const ds = getDataSource();

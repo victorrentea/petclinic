@@ -18,13 +18,12 @@ import { User } from './user.entity';
 import { toUser, toUserDto } from './user.mapper';
 
 /**
- * Ported from victor.training.petclinic.rest.UserRestController.
+ * REST controller for users, mounted at "/api/users".
  *
- * Java: @RestController @RequestMapping("/api/users")
- *       @PreAuthorize("hasRole(@roles.ADMIN)")  ->  @Roles('ROLE_ADMIN') (class-level)
+ * The whole controller requires the ADMIN role via @Roles('ROLE_ADMIN').
  *
- * Mirrors the Java design: NO service layer — the controller injects the
- * TypeORM repositories directly and uses the stateless mapper functions.
+ * No service layer — the controller injects the TypeORM repositories directly
+ * and uses the stateless mapper functions.
  */
 @ApiTags('user-rest-controller')
 @Controller('api/users')
@@ -34,25 +33,21 @@ export class UserController {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     // Role is registered in forFeature so cascade persistence resolves its
-    // metadata; the controller persists roles via the User cascade, mirroring
-    // the Java @OneToMany(cascade = ALL).
+    // metadata; the controller persists roles via the User cascade.
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
   ) {}
 
   /**
-   * Java: @PostMapping @Transactional addUser(@RequestBody @Validated UserDto)
+   * POST /api/users with a validated UserDto:
    *   - reject when the user has no roles ("User must have at least a role set!")
    *   - normalise each role name to the ROLE_ prefix
    *   - set the Role.user back-reference when absent
    *   - bcrypt-encode the password before saving
    *   - return 201 Created with Location: /api/users/{username}
    *
-   * The Java code throws IllegalArgumentException for the empty-roles case. That
-   * exception is NOT specially handled by ExceptionControllerAdvice, so it falls
-   * through to the generic handler and yields HTTP 500. We faithfully reproduce
-   * that by throwing a plain Error (the global exception filter maps unhandled
-   * errors to 500), NOT a 400.
+   * The empty-roles case throws a plain Error, which the global exception filter
+   * maps to HTTP 500 (NOT a 400).
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)

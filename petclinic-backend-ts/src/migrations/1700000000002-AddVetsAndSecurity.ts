@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Ported from Flyway V2__add_vets_and_security.sql.
- * Table and column names are kept IDENTICAL to the Java backend (snake_case).
+ * Adds the vets, specialties, users and roles schema.
+ * Table and column names use snake_case.
  */
 export class AddVetsAndSecurity1700000000002 implements MigrationInterface {
   name = 'AddVetsAndSecurity1700000000002';

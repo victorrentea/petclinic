@@ -1,7 +1,7 @@
 import { SetMetadata } from '@nestjs/common';
 
 /**
- * Security metadata decorators, mirroring Spring's method-level @PreAuthorize.
+ * Security metadata decorators for declaring role requirements on handlers.
  *
  * This is the canonical home for the @Roles / @PermitAll decorators and their
  * metadata keys. `src/common/security/{roles,permit-all}.decorator.ts` re-export
@@ -17,25 +17,25 @@ export const ROLES_KEY = 'roles';
 export const PERMIT_ALL_KEY = 'permitAll';
 
 /**
- * Mirrors Spring's @PreAuthorize("hasRole(...)") / "hasAnyRole(...)".
+ * Declares the role(s) required to invoke a handler.
  *
  * Attach one or more role names (e.g. 'ROLE_VET_ADMIN'). When applied at the
  * class level it guards every handler; a method-level @Roles overrides the
- * class-level one. The RolesGuard treats multiple roles as "hasAnyRole".
+ * class-level one. The RolesGuard requires the principal to hold any one of them.
  *
  * Role-based access is only enforced when PETCLINIC_SECURITY_ENABLE=true;
- * otherwise everything is permitted (default), matching the Java backend.
+ * otherwise everything is permitted (default).
  */
 export const Roles = (...roles: string[]): MethodDecorator & ClassDecorator =>
   SetMetadata(ROLES_KEY, roles);
 
 /**
- * Mirrors Spring's @PreAuthorize("permitAll()").
+ * Marks a handler (or controller) as publicly reachable.
  *
  * Applied at the method level to override a class-level @Roles(...) guard so the
  * endpoint is reachable without authentication, even when
  * PETCLINIC_SECURITY_ENABLE=true. The RolesGuard short-circuits (allows) when
- * this metadata is present, exactly like Spring's permitAll().
+ * this metadata is present.
  */
 export const PermitAll = (): MethodDecorator & ClassDecorator =>
   SetMetadata(PERMIT_ALL_KEY, true);

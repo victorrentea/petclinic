@@ -11,8 +11,7 @@ import { Owner } from '../owners/owner.entity';
 import { Visit } from '../visits/visit.entity';
 
 /**
- * Ported from victor.training.petclinic.model.Pet.
- * @Table(name = "pets")
+ * Pet entity, mapped to the "pets" table.
  */
 @Entity({ name: 'pets' })
 export class Pet {
@@ -22,7 +21,7 @@ export class Pet {
   @Column({ type: 'text', nullable: true })
   name?: string;
 
-  /** Java LocalDate -> ISO 'YYYY-MM-DD' string, stored in a DATE column. */
+  /** ISO 'YYYY-MM-DD' string, stored in a DATE column. */
   @Column({ name: 'birth_date', type: 'date', nullable: true })
   birthDate?: string;
 
@@ -34,13 +33,11 @@ export class Pet {
   @JoinColumn({ name: 'owner_id' })
   owner?: Owner;
 
-  // Java: @OneToMany(cascade = ALL, mappedBy = "pet", fetch = LAZY)
   @OneToMany(() => Visit, (visit) => visit.pet, { cascade: true })
   visits!: Visit[];
 
   /**
-   * Mirrors Java Pet.getVisitsSortedByDate():
-   * visits sorted by date DESCENDING (ascending=false).
+   * Returns this pet's visits sorted by date DESCENDING.
    */
   getVisitsSortedByDate(): Visit[] {
     return [...(this.visits ?? [])].sort((a, b) => {
@@ -53,7 +50,7 @@ export class Pet {
     });
   }
 
-  /** Mirrors Java Pet.addVisit(): adds the visit and back-links it to this pet. */
+  /** Adds the visit and back-links it to this pet. */
   addVisit(visit: Visit): void {
     (this.visits ??= []).push(visit);
     visit.pet = this;

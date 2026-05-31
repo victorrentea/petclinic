@@ -8,19 +8,13 @@ import { User } from '../users/user.entity';
 import { AuthenticatedPrincipal } from './authenticated-principal';
 
 /**
- * HTTP Basic authentication strategy, ported from
- * victor.training.petclinic.security.BasicAuthenticationConfig.
+ * HTTP Basic authentication strategy.
  *
- * The Java config wires `auth.jdbcAuthentication()` with:
- *   usersByUsernameQuery       = "select username,password,enabled from users where username=?"
- *   authoritiesByUsernameQuery = "select username,role from roles where username=?"
- *
- * Here we reproduce that against the `users` / `roles` tables via TypeORM:
+ * Validates credentials against the `users` / `roles` tables via TypeORM:
  *   1. load the user by username (with its eager `roles`);
  *   2. reject if missing, disabled, or without a stored password hash;
  *   3. bcrypt.compare the supplied password against the stored BCrypt hash
- *      (Spring used BCryptPasswordEncoder; the seeded `admin` user has the
- *      BCrypt hash for "admin");
+ *      (the seeded `admin` user has the BCrypt hash for "admin");
  *   4. attach the role names as authorities on the principal.
  *
  * Passport's `done(err, user)` contract: passing `false` as the user signals an

@@ -5,12 +5,11 @@ import { User } from './user.entity';
 import { UserController } from './user.controller';
 
 /**
- * Feature module for the USERS domain, ported from the Java backend.
+ * Feature module for the USERS domain.
  *
- * Mirrors the Java design: NO service layer — the controller injects the
- * TypeORM repositories directly. Registers User + Role so their repositories
- * are injectable and so the User -> Role cascade (Java @OneToMany(cascade=ALL))
- * has both entities' metadata available.
+ * No service layer — the controller injects the TypeORM repositories directly.
+ * Registers User + Role so their repositories are injectable and so the
+ * User -> Role cascade has both entities' metadata available.
  *
  * The mappers (user.mapper.ts) are stateless plain functions imported directly
  * by the controller, so they are intentionally NOT declared as providers.

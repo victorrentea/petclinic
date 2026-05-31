@@ -2,8 +2,7 @@
 /**
  * OpenAPI sync guardrail — CLI.
  *
- * TS equivalent of the Java `OpenApiExtractorTest` (which regenerates the
- * committed `openapi.yaml`) plus the `OpenApiSyncTest` drift check from
+ * Regenerates the committed `openapi.yaml` and runs the drift check described in
  * GUARDRAILS.md.
  *
  *   npm run guardrail:openapi:generate   # (re)write the committed openapi.yaml

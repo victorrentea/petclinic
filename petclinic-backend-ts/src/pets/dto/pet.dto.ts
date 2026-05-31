@@ -6,13 +6,13 @@ import { VisitDto } from '../../visits/dto/visit.dto';
 import { IsPastOrPresent } from '../../common/validation/is-past-or-present.validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.PetDto.
+ * Data transfer object for a pet.
  *
- * Java LocalDate birthDate -> ISO 'YYYY-MM-DD' string.
+ * birthDate is an ISO 'YYYY-MM-DD' string.
  */
 export class PetDto {
-  // Java @NotBlank: rejects null, empty AND whitespace-only with a single "must not be blank".
-  // @IsDefined covers null; @Matches(/\S/) covers empty/whitespace; @MaxLength mirrors @Size(max=30).
+  // Reject null, empty AND whitespace-only with a single "must not be blank":
+  // @IsDefined covers null; @Matches(/\S/) covers empty/whitespace; @MaxLength caps length at 30.
   @IsDefined({ message: 'must not be blank' })
   @Matches(/\S/, { message: 'must not be blank' })
   @MaxLength(30, { message: 'size must be between 0 and 30' })

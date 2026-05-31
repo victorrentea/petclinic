@@ -7,20 +7,17 @@ import { CORS_ORIGIN, getPort, OPENAPI_INFO } from './config/app-config';
 import { validationExceptionFactory } from './common/all-exceptions.filter';
 
 /**
- * Application bootstrap — mirrors the Java backend (CorsConfig + springdoc +
- * Spring Boot defaults):
+ * Application bootstrap:
  *
  *  - listens on PORT (default 8080);
- *  - CORS for the Angular dev server (http://localhost:4200) with credentials,
- *    exactly as CorsConfig.java;
+ *  - CORS for the Angular dev server (http://localhost:4200) with credentials;
  *  - global ValidationPipe { transform, whitelist } wired with
  *    validationExceptionFactory so class-validator errors reach the global
- *    RFC-7807 filter and get Java-style humanized messages (jakarta validation
- *    parity for @Validated @RequestBody);
+ *    RFC-7807 filter and get humanized messages for validated request bodies;
  *  - Swagger UI at /swagger-ui (so /swagger-ui/index.html — the RootController
  *    redirect target — resolves) and the OpenAPI document at /v3/api-docs
- *    (JSON) and /v3/api-docs.yaml (YAML), matching springdoc's default paths so
- *    the OpenApiExtractor guardrail (GET /v3/api-docs.yaml) keeps working.
+ *    (JSON) and /v3/api-docs.yaml (YAML), the paths the OpenApiExtractor
+ *    guardrail (GET /v3/api-docs.yaml) reads.
  *
  * The global exception filter (AllExceptionsFilter) and the global RolesGuard
  * are registered as APP_FILTER / APP_GUARD providers in AppModule.
@@ -34,7 +31,7 @@ import { validationExceptionFactory } from './common/all-exceptions.filter';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
-  // CORS — mirror CorsConfig.java exactly.
+  // CORS configuration for the Angular dev server.
   app.enableCors({
     origin: CORS_ORIGIN,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -43,8 +40,8 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  // Global validation — jakarta @Validated parity. The custom exception factory
-  // preserves the raw ValidationError[] so AllExceptionsFilter can humanize them.
+  // Global validation. The custom exception factory preserves the raw
+  // ValidationError[] so AllExceptionsFilter can humanize them.
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -54,12 +51,11 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // OpenAPI / Swagger — metadata from openapi.info.* (application.properties).
+  // OpenAPI / Swagger document, built from the OPENAPI_INFO metadata.
   const swaggerConfig = new DocumentBuilder()
     .setTitle(OPENAPI_INFO.title)
     .setDescription(OPENAPI_INFO.description)
     .setVersion(OPENAPI_INFO.version)
-    .setTermsOfService(OPENAPI_INFO.termsOfService)
     .addBasicAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

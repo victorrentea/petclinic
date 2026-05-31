@@ -273,8 +273,7 @@ components:
       type: http
 info:
   contact: {}
-  description: This is the REST API documentation of the Spring Petclinic backend. If authentication is enabled, use admin/admin when calling the APIs
-  termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
+  description: This is the REST API documentation of the Petclinic backend. If authentication is enabled, use admin/admin when calling the APIs
   title: REST Petclinic Backend API
   version: '1.0'
 openapi: 3.0.0

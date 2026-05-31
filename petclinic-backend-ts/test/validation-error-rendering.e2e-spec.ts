@@ -10,11 +10,10 @@ import {
 } from './test-app';
 
 /**
- * Ported from victor.training.petclinic.rest.ValidationErrorRenderingTest.
+ * End-to-end tests for validation error rendering.
  *
  * Asserts the RFC-7807 ProblemDetail body carries a humanized `errors[]` array
- * with exactly one entry per failed constraint (mirroring the Java
- * ValidationErrorExtractor output).
+ * with exactly one entry per failed constraint.
  */
 describe('Validation error rendering (e2e)', () => {
   let app: INestApplication;
@@ -51,7 +50,7 @@ describe('Validation error rendering (e2e)', () => {
 
     const res = await http().post('/api/owners').send(payload).expect(400);
 
-    // RFC-7807 ProblemDetail shape (mirrors ExceptionControllerAdvice).
+    // RFC-7807 ProblemDetail shape.
     expect(res.body.status).toBe(400);
     expect(res.body.title).toBe('Validation Error');
     expect(Array.isArray(res.body.errors)).toBe(true);

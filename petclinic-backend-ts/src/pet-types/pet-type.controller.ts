@@ -24,12 +24,11 @@ import { PetTypeFieldsDto } from './dto/pet-type-fields.dto';
 import { toPetType, toPetTypeDto, toPetTypeDtos } from './pet-type.mapper';
 
 /**
- * Ported from victor.training.petclinic.rest.PetTypeRestController.
+ * REST controller for pet types.
  *
- * No service layer — the controller injects the TypeORM repository directly,
- * mirroring the Java app (Spring Data repository injected into the controller).
+ * No service layer — the controller injects the TypeORM repository directly.
  *
- * Class-level @PreAuthorize("hasAnyRole(@roles.OWNER_ADMIN, @roles.VET_ADMIN)").
+ * The whole controller requires the OWNER_ADMIN or VET_ADMIN role.
  */
 @ApiTags('pettypes')
 @Controller('api/pettypes')
@@ -47,7 +46,7 @@ export class PetTypeController {
     return toPetTypeDtos(petTypes);
   }
 
-  /** GET /api/pettypes/{petTypeId} → 200; 404 when missing (Java orElseThrow). */
+  /** GET /api/pettypes/{petTypeId} → 200; 404 when missing. */
   @Get(':petTypeId')
   async getPetType(
     @Param('petTypeId', ParseIntPipe) petTypeId: number,
@@ -60,8 +59,7 @@ export class PetTypeController {
   }
 
   /**
-   * POST /api/pettypes (consumes application/json) → 201 Created + Location.
-   * @PreAuthorize("hasRole(@roles.VET_ADMIN)").
+   * POST /api/pettypes → 201 Created + Location. Requires the VET_ADMIN role.
    */
   @Post()
   @Roles('ROLE_VET_ADMIN')
@@ -77,7 +75,7 @@ export class PetTypeController {
 
   /**
    * PUT /api/pettypes/{petTypeId} → 200/void; 404 when missing.
-   * @PreAuthorize("hasRole(@roles.VET_ADMIN)").
+   * Requires the VET_ADMIN role.
    */
   @Put(':petTypeId')
   @Roles('ROLE_VET_ADMIN')
@@ -95,8 +93,8 @@ export class PetTypeController {
 
   /**
    * DELETE /api/pettypes/{petTypeId} → 204 No Content.
-   * Maps DataIntegrityViolationException (FK in use) to a meaningful error.
-   * @PreAuthorize("hasRole(@roles.VET_ADMIN)").
+   * Maps a foreign-key violation (type still in use) to a meaningful error.
+   * Requires the VET_ADMIN role.
    */
   @Delete(':petTypeId')
   @Roles('ROLE_VET_ADMIN')

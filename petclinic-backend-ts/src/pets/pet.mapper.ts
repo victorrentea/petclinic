@@ -7,21 +7,17 @@ import { PetTypeDto } from '../pet-types/dto/pet-type.dto';
 import { toVisitsDto } from '../visits/visit.mapper';
 
 /**
- * Ported from victor.training.petclinic.mapper.PetMapper (MapStruct,
- * `uses = VisitMapper.class`).
+ * Maps Pet entities to/from PetDto (delegates visit mapping to visit.mapper).
  *
- * STATELESS plain functions (no Nest DI, no @Injectable) mirroring MapStruct's
- * stateless nature and avoiding circular DI between the Owner/Pet/Visit mappers.
- * Controllers import these functions directly.
+ * Stateless plain functions (no Nest DI, no @Injectable), which avoids circular
+ * DI between the Owner/Pet/Visit mappers. Controllers import them directly.
  */
 
 /**
- * Mirrors `PetDto toPetDto(Pet)`:
- *   @Mapping(source = "owner.id", target = "ownerId")
- *   @Mapping(source = "visitsSortedByDate", target = "visits")
+ * Maps a Pet entity to a PetDto.
  *
- * Visits are emitted sorted by date DESCENDING via Pet.getVisitsSortedByDate(),
- * matching Java's PropertyComparator output. PetType is mapped via toPetTypeDto.
+ * Visits are emitted sorted by date DESCENDING via Pet.getVisitsSortedByDate();
+ * the owner id is projected to `ownerId`. PetType is mapped via toPetTypeDto.
  */
 export function toPetDto(pet: Pet): PetDto {
   const dto = new PetDto();
@@ -33,8 +29,7 @@ export function toPetDto(pet: Pet): PetDto {
   const sortedVisits = pet.getVisitsSortedByDate();
   for (const visit of sortedVisits) {
     // Stitch the back-reference so the visit mapper can project the denormalized
-    // petId/petName/owner* fields. Java's managed entities carry these
-    // bidirectional links for free; TypeORM does not populate `visit.pet` on a
+    // petId/petName/owner* fields. TypeORM does not populate `visit.pet` on a
     // visit loaded as a child via owner->pets->visits, so set it here.
     visit.pet = visit.pet ?? pet;
   }
@@ -42,17 +37,16 @@ export function toPetDto(pet: Pet): PetDto {
   return dto;
 }
 
-/** Mirrors `List<PetDto> toPetsDto(List<Pet>)`. */
+/** Maps a list of Pet entities to a list of PetDto. */
 export function toPetsDto(pets: Pet[]): PetDto[] {
   return pets.map((pet) => toPetDto(pet));
 }
 
 /**
- * Mirrors `Pet toPet(PetDto)`:
- *   @Mapping(source = "ownerId", target = "owner.id")
+ * Maps a PetDto to a Pet entity.
  *
- * The owner relation is reconstructed as a stub carrying only the id, exactly
- * like MapStruct populating a nested `owner.id`.
+ * The owner relation is reconstructed as a stub carrying only the id (from
+ * `ownerId`).
  */
 export function toPet(petDto: PetDto): Pet {
   const pet = new Pet();
@@ -68,16 +62,13 @@ export function toPet(petDto: PetDto): Pet {
   return pet;
 }
 
-/** Mirrors `List<Pet> toPets(List<PetDto>)`. */
+/** Maps a list of PetDto to a list of Pet entities. */
 export function toPets(petDtos: PetDto[]): Pet[] {
   return petDtos.map((petDto) => toPet(petDto));
 }
 
 /**
- * Mirrors `Pet toPet(PetFieldsDto)`:
- *   @Mapping(target = "id", ignore = true)
- *   @Mapping(target = "owner", ignore = true)
- *   @Mapping(target = "visits", ignore = true)
+ * Maps a PetFieldsDto to a Pet entity, leaving id, owner and visits unset.
  */
 export function toPetFromFields(fieldsDto: PetFieldsDto): Pet {
   const pet = new Pet();
@@ -87,7 +78,7 @@ export function toPetFromFields(fieldsDto: PetFieldsDto): Pet {
   return pet;
 }
 
-/** Mirrors `PetTypeDto toPetTypeDto(PetType)`. */
+/** Maps a PetType entity to a PetTypeDto. */
 export function toPetTypeDto(petType: PetType): PetTypeDto {
   const dto = new PetTypeDto();
   dto.id = petType.id;
@@ -95,7 +86,7 @@ export function toPetTypeDto(petType: PetType): PetTypeDto {
   return dto;
 }
 
-/** Mirrors `PetType toPetType(PetTypeDto)`. */
+/** Maps a PetTypeDto to a PetType entity. */
 export function toPetType(petTypeDto: PetTypeDto): PetType {
   const petType = new PetType();
   petType.id = petTypeDto.id;
@@ -103,7 +94,7 @@ export function toPetType(petTypeDto: PetTypeDto): PetType {
   return petType;
 }
 
-/** Mirrors `List<PetTypeDto> toPetTypeDtos(List<PetType>)`. */
+/** Maps a list of PetType entities to a list of PetTypeDto. */
 export function toPetTypeDtos(petTypes: PetType[]): PetTypeDto[] {
   return petTypes.map((petType) => toPetTypeDto(petType));
 }

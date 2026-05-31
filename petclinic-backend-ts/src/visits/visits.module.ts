@@ -6,9 +6,9 @@ import { Owner } from '../owners/owner.entity';
 import { VisitController } from './visit.controller';
 
 /**
- * Ported feature module for the Visits domain.
+ * Feature module for the Visits domain.
  *
- * Registers Visit (plus Pet + Owner, traversed by the JOIN FETCH / relations in
+ * Registers Visit (plus Pet + Owner, traversed by the relations in
  * VisitController) with TypeORM. The VisitController is exported so the MCP
  * layer can reuse `findByPetId`.
  */

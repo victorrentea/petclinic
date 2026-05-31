@@ -8,16 +8,14 @@ import { BasicAuthStrategy } from './basic-auth.strategy';
 import { RolesGuard } from './roles.guard';
 
 /**
- * Security feature module, mirroring the Java security package
- * (BasicAuthenticationConfig + DisableSecurityConfig + Roles + CorsConfig).
+ * Security feature module.
  *
  * Wiring:
  *   - PassportModule: registers the passport infrastructure. We use the default
- *     ('basic') strategy from passport-http; no session (stateless, like Spring
- *     httpBasic).
+ *     ('basic') strategy from passport-http; no session (stateless).
  *   - TypeOrmModule.forFeature([User, Role]): makes the User repository
  *     injectable into BasicAuthStrategy so it can validate credentials against
- *     the users/roles tables (replacing Spring's jdbcAuthentication queries).
+ *     the users/roles tables.
  *   - Providers: BasicAuthStrategy (passport verify callback), BasicAuthGuard,
  *     and RolesGuard (the global authorization guard).
  *

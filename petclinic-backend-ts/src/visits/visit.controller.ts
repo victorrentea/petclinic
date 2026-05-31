@@ -23,12 +23,12 @@ import { toVisit, toVisitDto, toVisitsDto } from './visit.mapper';
 import { Roles } from '../common/security/roles.decorator';
 
 /**
- * Ported from victor.training.petclinic.rest.VisitRestController.
+ * REST controller for visits.
  *
- * Mirrors the Java design: NO service layer — the controller injects the
- * TypeORM repository directly and calls stateless mapper functions.
+ * No service layer — the controller injects the TypeORM repository directly
+ * and calls stateless mapper functions.
  *
- * Class-level `@PreAuthorize("hasRole(@roles.OWNER_ADMIN)")` -> @Roles('ROLE_OWNER_ADMIN').
+ * The whole controller requires the OWNER_ADMIN role via @Roles('ROLE_OWNER_ADMIN').
  */
 @ApiTags('visits')
 @Roles('ROLE_OWNER_ADMIN')
@@ -39,14 +39,14 @@ export class VisitController {
     private readonly visitRepository: Repository<Visit>,
   ) {}
 
-  /** GET /api/visits — mirrors listVisits() using findAllWithPetAndOwner (JOIN FETCH). */
+  /** GET /api/visits — lists all visits with their pet and owner eagerly loaded. */
   @Get()
   async listVisits(): Promise<VisitDto[]> {
     const visits = await this.findAllWithPetAndOwner();
     return toVisitsDto(visits);
   }
 
-  /** GET /api/visits/{visitId} — mirrors getVisit(); 404 when absent (orElseThrow). */
+  /** GET /api/visits/{visitId} — returns the visit; 404 when absent. */
   @Get(':visitId')
   async getVisit(@Param('visitId', ParseIntPipe) visitId: number): Promise<VisitDto> {
     const visit = await this.findByIdOrThrow(visitId);
@@ -54,8 +54,8 @@ export class VisitController {
   }
 
   /**
-   * POST /api/visits — mirrors addVisit(): 201 Created with a
-   * Location header `/api/visits/{id}` and an empty body.
+   * POST /api/visits — 201 Created with a Location header
+   * `/api/visits/{id}` and an empty body.
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -67,8 +67,8 @@ export class VisitController {
   }
 
   /**
-   * PUT /api/visits/{visitId} — mirrors updateVisit(): loads the existing visit
-   * (404 if absent), sets date + description only, saves. Returns void (200).
+   * PUT /api/visits/{visitId} — loads the existing visit (404 if absent),
+   * sets date + description only, saves. Returns void (200).
    */
   @Put(':visitId')
   async updateVisit(
@@ -81,7 +81,7 @@ export class VisitController {
     await this.visitRepository.save(currentVisit);
   }
 
-  /** DELETE /api/visits/{visitId} — mirrors deleteVisit(); void (200), 404 if absent. */
+  /** DELETE /api/visits/{visitId} — void (200), 404 if absent. */
   @Delete(':visitId')
   async deleteVisit(@Param('visitId', ParseIntPipe) visitId: number): Promise<void> {
     const visit = await this.findByIdOrThrow(visitId);
@@ -89,9 +89,8 @@ export class VisitController {
   }
 
   /**
-   * Mirrors VisitRepository.findAllWithPetAndOwner():
-   * `SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner`.
-   * JOIN FETCH == INNER join + eager select of the joined rows.
+   * Loads all visits, inner-joining and eagerly selecting each visit's pet
+   * and that pet's owner.
    */
   private findAllWithPetAndOwner(): Promise<Visit[]> {
     return this.visitRepository
@@ -102,16 +101,15 @@ export class VisitController {
   }
 
   /**
-   * Mirrors VisitRepository.findByPetId(int petId) — a derived query with NO
-   * join fetch (returns plain visits). Exposed on the controller (and the
-   * controller is exported from VisitsModule) so the MCP layer can reuse it,
-   * matching the Java MCP tools which call visitRepository.findByPetId(petId).
+   * Finds visits by pet id, returning plain visits with no joined relations.
+   * Exposed on the controller (and the controller is exported from
+   * VisitsModule) so the MCP layer can reuse it.
    */
   findByPetId(petId: number): Promise<Visit[]> {
     return this.visitRepository.find({ where: { pet: { id: petId } } });
   }
 
-  /** Mirrors `visitRepository.findById(id).orElseThrow()` -> 404 NotFound. */
+  /** Loads a visit by id, throwing 404 NotFound when missing. */
   private async findByIdOrThrow(visitId: number): Promise<Visit> {
     const visit = await this.visitRepository.findOne({
       where: { id: visitId },

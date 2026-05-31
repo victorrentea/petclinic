@@ -5,9 +5,9 @@ import { PetTypeDto } from '../../pet-types/dto/pet-type.dto';
 import { IsPastOrPresent } from '../../common/validation/is-past-or-present.validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.PetFieldsDto.
+ * Mutable fields accepted when creating or updating a pet.
  *
- * Java LocalDate birthDate -> ISO 'YYYY-MM-DD' string.
+ * birthDate is an ISO 'YYYY-MM-DD' string.
  */
 export class PetFieldsDto {
   @IsDefined()

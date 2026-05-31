@@ -15,14 +15,14 @@ import { buildProblemDetail, ProblemDetail } from './problem-detail';
 import { formatValidationErrors } from './validation-error.formatter';
 
 /**
- * Global exception handler, mirroring the Spring {@code ExceptionControllerAdvice}.
+ * Global exception handler producing RFC-7807 ProblemDetail responses.
  *
  * Maps:
  *   - validation failures (class-validator errors surfaced via {@link ValidationPipe}
  *     as a {@link BadRequestException}) -> 400, title "Validation Error",
  *     {@code errors[]} = humanized messages;
  *   - {@link NotFoundException} / TypeORM {@link EntityNotFoundError}
- *     (the analog of Java {@code NoSuchElementException}) -> 404, title "Not found!";
+ *     -> 404, title "Not found!";
  *   - everything else -> 500, title/detail = the error message.
  *
  * NOTE: This filter is intentionally NOT registered here. The Integration phase wires
@@ -46,8 +46,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const pd = this.toProblemDetail(exception, requestUrl);
 
-    // Spring's ProblemDetail always carries `instance` = the request URI path (path only,
-    // not the full URL). Emit it after `detail` to mirror Spring's JSON key order.
+    // `instance` is the request URI path (path only, not the full URL).
+    // Emit it after `detail` to fix the JSON key order.
     const body = {
       type: pd.type,
       title: pd.title,
@@ -79,7 +79,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return pd;
     }
 
-    // ----- 404: not found (NoSuchElementException analog) -----------------------------
+    // ----- 404: not found -------------------------------------------------------------
     if (exception instanceof NotFoundException || exception instanceof EntityNotFoundError) {
       this.logger.error('Not found!');
       return buildProblemDetail('Not found!', 'Not found!', HttpStatus.NOT_FOUND, requestUrl);
@@ -108,7 +108,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * Recovers humanized validation messages from a {@link BadRequestException} raised by
    * the {@link ValidationPipe}. Handles two shapes:
    *   1. raw {@link ValidationError}[] attached via {@link validationExceptionFactory}
-   *      (preferred — yields the exact Java-style humanized output);
+   *      (preferred — yields the exact humanized output);
    *   2. the default Nest payload {@code { message: string[], ... }} (fallback — the
    *      messages are class-validator defaults, already reasonably readable).
    * Returns {@code null} when the exception is not a validation failure.
@@ -152,7 +152,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return exception.message;
   }
 
-  /** Reconstructs the full request URL, mirroring Java {@code request.getRequestURL()}. */
+  /** Reconstructs the full request URL (scheme://host/path). */
   private buildRequestUrl(request: Request): string {
     const protocol = request.protocol ?? 'http';
     const host = request.get?.('host') ?? 'localhost';
@@ -160,7 +160,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
-   * Extracts the request URI path (no scheme/host/query), mirroring the value Spring puts in
+   * Extracts the request URI path (no scheme/host/query) used as
    * {@code ProblemDetail.instance} (e.g. "/api/owners").
    */
   private buildRequestPath(request: Request): string {
@@ -171,8 +171,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
 /**
  * Exception factory for the global {@link ValidationPipe} that preserves the raw
- * {@link ValidationError}[] so {@link AllExceptionsFilter} can humanize them exactly like
- * the Java {@code ValidationErrorExtractor}/{@code ValidationErrorFieldExtractor}.
+ * {@link ValidationError}[] so {@link AllExceptionsFilter} can humanize them.
  *
  * Wiring (Integration phase, in main.ts):
  *   app.useGlobalPipes(new ValidationPipe({

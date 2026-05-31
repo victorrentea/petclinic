@@ -10,7 +10,7 @@ import {
 } from './test-app';
 
 /**
- * Ported from victor.training.petclinic.rest.UserTest.
+ * End-to-end tests for the users endpoints.
  */
 describe('UserController (e2e)', () => {
   let app: INestApplication;
@@ -57,13 +57,11 @@ describe('UserController (e2e)', () => {
     await http().post('/api/users').send(newUser).expect(400);
   });
 
-  // Faithful port of Java UserTest.create_noRoles_triggers_server_error.
-  // In Java, roles:null passes validation (no @NotNull on roles) and the
-  // controller throws IllegalArgumentException -> 500. The ported UserDto.roles
-  // carries @ValidateNested({each:true}); class-validator's each:true rejects a
-  // null value at validation time -> 400 (never reaching the controller). Marked
-  // it.failing: flips to a pass once UserDto.roles tolerates null on input.
-  // (Port nuance — see task report.)
+  // Expects the empty-roles case to reach the controller and yield a 500. But
+  // UserDto.roles carries @ValidateNested({each:true}); class-validator's
+  // each:true rejects a null value at validation time -> 400 (never reaching the
+  // controller). Marked it.failing: flips to a pass once UserDto.roles tolerates
+  // null on input. (Known nuance — see task report.)
   it.failing('create_noRoles_triggers_server_error (500)', async () => {
     // it.failing requires the body to throw; throw the skip marker when no DB.
     if (!available) throw new Error('skipped: no DB');

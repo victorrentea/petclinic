@@ -3,20 +3,17 @@ import { NextFunction, Request, Response } from 'express';
 import { getMcpApiKeys } from '../config/app-config';
 
 /**
- * Ported from victor.training.petclinic.mcp.McpSecurity (the `ApiKeyFilter` +
- * the `mcpApiKeyChain` SecurityFilterChain scoped to /sse, /sse/**, /mcp/**).
+ * X-API-Key authentication for the MCP routes (/sse, /sse/**, /mcp/**).
  *
  * Reads the `X-API-Key` header, maps it to an owner id via the configured
  * api-keys (demo-key-1=1, demo-key-2=2, demo-key-3=3) and, when valid, stamps
  * the resolved owner id onto the request. MCP requests without a recognised
- * key are rejected with 401 (mirroring `authorizeHttpRequests().anyRequest()
- * .authenticated()`).
+ * key are rejected with 401.
  *
- * Java derived the caller's owner id from the SecurityContext
- * (`McpSecurity.currentOwnerId()`). Here we keep it on the Express request and,
- * for the SSE flow, the MCP server remembers it per connection/session so that
- * tool + resource callbacks (which run on later POST /messages requests) can
- * still resolve the original caller. See {@link McpServerService}.
+ * The resolved owner id is kept on the Express request and, for the SSE flow,
+ * the MCP server remembers it per connection/session so that tool + resource
+ * callbacks (which run on later POST /messages requests) can still resolve the
+ * original caller. See {@link McpServerService}.
  */
 export const API_KEY_HEADER = 'x-api-key';
 
@@ -27,7 +24,7 @@ export interface McpAuthenticatedRequest extends Request {
 
 /**
  * Resolves the owner id from an `X-API-Key` header value, or `undefined` when
- * the key is missing/unknown. Stateless, mirroring the Java filter's lookup.
+ * the key is missing/unknown. Stateless.
  */
 export function resolveOwnerIdFromApiKey(apiKey: string | undefined): number | undefined {
   if (!apiKey) {
@@ -44,8 +41,8 @@ export class ApiKeyMiddleware implements NestMiddleware {
     const apiKey = Array.isArray(header) ? header[0] : header;
     const ownerId = resolveOwnerIdFromApiKey(apiKey);
     if (ownerId === undefined) {
-      // Mirrors the scoped chain's `anyRequest().authenticated()`: unauthenticated
-      // MCP requests are rejected before reaching the SSE/message handlers.
+      // Unauthenticated MCP requests are rejected before reaching the
+      // SSE/message handlers.
       res.status(401).json({
         status: 401,
         title: 'Unauthorized',

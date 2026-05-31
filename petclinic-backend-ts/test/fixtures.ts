@@ -8,13 +8,11 @@ import { Vet } from '../src/vets/vet.entity';
 import { Specialty } from '../src/specialties/specialty.entity';
 
 /**
- * Test fixture builders mirroring petclinic-backend rest/TestData.java and the
- * per-test @BeforeEach setup of the Java REST tests. Rows are inserted directly
- * via the TypeORM repositories (the analog of the Java tests' @Autowired
- * repositories), independent of the controllers under test.
+ * Test fixture builders. Rows are inserted directly via the TypeORM
+ * repositories, independent of the controllers under test.
  */
 
-/** TestData.anOwner() — Sherlock Holmes. */
+/** Builds a sample owner — Sherlock Holmes. */
 export async function saveOwner(
   ds: DataSource,
   overrides: Partial<Owner> = {},
@@ -36,7 +34,7 @@ export async function savePetType(ds: DataSource, name: string): Promise<PetType
   return repo.save(repo.create({ name }));
 }
 
-/** TestData.aPet() — Leo, born 2010-10-10 — linked to the given owner + type. */
+/** Builds a sample pet — Leo, born 2010-10-10 — linked to the given owner + type. */
 export async function savePet(
   ds: DataSource,
   owner: Owner,

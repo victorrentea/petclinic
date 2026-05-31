@@ -4,11 +4,11 @@ import { IsDefined, IsOptional, Length, Matches, Min, ValidateNested } from 'cla
 import { SpecialtyDto } from '../../specialties/dto/specialty.dto';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.VetDto.
+ * Data transfer object for a vet.
  */
 export class VetDto {
   // class-validator emits constraints in reverse declaration order, so declare Matches before
-  // Length to reproduce Java's emitted Size-then-Pattern order for the vet name fields.
+  // Length to emit the size message before the pattern message for the vet name fields.
   @IsDefined({ message: 'must not be null' })
   @Matches(/\w+/, { message: 'must match "\\w+"' })
   @Length(1, 30, { message: 'size must be between 1 and 30' })

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, Length, Matches } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.OwnerFieldsDto.
+ * Mutable fields accepted when creating or updating an owner.
  */
 export class OwnerFieldsDto {
   @IsDefined({ message: 'must not be null' })
@@ -26,7 +26,7 @@ export class OwnerFieldsDto {
   city!: string;
 
   // class-validator emits constraints in reverse declaration order, so declare Length before
-  // Matches to reproduce Java's emitted Pattern-then-Size order for telephone.
+  // Matches to emit the pattern message before the size message for telephone.
   @IsDefined({ message: 'must not be null' })
   @Length(1, 20, { message: 'size must be between 1 and 20' })
   @Matches(/^[0-9]*$/, { message: 'must match "^[0-9]*$"' })

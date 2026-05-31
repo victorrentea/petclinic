@@ -19,12 +19,12 @@ import { Roles } from '../common/security/roles.decorator';
 import { toPetDto, toPetsDto, toPetType } from './pet.mapper';
 
 /**
- * Ported from victor.training.petclinic.rest.PetRestController.
+ * REST controller for pets.
  *
- * Mirrors the Java design: NO service layer — the controller injects the
- * TypeORM repository directly and uses stateless mapper functions.
+ * No service layer — the controller injects the TypeORM repository directly
+ * and uses stateless mapper functions.
  *
- * Class-level @PreAuthorize("hasRole(@roles.OWNER_ADMIN)") -> @Roles('ROLE_OWNER_ADMIN').
+ * The whole controller requires the OWNER_ADMIN role via @Roles('ROLE_OWNER_ADMIN').
  */
 @ApiTags('pets')
 @Controller('api/pets')
@@ -36,8 +36,7 @@ export class PetController {
   ) {}
 
   /**
-   * GET /api/pets/{petId} — mirrors getPet.
-   * Java `findById(petId).orElseThrow()` -> 404 when absent.
+   * GET /api/pets/{petId} — returns the pet, or 404 when absent.
    */
   @Get(':petId')
   async getPet(@Param('petId', ParseIntPipe) petId: number): Promise<PetDto> {
@@ -52,7 +51,7 @@ export class PetController {
   }
 
   /**
-   * GET /api/pets — mirrors listPets (produces "application/json").
+   * GET /api/pets — lists all pets.
    */
   @Get()
   async listPets(): Promise<PetDto[]> {
@@ -63,12 +62,9 @@ export class PetController {
   }
 
   /**
-   * PUT /api/pets/{petId} — mirrors updatePet.
+   * PUT /api/pets/{petId} — updates a pet.
    *
-   * Java is @Transactional and relies on JPA dirty-checking: it loads the pet,
-   * mutates name/birthDate/type via setters, and the changes flush on commit
-   * (no explicit save). TypeORM has no such session, so we load + mutate + save.
-   * Returns void / 200, exactly like the Java method (which has no body).
+   * Loads the pet, mutates name/birthDate/type, and saves it. Returns void / 200.
    */
   @Put(':petId')
   async updatePet(
@@ -86,8 +82,7 @@ export class PetController {
   }
 
   /**
-   * DELETE /api/pets/{petId} — mirrors deletePet.
-   * Java returns void (200). `findById(petId).orElseThrow()` -> 404 when absent.
+   * DELETE /api/pets/{petId} — returns void (200), or 404 when absent.
    */
   @Delete(':petId')
   @HttpCode(HttpStatus.OK)

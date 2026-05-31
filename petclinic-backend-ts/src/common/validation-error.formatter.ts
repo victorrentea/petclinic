@@ -1,11 +1,9 @@
 import { ValidationError } from 'class-validator';
 
 /**
- * Humanizes class-validator {@link ValidationError}s into the exact same readable
- * strings produced by the Java {@code ValidationErrorExtractor} /
- * {@code ValidationErrorFieldExtractor}.
+ * Humanizes class-validator {@link ValidationError}s into readable strings.
  *
- * Java algorithm (both extractors are identical in spirit):
+ * Algorithm:
  *   1. humanize the property path  -> "Birth date"
  *   2. if the violation message already starts with the (lowercased) field name,
  *      use the message as-is but capitalize its first letter;
@@ -21,14 +19,12 @@ import { ValidationError } from 'class-validator';
  * "birthDate"   -> "Birth date"
  * "owner.city"  -> "Owner city"
  * ""            -> "Value"
- *
- * Mirrors {@code humanizePath} in the Java extractors.
  */
 export function humanizePath(path: string | null | undefined): string {
   if (path === null || path === undefined || path === '') {
     return 'Value';
   }
-  // split camelCase, then replace dots with spaces (order matches Java: regex then replace)
+  // split camelCase, then replace dots with spaces
   let single = path.replace(/([a-z])([A-Z])/g, '$1 $2');
   single = single.replace(/\./g, ' ').trim();
   if (single === '') {
@@ -39,7 +35,7 @@ export function humanizePath(path: string | null | undefined): string {
   return parts.join(' ');
 }
 
-/** Capitalizes the first character; mirrors {@code capitalizeFirst} in the Java extractors. */
+/** Capitalizes the first character of the string. */
 export function capitalizeFirst(s: string): string {
   if (s === null || s === undefined || s === '') {
     return s;
@@ -47,7 +43,7 @@ export function capitalizeFirst(s: string): string {
   return s.charAt(0).toUpperCase() + (s.length > 1 ? s.substring(1) : '');
 }
 
-/** Stringifies an invalid value the way Java's {@code String.valueOf}/{@code toString} would. */
+/** Stringifies an invalid value for display in the error message. */
 function stringifyInvalidValue(value: unknown): string {
   if (value === null || value === undefined) {
     return 'null';
@@ -62,7 +58,7 @@ function stringifyInvalidValue(value: unknown): string {
   return String(value);
 }
 
-/** Combines a humanized field with its message + invalid value, mirroring the Java extractors. */
+/** Combines a humanized field with its message + invalid value. */
 function combine(field: string, rawMessage: string | undefined, invalidValue: unknown): string {
   const message = (rawMessage ?? '').trim();
   const msgLower = message.toLowerCase();
@@ -83,8 +79,7 @@ function combine(field: string, rawMessage: string | undefined, invalidValue: un
  * Flattens (possibly nested) class-validator errors into humanized messages.
  *
  * Nested errors (from {@code @ValidateNested}) carry a {@code children[]} list; the
- * full property path is the dot-joined chain of parent properties — matching the
- * way Spring exposes nested bean-validation paths (e.g. "owner.city").
+ * full property path is the dot-joined chain of parent properties (e.g. "owner.city").
  */
 export function formatValidationErrors(errors: ValidationError[]): string[] {
   const result: string[] = [];
@@ -94,13 +89,11 @@ export function formatValidationErrors(errors: ValidationError[]): string[] {
 
 /**
  * class-validator's {@code @Length}/{@code @Min}/{@code @Matches} do NOT skip null/undefined
- * values, so a missing field fails BOTH the presence constraint ({@code isDefined}, mirroring
- * Jakarta {@code @NotNull}) AND the secondary constraint — emitting two messages. Jakarta's
- * {@code @Size}/{@code @Min}/{@code @Pattern}/{@code @PastOrPresent} all short-circuit on null,
- * so only the {@code @NotNull} violation surfaces. We reproduce that here: when the value is
- * null/undefined and a presence constraint ({@code isDefined}) is present, keep ONLY it and drop
- * the secondary constraints. When the value is present (e.g. an empty string), every failed
- * constraint is kept — matching Java, which then reports Size/Pattern etc.
+ * values, so a missing field fails BOTH the presence constraint ({@code isDefined}) AND the
+ * secondary constraint — emitting two messages. To surface only the most useful message: when
+ * the value is null/undefined and a presence constraint ({@code isDefined}) is present, keep
+ * ONLY it and drop the secondary constraints. When the value is present (e.g. an empty string),
+ * every failed constraint is kept, so size/pattern/etc. are all reported.
  */
 function constraintMessagesFor(error: ValidationError): string[] {
   const constraints = error.constraints ?? {};
@@ -118,7 +111,7 @@ function isArrayIndex(property: string): boolean {
 
 function collect(errors: ValidationError[], parentPath: string, result: string[]): void {
   for (const error of errors) {
-    // Render array-index segments as Spring does: "roles" + "[0]" + ".name" -> "roles[0].name"
+    // Render array-index segments as "roles" + "[0]" + ".name" -> "roles[0].name"
     // (class-validator surfaces the index as a child whose property is the numeric string "0").
     let path: string;
     if (parentPath === '') {
@@ -131,7 +124,7 @@ function collect(errors: ValidationError[], parentPath: string, result: string[]
 
     if (error.constraints) {
       const field = humanizePath(path);
-      // one humanized line per failed constraint, mirroring one ConstraintViolation per failure
+      // one humanized line per failed constraint
       for (const message of constraintMessagesFor(error)) {
         result.push(combine(field, message, error.value));
       }

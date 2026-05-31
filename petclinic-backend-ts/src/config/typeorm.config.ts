@@ -6,15 +6,14 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
  * Builds the shared Postgres connection options used both by the standalone
  * TypeORM DataSource (for migrations / CLI) and by NestJS' TypeOrmModule.
  *
- * Env (with defaults mirroring the Java backend / start-database.sh):
+ * Env (with defaults matching start-database.sh):
  *   DB_HOST=localhost
  *   DB_PORT=5432
  *   DB_NAME=petclinic
  *   DB_USER=petclinic
  *   DB_PASS=petclinic
  *
- * Flyway owns the schema in the Java app; here TypeORM migrations do.
- * synchronize is ALWAYS false — never auto-DDL.
+ * TypeORM migrations own the schema. synchronize is ALWAYS false — never auto-DDL.
  */
 export function buildDataSourceOptions(): DataSourceOptions {
   return {

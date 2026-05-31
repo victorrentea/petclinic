@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Ported from Flyway V3__sample_data.sql.
- * Seed rows are preserved VERBATIM, including the bcrypt admin hash and the
+ * Seeds sample data.
+ * Seed rows include the bcrypt admin hash and the
  * literary owners / pets / visits. Insertion order is significant: the
  * IDENTITY-generated pet ids referenced by the visits rows depend on it.
  */

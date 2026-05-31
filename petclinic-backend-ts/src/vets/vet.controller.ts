@@ -24,15 +24,14 @@ import { toSpecialties } from '../specialties/specialty.mapper';
 import { Roles } from '../common/security/roles.decorator';
 
 /**
- * Ported from victor.training.petclinic.rest.VetRestController.
+ * REST controller for vets.
  *
- * No service layer (mirrors Java): the controller injects the TypeORM
- * repositories directly and runs the queries the Java repositories declared.
+ * No service layer: the controller injects the TypeORM repositories directly
+ * and runs the queries itself.
  *
- * Class-level `@PreAuthorize("hasRole(@roles.VET_ADMIN)")` -> @Roles('ROLE_VET_ADMIN').
- * The (globally registered, security-phase-owned) RolesGuard reads this metadata;
- * controllers only attach @Roles, mirroring how every Java controller carries a
- * single class-level @PreAuthorize.
+ * The whole controller requires the VET_ADMIN role via @Roles('ROLE_VET_ADMIN').
+ * The globally registered RolesGuard reads this metadata; controllers only
+ * attach @Roles.
  */
 @ApiTags('vets')
 @Controller('api/vets')
@@ -46,8 +45,7 @@ export class VetController {
   ) {}
 
   /**
-   * GET /api/vets
-   * Java: `@Query("SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties")`.
+   * GET /api/vets — lists all vets with their specialties left-joined.
    */
   @Get()
   async listVets(): Promise<VetDto[]> {
@@ -60,8 +58,7 @@ export class VetController {
   }
 
   /**
-   * GET /api/vets/{vetId}
-   * Java: `@Query("... WHERE v.id = :id")` + `orElseThrow()` -> 404.
+   * GET /api/vets/{vetId} — returns the vet, or 404 when absent.
    */
   @Get(':vetId')
   async getVet(@Param('vetId', ParseIntPipe) vetId: number): Promise<VetDto> {
@@ -70,8 +67,7 @@ export class VetController {
   }
 
   /**
-   * POST /api/vets -> 201 Created with a Location header.
-   * Java: `ResponseEntity.created(/api/vets/{id})`.
+   * POST /api/vets -> 201 Created with a `Location: /api/vets/{id}` header.
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -85,7 +81,7 @@ export class VetController {
   }
 
   /**
-   * PUT /api/vets/{vetId} -> 200 / void (Java returns void).
+   * PUT /api/vets/{vetId} -> 200 / void.
    */
   @Put(':vetId')
   async updateVet(
@@ -103,9 +99,8 @@ export class VetController {
   }
 
   /**
-   * Java private updateSpecialties: if the vet has specialties, re-resolve them
-   * by name (findSpecialtiesByNameIn) so detached/new Specialty instances become
-   * managed entities, then save.
+   * If the vet has specialties, re-resolve them by name so detached/new
+   * Specialty instances become persisted entities, then save.
    */
   private async updateSpecialties(currentVet: Vet): Promise<void> {
     if (currentVet.getNrOfSpecialties() > 0) {
@@ -121,8 +116,7 @@ export class VetController {
   }
 
   /**
-   * DELETE /api/vets/{vetId} -> void.
-   * Java: `@Transactional` findById().orElseThrow() then delete().
+   * DELETE /api/vets/{vetId} -> void. 404 when absent, then delete.
    */
   @Delete(':vetId')
   async deleteVet(
@@ -133,8 +127,8 @@ export class VetController {
   }
 
   /**
-   * Mirrors the Java `findById` query (LEFT JOIN FETCH specialties) plus
-   * `orElseThrow()` -> 404 Not Found.
+   * Loads a vet by id (left-joining its specialties), throwing 404 Not Found
+   * when missing.
    */
   private async findByIdOrThrow(vetId: number): Promise<Vet> {
     const vet = await this.vetRepository

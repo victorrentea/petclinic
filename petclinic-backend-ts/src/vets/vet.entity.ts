@@ -2,10 +2,9 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 't
 import { Specialty } from '../specialties/specialty.entity';
 
 /**
- * Ported from victor.training.petclinic.model.Vet.
- * @Table(name = "vets")
+ * Vet entity, mapped to the "vets" table.
  *
- * Vet <-> Specialty is @ManyToMany via the 'vet_specialties' join table
+ * Vet <-> Specialty is a many-to-many via the 'vet_specialties' join table
  * (joinColumn vet_id, inverseJoinColumn specialty_id, unique (vet_id, specialty_id)).
  */
 @Entity({ name: 'vets' })
@@ -27,17 +26,17 @@ export class Vet {
   })
   specialties!: Specialty[];
 
-  /** Mirrors Java Vet.clearSpecialties(). */
+  /** Removes all of this vet's specialties. */
   clearSpecialties(): void {
     this.specialties = [];
   }
 
-  /** Mirrors Java Vet.getNrOfSpecialties(). */
+  /** Returns the number of specialties this vet has. */
   getNrOfSpecialties(): number {
     return (this.specialties ?? []).length;
   }
 
-  /** Mirrors Java Vet.addSpecialty(). */
+  /** Adds a specialty to this vet. */
   addSpecialty(specialty: Specialty): void {
     (this.specialties ??= []).push(specialty);
   }

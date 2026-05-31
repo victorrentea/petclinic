@@ -25,10 +25,10 @@ import {
 } from './specialty.mapper';
 
 /**
- * Ported from victor.training.petclinic.rest.SpecialtyRestController.
+ * REST controller for specialties.
  *
- * @RequestMapping("/api") with sub-paths "/specialties..."; class-level
- * @PreAuthorize("hasRole(@roles.VET_ADMIN)") → @Roles('ROLE_VET_ADMIN').
+ * Mounted at "/api" with "/specialties..." sub-paths; the whole controller
+ * requires the VET_ADMIN role via @Roles('ROLE_VET_ADMIN').
  *
  * No service layer: the TypeORM repository is injected directly and the
  * stateless mapper functions are imported.
@@ -84,7 +84,7 @@ export class SpecialtyController {
     await this.specialtyRepository.remove(specialty);
   }
 
-  /** Mirrors Java's `findById(id).orElseThrow()` → 404 when missing. */
+  /** Loads a specialty by id, throwing a 404 when missing. */
   private async findByIdOrThrow(id: number): Promise<Specialty> {
     const specialty = await this.specialtyRepository.findOneBy({ id });
     if (!specialty) {

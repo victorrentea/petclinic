@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, Length } from 'class-validator';
 
 /**
- * Ported from victor.training.petclinic.rest.dto.RoleDto.
+ * Data transfer object for a role.
  */
 export class RoleDto {
   @IsDefined({ message: 'must not be null' })

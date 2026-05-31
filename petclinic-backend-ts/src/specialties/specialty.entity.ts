@@ -1,8 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 /**
- * Ported from victor.training.petclinic.model.Specialty.
- * @Table(name = "specialties")
+ * Specialty entity, mapped to the "specialties" table.
  */
 @Entity({ name: 'specialties' })
 export class Specialty {

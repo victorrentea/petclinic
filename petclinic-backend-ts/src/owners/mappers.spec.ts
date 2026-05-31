@@ -7,11 +7,10 @@ import { Visit } from '../visits/visit.entity';
 import { toVisitDto } from '../visits/visit.mapper';
 
 /**
- * Database-free unit tests for the stateless mapper functions, mirroring the
- * MapStruct mapper behaviours of the Java backend:
- *   - PetMapper: visits emitted sorted by date DESCENDING (Pet.getVisitsSortedByDate)
- *   - OwnerMapper: pets emitted sorted by name ASCENDING (Owner.getPets)
- *   - VisitMapper: VisitDto populated from pet + pet.owner (petId/petName/ownerId/...)
+ * Database-free unit tests for the stateless mapper functions:
+ *   - pet.mapper: visits emitted sorted by date DESCENDING (Pet.getVisitsSortedByDate)
+ *   - owner.mapper: pets emitted sorted by name ASCENDING (Owner.getPets)
+ *   - visit.mapper: VisitDto populated from pet + pet.owner (petId/petName/ownerId/...)
  *
  * These run without a DB: entities are constructed in-memory; no @InjectRepository
  * or TypeORM connection is touched.

@@ -2,13 +2,10 @@ import { Specialty } from './specialty.entity';
 import { SpecialtyDto } from './dto/specialty.dto';
 
 /**
- * Stateless mapper ported from victor.training.petclinic.mapper.SpecialtyMapper
- * (MapStruct, componentModel = "spring").
+ * Stateless mapper between Specialty entities and SpecialtyDto.
  *
- * Plain functions — NO Nest DI, NO @Injectable — mirroring MapStruct's
- * stateless nature. Controllers import these functions directly.
- *
- * MapStruct maps matching properties by name; here both `id` and `name`.
+ * Plain functions — no Nest DI, no @Injectable. Controllers import these
+ * functions directly. Maps the matching `id` and `name` properties.
  */
 
 export function toSpecialty(dto: SpecialtyDto): Specialty {
@@ -30,7 +27,7 @@ export function toSpecialtyDtos(specialties: Specialty[]): SpecialtyDto[] {
 }
 
 /**
- * Mirrors MapStruct's `List<Specialty> toSpecialty(List<SpecialtyDto>)`.
+ * Maps a list of SpecialtyDto to a list of Specialty entities.
  * Named distinctly because TS has no method overloading.
  */
 export function toSpecialties(dtos: SpecialtyDto[]): Specialty[] {

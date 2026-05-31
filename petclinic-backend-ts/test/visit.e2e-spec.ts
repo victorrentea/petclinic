@@ -13,7 +13,7 @@ import {
 import { savePet, savePetType, saveOwner, saveVisit, todayIso } from './fixtures';
 
 /**
- * Ported from victor.training.petclinic.rest.VisitTest.
+ * End-to-end tests for the visits endpoints.
  */
 describe('VisitController (e2e)', () => {
   let app: INestApplication;
@@ -83,9 +83,9 @@ describe('VisitController (e2e)', () => {
     expect(created.ownerLastName).toBe(ownerData.lastName);
   });
 
-  // NOTE: the Java VisitTest has NO create-success test (only create_invalid),
-  // so we do not assert a 201 here. (A naive create would also trip the ported
-  // VisitDto.id @Min(0) bug — see the task report.)
+  // NOTE: there is no create-success test here (only create_invalid), so we do
+  // not assert a 201. (A naive create would also trip the VisitDto.id @Min(0)
+  // defect — see the task report.)
 
   it('create_invalid (missing description)', async () => {
     if (!available) return;

@@ -1,6 +1,6 @@
 ---
 name: add-field
-description: Add a new field to an existing domain entity, propagating the change across all layers (OpenAPI spec, JPA entity, MapStruct mapper, DB schema). Explicit invocation only — user must type /add-field.
+description: Add a new field to an existing domain entity, propagating the change across all layers (TypeORM entity, migration, DTO, mapper, OpenAPI). Explicit invocation only — user must type /add-field.
 ---
 
 # Add Field to Entity
@@ -17,38 +17,37 @@ Given:
 Follow these steps **in order**, using TDD — write a failing test first, confirm it fails, then implement.
 
 ### 1. Write a failing test
-- Add a test in the appropriate `*Test` class (e.g., `OwnerTest`) that verifies the new field is present in the API response or request.
-- Run the test and confirm it **fails**.
+- Add a test (e.g. an e2e spec under `test/` or a `*.spec.ts` next to the controller) that verifies the new field is present in the API response or accepted in a request.
+- Run it and confirm it **fails**: `npm test -- path/to/file.spec.ts`
 
-### 2. Update the OpenAPI spec
-- Edit `petclinic-backend/src/main/resources/openapi.yml`
-- Add `$FIELD_NAME` to the relevant DTO schema(s) (request and/or response as appropriate)
+### 2. Update the TypeORM entity
+- Add the field to `src/<domain>/<entity>.entity.ts`
+- Use the appropriate `@Column({ name: '...', ... })` (snake_case DB column name)
 
-### 3. Regenerate code
+### 3. Add a migration
+- Add a new migration class under `src/migrations/` that `ALTER TABLE ... ADD COLUMN ...` for the new column (the schema is owned by migrations; `synchronize: false`)
+- Apply it: `npm run migration:run`
+
+### 4. Update the DTO(s)
+- Add `$FIELD_NAME` to the relevant DTO under `src/<domain>/dto/` (request and/or response as appropriate)
+- Add `class-validator` decorators (`@IsNotEmpty()`, `@Length()`, `@Matches()`, etc.) and `@ApiProperty(...)` from `@nestjs/swagger`
+
+### 5. Update the mapper
+- Add the field mapping in the stateless mapper function in `src/<domain>/<domain>.mapper.ts` (entity↔DTO, both directions as needed)
+
+### 6. Regenerate the OpenAPI spec
 ```sh
-cd petclinic-backend && mvn clean install -DskipTests
+npm run guardrail:openapi:generate
 ```
-This regenerates the DTOs in `target/generated-sources/`.
-
-### 4. Update the JPA Entity
-- Add the field to `model/$ENTITY.java`
-- Use appropriate JPA annotations (`@Column`, `@NotNull`, etc.)
-- Update Lombok annotations if needed
-
-### 5. Update the MapStruct Mapper
-- Add the field mapping in the relevant mapper (in `target/generated-sources/` or handwritten mapper)
-- If a custom mapping expression is needed, add it via `@Mapping`
-
-### 6. Update DB schema (if needed)
-- Add a column to the relevant SQL script in `src/main/resources/db/`
+This rewrites the committed `openapi.yaml`. The frontend regenerates its TS types from it.
 
 ### 7. Run the failing test again — it should now **pass**
 ```sh
-cd petclinic-backend && mvn test -Dtest=EntityNameTest
+npm test -- path/to/file.spec.ts
 ```
 
 ## Constraints
-- Constructor injection only (no `@Autowired` in production code)
-- Use Lombok where applicable
+- Constructor injection in controllers (no service layer)
+- Stateless mapper functions for DTO mapping (no DI, no `@Injectable`)
 - Line length ≤ 120 chars
-- Follow existing naming conventions in the entity
+- Follow existing naming conventions in the entity (snake_case DB columns)

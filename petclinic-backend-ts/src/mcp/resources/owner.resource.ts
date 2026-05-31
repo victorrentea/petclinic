@@ -3,13 +3,12 @@ import { Owner } from '../../owners/owner.entity';
 import { Pet } from '../../pets/pet.entity';
 
 /**
- * Ported from victor.training.petclinic.mcp.OwnerMcpResource.
+ * The owner MCP resource.
  *
  * Resource uri `me://profile`, name `me_profile`: returns the authenticated
- * owner's markdown profile (name, address, phone, pets). The markdown template
- * is reproduced verbatim from the Java text block.
+ * owner's markdown profile (name, address, phone, pets).
  *
- * Stateless plain function (mirrors the project's stateless-mapper convention);
+ * Stateless plain function (matches the project's stateless-mapper convention);
  * the owner id + repository are supplied by the MCP wiring per request.
  */
 export const OWNER_RESOURCE_URI = 'me://profile';
@@ -18,9 +17,7 @@ export const OWNER_RESOURCE_DESCRIPTION =
   "The authenticated owner's profile: name, address, phone, and pets.";
 
 /**
- * Mirrors `OwnerRepository.findByIdFetchingPets(id)`:
- * `SELECT o FROM Owner o LEFT JOIN FETCH o.pets WHERE o.id = :id`.
- * Also fetches each pet's type (Java traverses `pet.getType().getName()`).
+ * Loads an owner by id, eagerly fetching its pets and each pet's type.
  */
 export function findOwnerFetchingPets(
   ownerRepository: Repository<Owner>,
@@ -32,7 +29,7 @@ export function findOwnerFetchingPets(
   });
 }
 
-/** Reproduces OwnerMcpResource.formatPet(): `- id=.. — name (type), born date`. */
+/** Formats a single pet line: `- id=.. — name (type), born date`. */
 function formatPet(pet: Pet): string {
   const type = pet.type == null ? '?' : (pet.type.name ?? '?');
   return `- id=${pet.id} — ${pet.name} (${type}), born ${pet.birthDate}`;
@@ -40,7 +37,7 @@ function formatPet(pet: Pet): string {
 
 /**
  * Builds the markdown profile for the authenticated owner. Throws when the
- * owner cannot be found (Java threw IllegalStateException).
+ * owner cannot be found.
  */
 export async function buildOwnerProfileMarkdown(
   ownerRepository: Repository<Owner>,
@@ -51,12 +48,11 @@ export async function buildOwnerProfileMarkdown(
     throw new Error(`No owner with id=${ownerId}`);
   }
 
-  // Mirrors Owner.getPets(): unmodifiable view sorted by name ascending.
+  // Pets sorted by name ascending.
   const pets = owner.getPets();
   const petLines = pets.map(formatPet).join('\n');
 
-  // Reproduces the Java text block (4-space indent stripped by Java's
-  // incidental-whitespace rules -> left-aligned markdown).
+  // Left-aligned markdown profile.
   return (
     `# ${owner.firstName} ${owner.lastName}\n` +
     `- Address: ${owner.address}, ${owner.city}\n` +

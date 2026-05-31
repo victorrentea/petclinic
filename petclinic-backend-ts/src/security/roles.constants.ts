@@ -1,19 +1,13 @@
 /**
- * Role name constants, ported 1:1 from
- * victor.training.petclinic.security.Roles.
+ * Role name constants:
+ *   OWNER_ADMIN = "ROLE_OWNER_ADMIN"
+ *   VET_ADMIN   = "ROLE_VET_ADMIN"
+ *   ADMIN       = "ROLE_ADMIN"
  *
- * Java reference:
- *   public final String OWNER_ADMIN = "ROLE_OWNER_ADMIN";
- *   public final String VET_ADMIN   = "ROLE_VET_ADMIN";
- *   public final String ADMIN       = "ROLE_ADMIN";
- *
- * In Spring, the `Roles` @Component is referenced from SpEL inside
- * @PreAuthorize("hasRole(@roles.X)"). The roles stored in the `roles` table
- * already carry the `ROLE_` prefix (see the SampleData migration), and Spring's
- * hasRole() compares against authorities verbatim once the GrantedAuthority is
- * built from that column. The TS port therefore keeps the full `ROLE_`-prefixed
- * names as the canonical authority strings and compares them directly in the
- * RolesGuard.
+ * The roles stored in the `roles` table already carry the `ROLE_` prefix (see
+ * the SampleData migration). These constants keep the full `ROLE_`-prefixed
+ * names as the canonical authority strings, which the RolesGuard compares
+ * against directly.
  */
 export const ROLE_OWNER_ADMIN = 'ROLE_OWNER_ADMIN';
 export const ROLE_VET_ADMIN = 'ROLE_VET_ADMIN';

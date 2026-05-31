@@ -8,16 +8,15 @@ import { McpController } from './mcp.controller';
 import { ApiKeyMiddleware } from './api-key.middleware';
 
 /**
- * MCP feature module, ported from the Spring AI MCP server wiring.
+ * MCP feature module.
  *
- * Mirrors the Java design (NO service layer): McpServerService injects the
- * TypeORM repositories for Owner/Pet/Visit directly and the stateless
- * resource/tool functions operate on them.
+ * No service layer: McpServerService injects the TypeORM repositories for
+ * Owner/Pet/Visit directly and the stateless resource/tool functions operate
+ * on them.
  *
  * ApiKeyMiddleware is bound to the MCP routes only (GET /sse,
- * POST /mcp/messages) — the X-API-Key chain that, in Java, was a separate
- * SecurityFilterChain scoped to "/sse", "/sse/**", "/mcp/**" with
- * @Order(HIGHEST_PRECEDENCE) so it ran before the /api chain.
+ * POST /mcp/messages) — the X-API-Key chain that gates "/sse", "/sse/**" and
+ * "/mcp/**" independently of the /api authorization.
  */
 @Module({
   imports: [TypeOrmModule.forFeature([Owner, Pet, Visit])],
