@@ -12,6 +12,9 @@ echo "==> mvn install: petclinic-database"
 echo "==> mvn install: petclinic-backend"
 (cd "$ROOT/petclinic-backend" && mvn install -DskipTests)
 
+echo "==> npm install + build: petclinic-backend-ts"
+(cd "$ROOT/petclinic-backend-ts" && npm install && npm run build)
+
 echo "==> npm install: petclinic-frontend"
 (cd "$ROOT/petclinic-frontend" && npm install)
 

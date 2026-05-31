@@ -1,0 +1,39 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsDefined, IsOptional, Length, Matches, Min, ValidateNested } from 'class-validator';
+import { SpecialtyDto } from '../../specialties/dto/specialty.dto';
+
+/**
+ * Ported from victor.training.petclinic.rest.dto.VetDto.
+ */
+export class VetDto {
+  // class-validator emits constraints in reverse declaration order, so declare Matches before
+  // Length to reproduce Java's emitted Size-then-Pattern order for the vet name fields.
+  @IsDefined({ message: 'must not be null' })
+  @Matches(/\w+/, { message: 'must match "\\w+"' })
+  @Length(1, 30, { message: 'size must be between 1 and 30' })
+  @ApiProperty({ example: 'James', description: 'The first name of the vet.' })
+  firstName!: string;
+
+  @IsDefined({ message: 'must not be null' })
+  @Matches(/\w+/, { message: 'must match "\\w+"' })
+  @Length(1, 30, { message: 'size must be between 1 and 30' })
+  @ApiProperty({ example: 'Carter', description: 'The last name of the vet.' })
+  lastName!: string;
+
+  @IsDefined({ message: 'must not be null' })
+  @ValidateNested({ each: true })
+  @Type(() => SpecialtyDto)
+  @ApiProperty({ type: () => [SpecialtyDto], description: 'The specialties of the vet.' })
+  specialties: SpecialtyDto[] = [];
+
+  @IsOptional()
+  @Min(0, { message: 'must be greater than or equal to 0' })
+  @ApiProperty({
+    readOnly: true,
+    example: 1,
+    description: 'The ID of the vet.',
+    required: true,
+  })
+  id!: number;
+}

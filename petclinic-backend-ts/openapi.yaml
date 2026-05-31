@@ -1,0 +1,813 @@
+components:
+  schemas:
+    OwnerDto:
+      properties:
+        address:
+          description: The postal address of the pet owner.
+          example: 110 W. Liberty St.
+          type: string
+        city:
+          description: The city of the pet owner.
+          example: Madison
+          type: string
+        firstName:
+          description: The first name of the pet owner.
+          example: George
+          type: string
+        id:
+          description: The ID of the pet owner.
+          example: 1
+          readOnly: true
+          type: number
+        lastName:
+          description: The last name of the pet owner.
+          example: Franklin
+          type: string
+        pets:
+          description: The pets owned by this individual including any booked vet visits.
+          items:
+            $ref: '#/components/schemas/PetDto'
+          readOnly: true
+          type: array
+        telephone:
+          description: The telephone number of the pet owner.
+          example: '6085551023'
+          type: string
+      required:
+        - firstName
+        - lastName
+        - address
+        - city
+        - telephone
+        - pets
+      type: object
+    OwnerFieldsDto:
+      properties:
+        address:
+          description: The postal address of the pet owner.
+          example: 110 W. Liberty St.
+          type: string
+        city:
+          description: The city of the pet owner.
+          example: Madison
+          type: string
+        firstName:
+          description: The first name of the pet owner.
+          example: George
+          type: string
+        lastName:
+          description: The last name of the pet owner.
+          example: Franklin
+          type: string
+        telephone:
+          description: The telephone number of the pet owner.
+          example: '6085551023'
+          type: string
+      required:
+        - firstName
+        - lastName
+        - address
+        - city
+        - telephone
+      type: object
+    PetDto:
+      properties:
+        birthDate:
+          example: '2010-09-07'
+          type: string
+        id:
+          description: The ID of the pet.
+          example: 1
+          readOnly: true
+          type: number
+        name:
+          description: The name of the pet.
+          example: Leo
+          type: string
+        ownerId:
+          description: The ID of the pet's owner.
+          example: 1
+          readOnly: true
+          type: number
+        visits:
+          description: Vet visit bookings for this pet.
+          items:
+            $ref: '#/components/schemas/VisitDto'
+          readOnly: true
+          type: array
+      required:
+        - name
+        - birthDate
+        - id
+        - visits
+      type: object
+    PetFieldsDto:
+      properties:
+        birthDate:
+          description: The date of birth of the pet.
+          example: '2010-09-07'
+          type: string
+        name:
+          description: The name of the pet.
+          example: Leo
+          type: string
+        type:
+          $ref: '#/components/schemas/PetTypeDto'
+      required:
+        - name
+        - birthDate
+        - type
+      type: object
+    PetTypeDto:
+      properties:
+        id:
+          description: The ID of the pet type.
+          example: 1
+          type: number
+        name:
+          description: The name of the pet type.
+          example: cat
+          type: string
+      required:
+        - name
+        - id
+      type: object
+    PetTypeFieldsDto:
+      properties:
+        name:
+          description: The name of the pet type.
+          example: cat
+          type: string
+      required:
+        - name
+      type: object
+    RoleDto:
+      properties:
+        name:
+          description: The role's name
+          example: admin
+          type: string
+      required:
+        - name
+      type: object
+    SpecialtyDto:
+      properties:
+        id:
+          description: The ID of the specialty.
+          example: 1
+          readOnly: true
+          type: number
+        name:
+          description: The name of the specialty.
+          example: radiology
+          type: string
+      required:
+        - id
+        - name
+      type: object
+    UserDto:
+      properties:
+        enabled:
+          description: Indicates if the user is enabled
+          example: true
+          type: boolean
+        password:
+          description: The password
+          example: 1234abc
+          type: string
+        roles:
+          description: The roles of an user
+          items:
+            $ref: '#/components/schemas/RoleDto'
+          type: array
+        username:
+          description: The username
+          example: john.doe
+          type: string
+      required:
+        - username
+        - roles
+      type: object
+    VetDto:
+      properties:
+        firstName:
+          description: The first name of the vet.
+          example: James
+          type: string
+        id:
+          description: The ID of the vet.
+          example: 1
+          readOnly: true
+          type: number
+        lastName:
+          description: The last name of the vet.
+          example: Carter
+          type: string
+        specialties:
+          description: The specialties of the vet.
+          items:
+            $ref: '#/components/schemas/SpecialtyDto'
+          type: array
+      required:
+        - firstName
+        - lastName
+        - specialties
+        - id
+      type: object
+    VisitDto:
+      properties:
+        date:
+          description: The date of the visit.
+          example: '2013-01-01'
+          type: string
+        description:
+          description: The description for the visit.
+          example: rabies shot
+          type: string
+        id:
+          description: The ID of the visit.
+          example: 1
+          readOnly: true
+          type: number
+        ownerFirstName:
+          description: First name of the owner (server-populated).
+          readOnly: true
+          type: string
+        ownerId:
+          description: ID of the owner of the pet (server-populated).
+          readOnly: true
+          type: number
+        ownerLastName:
+          description: Last name of the owner (server-populated).
+          readOnly: true
+          type: string
+        petId:
+          description: The ID of the pet.
+          example: 1
+          type: number
+        petName:
+          description: Name of the pet (server-populated).
+          readOnly: true
+          type: string
+      required:
+        - description
+        - id
+        - petId
+      type: object
+    VisitFieldsDto:
+      properties:
+        date:
+          description: The date of the visit.
+          example: '2013-01-01'
+          type: string
+        description:
+          description: The description for the visit.
+          example: rabies shot
+          type: string
+      required:
+        - description
+      type: object
+  securitySchemes:
+    basic:
+      scheme: basic
+      type: http
+info:
+  contact: {}
+  description: This is the REST API documentation of the Spring Petclinic backend. If authentication is enabled, use admin/admin when calling the APIs
+  termsOfService: https://github.com/spring-petclinic/petclinic-rest/blob/master/terms.txt
+  title: REST Petclinic Backend API
+  version: '1.0'
+openapi: 3.0.0
+paths:
+  /api/owners:
+    get:
+      operationId: listOwners
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OwnerDto'
+                type: array
+          description: ''
+      summary: List owners
+      tags:
+        - owner
+    post:
+      operationId: addOwner
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerFieldsDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      summary: Create an owner
+      tags:
+        - owner
+  /api/owners/count:
+    get:
+      operationId: countOwners
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      summary: Count owners
+      tags:
+        - owner
+  /api/owners/{ownerId}:
+    delete:
+      operationId: deleteOwner
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      summary: Delete an owner by ID
+      tags:
+        - owner
+    get:
+      operationId: getOwner
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerDto'
+          description: ''
+      summary: Get an owner by ID
+      tags:
+        - owner
+    put:
+      operationId: updateOwner
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerFieldsDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      summary: Update an owner
+      tags:
+        - owner
+  /api/owners/{ownerId}/pets:
+    post:
+      operationId: addPetToOwner
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetFieldsDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      summary: Add a pet to an owner
+      tags:
+        - owner
+  /api/owners/{ownerId}/pets/{petId}:
+    get:
+      operationId: getOwnersPet
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetDto'
+          description: ''
+      summary: Get a pet belonging to an owner
+      tags:
+        - owner
+    put:
+      operationId: updateOwnersPet
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetFieldsDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      summary: Update an owner's pet
+      tags:
+        - owner
+  /api/owners/{ownerId}/pets/{petId}/visits:
+    post:
+      operationId: addVisitToOwner
+      parameters:
+        - in: path
+          name: ownerId
+          required: true
+          schema:
+            type: number
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitFieldsDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      summary: Add a visit for an owner's pet
+      tags:
+        - owner
+  /api/pets:
+    get:
+      operationId: PetController_listPets
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pets
+  /api/pets/{petId}:
+    delete:
+      operationId: PetController_deletePet
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pets
+    get:
+      operationId: PetController_getPet
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pets
+    put:
+      operationId: PetController_updatePet
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pets
+  /api/pettypes:
+    get:
+      operationId: PetTypeController_listPetTypes
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pettypes
+    post:
+      operationId: PetTypeController_addPetType
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetTypeFieldsDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      tags:
+        - pettypes
+  /api/pettypes/{petTypeId}:
+    delete:
+      operationId: PetTypeController_deletePetType
+      parameters:
+        - in: path
+          name: petTypeId
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: ''
+      tags:
+        - pettypes
+    get:
+      operationId: PetTypeController_getPetType
+      parameters:
+        - in: path
+          name: petTypeId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pettypes
+    put:
+      operationId: PetTypeController_updatePetType
+      parameters:
+        - in: path
+          name: petTypeId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetTypeDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      tags:
+        - pettypes
+  /api/specialties:
+    get:
+      operationId: SpecialtyController_listSpecialties
+      parameters: []
+      responses:
+        '200':
+          description: ''
+    post:
+      operationId: SpecialtyController_addSpecialty
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialtyDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+  /api/specialties/{specialtyId}:
+    delete:
+      operationId: SpecialtyController_deleteSpecialty
+      parameters:
+        - in: path
+          name: specialtyId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+    get:
+      operationId: SpecialtyController_getSpecialty
+      parameters:
+        - in: path
+          name: specialtyId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+    put:
+      operationId: SpecialtyController_updateSpecialty
+      parameters:
+        - in: path
+          name: specialtyId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialtyDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+  /api/users:
+    post:
+      operationId: UserController_addUser
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+          description: ''
+      tags:
+        - user-rest-controller
+  /api/vets:
+    get:
+      operationId: VetController_listVets
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - vets
+    post:
+      operationId: VetController_addVet
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VetDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      tags:
+        - vets
+  /api/vets/{vetId}:
+    delete:
+      operationId: VetController_deleteVet
+      parameters:
+        - in: path
+          name: vetId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - vets
+    get:
+      operationId: VetController_getVet
+      parameters:
+        - in: path
+          name: vetId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - vets
+    put:
+      operationId: VetController_updateVet
+      parameters:
+        - in: path
+          name: vetId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VetDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      tags:
+        - vets
+  /api/visits:
+    get:
+      operationId: VisitController_listVisits
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - visits
+    post:
+      operationId: VisitController_addVisit
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitDto'
+        required: true
+      responses:
+        '201':
+          description: ''
+      tags:
+        - visits
+  /api/visits/{visitId}:
+    delete:
+      operationId: VisitController_deleteVisit
+      parameters:
+        - in: path
+          name: visitId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - visits
+    get:
+      operationId: VisitController_getVisit
+      parameters:
+        - in: path
+          name: visitId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+      tags:
+        - visits
+    put:
+      operationId: VisitController_updateVisit
+      parameters:
+        - in: path
+          name: visitId
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitFieldsDto'
+        required: true
+      responses:
+        '200':
+          description: ''
+      tags:
+        - visits
+servers: []
+tags: []
