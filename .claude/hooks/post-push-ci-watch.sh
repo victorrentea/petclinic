@@ -67,7 +67,7 @@ msg = (
     'Run EXACTLY this as a Bash tool call with run_in_background: true, then continue other work — do NOT block on it:\n\n'
     + watch_cmd + '\n\n'
     'When the background task completes, its exit status is the verdict (0 = CI passed, non-zero = failed). '
-    'Summarize the CI result to the user; if it failed, offer to run /fix-ci.'
+    'Summarize the CI result to the user; if it failed, surface the failing job/step and offer to investigate and fix it.'
 )
 print(json.dumps({'hookSpecificOutput': {'hookEventName': 'PostToolUse', 'additionalContext': msg}}))
 "
