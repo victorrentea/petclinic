@@ -1,6 +1,7 @@
 package victor.training.petclinic.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,7 @@ public class BasicAuthenticationConfig {
         return http.build();
     }
 
+    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         // @formatter:off
         auth
