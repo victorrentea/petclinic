@@ -60,7 +60,8 @@ public class OwnerSteps {
         for (Map<String, String> row : table.asMaps()) {
             jdbc.update(
                 "INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES (?, ?, ?, ?, ?)",
-                row.get("firstName"), row.get("lastName"), "addr", "city", "0000000000"
+                row.get("firstName"), row.get("lastName"), "addr",
+                row.getOrDefault("city", "unknown"), "0000000000"
             );
         }
     }

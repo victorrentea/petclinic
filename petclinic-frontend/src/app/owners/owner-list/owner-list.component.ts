@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {Owner, Page} from '../owner';
+import {Router, ActivatedRoute} from '@angular/router';
+import {Sort} from '@angular/material/sort';
+import {PageEvent} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-owner-list',
@@ -10,63 +11,42 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
+  ownersPage: Page<Owner> | null = null;
+  lastName = '';
+  page = 0;
+  size = 10;
+  sort = 'firstName,asc';
+  errorMessage = '';
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
-  }
+  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {}
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.route.queryParams.subscribe(params => {
+      this.lastName = params['lastName'] || '';
+      this.page = +params['page'] || 0;
+      this.size = +params['size'] || 10;
+      this.sort = params['sort'] || 'firstName,asc';
+      this.ownerService.searchOwnersPaged(this.lastName, this.page, this.size, this.sort)
+        .subscribe(p => this.ownersPage = p, (err: any) => this.errorMessage = err);
+    });
   }
 
-  onSelect(owner: Owner) {
-    this.router.navigate(['/owners', owner.id]);
+  searchByLastName(lastName: string) {
+    this.router.navigate([], { relativeTo: this.route,
+      queryParams: { lastName, page: 0, size: this.size, sort: this.sort } });
   }
 
-  addOwner() {
-    this.router.navigate(['/owners/add']);
+  onSortChange(sort: Sort) {
+    const sortParam = sort.direction ? sort.active + ',' + sort.direction : 'firstName,asc';
+    this.router.navigate([], { relativeTo: this.route,
+      queryParams: { lastName: this.lastName, page: 0, size: this.size, sort: sortParam } });
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
-
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
-      );
-
-      }
+  onPageChange(event: PageEvent) {
+    this.router.navigate([], { relativeTo: this.route,
+      queryParams: { lastName: this.lastName, page: event.pageIndex, size: event.pageSize, sort: this.sort } });
   }
 
-
+  onSelect(owner: Owner) { this.router.navigate(['/owners', owner.id]); }
+  addOwner() { this.router.navigate(['/owners/add']); }
 }

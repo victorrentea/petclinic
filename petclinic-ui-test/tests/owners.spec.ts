@@ -46,6 +46,20 @@ test.describe('Owners Page', () => {
     expect(ApiClient.sorted(actualFullNames)).toEqual(ApiClient.sorted(expectedFullNames));
   });
 
+  test('pagination range shows correct range after refresh on page 2', async ({ page }) => {
+    await page.goto('/petclinic/owners?lastName=&page=1&size=10&sort=firstName,asc');
+    await page.waitForSelector('#ownersTable', { timeout: 10000 });
+
+    await page.reload();
+    await page.waitForSelector('#ownersTable', { timeout: 10000 });
+
+    const rangeLabel = page.locator('.mat-mdc-paginator-range-label');
+    await rangeLabel.waitFor({ state: 'visible', timeout: 5000 });
+    const labelText = await rangeLabel.textContent();
+
+    expect(labelText).toMatch(/11\s*[–-]\s*20/);
+  });
+
   test('filters owners by last name prefix', async ({ page }) => {
     // Fetch all owners and choose a prefix
     const allOwners = await apiClient.fetchOwners();
