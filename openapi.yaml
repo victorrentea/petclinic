@@ -1443,7 +1443,7 @@ components:
           example: 110 W. Liberty St.
           maxLength: 255
           minLength: 1
-        city:
+        cityName:
           type: string
           description: The city of the pet owner.
           example: Madison
@@ -1484,7 +1484,7 @@ components:
           pattern: "^[0-9]*$"
       required:
       - address
-      - city
+      - cityName
       - firstName
       - lastName
       - pets

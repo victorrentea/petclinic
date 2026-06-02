@@ -109,7 +109,7 @@ export interface components {
        * @description The city of the pet owner.
        * @example Madison
        */
-      city: string;
+      cityName: string;
       /**
        * @description The first name of the pet owner.
        * @example George
