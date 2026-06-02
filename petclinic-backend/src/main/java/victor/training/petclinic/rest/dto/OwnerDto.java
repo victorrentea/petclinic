@@ -37,7 +37,7 @@ public class OwnerDto {
     @NotNull
     @Size(min = 1, max = 80)
     @Schema(example = "Madison", description = "The city of the pet owner.")
-    private String city;
+    private String cityName;
 
     @NotNull
     @Pattern(regexp = "^[0-9]*$")
