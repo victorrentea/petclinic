@@ -24,6 +24,56 @@ print(d.get('tool_input', {}).get('command', ''))
 printf '%s' "$COMMAND" | grep -qE '(^|&&|\|\||;)\s*git push\b' || exit 0
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+# This hook is scoped to THIS repo. A single session may push to other working
+# copies (e.g. `cd ~/workspace/other && git push`); without this guard the hook
+# attributes those pushes to this repo and watches the wrong CI. Resolve the
+# directory the push actually ran in (honoring a leading/embedded `cd`) and bail
+# unless it resolves to this repo's working tree.
+DECISION=$(COMMAND="$COMMAND" REPO_ROOT="$REPO_ROOT" python3 - <<'PYEOF'
+import os, re, shlex, subprocess
+
+def toplevel(d):
+    try:
+        r = subprocess.run(['git', '-C', d, 'rev-parse', '--show-toplevel'],
+                           capture_output=True, text=True)
+        out = r.stdout.strip()
+        return os.path.realpath(out) if r.returncode == 0 and out else ''
+    except Exception:
+        return ''
+
+cmd = os.environ.get('COMMAND', '')
+repo_root = os.environ.get('REPO_ROOT', '')
+
+# Effective working dir = the last `cd` before `git push` (else the session cwd).
+workdir = ''
+for seg in re.split(r'(?:&&|\|\||;|\n)', cmd):
+    s = seg.strip()
+    if s.startswith('cd '):
+        rest = s[3:].strip()
+        try:
+            parts = shlex.split(rest)
+        except ValueError:
+            parts = rest.split()
+        if parts:
+            workdir = parts[0]
+    if re.search(r'\bgit\s+push\b', s):
+        break
+
+repo_top = toplevel(repo_root) or os.path.realpath(repo_root)
+if not workdir:
+    push_top = repo_top
+else:
+    workdir = os.path.expanduser(os.path.expandvars(workdir))
+    if not os.path.isabs(workdir):
+        workdir = os.path.join(repo_root, workdir)
+    push_top = toplevel(workdir)
+
+print('MATCH' if push_top and push_top == repo_top else 'SKIP')
+PYEOF
+)
+[[ "$DECISION" == "MATCH" ]] || exit 0
+
 cd "$REPO_ROOT" || exit 0
 
 # Need gh to watch runs at all.
