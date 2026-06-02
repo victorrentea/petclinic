@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,8 +30,8 @@ public class ExceptionControllerAdvice {
     private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status, HttpServletRequest request) {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
-        pd.setDetail(detail);
-        pd.setType(URI.create(request.getRequestURL().toString()));
+          pd.setDetail(detail);
+        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
