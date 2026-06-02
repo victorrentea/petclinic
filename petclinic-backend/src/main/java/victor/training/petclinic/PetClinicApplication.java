@@ -15,7 +15,7 @@ public class PetClinicApplication {
 
 	@Bean
 	@ConfigurationProperties(prefix = "openapi")
-    // MY JIRA_PAT=afa87as87f6asf786asf97yas98yas98faus89fyas98fyas9gt8ag78a
+    // MY JIRA_PAT=ATATT3xFfGF0T9aQ7pLmNc2vKx8RbWzYhJ4eD6sUgF1iO3nXwQ5tBvCkMpZrLyHa2dEfGhIjKlMnOpQrStUvWxYz0987654321AbCdEf=2F3A9C1D
 	OpenAPI customOpenAPI() {
 		return new OpenAPI();
 	}
