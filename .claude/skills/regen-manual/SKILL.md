@@ -1,5 +1,7 @@
 ---
+name: regen-manual
 description: Regenerate user-manual/manual.md by crawling the running PetClinic UI in a browser. Diff-based — uses the prior manual as a checklist and only updates what changed.
+disable-model-invocation: true
 ---
 
 # Regenerate the user manual
