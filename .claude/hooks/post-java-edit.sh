@@ -2,6 +2,8 @@
 # PostToolUse hook: runs after editing a Java file.
 #   1. Spotless: format the file via spotless:apply
 #   2. FQCN check: warn Claude when fully-qualified class names appear in code
+# example: victor.training.petclinic.rest.error.ExceptionControllerAdvice.buildProblemDetail
+
 set -uo pipefail
 
 INPUT=$(cat)
