@@ -14,6 +14,9 @@ import {SpecialtiesModule} from './specialties/specialties.module';
 import {HttpErrorHandler} from './error.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSortModule} from '@angular/material/sort';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {HttpErrorInterceptor} from './http-error.interceptor';
 
 @NgModule({
@@ -33,6 +36,9 @@ import {HttpErrorInterceptor} from './http-error.interceptor';
     PartsModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
     AppRoutingModule
   ],
   providers: [

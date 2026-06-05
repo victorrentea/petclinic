@@ -1,7 +1,22 @@
 import { Owner } from './owner.entity';
 import { OwnerDto } from './dto/owner.dto';
 import { OwnerFieldsDto } from './dto/owner-fields.dto';
+import { OwnerListRowDto } from './dto/owner-list-row.dto';
 import { toPetDto } from '../pets/pet.mapper';
+
+/**
+ * Shape of a raw row produced by the grouped list projection query
+ * (createQueryBuilder().getRawMany()). Column aliases are explicit in the query.
+ */
+export interface OwnerListRawRow {
+  id: number | string;
+  firstName: string | null;
+  lastName: string | null;
+  address: string | null;
+  city: string | null;
+  telephone: string | null;
+  petNames: string[] | null;
+}
 
 /**
  * Maps Owner entities to/from their DTOs (delegates pet mapping to pet.mapper).
@@ -51,4 +66,23 @@ export function toOwner(ownerFieldsDto: OwnerFieldsDto): Owner {
 /** Maps a list of Owner entities to a list of OwnerDto. */
 export function toOwnerDtoCollection(owners: Owner[]): OwnerDto[] {
   return owners.map((owner) => toOwnerDto(owner));
+}
+
+/**
+ * Maps a raw grouped projection row to an OwnerListRowDto.
+ *
+ * `id` arrives as a string from pg for bigint-ish columns; coerce to number.
+ * `petNames` is a Postgres text[] (array_remove(array_agg(...), NULL)); NULL when
+ * the owner has no pets, mapped to an empty array.
+ */
+export function toOwnerListRowDto(raw: OwnerListRawRow): OwnerListRowDto {
+  const dto = new OwnerListRowDto();
+  dto.id = Number(raw.id);
+  dto.firstName = raw.firstName ?? '';
+  dto.lastName = raw.lastName ?? '';
+  dto.address = raw.address ?? '';
+  dto.city = raw.city ?? '';
+  dto.telephone = raw.telephone ?? '';
+  dto.petNames = raw.petNames ?? [];
+  return dto;
 }

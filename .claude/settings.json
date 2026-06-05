@@ -2,11 +2,11 @@
   "permissions": {
     "deny": [
       "Bash(git commit --no-verify*)",
-      "Bash(git push --no-verify*)"
+      "Bash(git push --no-verify*)",
+      "Edit(.claude/settings.json)",
+      "Write(.claude/settings.json)"
     ],
     "ask": [
-      "Edit(.claude/settings.json)",
-      "Write(.claude/settings.json)",
       "Edit(.claude/settings.local.json)",
       "Write(.claude/settings.local.json)",
       "Edit(.githooks/*)",

@@ -15,7 +15,7 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { Owner } from './owner.entity';
 import { Pet } from '../pets/pet.entity';
@@ -24,16 +24,53 @@ import { PetType } from '../pet-types/pet-type.entity';
 
 import { OwnerDto } from './dto/owner.dto';
 import { OwnerFieldsDto } from './dto/owner-fields.dto';
+import { OwnerListRowDto } from './dto/owner-list-row.dto';
+import { ListOwnersQueryDto } from './dto/list-owners-query.dto';
 import { PetDto } from '../pets/dto/pet.dto';
 import { PetFieldsDto } from '../pets/dto/pet-fields.dto';
 import { VisitFieldsDto } from '../visits/dto/visit-fields.dto';
 
-import { toOwner, toOwnerDto, toOwnerDtoCollection } from './owner.mapper';
+import { toOwner, toOwnerDto, toOwnerListRowDto, OwnerListRawRow } from './owner.mapper';
 import { toPetDto, toPetFromFields } from '../pets/pet.mapper';
 import { toVisitFromFields } from '../visits/visit.mapper';
+import { PageDto, buildPage } from '../common/page.dto';
+import { OwnerListPageDto } from './dto/owner-list-page.dto';
 
 import { Roles } from '../common/security/roles.decorator';
 import { PermitAll } from '../common/security/permit-all.decorator';
+
+/**
+ * Whitelist mapping each accepted sort key to its full ORDER BY column chain.
+ *
+ * The requested direction applies to every column EXCEPT the final `owner.id`
+ * tiebreaker, which is always ASC. Client input is only ever looked up in this
+ * map, never interpolated — this map is the SQL-injection boundary for sorting.
+ */
+const SORT_CHAINS: Record<string, string[]> = {
+  name: ['owner.firstName', 'owner.lastName'],
+  address: ['owner.address', 'owner.firstName', 'owner.lastName'],
+  city: ['owner.city', 'owner.firstName', 'owner.lastName'],
+};
+
+/** TEXT columns that need human collation (lower+unaccent) in ORDER BY. */
+const COLLATED_COLUMNS = new Set([
+  'owner.firstName',
+  'owner.lastName',
+  'owner.address',
+  'owner.city',
+]);
+
+/**
+ * Maps each whitelisted sort key's entity-qualified columns to the raw SQL
+ * column references used in the grouped projection's ORDER BY. Built from the
+ * fixed whitelist — never from client input — so it is injection-safe.
+ */
+const RAW_COLUMNS: Record<string, string> = {
+  'owner.firstName': 'owner.first_name',
+  'owner.lastName': 'owner.last_name',
+  'owner.address': 'owner.address',
+  'owner.city': 'owner.city',
+};
 
 /**
  * REST controller for owners.
@@ -56,15 +93,23 @@ export class OwnerController {
   ) {}
 
   /**
-   * GET /api/owners?lastName= — filters by a case-sensitive prefix on last name
-   * (`WHERE last_name LIKE :lastName%`); an empty lastName matches every owner.
+   * GET /api/owners — paginated, sorted, last-name-filtered list of owners.
+   *
+   * Returns a Spring-style page envelope of {@link OwnerListRowDto} (a list
+   * read-model: no visits, no pet types, no full pet entities). Pet names are
+   * aggregated in SQL. Pagination/sorting/filtering all happen at the DB level —
+   * the result set is never materialized in memory.
    */
   @Get()
   @ApiOperation({ operationId: 'listOwners', summary: 'List owners' })
-  @ApiOkResponse({ type: [OwnerDto] })
-  async listOwners(@Query('lastName') lastName = ''): Promise<OwnerDto[]> {
-    const owners = await this.findByLastNameStartingWith(lastName);
-    return toOwnerDtoCollection(owners);
+  @ApiOkResponse({ type: OwnerListPageDto })
+  async listOwners(@Query() query: ListOwnersQueryDto): Promise<PageDto<OwnerListRowDto>> {
+    const escaped = query.lastName.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+    const prefix = `${escaped}%`;
+    const totalElements = await this.countByLastNameStartingWith(prefix);
+    const rawRows = await this.findListPage(prefix, query);
+    const content = rawRows.map((raw) => toOwnerListRowDto(raw));
+    return buildPage(content, totalElements, query.page, query.size);
   }
 
   /** GET /api/owners/count — publicly reachable (@PermitAll). */
@@ -244,23 +289,70 @@ export class OwnerController {
   }
 
   /**
-   * Finds owners whose last name starts with the given prefix (case-sensitive
-   * LIKE). Implemented with a QueryBuilder, escaping LIKE wildcards in the
-   * user-supplied prefix.
+   * COUNT of owners whose last name starts with the given (already-escaped) LIKE
+   * prefix. No join — `totalElements` only depends on the owner filter.
    */
-  private async findByLastNameStartingWith(lastName: string): Promise<Owner[]> {
-    const escaped = lastName.replace(/[\\%_]/g, (ch) => `\\${ch}`);
-    // Eager-load pets (+ each pet's type and visits) so the owner mapper can
-    // project them, so each owner in the list carries its full pets/visits.
-    // Order by owner id to keep the list stable (id-ascending).
+  private async countByLastNameStartingWith(prefix: string): Promise<number> {
     return this.ownerRepository
       .createQueryBuilder('owner')
-      .leftJoinAndSelect('owner.pets', 'pet')
-      .leftJoinAndSelect('pet.type', 'type')
-      .leftJoinAndSelect('pet.visits', 'visit')
-      .where("owner.lastName LIKE :prefix ESCAPE '\\'", { prefix: `${escaped}%` })
-      .orderBy('owner.id', 'ASC')
-      .getMany();
+      .where("owner.lastName LIKE :prefix ESCAPE '\\'", { prefix })
+      .getCount();
+  }
+
+  /**
+   * Single grouped projection query for one page of the owners list.
+   *
+   * LEFT JOINs pet and aggregates pet names in SQL (one row per owner after
+   * GROUP BY, so LIMIT/OFFSET paginate correctly). The ORDER BY chain is built
+   * server-side from the sort whitelist (never interpolating client input) with
+   * human collation + empty-as-empty-string semantics. Returns raw rows whose
+   * aliases match {@link OwnerListRawRow}.
+   */
+  private async findListPage(prefix: string, query: ListOwnersQueryDto): Promise<OwnerListRawRow[]> {
+    const qb = this.ownerRepository
+      .createQueryBuilder('owner')
+      .select('owner.id', 'id')
+      .addSelect('owner.first_name', 'firstName')
+      .addSelect('owner.last_name', 'lastName')
+      .addSelect('owner.address', 'address')
+      .addSelect('owner.city', 'city')
+      .addSelect('owner.telephone', 'telephone')
+      .addSelect('array_remove(array_agg(pet.name ORDER BY pet.name), NULL)', 'petNames')
+      .leftJoin('owner.pets', 'pet')
+      .where("owner.lastName LIKE :prefix ESCAPE '\\'", { prefix })
+      .groupBy('owner.id');
+
+    this.applySortChain(qb, query.sort);
+
+    return qb
+      .limit(query.size)
+      .offset(query.page * query.size)
+      .getRawMany<OwnerListRawRow>();
+  }
+
+  /**
+   * Expands the requested `sort` (`col,dir`, already validated) into a full
+   * ORDER BY chain via the {@link SORT_CHAINS} whitelist, then appends the
+   * always-ASC `owner.id` tiebreaker. No `sort` → the default `name,asc` chain.
+   * Text columns are wrapped in `lower(unaccent(coalesce(col, '')))` for
+   * case/diacritic-insensitive sorting with NULL/empty treated as empty string.
+   */
+  private applySortChain(qb: SelectQueryBuilder<Owner>, sort?: string): void {
+    const [key, dir] = (sort ?? 'name,asc').split(',');
+    const direction = dir === 'desc' ? 'DESC' : 'ASC';
+    const columns = SORT_CHAINS[key];
+    for (const column of columns) {
+      const expression = COLLATED_COLUMNS.has(column)
+        ? `lower(unaccent(coalesce(${this.toRawColumn(column)}, '')))`
+        : this.toRawColumn(column);
+      qb.addOrderBy(expression, direction);
+    }
+    qb.addOrderBy('owner.id', 'ASC');
+  }
+
+  /** Maps an entity-qualified column (`owner.firstName`) to its raw SQL column. */
+  private toRawColumn(column: string): string {
+    return RAW_COLUMNS[column];
   }
 
   /**

@@ -3,6 +3,39 @@
 display:none;
 }
 
+/* Loading overlay: dim stale rows, never collapse to empty */
+#ownersTable {
+	position: relative;
+	min-height: 80px;
+}
+
+#ownersTable.is-loading table {
+	opacity: 0.4;
+	transition: opacity 0.15s ease;
+	pointer-events: none;
+}
+
+.owners-loading-overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2;
+}
+
+.owners-empty {
+	padding: 24px 0;
+	text-align: center;
+	color: #777;
+}
+
+/* matSort affordance on a Bootstrap table (not mat-table) */
+th[mat-sort-header] {
+	cursor: pointer;
+	user-select: none;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;
