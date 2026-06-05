@@ -22,7 +22,7 @@ Frontend: `npm start` (dev server), `npm run build` (regenerates API types first
 
 ## Architecture
 - REST API at http://localhost:8080/api/ (`/owners`, `/pets`, `/vets`, `/visits`, `/pettypes`, `/specialties`, `/users`); Swagger UI at http://localhost:8080/swagger-ui
-- See [GUARDRAILS.md](GUARDRAILS.md) for guardrail tests and CI drift checks
+- See `GUARDRAILS.md` for guardrail tests and CI drift checks
 - OpenTelemetry auto-instrumentation exports to the LGTM stack via OTLP on `:4318`
 
 ## Domain Model
