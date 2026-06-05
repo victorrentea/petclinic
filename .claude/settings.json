@@ -3,6 +3,7 @@
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
+      "Bash(git add*)",
       "Edit(.claude/settings.json)",
       "Write(.claude/settings.json)"
     ],
@@ -11,7 +12,6 @@
       "Write(.claude/settings.local.json)",
       "Edit(.githooks/*)",
       "Write(.githooks/*)",
-      "Bash(git add .githooks*)",
       "Edit(.github/workflows/*)",
       "Write(.github/workflows/*)",
       "Edit(petclinic-backend-ts/src/migrations/*)",
