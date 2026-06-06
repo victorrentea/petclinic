@@ -57,6 +57,31 @@ test.describe('Visits Page', () => {
     await expect(page).toHaveURL(/\/owners\/\d+/);
   });
 
+  test('Add Visit from the visits page lets the user pick the pet and the vet', async ({page}) => {
+    const description = `e2e pet-picker visit ${Date.now()}`;
+
+    const visitsPage = new VisitsPage(page);
+    await visitsPage.open();
+    await page.getByRole('button', {name: 'Add Visit'}).click();
+    await expect(page).toHaveURL(/\/visits\/add$/);
+
+    const petSelect = page.locator('#petId');
+    await petSelect.selectOption({index: 0});
+    await page.locator('input[name="date"]').fill('2026-12-02');
+    await page.locator('#description').fill(description);
+    const vetSelect = page.locator('#vetId');
+    await vetSelect.selectOption({index: 1});
+    const vetFullName = ((await vetSelect.locator('option').nth(1).textContent()) || '')
+      .trim().replace(/\s+/g, ' ');
+    await page.locator('form#visit button[type="submit"]').click();
+    await expect(page).toHaveURL(/\/owners\/\d+/);
+
+    await visitsPage.open();
+    const row = (await visitsPage.getVisitRows()).find(r => r.description === description);
+    expect(row).toBeDefined();
+    expect(row!.vetFullName).toBe(vetFullName);
+  });
+
   test('creating a visit with a vet shows the vet in the visits list', async ({page}) => {
     const visits = await apiClient.fetchVisits();
     const petId = visits[0].petId;

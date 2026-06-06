@@ -24,6 +24,8 @@ export class VisitAddComponent implements OnInit {
   currentOwner: Owner;
   currentPetType: PetType;
   vets: Vet[] = [];
+  pets: Pet[] = [];
+  needsPetSelection = false;
   addedSuccess = false;
   errorMessage: string;
 
@@ -41,22 +43,36 @@ export class VisitAddComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.route.parent);
     this.vetService.getVets().subscribe(
       vets => this.vets = vets,
       error => this.errorMessage = error as any);
     const petId = this.route.snapshot.params.id;
-    this.petService.getPetById(petId).subscribe(
-      pet => {
-        this.currentPet = pet;
-        this.visit.pet = this.currentPet;
-        this.currentPetType = this.currentPet.type;
-        this.ownerService.getOwnerById(pet.ownerId).subscribe(
-          owner => {
-            this.currentOwner = owner;
-          }
-        )
-      },
+    if (petId) {
+      this.petService.getPetById(petId).subscribe(
+        pet => this.adoptPet(pet),
+        error => this.errorMessage = error as any);
+    } else {
+      // Reached via the bare /visits/add route: the pet must be picked in the form.
+      this.needsPetSelection = true;
+      this.petService.getPets().subscribe(
+        pets => this.pets = pets,
+        error => this.errorMessage = error as any);
+    }
+  }
+
+  onPetSelected(petId: number) {
+    const pet = this.pets.find(p => p.id === petId);
+    if (pet) {
+      this.adoptPet(pet);
+    }
+  }
+
+  private adoptPet(pet: Pet) {
+    this.currentPet = pet;
+    this.visit.pet = pet;
+    this.currentPetType = pet.type;
+    this.ownerService.getOwnerById(pet.ownerId).subscribe(
+      owner => this.currentOwner = owner,
       error => this.errorMessage = error as any);
   }
 
