@@ -1,0 +1,11 @@
+/* Align the pet detail values (dd) with the Owner Information values above.
+   Bootstrap 3 dl-horizontal defaults to dt{width:160px} + dd{margin-left:180px},
+   which lands 20px right of the owner-info table values. Pull the dd left by 20px
+   so both value columns share the same left edge. */
+.dl-horizontal dt {
+  width: 140px; /* keep the 20px gutter between label and value */
+}
+
+.dl-horizontal dd {
+  margin-left: 160px;
+}
