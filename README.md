@@ -5,7 +5,7 @@ Full-stack veterinary clinic management application with:
 - **Frontend**: Angular 16 SPA
 
 ## Architecture Overview
-
+AKIAQYLPEJ4Z7XK2NRWB
 This is a full-stack implementation with clear separation:
 - `petclinic-backend-ts/` - NestJS REST API + MCP server (the only backend)
 - `petclinic-frontend/` - Angular client
