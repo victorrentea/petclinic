@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Owner } from './owner.entity';
 import { Pet } from '../pets/pet.entity';
 import { Visit } from '../visits/visit.entity';
-import { PetType } from '../pet-types/pet-type.entity';
+import { PetType } from '../pets/pet-type.entity';
 import { OwnerController } from './owner.controller';
 
 /**

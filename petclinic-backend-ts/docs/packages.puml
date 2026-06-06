@@ -1,0 +1,35 @@
+@startuml
+
+title Package Dependencies
+caption Auto-generated from TypeScript imports. Update with: npm run guardrail:package-deps
+
+[config]
+[mcp]
+[owners]
+[pets]
+[root]
+[security]
+[specialties]
+[users]
+[vets]
+[visits]
+
+[mcp] --> [config]
+[mcp] --> [owners]
+[mcp] --> [pets]
+[mcp] --> [vets]
+[mcp] --> [visits]
+[owners] --> [pets]
+[owners] --> [visits]
+[pets] --> [owners]
+[pets] --> [visits]
+[security] --> [config]
+[security] --> [users]
+[users] --> [security]
+[vets] --> [specialties]
+[vets] --> [visits]
+[visits] --> [owners]
+[visits] --> [pets]
+[visits] --> [vets]
+
+@enduml

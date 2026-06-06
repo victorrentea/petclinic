@@ -1,7 +1,9 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDefined, IsOptional, Matches, MaxLength, Min, ValidateNested } from 'class-validator';
-import { PetTypeDto } from '../../pet-types/dto/pet-type.dto';
+import { PetTypeDto } from './pet-type.dto';
 import { VisitDto } from '../../visits/dto/visit.dto';
 import { IsPastOrPresent } from '../../common/validation/is-past-or-present.validator';
 
@@ -52,5 +54,8 @@ export class PetDto {
     description: 'Vet visit bookings for this pet.',
     required: true,
   })
-  visits: VisitDto[] = [];
+  visits: readonly VisitDto[] = [];
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<PetDto, components['schemas']['PetDto']>;

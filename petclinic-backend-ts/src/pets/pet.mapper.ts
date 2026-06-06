@@ -1,9 +1,9 @@
 import { Pet } from './pet.entity';
-import { PetType } from '../pet-types/pet-type.entity';
+import { PetType } from './pet-type.entity';
 import { Owner } from '../owners/owner.entity';
 import { PetDto } from './dto/pet.dto';
 import { PetFieldsDto } from './dto/pet-fields.dto';
-import { PetTypeDto } from '../pet-types/dto/pet-type.dto';
+import { PetTypeDto } from './dto/pet-type.dto';
 import { toVisitsDto } from '../visits/visit.mapper';
 
 /**
@@ -23,7 +23,9 @@ export function toPetDto(pet: Pet): PetDto {
   const dto = new PetDto();
   dto.id = pet.id;
   dto.name = pet.name as string;
-  dto.birthDate = pet.birthDate as string;
+  dto.birthDate = pet.birthDate instanceof Date
+    ? pet.birthDate.toISOString().split('T')[0]
+    : (pet.birthDate as unknown as string) ?? '';
   dto.type = pet.type ? toPetTypeDto(pet.type) : (undefined as unknown as PetTypeDto);
   dto.ownerId = pet.owner?.id;
   const sortedVisits = pet.getVisitsSortedByDate();
@@ -52,7 +54,7 @@ export function toPet(petDto: PetDto): Pet {
   const pet = new Pet();
   pet.id = petDto.id;
   pet.name = petDto.name;
-  pet.birthDate = petDto.birthDate;
+  pet.birthDate = petDto.birthDate ? new Date(petDto.birthDate) : undefined;
   pet.type = petDto.type ? toPetType(petDto.type) : undefined;
   if (petDto.ownerId !== undefined && petDto.ownerId !== null) {
     const owner = new Owner();
@@ -73,7 +75,7 @@ export function toPets(petDtos: PetDto[]): Pet[] {
 export function toPetFromFields(fieldsDto: PetFieldsDto): Pet {
   const pet = new Pet();
   pet.name = fieldsDto.name;
-  pet.birthDate = fieldsDto.birthDate;
+  pet.birthDate = fieldsDto.birthDate ? new Date(fieldsDto.birthDate) : undefined;
   pet.type = fieldsDto.type ? toPetType(fieldsDto.type) : undefined;
   return pet;
 }

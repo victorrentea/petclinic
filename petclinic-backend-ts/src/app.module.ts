@@ -9,7 +9,6 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter';
 
 import { OwnersModule } from './owners/owners.module';
 import { PetsModule } from './pets/pets.module';
-import { PetTypesModule } from './pet-types/pet-types.module';
 import { VetsModule } from './vets/vets.module';
 import { SpecialtiesModule } from './specialties/specialties.module';
 import { VisitsModule } from './visits/visits.module';
@@ -49,7 +48,6 @@ import { McpModule } from './mcp/mcp.module';
     // Feature modules (one per REST domain).
     OwnersModule,
     PetsModule,
-    PetTypesModule,
     VetsModule,
     SpecialtiesModule,
     VisitsModule,

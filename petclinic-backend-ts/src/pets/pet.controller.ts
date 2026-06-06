@@ -75,7 +75,7 @@ export class PetController {
     if (!currentPet) {
       throw new NotFoundException('Not found!');
     }
-    currentPet.birthDate = petDto.birthDate;
+    currentPet.birthDate = petDto.birthDate ? new Date(petDto.birthDate) : undefined;
     currentPet.name = petDto.name;
     currentPet.type = toPetType(petDto.type);
     await this.petRepository.save(currentPet);

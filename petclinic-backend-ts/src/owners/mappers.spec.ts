@@ -2,7 +2,7 @@ import { Owner } from './owner.entity';
 import { toOwnerDto } from './owner.mapper';
 import { Pet } from '../pets/pet.entity';
 import { toPetDto } from '../pets/pet.mapper';
-import { PetType } from '../pet-types/pet-type.entity';
+import { PetType } from '../pets/pet-type.entity';
 import { Visit } from '../visits/visit.entity';
 import { toVisitDto } from '../visits/visit.mapper';
 
@@ -28,7 +28,7 @@ function buildPet(id: number, name: string, birthDate = '2010-01-01'): Pet {
   const p = new Pet();
   p.id = id;
   p.name = name;
-  p.birthDate = birthDate;
+  p.birthDate = new Date(birthDate);
   const type = new PetType();
   type.id = 1;
   type.name = 'dog';

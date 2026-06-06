@@ -20,7 +20,7 @@ import { Repository } from 'typeorm';
 import { Owner } from './owner.entity';
 import { Pet } from '../pets/pet.entity';
 import { Visit } from '../visits/visit.entity';
-import { PetType } from '../pet-types/pet-type.entity';
+import { PetType } from '../pets/pet-type.entity';
 
 import { OwnerDto } from './dto/owner.dto';
 import { OwnerFieldsDto } from './dto/owner-fields.dto';
@@ -188,7 +188,7 @@ export class OwnerController {
     if (!currentPet) {
       throw new NotFoundException();
     }
-    currentPet.birthDate = petFieldsDto.birthDate;
+    currentPet.birthDate = petFieldsDto.birthDate ? new Date(petFieldsDto.birthDate) : undefined;
     currentPet.name = petFieldsDto.name;
     const type = await this.petTypeRepository.findOne({ where: { id: petFieldsDto.type.id } });
     if (!type) {

@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, Length, Min } from 'class-validator';
 
@@ -17,3 +19,6 @@ export class PetTypeDto {
   @ApiProperty({ example: 1, description: 'The ID of the pet type.' })
   id!: number;
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<PetTypeDto, components['schemas']['PetTypeDto']>;

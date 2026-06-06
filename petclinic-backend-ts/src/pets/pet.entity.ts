@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PetType } from '../pet-types/pet-type.entity';
+import { PetType } from './pet-type.entity';
 import { Owner } from '../owners/owner.entity';
 import { Visit } from '../visits/visit.entity';
 
@@ -21,9 +21,8 @@ export class Pet {
   @Column({ type: 'text', nullable: true })
   name?: string;
 
-  /** ISO 'YYYY-MM-DD' string, stored in a DATE column. */
   @Column({ name: 'birth_date', type: 'date', nullable: true })
-  birthDate?: string;
+  birthDate?: Date;
 
   @ManyToOne(() => PetType)
   @JoinColumn({ name: 'type_id' })
