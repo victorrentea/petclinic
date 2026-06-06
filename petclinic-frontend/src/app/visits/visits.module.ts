@@ -8,6 +8,7 @@ import {VisitAddComponent} from './visit-add/visit-add.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {FormsModule} from '@angular/forms';
 import {PetsRoutingModule} from '../pets/pets-routing.module';
+import {VetService} from '../vets/vet.service';
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -47,6 +48,7 @@ export const MY_DATE_FORMATS = {
   ],
   providers: [
     VisitService,
+    VetService,
     {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
     {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS}
   ]

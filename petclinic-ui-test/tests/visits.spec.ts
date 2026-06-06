@@ -31,6 +31,7 @@ test.describe('Visits Page', () => {
       description: v.description,
       petName: v.petName ?? '',
       ownerFullName: `${v.ownerFirstName ?? ''} ${v.ownerLastName ?? ''}`.trim(),
+      vetFullName: `${v.vetFirstName ?? ''} ${v.vetLastName ?? ''}`.trim(),
     }));
 
     const visitsPage = new VisitsPage(page);
@@ -54,5 +55,27 @@ test.describe('Visits Page', () => {
     await visitsPage.open();
     await visitsPage.clickFirstOwnerLink();
     await expect(page).toHaveURL(/\/owners\/\d+/);
+  });
+
+  test('creating a visit with a vet shows the vet in the visits list', async ({page}) => {
+    const visits = await apiClient.fetchVisits();
+    const petId = visits[0].petId;
+    const description = `e2e vet visit ${Date.now()}`;
+
+    await page.goto(`/pets/${petId}/visits/add`);
+    await page.locator('input[name="date"]').fill('2026-12-01');
+    await page.locator('#description').fill(description);
+    const vetSelect = page.locator('#vetId');
+    await vetSelect.selectOption({index: 0});
+    const vetFullName = ((await vetSelect.locator('option').first().textContent()) || '')
+      .trim().replace(/\s+/g, ' ');
+    await page.getByRole('button', {name: 'Add Visit'}).click();
+    await expect(page).toHaveURL(/\/owners\/\d+/);
+
+    const visitsPage = new VisitsPage(page);
+    await visitsPage.open();
+    const row = (await visitsPage.getVisitRows()).find(r => r.description === description);
+    expect(row).toBeDefined();
+    expect(row!.vetFullName).toBe(vetFullName);
   });
 });

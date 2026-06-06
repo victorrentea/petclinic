@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Owner } from '../../owners/owner.entity';
 import { Pet } from '../../pets/pet.entity';
+import { Vet } from '../../vets/vet.entity';
 import { Visit } from '../../visits/visit.entity';
 import { todayIsoDate } from '../../visits/visit.entity';
 
@@ -22,6 +23,9 @@ export interface VisitView {
   petName: string;
   date: string | undefined;
   description: string | undefined;
+  vetId: number | undefined;
+  vetFirstName: string | undefined;
+  vetLastName: string | undefined;
 }
 
 /** The phone number collected via elicitation for create_visit. */
@@ -34,6 +38,7 @@ export interface VisitToolRepos {
   ownerRepository: Repository<Owner>;
   petRepository: Repository<Pet>;
   visitRepository: Repository<Visit>;
+  vetRepository: Repository<Vet>;
 }
 
 /** Result of an elicitation request. */
@@ -80,13 +85,13 @@ function parseIsoDate(date: string): string {
 }
 
 /**
- * Finds visits by pet id: plain visits, no joined relations.
+ * Finds visits by pet id, with the serving vet joined.
  */
 function findVisitsByPetId(
   visitRepository: Repository<Visit>,
   petId: number,
 ): Promise<Visit[]> {
-  return visitRepository.find({ where: { pet: { id: petId } } });
+  return visitRepository.find({ where: { pet: { id: petId } }, relations: { vet: true } });
 }
 
 /**
@@ -120,6 +125,9 @@ export async function listVisits(repos: VisitToolRepos, ownerId: number): Promis
         petName: pet.name ?? '',
         date: v.date,
         description: v.description,
+        vetId: v.vet?.id,
+        vetFirstName: v.vet?.firstName,
+        vetLastName: v.vet?.lastName,
       });
     }
   }
@@ -128,17 +136,18 @@ export async function listVisits(repos: VisitToolRepos, ownerId: number): Promis
 
 /**
  * Tool `create_visit`: creates a vet visit for one of the owner's pets after
- * eliciting + confirming a phone number.
+ * eliciting + confirming a phone number. The serving vet is mandatory.
  *
  * Validation order is preserved exactly: pet exists -> pet belongs to owner ->
- * date parses -> date is today/future -> elicitation enabled -> elicit ->
- * accept? -> phone non-blank -> save owner phone -> save visit.
+ * vet exists -> date parses -> date is today/future -> elicitation enabled ->
+ * elicit -> accept? -> phone non-blank -> save owner phone -> save visit.
  */
 export async function createVisit(
   repos: VisitToolRepos,
   ownerId: number,
   context: VisitToolContext,
   petId: number,
+  vetId: number,
   date: string,
   description: string,
 ): Promise<string> {
@@ -152,6 +161,10 @@ export async function createVisit(
   if (pet.owner == null || pet.owner.id !== ownerId) {
     throw new Error(`Pet ${petId} does not belong to owner ${ownerId}`);
   }
+  const vet = await repos.vetRepository.findOne({ where: { id: vetId } });
+  if (!vet) {
+    throw new Error(`Vet not found: ${vetId}`);
+  }
   const visitDate = parseIsoDate(date);
   requireFutureDate(visitDate);
 
@@ -161,7 +174,7 @@ export async function createVisit(
     );
   }
   const prompt =
-    `Create visit for pet '${pet.name}' on ${visitDate}` +
+    `Create visit for pet '${pet.name}' with ${vet.firstName} ${vet.lastName} on ${visitDate}` +
     ` — "${description}". No phone number on file for you — please provide one to receive reminders.`;
   const elicit = await context.elicitPhone(prompt);
   if (elicit.action !== ELICIT_ACCEPT) {
@@ -177,11 +190,13 @@ export async function createVisit(
 
   const v = new Visit();
   v.pet = pet;
+  v.vet = vet;
   v.date = visitDate;
   v.description = description;
   const saved = await repos.visitRepository.save(v);
   return (
-    `Created visit id=${saved.id} for pet '${pet.name}' on ${visitDate}` +
+    `Created visit id=${saved.id} for pet '${pet.name}'` +
+    ` with ${vet.firstName} ${vet.lastName} on ${visitDate}` +
     `; reminders will be sent to ${owner.telephone}`
   );
 }

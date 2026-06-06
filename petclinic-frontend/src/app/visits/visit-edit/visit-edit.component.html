@@ -47,6 +47,16 @@
              <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 characters long</span>           <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 charaters long</span>
          </div>
         </div>
+        <div class="form-group has-feedback" [class.has-success]="vet.dirty && vet.valid" [class.has-error]="vet.dirty && !vet.valid">
+          <label class="col-sm-2 control-label">Vet</label>
+          <div class="col-sm-10">
+            <select id="vetId" name="vetId" class="form-control" required [(ngModel)]="visit.vetId" #vet="ngModel">
+              <option *ngFor="let v of vets" [ngValue]="v.id">{{ v.firstName }} {{ v.lastName }}</option>
+            </select>
+            <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="vet.valid" [class.glyphicon-remove]="!vet.valid" aria-hidden="true"></span>
+            <span class="help-block" *ngIf="vet.dirty && vet.hasError('required')">Vet is required</span>
+          </div>
+        </div>
 
       </div>
       <div class="form-group">

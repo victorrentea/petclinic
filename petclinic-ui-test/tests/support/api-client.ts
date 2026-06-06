@@ -18,6 +18,9 @@ export interface VisitDto {
   ownerId?: number;
   ownerFirstName?: string;
   ownerLastName?: string;
+  vetId: number;
+  vetFirstName?: string;
+  vetLastName?: string;
 }
 
 export class ApiClient {

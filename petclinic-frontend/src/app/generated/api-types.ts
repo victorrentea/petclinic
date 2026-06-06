@@ -329,6 +329,16 @@ export interface components {
       petId: number;
       /** @description Name of the pet (server-populated). */
       petName?: string;
+      /** @description First name of the vet (server-populated). */
+      vetFirstName?: string;
+      /**
+       * Format: int32
+       * @description The ID of the vet who served the visit.
+       * @example 1
+       */
+      vetId: number;
+      /** @description Last name of the vet (server-populated). */
+      vetLastName?: string;
     };
     VisitFieldsDto: {
       /**
@@ -342,6 +352,12 @@ export interface components {
        * @example rabies shot
        */
       description: string;
+      /**
+       * Format: int32
+       * @description The ID of the vet who served the visit.
+       * @example 1
+       */
+      vetId: number;
     };
   };
   responses: never;

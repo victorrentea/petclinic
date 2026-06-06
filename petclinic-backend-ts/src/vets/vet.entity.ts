@@ -1,5 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Specialty } from '../specialties/specialty.entity';
+import { Visit } from '../visits/visit.entity';
 
 /**
  * Vet entity, mapped to the "vets" table.
@@ -25,6 +26,10 @@ export class Vet {
     inverseJoinColumn: { name: 'specialty_id', referencedColumnName: 'id' },
   })
   specialties!: Specialty[];
+
+  /** Inverse side of Visit.vet — the visits this vet served. */
+  @OneToMany(() => Visit, (visit) => visit.vet)
+  visits?: Visit[];
 
   /** Removes all of this vet's specialties. */
   clearSpecialties(): void {

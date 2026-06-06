@@ -42,6 +42,7 @@ const MIGRATIONS_DIR = join(__dirname, '..', '..', 'src', 'migrations');
 const MIGRATION_FILES = [
   '1700000000001-CoreOwnersPets.ts',
   '1700000000002-AddVetsAndSecurity.ts',
+  '1700000000004-AddVetToVisit.ts',
 ];
 
 interface TableSchema {
@@ -53,10 +54,15 @@ interface TableSchema {
  * migration files and extracts the leading identifier of each column/constraint
  * line. Constraint keywords (PRIMARY/FOREIGN/UNIQUE/CONSTRAINT/CHECK) are
  * dropped so only real column names remain.
+ *
+ * Columns added later via `ALTER TABLE <name> ADD COLUMN <col>` are folded
+ * into the owning table (files are processed in chronological order, so the
+ * CREATE TABLE is always seen before the ALTER).
  */
 function parseMigrationSchema(): Map<string, TableSchema> {
   const tables = new Map<string, TableSchema>();
   const createTable = /CREATE TABLE\s+(\w+)\s*\(([\s\S]*?)\)\s*`/gi;
+  const addColumn = /ALTER TABLE\s+(\w+)\s+ADD COLUMN\s+(\w+)/gi;
 
   for (const file of MIGRATION_FILES) {
     const sql = readFileSync(join(MIGRATIONS_DIR, file), 'utf8');
@@ -78,6 +84,12 @@ function parseMigrationSchema(): Map<string, TableSchema> {
         }
       }
       tables.set(tableName, { columns });
+    }
+    while ((match = addColumn.exec(sql)) !== null) {
+      const table = tables.get(match[1].toLowerCase());
+      if (table) {
+        table.columns.add(match[2].toLowerCase());
+      }
     }
   }
   return tables;

@@ -1,5 +1,6 @@
 import { Visit } from './visit.entity';
 import { Pet } from '../pets/pet.entity';
+import { Vet } from '../vets/vet.entity';
 import { VisitDto } from './dto/visit.dto';
 import { VisitFieldsDto } from './dto/visit-fields.dto';
 
@@ -10,9 +11,16 @@ import { VisitFieldsDto } from './dto/visit-fields.dto';
  * DI between the Owner/Pet/Visit mappers. Controllers import them directly.
  */
 
+/** Builds a Vet stub carrying only the id, for FK assignment. */
+export function vetStub(vetId: number): Vet {
+  const vet = new Vet();
+  vet.id = vetId;
+  return vet;
+}
+
 /**
- * Maps a VisitDto to a Visit entity. The `petId` becomes a pet stub carrying
- * only the id.
+ * Maps a VisitDto to a Visit entity. The `petId` and `vetId` become stubs
+ * carrying only the id.
  *
  * The Visit's `date` defaults to today when the DTO omits it (see Visit.create
  * / CONVENTIONS "Dates").
@@ -26,6 +34,7 @@ export function toVisit(visitDto: VisitDto): Visit {
   const pet = new Pet();
   pet.id = visitDto.petId;
   visit.pet = pet;
+  visit.vet = vetStub(visitDto.vetId);
   return visit;
 }
 
@@ -38,12 +47,13 @@ export function toVisitFromFields(visitFieldsDto: VisitFieldsDto): Visit {
     visit.date = visitFieldsDto.date;
   }
   visit.description = visitFieldsDto.description;
+  visit.vet = vetStub(visitFieldsDto.vetId);
   return visit;
 }
 
 /**
  * Maps a Visit entity to a VisitDto, flattening the pet and its owner into the
- * denormalized petId/petName/ownerId/ownerFirstName/ownerLastName fields.
+ * denormalized petId/petName/owner* fields and the vet into the vet* fields.
  */
 export function toVisitDto(visit: Visit): VisitDto {
   const dto = new VisitDto();
@@ -60,6 +70,12 @@ export function toVisitDto(visit: Visit): VisitDto {
       dto.ownerFirstName = owner.firstName;
       dto.ownerLastName = owner.lastName;
     }
+  }
+  const vet = visit.vet;
+  if (vet) {
+    dto.vetId = vet.id;
+    dto.vetFirstName = vet.firstName;
+    dto.vetLastName = vet.lastName;
   }
   return dto;
 }

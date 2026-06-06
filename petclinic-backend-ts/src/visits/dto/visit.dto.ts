@@ -53,4 +53,21 @@ export class VisitDto {
     description: 'Last name of the owner (server-populated).',
   })
   ownerLastName?: string;
+
+  @IsDefined({ message: 'must not be null' })
+  @Min(1, { message: 'must be greater than or equal to 1' })
+  @ApiProperty({ example: 1, description: 'The ID of the vet who served the visit.' })
+  vetId!: number;
+
+  @ApiPropertyOptional({
+    readOnly: true,
+    description: 'First name of the vet (server-populated).',
+  })
+  vetFirstName?: string;
+
+  @ApiPropertyOptional({
+    readOnly: true,
+    description: 'Last name of the vet (server-populated).',
+  })
+  vetLastName?: string;
 }

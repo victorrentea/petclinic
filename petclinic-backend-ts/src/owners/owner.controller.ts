@@ -274,6 +274,7 @@ export class OwnerController {
       .leftJoinAndSelect('owner.pets', 'pet')
       .leftJoinAndSelect('pet.type', 'type')
       .leftJoinAndSelect('pet.visits', 'visit')
+      .leftJoinAndSelect('visit.vet', 'vet')
       .where('owner.id = :id', { id })
       .getOne();
   }

@@ -25,14 +25,17 @@ describe('VisitsPageComponent', () => {
     {
       id: 1, date: '2024-01-15', description: 'rabies shot', pet: null as any,
       petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
+      vetId: 1, vetFirstName: 'James', vetLastName: 'Carter',
     },
     {
       id: 2, date: '2025-06-04', description: 'checkup', pet: null as any,
       petId: 8, petName: 'Basil', ownerId: 2, ownerFirstName: 'Betty', ownerLastName: 'Davis',
+      vetId: 2, vetFirstName: 'Helen', vetLastName: 'Leary',
     },
     {
       id: 3, date: '2023-09-10', description: 'spayed', pet: null as any,
       petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
+      vetId: 1, vetFirstName: 'James', vetLastName: 'Carter',
     },
   ];
 
@@ -94,6 +97,21 @@ describe('VisitsPageComponent', () => {
       expect(links.length).toBe(visits.length);
       expect(links[0].attributes['ng-reflect-router-link'] || links[0].nativeElement.getAttribute('href'))
         .toContain('/owners/');
+    });
+  }));
+
+  it('renders a Vet column header after Owner and a td.visit-vet cell per row', waitForAsync(() => {
+    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      const headers = fixture.debugElement.queryAll(By.css('thead th'));
+      const headerText = headers.map(h => h.nativeElement.textContent.trim());
+      expect(headerText).toEqual(['Date', 'Description', 'Pet', 'Owner', 'Vet']);
+      const vetCells = fixture.debugElement.queryAll(By.css('td.visit-vet'));
+      expect(vetCells.length).toBe(visits.length);
+      const sortedFirstRowVet = vetCells[0].nativeElement.textContent.trim();
+      expect(sortedFirstRowVet).toContain('Helen Leary');
     });
   }));
 });

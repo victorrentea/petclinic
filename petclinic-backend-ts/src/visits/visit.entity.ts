@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Pet } from '../pets/pet.entity';
+import { Vet } from '../vets/vet.entity';
 
 /**
  * Visit entity, mapped to the "visits" table.
@@ -23,6 +24,11 @@ export class Visit {
   @ManyToOne(() => Pet, (pet) => pet.visits)
   @JoinColumn({ name: 'pet_id' })
   pet?: Pet;
+
+  /** The vet who served this visit — required (vet_id is NOT NULL). */
+  @ManyToOne(() => Vet, (vet) => vet.visits, { nullable: false })
+  @JoinColumn({ name: 'vet_id' })
+  vet?: Vet;
 
   /**
    * Creates a Visit whose date defaults to today when none is supplied.

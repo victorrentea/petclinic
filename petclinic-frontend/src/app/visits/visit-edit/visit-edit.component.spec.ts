@@ -16,8 +16,15 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+
+const testVets: Vet[] = [
+  { id: 1, firstName: 'James', lastName: 'Carter', specialties: [] },
+  { id: 2, firstName: 'Helen', lastName: 'Leary', specialties: [] }
+];
 
 class VisitServiceStub {
   getVisitById(visitId: string): Observable<Visit> {
@@ -40,6 +47,12 @@ class PetServiceStub {
   }
 }
 
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of(testVets);
+  }
+}
+
 describe('VisitEditComponent', () => {
   let component: VisitEditComponent;
   let fixture: ComponentFixture<VisitEditComponent>;
@@ -57,6 +70,7 @@ describe('VisitEditComponent', () => {
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
         {provide: PetService, useClass: PetServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -88,6 +102,7 @@ describe('VisitEditComponent', () => {
       id: 1,
       date: '2016-09-07',
       description: '',
+      vetId: 2,
       pet: testPet
     };
 
@@ -102,13 +117,20 @@ describe('VisitEditComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should load vets and preselect the visit current vet', () => {
+    expect(component.vets).toEqual(testVets);
+    expect(component.visit.vetId).toBe(2);
+  });
+
   it('should submit visit and navigate to owner detail', () => {
     const router = fixture.debugElement.injector.get(Router) as unknown as RouterStub;
     spyOn(router, 'navigate');
     component.currentOwner = visitEditOwner as any;
     component.currentPet = testPet;
-    const visit: Visit = { id: 1, date: '2023-05-01', description: 'updated', pet: testPet };
+    const visit: Visit = { id: 1, date: '2023-05-01', description: 'updated', vetId: 1, pet: testPet };
+    const updateSpy = spyOn(visitService, 'updateVisit').and.callThrough();
     component.onSubmit(visit);
+    expect(updateSpy.calls.mostRecent().args[1].vetId).toBe(1);
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });
 

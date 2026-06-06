@@ -10,8 +10,9 @@ import {
   getDataSource,
   isDbAvailable,
 } from './test-app';
-import { savePet, savePetType, saveOwner } from './fixtures';
+import { savePet, savePetType, saveOwner, saveVet, saveVisit } from './fixtures';
 import { todayIso } from './fixtures';
+import { Pet } from '../src/pets/pet.entity';
 
 /**
  * End-to-end tests for the owners endpoints.
@@ -64,6 +65,19 @@ describe('OwnerController (e2e)', () => {
     expect(res.body.id).toBe(ownerId);
     expect(res.body.firstName).toBe('George');
     expect(res.body.lastName).toBe('Franklin');
+  });
+
+  it('getById_returnsVisitsWithVet', async () => {
+    if (!available) return;
+    const pet = await ds.getRepository(Pet).findOneByOrFail({ id: petId });
+    const vet = await saveVet(ds, 'Helen', 'Leary');
+    await saveVisit(ds, pet, { description: 'rabies shot', vet });
+
+    const res = await http().get(`/api/owners/${ownerId}`).expect(200);
+    const visit = res.body.pets[0].visits[0];
+    expect(visit.vetId).toBe(vet.id);
+    expect(visit.vetFirstName).toBe('Helen');
+    expect(visit.vetLastName).toBe('Leary');
   });
 
   it('getById_notFound', async () => {

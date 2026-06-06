@@ -249,10 +249,23 @@ components:
           description: Name of the pet (server-populated).
           readOnly: true
           type: string
+        vetFirstName:
+          description: First name of the vet (server-populated).
+          readOnly: true
+          type: string
+        vetId:
+          description: The ID of the vet who served the visit.
+          example: 1
+          type: number
+        vetLastName:
+          description: Last name of the vet (server-populated).
+          readOnly: true
+          type: string
       required:
         - description
         - id
         - petId
+        - vetId
       type: object
     VisitFieldsDto:
       properties:
@@ -264,8 +277,13 @@ components:
           description: The description for the visit.
           example: rabies shot
           type: string
+        vetId:
+          description: The ID of the vet who served the visit.
+          example: 1
+          type: number
       required:
         - description
+        - vetId
       type: object
   securitySchemes:
     basic:

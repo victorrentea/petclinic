@@ -11,6 +11,7 @@ import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Visit} from '../visit';
 import {Pet} from '../../pets/pet';
 import {Observable, of} from 'rxjs';
+import {By} from '@angular/platform-browser';
 import Spy = jasmine.Spy;
 
 class VisitServiceStub {
@@ -66,6 +67,9 @@ describe('VisitListComponent', () => {
       id: 1,
       date: '2016-09-07',
       description: '',
+      vetId: 2,
+      vetFirstName: 'Helen',
+      vetLastName: 'Leary',
       pet: testPet
     }];
 
@@ -87,6 +91,12 @@ describe('VisitListComponent', () => {
     fixture.detectChanges();
     component.deleteVisit(component.visits[0]);
     expect(spy.calls.any()).toBe(true, 'deleteVisit called');
+  });
+
+  it('should render the vet full name in the visit-vet cell', () => {
+    fixture.detectChanges();
+    const cell = fixture.debugElement.query(By.css('td.visit-vet'));
+    expect(cell.nativeElement.textContent).toContain('Helen Leary');
   });
 
 });

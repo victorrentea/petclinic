@@ -7,6 +7,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { Owner } from '../owners/owner.entity';
 import { Pet } from '../pets/pet.entity';
+import { Vet } from '../vets/vet.entity';
 import { Visit } from '../visits/visit.entity';
 import {
   OWNER_RESOURCE_DESCRIPTION,
@@ -55,6 +56,7 @@ export class McpServerService implements OnModuleInit {
     @InjectRepository(Owner) private readonly ownerRepository: Repository<Owner>,
     @InjectRepository(Pet) private readonly petRepository: Repository<Pet>,
     @InjectRepository(Visit) private readonly visitRepository: Repository<Visit>,
+    @InjectRepository(Vet) private readonly vetRepository: Repository<Vet>,
   ) {
     this.server = new McpServer(
       { name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION },
@@ -72,6 +74,7 @@ export class McpServerService implements OnModuleInit {
       ownerRepository: this.ownerRepository,
       petRepository: this.petRepository,
       visitRepository: this.visitRepository,
+      vetRepository: this.vetRepository,
     };
   }
 
@@ -128,6 +131,10 @@ export class McpServerService implements OnModuleInit {
             .number()
             .int()
             .describe('Pet ID (must belong to the authenticated owner)'),
+          vetId: z
+            .number()
+            .int()
+            .describe('Vet ID — the vet who will serve the visit (required)'),
           date: z
             .string()
             .describe('Visit date (yyyy-MM-dd); must be today or in the future'),
@@ -136,7 +143,7 @@ export class McpServerService implements OnModuleInit {
             .describe('Visit description (reason, diagnosis, notes...)'),
         },
       },
-      async ({ petId, date, description }, extra) => {
+      async ({ petId, vetId, date, description }, extra) => {
         const ownerId = this.ownerIdFor(extra.sessionId);
         const context = this.elicitContext(extra.requestId, extra.sessionId);
         const message = await createVisit(
@@ -144,6 +151,7 @@ export class McpServerService implements OnModuleInit {
           ownerId,
           context,
           petId,
+          vetId,
           date,
           description,
         );

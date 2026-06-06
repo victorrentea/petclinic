@@ -42,7 +42,7 @@ export class PetController {
   async getPet(@Param('petId', ParseIntPipe) petId: number): Promise<PetDto> {
     const pet = await this.petRepository.findOne({
       where: { id: petId },
-      relations: { type: true, owner: true, visits: true },
+      relations: { type: true, owner: true, visits: { vet: true } },
     });
     if (!pet) {
       throw new NotFoundException('Not found!');
@@ -56,7 +56,7 @@ export class PetController {
   @Get()
   async listPets(): Promise<PetDto[]> {
     const allPets = await this.petRepository.find({
-      relations: { type: true, owner: true, visits: true },
+      relations: { type: true, owner: true, visits: { vet: true } },
     });
     return toPetsDto(allPets);
   }

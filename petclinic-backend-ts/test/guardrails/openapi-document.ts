@@ -125,7 +125,6 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
     .setTitle(OPENAPI_INFO.title)
     .setDescription(OPENAPI_INFO.description)
     .setVersion(OPENAPI_INFO.version)
-    .setTermsOfService(OPENAPI_INFO.termsOfService)
     .addBasicAuth()
     .build();
   return SwaggerModule.createDocument(app, config);

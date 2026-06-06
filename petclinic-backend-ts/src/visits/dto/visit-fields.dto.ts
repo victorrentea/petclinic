@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDefined, IsOptional, Length, Matches } from 'class-validator';
+import { IsDefined, IsOptional, Length, Matches, Min } from 'class-validator';
 
 /**
  * Mutable fields accepted when creating or updating a visit.
@@ -16,4 +16,9 @@ export class VisitFieldsDto {
   @Length(1, 255, { message: 'size must be between 1 and 255' })
   @ApiProperty({ example: 'rabies shot', description: 'The description for the visit.' })
   description!: string;
+
+  @IsDefined({ message: 'must not be null' })
+  @Min(1, { message: 'must be greater than or equal to 1' })
+  @ApiProperty({ example: 1, description: 'The ID of the vet who served the visit.' })
+  vetId!: number;
 }

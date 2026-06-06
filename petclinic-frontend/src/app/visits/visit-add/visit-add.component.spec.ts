@@ -16,6 +16,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -28,9 +30,20 @@ class PetServiceStub {
 
 const visitOwner: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
+const testVets: Vet[] = [
+  { id: 1, firstName: 'James', lastName: 'Carter', specialties: [] },
+  { id: 2, firstName: 'Helen', lastName: 'Leary', specialties: [] }
+];
+
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
     return of(visitOwner);
+  }
+}
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of(testVets);
   }
 }
 
@@ -57,6 +70,7 @@ describe('VisitAddComponent', () => {
         {provide: PetService, useClass: PetServiceStub},
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -96,14 +110,20 @@ describe('VisitAddComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should load vets on init for the dropdown', () => {
+    expect(component.vets).toEqual(testVets);
+  });
+
   it('should submit visit and navigate to owner detail', () => {
     const router = fixture.debugElement.injector.get(Router) as unknown as RouterStub;
     spyOn(router, 'navigate');
     component.currentOwner = visitOwner;
     component.currentPet = testPet;
-    const visit: any = { id: null, date: '2023-05-01', description: 'checkup', pet: testPet };
+    const visit: any = { id: null, date: '2023-05-01', description: 'checkup', vetId: 2, pet: testPet };
+    const addSpy = spyOn(visitService, 'addVisit').and.callThrough();
     component.onSubmit(visit);
     expect(visit.id).toBeNull();
+    expect(addSpy.calls.mostRecent().args[0].vetId).toBe(2);
     expect(component.addedSuccess).toBeTrue();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });

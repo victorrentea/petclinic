@@ -19,7 +19,7 @@ import { Repository } from 'typeorm';
 import { Visit } from './visit.entity';
 import { VisitDto } from './dto/visit.dto';
 import { VisitFieldsDto } from './dto/visit-fields.dto';
-import { toVisit, toVisitDto, toVisitsDto } from './visit.mapper';
+import { toVisit, toVisitDto, toVisitsDto, vetStub } from './visit.mapper';
 import { Roles } from '../common/security/roles.decorator';
 
 /**
@@ -39,10 +39,10 @@ export class VisitController {
     private readonly visitRepository: Repository<Visit>,
   ) {}
 
-  /** GET /api/visits — lists all visits with their pet and owner eagerly loaded. */
+  /** GET /api/visits — lists all visits with their pet, owner and vet eagerly loaded. */
   @Get()
   async listVisits(): Promise<VisitDto[]> {
-    const visits = await this.findAllWithPetAndOwner();
+    const visits = await this.findAllWithPetOwnerAndVet();
     return toVisitsDto(visits);
   }
 
@@ -68,7 +68,7 @@ export class VisitController {
 
   /**
    * PUT /api/visits/{visitId} — loads the existing visit (404 if absent),
-   * sets date + description only, saves. Returns void (200).
+   * sets date + description + vet only, saves. Returns void (200).
    */
   @Put(':visitId')
   async updateVisit(
@@ -78,6 +78,7 @@ export class VisitController {
     const currentVisit = await this.findByIdOrThrow(visitId);
     currentVisit.date = visitDto.date;
     currentVisit.description = visitDto.description;
+    currentVisit.vet = vetStub(visitDto.vetId);
     await this.visitRepository.save(currentVisit);
   }
 
@@ -89,14 +90,15 @@ export class VisitController {
   }
 
   /**
-   * Loads all visits, inner-joining and eagerly selecting each visit's pet
-   * and that pet's owner.
+   * Loads all visits, eagerly selecting each visit's pet, that pet's owner,
+   * and the serving vet (left join, defensive — vet_id is NOT NULL).
    */
-  private findAllWithPetAndOwner(): Promise<Visit[]> {
+  private findAllWithPetOwnerAndVet(): Promise<Visit[]> {
     return this.visitRepository
       .createQueryBuilder('v')
       .innerJoinAndSelect('v.pet', 'p')
       .innerJoinAndSelect('p.owner', 'o')
+      .leftJoinAndSelect('v.vet', 'vet')
       .getMany();
   }
 
@@ -113,7 +115,7 @@ export class VisitController {
   private async findByIdOrThrow(visitId: number): Promise<Visit> {
     const visit = await this.visitRepository.findOne({
       where: { id: visitId },
-      relations: { pet: { owner: true } },
+      relations: { pet: { owner: true }, vet: true },
     });
     if (!visit) {
       throw new NotFoundException();

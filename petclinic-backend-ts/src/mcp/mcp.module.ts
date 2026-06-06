@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Owner } from '../owners/owner.entity';
 import { Pet } from '../pets/pet.entity';
+import { Vet } from '../vets/vet.entity';
 import { Visit } from '../visits/visit.entity';
 import { McpServerService } from './mcp-server';
 import { McpController } from './mcp.controller';
@@ -19,7 +20,7 @@ import { ApiKeyMiddleware } from './api-key.middleware';
  * "/mcp/**" independently of the /api authorization.
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([Owner, Pet, Visit])],
+  imports: [TypeOrmModule.forFeature([Owner, Pet, Visit, Vet])],
   controllers: [McpController],
   providers: [McpServerService],
 })

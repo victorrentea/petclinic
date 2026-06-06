@@ -10,7 +10,7 @@ import {
   getDataSource,
   isDbAvailable,
 } from './test-app';
-import { savePet, savePetType, saveOwner, saveVisit, todayIso } from './fixtures';
+import { savePet, savePetType, saveOwner, saveVet, saveVisit, todayIso } from './fixtures';
 
 /**
  * End-to-end tests for the visits endpoints.
@@ -24,6 +24,7 @@ describe('VisitController (e2e)', () => {
   let petId: number;
   let ownerData: { id: number; firstName?: string; lastName?: string };
   let petName: string;
+  let vetData: { id: number; firstName?: string; lastName?: string };
 
   beforeAll(async () => {
     available = await isDbAvailable();
@@ -46,7 +47,9 @@ describe('VisitController (e2e)', () => {
     const pet = await savePet(ds, owner, type);
     petId = pet.id;
     petName = pet.name as string;
-    const visit = await saveVisit(ds, pet, { date: todayIso(), description: 'rabies shot' });
+    const vet = await saveVet(ds, 'Helen', 'Leary');
+    vetData = { id: vet.id, firstName: vet.firstName, lastName: vet.lastName };
+    const visit = await saveVisit(ds, pet, { date: todayIso(), description: 'rabies shot', vet });
     visitId = visit.id;
   });
 
@@ -59,6 +62,9 @@ describe('VisitController (e2e)', () => {
     expect(res.body.id).toBe(visitId);
     expect(res.body.description).toBe('rabies shot');
     expect(res.body.petId).toBe(petId);
+    expect(res.body.vetId).toBe(vetData.id);
+    expect(res.body.vetFirstName).toBe(vetData.firstName);
+    expect(res.body.vetLastName).toBe(vetData.lastName);
   });
 
   it('getById_notFound', async () => {
@@ -81,15 +87,32 @@ describe('VisitController (e2e)', () => {
     expect(created.ownerId).toBe(ownerData.id);
     expect(created.ownerFirstName).toBe(ownerData.firstName);
     expect(created.ownerLastName).toBe(ownerData.lastName);
+    expect(created.vetId).toBe(vetData.id);
+    expect(created.vetFirstName).toBe(vetData.firstName);
+    expect(created.vetLastName).toBe(vetData.lastName);
   });
 
-  // NOTE: there is no create-success test here (only create_invalid), so we do
-  // not assert a 201. (A naive create would also trip the VisitDto.id @Min(0)
-  // defect — see the task report.)
+  it('create_ok (with vet) round-trips the vet', async () => {
+    if (!available) return;
+    const newVisit = { petId, vetId: vetData.id, date: todayIso(), description: 'checkup' };
+    const res = await http().post('/api/visits').send(newVisit).expect(201);
+    const location = res.headers.location as string;
+    expect(location).toMatch(/^\/api\/visits\/\d+$/);
+    const created = (await http().get(location).expect(200)).body;
+    expect(created.vetId).toBe(vetData.id);
+    expect(created.vetFirstName).toBe(vetData.firstName);
+    expect(created.vetLastName).toBe(vetData.lastName);
+  });
 
   it('create_invalid (missing description)', async () => {
     if (!available) return;
-    const newVisit = { petId, date: todayIso() }; // missing description
+    const newVisit = { petId, vetId: vetData.id, date: todayIso() }; // missing description
+    await http().post('/api/visits').send(newVisit).expect(400);
+  });
+
+  it('create_invalid (missing vetId)', async () => {
+    if (!available) return;
+    const newVisit = { petId, date: todayIso(), description: 'checkup' }; // missing vetId
     await http().post('/api/visits').send(newVisit).expect(400);
   });
 
@@ -98,6 +121,23 @@ describe('VisitController (e2e)', () => {
     const existing = (await http().get(`/api/visits/${visitId}`).expect(200)).body;
     existing.description = null;
     await http().put(`/api/visits/${visitId}`).send(existing).expect(400);
+  });
+
+  it('update_changesVet', async () => {
+    if (!available) return;
+    const otherVet = await saveVet(ds, 'Rafael', 'Ortega');
+    const body = { date: todayIso(), description: 'rabies shot', vetId: otherVet.id };
+    await http().put(`/api/visits/${visitId}`).send(body).expect(200);
+    const updated = (await http().get(`/api/visits/${visitId}`).expect(200)).body;
+    expect(updated.vetId).toBe(otherVet.id);
+    expect(updated.vetFirstName).toBe('Rafael');
+    expect(updated.vetLastName).toBe('Ortega');
+  });
+
+  it('update_invalid (missing vetId)', async () => {
+    if (!available) return;
+    const body = { date: todayIso(), description: 'rabies shot' }; // missing vetId
+    await http().put(`/api/visits/${visitId}`).send(body).expect(400);
   });
 
   it('delete_ok', async () => {

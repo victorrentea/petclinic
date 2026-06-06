@@ -5,6 +5,7 @@ export interface VisitRow {
   description: string;
   petName: string;
   ownerFullName: string;
+  vetFullName: string;
 }
 
 export class VisitsPage {
@@ -47,6 +48,7 @@ export class VisitsPage {
         description: ((await row.locator('td.visit-description').textContent()) || '').trim(),
         petName: ((await row.locator('td.visit-pet').textContent()) || '').trim(),
         ownerFullName: ((await row.locator('td.visit-owner a.owner-link').textContent()) || '').trim().replace(/\s+/g, ' '),
+        vetFullName: ((await row.locator('td.visit-vet').textContent()) || '').trim().replace(/\s+/g, ' '),
       });
     }
     return result;

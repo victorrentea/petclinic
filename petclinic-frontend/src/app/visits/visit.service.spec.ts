@@ -14,7 +14,7 @@ describe('VisitService', () => {
   const owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
   const pet = { id: 1, name: 'Leo', birthDate: '2010-09-07', type: { id: 1, name: 'cat' }, ownerId: 1, visits: [], owner };
   const expectedVisits: Visit[] = [
-    { id: 1, date: '2013-01-01', description: 'rabies shot', pet }
+    { id: 1, date: '2013-01-01', description: 'rabies shot', vetId: 1, pet }
   ];
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('VisitService', () => {
   });
 
   it('should add visit via owner/pet URL', () => {
-    const newVisit: Visit = { id: 0, date: '2023-05-01', description: 'checkup', pet };
+    const newVisit: Visit = { id: 0, date: '2023-05-01', description: 'checkup', vetId: 1, pet };
     visitService.addVisit(newVisit).subscribe(v => expect(v).toEqual(newVisit), fail);
     const req = httpTestingController.expectOne('http://localhost:8080/api/owners/1/pets/1/visits');
     expect(req.request.method).toEqual('POST');
@@ -51,7 +51,7 @@ describe('VisitService', () => {
   });
 
   it('should update visit', () => {
-    const visit: Visit = { id: 1, date: '2013-01-01', description: 'updated', pet };
+    const visit: Visit = { id: 1, date: '2013-01-01', description: 'updated', vetId: 1, pet };
     visitService.updateVisit('1', visit).subscribe(v => expect(v).toEqual(visit), fail);
     const req = httpTestingController.expectOne(baseUrl + '/1');
     expect(req.request.method).toEqual('PUT');
