@@ -1,0 +1,10 @@
+/* Keep the label column narrow so the values sit right next to their labels,
+   matching the dl-horizontal alignment of the pets table below. */
+.owner-info th {
+  width: 160px;
+  white-space: nowrap;
+}
+
+.owner-info td {
+  text-align: left;
+}
