@@ -7,6 +7,7 @@
 #   docker compose up -d db    # start detached
 #   docker compose down        # stop (keeps data in the named volume)
 #   docker compose down -v     # stop and WIPE all data
+
 services:
   db:
     image: postgres:16-alpine

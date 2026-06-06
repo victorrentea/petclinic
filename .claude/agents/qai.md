@@ -7,6 +7,9 @@ description: >
   "translate this feature to a Playwright test", "add a UI test for X", or any
   request that mentions both a user-visible feature and `petclinic-ui-test/`.
 tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch
+model: opus
+skills: 
+  - frontend-dev
 ---
 
 # QAI — Feature-to-Playwright-Test Translator
