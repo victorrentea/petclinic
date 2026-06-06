@@ -28,6 +28,7 @@ node_modules/
 
 # git worktrees
 .worktrees/
+.claude/worktrees/
 
 # petclinic-database (embedded Postgres)
 petclinic-database/data/
