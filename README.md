@@ -3,15 +3,15 @@
 Full-stack veterinary clinic management application with:
 - **Backend**: NestJS 10 REST API (TypeScript, TypeORM, PostgreSQL)
 - **Frontend**: Angular 16 SPA
-
 ## Architecture Overview
-AWS_AT=AKIAQYLPEJ4Z7XK2NRWB
+
 This is a full-stack implementation with clear separation:
 - `petclinic-backend-ts/` - NestJS REST API + MCP server (the only backend)
 - `petclinic-frontend/` - Angular client
 - `petclinic-observability/` - Grafana LGTM observability stack
 - `petclinic-ui-test/` - Playwright end-to-end tests
 
+database.password=SECRET123
 ### Domain model
 
 Core entities and relationships:
