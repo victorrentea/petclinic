@@ -16,6 +16,10 @@
       "Write(.github/workflows/*)",
       "Edit(petclinic-backend-ts/src/migrations/*)",
       "Write(petclinic-backend-ts/src/migrations/*)",
+      "Edit(petclinic-backend-ts/docs/packages.puml)",
+      "Write(petclinic-backend-ts/docs/packages.puml)",
+      "Edit(petclinic-backend-ts/test/guardrails/package-deps.ts)",
+      "Write(petclinic-backend-ts/test/guardrails/package-deps.ts)",
       "Edit(.github/CODEOWNERS)",
       "Write(.github/CODEOWNERS)",
       "Edit(**/package.json)",
@@ -23,7 +27,8 @@
     ]
   },
   "skillOverrides": {
-    "add-field": "user-invocable-only"
+    "add-field": "user-invocable-only",
+    "update-config": "user-invocable-only"
   },
   "hooks": {
     "SessionStart": [

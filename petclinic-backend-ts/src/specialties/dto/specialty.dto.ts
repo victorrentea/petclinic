@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsOptional, Length, Min } from 'class-validator';
 
@@ -20,3 +22,6 @@ export class SpecialtyDto {
   @ApiProperty({ example: 'radiology', description: 'The name of the specialty.' })
   name!: string;
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<SpecialtyDto, components['schemas']['SpecialtyDto']>;

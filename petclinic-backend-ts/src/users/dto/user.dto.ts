@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsDefined, IsOptional, Length, ValidateNested } from 'class-validator';
@@ -25,5 +27,8 @@ export class UserDto {
   @ValidateNested({ each: true })
   @Type(() => RoleDto)
   @ApiProperty({ type: () => [RoleDto], description: 'The roles of an user' })
-  roles: RoleDto[] = [];
+  roles?: RoleDto[];
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<UserDto, components['schemas']['UserDto']>;

@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, Length, Matches } from 'class-validator';
 
@@ -33,3 +35,6 @@ export class OwnerFieldsDto {
   @ApiProperty({ example: '6085551023', description: 'The telephone number of the pet owner.' })
   telephone!: string;
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<OwnerFieldsDto, components['schemas']['OwnerFieldsDto']>;

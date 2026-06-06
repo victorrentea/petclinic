@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDefined, IsOptional, Length, Matches, Min, ValidateNested } from 'class-validator';
@@ -48,5 +50,8 @@ export class OwnerDto {
     description: 'The pets owned by this individual including any booked vet visits.',
     required: true,
   })
-  pets: PetDto[] = [];
+  pets: readonly PetDto[] = [];
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<OwnerDto, components['schemas']['OwnerDto']>;

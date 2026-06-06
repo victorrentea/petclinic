@@ -21,9 +21,9 @@ npm run migration:run               # apply TypeORM migrations (schema + seed da
 4. Domain Model (`src/<domain>/<name>.entity.ts`) - TypeORM entities
 
 **Key patterns:**
-- DTOs hand-written in `src/<domain>/dto/` with `class-validator` decorators
+- DTOs hand-written in `src/<domain>/dto/` with `class-validator` decorators, each compile-time-locked to the contract via `true satisfies Exact<XDto, components['schemas']['XDto']>` against the generated `src/generated/api-types.ts` (`npm run generate:api`, wired as `prebuild`)
 - Global RFC-7807 ProblemDetail exception filter (`src/common/all-exceptions.filter.ts`)
-- `openapi.yaml` at project root is generated output (OpenAPI sync guardrail), not a source spec
+- The root `openapi.yaml` is the source of truth for DTO shapes: to change a DTO, change `openapi.yaml` first, then align the DTO class (and the frontend follows via its own generated `api-types.ts`). The OpenAPI sync guardrail still verifies the Nest decorators produce exactly that document.
 
 **MCP server:** exposed over SSE at `/sse` (POST messages at `/mcp/messages`), authenticated with `X-API-Key` (maps key → owner id); see `src/mcp/`.
 

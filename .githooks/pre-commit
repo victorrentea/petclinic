@@ -43,21 +43,83 @@ if [ -f "$SECRETS_FILE" ]; then
   fi
 fi
 
-# ── Frontend: regenerate TS types from openapi.yaml ────────────────────────
-# Gated: only run when openapi.yaml is staged — that's the sole input.
+# ── Contract sync: openapi.yaml (repo root) is the source of truth ─────────
+# When it is staged, regenerate the TS models on BOTH sides (frontend +
+# backend) so the generated api-types.ts files can never go stale.
+OPENAPI_STAGED=false
 if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
-  if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
-    NPM_OUT=$(mktemp)
-    trap 'rm -f "$NPM_OUT"' EXIT
-    if ! npm --prefix "$ROOT/petclinic-frontend" run generate:api --silent >"$NPM_OUT" 2>&1; then
-      cat "$NPM_OUT"
-      echo "[pre-commit] ❌ TS-types regeneration failed — commit blocked."
+  OPENAPI_STAGED=true
+fi
+
+if $OPENAPI_STAGED; then
+  NPM_OUT=$(mktemp)
+  trap 'rm -f "$NPM_OUT"' EXIT
+  for MODULE in petclinic-frontend petclinic-backend-ts; do
+    if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/$MODULE/node_modules" ]; then
+      if ! npm --prefix "$ROOT/$MODULE" run generate:api --silent >"$NPM_OUT" 2>&1; then
+        cat "$NPM_OUT"
+        echo "[pre-commit] ❌ TS-types regeneration failed in $MODULE — commit blocked."
+        exit 1
+      fi
+    else
+      echo "[pre-commit] ⚠️  npm or $MODULE/node_modules missing — skipping TS-types regen."
+      echo "[pre-commit]    Install with: cd $MODULE && npm install"
+    fi
+  done
+  git add "$ROOT/petclinic-frontend/src/app/generated/api-types.ts" \
+          "$ROOT/petclinic-backend-ts/src/generated/api-types.ts"
+fi
+
+# ── Contract drift: type-check both sides against the generated models ─────
+# Backend DTO classes are compile-time-locked to the contract (`Exact<...>`
+# assertions, see GUARDRAILS.md), so a DTO or contract change that leaves
+# stale code on either side fails `tsc` here and blocks the commit.
+if $OPENAPI_STAGED || git diff --cached --name-only | grep -q '^petclinic-backend-ts/src/'; then
+  if ! (cd "$ROOT/petclinic-backend-ts" && npx tsc -p tsconfig.build.json --noEmit); then
+    echo "[pre-commit] ❌ Backend out of sync with openapi.yaml (or broken) — commit blocked."
+    exit 1
+  fi
+fi
+if $OPENAPI_STAGED || git diff --cached --name-only | grep -q '^petclinic-frontend/src/'; then
+  if ! (cd "$ROOT/petclinic-frontend" && npx tsc -p tsconfig.json --noEmit --skipLibCheck); then
+    echo "[pre-commit] ❌ Frontend out of sync with openapi.yaml (or broken) — commit blocked."
+    exit 1
+  fi
+fi
+
+# ── Backend: 'date' columns must be typed Date, not string ─────────────────
+# Parses the staged sources with the TS compiler API (test/guardrails/date-column-type.ts).
+STAGED_BACKEND_TS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^petclinic-backend-ts/src/.*\.ts$' || true)
+if [ -n "$STAGED_BACKEND_TS" ]; then
+  if [ -d "$ROOT/petclinic-backend-ts/node_modules" ]; then
+    FILES=$(printf '%s\n' "$STAGED_BACKEND_TS" | sed 's|^petclinic-backend-ts/||')
+    if ! (cd "$ROOT/petclinic-backend-ts" && npx ts-node --compiler-options '{"module":"commonjs"}' \
+        test/guardrails/date-column-type.ts --staged $FILES); then
+      echo "[pre-commit] ❌ @Column 'date' fields typed string — commit blocked."
+      echo "[pre-commit]    Type them Date (see GUARDRAILS.md)."
       exit 1
     fi
-    git add "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"
   else
-    echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
-    echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
+    echo "[pre-commit] ⚠️  petclinic-backend-ts/node_modules missing — skipping date-column check."
+    echo "[pre-commit]    Install with: cd petclinic-backend-ts && npm install"
+  fi
+fi
+
+# ── Backend: package dependency diagram must be up to date ──────────────────
+# When src/ files change, the cross-package import graph may change.
+# docs/packages.puml must always reflect actual imports (regenerate with npm run guardrail:package-deps).
+if git diff --cached --name-only | grep -qE '^petclinic-backend-ts/src/'; then
+  if [ -d "$ROOT/petclinic-backend-ts/node_modules" ]; then
+    if ! (cd "$ROOT/petclinic-backend-ts" && npx ts-node --compiler-options '{"module":"commonjs"}' \
+        test/guardrails/package-deps.ts --check); then
+      echo "[pre-commit] ❌ docs/packages.puml is out of sync with actual imports — commit blocked."
+      echo "[pre-commit]    Run: cd petclinic-backend-ts && npm run guardrail:package-deps"
+      echo "[pre-commit]    Then stage docs/packages.puml and commit again."
+      exit 1
+    fi
+  else
+    echo "[pre-commit] ⚠️  petclinic-backend-ts/node_modules missing — skipping package-deps check."
+    echo "[pre-commit]    Install with: cd petclinic-backend-ts && npm install"
   fi
 fi
 

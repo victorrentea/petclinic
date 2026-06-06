@@ -1,3 +1,5 @@
+import { components } from '../../generated/api-types';
+import { Exact } from '../../common/contract';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDefined, IsOptional, Length, Matches, Min } from 'class-validator';
 
@@ -71,3 +73,6 @@ export class VisitDto {
   })
   vetLastName?: string;
 }
+
+// Compile-time lock against the root openapi.yaml (see GUARDRAILS.md).
+true satisfies Exact<VisitDto, components['schemas']['VisitDto']>;
