@@ -7,7 +7,6 @@
 # GIT + Agent Settings
 /.github/CODEOWNERS              @victorrentea/elders
 /.claude/settings.json           @victorrentea/elders
-/.claude/settings.local.json     @victorrentea/elders
 
 # Contracts
 /openapi.yaml                    @victorrentea/elders
@@ -20,6 +19,7 @@
 /petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
 
 # Architecture
+/petclinic-backend/docs/generated/DomainModel.puml @victorrentea/elders
 /petclinic-backend/docs/packages.puml @victorrentea/elders
 /petclinic-backend/docs/c4model.dsl @victorrentea/elders
 
