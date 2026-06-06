@@ -2,7 +2,6 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
-import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {By} from '@angular/platform-browser';
 
@@ -73,17 +72,6 @@ describe('VisitsPageComponent', () => {
       expect(empty.nativeElement.textContent).toContain('No visits found.');
     });
   }));
-
-  it('navigates to /visits/add when Add Visit clicked', () => {
-    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
-    const router = TestBed.inject(Router);
-    const navSpy = spyOn(router, 'navigate');
-    fixture.detectChanges();
-
-    component.addVisit();
-
-    expect(navSpy).toHaveBeenCalledWith(['/visits/add']);
-  });
 
   it('renders owner cell as a link to /owners/{ownerId}', waitForAsync(() => {
     spyOn(visitService, 'getVisits').and.returnValue(of(visits));

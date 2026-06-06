@@ -2,11 +2,9 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {VisitEditComponent} from './visit-edit/visit-edit.component';
-import {VisitAddComponent} from './visit-add/visit-add.component';
 
 const visitRoutes: Routes = [
   {path: 'visits', component: VisitsPageComponent},
-  {path: 'visits/add', component: VisitAddComponent},
   {path: 'visits/:id/edit', component: VisitEditComponent},
 ];
 
