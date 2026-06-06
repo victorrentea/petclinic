@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # PostToolUse hook: runs after editing a Java file.
-#   1. Spotless: format the file via spotless:apply
-#   2. FQCN check: warn Claude when fully-qualified class names appear in code
+#   FQCN check: warn Claude when fully-qualified class names appear in code
 # example: victor.training.petclinic.rest.error.ExceptionControllerAdvice.buildProblemDetail
+# NOTE: Spotless formatting moved to .githooks/pre-commit — reformatting files
+# right after an edit invalidated Claude's read cache (file changed on disk
+# behind the agent's back).
 
 set -uo pipefail
 
@@ -11,16 +13,7 @@ FILE=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); prin
 
 printf '%s' "$FILE" | grep -qE '\.java$' || exit 0
 
-# ── 1. Spotless ───────────────────────────────────────────────────────────────
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OUTPUT=$(cd "$REPO_ROOT/petclinic-backend" && mvn spotless:apply -q 2>&1)
-STATUS=$?
-if [ $STATUS -ne 0 ]; then
-    echo "$OUTPUT"
-    exit $STATUS
-fi
-
-# ── 2. FQCN check ─────────────────────────────────────────────────────────────
+# ── FQCN check ────────────────────────────────────────────────────────────────
 [[ -f "$FILE" ]] || exit 0
 
 FQCNS=$(grep -nE '[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+\.[A-Z][a-zA-Z0-9]*' "$FILE" \

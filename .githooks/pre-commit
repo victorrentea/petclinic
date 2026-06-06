@@ -43,6 +43,26 @@ if [ -f "$SECRETS_FILE" ]; then
   fi
 fi
 
+# ── Backend: Spotless-format staged Java files ─────────────────────────────
+# (moved here from .claude/hooks/post-java-edit.sh — formatting on every edit
+#  invalidated Claude's read cache)
+STAGED_JAVA=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^petclinic-backend/.*\.java$' || true)
+if [ -n "$STAGED_JAVA" ]; then
+  if command -v mvn >/dev/null 2>&1; then
+    if ! SPOTLESS_OUT=$(cd "$ROOT/petclinic-backend" && mvn spotless:apply -q 2>&1); then
+      echo "$SPOTLESS_OUT"
+      echo "[pre-commit] ❌ Spotless failed — commit blocked."
+      exit 1
+    fi
+    # Re-stage the formatted files so the commit contains the formatted version.
+    while IFS= read -r f; do
+      git add "$ROOT/$f"
+    done <<<"$STAGED_JAVA"
+  else
+    echo "[pre-commit] ⚠️  mvn not on PATH — skipping Spotless formatting."
+  fi
+fi
+
 # ── Frontend: regenerate TS types from openapi.yaml ────────────────────────
 # Gated: only run when openapi.yaml is staged — that's the sole input.
 if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
