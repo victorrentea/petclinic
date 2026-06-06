@@ -136,3 +136,70 @@ describe('VisitAddComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });
 });
+
+describe('VisitAddComponent without pet in route', () => {
+  let component: VisitAddComponent;
+  let fixture: ComponentFixture<VisitAddComponent>;
+
+  const leo: Pet = {
+    id: 7,
+    name: 'Leo',
+    birthDate: '2010-09-07',
+    type: {id: 1, name: 'cat'},
+    ownerId: 1,
+    owner: null,
+    visits: []
+  };
+
+  class NoPetRouteStub {
+    params = of({});
+    get snapshot() {
+      return {params: {}};
+    }
+  }
+
+  class PetListServiceStub {
+    getPets(): Observable<Pet[]> {
+      return of([leo]);
+    }
+    getPetById(petId: number): Observable<Pet> {
+      return of();
+    }
+  }
+
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [VisitAddComponent],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule],
+      providers: [
+        {provide: PetService, useClass: PetListServiceStub},
+        {provide: VisitService, useClass: VisitServiceStub},
+        {provide: OwnerService, useClass: OwnerServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
+        {provide: Router, useClass: RouterStub},
+        {provide: ActivatedRoute, useClass: NoPetRouteStub}
+      ]
+    })
+      .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(VisitAddComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('loads all pets for the required pet dropdown', () => {
+    expect(component.needsPetSelection).toBeTrue();
+    expect(component.pets).toEqual([leo]);
+  });
+
+  it('selecting a pet wires it into the visit and loads its owner', () => {
+    component.onPetSelected(7);
+    expect(component.currentPet).toBe(leo);
+    expect(component.visit.pet).toBe(leo);
+    expect(component.currentPetType).toEqual({id: 1, name: 'cat'});
+    expect(component.currentOwner).toEqual(visitOwner);
+  });
+});

@@ -26,6 +26,19 @@
 
       <div class="form-group" >
 
+        <div class="form-group has-feedback" *ngIf="needsPetSelection"
+             [class.has-success]="petSel.dirty && petSel.valid" [class.has-error]="petSel.dirty && !petSel.valid">
+          <label class="col-sm-2 control-label">Pet</label>
+          <div class="col-sm-10">
+            <select id="petId" name="petId" class="form-control" required
+                    [ngModel]="currentPet.id" (ngModelChange)="onPetSelected($event)" #petSel="ngModel">
+              <option *ngFor="let p of pets" [ngValue]="p.id">{{ p.name }} ({{ p.type.name }})</option>
+            </select>
+            <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="petSel.valid" [class.glyphicon-remove]="!petSel.valid" aria-hidden="true"></span>
+            <span class="help-block" *ngIf="petSel.dirty && petSel.hasError('required')">Pet is required</span>
+          </div>
+        </div>
+
         <div class="form-group has-feedback" [class.has-success]="date.dirty && date.valid" [class.has-error]="date.dirty && !date.valid">
           <label class="col-sm-2 control-label">Date</label>
           <div class="col-sm-10">
