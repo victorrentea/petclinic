@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Transactional
 class OwnerMcpResourceTest {
 
-    @Autowired OwnerMcpResource ownerMcpResource;
+    @Autowired PetClinicMcp petClinicMcp;
     @Autowired OwnerRepository ownerRepository;
     @Autowired PetRepository petRepository;
 
@@ -51,7 +51,7 @@ class OwnerMcpResourceTest {
         ownerRepository.save(ron);
         authenticateAs(ron.getId());
 
-        String profile = ownerMcpResource.me();
+        String profile = petClinicMcp.me();
 
         assertThat(profile)
             .contains("Ronald Weasley_TST")
@@ -63,7 +63,7 @@ class OwnerMcpResourceTest {
     void unknown_id_throws() {
         authenticateAs(999_999);
 
-        assertThatThrownBy(() -> ownerMcpResource.me())
+        assertThatThrownBy(() -> petClinicMcp.me())
             .isInstanceOf(IllegalStateException.class);
     }
 

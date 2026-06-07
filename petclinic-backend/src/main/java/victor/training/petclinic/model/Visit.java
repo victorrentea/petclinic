@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "visits")
@@ -18,6 +19,10 @@ public class Visit {
 
     @Column(name = "visit_date", columnDefinition = "DATE")
     private LocalDate date = LocalDate.now();
+
+    /** Exact local time of the appointment; null on legacy rows created before V4. */
+    @Column(name = "visit_time", columnDefinition = "TIME")
+    private LocalTime time;
 
     @NotEmpty
     private String description;

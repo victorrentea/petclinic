@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Transactional
 class CancelVisitToolTest {
 
-    @Autowired VisitMcpTools visitTools;
+    @Autowired PetClinicMcp petClinicMcp;
     @Autowired OwnerRepository ownerRepository;
     @Autowired PetRepository petRepository;
     @Autowired VisitRepository visitRepository;
@@ -46,7 +46,7 @@ class CancelVisitToolTest {
         visitRepository.save(new Visit().setPet(pet).setDate(futureDate).setDescription("Check"));
         authenticateAs(owner.getId());
 
-        String result = visitTools.cancelVisit(futureDate.toString());
+        String result = petClinicMcp.cancelVisit(futureDate.toString());
 
         assertThat(result).contains("Cancelled 1 visit(s)").contains(futureDate.toString());
         assertThat(visitRepository.findByPetId(pet.getId())).isEmpty();
@@ -58,7 +58,7 @@ class CancelVisitToolTest {
         authenticateAs(owner.getId());
         LocalDate futureDate = LocalDate.now().plusDays(14);
 
-        String result = visitTools.cancelVisit(futureDate.toString());
+        String result = petClinicMcp.cancelVisit(futureDate.toString());
 
         assertThat(result).contains("No upcoming visits found").contains(futureDate.toString());
     }
@@ -68,7 +68,7 @@ class CancelVisitToolTest {
         Owner owner = ownerWithPet();
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> visitTools.cancelVisit("2020-01-01"))
+        assertThatThrownBy(() -> petClinicMcp.cancelVisit("2020-01-01"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
@@ -77,7 +77,7 @@ class CancelVisitToolTest {
     void cancel_throws_when_owner_not_found() {
         authenticateAs(999_999);
 
-        assertThatThrownBy(() -> visitTools.cancelVisit(LocalDate.now().plusDays(1).toString()))
+        assertThatThrownBy(() -> petClinicMcp.cancelVisit(LocalDate.now().plusDays(1).toString()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Owner not found");
     }
@@ -88,8 +88,8 @@ class CancelVisitToolTest {
         Pet pet = owner.getPets().get(0);
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> visitTools.createVisit(null, pet.getId(),
-                LocalDate.now().plusDays(7).toString(), "Test visit"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(null, pet.getId(),
+                LocalDate.now().plusDays(7).toString(), "10:30", "Test visit"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("elicitation");
     }
@@ -101,8 +101,8 @@ class CancelVisitToolTest {
         Pet petOfOwner2 = owner2.getPets().get(0);
         authenticateAs(owner1.getId());
 
-        assertThatThrownBy(() -> visitTools.createVisit(null, petOfOwner2.getId(),
-                LocalDate.now().plusDays(7).toString(), "Attempt"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(null, petOfOwner2.getId(),
+                LocalDate.now().plusDays(7).toString(), "10:30", "Attempt"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not belong to owner");
     }
@@ -112,8 +112,8 @@ class CancelVisitToolTest {
         Owner owner = ownerWithPet();
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> visitTools.createVisit(null, 999_999,
-                LocalDate.now().plusDays(7).toString(), "Visit"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(null, 999_999,
+                LocalDate.now().plusDays(7).toString(), "10:30", "Visit"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Pet not found");
     }
@@ -124,7 +124,7 @@ class CancelVisitToolTest {
         Pet pet = owner.getPets().get(0);
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> visitTools.createVisit(null, pet.getId(), "2020-01-01", "Old visit"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(null, pet.getId(), "2020-01-01", "10:30", "Old visit"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
@@ -133,7 +133,7 @@ class CancelVisitToolTest {
     void list_throws_when_owner_not_found() {
         authenticateAs(999_999);
 
-        assertThatThrownBy(() -> visitTools.listVisits())
+        assertThatThrownBy(() -> petClinicMcp.listVisits())
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Owner not found");
     }

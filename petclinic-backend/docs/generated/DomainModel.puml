@@ -44,6 +44,7 @@ class Vet {
 class Visit {
   id : Integer
   date : LocalDate
+  time : LocalTime
   description : String
 }
 

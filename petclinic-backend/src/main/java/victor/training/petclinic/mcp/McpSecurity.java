@@ -1,12 +1,11 @@
 package victor.training.petclinic.mcp;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -27,12 +26,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
-@EnableConfigurationProperties(McpSecurity.McpProperties.class)
 public class McpSecurity {
 
-    public static final String API_KEY_HEADER = "X-API-Key";
-
-    /** Owner id of the caller, derived from the authenticated API key. */
+    /** Owner id of the caller, extracted from the JWT subject claim. */
     public static int currentOwnerId() {
         return Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getName());
     }
@@ -41,45 +37,51 @@ public class McpSecurity {
     // @Order ensures this chain is consulted before the backend's catch-all chain.
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    SecurityFilterChain mcpApiKeyChain(HttpSecurity http, McpProperties props) throws Exception {
+    SecurityFilterChain mcpJwtChain(HttpSecurity http) throws Exception {
         return http
             .securityMatcher("/sse", "/sse/**", "/mcp/**")
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-            .addFilterBefore(new ApiKeyFilter(props.getApiKeys()), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtBearerFilter(), UsernamePasswordAuthenticationFilter.class)
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .build();
     }
 
-    @ConfigurationProperties(prefix = "petclinic.mcp")
-    public static class McpProperties {
-        private Map<String, Integer> apiKeys = new HashMap<>();
-        public Map<String, Integer> getApiKeys() { return apiKeys; }
-        public void setApiKeys(Map<String, Integer> apiKeys) { this.apiKeys = apiKeys; }
-    }
-
-    private static class ApiKeyFilter extends OncePerRequestFilter {
-        private final Map<String, Integer> apiKeys;
-
-        ApiKeyFilter(Map<String, Integer> apiKeys) {
-            this.apiKeys = apiKeys;
-        }
+    private static class JwtBearerFilter extends OncePerRequestFilter {
 
         @Override
         protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
-            String key = req.getHeader(API_KEY_HEADER);
-            Integer ownerId = key == null ? null : apiKeys.get(key);
-            if (ownerId != null) {
-                var auth = new UsernamePasswordAuthenticationToken(
-                    ownerId.toString(),
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_MCP")));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            String header = req.getHeader("Authorization");
+            if (header != null && header.startsWith("Bearer ")) {
+                String subject = extractSubject(header.substring(7));
+                if (subject != null) {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                        subject,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_MCP")));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
             chain.doFilter(req, res);
+        }
+
+        private static String extractSubject(String jwt) {
+            try {
+                String[] parts = jwt.split("\\.");
+                if (parts.length < 2) return null;
+                byte[] decoded = Base64.getUrlDecoder().decode(padBase64(parts[1]));
+                String payload = new String(decoded, StandardCharsets.UTF_8);
+                return new ObjectMapper().readTree(payload).path("sub").asText(null);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        private static String padBase64(String s) {
+            return s + "=".repeat((4 - s.length() % 4) % 4);
         }
     }
 }

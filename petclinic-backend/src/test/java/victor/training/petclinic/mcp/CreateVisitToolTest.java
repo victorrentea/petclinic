@@ -1,11 +1,13 @@
 package victor.training.petclinic.mcp;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Consumer;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.when;
 @Transactional
 class CreateVisitToolTest {
 
-    @Autowired VisitMcpTools visitTools;
+    @Autowired PetClinicMcp petClinicMcp;
     @Autowired OwnerRepository ownerRepository;
     @Autowired PetRepository petRepository;
     @Autowired VisitRepository visitRepository;
@@ -73,11 +75,12 @@ class CreateVisitToolTest {
     void creates_visit_after_owner_accepts_elicitation_and_provides_phone() {
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.ACCEPT,
-                new VisitMcpTools.VisitPhoneInput("0744123456"), null));
+                new PetClinicMcp.VisitPhoneInput("0744123456"), null));
 
-        String result = visitTools.createVisit(context, petId, future.toString(), "Vaccination");
+        String result = petClinicMcp.createVisit(context, petId, future.toString(), "10:30", "Vaccination");
 
-        assertThat(result).contains("Created visit").contains("Rex").contains(future.toString());
+        assertThat(result).contains("Created visit").contains("Rex")
+            .contains(future.toString()).contains("10:30");
         assertThat(visitRepository.findByPetId(petId))
             .extracting(v -> v.getDescription())
             .contains("Vaccination");
@@ -90,7 +93,7 @@ class CreateVisitToolTest {
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.DECLINE, null, null));
 
-        String result = visitTools.createVisit(context, petId, future.toString(), "Checkup");
+        String result = petClinicMcp.createVisit(context, petId, future.toString(), "10:30", "Checkup");
 
         assertThat(result).isEqualTo("Visit creation cancelled by user.");
         assertThat(visitRepository.findByPetId(petId)).isEmpty();
@@ -100,9 +103,9 @@ class CreateVisitToolTest {
     void blank_phone_in_elicitation_is_rejected() {
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.ACCEPT,
-                new VisitMcpTools.VisitPhoneInput("   "), null));
+                new PetClinicMcp.VisitPhoneInput("   "), null));
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, petId, future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Phone number is required");
     }
@@ -112,7 +115,7 @@ class CreateVisitToolTest {
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.ACCEPT, null, null));
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, petId, future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Phone number is required");
     }
@@ -121,7 +124,7 @@ class CreateVisitToolTest {
     void unknown_pet_is_rejected() {
         McpSyncRequestContext context = mock(McpSyncRequestContext.class);
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, 999_999, future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, 999_999, future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Pet not found");
     }
@@ -143,7 +146,7 @@ class CreateVisitToolTest {
 
         McpSyncRequestContext context = mock(McpSyncRequestContext.class);
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, otherPet.getId(), future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, otherPet.getId(), future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not belong to owner");
     }
@@ -153,14 +156,27 @@ class CreateVisitToolTest {
         McpSyncRequestContext context = mock(McpSyncRequestContext.class);
         String past = LocalDate.now().minusDays(1).toString();
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, petId, past, "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, past, "10:30", "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
 
     @Test
+    void today_with_already_passed_time_is_rejected() {
+        // minusHours(1) wraps past midnight to 23:xx (a future time today) — skip in that window
+        Assumptions.assumeTrue(LocalTime.now().isAfter(LocalTime.of(1, 0)));
+        McpSyncRequestContext context = mock(McpSyncRequestContext.class);
+        String today = LocalDate.now().toString();
+        String pastTime = LocalTime.now().minusHours(1).withSecond(0).withNano(0).toString();
+
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, today, pastTime, "Checkup"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Visit time must be in the future");
+    }
+
+    @Test
     void null_context_means_no_elicitation_support() {
-        assertThatThrownBy(() -> visitTools.createVisit(null, petId, future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(null, petId, future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("elicitation");
     }
@@ -170,13 +186,13 @@ class CreateVisitToolTest {
         McpSyncRequestContext context = mock(McpSyncRequestContext.class);
         when(context.elicitEnabled()).thenReturn(false);
 
-        assertThatThrownBy(() -> visitTools.createVisit(context, petId, future.toString(), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, future.toString(), "10:30", "Checkup"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("elicitation");
     }
 
     @SuppressWarnings("unchecked")
-    private static McpSyncRequestContext elicitingContext(StructuredElicitResult<VisitMcpTools.VisitPhoneInput> r) {
+    private static McpSyncRequestContext elicitingContext(StructuredElicitResult<PetClinicMcp.VisitPhoneInput> r) {
         McpSyncRequestContext context = mock(McpSyncRequestContext.class);
         when(context.elicitEnabled()).thenReturn(true);
         when(context.elicit(any(Consumer.class), any(Class.class))).thenReturn((StructuredElicitResult) r);

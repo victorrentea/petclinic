@@ -1,12 +1,5 @@
 {
   "mcpServers": {
-    "petclinic-mcp": {
-      "type": "sse",
-      "url": "http://localhost:8080/sse",
-      "headers": {
-        "X-API-Key": "demo-key-1"
-      }
-    },
     "postgres-db": {
       "command": "npx",
       "args": [
