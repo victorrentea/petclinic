@@ -117,6 +117,5 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 ## Task Modifiers
 - Always write code using red-green TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
 - Auto-push after commit if git username is `victorrentea` and repo is `github.com/victorrentea/*`
-- After every push, monitor the CI in background and fix if it fails
 - Keep explanations concise
 - Challenge ambiguous/wrong prompts

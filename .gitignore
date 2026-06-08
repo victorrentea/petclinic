@@ -71,3 +71,6 @@ __pycache__/
 /.playwright-mcp
 /petclinic-database/.bootstrapped
 .claude/settings.local.json
+
+# Lazily-built CI-watch hook helper (mvdan.cc/sh parser)
+.claude/hooks/pushwatch/pushwatch
