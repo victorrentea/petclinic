@@ -40,6 +40,10 @@ See sub-module `CLAUDE.md` files for backend and frontend specifics.
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+## Scale
+- The `owners` table holds **hundreds of thousands of rows** in production.
+- Never load all owners into memory — always paginate and filter at the DB level.
+
 ## API Endpoints
 REST API at http://localhost:8080/api/ — OpenAPI docs: http://localhost:8080/swagger-ui.html
 

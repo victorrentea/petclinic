@@ -85,7 +85,7 @@ Open the owner's detail page and click *Edit Pet* next to the pet you want to ch
 
 ## Visits
 
-The Visits area gives you a chronological view of every visit across the clinic. It is the right place to check what's been happening recently or to find a specific visit. To register a new visit, however, you start from a specific pet — see [Pets](#pets) above.
+The Visits area gives you a chronological view of every visit across the clinic. It is the right place to check what's been happening recently or to find a specific visit. To register or edit a visit, start from the owner's record — find the pet in question and use the per-pet action buttons there.
 
 ### Viewing all visits
 
@@ -97,7 +97,13 @@ The list is sorted with the most recent visit first. Each row shows the visit da
 
 ![](screenshots/visits-add.png)
 
-To add a visit, open the owner's record (see [Owners](#owners)), find the pet that came in for the visit, and click *Add Visit* in that pet's section. The *New Visit* form opens with the pet's identifying details at the top and the pet's previous visits listed below. Pick the *Date* from the calendar, write a *Description* of what was done, and click *Add Visit* to save. The visit appears under that pet on the owner record and in the chronological *Visits* list. The *Add Visit* button at the bottom of the list page only works in the context of a specific pet — always start from the owner's record.
+To add a visit, open the owner's record (see [Owners](#owners)), find the pet that came in for the visit, and click *Add Visit* in that pet's section. The *New Visit* form opens with the pet's identifying details at the top and the pet's previous visits listed below. Pick the *Date* from the calendar, write a *Description* of what was done, and click *Add Visit* to save. The visit appears under that pet on the owner record and in the chronological *Visits* list.
+
+### Editing a visit
+
+![](screenshots/visits-edit.png)
+
+From the owner's record, find the pet whose visit you need to correct and click *Edit Visit* next to that entry. The edit form opens pre-filled with the existing date and description. Update the fields as needed and save. To remove a visit entirely, click *Delete Visit* on the owner's detail page instead.
 
 ---
 

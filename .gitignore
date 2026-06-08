@@ -74,3 +74,4 @@ __pycache__/
 
 # Lazily-built CI-watch hook helper (mvdan.cc/sh parser)
 .claude/hooks/pushwatch/pushwatch
+/user-manual/screenshots/visits-edit.png
