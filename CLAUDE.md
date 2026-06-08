@@ -23,37 +23,13 @@ Each script is foreground; run them in separate terminals.
 ./start-observability.sh   # optional: Grafana LGTM (Ctrl+C tears it down)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-./mvnw test                         # Run tests
-./mvnw test -Dtest=ClassName#methodName  # Single test
-./mvnw clean install                # Build + regenerate MapStruct mappers
-```
+See sub-module `CLAUDE.md` files for backend and frontend specifics.
 
-### Frontend (petclinic-frontend/)
-```sh
-npm start                  # Dev server on localhost:4200
-npm run build              # Production build
-npm test                   # Karma tests
-npm run test-headless       # Headless Chrome tests
-npm run e2e                # Playwright e2e tests
-```
-
-## Architecture
-
-### Backend
-- REST Controllers (`rest/`) → Mappers (MapStruct) → Spring Data JPA repositories → JPA entities
-- No service layer; constructor injection via `@RequiredArgsConstructor`
-- DTOs hand-written in `rest/dto/`; `openapi.yaml` is **generated** output (from `OpenApiExtractorTest`)
-- Global exception handling via `@RestControllerAdvice`
-
-See [GUARDRAILS.md](GUARDRAILS.md) for guardrail tests and CI drift checks.
-
-### Database
+## Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
 
-### Security
+## Security
 - Disabled by default; enable via `petclinic.security.enable=true`
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN` — default user: `admin`/`admin`
 
@@ -67,14 +43,7 @@ See [GUARDRAILS.md](GUARDRAILS.md) for guardrail tests and CI drift checks.
 ## API Endpoints
 REST API at http://localhost:8080/api/ — OpenAPI docs: http://localhost:8080/swagger-ui.html
 
-## Development Notes
-
-### Code Preferences
-- MapStruct for DTO mapping; Lombok: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
-- Avoid ternary unless it fits in half a line (~60 chars); use if/else otherwise
+See [GUARDRAILS.md](GUARDRAILS.md) for guardrail tests and CI drift checks.
 
 ## Task Modifiers
 - Always write code using red-green TDD: write a failing test first, confirm it fails, then implement — no production code without a prior failing test
