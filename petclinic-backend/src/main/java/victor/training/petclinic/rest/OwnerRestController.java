@@ -1,8 +1,14 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -54,11 +60,47 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
+    /**
+     * Logical columns the UI is allowed to sort on; anything else is dropped to avoid injection / 500s.
+     * The {@code name} column maps to the underlying {@code lastName, firstName} entity fields.
+     */
+    private static final Set<String> SORTABLE = Set.of("name", "city");
+
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        Pageable pageable) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, sanitize(pageable));
+        return owners.map(ownerMapper::toOwnerDto);
+    }
+
+    /**
+     * Whitelist the requested sort to {@link #SORTABLE} (expanding {@code name} to {@code lastName,
+     * firstName}), default to name ascending when nothing valid remains, and always append a stable
+     * {@code id} tiebreaker for deterministic paging.
+     */
+    private Pageable sanitize(Pageable pageable) {
+        List<Sort.Order> safeOrders = new ArrayList<>();
+        for (Sort.Order order : pageable.getSort()) {
+            if (!SORTABLE.contains(order.getProperty())) {
+                continue;
+            }
+            if (order.getProperty().equals("name")) {
+                safeOrders.add(new Sort.Order(order.getDirection(), "lastName"));
+                safeOrders.add(new Sort.Order(order.getDirection(), "firstName"));
+            } else {
+                safeOrders.add(order);
+            }
+        }
+        Sort sort;
+        if (safeOrders.isEmpty()) {
+            sort = Sort.by(Sort.Direction.ASC, "lastName", "firstName");
+        } else {
+            sort = Sort.by(safeOrders);
+        }
+        sort = sort.and(Sort.by(Sort.Direction.ASC, "id"));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

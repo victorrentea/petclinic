@@ -9,6 +9,21 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnerPage {
+  content: OwnerDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface OwnerPageQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  lastName?: string;
+}
+
 export interface VisitDto {
   id: number;
   date: string;
@@ -30,16 +45,20 @@ export class ApiClient {
     });
   }
 
-  async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
+  // Listing returns a Spring Data Page envelope; backend caps size at 20.
+  async fetchOwnerPage(query: OwnerPageQuery = {}): Promise<OwnerPage> {
+    const response = await this.client.get<OwnerPage>('/owners', { params: query });
     return response.data;
   }
 
+  async fetchOwners(): Promise<OwnerDto[]> {
+    const page = await this.fetchOwnerPage({ page: 0, size: 20, sort: 'name,asc' });
+    return page.content;
+  }
+
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
-    });
-    return response.data;
+    const page = await this.fetchOwnerPage({ page: 0, size: 20, sort: 'name,asc', lastName: prefix });
+    return page.content;
   }
 
   async fetchVisits(): Promise<VisitDto[]> {
@@ -50,6 +69,13 @@ export class ApiClient {
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
       .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
+      .filter(name => name.length > 0);
+  }
+
+  // The UI renders the Name column last-name-first ("Franklin George") to match the sort key.
+  static getFullNamesLastFirst(owners: OwnerDto[]): string[] {
+    return owners
+      .map(owner => `${owner.lastName} ${owner.firstName}`.trim())
       .filter(name => name.length > 0);
   }
 

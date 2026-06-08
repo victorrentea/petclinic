@@ -3,6 +3,46 @@
 display:none;
 }
 
+/* Sortable column headers (Name, City) — show a hand cursor and avoid text selection on click. */
+th.sortable {
+	cursor: pointer;
+	user-select: none;
+}
+
+th.sortable:hover {
+	text-decoration: underline;
+}
+
+/* Affordance: a washed-out ↕ hints a column is sortable; the active column's ▲/▼ is full strength. */
+.sort-indicator {
+	margin-left: 8px;
+	font-size: 1.25em;
+	font-weight: bold;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.sort-indicator.active {
+	color: #fff;
+}
+
+/* Fixed layout + explicit column widths so columns don't jump left/right when the
+   row content changes between sorts/pages (sums to 100%). */
+#ownersTable table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+#ownersTable th:nth-child(1), #ownersTable td:nth-child(1) { width: 20%; } /* Name */
+#ownersTable th:nth-child(2), #ownersTable td:nth-child(2) { width: 26%; } /* Address */
+#ownersTable th:nth-child(3), #ownersTable td:nth-child(3) { width: 16%; } /* City */
+#ownersTable th:nth-child(4), #ownersTable td:nth-child(4) { width: 18%; } /* Telephone */
+#ownersTable th:nth-child(5), #ownersTable td:nth-child(5) { width: 20%; } /* Pets */
+
+#ownersTable td {
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;

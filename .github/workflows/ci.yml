@@ -116,3 +116,28 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      # Spins up backend + frontend + Playwright as isolated containers and runs the
+      # Playwright e2e suite (tests/*.spec.ts) against the full stack. Browser tests run
+      # here in CI only — never in the pre-commit hook.
+      - name: Run Playwright e2e (docker-compose)
+        working-directory: petclinic-ui-test
+        run: docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from playwright
+
+      - name: Upload e2e artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            petclinic-ui-test/test-results
+            petclinic-ui-test/playwright-report
+          if-no-files-found: ignore

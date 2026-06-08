@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -128,7 +129,8 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        // Listing is paged + sorted now; filter so the created owner is deterministically on the page.
+        List<OwnerDto> owners = search("/api/owners?lastName=Franklin");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -156,7 +158,9 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        // The listing endpoint now returns a Spring Data Page envelope; owners live under "content".
+        JsonNode content = mapper.readTree(responseJson).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
         });
     }
 

@@ -8,13 +8,16 @@ import {OwnerAddComponent} from './owner-add/owner-add.component';
 import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
 import {PetsModule} from '../pets/pets.module';
+import {MatPaginatorIntl, MatPaginatorModule} from '@angular/material/paginator';
+import {ownersPaginatorIntl} from './owner-paginator-intl';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     OwnersRoutingModule,
-    PetsModule
+    PetsModule,
+    MatPaginatorModule
   ],
   declarations: [
     OwnerListComponent,
@@ -22,7 +25,10 @@ import {PetsModule} from '../pets/pets.module';
     OwnerEditComponent,
     OwnerAddComponent
   ],
-  providers: [OwnerService]
+  providers: [
+    OwnerService,
+    {provide: MatPaginatorIntl, useFactory: ownersPaginatorIntl}
+  ]
 
 })
 

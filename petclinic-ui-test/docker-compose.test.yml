@@ -44,6 +44,8 @@ services:
       - BASE_URL=http://frontend:8080
       - API_BASE_URL=http://backend:8080/api
       - CI=true
+      # Apps run as their own containers here, so Playwright must not try to self-start them.
+      - SKIP_SERVER_START=1
     command: sh -c "npm install && npx playwright test"
     depends_on:
       backend:

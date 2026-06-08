@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -34,6 +35,14 @@ describe('OwnerService', () => {
     }
   ];
 
+  const expectedPage: OwnerPage = {
+    content: expectedOwners,
+    totalElements: 2,
+    totalPages: 1,
+    number: 0,
+    size: 10
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -48,14 +57,32 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
+  it('sends page/size/sort params and returns the page envelope', () => {
     ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+      .getOwners({ page: 2, size: 5, sort: 'city,desc', lastName: '' })
+      .subscribe((result) => expect(result).toEqual(expectedPage), fail);
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    const req = httpTestingController.expectOne(
+      (r) => r.url === ownerService.entityUrl
+        && r.params.get('page') === '2'
+        && r.params.get('size') === '5'
+        && r.params.get('sort') === 'city,desc'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expect(req.request.params.has('lastName')).toBeFalse(); // empty lastName omitted
+    req.flush(expectedPage);
+  });
+
+  it('includes lastName when a search term is set', () => {
+    ownerService
+      .getOwners({ page: 0, size: 10, sort: 'lastName,asc', lastName: 'Fr' })
+      .subscribe();
+
+    const req = httpTestingController.expectOne(
+      (r) => r.url === ownerService.entityUrl && r.params.get('lastName') === 'Fr'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedPage);
   });
 
   it('search the owner by id', () => {
@@ -129,17 +156,5 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('DELETE');
     expect(req.request.body).toEqual(null);
     req.flush(null);
-  });
-
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
   });
 });

@@ -51,7 +51,8 @@ public class OwnerSteps {
             .baseUri(http.baseUri())
             .get("/api/owners?lastName=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
-        List<String> lastNames = response.jsonPath().getList("lastName", String.class);
+        // Listing returns a Spring Data Page envelope; owners are under "content".
+        List<String> lastNames = response.jsonPath().getList("content.lastName", String.class);
         assertThat(lastNames).contains(lastName);
     }
 
@@ -67,12 +68,16 @@ public class OwnerSteps {
 
     @Then("the response JSON array has size {int}")
     public void theResponseJsonArrayHasSize(int expected) {
-        assertThat(http.getLastResponse().jsonPath().getList("$").size()).isEqualTo(expected);
+        var jsonPath = http.getLastResponse().jsonPath();
+        String listPath = jsonPath.get("content") != null ? "content" : "$";
+        assertThat(jsonPath.getList(listPath).size()).isEqualTo(expected);
     }
 
     @Then("every item in the response has {string} equal to {string}")
     public void everyItemInTheResponseHasFieldEqualTo(String field, String value) {
-        List<String> values = http.getLastResponse().jsonPath().getList(field, String.class);
+        var jsonPath = http.getLastResponse().jsonPath();
+        String fieldPath = jsonPath.get("content") != null ? "content." + field : field;
+        List<String> values = jsonPath.getList(fieldPath, String.class);
         assertThat(values).isNotEmpty();
         assertThat(values).allMatch(v -> v.equals(value));
     }
