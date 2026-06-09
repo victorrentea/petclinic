@@ -1,0 +1,12 @@
+/* Bootstrap's .dl-horizontal right-aligns the term (dt) and pushes it 160px wide.
+   Left-align the pet labels (Name / Birth Date / Type) to match the Owner
+   Information labels above, and tighten the term/value gap. dd margin-left 120px
+   keeps the pet value column aligned with the owner value column. */
+.dl-horizontal dt {
+  text-align: left;
+  width: 104px;
+}
+
+.dl-horizontal dd {
+  margin-left: 120px;
+}

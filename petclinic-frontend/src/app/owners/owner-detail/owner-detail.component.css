@@ -1,0 +1,8 @@
+/* Owner Information: keep the label column just wide enough for the longest
+   label ("Telephone") so the values sit close to their labels instead of leaving
+   a large empty gap. 120px (border-box) also matches the pets' dd margin-left,
+   so the owner value column lines up with the pet value column below. */
+.table th {
+  width: 120px;
+  white-space: nowrap;
+}
