@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": [
+    "petclinic-mcp"
+  ],
+  "disabledMcpjsonServers": [
+    "postgres-db",
+    "grafana",
+    "context7",
+    "playwright"
+  ]
+}
