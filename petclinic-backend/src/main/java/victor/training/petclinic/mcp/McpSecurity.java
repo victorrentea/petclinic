@@ -39,7 +39,7 @@ public class McpSecurity {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     SecurityFilterChain mcpJwtChain(HttpSecurity http) throws Exception {
         return http
-            .securityMatcher("/sse", "/sse/**", "/mcp/**")
+            .securityMatcher("/mcp", "/mcp/**")
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())

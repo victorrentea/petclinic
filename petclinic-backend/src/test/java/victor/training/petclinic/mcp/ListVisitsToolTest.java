@@ -52,12 +52,11 @@ class ListVisitsToolTest {
             .setCity("Testville")
             .setTelephone("0000000000");
         owner.addPet(pet);
-        ownerRepository.save(owner);
-
-        visitRepository.save(new Visit()
-            .setPet(pet)
+        // addVisit keeps both sides of the association in sync, so listVisits can navigate pet.getVisits().
+        pet.addVisit(new Visit()
             .setDate(LocalDate.of(2026, 5, 24))
             .setDescription("Annual checkup"));
+        ownerRepository.save(owner);
 
         authenticateAs(owner.getId());
 

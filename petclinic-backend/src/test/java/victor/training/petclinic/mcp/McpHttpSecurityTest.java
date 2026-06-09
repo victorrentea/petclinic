@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// Covers the JWT Bearer filter wired by McpSecurity: /sse and /mcp/** require a valid Bearer token.
+// Covers the JWT Bearer filter wired by McpSecurity: /mcp and /mcp/** require a valid Bearer token.
 // Without these, Sonar new-code coverage tanks because the filter chain bean only runs against real HTTP.
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -26,8 +26,8 @@ class McpHttpSecurityTest {
     @Autowired MockMvc mockMvc;
 
     @Test
-    void sse_withoutToken_isForbidden() throws Exception {
-        mockMvc.perform(get("/sse"))
+    void mcpStream_withoutToken_isForbidden() throws Exception {
+        mockMvc.perform(get("/mcp"))
             .andExpect(status().isForbidden());
     }
 

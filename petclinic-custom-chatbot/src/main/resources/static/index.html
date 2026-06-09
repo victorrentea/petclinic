@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PetClinic Assistant</title>
+    <!-- styles extracted to assistant.css -->
+    <link rel="stylesheet" href="assistant.css">
+</head>
+<body>
+
+<!-- top controls: name -->
+<div class="top-controls">
+    <label for="assistantUser">Name</label>
+    <input type="text" id="assistantUser" placeholder="Name" value="george" style="width:120px; padding:6px;" />
+</div>
+
+<!-- message history -->
+<div id="messageHistory" class="message-history" aria-live="polite" aria-atomic="false">
+    <div id="spinnerOverlay" class="spinner-overlay" role="status" aria-hidden="true">
+        <div class="spinner" aria-hidden="true"></div>
+    </div>
+</div>
+
+<!-- chat input row: message input (takes rest) + send button aligned right -->
+<div class="chat-row">
+    <label for="assistantInput" style="position:absolute; left:-9999px;">Message</label>
+    <input type="text" id="assistantInput" placeholder="Type a message" style="padding:6px;" />
+    <button id="assistantSend" type="button">Send</button>
+</div>
+
+<!-- predefined prompts -->
+<a class="prompt">My dog Leo is limping and won't put weight on his leg</a><br>
+<a class="prompt">My cat has bad breath and a broken tooth</a><br>
+<a class="prompt">My dog has an itchy skin rash and a lump</a><br>
+<a class="prompt">Yes, please book a visit for the specialty you recommended, next Monday at 10:00</a><br>
+
+</body>
+<script src="assistant-md.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var anchors = document.querySelectorAll("body a");
+        var input = document.getElementById('assistantInput');
+        var btn = document.getElementById('assistantSend');
+        var userInput = document.getElementById('assistantUser');
+        var overlay = document.getElementById('spinnerOverlay');
+        var historyEl = document.getElementById('messageHistory');
+        var hideTimeout = null;
+
+        function scrollHistoryToBottom() {
+            if (!historyEl) return;
+            historyEl.scrollTop = historyEl.scrollHeight;
+        }
+
+        // Keep overlay visually in sync with the scroll position so it appears to scroll with content
+        function syncOverlayPosition() {
+            if (!overlay || !historyEl) return;
+            // move overlay visually by the scrollTop so it follows the scrolled content
+            overlay.style.transform = 'translateY(' + historyEl.scrollTop + 'px)';
+        }
+        // update overlay position when user scrolls the history
+        historyEl.addEventListener('scroll', function() { syncOverlayPosition(); });
+
+        function appendMessage(role, text, meta) {
+            var el = document.createElement('div');
+            el.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
+            if (role === 'user') {
+                el.innerText = text;
+            } else {
+                // assistant: allow HTML rendering using the global renderMarkdown
+                el.innerHTML = text ? renderMarkdown(text) : '';
+            }
+            if (meta && role === 'user') {
+                var m = document.createElement('small');
+                m.className = 'meta';
+                m.innerText = meta;
+                el.appendChild(m);
+            }
+            historyEl.appendChild(el);
+            scrollHistoryToBottom();
+            return el;
+        }
+
+        function showOverlay() {
+            if (!overlay) return;
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            // ensure overlay is positioned to match current scroll
+            syncOverlayPosition();
+            // fallback hide after 20s
+            if (hideTimeout) clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(hideOverlay, 20000);
+        }
+
+        function hideOverlay() {
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            overlay.setAttribute('aria-hidden', 'true');
+            // reset transform when hidden
+            overlay.style.transform = 'none';
+            if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+        }
+
+        async function sendToAssistant(text) {
+            if (!text) {
+                return;
+            }
+            var user = (userInput && userInput.value) ? userInput.value.trim() : '';
+            if (!user) user = 'george';
+
+            // append user message immediately
+            appendMessage('user', text, user + ' • ' + new Date().toLocaleTimeString());
+            // clear the input textbox after sending and focus it
+            if (input) { input.value = ''; try { input.focus(); } catch(e) { /* ignore */ } }
+
+            // append assistant placeholder
+            var assistantEl = appendMessage('assistant', '', null);
+
+            showOverlay();
+
+            // fetch the streaming assistant response and append progressively
+            var url = '/'+ encodeURIComponent(user) + '/assistant?q=' + encodeURIComponent(text);
+            try {
+                const res = await fetch(url, { method: 'GET', headers: { Accept: 'text/markdown' } });
+                if (!res.ok) {
+                    assistantEl.innerText = 'Error: ' + res.status + ' ' + res.statusText;
+                    hideOverlay();
+                    return;
+                }
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let done = false;
+                let accumulated = '';
+
+                while (!done) {
+                    const { value, done: streamDone } = await reader.read();
+                    if (value) {
+                        accumulated += decoder.decode(value, { stream: true });
+                        // append chunk to assistant element (progressive rendering) as HTML
+                        assistantEl.innerHTML = renderMarkdown(accumulated);
+                        scrollHistoryToBottom();
+                    }
+                    done = streamDone;
+                }
+
+                // finalize with any remaining text
+                assistantEl.innerHTML = renderMarkdown(accumulated.trim());
+                // no timestamp for assistant messages as requested
+            } catch (e) {
+                assistantEl.innerText = 'Request failed: ' + (e && e.message ? e.message : e);
+            } finally {
+                hideOverlay();
+            }
+        }
+
+        // wire anchors to use current user value when clicked
+        anchors.forEach(function(anchor) {
+            var text = anchor.textContent;
+            // prevent default navigation and perform fetch streaming
+            anchor.href = '#';
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                sendToAssistant(text);
+            });
+            // ensure a line break after each anchor (avoid duplicate BRs)
+            var nextEl = anchor.nextElementSibling;
+            if (!nextEl || nextEl.tagName !== 'BR') {
+                anchor.insertAdjacentHTML('afterend', '<br>');
+            }
+        });
+
+        btn.addEventListener('click', function() {
+            var text = input.value ? input.value.trim() : '';
+            if (text.length === 0) {
+                return;
+            }
+            // clear input and focus for quick follow-up
+            input.value = '';
+            try { input.focus(); } catch (e) { /* ignore */ }
+            sendToAssistant(text);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var text = input.value ? input.value.trim() : '';
+                if (text.length === 0) {
+                    return;
+                }
+                // clear input and focus (user requested clearing after Enter send)
+                input.value = '';
+                try { input.focus(); } catch (e) { /* ignore */ }
+                sendToAssistant(text);
+            }
+        });
+
+    });
+</script>
+</html>

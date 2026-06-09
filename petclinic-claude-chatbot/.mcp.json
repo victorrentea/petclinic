@@ -2,7 +2,7 @@
   "mcpServers": {
     "petclinic-mcp": {
       "type": "sse",
-      "url": "http://localhost:8080/sse",
+      "url": "http://localhost:8080/mcp",
       "headers": {
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6Ikdlb3JnZSBGcmFua2xpbiIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs"
       }

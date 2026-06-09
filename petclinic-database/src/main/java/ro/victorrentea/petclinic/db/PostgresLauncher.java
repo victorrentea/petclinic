@@ -38,6 +38,7 @@ public class PostgresLauncher {
         System.out.println("  JDBC URL (latency proxy): jdbc:postgresql://localhost:15432"
                 + "/" + DB_NAME + " (user: " + DB_USER + ", password: " + DB_PASSWORD + ")");
         System.out.println("  Data dir: " + dataDir);
+        System.out.println("✅ started petclinic-database on port " + pg.getPort());
         System.out.println("Press Ctrl+C to stop.");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

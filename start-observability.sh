@@ -23,6 +23,7 @@ echo "⏳ Waiting for Grafana to be ready..."
 for i in {1..60}; do
   if curl -fsS http://localhost:3300/api/health >/dev/null 2>&1; then
     echo "✅ Grafana ready at http://localhost:3300 (admin/admin)"
+    echo "✅ started observability on port 3300"
     break
   fi
   sleep 1

@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springaicommunity.mcp.annotation.McpResource;
 import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpTool.McpAnnotations;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springaicommunity.mcp.context.McpSyncRequestContext;
 import org.springaicommunity.mcp.context.StructuredElicitResult;
@@ -24,6 +26,7 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
+@RequiredArgsConstructor
 @Component
 public class PetClinicMcp {
 
@@ -31,20 +34,12 @@ public class PetClinicMcp {
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
 
-    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
-        this.ownerRepository = ownerRepository;
-        this.petRepository = petRepository;
-        this.visitRepository = visitRepository;
-    }
-
-    // ── Resource ─────────────────────────────────────────────────────────────
-
     @McpResource(
-        uri = "me://profile",
-        name = "me_profile",
-        description = "The authenticated owner's profile: name, address, phone, and pets."
+        uri = "me://petclinic-owner-profile",
+        name = "petclinic-owner-profile",
+        description = "The authenticated petclinic owner's profile: name, address, phone, and list of pets."
     )
-    public String me() {
+    public String myProfile() {
         int ownerId = McpSecurity.currentOwnerId();
         Owner owner = ownerRepository.findByIdFetchingPets(ownerId)
             .orElseThrow(() -> new IllegalStateException("No owner with id=" + ownerId));
@@ -53,7 +48,8 @@ public class PetClinicMcp {
         String petLines = pets.stream().map(this::formatPet).collect(Collectors.joining("\n"));
 
         return """
-            # %s %s
+            - First name: %s
+            - Last name: %s
             - Address: %s, %s
             - Phone: %s
 
@@ -72,8 +68,6 @@ public class PetClinicMcp {
         return "- id=%d — %s (%s), born %s".formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());
     }
 
-    // ── Tools ─────────────────────────────────────────────────────────────────
-
     public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description) {}
 
     public record VisitPhoneInput(String phone) {}
@@ -81,15 +75,17 @@ public class PetClinicMcp {
     @McpTool(
         name = "list_visits",
         description = "List veterinary visits for every pet of the authenticated owner.",
-        annotations = @McpTool.McpAnnotations(readOnlyHint = true, openWorldHint = false)
+        annotations = @McpAnnotations(readOnlyHint = true, openWorldHint = false)
     )
+    @Transactional(readOnly = true)
     public List<VisitView> listVisits() {
         int ownerId = McpSecurity.currentOwnerId();
         Owner owner = ownerRepository.findByIdFetchingPets(ownerId)
             .orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
         List<VisitView> result = new ArrayList<>();
         for (Pet pet : owner.getPets()) {
-            for (Visit v : visitRepository.findByPetId(pet.getId())) {
+            // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.
+            for (Visit v : pet.getVisitsSortedByDate()) {
                 result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(), v.getDescription()));
             }
         }
@@ -105,8 +101,8 @@ public class PetClinicMcp {
     public String createVisit(
             McpSyncRequestContext context,
             @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future", required = true) String date,
-            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) String time,
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future", required = true) LocalDate visitDate,
+            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) LocalTime visitTime,
             @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
         int ownerId = McpSecurity.currentOwnerId();
         Pet pet = petRepository.findById(petId)
@@ -114,9 +110,7 @@ public class PetClinicMcp {
         if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
             throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
         }
-        LocalDate visitDate = LocalDate.parse(date);
         requireFutureDate(visitDate);
-        LocalTime visitTime = LocalTime.parse(time);
         if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
         }
@@ -154,31 +148,32 @@ public class PetClinicMcp {
         name = "cancel_visit",
         description = "Cancel an upcoming vet visit for one of the authenticated owner's pets. "
             + "Only visits dated strictly in the future can be cancelled.",
-        annotations = @McpTool.McpAnnotations(destructiveHint = true)
+        annotations = @McpAnnotations(destructiveHint = true)
     )
     @Transactional
     public String cancelVisit(
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be in the future", required = true) String date) {
-        LocalDate visitDate = LocalDate.parse(date);
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be in the future", required = true) LocalDate visitDate) {
         requireFutureDate(visitDate);
 
         int ownerId = McpSecurity.currentOwnerId();
         Owner owner = ownerRepository.findByIdFetchingPets(ownerId)
             .orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
 
-        int cancelled = 0;
-        for (Pet pet : owner.getPets()) {
-            for (Visit v : visitRepository.findByPetId(pet.getId())) {
-                if (v.getDate().equals(visitDate)) {
-                    visitRepository.delete(v);
-                    cancelled++;
-                }
-            }
-        }
-        if (cancelled == 0) {
+        // Navigate the mapped Pet→Visit association and filter the matching date (lazy; safe under @Transactional).
+        List<Visit> matching = owner.getPets().stream()
+            .flatMap(pet -> pet.getVisits().stream())
+            .filter(v -> v.getDate().equals(visitDate))
+            .toList();
+        // Detach from the managed collection too, otherwise cascade=ALL re-persists the visit on flush.
+        matching.forEach(v -> {
+            v.getPet().getVisits().remove(v);
+            visitRepository.delete(v);
+        });
+
+        if (matching.isEmpty()) {
             return "No upcoming visits found on " + visitDate;
         }
-        return "Cancelled " + cancelled + " visit(s) on " + visitDate;
+        return "Cancelled " + matching.size() + " visit(s) on " + visitDate;
     }
 
     private static void requireFutureDate(LocalDate d) {

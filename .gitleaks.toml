@@ -1,0 +1,13 @@
+# Extend gitleaks' default rules, but allowlist the single PUBLIC demo MCP JWT used across
+# the PetClinic workshop. It encodes {"sub":"1","name":"George Franklin",...}, authenticates
+# only against the localhost MCP server, and is already committed elsewhere in the repo
+# (petclinic-claude-chatbot/.mcp.json, McpHttpSecurityTest). It is NOT a real credential.
+# The allowlist is scoped to exactly this token's payload — any other JWT is still caught.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public demo MCP JWT (George Franklin, sub=1, localhost only)"
+regexes = [
+  '''eyJzdWIiOiIxIiwibmFtZSI6Ikdlb3JnZSBGcmFua2xpbi[A-Za-z0-9_-]*''',
+]

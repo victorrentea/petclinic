@@ -64,7 +64,7 @@ class SickPetScenarioTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         // step 1: the LLM reads the me://profile resource to discover the caller's pets
-        String profile = petClinicMcp.me();
+        String profile = petClinicMcp.myProfile();
         assertThat(profile).contains("Mițică");
 
         // step 2: the LLM extracts the pet id from the resource text
@@ -72,7 +72,7 @@ class SickPetScenarioTest {
 
         // step 3: the LLM calls create_visit for tomorrow at 08:00; the owner confirms via elicitation
         McpSyncRequestContext context = acceptingContext("0744123456");
-        String result = petClinicMcp.createVisit(context, petId, tomorrow.toString(), "08:00",
+        String result = petClinicMcp.createVisit(context, petId, tomorrow, LocalTime.of(8, 0),
             "Mițică is sick");
 
         assertThat(result).contains("Created visit").contains("Mițică")
