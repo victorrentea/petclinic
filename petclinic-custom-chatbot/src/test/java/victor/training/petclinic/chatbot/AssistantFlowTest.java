@@ -1,6 +1,8 @@
 package victor.training.petclinic.chatbot;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -18,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <ul>
  *   <li>calls the real OpenAI API (chat + embeddings) — gated on {@code OPENAI_API_KEY};
  *       skips cleanly when the key is absent (forks/CI without the secret);</li>
- *   <li>REQUIRES the petclinic backend running on :8080 exposing the MCP server at /sse
+ *   <li>REQUIRES the petclinic backend running on :8080 exposing the MCP server at /mcp
  *       (CI starts it; locally run {@code ./start-database.sh} + {@code ./start-backend.sh}
  *       first). The demo JWT is George Franklin (owner sub=1), whose pet is "Leo";</li>
  *   <li>creates a real {@code Visit} row as a side effect (create_visit; elicitation
@@ -78,14 +80,29 @@ class AssistantFlowTest {
   }
 
   /** Calls the streaming markdown endpoint and joins all chunks into one String. */
-  private String ask(String username, String q) {
+  private String ask(String username, String message) {
     WebClient webClient = WebClient.create("http://localhost:" + port);
     return String.join("", webClient.get()
-        .uri("/{u}/assistant?q={q}", username, q)
+        .uri("/assistant?message={m}", message)
+        // Identity now travels in the Bearer token (SecurityConfig parses it); the name claim both
+        // labels the owner and isolates per-conversation memory, like the old path username did.
+        .header("Authorization", "Bearer " + demoJwt(username))
         .accept(MediaType.parseMediaType("text/markdown"))
         .retrieve()
         .bodyToFlux(String.class)
         .collectList()
         .block(Duration.ofSeconds(120)));
+  }
+
+  /** A JWT with a throw-away (never-verified) signature — the app only reads the payload claims. */
+  private static String demoJwt(String username) {
+    String header = base64Url("{\"alg\":\"HS256\",\"typ\":\"JWT\"}");
+    String payload = base64Url(
+        "{\"name\":\"" + username + "\",\"email\":\"" + username + "@petclinic.example\"}");
+    return header + "." + payload + ".c2ln"; // dummy base64url signature, not validated
+  }
+
+  private static String base64Url(String json) {
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
   }
 }

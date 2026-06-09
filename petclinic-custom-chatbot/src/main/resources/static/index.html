@@ -8,11 +8,12 @@
 </head>
 <body>
 
-<!-- top controls: name -->
+<!-- signed-in user (read-only): name + email, right-aligned, no label -->
 <div class="top-controls">
-    <label for="assistantUser">Name</label>
-    <input type="text" id="assistantUser" placeholder="Name" value="george" readonly style="width:160px; padding:6px;" />
-    <span id="assistantEmail" class="muted" style="margin-left:8px; color:#6b7280;"></span>
+    <span class="signed-in-user">
+        <span id="assistantUser" class="signed-in-name"></span>
+        <span id="assistantEmail" class="signed-in-email muted"></span>
+    </span>
 </div>
 
 <!-- message history -->
@@ -42,7 +43,9 @@
         var anchors = document.querySelectorAll("body a");
         var input = document.getElementById('assistantInput');
         var btn = document.getElementById('assistantSend');
-        var userInput = document.getElementById('assistantUser');
+        var userNameEl = document.getElementById('assistantUser');
+        var emailEl = document.getElementById('assistantEmail');
+        var currentUser = 'george'; // identity is fixed by the access token, not user-editable
         var overlay = document.getElementById('spinnerOverlay');
         var historyEl = document.getElementById('messageHistory');
         var hideTimeout = null;
@@ -54,8 +57,7 @@
         // The user is fixed by the access token (read-only) — extract its claims (sub / name / email).
         try {
             var jwtClaims = JSON.parse(atob(DEMO_JWT.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (jwtClaims.name) userInput.value = jwtClaims.name;
-            var emailEl = document.getElementById('assistantEmail');
+            if (jwtClaims.name) { currentUser = jwtClaims.name; userNameEl.innerText = jwtClaims.name; }
             if (emailEl && jwtClaims.email) emailEl.innerText = '<' + jwtClaims.email + '>';
         } catch (e) { /* keep the default */ }
 
@@ -117,8 +119,7 @@
             if (!text) {
                 return;
             }
-            var user = (userInput && userInput.value) ? userInput.value.trim() : '';
-            if (!user) user = 'george';
+            var user = (currentUser || '').trim() || 'george';
 
             // append user message immediately
             appendMessage('user', text, user + ' • ' + new Date().toLocaleTimeString());
@@ -130,8 +131,9 @@
 
             showOverlay();
 
-            // fetch the streaming assistant response and append progressively
-            var url = '/'+ encodeURIComponent(user) + '/assistant?q=' + encodeURIComponent(text);
+            // fetch the streaming assistant response and append progressively.
+            // Identity travels in the Bearer token, not the URL.
+            var url = '/assistant?message=' + encodeURIComponent(text);
             try {
                 const res = await fetch(url, { method: 'GET', headers: { Accept: 'text/markdown', 'Authorization': 'Bearer ' + DEMO_JWT } });
                 if (!res.ok) {

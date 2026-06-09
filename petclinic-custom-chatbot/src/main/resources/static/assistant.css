@@ -14,6 +14,7 @@
 }
 
 html, body {
+    height: 100%;
     background: var(--bg);
     color: var(--text);
     margin: 0;
@@ -21,15 +22,26 @@ html, body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* full-height column so the message history can grow to fill the viewport */
+body {
+    box-sizing: border-box;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Top controls: name + restart */
 .top-controls {
     display: flex;
-    align-items: center;
+    align-items: baseline;
+    justify-content: flex-end; /* identity sits at the right edge */
     gap: 8px;
     margin-bottom: 8px;
 }
 
-.top-controls label { margin: 0; }
+.signed-in-user { font-size: 0.9em; }
+.signed-in-name { font-weight: 600; }
+.signed-in-email { margin-left: 6px; color: #6b7280; }
 
 /* chat-row: message input + send button aligned to right */
 .chat-row {
@@ -118,7 +130,7 @@ input, button {
 
 /* message history styles */
 .message-history {
-    height: 50vh; /* user requested: take 50% of screen height */
+    flex: 1 1 auto; /* grow to fill the viewport between header and input row */
     min-height: 80px;
     overflow-y: auto;
     background: var(--panel);

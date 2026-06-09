@@ -18,7 +18,7 @@ Each script is foreground; run them in separate terminals.
 ```sh
 ./install-all.sh           # one-time: mvn install + npm install for all modules
 ./start-database.sh        # embedded Postgres on localhost:5432
-./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /sse)
+./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-observability.sh   # optional: Grafana LGTM (Ctrl+C tears it down)
 ```
