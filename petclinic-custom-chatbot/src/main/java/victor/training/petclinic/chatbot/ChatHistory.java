@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -45,13 +46,14 @@ class ChatHistory {
   }
 
   /**
-   * Pass the streamed assistant reply through UNCHANGED (chunks still reach the browser immediately),
-   * while accumulating it and recording the assembled text once the stream completes. Keeps the
-   * StringBuilder / doOnNext / doOnComplete plumbing out of the controller.
+   * A {@code Flux.transform} operator that records the assistant reply: it passes the stream through
+   * unchanged (chunks still reach the browser immediately) while accumulating it, and stores the
+   * assembled text in this owner's transcript once the stream completes. The controller applies it as
+   * a trailing operator instead of wrapping the whole stream in a call.
    */
-  Flux<String> recordAssistantReply(String conversationId, Flux<String> reply) {
+  Function<Flux<String>, Flux<String>> recordingReply(String conversationId) {
     StringBuilder buffer = new StringBuilder();
-    return reply
+    return reply -> reply
         .doOnNext(buffer::append)
         .doOnComplete(() -> append(conversationId, "assistant", buffer.toString().trim()));
   }

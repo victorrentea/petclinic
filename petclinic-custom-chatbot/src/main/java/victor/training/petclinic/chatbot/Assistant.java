@@ -134,22 +134,16 @@ public class Assistant {
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
   Flux<String> assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
-    // owner is never null here: SecurityConfig's anyExchange().authenticated() rule makes the filter
-    // chain reject unauthenticated /assistant requests with 401 before this controller is reached.
     String conversationId = owner.name();
     chatHistory.append(conversationId, "user", message); // record the user turn in the FULL transcript
-
-    // Flux.defer postpones the BLOCKING ChatClient.stream() (which eagerly resolves MCP tools via a
-    // blocking listTools()) to subscription time, so it runs on boundedElastic where blocking is
-    // allowed; without it you get "block()/blockFirst()/blockLast() are blocking". ChatHistory tees
-    // the streamed reply to record it once complete (chunks still flow to the client immediately).
-    return Flux.defer(() -> chatHistory.recordAssistantReply(conversationId, chatClient.prompt()
+    return Flux.defer(() -> chatClient.prompt()
             .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
             .user(message)
             .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
             .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's history
             .stream()
-            .content()))
+            .content()
+            .transform(chatHistory.recordingReply(conversationId))) // record the reply as it streams
         .subscribeOn(Schedulers.boundedElastic());
   }
 
@@ -163,13 +157,11 @@ public class Assistant {
     return chatHistory.transcript(owner.name());
   }
 
-  /** The active chat model's name (e.g. "gpt-4o-mini", or "qwen2.5" under the `local` profile). */
   @GetMapping(value = "/model", produces = "text/plain")
   String model() {
     return chatModel.getDefaultOptions().getModel();
   }
 
-  /** Clear button: wipe BOTH this owner's displayed transcript and the model's memory of the chat. */
   @DeleteMapping("/history")
   void clearConversation(@AuthenticationPrincipal OwnerJwtPrincipal owner) {
     chatHistory.clear(owner.name());
