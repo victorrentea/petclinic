@@ -74,3 +74,6 @@ __pycache__/
 
 # Lazily-built CI-watch hook helper (mvdan.cc/sh parser)
 .claude/hooks/pushwatch/pushwatch
+
+# Custom-chatbot on-disk RAG embedding cache (avoids re-embedding on restart)
+petclinic-custom-chatbot/rag-vector-store.json

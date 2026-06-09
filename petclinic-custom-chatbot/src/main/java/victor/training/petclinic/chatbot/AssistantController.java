@@ -1,8 +1,12 @@
 package victor.training.petclinic.chatbot;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
@@ -12,6 +16,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,20 +48,26 @@ public class AssistantController {
         description that summarizes the symptom and the chosen specialty.
       - Today's date is supplied to you by the system — use it to pick a valid future date,
         and ask the owner for their preferred day/time rather than silently defaulting.
-      - After booking, confirm back to the owner with the returned visit id.
+      - After booking, confirm back to the owner with the returned visit id, and email them a
+        short confirmation using the send-email tool (to the owner email in the system note).
 
       Be concise. When unsure, ask rather than assume.
       """;
 
   private final ChatClient ai;
+  private final String ownerEmail;
   private final Map<String, PromptChatMemoryAdvisor> memory = new ConcurrentHashMap<>();
 
   AssistantController(
       ChatClient.Builder builder,
       VectorStore vectorStore, // interface, so tests can swap pgvector -> SimpleVectorStore
-      McpSyncClient petclinicMcpClient) {
+      McpSyncClient petclinicMcpClient,
+      EmailTool emailTool,
+      @Value("${petclinic.chatbot.mcp.bearer}") String bearerJwt) {
+    this.ownerEmail = emailFromJwt(bearerJwt);
     this.ai = builder
         .defaultSystem(SYSTEM_PROMPT)
+        .defaultTools(emailTool) // local tool, alongside the remote MCP tools below
         .defaultToolCallbacks(SyncMcpToolCallbackProvider.builder().mcpClients(petclinicMcpClient).build())
         .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
         .build();
@@ -68,7 +79,7 @@ public class AssistantController {
     // The MCP tools are a blocking (sync) client, so run the whole ChatClient pipeline on a
     // blocking-capable scheduler — never call block() on a WebFlux event-loop thread.
     return Flux.defer(() -> ai.prompt()
-            .system("The owner's username is \"%s\". Today is %s.".formatted(username, LocalDate.now()))
+            .system("The owner's username is \"%s\", email %s. Today is %s.".formatted(username, ownerEmail, LocalDate.now()))
             .user(q)
             .advisors(mem)
             .stream()
@@ -82,5 +93,16 @@ public class AssistantController {
                 .chatMemoryRepository(new InMemoryChatMemoryRepository())
                 .build())
         .build();
+  }
+
+  /** Reads the "email" claim from the (unverified) demo JWT payload. */
+  private static String emailFromJwt(String jwt) {
+    try {
+      String payload = new String(Base64.getUrlDecoder().decode(jwt.split("\\.")[1]), StandardCharsets.UTF_8);
+      Matcher m = Pattern.compile("\"email\"\\s*:\\s*\"([^\"]+)\"").matcher(payload);
+      return m.find() ? m.group(1) : "";
+    } catch (RuntimeException e) {
+      return "";
+    }
   }
 }

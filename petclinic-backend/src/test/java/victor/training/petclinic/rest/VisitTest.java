@@ -69,9 +69,9 @@ public class VisitTest {
         petId = pet.getId();
 
         Visit visit = new Visit();
-        visit.setPet(pet);
         visit.setDate(LocalDate.now());
         visit.setDescription("rabies shot");
+        pet.addVisit(visit);
         visitRepository.save(visit);
         visitId = visit.getId();
     }
@@ -184,9 +184,9 @@ public class VisitTest {
     void findVisitsByPetId() {
         // Add a second visit for the same pet
         Visit visit2 = new Visit();
-        visit2.setPet(petRepository.findById(petId).orElseThrow());
         visit2.setDate(LocalDate.now().minusDays(1));
         visit2.setDescription("checkup");
+        petRepository.findById(petId).orElseThrow().addVisit(visit2);
         visitRepository.save(visit2);
 
         // Test repository method findByPetId

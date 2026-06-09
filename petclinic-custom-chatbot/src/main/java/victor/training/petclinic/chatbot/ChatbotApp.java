@@ -7,6 +7,8 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import io.modelcontextprotocol.spec.McpSchema.ClientCapabilities;
 import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,6 +26,13 @@ public class ChatbotApp {
   @EventListener
   void started(WebServerInitializedEvent event) {
     System.out.println("✅ started petclinic-custom-chatbot on port " + event.getWebServer().getPort());
+  }
+
+  @Bean
+  SimpleVectorStore vectorStore(EmbeddingModel embeddingModel) {
+    // In-memory vector store — no Postgres/Docker needed to run the workshop.
+    // RagIngestion persists it to disk so embeddings survive restarts (no re-embedding cost).
+    return SimpleVectorStore.builder(embeddingModel).build();
   }
 
   @Bean

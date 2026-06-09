@@ -119,26 +119,39 @@ public class PetClinicMcp {
             throw new IllegalStateException(
                 "create_visit requires an MCP client that supports elicitation (owner must confirm).");
         }
-        String prompt = "Create visit for pet '" + pet.getName() + "' on " + visitDate + " at " + visitTime
-            + " — \"" + description + "\". No phone number on file for you — please provide one to receive reminders.";
+        Owner owner = pet.getOwner();
+        String existingPhone = owner.getTelephone();
+        boolean hasPhone = existingPhone != null && !existingPhone.isBlank();
+
+        String prompt;
+        if (hasPhone) {
+            // Already have a number: ask only to CONFIRM it (pre-filled), or override with a new one.
+            prompt = "Confirm the visit for pet '" + pet.getName() + "' on " + visitDate + " at " + visitTime
+                + ". Reminders go to " + existingPhone + " — accept to keep it, or enter a different number.";
+        } else {
+            prompt = "Create visit for pet '" + pet.getName() + "' on " + visitDate + " at " + visitTime
+                + ". No phone number on file — please provide one to receive reminders.";
+        }
         StructuredElicitResult<VisitPhoneInput> elicit =
             context.elicit(e -> e.message(prompt), VisitPhoneInput.class);
         if (elicit.action() != ElicitResult.Action.ACCEPT) {
             return "Visit creation cancelled by user.";
         }
         VisitPhoneInput input = elicit.structuredContent();
-        if (input == null || input.phone() == null || input.phone().isBlank()) {
+        String phone = input == null ? null : input.phone();
+        if (phone != null && !phone.isBlank()) {
+            owner.setTelephone(phone.trim());   // a new or changed number
+            ownerRepository.save(owner);
+        } else if (!hasPhone) {
             throw new IllegalArgumentException("Phone number is required to schedule a visit.");
         }
-        Owner owner = pet.getOwner();
-        owner.setTelephone(input.phone().trim());
-        ownerRepository.save(owner);
+        // else: blank answer but a number is already on file — keep it as-is.
 
         Visit v = new Visit();
-        v.setPet(pet);
         v.setDate(visitDate);
         v.setTime(visitTime);
         v.setDescription(description);
+        pet.addVisit(v);   // maintain both sides of the Pet<->Visit association
         Visit saved = visitRepository.save(v);
         return "Created visit id=" + saved.getId() + " for pet '" + pet.getName() + "' on " + visitDate
             + " at " + visitTime + "; reminders will be sent to " + owner.getTelephone();

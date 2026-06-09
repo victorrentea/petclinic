@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,23 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>LLM output is non-deterministic, so assertions only check for key substrings.
  *
- * <p>pgvector is swapped for an in-memory SimpleVectorStore via {@link TestVectorStoreConfig},
- * and the pgvector + datasource autoconfigurations are excluded, so no Postgres/Docker is
- * required.
+ * <p>The app uses an in-memory SimpleVectorStore by default, so no Postgres/Docker is required.
  *
  * <p>Named {@code *Test} (not {@code *IT}) on purpose: this project has no failsafe plugin and
  * runs everything under surefire via {@code mvn test} — matching the backend's convention.
  */
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        "spring.ai.vectorstore.pgvector.initialize-schema=false",
-        "spring.autoconfigure.exclude="
-            + "org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreAutoConfiguration,"
-            + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-            + "org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration"
-    })
-@Import(TestVectorStoreConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 class AssistantFlowTest {
 

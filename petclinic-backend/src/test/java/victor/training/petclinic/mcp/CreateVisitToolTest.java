@@ -100,7 +100,8 @@ class CreateVisitToolTest {
     }
 
     @Test
-    void blank_phone_in_elicitation_is_rejected() {
+    void blank_phone_when_none_on_file_is_rejected() {
+        ownerRepository.findById(ownerId).orElseThrow().setTelephone(null); // no phone on file
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.ACCEPT,
                 new PetClinicMcp.VisitPhoneInput("   "), null));
@@ -111,13 +112,27 @@ class CreateVisitToolTest {
     }
 
     @Test
-    void null_structured_content_is_rejected() {
+    void null_structured_content_when_none_on_file_is_rejected() {
+        ownerRepository.findById(ownerId).orElseThrow().setTelephone(null); // no phone on file
         McpSyncRequestContext context = elicitingContext(
             new StructuredElicitResult<>(ElicitResult.Action.ACCEPT, null, null));
 
         assertThatThrownBy(() -> petClinicMcp.createVisit(context, petId, future, LocalTime.of(10, 30), "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Phone number is required");
+    }
+
+    @Test
+    void blank_confirmation_keeps_the_existing_phone() {
+        // owner already has "0000000000"; accepting the confirmation with a blank phone keeps it
+        McpSyncRequestContext context = elicitingContext(
+            new StructuredElicitResult<>(ElicitResult.Action.ACCEPT,
+                new PetClinicMcp.VisitPhoneInput("   "), null));
+
+        String result = petClinicMcp.createVisit(context, petId, future, LocalTime.of(10, 30), "Checkup");
+
+        assertThat(result).contains("Created visit");
+        assertThat(ownerRepository.findById(ownerId).orElseThrow().getTelephone()).isEqualTo("0000000000");
     }
 
     @Test
