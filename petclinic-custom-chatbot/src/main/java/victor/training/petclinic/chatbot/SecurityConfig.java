@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -33,9 +34,13 @@ class SecurityConfig {
         .csrf(ServerHttpSecurity.CsrfSpec::disable)
         .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
         .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-        // Only the static page + its assets load without a token (the browser fetches them before
-        // it can present one). Everything else — i.e. /assistant — requires the Bearer token.
+        // Only the static page + its assets load without a token (the browser fetches them before it
+        // can present one). The SSE elicitation channel is also permitted at the filter level because
+        // an EventSource can't send an Authorization header — it carries the JWT as a ?token= query
+        // param, which ElicitationController decodes and enforces itself (scoping events to that one
+        // owner). Everything else — /assistant, POST /elicitations/{id} — still requires the token.
         .authorizeExchange(e -> e
+            .pathMatchers(HttpMethod.GET, "/elicitations").permitAll()
             .pathMatchers("/", "/index.html", "/*.css", "/*.js").permitAll()
             .anyExchange().authenticated())
         .addFilterAt(bearerAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)

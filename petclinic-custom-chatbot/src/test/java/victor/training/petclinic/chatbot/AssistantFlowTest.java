@@ -6,10 +6,12 @@ import java.util.Base64;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.Disposable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,8 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   <li>REQUIRES the petclinic backend running on :8080 exposing the MCP server at /mcp
  *       (CI starts it; locally run {@code ./start-database.sh} + {@code ./start-backend.sh}
  *       first). The demo JWT is George Franklin (owner sub=1), whose pet is "Leo";</li>
- *   <li>creates a real {@code Visit} row as a side effect (create_visit; elicitation
- *       auto-accepts the demo phone configured on the MCP client).</li>
+ *   <li>creates a real {@code Visit} row as a side effect (create_visit elicits the owner's phone;
+ *       a stand-in "browser" subscribed to the elicitation channel submits the demo phone).</li>
  * </ul>
  *
  * <p>LLM output is non-deterministic, so assertions only check for key substrings.
@@ -41,18 +43,23 @@ class AssistantFlowTest {
   @LocalServerPort
   int port;
 
+  @Autowired
+  PendingElicitations elicitations;
+
   @Test
   void triages_recommends_specialty_and_books_a_visit() {
     String user = "it-george";
+    Disposable browser = autoAnswerPhone(user); // stand in for the human at the browser
 
     // 1. Describe a symptom -> the assistant engages and offers to book a vet visit.
     //    (The specialty wording is LLM-paraphrased; the hard proof is the real booking in step 2.)
     String r1 = ask(user, "My dog Leo is limping and won't put weight on his leg");
     assertThat(r1.toLowerCase()).containsAnyOf("appointment", "visit", "schedule", "book");
 
-    // 2. Agree to book -> backend create_visit runs (elicitation auto-accepts the demo phone) and
-    //    the assistant confirms the scheduled visit. (The LLM paraphrases the tool's raw output.)
+    // 2. Agree to book -> backend create_visit runs. It elicits the owner's phone, which our
+    //    auto-answering browser supplies, so the visit is booked and the assistant confirms it.
     String r2 = ask(user, "Yes, please book a radiology visit for Leo next Monday at 10:00");
+    browser.dispose();
     assertThat(r2.toLowerCase()).containsAnyOf("scheduled", "booked", "created");
 
     // 3. Confirm the visit is now listed for Leo.
@@ -73,10 +80,22 @@ class AssistantFlowTest {
   @Test
   void books_a_visit_relative_to_now_using_the_clock_tool() {
     String user = "clock-demo";
+    Disposable browser = autoAnswerPhone(user); // stand in for the human at the browser
     ask(user, "My dog Leo is limping and won't put weight on his leg.");
     // "one hour from now" only resolves to a valid FUTURE time if the assistant asks the clock tool.
     String r = ask(user, "Yes, book a radiology visit for Leo one hour from now.");
+    browser.dispose();
     assertThat(r.toLowerCase()).containsAnyOf("scheduled", "booked", "created");
+  }
+
+  /**
+   * Stand-in for the human at the browser: subscribe to this owner's elicitation SSE channel and
+   * immediately submit the demo phone whenever create_visit asks for one — so the booking flow
+   * completes without a real UI. Dispose it when done.
+   */
+  private Disposable autoAnswerPhone(String user) {
+    return elicitations.events(user)
+        .subscribe(event -> elicitations.submit(user, event.id(), "0744123456"));
   }
 
   /** Calls the streaming markdown endpoint and joins all chunks into one String. */
