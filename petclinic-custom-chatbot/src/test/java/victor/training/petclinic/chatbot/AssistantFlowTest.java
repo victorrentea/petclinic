@@ -58,6 +58,16 @@ class AssistantFlowTest {
     assertThat(r3.toLowerCase()).containsAnyOf("leo", "radiology");
   }
 
+  @Test
+  void remembers_context_across_human_messages() {
+    String user = "memory-demo";
+    // State a fact the model can't otherwise know...
+    ask(user, "My dog's name is Pixel, and he is a husky.");
+    // ...then ask for it back: only the per-conversation memory can answer this.
+    String answer = ask(user, "What is my dog's name?");
+    assertThat(answer.toLowerCase()).contains("pixel");
+  }
+
   /** Calls the streaming markdown endpoint and joins all chunks into one String. */
   private String ask(String username, String q) {
     WebClient webClient = WebClient.create("http://localhost:" + port);

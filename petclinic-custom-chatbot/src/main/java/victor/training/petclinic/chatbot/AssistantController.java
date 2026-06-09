@@ -3,22 +3,21 @@ package victor.training.petclinic.chatbot;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Base64;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -48,51 +47,62 @@ public class AssistantController {
         description that summarizes the symptom and the chosen specialty.
       - Today's date is supplied to you by the system — use it to pick a valid future date,
         and ask the owner for their preferred day/time rather than silently defaulting.
-      - After booking, confirm back to the owner with the returned visit id, and email them a
-        short confirmation using the send-email tool (to the owner email in the system note).
+      - After booking, confirm with the returned visit id and email the owner a short
+        confirmation using the send-email tool (it always goes to the logged-in owner).
 
-      Be concise. When unsure, ask rather than assume.
+      Be concise. When unsure, ask rather than assume. Use the earlier conversation as context.
       """;
 
   private final ChatClient ai;
-  private final String ownerEmail;
-  private final Map<String, PromptChatMemoryAdvisor> memory = new ConcurrentHashMap<>();
 
   AssistantController(
       ChatClient.Builder builder,
       VectorStore vectorStore, // interface, so tests can swap pgvector -> SimpleVectorStore
       McpSyncClient petclinicMcpClient,
-      EmailTool emailTool,
-      @Value("${petclinic.chatbot.mcp.bearer}") String bearerJwt) {
-    this.ownerEmail = emailFromJwt(bearerJwt);
+      EmailTool emailTool) {
     this.ai = builder
         .defaultSystem(SYSTEM_PROMPT)
         .defaultTools(emailTool) // local tool, alongside the remote MCP tools below
         .defaultToolCallbacks(SyncMcpToolCallbackProvider.builder().mcpClients(petclinicMcpClient).build())
-        .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+        .defaultAdvisors(
+            // Per-conversation memory: history is keyed by conversationId (set to the username
+            // per request below), so each owner has an isolated, multi-turn conversation.
+            MessageChatMemoryAdvisor.builder(
+                MessageWindowChatMemory.builder()
+                    .chatMemoryRepository(new InMemoryChatMemoryRepository())
+                    .build())
+                .build(),
+            QuestionAnswerAdvisor.builder(vectorStore).build()) // RAG over the specialty knowledge
         .build();
   }
 
   @GetMapping(value = "/{username}/assistant", produces = "text/markdown")
-  Flux<String> assistant(@PathVariable String username, @RequestParam String q) {
-    var mem = memory.computeIfAbsent(username, k -> memoryAdvisor());
+  Flux<String> assistant(
+      @PathVariable String username,
+      @RequestParam String q,
+      @RequestHeader(value = "Authorization", required = false) String authorization) {
+    String ownerEmail = emailFromBearer(authorization); // the web page sends the access token
     // The MCP tools are a blocking (sync) client, so run the whole ChatClient pipeline on a
-    // blocking-capable scheduler — never call block() on a WebFlux event-loop thread.
-    return Flux.defer(() -> ai.prompt()
-            .system("The owner's username is \"%s\", email %s. Today is %s.".formatted(username, ownerEmail, LocalDate.now()))
-            .user(q)
-            .advisors(mem)
-            .stream()
-            .content())
-        .subscribeOn(Schedulers.boundedElastic());
+    // blocking-capable scheduler — never call block() on a WebFlux event-loop thread. The owner
+    // email is published into the security context on that same thread so the EmailTool can read it.
+    return Flux.defer(() -> {
+          OwnerContext.setEmail(ownerEmail);
+          return ai.prompt()
+              .system("The owner's username is \"%s\". Today is %s.".formatted(username, LocalDate.now()))
+              .user(q)
+              .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, username)) // this owner's history
+              .stream()
+              .content();
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .doFinally(signal -> OwnerContext.clear());
   }
 
-  private PromptChatMemoryAdvisor memoryAdvisor() {
-    return PromptChatMemoryAdvisor.builder(
-            MessageWindowChatMemory.builder()
-                .chatMemoryRepository(new InMemoryChatMemoryRepository())
-                .build())
-        .build();
+  private static String emailFromBearer(String authorization) {
+    if (authorization == null || !authorization.startsWith("Bearer ")) {
+      return "";
+    }
+    return emailFromJwt(authorization.substring("Bearer ".length()).trim());
   }
 
   /** Reads the "email" claim from the (unverified) demo JWT payload. */

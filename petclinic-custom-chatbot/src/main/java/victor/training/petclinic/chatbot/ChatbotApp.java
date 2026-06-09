@@ -45,8 +45,7 @@ public class ChatbotApp {
         .customizeRequest(rb -> rb.header("Authorization", "Bearer " + bearer))
         .build();
     // create_visit asks the client for a phone via MCP ELICITATION. Single-turn REST has no
-    // human at the keyboard, so we auto-ACCEPT a configured demo phone here. (The reference
-    // AiApp used .sampling(...) for its remote SMS tool instead.)
+    // human at the keyboard, so we auto-ACCEPT a configured demo phone here.
     var client = McpClient.sync(transport)
         .elicitation(req -> new ElicitResult(ElicitResult.Action.ACCEPT, Map.of("phone", phone)))
         .capabilities(ClientCapabilities.builder().elicitation().build())

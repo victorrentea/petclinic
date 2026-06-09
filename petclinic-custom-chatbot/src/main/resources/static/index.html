@@ -46,6 +46,10 @@
         var historyEl = document.getElementById('messageHistory');
         var hideTimeout = null;
 
+        // Demo "access token" the page presents to the assistant on every request. Its email claim
+        // is what the local EmailTool sends to. In a real app this would come from your login/OAuth flow.
+        var DEMO_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6Ikdlb3JnZSBGcmFua2xpbiIsImVtYWlsIjoiZ2VvcmdlLmZyYW5rbGluQHBldGNsaW5pYy5leGFtcGxlIiwiaWF0IjoxNzQ5MTY4MDAwLCJleHAiOjE4MTIyNDAwMDB9.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs';
+
         function scrollHistoryToBottom() {
             if (!historyEl) return;
             historyEl.scrollTop = historyEl.scrollHeight;
@@ -120,7 +124,7 @@
             // fetch the streaming assistant response and append progressively
             var url = '/'+ encodeURIComponent(user) + '/assistant?q=' + encodeURIComponent(text);
             try {
-                const res = await fetch(url, { method: 'GET', headers: { Accept: 'text/markdown' } });
+                const res = await fetch(url, { method: 'GET', headers: { Accept: 'text/markdown', 'Authorization': 'Bearer ' + DEMO_JWT } });
                 if (!res.ok) {
                     assistantEl.innerText = 'Error: ' + res.status + ' ' + res.statusText;
                     hideOverlay();
