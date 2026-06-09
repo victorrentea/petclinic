@@ -37,12 +37,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: petclinic-frontend/package-lock.json
 
-      # The custom-chatbot integration test needs an OpenAI key. Compute a boolean
-      # so fork PRs / runs without the secret SKIP the chatbot steps cleanly.
-      - name: Detect OpenAI secret
-        id: openai
-        run: echo "present=${{ secrets.OPENAI_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
-
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
@@ -73,37 +67,11 @@ jobs:
         working-directory: petclinic-backend
         run: mvn -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
 
-      # ---------------------------------------------------------------------------
-      # Custom-chatbot integration test: it talks to OpenAI AND to the petclinic MCP
-      # server exposed by the backend on :8080, so it needs both an OpenAI API key
-      # and a running backend. It uses an in-memory vector store (no pgvector), so we
-      # only start the embedded DB + backend here — no Docker/pgvector required.
-      # All chatbot steps are gated on the OpenAI secret so fork PRs skip cleanly.
-      # ---------------------------------------------------------------------------
-      - name: Start database (background)
-        if: steps.openai.outputs.present == 'true'
-        run: |
-          ./start-database.sh > /tmp/db.log 2>&1 &
-          for i in $(seq 1 60); do (echo > /dev/tcp/localhost/5432) >/dev/null 2>&1 && break; sleep 2; done
-
-      - name: Start backend (background)
-        if: steps.openai.outputs.present == 'true'
-        run: |
-          ./start-backend.sh > /tmp/backend.log 2>&1 &
-          for i in $(seq 1 60); do
-            curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1 && break
-            sleep 2
-          done
-          if ! curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
-            echo "::error::Backend did not become healthy on :8080 within ~120s"
-            cat /tmp/backend.log
-            exit 1
-          fi
-
-      - name: Custom chatbot integration test
-        if: steps.openai.outputs.present == 'true'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # Custom-chatbot module: compile it and run its tests. The OpenAI integration tests
+      # (AssistantFlowTest) are @EnabledIfEnvironmentVariable(OPENAI_API_KEY) and SKIP here
+      # because we deliberately do NOT provide the key on CI — those tests cost money and are
+      # run locally only. This step just guards the module against compile drift.
+      - name: Compile custom-chatbot module (OpenAI tests skip without the key)
         run: mvn -B -ntp -f petclinic-custom-chatbot/pom.xml test
 
       - name: Regenerate TS types from openapi.yaml
