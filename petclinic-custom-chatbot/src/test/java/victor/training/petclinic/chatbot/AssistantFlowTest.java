@@ -2,8 +2,12 @@ package victor.training.petclinic.chatbot;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Base64;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +44,25 @@ class AssistantFlowTest {
 
   @LocalServerPort
   int port;
+
+  @BeforeEach
+  void clearGeorgesUpcomingVisits() throws Exception {
+    // create_visit caps upcoming visits per pet, so clear George's (owner 1) upcoming visits before
+    // each test — otherwise repeated e2e runs accumulate bookings, hit the cap, and fail to book.
+    WebClient backend = WebClient.create("http://localhost:8080");
+    String ownerJson = backend.get().uri("/api/owners/1")
+        .retrieve().bodyToMono(String.class).block(Duration.ofSeconds(10));
+    JsonNode owner = new ObjectMapper().readTree(ownerJson);
+    String today = LocalDate.now().toString();
+    for (JsonNode pet : owner.get("pets")) {
+      for (JsonNode visit : pet.get("visits")) {
+        if (visit.get("date").asText().compareTo(today) >= 0) { // today-or-future = what the cap counts
+          backend.delete().uri("/api/visits/{id}", visit.get("id").asInt())
+              .retrieve().toBodilessEntity().block(Duration.ofSeconds(10));
+        }
+      }
+    }
+  }
 
   @Test
   void triages_recommends_specialty_and_books_a_visit() {

@@ -13,6 +13,7 @@
     <span class="signed-in-user">
         <span id="assistantUser" class="signed-in-name"></span>
         <span id="assistantEmail" class="signed-in-email muted"></span>
+        <span id="assistantModel" class="signed-in-model muted"></span>
     </span>
 </div>
 
@@ -28,6 +29,7 @@
     <label for="assistantInput" style="position:absolute; left:-9999px;">Message</label>
     <input type="text" id="assistantInput" placeholder="Type a message" style="padding:6px;" />
     <button id="assistantSend" type="button">Send</button>
+    <button id="assistantClear" type="button">Clear</button>
 </div>
 
 <!-- predefined prompts -->
@@ -86,7 +88,7 @@
                 // assistant: allow HTML rendering using the global renderMarkdown
                 el.innerHTML = text ? renderMarkdown(text) : '';
             }
-            if (meta && role === 'user') {
+            if (meta) { // timestamp, shown under both user and assistant messages
                 var m = document.createElement('small');
                 m.className = 'meta';
                 m.innerText = meta;
@@ -121,10 +123,8 @@
             if (!text) {
                 return;
             }
-            var user = (currentUser || '').trim() || 'george';
-
-            // append user message immediately
-            appendMessage('user', text, user + ' • ' + new Date().toLocaleTimeString());
+            // append user message immediately, with just a timestamp (the author is always the logged-in user)
+            appendMessage('user', text, new Date().toLocaleTimeString());
             // clear the input textbox after sending and focus it
             if (input) { input.value = ''; try { input.focus(); } catch(e) { /* ignore */ } }
 
@@ -160,9 +160,12 @@
                     done = streamDone;
                 }
 
-                // finalize with any remaining text
+                // finalize with any remaining text, then stamp the assistant message with a timestamp
                 assistantEl.innerHTML = renderMarkdown(accumulated.trim());
-                // no timestamp for assistant messages as requested
+                var am = document.createElement('small');
+                am.className = 'meta';
+                am.innerText = new Date().toLocaleTimeString();
+                assistantEl.appendChild(am);
             } catch (e) {
                 assistantEl.innerText = 'Request failed: ' + (e && e.message ? e.message : e);
             } finally {
@@ -182,7 +185,7 @@
                 if (!res.ok) return;
                 const entries = await res.json();
                 entries.forEach(function(entry) {
-                    var el = appendMessage(entry.role, entry.text, null);
+                    var el = appendMessage(entry.role, entry.text, entry.time); // server-stored timestamp survives reload
                     if (el && entry.inMemory === false) {
                         el.classList.add('forgotten'); // model has forgotten this one
                     }
@@ -191,6 +194,15 @@
             } catch (e) { /* history is best-effort; ignore */ }
         }
         loadHistory();
+
+        // Show which model is actually answering (gpt-4o-mini by default, qwen2.5 under the `local` profile).
+        fetch('/model', { headers: { 'Authorization': 'Bearer ' + DEMO_JWT } })
+            .then(function(r) { return r.ok ? r.text() : ''; })
+            .then(function(model) {
+                var el = document.getElementById('assistantModel');
+                if (el && model) el.innerText = ' talking to ' + model;
+            })
+            .catch(function() { /* best-effort */ });
 
         // wire anchors to use current user value when clicked
         anchors.forEach(function(anchor) {
@@ -217,6 +229,16 @@
             input.value = '';
             try { input.focus(); } catch (e) { /* ignore */ }
             sendToAssistant(text);
+        });
+
+        // Clear button: wipe the server-side transcript + the model's memory, then blank the screen.
+        var clearBtn = document.getElementById('assistantClear');
+        if (clearBtn) clearBtn.addEventListener('click', async function() {
+            try {
+                await fetch('/history', { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + DEMO_JWT } });
+            } catch (e) { /* best-effort */ }
+            historyEl.querySelectorAll('.message').forEach(function(m) { m.remove(); });
+            try { input.focus(); } catch (e) { /* ignore */ }
         });
 
         input.addEventListener('keydown', function(e) {

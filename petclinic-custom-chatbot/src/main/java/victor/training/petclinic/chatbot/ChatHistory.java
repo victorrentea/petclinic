@@ -1,5 +1,7 @@
 package victor.training.petclinic.chatbot;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 /**
  * In-memory, per-owner FULL chat transcript — the UI repaints it on page reload so the conversation
@@ -20,17 +23,37 @@ import org.springframework.stereotype.Component;
 @Component
 class ChatHistory {
 
+  /** Wall-clock time (HH:mm:ss) stamped when a message is recorded, so it survives a page reload. */
+  private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
   /** One transcript line. {@code inMemory} = still inside the model's window (see flagging below). */
-  record Entry(String role, String text, boolean inMemory) {}
+  record Entry(String role, String text, boolean inMemory, String time) {}
 
   private final Map<String, List<StoredMessage>> byOwner = new ConcurrentHashMap<>();
 
-  private record StoredMessage(String role, String text) {}
+  private record StoredMessage(String role, String text, String time) {}
 
-  /** Append one message (user or assistant) to this owner's transcript. */
+  /** Append one message (user or assistant) to this owner's transcript, stamped with the current time. */
   void append(String conversationId, String role, String text) {
     byOwner.computeIfAbsent(conversationId, k -> Collections.synchronizedList(new ArrayList<>()))
-        .add(new StoredMessage(role, text));
+        .add(new StoredMessage(role, text, LocalTime.now().format(TIME_FMT)));
+  }
+
+  /** Forget this owner's entire transcript (the Clear button). */
+  void clear(String conversationId) {
+    byOwner.remove(conversationId);
+  }
+
+  /**
+   * Pass the streamed assistant reply through UNCHANGED (chunks still reach the browser immediately),
+   * while accumulating it and recording the assembled text once the stream completes. Keeps the
+   * StringBuilder / doOnNext / doOnComplete plumbing out of the controller.
+   */
+  Flux<String> recordAssistantReply(String conversationId, Flux<String> reply) {
+    StringBuilder buffer = new StringBuilder();
+    return reply
+        .doOnNext(buffer::append)
+        .doOnComplete(() -> append(conversationId, "assistant", buffer.toString().trim()));
   }
 
   /**
@@ -51,7 +74,7 @@ class ChatHistory {
     List<Entry> result = new ArrayList<>(snapshot.size());
     for (int i = 0; i < snapshot.size(); i++) {
       StoredMessage m = snapshot.get(i);
-      result.add(new Entry(m.role(), m.text(), i >= firstInMemoryIndex));
+      result.add(new Entry(m.role(), m.text(), i >= firstInMemoryIndex, m.time()));
     }
     return result;
   }
