@@ -170,6 +170,28 @@
             }
         }
 
+        // On load, repaint the FULL transcript the server remembers (the chat memory is a sliding
+        // window, so a reload would otherwise show a blank page). Messages that have aged OUT of the
+        // model's memory window come back with inMemory=false and are dimmed via the 'forgotten' class.
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history', {
+                    method: 'GET',
+                    headers: { Accept: 'application/json', 'Authorization': 'Bearer ' + DEMO_JWT }
+                });
+                if (!res.ok) return;
+                const entries = await res.json();
+                entries.forEach(function(entry) {
+                    var el = appendMessage(entry.role, entry.text, null);
+                    if (el && entry.inMemory === false) {
+                        el.classList.add('forgotten'); // model has forgotten this one
+                    }
+                });
+                scrollHistoryToBottom();
+            } catch (e) { /* history is best-effort; ignore */ }
+        }
+        loadHistory();
+
         // wire anchors to use current user value when clicked
         anchors.forEach(function(anchor) {
             var text = anchor.textContent;

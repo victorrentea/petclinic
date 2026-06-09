@@ -178,6 +178,12 @@ input, button {
     margin-top: 6px;
 }
 
+/* messages that have aged OUT of the model's memory window — dimmed so the demo shows what's
+   "forgotten" (still on screen, but no longer in the LLM's context). */
+.message.forgotten {
+    opacity: .45;
+}
+
 /* small responsive tweak */
 @media (max-width: 600px) {
     .message-history { height: 40vh; }

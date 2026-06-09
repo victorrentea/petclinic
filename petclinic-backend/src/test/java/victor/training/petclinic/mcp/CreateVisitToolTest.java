@@ -111,6 +111,21 @@ class CreateVisitToolTest {
     }
 
     @Test
+    void rejects_booking_when_pet_already_has_max_upcoming_visits() {
+        // Fill the pet up to the cap with future visits, on distinct future days.
+        for (int i = 0; i < PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET; i++) {
+            petClinicMcp.createVisit(petId, LocalDate.now().plusDays(i + 1), LocalTime.of(10, 0), "Booking " + i);
+        }
+
+        // One more must be rejected as service abuse.
+        assertThatThrownBy(() ->
+            petClinicMcp.createVisit(petId, future.plusDays(100), LocalTime.of(9, 0), "One too many"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("already has the maximum")
+            .hasMessageContaining(String.valueOf(PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET));
+    }
+
+    @Test
     void today_with_already_passed_time_is_rejected() {
         // minusHours(1) wraps past midnight to 23:xx (a future time today) — skip in that window
         Assumptions.assumeTrue(LocalTime.now().isAfter(LocalTime.of(1, 0)));
