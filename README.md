@@ -9,7 +9,7 @@ Full-stack veterinary clinic management application with:
 - **Backend**: Spring Boot REST API (Java 21)
 - **Frontend**: Angular SPA
 
-[See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
+- [See the presentation of the Spring Petclinic Framework version](http://fr.slideshare.net/AntoineRey/spring-framework-petclinic-sample-application)
 
 ## Architecture Overview
 
