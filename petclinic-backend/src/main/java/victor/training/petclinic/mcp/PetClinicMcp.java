@@ -30,6 +30,13 @@ import victor.training.petclinic.repository.VisitRepository;
 @Component
 public class PetClinicMcp {
 
+    /**
+     * Service-abuse guardrail: a single pet may hold at most this many UPCOMING visits. Blocks
+     * mass-booking attempts (e.g. "one appointment every hour for the entire week") at the tool level,
+     * so the rule holds no matter which client (LLM, UI, script) calls create_visit.
+     */
+    static final int MAX_UPCOMING_VISITS_PER_PET = 3;
+
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
@@ -113,6 +120,7 @@ public class PetClinicMcp {
         if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
         }
+        requireUnderUpcomingVisitCap(pet);
 
         Visit v = new Visit();
         v.setDate(visitDate);
@@ -154,6 +162,22 @@ public class PetClinicMcp {
             return "No upcoming visits found on " + visitDate;
         }
         return "Cancelled " + matching.size() + " visit(s) on " + visitDate;
+    }
+
+    /**
+     * Service-abuse guard: refuse the booking if the pet already holds {@value #MAX_UPCOMING_VISITS_PER_PET}
+     * upcoming (today-or-future) visits. The message is phrased so the LLM can relay it to the owner.
+     */
+    private void requireUnderUpcomingVisitCap(Pet pet) {
+        LocalDate today = LocalDate.now();
+        long upcoming = pet.getVisits().stream()
+            .filter(v -> v.getDate() != null && !v.getDate().isBefore(today))
+            .count();
+        if (upcoming >= MAX_UPCOMING_VISITS_PER_PET) {
+            throw new IllegalArgumentException(
+                "Pet '" + pet.getName() + "' already has the maximum of " + MAX_UPCOMING_VISITS_PER_PET
+                    + " upcoming visits. Please cancel an existing visit before booking another.");
+        }
     }
 
     private static void requireFutureDate(LocalDate d) {
