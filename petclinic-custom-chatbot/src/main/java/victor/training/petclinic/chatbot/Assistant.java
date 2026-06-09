@@ -67,31 +67,34 @@ public class Assistant {
         .build();
   }
 
+    /**
+     * Per-conversation memory: history is keyed by conversationId (set to the owner's name per
+     * request), so each owner has an isolated, multi-turn conversation. In-memory only — it resets
+     * on restart, which is fine for this demo.
+     */
+    private static MessageChatMemoryAdvisor chatMemoryAdvisor() {
+        return MessageChatMemoryAdvisor.builder(
+                MessageWindowChatMemory.builder()
+                    .chatMemoryRepository(new InMemoryChatMemoryRepository())
+                    .build())
+            .build();
+    }
+
   @GetMapping(value = "/assistant", produces = "text/markdown")
   Flux<String> assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
     // owner is never null here: SecurityConfig's anyExchange().authenticated() rule makes the filter
     // chain reject unauthenticated /assistant requests with 401 before this controller is reached.
-    return ai.prompt()
-        .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
-        .user(message)
-        .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
-        .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, owner.name())) // this owner's history
-        .stream()
-        .content()
-        // MCP tool calls use a blocking (sync) client, so run the streaming off the Netty event loop.
+    // defer + subscribeOn: ChatClient.stream() eagerly resolves the MCP tools via a BLOCKING
+    // listTools(), and every MCP tool call blocks too. defer postpones that to subscription time so
+    // it all runs on boundedElastic (blocking-allowed); without it, listTools() blocks a non-blocking
+    // reactor thread and throws "block()/blockFirst()/blockLast() are blocking".
+    return Flux.defer(() -> ai.prompt()
+            .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
+            .user(message)
+            .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
+            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, owner.name())) // this owner's history
+            .stream()
+            .content())
         .subscribeOn(Schedulers.boundedElastic());
-  }
-
-  /**
-   * Per-conversation memory: history is keyed by conversationId (set to the owner's name per
-   * request), so each owner has an isolated, multi-turn conversation. In-memory only — it resets
-   * on restart, which is fine for this demo.
-   */
-  private static MessageChatMemoryAdvisor chatMemoryAdvisor() {
-    return MessageChatMemoryAdvisor.builder(
-            MessageWindowChatMemory.builder()
-                .chatMemoryRepository(new InMemoryChatMemoryRepository())
-                .build())
-        .build();
   }
 }
