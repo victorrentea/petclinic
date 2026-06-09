@@ -154,7 +154,7 @@ public class PetClinicMcp {
         name = "cancel_visit",
         description = "Cancel an upcoming vet visit for one of the authenticated owner's pets. "
             + "Only visits dated strictly in the future can be cancelled.",
-        annotations = @McpTool.McpAnnotations(destructiveHint = true)
+        annotations = @McpTool.McpAnnotations(destructiveHint = true) // hint = agent might not care
     )
     @Transactional
     public String cancelVisit(
