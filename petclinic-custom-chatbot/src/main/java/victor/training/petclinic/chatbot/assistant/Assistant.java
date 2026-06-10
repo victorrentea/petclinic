@@ -106,7 +106,7 @@ public class Assistant {
   @Autowired // disambiguate from the test-seam constructor below (two ctors -> Spring needs the marker)
   Assistant(
       ChatClient.Builder builder,
-      VectorStore vectorStore, // interface, so tests can swap pgvector -> SimpleVectorStore
+      VectorStore vectorStore, // pgvector or SimpleVectorStore
       McpSyncClient petclinicMcpClient,
       LocalTools localTools,
       ChatHistory history,
@@ -119,7 +119,7 @@ public class Assistant {
     // button. The SAME instance backs both the memory advisor and /history DELETE (so kept as a field).
     this.chatMemory = MessageWindowChatMemory.builder()
         .chatMemoryRepository(new InMemoryChatMemoryRepository())
-        .maxMessages(MEMORY_WINDOW_MESSAGES) // SAME constant the /history endpoint flags against
+        .maxMessages(MEMORY_WINDOW_MESSAGES)
         .build();
     this.chatClient = builder
         .defaultSystem(SYSTEM_PROMPT)
