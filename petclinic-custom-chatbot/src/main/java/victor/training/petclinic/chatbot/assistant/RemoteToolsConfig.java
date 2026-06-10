@@ -39,7 +39,8 @@ class RemoteToolsConfig {
         @Value("${petclinic.chatbot.mcp.url}") String url,
         @Value("${petclinic.chatbot.mcp.api-key}") String apiKey) {
         McpSyncHttpClientRequestCustomizer perRequestHeaders =
-            (builder, method, endpoint, body, context) -> injectHeaders(builder, apiKey);
+            (builder, method, endpoint, body, context) ->
+                injectHeaders(builder, apiKey);
         var transport = HttpClientStreamableHttpTransport.builder(url)
             .endpoint("/mcp")
             .httpRequestCustomizer(perRequestHeaders)

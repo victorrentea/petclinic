@@ -3,6 +3,7 @@ package victor.training.petclinic.chatbot.assistant;
 import java.util.List;
 import java.util.Map;
 
+import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -11,6 +12,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -90,6 +92,7 @@ public class Assistant {
       ChatClient.Builder builder,
       ChatHistory chatHistory,
       JudgeGuard judgeGuard,
+      McpSyncClient petclinicMcpClient,
       LocalTools localTools) {
     this.chatModel = chatModel;
     this.chatHistory = chatHistory; //verbatim storage of ALL*** messages ever exchangd
@@ -103,6 +106,7 @@ public class Assistant {
     this.chatClient = builder
         .defaultSystem(SYSTEM_PROMPT)
         .defaultTools(localTools) // local Spring AI tools: clock (currentDateTime) + sendEmail
+        .defaultToolCallbacks(SyncMcpToolCallbackProvider.builder().mcpClients(petclinicMcpClient).build()) // MCP tools: get_owner_profile + create_visit
         // message types: ✅user,✅assistant,⚠️system prompt,tool
         .defaultAdvisors(
             // Cheap, deterministic gate BEFORE the model: blocks known jailbreak/off-topic probes with
@@ -120,10 +124,10 @@ public class Assistant {
     String conversationId = owner.name();
     chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record in the FULL transcript
     // Judge INPUT gate: semantically vet the inbound message BEFORE the main model; UNSAFE short-circuits.
-    if (!judgeGuard.isAllowed(message)) {
-      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
-      return REFUSAL_MESSAGE;
-    }
+//    if (!judgeGuard.isAllowed(message)) {
+//      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
+//      return REFUSAL_MESSAGE;
+//    }
       String reply = chatClient.prompt()
           .system("The user in front of your has id: " + owner.id() +
               ", name: " + owner.name() + ", email: " + owner.email())
@@ -137,9 +141,9 @@ public class Assistant {
           .call()
           .content();
     // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
-    if (!judgeGuard.isReplyAllowed(message, reply)) {
-      reply = REFUSAL_MESSAGE;
-    }
+//    if (!judgeGuard.isReplyAllowed(message, reply)) {
+//      reply = REFUSAL_MESSAGE;
+//    }
     chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
     return reply;
   }

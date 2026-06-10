@@ -81,7 +81,15 @@ public class PetClinicMcp {
     )
     @Transactional(readOnly = true)
     public List<VisitView> listVisits() {
-       return null;
+        int ownerId = McpSecurity.currentOwnerId();
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow();
+        List<VisitView> visits = new ArrayList<>();
+        for (Pet pet : owner.getPets()) {
+            for (Visit v : pet.getVisits()) {
+                visits.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(), v.getDescription()));
+            }
+        }
+        return visits;
     }
 
     @McpTool(
@@ -96,8 +104,26 @@ public class PetClinicMcp {
             @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) LocalTime visitTime,
             @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
         int ownerId = McpSecurity.currentOwnerId();
-        // elicitation
-        return null;
+        Pet pet = petRepository.findById(petId)
+            .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
+        if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
+            throw new IllegalArgumentException(
+                "Pet '" + pet.getName() + "' does not belong to owner " + ownerId);
+        }
+        requireFutureDate(visitDate);
+        if (visitDate.isEqual(LocalDate.now()) && visitTime != null && visitTime.isBefore(LocalTime.now())) {
+            throw new IllegalArgumentException("Visit time must be in the future: " + visitTime);
+        }
+        requireUnderUpcomingVisitCap(pet);
+
+        Visit visit = new Visit();
+        visit.setDate(visitDate);
+        visit.setTime(visitTime);
+        visit.setDescription(description);
+        pet.addVisit(visit); // maintains both sides so the cap check sees freshly-booked visits this tx
+        Visit saved = visitRepository.save(visit);
+
+        return "Created visit #%d for %s on %s at %s".formatted(saved.getId(), pet.getName(), visitDate, visitTime);
     }
 
     @McpTool(
@@ -110,8 +136,25 @@ public class PetClinicMcp {
     public String cancelVisit(
             @McpToolParam(description = "Visit date (yyyy-MM-dd); must be in the future", required = true) LocalDate visitDate) {
         requireFutureDate(visitDate);
+        int ownerId = McpSecurity.currentOwnerId();
+        Owner owner = ownerRepository.findByIdFetchingPets(ownerId)
+            .orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
 
-        return null;
+        // Navigate the mapped Pet→Visit association and filter the matching date (lazy; safe under @Transactional).
+        List<Visit> matching = owner.getPets().stream()
+            .flatMap(pet -> pet.getVisits().stream())
+            .filter(v -> v.getDate().equals(visitDate))
+            .toList();
+        // Detach from the managed collection too, otherwise cascade=ALL re-persists the visit on flush.
+        matching.forEach(v -> {
+            v.getPet().getVisits().remove(v);
+            visitRepository.delete(v);
+        });
+
+        if (matching.isEmpty()) {
+            return "No upcoming visits found on " + visitDate;
+        }
+        return "Cancelled " + matching.size() + " visit(s) on " + visitDate;
     }
 
     private void requireUnderUpcomingVisitCap(Pet pet) {
@@ -138,7 +181,25 @@ public class PetClinicMcp {
             + "emergency. ELICITS the address from the user and asks them to confirm the dispatch request."
     )
     public String callVetAmbulance(McpSyncRequestContext context) {
-        // require user address via elicitation
-        return null;
+        // Dispatching an ambulance is costly and irreversible — NEVER let the LLM trigger it on its own.
+        // We force a HUMAN elicitation: the person in front of the chatbot must type the destination
+        // address and explicitly approve ("Request Ambulance"). No human approval => no dispatch.
+        if (context == null || !context.elicitEnabled()) {
+            throw new IllegalStateException(
+                "Dispatching a vet ambulance requires human elicitation, which this client does not support.");
+        }
+        StructuredElicitResult<AmbulanceAddressInput> answer = context.elicit(
+            spec -> spec.message("Confirm the exact street address where the vet ambulance should be sent. "
+                + "Approve only if you really want an ambulance dispatched."),
+            AmbulanceAddressInput.class);
+
+        if (answer.action() != ElicitResult.Action.ACCEPT) {
+            return "Vet ambulance was not requested."; // human declined or cancelled
+        }
+        AmbulanceAddressInput input = answer.structuredContent();
+        if (input == null || input.address() == null || input.address().isBlank()) {
+            throw new IllegalArgumentException("A destination address is required to dispatch the ambulance.");
+        }
+        return "Vet ambulance dispatched to " + input.address();
     }
 }

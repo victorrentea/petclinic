@@ -50,14 +50,14 @@
         var btn = document.getElementById('assistantSend');
         var userNameEl = document.getElementById('assistantUser');
         var emailEl = document.getElementById('assistantEmail');
-        var currentUser = 'george'; // identity is fixed by the access token, not user-editable
+        var currentUser = 'Kevin McCallister'; // identity is fixed by the access token, not user-editable
         var overlay = document.getElementById('spinnerOverlay');
         var historyEl = document.getElementById('messageHistory');
         var hideTimeout = null;
 
         // Demo "access token" the page presents to the assistant on every request. Its email claim
         // is what the local EmailTool sends to. In a real app this would come from your login/OAuth flow.
-        var DEMO_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6Ikdlb3JnZSBGcmFua2xpbiIsImVtYWlsIjoiZ2VvcmdlLmZyYW5rbGluQHBldGNsaW5pYy5leGFtcGxlIiwiaWF0IjoxNzQ5MTY4MDAwLCJleHAiOjE4MTIyNDAwMDB9.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs';
+        var DEMO_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs';
 
         // The user is fixed by the access token (read-only) — extract its claims (sub / name / email).
         try {
