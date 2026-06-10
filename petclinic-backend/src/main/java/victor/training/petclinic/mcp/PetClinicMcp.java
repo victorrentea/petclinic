@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.springaicommunity.mcp.annotation.McpResource;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpTool.McpAnnotations;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -41,14 +40,28 @@ public class PetClinicMcp {
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
 
-    @McpResource(
-        uri = "me://petclinic-owner-profile",
-        name = "petclinic-owner-profile",
-        description = "The authenticated petclinic owner's profile: name, address, phone, and list of pets."
+    @McpTool(
+        name = "get_owner_profile",
+        description = "Fetch the authenticated owner's profile — name, address, phone and the list of "
+            + "pets. Takes NO arguments: the owner is resolved from the per-request identity header the "
+            + "calling application attaches (not from anything the model supplies), so it cannot be spoofed.",
+        annotations = @McpAnnotations(readOnlyHint = true, openWorldHint = false)
     )
-    public String myProfile() {
-        int ownerId = McpSecurity.currentOwnerId();
-        return null;
+    @Transactional(readOnly = true)
+    public String getOwnerProfile() {
+        int ownerId = McpSecurity.currentOwnerId(); // from the Authorization header, unpacked by McpAuthFilter
+        Owner owner = ownerRepository.findById(ownerId)
+            .orElseThrow(() -> new IllegalStateException("Authenticated owner not found: " + ownerId));
+        String pets = owner.getPets().isEmpty()
+            ? "(no pets on file)"
+            : owner.getPets().stream().map(this::formatPet).collect(Collectors.joining("\n"));
+        return """
+            Owner #%d: %s
+            Address: %s, %s
+            Phone: %s
+            Pets:
+            %s""".formatted(owner.getId(), owner.getFirstName() + " " + owner.getLastName(),
+                owner.getAddress(), owner.getCity(), owner.getTelephone(), pets);
     }
 
     private String formatPet(Pet pet) {
@@ -62,7 +75,8 @@ public class PetClinicMcp {
 
     @McpTool(
         name = "list_visits",
-        description = "List veterinary visits for every pet of the authenticated owner.",
+        description = "List veterinary visits for every pet of the authenticated owner. Takes no "
+            + "arguments — the owner is resolved from the per-request identity header, not the model.",
         annotations = @McpAnnotations(readOnlyHint = true, openWorldHint = false)
     )
     @Transactional(readOnly = true)
@@ -82,6 +96,7 @@ public class PetClinicMcp {
             @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) LocalTime visitTime,
             @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
         int ownerId = McpSecurity.currentOwnerId();
+        // elicitation
         return null;
     }
 
@@ -123,7 +138,7 @@ public class PetClinicMcp {
             + "emergency. ELICITS the address from the user and asks them to confirm the dispatch request."
     )
     public String callVetAmbulance(McpSyncRequestContext context) {
-        // requrie user address via elicitation
+        // require user address via elicitation
         return null;
     }
 }

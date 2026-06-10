@@ -51,7 +51,8 @@ public class Assistant {
            and offer to book a visit with it.
 
         Booking rules (only after the owner agrees):
-        - Read the owner's profile and pets from the `me://petclinic-owner-profile` resource.
+        - Read the owner's profile and pets by calling the `get_owner_profile` tool. It takes NO
+          arguments and always returns the logged-in owner — never pass an id.
         - ALWAYS confirm WHICH pet the visit is for before booking. If the owner has more than
           one pet, ask which one — never guess.
         - To resolve relative times like "now", "in 1 hour" or "tomorrow", call the
@@ -102,7 +103,7 @@ public class Assistant {
     this.chatClient = builder
         .defaultSystem(SYSTEM_PROMPT)
         .defaultTools(localTools) // local Spring AI tools: clock (currentDateTime) + sendEmail
-        // message types: user,assistant,system⚠️,tool
+        // message types: ✅user,✅assistant,⚠️system prompt,tool
         .defaultAdvisors(
             // Cheap, deterministic gate BEFORE the model: blocks known jailbreak/off-topic probes with
             // a fixed refusal. SafeGuardAdvisor matches plain, CASE-SENSITIVE substrings.
@@ -119,10 +120,10 @@ public class Assistant {
     String conversationId = owner.name();
     chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record in the FULL transcript
     // Judge INPUT gate: semantically vet the inbound message BEFORE the main model; UNSAFE short-circuits.
-//    if (!judgeGuard.isAllowed(message)) {
-//      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
-//      return REFUSAL_MESSAGE;
-//    }
+    if (!judgeGuard.isAllowed(message)) {
+      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
+      return REFUSAL_MESSAGE;
+    }
       String reply = chatClient.prompt()
           .system("The user in front of your has id: " + owner.id() +
               ", name: " + owner.name() + ", email: " + owner.email())
@@ -136,9 +137,9 @@ public class Assistant {
           .call()
           .content();
     // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
-//    if (!judgeGuard.isReplyAllowed(message, reply)) {
-//      reply = REFUSAL_MESSAGE;
-//    }
+    if (!judgeGuard.isReplyAllowed(message, reply)) {
+      reply = REFUSAL_MESSAGE;
+    }
     chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
     return reply;
   }
