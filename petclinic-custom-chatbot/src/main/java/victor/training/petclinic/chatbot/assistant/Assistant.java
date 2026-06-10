@@ -120,14 +120,15 @@ public class Assistant {
       chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
       return REFUSAL_MESSAGE;
     }
-    String reply = chatClient.prompt()
-        // TODO systme prompt / conversation!
-        .user(message)
-        .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's memory window
-        // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
-        // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
-        .call()
-        .content();
+      String reply = chatClient.prompt()
+          .system("The user in front of your has id: " + owner.id() +
+              " and name: " + owner.name() + " email: " + owner.email())
+          .user(message)
+          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's memory window
+          // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
+          // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
+          .call()
+          .content();
     // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
     if (!judgeGuard.isReplyAllowed(message, reply)) {
       reply = REFUSAL_MESSAGE;
