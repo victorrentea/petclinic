@@ -100,6 +100,7 @@ public class Assistant {
   private final ChatHistory chatHistory;
   private final ChatModel chatModel; // the single active model bean (OpenAI by default, Ollama in `local`)
   private final MessageWindowChatMemory chatMemory; // kept as a field so /history DELETE can clear it
+  private final JudgeGuard judgeGuard; // the semantic "judge LLM" input gate (see JudgeGuard)
 
   Assistant(
       ChatClient.Builder builder,
@@ -107,10 +108,13 @@ public class Assistant {
       McpSyncClient petclinicMcpClient,
       LocalTools localTools,
       ChatHistory history,
-      ChatModel chatModel) {
+      ChatModel chatModel,
+      JudgeGuard judgeGuard) {
     this.chatHistory = history;
     this.chatModel = chatModel;
-    // Per-conversation memory: keyed by owner, in-memory only — resets on restart or via the Clear button.
+    this.judgeGuard = judgeGuard;
+    // Per-conversation memory: keyed by owner, in-memory only — resets on restart or via the Clear
+    // button. The SAME instance backs both the memory advisor and /history DELETE (so kept as a field).
     this.chatMemory = MessageWindowChatMemory.builder()
         .chatMemoryRepository(new InMemoryChatMemoryRepository())
         .maxMessages(MEMORY_WINDOW_MESSAGES) // SAME constant the /history endpoint flags against
@@ -130,10 +134,27 @@ public class Assistant {
         .build();
   }
 
+  /** Test seam: inject the already-built collaborators directly (no real OpenAI/MCP wiring). */
+  Assistant(ChatClient chatClient, ChatHistory history, ChatModel chatModel,
+      MessageWindowChatMemory chatMemory, JudgeGuard judgeGuard) {
+    this.chatClient = chatClient;
+    this.chatHistory = history;
+    this.chatModel = chatModel;
+    this.chatMemory = chatMemory;
+    this.judgeGuard = judgeGuard;
+  }
+
   @GetMapping(value = "/assistant", produces = "text/markdown")
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
     String conversationId = owner.name();
     chatHistory.append(conversationId, "user", message); // record the user turn in the FULL transcript
+    // Judge LLM layer: one cheap, SEPARATE classifier call that semantically vets the inbound message
+    // BEFORE the main model — catching paraphrased jailbreaks/off-topic asks the SafeGuardAdvisor
+    // substring filter (still active as defense-in-depth) misses. Input-gating only; UNSAFE short-circuits.
+    if (!judgeGuard.isAllowed(message)) {
+      chatHistory.append(conversationId, "assistant", REFUSAL_MESSAGE); // record the refusal as the reply
+      return REFUSAL_MESSAGE; // do NOT call the main chatClient
+    }
     String reply = chatClient.prompt()
         .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
         .user(message)
