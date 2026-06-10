@@ -83,23 +83,40 @@ public class Assistant {
 
   private final ChatClient chatClient;
   private final ChatModel chatModel; // the single active model bean (OpenAI by default, Ollama in `local`)
-    private final ChatHistory chatHistory;
+  private final ChatHistory chatHistory;
+  private final MessageWindowChatMemory chatMemory; // kept as a field so DELETE /history can clear it
 
-    @Autowired // disambiguate from the test-seam constructor below (two ctors -> Spring needs the marker)
+  @Autowired
   Assistant(
       ChatModel chatModel,
-      ChatClient.Builder builder, ChatHistory chatHistory) {
+      ChatClient.Builder builder,
+      ChatHistory chatHistory) {
     this.chatModel = chatModel;
-    this.chatClient = builder
+    this.chatHistory = chatHistory; //verbatim storage of ALL*** messages ever exchangd
+    // Per-conversation memory: keyed by owner, in-memory only (resets on restart or via Clear), sized
+    // to MEMORY_WINDOW_MESSAGES so the model visibly "forgets" older turns.
+    this.chatMemory = MessageWindowChatMemory.builder()
+        .chatMemoryRepository(new InMemoryChatMemoryRepository())
+        .maxMessages(MEMORY_WINDOW_MESSAGES)
         .build();
-      this.chatHistory = chatHistory;
+    this.chatClient = builder
+        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+        .build();
   }
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
-      return chatClient.prompt(message)
-          .call()
-          .content();
+    String conversationId = owner.name();
+    chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record in the FULL transcript
+    String reply = chatClient.prompt()
+        .user(message)
+        .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's memory window
+        // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
+        // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
+        .call()
+        .content();
+    chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
+    return reply;
   }
 
 
@@ -127,6 +144,6 @@ public class Assistant {
   @DeleteMapping("/history")
   void clearConversation(@AuthenticationPrincipal OwnerJwtPrincipal owner) {
     chatHistory.clear(owner.name());
-//    chatMemory.clear(owner.name());
+    chatMemory.clear(owner.name());
   }
 }
