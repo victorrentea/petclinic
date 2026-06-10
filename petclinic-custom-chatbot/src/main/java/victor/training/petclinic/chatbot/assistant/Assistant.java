@@ -12,6 +12,7 @@ import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvi
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -149,10 +150,10 @@ public class Assistant {
   @GetMapping(value = "/assistant", produces = "text/markdown")
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
     String conversationId = owner.name();
-    chatHistory.append(conversationId, "user", message); // record the user turn in the FULL transcript
+    chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record the user turn in the FULL transcript
     // Judge INPUT gate: vet the inbound message before the main model; UNSAFE short-circuits.
     if (!judgeGuard.isAllowed(message)) {
-      chatHistory.append(conversationId, "assistant", REFUSAL_MESSAGE);
+      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
       return REFUSAL_MESSAGE;
     }
     String reply = chatClient.prompt()
@@ -166,7 +167,7 @@ public class Assistant {
     if (!judgeGuard.isReplyAllowed(message, reply)) {
       reply = REFUSAL_MESSAGE;
     }
-    chatHistory.append(conversationId, "assistant", reply.trim());
+    chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
     return reply;
   }
 
