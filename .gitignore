@@ -77,3 +77,6 @@ __pycache__/
 
 # Custom-chatbot on-disk RAG embedding cache (avoids re-embedding on restart) — match anywhere it lands
 rag-vector-store.json
+
+# codegraph local index + daemon state (SQLite db, socket, pid, logs) — machine-local, never commit
+.codegraph/

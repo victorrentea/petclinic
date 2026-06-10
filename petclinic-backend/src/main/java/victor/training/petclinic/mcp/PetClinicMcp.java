@@ -178,7 +178,7 @@ public class PetClinicMcp {
     @McpTool(
         name = "call_vet_ambulance",
         description = "Dispatch a veterinary ambulance to drive (by car) to a given address for an "
-            + "emergency. ELICITS the address from the user and asks them to confirm the dispatch request."
+            + "emergency. "
     )
     public String callVetAmbulance(McpSyncRequestContext context) {
         // Dispatching an ambulance is costly and irreversible — NEVER let the LLM trigger it on its own.

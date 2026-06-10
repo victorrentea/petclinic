@@ -5,14 +5,18 @@ import java.util.Map;
 
 import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -85,6 +89,7 @@ public class Assistant {
   private final ChatHistory chatHistory;
   private final MessageWindowChatMemory chatMemory; // kept as a field so DELETE /history can clear it
   private final JudgeGuard judgeGuard; // semantic "judge LLM" input + output gates around the main model
+  private final TokenCostMeter tokenCostMeter; // turns per-call token usage into the $ Prometheus metric
 
   @Autowired
   Assistant(
@@ -93,10 +98,13 @@ public class Assistant {
       ChatHistory chatHistory,
       JudgeGuard judgeGuard,
       McpSyncClient petclinicMcpClient,
-      LocalTools localTools) {
+      LocalTools localTools,
+      VectorStore vectorStore,
+      TokenCostMeter tokenCostMeter) {
     this.chatModel = chatModel;
     this.chatHistory = chatHistory; //verbatim storage of ALL*** messages ever exchangd
     this.judgeGuard = judgeGuard;
+    this.tokenCostMeter = tokenCostMeter;
     // Per-conversation memory: keyed by owner, in-memory only (resets on restart or via Clear), sized
     // to MEMORY_WINDOW_MESSAGES so the model visibly "forgets" older turns.
     this.chatMemory = MessageWindowChatMemory.builder()
@@ -115,7 +123,11 @@ public class Assistant {
                 .sensitiveWords(JAILBREAK_TRIGGERS)
                 .failureResponse(REFUSAL_MESSAGE)
                 .build(),
-            MessageChatMemoryAdvisor.builder(chatMemory).build())
+            MessageChatMemoryAdvisor.builder(chatMemory).build(),
+            // RAG: each turn, similarity-search the specialty vector store with the user's message and
+            // inject the top matching specialty sections (symptoms + care guidance) into the prompt, so
+            // the model recommends a specialty grounded in the clinic's knowledge base instead of guessing.
+            QuestionAnswerAdvisor.builder(vectorStore).build())
         .build();
   }
 
@@ -128,7 +140,10 @@ public class Assistant {
 //      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
 //      return REFUSAL_MESSAGE;
 //    }
-      String reply = chatClient.prompt()
+      // ONE terminal call: take the full ChatClientResponse so we can read BOTH the reply text and the
+      // token usage from a single round-trip (calling .content() AND .chatClientResponse() would fire
+      // the model twice).
+      ChatClientResponse response = chatClient.prompt()
           .system("The user in front of your has id: " + owner.id() +
               ", name: " + owner.name() + ", email: " + owner.email())
           .user(message)
@@ -139,7 +154,12 @@ public class Assistant {
           // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
           // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
           .call()
-          .content();
+          .chatClientResponse();
+      ChatResponse chatResponse = response.chatResponse();
+      // getMetadata().getUsage() carries only TOKEN counts (no $) — TokenCostMeter multiplies by price
+      // and records gen_ai_client_cost_usd_total for Prometheus/Grafana.
+      tokenCostMeter.record(chatResponse);
+      String reply = chatResponse.getResult().getOutput().getText();
     // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
 //    if (!judgeGuard.isReplyAllowed(message, reply)) {
 //      reply = REFUSAL_MESSAGE;

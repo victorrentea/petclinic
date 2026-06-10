@@ -59,6 +59,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- Observability: Actuator exposes /actuator/prometheus; with a MeterRegistry on the classpath,
+             Spring AI auto-records the GenAI metrics (gen_ai_client_token_usage_total,
+             gen_ai_client_operation_seconds*) — no extra code. micrometer-registry-prometheus renders
+             them in Prometheus text format for Grafana to scrape. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
         <!-- Proper JWT parsing (claims only — we never validate the signature in this demo). -->
         <dependency>
             <groupId>com.nimbusds</groupId>

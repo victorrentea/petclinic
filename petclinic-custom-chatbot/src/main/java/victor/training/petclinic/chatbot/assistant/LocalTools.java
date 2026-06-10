@@ -8,7 +8,6 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 /**
  * The LOCAL Spring AI tools (vs the remote MCP tools), exposed to the assistant alongside them:
@@ -56,11 +55,4 @@ class LocalTools {
     log.info("📧 (demo) sent email to {} — subject: \"{}\" — body: \"{}\"", to, subject, body);
     return "Email sent to " + to;
   }
-
-    public void method() {
-//        RestClient.builder().baseUrl()
-    }
-  // Alternative Instead of having the backend application, the main one, expose MCP endpoints,
-    // you could as well create a local tool that uses a REST client to connect to the backend
-    // endpoint already used, perhaps in other flows, perhaps even by its own frontend.
 }

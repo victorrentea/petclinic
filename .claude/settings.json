@@ -1,4 +1,7 @@
 {
+  "enabledMcpjsonServers": [
+    "petclinic-mcp"
+  ],
   "permissions": {
     "deny": [
       "Bash(git commit --no-verify*)",
