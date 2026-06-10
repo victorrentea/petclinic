@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *       skips cleanly when the key is absent (forks/CI without the secret);</li>
  *   <li>REQUIRES the petclinic backend running on :8080 exposing the MCP server at /mcp
  *       (CI starts it; locally run {@code ./start-database.sh} + {@code ./start-backend.sh}
- *       first). The demo JWT is George Franklin (owner sub=1), whose pet is "Leo";</li>
+ *       first). The demo JWT is Kevin McCallister (owner sub=1), whose pet is "Axel";</li>
  *   <li>creates a real {@code Visit} row as a side effect (create_visit books directly — no
  *       confirmation prompt).</li>
  * </ul>
@@ -48,8 +48,8 @@ class AssistantFlowTest {
   int port;
 
   @BeforeEach
-  void clearGeorgesUpcomingVisits() throws Exception {
-    // create_visit caps upcoming visits per pet, so clear George's (owner 1) upcoming visits before
+  void clearOwnersUpcomingVisits() throws Exception {
+    // create_visit caps upcoming visits per pet, so clear the authenticated owner's (owner 1) upcoming visits before
     // each test — otherwise repeated e2e runs accumulate bookings, hit the cap, and fail to book.
     WebClient backend = WebClient.create("http://localhost:8080");
     String ownerJson = backend.get().uri("/api/owners/1")
@@ -72,17 +72,17 @@ class AssistantFlowTest {
 
     // 1. Describe a symptom -> the assistant engages and offers to book a vet visit.
     //    (The specialty wording is LLM-paraphrased; the hard proof is the real booking in step 2.)
-    String r1 = ask(user, "My dog Leo is limping and won't put weight on his leg");
+    String r1 = ask(user, "My dog Axel is limping and won't put weight on his leg");
     assertThat(r1.toLowerCase()).containsAnyOf("appointment", "visit", "schedule", "book");
 
     // 2. Agree to book -> backend create_visit runs and books the visit directly (no confirmation
     //    prompt), so the assistant confirms it.
-    String r2 = ask(user, "Yes, please book a radiology visit for Leo next Monday at 10:00");
+    String r2 = ask(user, "Yes, please book a radiology visit for Axel next Monday at 10:00");
     assertThat(r2.toLowerCase()).containsAnyOf("scheduled", "booked", "created");
 
-    // 3. Confirm the visit is now listed for Leo.
+    // 3. Confirm the visit is now listed for Axel.
     String r3 = ask(user, "List my upcoming visits");
-    assertThat(r3.toLowerCase()).containsAnyOf("leo", "radiology");
+    assertThat(r3.toLowerCase()).containsAnyOf("axel", "radiology");
   }
 
   @Test
@@ -98,9 +98,9 @@ class AssistantFlowTest {
   @Test
   void books_a_visit_relative_to_now_using_the_clock_tool() {
     String user = "clock-demo";
-    ask(user, "My dog Leo is limping and won't put weight on his leg.");
+    ask(user, "My dog Axel is limping and won't put weight on his leg.");
     // "one hour from now" only resolves to a valid FUTURE time if the assistant asks the clock tool.
-    String r = ask(user, "Yes, book a radiology visit for Leo one hour from now.");
+    String r = ask(user, "Yes, book a radiology visit for Axel one hour from now.");
     assertThat(r.toLowerCase()).containsAnyOf("scheduled", "booked", "created");
   }
 
@@ -121,7 +121,7 @@ class AssistantFlowTest {
   /** A JWT with a throw-away (never-verified) signature — the app only reads the payload claims. */
   private static String demoJwt(String username) {
     String header = base64Url("{\"alg\":\"HS256\",\"typ\":\"JWT\"}");
-    // sub=1 (George) is the OWNER the backend books for — the chatbot propagates this token to the MCP.
+    // sub=1 (Kevin) is the OWNER the backend books for — the chatbot propagates this token to the MCP.
     String payload = base64Url(
         "{\"sub\":\"1\",\"name\":\"" + username + "\",\"email\":\"" + username + "@petclinic.example\"}");
     return header + "." + payload + ".c2ln"; // dummy base64url signature, not validated

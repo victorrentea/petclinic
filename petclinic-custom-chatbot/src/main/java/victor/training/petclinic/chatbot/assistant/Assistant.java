@@ -15,6 +15,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,26 @@ public class Assistant {
           + "booking visits. I can't take on other roles or off-topic tasks — but tell me what's "
           + "going on with your pet and I'll gladly help.";
 
+  /**
+   * Permissive RAG template (replaces {@code QuestionAnswerAdvisor}'s default, which orders the model
+   * to answer ONLY from the retrieved context and otherwise say it "can't answer"). That default breaks
+   * a conversational assistant: memory questions and tool-driven flows (booking, the owner's own pets)
+   * aren't in the specialty knowledge, so the model would refuse them. Here the specialty context is
+   * OPTIONAL — used to pick a specialty for a symptom; everything else falls back to tools and memory.
+   * Must keep both {@code {query}} and {@code {question_answer_context}} placeholders.
+   */
+  static final String RAG_PROMPT_TEMPLATE = """
+      {query}
+
+      Below are the clinic's veterinary specialties and the symptoms each one handles. Use them ONLY
+      to recommend the single best specialty when the owner describes a symptom. For anything else —
+      the owner's own pets and visits, booking, or facts stated earlier in this conversation — rely on
+      your tools and memory as usual; do NOT claim you can't answer just because it isn't listed below.
+      ---------------------
+      {question_answer_context}
+      ---------------------
+      """;
+
   private final ChatClient chatClient;
   private final ChatHistory chatHistory;
   private final ChatModel chatModel; // the single active model bean (OpenAI by default, Ollama in `local`)
@@ -138,7 +159,11 @@ public class Assistant {
                 .failureResponse(REFUSAL_MESSAGE)
                 .build(),
             MessageChatMemoryAdvisor.builder(chatMemory).build(),
-            QuestionAnswerAdvisor.builder(vectorStore).build()) // RAG over the specialty knowledge
+            // RAG over the specialty knowledge — with a permissive template so it augments rather than
+            // constrains the reply (memory + tools still work for non-symptom turns).
+            QuestionAnswerAdvisor.builder(vectorStore)
+                .promptTemplate(new PromptTemplate(RAG_PROMPT_TEMPLATE))
+                .build())
         .build();
   }
 
