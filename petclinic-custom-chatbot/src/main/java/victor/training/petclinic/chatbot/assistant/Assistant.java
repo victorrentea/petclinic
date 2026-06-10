@@ -1,4 +1,4 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.assistant;
 
 import java.time.LocalDate;
 import java.util.List;

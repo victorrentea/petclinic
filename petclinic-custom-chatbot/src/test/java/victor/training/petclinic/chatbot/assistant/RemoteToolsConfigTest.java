@@ -1,4 +1,4 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.assistant;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -37,7 +37,7 @@ class RemoteToolsConfigTest {
 
   @Test
   void propagates_the_in_flight_users_bearer_read_from_the_security_context() {
-    authenticate(new OwnerJwtPrincipal("1", "George Franklin", "george@petclinic.example", "user-jwt-123"));
+    authenticate(new OwnerJwtPrincipal(1, "George Franklin", "george@petclinic.example", "user-jwt-123"));
 
     HttpRequest request = customize();
 

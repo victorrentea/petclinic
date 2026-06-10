@@ -1,4 +1,4 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.assistant;
 
 import java.io.IOException;
 import java.util.List;

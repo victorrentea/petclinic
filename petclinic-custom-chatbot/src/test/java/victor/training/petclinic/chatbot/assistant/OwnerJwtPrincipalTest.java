@@ -1,4 +1,4 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.assistant;
 
 import org.junit.jupiter.api.Test;
 

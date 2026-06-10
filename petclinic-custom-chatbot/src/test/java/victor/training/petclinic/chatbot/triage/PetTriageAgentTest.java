@@ -1,12 +1,13 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.triage;
 
 import com.embabel.agent.test.unit.FakeOperationContext;
 import org.junit.jupiter.api.Test;
 
-import victor.training.petclinic.chatbot.PetTriageAgent.OwnerSymptom;
-import victor.training.petclinic.chatbot.PetTriageAgent.SpecialtyRecommendation;
-import victor.training.petclinic.chatbot.PetTriageAgent.TriageReport;
-import victor.training.petclinic.chatbot.PetTriageAgent.UrgencyAssessment;
+import victor.training.petclinic.chatbot.triage.PetTriageAgent.CostEstimate;
+import victor.training.petclinic.chatbot.triage.PetTriageAgent.OwnerSymptom;
+import victor.training.petclinic.chatbot.triage.PetTriageAgent.SpecialtyRecommendation;
+import victor.training.petclinic.chatbot.triage.PetTriageAgent.TriageReport;
+import victor.training.petclinic.chatbot.triage.PetTriageAgent.UrgencyAssessment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,20 +34,42 @@ class PetTriageAgentTest {
   }
 
   @Test
-  void report_fuses_both_upstream_assessments_into_the_prompt() {
+  void report_fuses_all_upstream_assessments_into_the_prompt() {
     FakeOperationContext ctx = FakeOperationContext.create();
     ctx.expectResponse(new TriageReport("**Radiology** recommended. Keep Leo calm and rested."));
 
     TriageReport report = agent.report(
         new UrgencyAssessment(true, "possible fracture"),
         new SpecialtyRecommendation("radiology", "restrict movement"),
+        new CostEstimate(375, "radiology base $250 + 50% emergency surcharge"),
         ctx);
 
     assertThat(report.markdown()).contains("Radiology");
-    // The whole point of the multi-step flow: the goal action sees BOTH blackboard objects the
-    // planner produced (urgency + specialty), so both must reach the final prompt.
+    // The whole point of the multi-step flow: the goal action sees ALL blackboard objects the
+    // planner produced (urgency + specialty + cost), so all must reach the final prompt.
     String prompt = ctx.getLlmInvocations().get(0).getPrompt();
     assertThat(prompt).contains("radiology");
     assertThat(prompt).contains("possible fracture");
+    assertThat(prompt).contains("375");
+    assertThat(prompt).contains("emergency surcharge");
+  }
+
+  @Test
+  void estimateCost_applies_specialty_base_rate_without_surcharge_when_not_an_emergency() {
+    CostEstimate estimate = agent.estimateCost(
+        new SpecialtyRecommendation("radiology", "restrict movement"),
+        new UrgencyAssessment(false, "no immediate danger"));
+
+    assertThat(estimate.estimatedCostUsd()).isEqualTo(250);
+  }
+
+  @Test
+  void estimateCost_adds_a_50_percent_surcharge_for_an_emergency() {
+    CostEstimate estimate = agent.estimateCost(
+        new SpecialtyRecommendation("radiology", "restrict movement"),
+        new UrgencyAssessment(true, "possible fracture"));
+
+    assertThat(estimate.estimatedCostUsd()).isEqualTo(375);
+    assertThat(estimate.basis()).contains("emergency surcharge");
   }
 }

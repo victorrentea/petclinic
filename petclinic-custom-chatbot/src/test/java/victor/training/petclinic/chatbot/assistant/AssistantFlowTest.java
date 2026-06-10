@@ -1,4 +1,4 @@
-package victor.training.petclinic.chatbot;
+package victor.training.petclinic.chatbot.assistant;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import victor.training.petclinic.chatbot.ChatbotApp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
