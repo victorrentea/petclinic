@@ -1,10 +1,12 @@
 package victor.training.petclinic.chatbot;
 
 /**
- * Bridges the current user's raw Bearer JWT to the MCP client's {@code customizeRequest}, which runs
- * on {@code java.net.http.HttpClient}'s own executor thread — NOT the request thread — so a per-thread
- * ThreadLocal can't reach it. A single {@code volatile} slot is cross-thread visible: {@link Assistant}
- * sets it for the duration of the (blocking, single-threaded) chat turn and clears it after.
+ * Bridges the current user's raw Bearer JWT to the MCP client's PER-REQUEST customizer
+ * ({@link RemoteToolsConfig#injectAuthHeaders}), which runs on {@code java.net.http.HttpClient}'s own
+ * executor thread — NOT the request thread — so a per-thread ThreadLocal can't reach it. A single
+ * {@code volatile} slot is cross-thread visible: {@link Assistant} sets it for the duration of the
+ * (blocking, single-threaded) chat turn and clears it after, and the customizer reads it AT request
+ * time for every outgoing tool-call POST.
  *
  * <p>One active turn at a time — correct for this demo (and the sequential e2e). True concurrent
  * multiplexing would instead build a per-request MCP client with the token captured in the customizer.
