@@ -1,13 +1,18 @@
 package victor.training.petclinic.chatbot.assistant;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,7 +40,8 @@ class JudgeGuardAssistantTest {
   private final JudgeGuard judgeGuard = mock(JudgeGuard.class);
 
   private final Assistant assistant =
-      new Assistant(mainChatClient, chatHistory, chatModel, chatMemory, judgeGuard);
+      new Assistant(mainChatClient, chatHistory, chatModel, chatMemory, judgeGuard,
+          new TokenCostMeter(new SimpleMeterRegistry()));
 
   private final OwnerJwtPrincipal george =
       new OwnerJwtPrincipal(1, "george", "george@petclinic.example", "dummy-token");
@@ -93,6 +99,7 @@ class JudgeGuardAssistantTest {
     when(requestSpec.toolContext(any(Map.class))).thenReturn(requestSpec);
     when(requestSpec.advisors(any(Consumer.class))).thenReturn(requestSpec);
     when(requestSpec.call()).thenReturn(responseSpec);
-    when(responseSpec.content()).thenReturn(content);
+    ChatResponse chatResponse = new ChatResponse(List.of(new Generation(new AssistantMessage(content))));
+    when(responseSpec.chatResponse()).thenReturn(chatResponse);
   }
 }

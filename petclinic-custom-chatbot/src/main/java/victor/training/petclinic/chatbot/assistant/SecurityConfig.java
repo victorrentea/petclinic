@@ -46,6 +46,8 @@ class SecurityConfig {
         // can present one). Everything else — notably /assistant — still requires the token.
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/", "/index.html", "/*.css", "/*.js").permitAll()
+            // Actuator open for scraping (demo): Prometheus pulls /actuator/prometheus without a JWT.
+            .requestMatchers("/actuator/**").permitAll()
             .anyRequest().authenticated())
         .addFilterBefore(new BearerAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
         .build();

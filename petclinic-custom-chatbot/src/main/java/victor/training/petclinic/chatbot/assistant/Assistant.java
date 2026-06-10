@@ -14,6 +14,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +104,7 @@ public class Assistant {
   private final ChatModel chatModel; // the single active model bean (OpenAI by default, Ollama in `local`)
   private final MessageWindowChatMemory chatMemory; // kept as a field so /history DELETE can clear it
   private final JudgeGuard judgeGuard; // the semantic "judge LLM" input + output gates (see JudgeGuard)
+  private final TokenCostMeter tokenCostMeter; // turns per-call token usage into the $ Prometheus metric
 
   @Autowired // disambiguate from the test-seam constructor below (two ctors -> Spring needs the marker)
   Assistant(
@@ -112,10 +114,12 @@ public class Assistant {
       LocalTools localTools,
       ChatHistory history,
       ChatModel chatModel,
-      JudgeGuard judgeGuard) {
+      JudgeGuard judgeGuard,
+      TokenCostMeter tokenCostMeter) {
     this.chatHistory = history;
     this.chatModel = chatModel;
     this.judgeGuard = judgeGuard;
+    this.tokenCostMeter = tokenCostMeter;
     // Per-conversation memory: keyed by owner, in-memory only — resets on restart or via the Clear
     // button. The SAME instance backs both the memory advisor and /history DELETE (so kept as a field).
     this.chatMemory = MessageWindowChatMemory.builder()
@@ -139,12 +143,13 @@ public class Assistant {
 
   /** Test seam: inject the already-built collaborators directly (no real OpenAI/MCP wiring). */
   Assistant(ChatClient chatClient, ChatHistory history, ChatModel chatModel,
-      MessageWindowChatMemory chatMemory, JudgeGuard judgeGuard) {
+      MessageWindowChatMemory chatMemory, JudgeGuard judgeGuard, TokenCostMeter tokenCostMeter) {
     this.chatClient = chatClient;
     this.chatHistory = history;
     this.chatModel = chatModel;
     this.chatMemory = chatMemory;
     this.judgeGuard = judgeGuard;
+    this.tokenCostMeter = tokenCostMeter;
   }
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
@@ -156,13 +161,17 @@ public class Assistant {
       chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
       return REFUSAL_MESSAGE;
     }
-    String reply = chatClient.prompt()
+    // One round-trip: take the full ChatResponse (not .content()) so we can both meter token cost and
+    // read the text from the SAME call — calling .content() AND .chatResponse() would fire two requests.
+    ChatResponse chatResponse = chatClient.prompt()
         .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
         .user(message)
         .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
         .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's history
         .call()
-        .content();
+        .chatResponse();
+    tokenCostMeter.record(chatResponse); // token usage -> $ metric (no-op for local/unpriced models)
+    String reply = chatResponse.getResult().getOutput().getText();
     // Judge OUTPUT gate: review the produced reply against the request; replace slop/off-topic drift.
     if (!judgeGuard.isReplyAllowed(message, reply)) {
       reply = REFUSAL_MESSAGE;
