@@ -1,5 +1,6 @@
 package victor.training.petclinic.chatbot;
 
+import com.embabel.agent.config.annotation.EnableAgents;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
 @SpringBootApplication
+@EnableAgents // scan @Agent beans (PetTriageAgent) and stand up the Embabel AgentPlatform
 public class ChatbotApp {
 
   public static void main(String[] args) {
