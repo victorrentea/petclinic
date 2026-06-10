@@ -80,14 +80,17 @@ public class Assistant {
   private final ChatModel chatModel; // the single active model bean (OpenAI by default, Ollama in `local`)
   private final ChatHistory chatHistory;
   private final MessageWindowChatMemory chatMemory; // kept as a field so DELETE /history can clear it
+  private final JudgeGuard judgeGuard; // semantic "judge LLM" input + output gates around the main model
 
   @Autowired
   Assistant(
       ChatModel chatModel,
       ChatClient.Builder builder,
-      ChatHistory chatHistory) {
+      ChatHistory chatHistory,
+      JudgeGuard judgeGuard) {
     this.chatModel = chatModel;
     this.chatHistory = chatHistory; //verbatim storage of ALL*** messages ever exchangd
+    this.judgeGuard = judgeGuard;
     // Per-conversation memory: keyed by owner, in-memory only (resets on restart or via Clear), sized
     // to MEMORY_WINDOW_MESSAGES so the model visibly "forgets" older turns.
     this.chatMemory = MessageWindowChatMemory.builder()
@@ -112,13 +115,23 @@ public class Assistant {
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
     String conversationId = owner.name();
     chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record in the FULL transcript
+    // Judge INPUT gate: semantically vet the inbound message BEFORE the main model; UNSAFE short-circuits.
+    if (!judgeGuard.isAllowed(message)) {
+      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
+      return REFUSAL_MESSAGE;
+    }
     String reply = chatClient.prompt()
+        // TODO systme prompt / conversation!
         .user(message)
         .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's memory window
         // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
         // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
         .call()
         .content();
+    // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
+    if (!judgeGuard.isReplyAllowed(message, reply)) {
+      reply = REFUSAL_MESSAGE;
+    }
     chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
     return reply;
   }
