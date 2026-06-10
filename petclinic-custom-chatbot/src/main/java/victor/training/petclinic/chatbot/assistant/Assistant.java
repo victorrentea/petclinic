@@ -97,15 +97,7 @@ public class Assistant {
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
-    String conversationId = owner.name();
-    String reply = chatClient.prompt()
-        .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
-        .user(message)
-        .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
-        .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's history
-        .call()
-        .content();
-    return reply;
+      return null;
   }
 
   /**
