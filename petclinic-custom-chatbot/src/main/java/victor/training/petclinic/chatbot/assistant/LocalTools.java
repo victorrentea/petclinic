@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,13 +33,21 @@ class LocalTools {
   }
 
   @Tool(description = "Email the authenticated pet owner (e.g. a visit confirmation). "
-      + "The recipient is always the logged-in owner — do not pass an address.")
+      + "The recipient is always the logged-in owner — do not pass an address.  ")
   String sendEmail(
-      @ToolParam(description = "email subject line") String subject,
+      @ToolParam(description = "email subject line: example [TICKET-123] Brief Description") String subject,
       @ToolParam(description = "email body text") String body,
       ToolContext toolContext) {
+    // Shape guard: subject MUST start with a [TAG] prefix. Throwing feeds the message back to the agent, which retries.
+    if (!subject.matches("^\\[TICKET-\\d+].*")) {
+        log.error("REJECTED subject: "+ subject);
+        // TODO 🦄 : check that ticket # acutally exists in JIRA
+        throw new IllegalArgumentException("Subject must start with a [TICKET-<number>] prefix, e.g. [TICKET-123] Brief Description");
+    }
+
+    String to = ((OwnerJwtPrincipal)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).email();
     // Injected by the controller from the security principal — never supplied by the model.
-    Object to = toolContext.getContext().get(OWNER_EMAIL);
+//    Object to = toolContext.getContext().get(OWNER_EMAIL);
     if (to == null || to.toString().isBlank()) {
       return "No authenticated owner email available — cannot send.";
     }

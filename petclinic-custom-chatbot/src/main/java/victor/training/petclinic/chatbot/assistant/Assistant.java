@@ -1,6 +1,7 @@
 package victor.training.petclinic.chatbot.assistant;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -87,7 +88,8 @@ public class Assistant {
       ChatModel chatModel,
       ChatClient.Builder builder,
       ChatHistory chatHistory,
-      JudgeGuard judgeGuard) {
+      JudgeGuard judgeGuard,
+      LocalTools localTools) {
     this.chatModel = chatModel;
     this.chatHistory = chatHistory; //verbatim storage of ALL*** messages ever exchangd
     this.judgeGuard = judgeGuard;
@@ -99,6 +101,7 @@ public class Assistant {
         .build();
     this.chatClient = builder
         .defaultSystem(SYSTEM_PROMPT)
+        .defaultTools(localTools) // local Spring AI tools: clock (currentDateTime) + sendEmail
         // message types: user,assistant,system⚠️,tool
         .defaultAdvisors(
             // Cheap, deterministic gate BEFORE the model: blocks known jailbreak/off-topic probes with
@@ -116,23 +119,26 @@ public class Assistant {
     String conversationId = owner.name();
     chatHistory.append(conversationId, MessageType.USER.getValue(), message); // record in the FULL transcript
     // Judge INPUT gate: semantically vet the inbound message BEFORE the main model; UNSAFE short-circuits.
-    if (!judgeGuard.isAllowed(message)) {
-      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
-      return REFUSAL_MESSAGE;
-    }
+//    if (!judgeGuard.isAllowed(message)) {
+//      chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), REFUSAL_MESSAGE);
+//      return REFUSAL_MESSAGE;
+//    }
       String reply = chatClient.prompt()
           .system("The user in front of your has id: " + owner.id() +
-              " and name: " + owner.name() + " email: " + owner.email())
+              ", name: " + owner.name() + ", email: " + owner.email())
           .user(message)
+          // Secure side channel to the tools: the owner's real email travels OUT-OF-BAND, never as
+          // part of the LLM conversation, so the user can't forge/override the sendEmail recipient.
+          .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email()))
           .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's memory window
           // ⭐️Chat Memory: gets all past messages from memory (capped at 6), send them before the current user prompt into the stateless LLM API
           // upon return, it saves the ASISSTANT message into that memory, evicting the oldest message if > 6
           .call()
           .content();
     // Judge OUTPUT gate: review the produced reply against the request; replace off-scope/slop drift.
-    if (!judgeGuard.isReplyAllowed(message, reply)) {
-      reply = REFUSAL_MESSAGE;
-    }
+//    if (!judgeGuard.isReplyAllowed(message, reply)) {
+//      reply = REFUSAL_MESSAGE;
+//    }
     chatHistory.append(conversationId, MessageType.ASSISTANT.getValue(), reply.trim());
     return reply;
   }
