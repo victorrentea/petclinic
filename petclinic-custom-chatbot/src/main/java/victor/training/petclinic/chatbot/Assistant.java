@@ -20,9 +20,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.context.Context;
 
 @RestController
 public class Assistant {
@@ -134,21 +131,25 @@ public class Assistant {
   }
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
-  Flux<String> assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
+  String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
     String conversationId = owner.name();
     chatHistory.append(conversationId, "user", message); // record the user turn in the FULL transcript
-    return Flux.defer(() -> chatClient.prompt()
-            .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
-            .user(message)
-            .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
-            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's history
-            .stream()
-            .content()
-            .transform(chatHistory.recordingReply(conversationId))) // record the reply as it streams
-        // stash THIS user's token in the Reactor Context; ReactorContextPropagation restores it into
-        // BearerTokenContext on whatever thread runs each MCP tool call (see ChatbotApp.customizeRequest).
-        .contextWrite(Context.of(ReactorContextPropagation.OWNER_BEARER, owner.token()))
-        .subscribeOn(Schedulers.boundedElastic());
+    // MVC + virtual threads: the whole turn runs on ONE thread, so this owner's token in the plain
+    // ThreadLocal is visible to the MCP client's customizeRequest when a (blocking) tool call fires.
+    BearerTokenContext.set(owner.token());
+    try {
+      String reply = chatClient.prompt()
+          .system("The owner's username is \"%s\". Today is %s.".formatted(owner.name(), LocalDate.now()))
+          .user(message)
+          .toolContext(Map.of(LocalTools.OWNER_EMAIL, owner.email())) // owner email for the email tool
+          .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId)) // this owner's history
+          .call()
+          .content();
+      chatHistory.append(conversationId, "assistant", reply.trim());
+      return reply;
+    } finally {
+      BearerTokenContext.clear();
+    }
   }
 
   /**

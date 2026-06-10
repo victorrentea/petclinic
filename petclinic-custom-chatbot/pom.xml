@@ -43,15 +43,17 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Spring MVC on virtual threads (spring.threads.virtual.enabled=true): one thread per request
+             end-to-end, so the per-user token ThreadLocal reaches the blocking MCP tool call. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- WebClient is used only by AssistantFlowTest; on the servlet stack it's no longer transitive. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <!-- Propagate the per-request user token (a ThreadLocal) across Reactor's worker threads, so
-             the MCP client's customizeRequest sees it on whichever boundedElastic thread runs a tool call. -->
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>context-propagation</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

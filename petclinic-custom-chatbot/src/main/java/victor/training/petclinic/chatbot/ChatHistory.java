@@ -7,19 +7,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 /**
  * In-memory, per-owner FULL chat transcript — the UI repaints it on page reload so the conversation
  * survives navigation (the model's own {@code MessageWindowChatMemory} only keeps the last N).
  *
  * <p>Keyed by owner name (the same value used as the {@code conversationId}), so each owner has an
- * isolated transcript. Thread-safe: a {@link ConcurrentHashMap} of synchronized lists, since the
- * reactive controller may append from boundedElastic threads. In-memory only — resets on restart,
- * which is fine for this demo.
+ * isolated transcript. Thread-safe: a {@link ConcurrentHashMap} of synchronized lists, since
+ * concurrent requests (each on its own virtual thread) may append in parallel. In-memory only —
+ * resets on restart, which is fine for this demo.
  */
 @Component
 class ChatHistory {
@@ -43,19 +41,6 @@ class ChatHistory {
   /** Forget this owner's entire transcript (the Clear button). */
   void clear(String conversationId) {
     byOwner.remove(conversationId);
-  }
-
-  /**
-   * A {@code Flux.transform} operator that records the assistant reply: it passes the stream through
-   * unchanged (chunks still reach the browser immediately) while accumulating it, and stores the
-   * assembled text in this owner's transcript once the stream completes. The controller applies it as
-   * a trailing operator instead of wrapping the whole stream in a call.
-   */
-  Function<Flux<String>, Flux<String>> recordingReply(String conversationId) {
-    StringBuilder buffer = new StringBuilder();
-    return reply -> reply
-        .doOnNext(buffer::append)
-        .doOnComplete(() -> append(conversationId, "assistant", buffer.toString().trim()));
   }
 
   /**

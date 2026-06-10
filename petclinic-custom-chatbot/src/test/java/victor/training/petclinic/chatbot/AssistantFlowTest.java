@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Named {@code *Test} (not {@code *IT}) on purpose: this project has no failsafe plugin and
  * runs everything under surefire via {@code mvn test} — matching the backend's convention.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = ChatbotApp.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 class AssistantFlowTest {
 
@@ -102,19 +102,18 @@ class AssistantFlowTest {
     assertThat(r.toLowerCase()).containsAnyOf("scheduled", "booked", "created");
   }
 
-  /** Calls the streaming markdown endpoint and joins all chunks into one String. */
+  /** Calls the (blocking) markdown endpoint and returns the full reply. */
   private String ask(String username, String message) {
     WebClient webClient = WebClient.create("http://localhost:" + port);
-    return String.join("", webClient.get()
+    return webClient.get()
         .uri("/assistant?message={m}", message)
         // Identity now travels in the Bearer token (SecurityConfig parses it); the name claim both
         // labels the owner and isolates per-conversation memory, like the old path username did.
         .header("Authorization", "Bearer " + demoJwt(username))
         .accept(MediaType.parseMediaType("text/markdown"))
         .retrieve()
-        .bodyToFlux(String.class)
-        .collectList()
-        .block(Duration.ofSeconds(120)));
+        .bodyToMono(String.class)
+        .block(Duration.ofSeconds(120));
   }
 
   /** A JWT with a throw-away (never-verified) signature — the app only reads the payload claims. */

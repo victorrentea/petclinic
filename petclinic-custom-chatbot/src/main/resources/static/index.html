@@ -134,7 +134,7 @@
 
             showOverlay();
 
-            // fetch the streaming assistant response and append progressively.
+            // fetch the assistant response in one shot (no longer streamed) and render it.
             // Identity travels in the Bearer token, not the URL.
             var url = '/assistant?message=' + encodeURIComponent(text);
             try {
@@ -145,28 +145,14 @@
                     return;
                 }
 
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder();
-                let done = false;
-                let accumulated = '';
-
-                while (!done) {
-                    const { value, done: streamDone } = await reader.read();
-                    if (value) {
-                        accumulated += decoder.decode(value, { stream: true });
-                        // append chunk to assistant element (progressive rendering) as HTML
-                        assistantEl.innerHTML = renderMarkdown(accumulated);
-                        scrollHistoryToBottom();
-                    }
-                    done = streamDone;
-                }
-
-                // finalize with any remaining text, then stamp the assistant message with a timestamp
-                assistantEl.innerHTML = renderMarkdown(accumulated.trim());
+                // single full-markdown payload — render it once, then stamp the timestamp
+                const md = await res.text();
+                assistantEl.innerHTML = renderMarkdown(md.trim());
                 var am = document.createElement('small');
                 am.className = 'meta';
                 am.innerText = new Date().toLocaleTimeString();
                 assistantEl.appendChild(am);
+                scrollHistoryToBottom();
             } catch (e) {
                 assistantEl.innerText = 'Request failed: ' + (e && e.message ? e.message : e);
             } finally {

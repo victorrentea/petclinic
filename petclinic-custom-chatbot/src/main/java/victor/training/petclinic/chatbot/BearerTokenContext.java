@@ -1,25 +1,27 @@
 package victor.training.petclinic.chatbot;
 
 /**
- * Blocking-thread bridge for the current user's raw Bearer JWT. The chatbot talks to the backend MCP
- * server over ONE shared connection authenticated by a static service API key; the per-USER identity
- * rides on each tool-call POST. {@link Assistant} publishes the owner's token here for the duration of
- * the blocking chat pipeline, and the MCP client's {@code customizeRequest} reads it to set this
- * request's {@code Authorization} header — so the backend resolves the right owner from the JWT sub.
+ * Bridges the current user's raw Bearer JWT to the MCP client's {@code customizeRequest}, which runs
+ * on {@code java.net.http.HttpClient}'s own executor thread — NOT the request thread — so a per-thread
+ * ThreadLocal can't reach it. A single {@code volatile} slot is cross-thread visible: {@link Assistant}
+ * sets it for the duration of the (blocking, single-threaded) chat turn and clears it after.
+ *
+ * <p>One active turn at a time — correct for this demo (and the sequential e2e). True concurrent
+ * multiplexing would instead build a per-request MCP client with the token captured in the customizer.
  */
 final class BearerTokenContext {
-  private static final ThreadLocal<String> TOKEN = new ThreadLocal<>();
+  private static volatile String token;
 
-  static void set(String token) {
-    TOKEN.set(token);
+  static void set(String value) {
+    token = value;
   }
 
   static String get() {
-    return TOKEN.get();
+    return token;
   }
 
   static void clear() {
-    TOKEN.remove();
+    token = null;
   }
 
   private BearerTokenContext() {
