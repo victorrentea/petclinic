@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PetTriageAgentTest {
 
-  private final PetTriageAgent agent = new PetTriageAgent();
+  private final PetTriageAgent agent = new PetTriageAgent("gpt-4o-mini");
 
   @Test
   void assessUrgency_passes_the_symptom_to_the_model() {

@@ -4,7 +4,7 @@ import com.embabel.agent.api.annotation.AchievesGoal;
 import com.embabel.agent.api.annotation.Action;
 import com.embabel.agent.api.annotation.Agent;
 import com.embabel.agent.api.common.OperationContext;
-import com.embabel.agent.api.models.OpenAiModels;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Embabel demo flow — a contrast to the single {@code ChatClient} prompt in {@code Assistant}.
@@ -24,8 +24,12 @@ import com.embabel.agent.api.models.OpenAiModels;
 @Agent(description = "Triages a pet symptom: assess urgency and recommend a single vet specialty")
 public class PetTriageAgent {
 
-  // gpt-4o-mini: same cheap, predictable model the Spring AI ChatClient is pinned to.
-  private static final String MODEL = OpenAiModels.GPT_4O_MINI;
+  /** Chat model — read from the SAME property the Spring AI ChatClient is pinned with (single source). */
+  private final String model;
+
+  PetTriageAgent(@Value("${spring.ai.openai.chat.options.model:gpt-4o-mini}") String model) {
+    this.model = model;
+  }
 
   public record OwnerSymptom(String text) {}
 
@@ -39,7 +43,7 @@ public class PetTriageAgent {
 
   @Action
   public UrgencyAssessment assessUrgency(OwnerSymptom symptom, OperationContext context) {
-    return context.ai().withLlm(MODEL).createObject("""
+    return context.ai().withLlm(model).createObject("""
         A pet owner describes this symptom for their pet:
         "%s"
         Decide whether it needs EMERGENCY veterinary attention now, with a one-line reason.
@@ -48,7 +52,7 @@ public class PetTriageAgent {
 
   @Action
   public SpecialtyRecommendation recommendSpecialty(OwnerSymptom symptom, OperationContext context) {
-    return context.ai().withLlm(MODEL).createObject("""
+    return context.ai().withLlm(model).createObject("""
         A pet owner describes this symptom for their pet:
         "%s"
         Pick the SINGLE most relevant vet specialty — one of: radiology, surgery, dentistry —
@@ -77,7 +81,7 @@ public class PetTriageAgent {
   @Action
   public TriageReport report(UrgencyAssessment urgency, SpecialtyRecommendation recommendation,
       CostEstimate cost, OperationContext context) {
-    return context.ai().withLlm(MODEL).createObject("""
+    return context.ai().withLlm(model).createObject("""
         Write a short Markdown triage report for a pet owner. Be concise and reassuring.
         - Urgency: %s (%s)
         - Recommended specialty: %s
