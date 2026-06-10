@@ -56,7 +56,7 @@ class SickPetScenarioTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         // step 1: the LLM reads the me://profile resource to discover the caller's pets
-        String profile = petClinicMcp.myProfile();
+        String profile = petClinicMcp.getOwnerProfile();
         assertThat(profile).contains("Mițică");
 
         // step 2: the LLM extracts the pet id from the resource text

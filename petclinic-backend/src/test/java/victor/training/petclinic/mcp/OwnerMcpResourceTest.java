@@ -51,7 +51,7 @@ class OwnerMcpResourceTest {
         ownerRepository.save(ron);
         authenticateAs(ron.getId());
 
-        String profile = petClinicMcp.myProfile();
+        String profile = petClinicMcp.getOwnerProfile();
 
         assertThat(profile)
             .contains("Ronald").contains("Weasley_TST")
@@ -63,7 +63,7 @@ class OwnerMcpResourceTest {
     void unknown_id_throws() {
         authenticateAs(999_999);
 
-        assertThatThrownBy(() -> petClinicMcp.myProfile())
+        assertThatThrownBy(() -> petClinicMcp.getOwnerProfile())
             .isInstanceOf(IllegalStateException.class);
     }
 

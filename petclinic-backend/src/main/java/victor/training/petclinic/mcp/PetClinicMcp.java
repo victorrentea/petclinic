@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.springaicommunity.mcp.annotation.McpResource;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpTool.McpAnnotations;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -41,12 +40,15 @@ public class PetClinicMcp {
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
 
-    @McpResource(
-        uri = "me://petclinic-owner-profile",
-        name = "petclinic-owner-profile",
-        description = "The authenticated petclinic owner's profile: name, address, phone, and list of pets."
+    @McpTool(
+        name = "get_owner_profile",
+        description = "Fetch the authenticated owner's profile — name, address, phone and the list of "
+            + "pets. Takes NO arguments: the owner is resolved from the per-request identity header the "
+            + "calling application attaches (not from anything the model supplies), so it cannot be spoofed.",
+        annotations = @McpAnnotations(readOnlyHint = true, openWorldHint = false)
     )
-    public String myProfile() {
+    @Transactional(readOnly = true)
+    public String getOwnerProfile() {
         int ownerId = McpSecurity.currentOwnerId();
         Owner owner = ownerRepository.findByIdFetchingPets(ownerId)
             .orElseThrow(() -> new IllegalStateException("No owner with id=" + ownerId));

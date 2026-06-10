@@ -53,7 +53,8 @@ public class Assistant {
          and offer to book a visit with it.
 
       Booking rules (only after the owner agrees):
-      - Read the owner's profile and pets from the `me://petclinic-owner-profile` resource.
+      - Read the owner's profile and pets by calling the `get_owner_profile` tool (it takes no
+        arguments — the owner is resolved from the request identity, never from you).
       - ALWAYS confirm WHICH pet the visit is for before booking. If the owner has more than
         one pet, ask which one — never guess.
       - To resolve relative times like "now", "in 1 hour" or "tomorrow", call the
