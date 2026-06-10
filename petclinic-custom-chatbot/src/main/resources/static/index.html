@@ -29,6 +29,7 @@
     <label for="assistantInput" style="position:absolute; left:-9999px;">Message</label>
     <input type="text" id="assistantInput" placeholder="Type a message" style="padding:6px;" />
     <button id="assistantSend" type="button">Send</button>
+    <button id="assistantTriage" type="button" title="Run the Embabel multi-step triage agent on the message">🤖 Embabel triage</button>
     <button id="assistantClear" type="button">Clear</button>
 </div>
 
@@ -173,6 +174,37 @@
             }
         }
 
+        // Embabel triage: one-shot call to the /triage agent endpoint (NOT streaming). The Embabel
+        // planner runs the multi-step flow server-side and returns a single Markdown report.
+        async function runTriage(text) {
+            if (!text) return;
+            appendMessage('user', text, new Date().toLocaleTimeString());
+            if (input) { input.value = ''; try { input.focus(); } catch (e) { /* ignore */ } }
+            var assistantEl = appendMessage('assistant', '', null);
+            showOverlay();
+            try {
+                const res = await fetch('/triage?symptom=' + encodeURIComponent(text), {
+                    method: 'GET',
+                    headers: { Accept: 'text/markdown', 'Authorization': 'Bearer ' + DEMO_JWT }
+                });
+                if (!res.ok) {
+                    assistantEl.innerText = 'Error: ' + res.status + ' ' + res.statusText;
+                    return;
+                }
+                const report = await res.text();
+                assistantEl.innerHTML = renderMarkdown('🤖 *Embabel triage agent*\n\n' + report.trim());
+                var am = document.createElement('small');
+                am.className = 'meta';
+                am.innerText = new Date().toLocaleTimeString();
+                assistantEl.appendChild(am);
+                scrollHistoryToBottom();
+            } catch (e) {
+                assistantEl.innerText = 'Request failed: ' + (e && e.message ? e.message : e);
+            } finally {
+                hideOverlay();
+            }
+        }
+
         // On load, repaint the FULL transcript the server remembers (the chat memory is a sliding
         // window, so a reload would otherwise show a blank page). Messages that have aged OUT of the
         // model's memory window come back with inMemory=false and are dimmed via the 'forgotten' class.
@@ -239,6 +271,14 @@
             } catch (e) { /* best-effort */ }
             historyEl.querySelectorAll('.message').forEach(function(m) { m.remove(); });
             try { input.focus(); } catch (e) { /* ignore */ }
+        });
+
+        // Embabel triage button: runs the agent flow on whatever is in the input box.
+        var triageBtn = document.getElementById('assistantTriage');
+        if (triageBtn) triageBtn.addEventListener('click', function() {
+            var text = input.value ? input.value.trim() : '';
+            if (text.length === 0) return;
+            runTriage(text);
         });
 
         input.addEventListener('keydown', function(e) {

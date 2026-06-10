@@ -18,10 +18,20 @@
 
     <properties>
         <java.version>21</java.version>
+        <embabel-agent.version>0.4.0</embabel-agent.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Embabel manages only its own modules (no Spring pin), so it inherits the
+                 spring-ai-bom below — keeping Spring AI on 1.1.7 across both stacks. -->
+            <dependency>
+                <groupId>com.embabel.agent</groupId>
+                <artifactId>embabel-agent-dependencies</artifactId>
+                <version>${embabel-agent.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
@@ -72,6 +82,19 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-mcp-client</artifactId>
+        </dependency>
+
+        <!-- Embabel: GOAP agent platform. The starter pulls embabel-agent-platform-autoconfigure
+             (+ embabel-agent-api, which also ships FakeOperationContext for unit tests). The OpenAI
+             autoconfigure registers OpenAI models with Embabel's own model registry (reads
+             OPENAI_API_KEY, same key the Spring AI ChatClient uses). -->
+        <dependency>
+            <groupId>com.embabel.agent</groupId>
+            <artifactId>embabel-agent-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.embabel.agent</groupId>
+            <artifactId>embabel-agent-openai-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

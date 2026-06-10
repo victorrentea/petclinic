@@ -1,5 +1,6 @@
 package victor.training.petclinic.chatbot;
 
+import com.embabel.agent.config.annotation.EnableAgents;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.boot.SpringApplication;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
 @SpringBootApplication
+@EnableAgents // scan @Agent beans (PetTriageAgent) and stand up the Embabel AgentPlatform
 public class ChatbotApp {
 
   public static void main(String[] args) {
