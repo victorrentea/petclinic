@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -96,7 +97,14 @@ public class Assistant {
     this.chatClient = builder
         .defaultSystem(SYSTEM_PROMPT)
         // message types: user,assistant,system⚠️,tool
-        .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+        .defaultAdvisors(
+            // Cheap, deterministic gate BEFORE the model: blocks known jailbreak/off-topic probes with
+            // a fixed refusal. SafeGuardAdvisor matches plain, CASE-SENSITIVE substrings.
+            SafeGuardAdvisor.builder()
+                .sensitiveWords(JAILBREAK_TRIGGERS)
+                .failureResponse(REFUSAL_MESSAGE)
+                .build(),
+            MessageChatMemoryAdvisor.builder(chatMemory).build())
         .build();
   }
 
