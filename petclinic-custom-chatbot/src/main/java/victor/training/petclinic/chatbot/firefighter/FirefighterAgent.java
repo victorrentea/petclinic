@@ -10,6 +10,7 @@ import com.embabel.agent.api.annotation.Agent;
 import com.embabel.agent.api.common.OperationContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +64,7 @@ public class FirefighterAgent {
   public record IncidentReport(String markdown) {}
 
   /** Spring wires the prototype-guard provider; the model comes from the SAME property as the others. */
+  @Autowired // two ctors -> Spring needs the marker to pick this one over the test-seam below
   public FirefighterAgent(
       @Value("${spring.ai.openai.chat.options.model:gpt-4o-mini}") String model,
       ObjectProvider<FirefighterGuard> guardProvider) {
