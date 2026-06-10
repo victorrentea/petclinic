@@ -2,7 +2,7 @@ package victor.training.petclinic.chatbot.assistant;
 
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
-import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
 import io.modelcontextprotocol.client.transport.customizer.McpSyncHttpClientRequestCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +16,11 @@ import java.net.http.HttpRequest;
  * One shared connection, authenticated service-to-service by a static API key; the per-USER identity
  * (the browser JWT) is read from the Spring SecurityContext per request (see {@link #injectAuthHeaders}).
  *
- * <p><b>Why a per-request customizer and not {@code customizeRequest}.</b> mcp-core 0.18.2's
- * {@code HttpClientSseClientTransport.Builder.customizeRequest(Consumer)} applies its consumer exactly
+ * <p>Transport: <b>Streamable HTTP</b> (MCP spec 2025-06-18) on the single {@code /mcp} endpoint —
+ * replaces the deprecated HTTP+SSE client transport, matching the backend's Streamable server.
+ *
+ * <p><b>Why a per-request customizer and not {@code customizeRequest}.</b> mcp-core's
+ * {@code customizeRequest(Consumer)} applies its consumer exactly
  * ONCE, at build/connect time, mutating a single shared {@code HttpRequest.Builder}
  * ({@code requestCustomizer.accept(requestBuilder)} in the builder). At that moment no chat turn is in
  * flight, so there is no authenticated user and NO {@code Authorization} header is ever attached to
@@ -36,8 +39,8 @@ class RemoteToolsConfig {
         @Value("${petclinic.chatbot.mcp.api-key}") String apiKey) {
         McpSyncHttpClientRequestCustomizer perRequestHeaders =
             (builder, method, endpoint, body, context) -> injectAuthHeaders(builder, apiKey);
-        var transport = HttpClientSseClientTransport.builder(url)
-            .sseEndpoint("/mcp")
+        var transport = HttpClientStreamableHttpTransport.builder(url)
+            .endpoint("/mcp")
             .httpRequestCustomizer(perRequestHeaders)
             .build();
         try {
