@@ -8,9 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableAgents // scan @Agent beans (PetTriageAgent) and stand up the Embabel AgentPlatform
+@EnableScheduling // drives RagIngestion's every-3s poll of the backend specialty feed
 public class ChatbotApp {
 
   public static void main(String[] args) {
