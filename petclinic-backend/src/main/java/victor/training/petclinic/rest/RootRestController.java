@@ -19,4 +19,14 @@ public class RootRestController {
 		response.sendRedirect(servletContextPath + "/swagger-ui/index.html");
 	}
 
+    // --- Artificial code smell to validate the customized SonarCloud rule java:S107 ---
+    // The "petclinic agentic (extend)" quality profile lowers S107's `max` parameters from 7 to 5.
+    // This method has 6 parameters, so the custom profile flags it while the default (max 7) would
+    // NOT. Temporary: remove after confirming the rule fires on SonarCloud.
+    public String describePet(String name, String type, int age, double weight,
+                              String ownerName, String city) {
+        return name + " (" + type + "), age " + age + ", " + weight + "kg — owner "
+            + ownerName + " from " + city;
+    }
+
 }
