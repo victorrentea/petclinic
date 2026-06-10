@@ -97,8 +97,17 @@ public class Assistant {
 
   @GetMapping(value = "/assistant", produces = "text/markdown")
   String assistant(@RequestParam String message, @AuthenticationPrincipal OwnerJwtPrincipal owner) {
-      return null;
+      return chatClient.prompt(message)
+          .call()
+          .content();
   }
+
+
+
+
+
+
+
 
   /**
    * The owner's FULL transcript for repaint-on-reload. Each entry carries {@code inMemory}: the last
