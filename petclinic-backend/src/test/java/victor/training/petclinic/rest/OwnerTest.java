@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -136,6 +137,23 @@ public class OwnerTest {
     }
 
     @Test
+    void list_returnsPagedEnvelope_withMetadataUnderPage() throws Exception {
+        mockMvc.perform(get("/api/owners?page=0&size=10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(10))
+            .andExpect(jsonPath("$.page.size").value(10))
+            .andExpect(jsonPath("$.page.number").value(0))
+            .andExpect(jsonPath("$.page.totalElements").isNumber());
+    }
+
+    @Test
+    void list_sizeAboveMax_isCappedAtTwenty() throws Exception {
+        mockMvc.perform(get("/api/owners?size=500"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.size").value(20));
+    }
+
+    @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
@@ -156,7 +174,8 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        JsonNode content = mapper.readTree(responseJson).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
         });
     }
 

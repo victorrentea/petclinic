@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -54,11 +57,14 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners (paged)")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName, Pageable pageable) {
+        Pageable safePageable = PageRequest.of(
+            pageable.getPageNumber(), pageable.getPageSize(), SortMapper.toEntitySort(pageable.getSort()));
+        Page<Owner> page = ownerRepository.findByLastNameStartingWith(lastName, safePageable);
+        return new PagedModel<>(page.map(ownerMapper::toOwnerDto));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
