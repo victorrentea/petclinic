@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import {OwnersPage} from './pages/OwnersPage';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -16,15 +17,16 @@ test.use({viewport: {width: 1440, height: 900}});
 test('columns do not flip left/right when sorting by name or city (asc/desc)', async ({page}) => {
   fs.mkdirSync(screenshotDir, {recursive: true});
 
+  const ownersPage = new OwnersPage(page);
   const leftEdgesPerSort: Record<string, number[]> = {};
 
   for (const sort of SORTS) {
-    await page.goto(`/owners?page=0&size=5&sort=${encodeURIComponent(sort)}`);
-    await page.locator('table#ownersTable td.ownerFullName').first().waitFor({state: 'visible'});
+    await ownersPage.open(`?page=0&size=5&sort=${encodeURIComponent(sort)}`);
+    await ownersPage.ownerNameCells.first().waitFor({state: 'visible'});
 
     const leftEdges: number[] = [];
     for (const col of COLUMNS) {
-      const box = await page.locator(`table#ownersTable th.mat-column-${col}`).boundingBox();
+      const box = await ownersPage.columnHeader(col).boundingBox();
       leftEdges.push(Math.round(box!.x));
     }
     leftEdgesPerSort[sort] = leftEdges;

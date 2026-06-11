@@ -93,10 +93,6 @@ export class OwnerListComponent implements OnInit {
     return (owner.pets ?? []).map(pet => pet.name).join(', ');
   }
 
-  onSelect(owner: Owner) {
-    this.router.navigate(['/owners', owner.id]);
-  }
-
   addOwner() {
     this.router.navigate(['/owners/add']);
   }

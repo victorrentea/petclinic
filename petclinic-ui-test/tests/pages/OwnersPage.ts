@@ -17,9 +17,13 @@ export class OwnersPage {
     this.ownersTable = page.locator('#ownersTable');
   }
 
-  async open() {
-    await this.page.goto('/owners');
+  async open(query: string = '') {
+    await this.page.goto('/owners' + query);
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  columnHeader(column: string): Locator {
+    return this.page.locator(`#ownersTable th.mat-column-${column}`);
   }
 
   async getOwnerFullNames(): Promise<string[]> {
