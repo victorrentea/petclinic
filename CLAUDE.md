@@ -75,6 +75,10 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+## Scale & Performance Constraints
+- **Target data volume:** ~100,000 owners in the database within one year (by ~June 2027).
+- Treat owners (and their pets/visits) as a large dataset: never load all owners into memory; always paginate and filter at the DB level.
+
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 - Owners: `/api/owners`, `/api/owners/{id}`
