@@ -10,6 +10,7 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
+  expectedTotalOwners?: number;
 
   constructor(options: IWorldOptions) {
     super(options);

@@ -26,17 +26,17 @@ test.describe('Owners Page', () => {
     console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
-  test('shows all owners on initial load', async ({ page }) => {
+  test('shows the first page of owners on initial load', async ({ page }) => {
     const ownersPage = new OwnersPage(page);
 
-    // Fetch expected owners from API
+    // Fetch the expected first page (size 10, name asc) from API
     const expectedOwners = await apiClient.fetchOwners();
     const expectedFullNames = ApiClient.getFullNames(expectedOwners);
 
     // Open the owners page
     await ownersPage.open();
 
-    // Wait for the expected number of owners
+    // Wait for the first page of owners
     await ownersPage.waitForOwnersCount(expectedFullNames.length);
 
     // Get actual owner names from the page

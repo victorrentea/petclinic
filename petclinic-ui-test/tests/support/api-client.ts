@@ -30,16 +30,19 @@ export class ApiClient {
     });
   }
 
+  // The owners endpoint is paginated (PagedModel envelope): rows under `content`, default size 10.
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    const response = await this.client.get('/owners', {
+      params: { page: 0, size: 10, sort: 'name,asc' }
+    });
+    return response.data.content ?? [];
   }
 
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
+    const response = await this.client.get('/owners', {
+      params: { lastName: prefix, page: 0, size: 10, sort: 'name,asc' }
     });
-    return response.data;
+    return response.data.content ?? [];
   }
 
   async fetchVisits(): Promise<VisitDto[]> {
@@ -47,10 +50,11 @@ export class ApiClient {
     return response.data;
   }
 
+  // The UI renders owner names as "lastName, firstName" (matches the Name sort order).
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
-      .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
-      .filter(name => name.length > 0);
+      .map(owner => `${owner.lastName}, ${owner.firstName}`.trim())
+      .filter(name => name.length > 2);
   }
 
   static sorted(values: string[]): string[] {
@@ -61,12 +65,10 @@ export class ApiClient {
     return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
 
+  // Names render as "lastName, firstName" — the last name is the part before the comma.
   static extractLastName(fullName: string): string {
-    const firstSpace = fullName.indexOf(' ');
-    if (firstSpace < 0 || firstSpace === fullName.length - 1) {
-      return fullName;
-    }
-    return fullName.substring(firstSpace + 1);
+    const comma = fullName.indexOf(',');
+    return comma < 0 ? fullName : fullName.substring(0, comma).trim();
   }
 
   static choosePrefixFrom(owners: OwnerDto[]): string {
