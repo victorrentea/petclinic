@@ -107,7 +107,8 @@ public class OwnerRestController {
     @Operation(operationId = "addPetToOwner", summary = "Add a pet to an owner")
     @PostMapping("{ownerId}/pets")
     @Transactional
-    public ResponseEntity<Void> addPetToOwner(@PathVariable int ownerId, @RequestBody @Validated PetFieldsDto petFieldsDto) {
+    public ResponseEntity<Void> addPetToOwner(@PathVariable int ownerId,
+            @RequestBody @Validated PetFieldsDto petFieldsDto) {
         Pet pet = petMapper.toPet(petFieldsDto);
         pet.setOwner(new Owner().setId(ownerId));
         pet.setType(petTypeRepository.findById(pet.getType().getId()).orElseThrow());
@@ -120,7 +121,8 @@ public class OwnerRestController {
     @Operation(operationId = "updateOwnersPet", summary = "Update an owner's pet")
     @PutMapping("{ownerId}/pets/{petId}")
     @Transactional
-    public void updateOwnersPet(@PathVariable int ownerId, @PathVariable int petId, @RequestBody @Validated PetFieldsDto petFieldsDto) {
+    public void updateOwnersPet(@PathVariable int ownerId, @PathVariable int petId,
+            @RequestBody @Validated PetFieldsDto petFieldsDto) {
         Pet currentPet = petRepository.findById(petId).orElseThrow();
         currentPet.setBirthDate(petFieldsDto.getBirthDate());
         currentPet.setName(petFieldsDto.getName());
@@ -130,7 +132,8 @@ public class OwnerRestController {
 
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
-    public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId, @RequestBody VisitFieldsDto visitFieldsDto) {
+    public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
+            @RequestBody VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         visit.setPet(new Pet().setId(petId));
         visitRepository.save(visit);

@@ -46,7 +46,9 @@ public class OwnerDto {
     private String telephone;
 
     @Valid
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "The pets owned by this individual including any booked vet visits.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY,
+        description = "The pets owned by this individual including any booked vet visits.",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     private List<PetDto> pets = new ArrayList<>();
 
     public OwnerDto addPetsItem(PetDto petsItem) {

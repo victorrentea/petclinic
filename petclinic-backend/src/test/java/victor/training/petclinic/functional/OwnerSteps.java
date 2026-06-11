@@ -23,8 +23,10 @@ public class OwnerSteps {
     @Autowired
     private JdbcTemplate jdbc;
 
-    @When("I register an owner with first name {string}, last name {string}, address {string}, city {string}, telephone {string}")
-    public void iRegisterAnOwner(String firstName, String lastName, String address, String city, String telephone) {
+    @When("I register an owner with first name {string}, last name {string}, address {string}, "
+        + "city {string}, telephone {string}")
+    public void iRegisterAnOwner(String firstName, String lastName, String address, String city,
+            String telephone) {
         String body = """
             {"firstName":"%s","lastName":"%s","address":"%s","city":"%s","telephone":"%s"}
             """.formatted(firstName, lastName, address, city, telephone);

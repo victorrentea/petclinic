@@ -32,6 +32,7 @@ public class VetDto {
     private List<@Valid SpecialtyDto> specialties = new ArrayList<>();
 
     @Min(0)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the vet.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the vet.",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
 }

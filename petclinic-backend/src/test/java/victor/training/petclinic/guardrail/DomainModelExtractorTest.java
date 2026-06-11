@@ -29,7 +29,8 @@ class DomainModelExtractorTest {
     private static final String DOMAIN_MODEL_PKG  = BASE_PKG + ".model";
     private static final Path   GENERATED_DIR     = Paths.get("docs/generated");
 
-    private record Association(String fromClass, String fromCardinality, String toClass, String toCardinality, String label) {}
+    private record Association(
+        String fromClass, String fromCardinality, String toClass, String toCardinality, String label) {}
 
     @Test
     void generateDomainModelDiagram() throws IOException {
@@ -110,16 +111,20 @@ class DomainModelExtractorTest {
                 if (manyToOne != null) {
                     boolean bidirectional = hasInverse(targetType, OneToMany.class, field.getName());
                     if (bidirectional && !emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(targetType.getSimpleName(), "1", cls.getSimpleName(), "0..*", field.getName()));
+                    result.add(new Association(
+                        targetType.getSimpleName(), "1", cls.getSimpleName(), "0..*", field.getName()));
                 } else if (oneToMany != null) {
                     if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "1", targetType.getSimpleName(), "0..*", field.getName()));
+                    result.add(new Association(
+                        cls.getSimpleName(), "1", targetType.getSimpleName(), "0..*", field.getName()));
                 } else if (manyToMany != null) {
                     if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "0..*", targetType.getSimpleName(), "0..*", field.getName()));
+                    result.add(new Association(
+                        cls.getSimpleName(), "0..*", targetType.getSimpleName(), "0..*", field.getName()));
                 } else if (oneToOne != null) {
                     if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "1", targetType.getSimpleName(), "1", field.getName()));
+                    result.add(new Association(
+                        cls.getSimpleName(), "1", targetType.getSimpleName(), "1", field.getName()));
                 }
             }
         }

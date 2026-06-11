@@ -67,7 +67,9 @@ public class VetRestController {
 
     private void updateSpecialties(Vet currentVet) {
         if(currentVet.getNrOfSpecialties() > 0){
-            Set<String> names = currentVet.getSpecialties().stream().map(Specialty::getName).collect(Collectors.toSet());
+            Set<String> names = currentVet.getSpecialties().stream()
+                .map(Specialty::getName)
+                .collect(Collectors.toSet());
             List<Specialty> vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);
             currentVet.setSpecialties(vetSpecialities);
         }

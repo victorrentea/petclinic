@@ -26,7 +26,8 @@ public class ValidationErrorRenderingTest {
     @Test
     void createOwner_withTwoValidationErrors_rendersErrorsArray() throws Exception {
         // Build JSON with two validation problems: empty firstName (@Size) + non-numeric telephone (@Pattern)
-        String payload = "{\"firstName\":\"\",\"lastName\":\"Smith\",\"address\":\"1 Road\",\"city\":\"Town\",\"telephone\":\"abc\"}";
+        String payload = "{\"firstName\":\"\",\"lastName\":\"Smith\",\"address\":\"1 Road\","
+            + "\"city\":\"Town\",\"telephone\":\"abc\"}";
 
         mockMvc.perform(post("/api/owners")
                 .contentType(MediaType.APPLICATION_JSON)

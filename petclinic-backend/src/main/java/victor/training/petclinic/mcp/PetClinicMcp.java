@@ -93,9 +93,11 @@ public class PetClinicMcp {
             .orElseThrow(() -> new IllegalArgumentException("Owner not found: " + ownerId));
         List<VisitView> result = new ArrayList<>();
         for (Pet pet : owner.getPets()) {
-            // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.
+            // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead
+            // of a per-pet repo query.
             for (Visit v : pet.getVisitsSortedByDate()) {
-                result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(), v.getDescription()));
+                result.add(new VisitView(
+                    v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(), v.getDescription()));
             }
         }
         return result;
@@ -108,10 +110,14 @@ public class PetClinicMcp {
     )
     @Transactional
     public String createVisit(
-            @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future", required = true) LocalDate visitDate,
-            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) LocalTime visitTime,
-            @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
+            @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true)
+            int petId,
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future", required = true)
+            LocalDate visitDate,
+            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true)
+            LocalTime visitTime,
+            @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true)
+            String description) {
         int ownerId = McpSecurity.currentOwnerId();
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
@@ -142,7 +148,8 @@ public class PetClinicMcp {
     )
     @Transactional
     public String cancelVisit(
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be in the future", required = true) LocalDate visitDate) {
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be in the future", required = true)
+            LocalDate visitDate) {
         requireFutureDate(visitDate);
 
         int ownerId = McpSecurity.currentOwnerId();

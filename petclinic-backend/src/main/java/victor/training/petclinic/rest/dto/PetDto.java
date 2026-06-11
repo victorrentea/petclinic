@@ -32,7 +32,8 @@ public class PetDto {
     private PetTypeDto type;
 
     @Min(0)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the pet.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the pet.",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
 
     @Min(0)
@@ -40,7 +41,8 @@ public class PetDto {
     private @Nullable Integer ownerId;
 
     @Valid
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Vet visit bookings for this pet.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Vet visit bookings for this pet.",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     private List<VisitDto> visits = new ArrayList<>();
 
 }

@@ -33,7 +33,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestControllerAdvice(basePackages = "victor.training.petclinic.rest")
 public class ExceptionControllerAdvice {
 
-    private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status, HttpServletRequest request) {
+    private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
+            HttpServletRequest request) {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
           pd.setDetail(detail);
@@ -44,22 +45,26 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
+            HttpServletRequest request) {
         List<String> errors = ValidationErrorExtractor.extract(ex);
         log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+            "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
         BindingResult bindingResult = ex.getBindingResult();
         // reuse ValidationErrorExtractor style: build list of readable messages
         List<String> errors = ValidationErrorFieldExtractor.extract(bindingResult);
         log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+            "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }

@@ -5,6 +5,8 @@ description: >
   Auto-trigger when: user asks for frontend, Angular, UI, component, template, service,
   module, routing, CSS work, references files under petclinic-frontend/, or uses /frontend-dev.
   Spawns an isolated subagent with full Angular 16 + Bootstrap 3 conventions for this project.
+paths: petclinic-frontend/**/*.java #programatic!
+
 ---
 
 # Frontend Developer Agent

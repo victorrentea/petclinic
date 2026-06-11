@@ -22,7 +22,8 @@ public class VisitDto {
     private String description;
 
     @Min(0)
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the visit.", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the visit.",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
 
     @NotNull

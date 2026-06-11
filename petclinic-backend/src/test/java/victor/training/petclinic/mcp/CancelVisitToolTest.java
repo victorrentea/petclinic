@@ -129,7 +129,8 @@ class CancelVisitToolTest {
         Pet pet = owner.getPets().get(0);
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> petClinicMcp.createVisit(pet.getId(), LocalDate.of(2020, 1, 1), LocalTime.of(10, 30), "Old visit"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(
+                pet.getId(), LocalDate.of(2020, 1, 1), LocalTime.of(10, 30), "Old visit"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
