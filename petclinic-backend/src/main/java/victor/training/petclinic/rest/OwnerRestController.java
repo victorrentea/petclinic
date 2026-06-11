@@ -60,7 +60,8 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners (paged)")
     @GetMapping(produces = "application/json")
     public PagedModel<OwnerDto> listOwners(
-            @RequestParam(name = "lastName", defaultValue = "") String lastName, Pageable pageable) {
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            Pageable pageable) {
         Pageable safePageable = PageRequest.of(
             pageable.getPageNumber(), pageable.getPageSize(), SortMapper.toEntitySort(pageable.getSort()));
         Page<Owner> page = ownerRepository.findByLastNameStartingWith(lastName, safePageable);

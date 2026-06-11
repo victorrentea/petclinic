@@ -173,6 +173,9 @@ Several of these paths are CODEOWNERS-protected (`openapi.yaml`, `db/migration/`
   main- or test-source line > 120 chars.
 - Lombok selectively: `@RequiredArgsConstructor`, `@Slf4j`, `@Data`/`@Getter`/`@Setter`, `@Builder`.
   Builder chains: one property per line, unless there are only 2 properties total.
+- Method parameters: keep them all on the signature line if they fit. The moment you wrap to a
+  new line (params start on the line after the method name), put **every** parameter on its own
+  line — never a mix of "some wrapped, some sharing a line". Same rule for builder chains above.
 - No ternary unless it fits in ~half a line (≤ ~60 chars) — otherwise `if/else`.
 - Don't return `Stream` from methods — return `List` (Stream only for humongous data).
 - Inner enums over top-level for tiny, locally-used enums.
