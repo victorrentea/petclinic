@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
     "petclinic-mcp": {
       "type": "http",
       "url": "http://localhost:8080/mcp",
