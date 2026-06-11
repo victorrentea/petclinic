@@ -1,9 +1,12 @@
 import { Owner } from './owner';
 
+/** Mirrors the backend `PagedModel<OwnerDto>` envelope: rows in `content`, metadata under `page`. */
 export interface OwnerPage {
   content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
+  page: {
+    number: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+  };
 }

@@ -3,6 +3,27 @@
 display:none;
 }
 
+.owners-table {
+	width: 100%;
+	margin-top: 12px;
+}
+
+.owners-search {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.owners-actions {
+	margin-top: 12px;
+}
+
+.no-owners {
+	padding: 16px;
+	text-align: center;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;
