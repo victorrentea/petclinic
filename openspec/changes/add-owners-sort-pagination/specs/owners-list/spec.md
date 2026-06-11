@@ -94,12 +94,8 @@ The Owners screen SHALL sync `page`, `size`, `sort`, and `lastName` to the URL q
 - **WHEN** the user changes the sort and then presses the browser back button
 - **THEN** the table returns to the previous sort/page/size from the URL
 
-### Requirement: Loading and empty states
-The Owners screen SHALL show a `mat-progress-bar` while a page is loading and a "No owners found" row when the result set is empty.
-
-#### Scenario: Loading indicator
-- **WHEN** a page request is in flight
-- **THEN** a progress bar is visible until the response arrives
+### Requirement: Empty state
+The Owners screen SHALL show a "No owners found" row when the result set is empty.
 
 #### Scenario: Empty result
 - **WHEN** a search matches no owners

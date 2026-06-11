@@ -46,7 +46,7 @@ Page owners with **no** collection fetch, then batch-load pets for the page (`@B
 Initial load: Name ASC, page 0, size 10. A new last-name search resets page to 0 but keeps sort + size. If a filter shrinks results below the current page, clamp to the last valid page.
 
 ### D8 — Frontend: Material + URL as source of truth
-Migrate `owner-list` to `mat-table` + `matSort` + `mat-paginator`; import `MatTableModule`, `MatSortModule`, `MatPaginatorModule` into `OwnersModule`. Sync `page/size/sort/lastName` to URL query params; the table reacts to `queryParamMap` (survives refresh, back button, sharing). `matSortDisableClear` for asc⇄desc only. Pets shown inline comma-separated in one cell. `mat-progress-bar` while loading; "No owners found" empty row.
+Migrate `owner-list` to `mat-table` + `matSort` + `mat-paginator`; import `MatTableModule`, `MatSortModule`, `MatPaginatorModule` into `OwnersModule`. Sync `page/size/sort/lastName` to URL query params; the table reacts to `queryParamMap` (survives refresh, back button, sharing). `matSortDisableClear` for asc⇄desc only. Pets shown inline comma-separated in one cell. "No owners found" empty row.
 
 ### D9 — Name display = `lastName, firstName`
 Business-approved display change so the visible order matches the Name sort key. In scope despite being beyond the literal issue.

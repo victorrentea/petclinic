@@ -36,7 +36,7 @@
 - [ ] 6.2 Add `matSort` on Name and City headers only (asc⇄desc, `matSortDisableClear`); leave Address/Telephone/Pets non-sortable
 - [ ] 6.3 Render Name cell as `lastName, firstName`; render Pets as inline comma-separated names in one cell
 - [ ] 6.4 Add `mat-paginator` (5 / 10 default / 20) below the table
-- [ ] 6.5 Add `mat-progress-bar` while loading and a "No owners found" empty row
+- [ ] 6.5 Add a "No owners found" empty row
 
 ## 7. Frontend — URL state as source of truth
 
