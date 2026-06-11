@@ -11,8 +11,6 @@ import {PetsModule} from '../pets/pets.module';
 import {MatTableModule} from '@angular/material/table';
 import {MatSortModule} from '@angular/material/sort';
 import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
   imports: [
@@ -22,9 +20,7 @@ import {MatButtonModule} from '@angular/material/button';
     PetsModule,
     MatTableModule,
     MatSortModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatButtonModule
+    MatPaginatorModule
   ],
   declarations: [
     OwnerListComponent,

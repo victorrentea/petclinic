@@ -5,7 +5,6 @@ import {OwnerPage} from '../owner-page';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Sort, SortDirection} from '@angular/material/sort';
 import {PageEvent} from '@angular/material/paginator';
-import {finalize} from 'rxjs/operators';
 
 @Component({
   selector: 'app-owner-list',
@@ -23,7 +22,6 @@ export class OwnerListComponent implements OnInit {
   sortActive = 'name';
   sortDirection: SortDirection = 'asc';
   lastName = '';
-  loading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,18 +43,16 @@ export class OwnerListComponent implements OnInit {
   }
 
   private loadPage() {
-    this.loading = true;
     this.ownerService.getOwnersPage({
       page: this.pageIndex,
       size: this.pageSize,
       sort: `${this.sortActive},${this.sortDirection}`,
       lastName: this.lastName
-    }).pipe(finalize(() => this.loading = false))
-      .subscribe((page: OwnerPage) => {
-        this.owners = page.content ?? [];
-        this.totalElements = page.page?.totalElements ?? 0;
-        this.clampToLastPageIfNeeded();
-      });
+    }).subscribe((page: OwnerPage) => {
+      this.owners = page.content ?? [];
+      this.totalElements = page.page?.totalElements ?? 0;
+      this.clampToLastPageIfNeeded();
+    });
   }
 
   private clampToLastPageIfNeeded() {

@@ -6,10 +6,8 @@
       <label for="lastName">Last name </label>
       <input class="form-control" id="lastName" name="lastName" maxlength="80"
              [(ngModel)]="lastName"/>
-      <button type="submit" id="search-owner" mat-stroked-button>Find Owner</button>
+      <button type="submit" id="search-owner" class="btn btn-default">Find Owner</button>
     </form>
-
-    <mat-progress-bar *ngIf="loading" id="owners-loading" mode="indeterminate"></mat-progress-bar>
 
     <table mat-table [dataSource]="owners" matSort id="ownersTable"
            [matSortActive]="sortActive" [matSortDirection]="sortDirection"
@@ -61,7 +59,7 @@
     </mat-paginator>
 
     <div class="owners-actions">
-      <button id="add-owner" mat-stroked-button (click)="addOwner()">Add Owner</button>
+      <button id="add-owner" class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>

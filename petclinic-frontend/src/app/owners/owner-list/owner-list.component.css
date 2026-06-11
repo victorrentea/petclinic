@@ -3,9 +3,53 @@
 display:none;
 }
 
+/* Fixed layout + explicit column widths so sorting (asc/desc, any column) never
+   reflows column boundaries left/right — widths come from these rules, not content. */
 .owners-table {
 	width: 100%;
 	margin-top: 12px;
+	table-layout: fixed;
+}
+
+.owners-table .mat-column-name {
+	width: 22%;
+}
+
+.owners-table .mat-column-address {
+	width: 24%;
+}
+
+.owners-table .mat-column-city {
+	width: 16%;
+}
+
+.owners-table .mat-column-telephone {
+	width: 20%;
+}
+
+.owners-table .mat-column-pets {
+	width: 18%;
+}
+
+/* Match the app's re-themed Bootstrap tables (assets/css/petclinic.css, Spring dark-green
+   palette): bold header with a 2px #34302d bottom border, 1px row separators, zebra rows. */
+.owners-table th.mat-mdc-header-cell,
+.owners-table td.mat-mdc-cell {
+	border-bottom: none;
+}
+
+.owners-table th.mat-mdc-header-cell {
+	background: transparent;
+	font-weight: 700;
+	border-bottom: 2px solid #34302d;
+}
+
+.owners-table td.mat-mdc-cell {
+	border-top: 1px solid #34302d;
+}
+
+.owners-table tr.mat-mdc-row:nth-child(odd) {
+	background: #f9f9f9;
 }
 
 .owners-search {
@@ -15,8 +59,28 @@ display:none;
 	margin-bottom: 12px;
 }
 
+/* Keep the label and the button on a single line; let only the input flex. */
+.owners-search label {
+	margin: 0;
+	white-space: nowrap;
+	flex: 0 0 auto;
+}
+
+.owners-search input {
+	flex: 1 1 auto;
+}
+
+.owners-search button {
+	white-space: nowrap;
+	flex: 0 0 auto;
+}
+
 .owners-actions {
 	margin-top: 12px;
+}
+
+#add-owner {
+	white-space: nowrap;
 }
 
 .no-owners {
