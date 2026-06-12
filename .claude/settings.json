@@ -37,6 +37,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "test \"$(git config --get core.hooksPath)\" = .githooks || { git config core.hooksPath .githooks && echo 'restored core.hooksPath -> .githooks (project hooks were disabled)'; }"
+          },
+          {
+            "type": "command",
             "command": "echo \"## Repo state\\nBranch: $(git branch --show-current)\\n\\nUncommitted changes:\\n$(git status --short)\\n\\nLast 5 commits:\\n$(git log --oneline -5)\""
           }
         ]
