@@ -67,11 +67,15 @@ cd "$REPO_ROOT" || exit 0
 # Need gh to watch runs at all.
 command -v gh >/dev/null 2>&1 || exit 0
 
-# Did the push land? Upstream must exist and match HEAD. If HEAD is ahead of its
-# upstream, the push was blocked/failed (e.g. by pre-push) — stay silent.
+# Did the push land? Upstream must exist and CONTAIN HEAD. We test that HEAD is an
+# ancestor of @{u} rather than requiring exact equality: a concurrent session that
+# shares this working copy (same .git) can advance origin/<branch> right after our
+# push, and an equality check would then bail silently — the CI watch "escapes".
+# The ancestor test stays correct under that race, yet still bails on a rejected
+# push (then HEAD is ahead of @{u}, i.e. NOT contained in it).
 UPSTREAM_REF=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null) || exit 0
 [[ -n "$UPSTREAM_REF" ]] || exit 0
-[[ "$(git rev-parse @ 2>/dev/null)" == "$(git rev-parse '@{u}' 2>/dev/null)" ]] || exit 0
+git merge-base --is-ancestor @ '@{u}' 2>/dev/null || exit 0
 
 # Only act on a github.com/victorrentea/* remote (where gh + Actions apply).
 REMOTE="${UPSTREAM_REF%%/*}"
