@@ -1,0 +1,8 @@
+.dl-horizontal dt {
+  text-align: left;
+}
+
+/* 10px horizontal gap between adjacent buttons. */
+.btn + .btn {
+  margin-left: 10px;
+}

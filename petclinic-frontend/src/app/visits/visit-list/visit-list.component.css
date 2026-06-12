@@ -1,0 +1,4 @@
+/* 10px horizontal gap between adjacent buttons. */
+.btn + .btn {
+  margin-left: 10px;
+}

@@ -1,0 +1,10 @@
+/* Keep the label column narrow so the value sits right next to it,
+   aligned with the pet "dd" values in the Pets and Visits section below. */
+.owner-info th {
+  width: 180px;
+}
+
+/* 10px horizontal gap between adjacent buttons. */
+.btn + .btn {
+  margin-left: 10px;
+}
