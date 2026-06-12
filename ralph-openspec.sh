@@ -135,7 +135,7 @@ EOF
 # invoke the coding agent with a fresh context
 invoke_agent() {
   local prompt="$1"
-  local args=(-p "$prompt" --dangerously-skip-permissions --max-turns "$MAX_TURNS" --output-format text)
+  local args=(-p "$prompt" --automode --max-turns "$MAX_TURNS" --output-format text)
   [ -n "$MODEL" ] && args+=(--model "$MODEL")
   claude "${args[@]}" 2>&1 | tee -a "$LOG_DIR/agent.log"
 }
