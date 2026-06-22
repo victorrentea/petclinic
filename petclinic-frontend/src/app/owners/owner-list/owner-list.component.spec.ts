@@ -27,7 +27,7 @@ class OwnerServiceStub {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(query: string): Observable<Owner[]> {
     return of();
   }
 }
@@ -106,21 +106,21 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
+  it('search should call getOwners for empty term', () => {
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('');
+    component.search('');
 
     expect(getOwnersSpy).toHaveBeenCalled();
     expect(searchOwnersSpy).not.toHaveBeenCalled();
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('search should call searchOwners for non-empty term', () => {
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
-    component.searchByLastName('Fr');
+    component.search('Fr');
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
     expect(getOwnersSpy).not.toHaveBeenCalled();
