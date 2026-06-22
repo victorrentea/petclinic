@@ -27,7 +27,8 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th class="sortable" id="sortName" (click)="sortBy('name')" style="cursor: pointer;">
+          <th class="sortable" id="sortName" (click)="sortBy('name')" (keyup.enter)="sortBy('name')"
+              tabindex="0" role="button" style="cursor: pointer;">
             Name
             <span *ngIf="sortField === 'name'"
                   class="glyphicon"
@@ -35,7 +36,8 @@
                   [class.glyphicon-chevron-down]="sortDir === 'desc'"></span>
           </th>
           <th>Address</th>
-          <th class="sortable" id="sortCity" (click)="sortBy('city')" style="cursor: pointer;">
+          <th class="sortable" id="sortCity" (click)="sortBy('city')" (keyup.enter)="sortBy('city')"
+              tabindex="0" role="button" style="cursor: pointer;">
             City
             <span *ngIf="sortField === 'city'"
                   class="glyphicon"

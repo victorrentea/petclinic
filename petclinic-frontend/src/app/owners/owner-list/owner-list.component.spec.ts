@@ -6,7 +6,7 @@ import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
 import {OwnerPage} from '../owner-page';
@@ -182,6 +182,31 @@ describe('OwnerListComponent', () => {
     expect(component.pageSize).toBe(20);
     expect(component.pageIndex).toBe(0);
     expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({size: 20, page: 0}));
+  });
+
+  it('loadOwners error path nulls the list and surfaces the error message', () => {
+    getOwnersSpy.and.returnValue(new Observable(subscriber => subscriber.error('boom')));
+
+    component.loadOwners();
+
+    expect(component.owners).toBeNull();
+    expect(component.errorMessage).toBe('boom' as any);
+  });
+
+  it('onSelect navigates to the owner detail page', () => {
+    const navigateSpy = spyOn(TestBed.inject(Router), 'navigate');
+
+    component.onSelect(testOwner);
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/owners', testOwner.id]);
+  });
+
+  it('addOwner navigates to the add-owner form', () => {
+    const navigateSpy = spyOn(TestBed.inject(Router), 'navigate');
+
+    component.addOwner();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/owners/add']);
   });
 
 });
