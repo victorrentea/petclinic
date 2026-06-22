@@ -136,16 +136,86 @@ public class OwnerTest {
     }
 
     @Test
-    void getAllWithAddressFilter() throws Exception {
+    void getAllWithLastNameFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = search("/api/owners?q=Java");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getLastName)
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void search_byCity_caseInsensitive() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setLastName("Wozniak");
+        owner2.setCity("Cupertino");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        // lowercase query against mixed-case data
+        List<OwnerDto> owners = search("/api/owners?q=cupertino");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(owner2Id);
+    }
+
+    @Test
+    void search_byAddress_midStringContains() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setLastName("Kernighan");
+        owner2.setAddress("742 Evergreen Terrace");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        // "green" is in the middle of "Evergreen", not a prefix
+        List<OwnerDto> owners = search("/api/owners?q=green");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(owner2Id);
+    }
+
+    @Test
+    void search_byTelephone_substring() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setLastName("Ritchie");
+        owner2.setTelephone("0755123456");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> owners = search("/api/owners?q=5512");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(owner2Id);
+    }
+
+    @Test
+    void search_byPetName_caseInsensitiveContains() throws Exception {
+        // the owner from before() owns pet "Rosy"; search by mid-string + lowercase
+        List<OwnerDto> owners = search("/api/owners?q=os");
+
+        assertThat(owners)
+            .extracting(OwnerDto::getId)
+            .contains(ownerId);
+    }
+
+    @Test
+    void search_repository_matchesWildcardLiterally() {
+        // LIKE wildcards in the query must be treated as literal characters
+        Owner percentOwner = TestData.anOwner();
+        percentOwner.setLastName("100%Pure");
+        int percentOwnerId = ownerRepository.save(percentOwner).getId();
+
+        assertThat(ownerRepository.search("100%Pure"))
+            .extracting(Owner::getId)
+            .contains(percentOwnerId);
+        // a bare wildcard must NOT match this owner as if it were "match anything"
+        assertThat(ownerRepository.search("XYZ%"))
+            .extracting(Owner::getId)
+            .doesNotContain(percentOwnerId);
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -162,7 +232,7 @@ public class OwnerTest {
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerDto> results = search("/api/owners?q=NonExistent");
 
         assertThat(results).isEmpty();
     }
