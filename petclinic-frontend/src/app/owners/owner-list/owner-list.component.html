@@ -27,9 +27,21 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th class="sortable" id="sortName" (click)="sortBy('name')" style="cursor: pointer;">
+            Name
+            <span *ngIf="sortField === 'name'"
+                  class="glyphicon"
+                  [class.glyphicon-chevron-up]="sortDir === 'asc'"
+                  [class.glyphicon-chevron-down]="sortDir === 'desc'"></span>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th class="sortable" id="sortCity" (click)="sortBy('city')" style="cursor: pointer;">
+            City
+            <span *ngIf="sortField === 'city'"
+                  class="glyphicon"
+                  [class.glyphicon-chevron-up]="sortDir === 'asc'"
+                  [class.glyphicon-chevron-down]="sortDir === 'desc'"></span>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -50,6 +62,29 @@
         </tr>
         </tbody>
       </table>
+
+      <div class="form-inline" id="pageSizeControl">
+        <label for="pageSize">Page size </label>
+        <select id="pageSize" class="form-control" name="pageSize"
+                [ngModel]="pageSize" (ngModelChange)="changePageSize($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
+      </div>
+
+      <nav *ngIf="totalPages > 1" id="ownersPagination">
+        <ul class="pagination">
+          <li [class.disabled]="pageIndex === 0">
+            <a href="javascript:void(0)" id="prevPage" (click)="goToPage(pageIndex - 1)">&laquo;</a>
+          </li>
+          <li *ngFor="let p of pageNumbers" [class.active]="p === pageIndex">
+            <a href="javascript:void(0)" class="pageLink" (click)="goToPage(p)">{{ p + 1 }}</a>
+          </li>
+          <li [class.disabled]="pageIndex === totalPages - 1">
+            <a href="javascript:void(0)" id="nextPage" (click)="goToPage(pageIndex + 1)">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

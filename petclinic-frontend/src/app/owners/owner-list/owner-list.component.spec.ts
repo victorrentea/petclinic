@@ -9,6 +9,7 @@ import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
+import {OwnerPage} from '../owner-page';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
@@ -23,11 +24,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(query: string): Observable<Owner[]> {
+  getOwners(): Observable<OwnerPage> {
     return of();
   }
 }
@@ -38,7 +35,6 @@ describe('OwnerListComponent', () => {
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -52,7 +48,7 @@ describe('OwnerListComponent', () => {
     telephone: '6085551023',
     pets: []
   };
-  let testOwners: Owner[];
+  let testPage: OwnerPage;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -74,15 +70,19 @@ describe('OwnerListComponent', () => {
   }));
 
   beforeEach(() => {
-    testOwners = [testOwner];
+    testPage = {
+      content: [testOwner],
+      totalElements: 25,
+      totalPages: 3,
+      number: 0,
+      size: 10
+    };
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
     getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+      .and.callFake((params: any = {}) => of({...testPage, number: params.page ?? 0}));
 
   });
 
@@ -106,24 +106,81 @@ describe('OwnerListComponent', () => {
     });
   }));
 
-  it('search should call getOwners for empty term', () => {
+  it('search should reset to page 0 and call getOwners with the query', () => {
+    component.pageIndex = 2;
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.search('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('search should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
 
     component.search('Fr');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+    expect(component.pageIndex).toBe(0);
+    expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({q: 'Fr', page: 0}));
+  });
+
+  it('header click sorts ascending, second click on same header toggles descending', () => {
+    component.sortBy('name');
+
+    expect(component.sortField).toBe('name');
+    expect(component.sortDir).toBe('asc');
+    expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({sort: 'name,asc'}));
+
+    component.sortBy('name');
+
+    expect(component.sortDir).toBe('desc');
+    expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({sort: 'name,desc'}));
+  });
+
+  it('sorting by a different field resets to ascending and page 0', () => {
+    component.sortBy('name');
+    component.sortBy('name'); // desc
+    component.pageIndex = 1;
+
+    component.sortBy('city');
+
+    expect(component.sortField).toBe('city');
+    expect(component.sortDir).toBe('asc');
+    expect(component.pageIndex).toBe(0);
+  });
+
+  it('Name and City headers are clickable, other headers are not', () => {
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('#sortName'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#sortCity'))).toBeTruthy();
+
+    const headers = fixture.debugElement.queryAll(By.css('th'));
+    const sortableCount = headers.filter(h => h.nativeElement.classList.contains('sortable')).length;
+    expect(sortableCount).toBe(2);
+  });
+
+  it('goToPage navigates to the requested server page', () => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+
+    component.goToPage(1);
+
+    expect(component.pageIndex).toBe(1);
+    expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({page: 1}));
+  });
+
+  it('goToPage ignores out-of-range pages', () => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+
+    component.goToPage(-1);
+    component.goToPage(component.totalPages);
+
     expect(getOwnersSpy).not.toHaveBeenCalled();
+  });
+
+  it('changePageSize resets to page 0 and refetches with the new size', () => {
+    component.pageIndex = 2;
+    getOwnersSpy.calls.reset();
+
+    component.changePageSize(20);
+
+    expect(component.pageSize).toBe(20);
+    expect(component.pageIndex).toBe(0);
+    expect(getOwnersSpy).toHaveBeenCalledWith(jasmine.objectContaining({size: 20, page: 0}));
   });
 
 });
