@@ -82,7 +82,8 @@ describe('OwnerListComponent', () => {
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
     getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.callFake((params: any = {}) => of({...testPage, number: params.page ?? 0}));
+      .and.callFake((params: any = {}) =>
+        of({...testPage, number: params.page ?? 0, size: params.size ?? testPage.size}));
 
   });
 
