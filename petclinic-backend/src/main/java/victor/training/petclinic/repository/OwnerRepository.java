@@ -5,11 +5,32 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 import victor.training.petclinic.model.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
     List<Owner> findByLastNameStartingWith(String lastName);
+
+    @Query("""
+        SELECT o FROM Owner o
+        WHERE lower(o.firstName) LIKE :pattern ESCAPE '\\'
+           OR lower(o.lastName)  LIKE :pattern ESCAPE '\\'
+           OR lower(o.address)   LIKE :pattern ESCAPE '\\'
+           OR lower(o.city)      LIKE :pattern ESCAPE '\\'
+           OR lower(o.telephone) LIKE :pattern ESCAPE '\\'
+           OR EXISTS (SELECT p FROM Pet p WHERE p.owner = o
+                      AND lower(p.name) LIKE :pattern ESCAPE '\\')
+        """)
+    List<Owner> searchOwners(@Param("pattern") String pattern);
+
+    default List<Owner> search(String q) {
+        String escaped = q.toLowerCase()
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_");
+        return searchOwners("%" + escaped + "%");
+    }
 
     Optional<Owner> findById(int id);
 
