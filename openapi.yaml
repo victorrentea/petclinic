@@ -190,7 +190,7 @@ paths:
       operationId: listOwners
       parameters:
       - in: query
-        name: lastName
+        name: q
         required: false
         schema:
           type: string
