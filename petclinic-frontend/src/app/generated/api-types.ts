@@ -557,7 +557,7 @@ export interface operations {
   listOwners: {
     parameters: {
       query?: {
-        lastName?: string;
+        q?: string;
       };
     };
     responses: {
