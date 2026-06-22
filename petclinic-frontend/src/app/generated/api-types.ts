@@ -170,6 +170,35 @@ export interface components {
        */
       telephone: string;
     };
+    PageOwnerDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      empty?: boolean;
+      first?: boolean;
+      last?: boolean;
+      /** Format: int32 */
+      number?: number;
+      /** Format: int32 */
+      numberOfElements?: number;
+      pageable?: components["schemas"]["PageableObject"];
+      /** Format: int32 */
+      size?: number;
+      sort?: components["schemas"]["SortObject"];
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
+    PageableObject: {
+      /** Format: int64 */
+      offset?: number;
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      paged?: boolean;
+      sort?: components["schemas"]["SortObject"];
+      unpaged?: boolean;
+    };
     PetDto: {
       /**
        * Format: date
@@ -250,6 +279,11 @@ export interface components {
        * @example admin
        */
       name: string;
+    };
+    SortObject: {
+      empty?: boolean;
+      sorted?: boolean;
+      unsorted?: boolean;
     };
     SpecialtyDto: {
       /**
@@ -558,13 +592,16 @@ export interface operations {
     parameters: {
       query?: {
         q?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["PageOwnerDto"];
         };
       };
       /** @description Bad Request */

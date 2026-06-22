@@ -3,6 +3,8 @@ package victor.training.petclinic.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -22,15 +24,7 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
            OR EXISTS (SELECT p FROM Pet p WHERE p.owner = o
                       AND lower(p.name) LIKE :pattern ESCAPE '\\')
         """)
-    List<Owner> searchOwners(@Param("pattern") String pattern);
-
-    default List<Owner> search(String q) {
-        String escaped = q.toLowerCase()
-            .replace("\\", "\\\\")
-            .replace("%", "\\%")
-            .replace("_", "\\_");
-        return searchOwners("%" + escaped + "%");
-    }
+    Page<Owner> searchOwners(@Param("pattern") String pattern, Pageable pageable);
 
     Optional<Owner> findById(int id);
 

@@ -20,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import victor.training.petclinic.model.Owner;
 import victor.training.petclinic.model.Pet;
@@ -32,8 +35,10 @@ import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -203,30 +208,169 @@ public class OwnerTest {
     }
 
     @Test
-    void search_repository_matchesWildcardLiterally() {
+    void search_matchesWildcardLiterally() throws Exception {
         // LIKE wildcards in the query must be treated as literal characters
         Owner percentOwner = TestData.anOwner();
         percentOwner.setLastName("100%Pure");
         int percentOwnerId = ownerRepository.save(percentOwner).getId();
 
-        assertThat(ownerRepository.search("100%Pure"))
-            .extracting(Owner::getId)
+        assertThat(searchByQuery("100%Pure"))
+            .extracting(OwnerDto::getId)
             .contains(percentOwnerId);
         // a bare wildcard must NOT match this owner as if it were "match anything"
-        assertThat(ownerRepository.search("XYZ%"))
-            .extracting(Owner::getId)
+        assertThat(searchByQuery("XYZ%"))
+            .extracting(OwnerDto::getId)
             .doesNotContain(percentOwnerId);
     }
 
+    @Test
+    void searchOwners_pagesAtDbLevel() {
+        String marker = "zzpage";
+        for (int i = 0; i < 5; i++) {
+            ownerRepository.save(TestData.anOwner().setLastName(marker + i));
+        }
+        Page<Owner> page0 = ownerRepository.searchOwners(
+            "%" + marker + "%", PageRequest.of(0, 2, Sort.by("firstName", "lastName")));
+
+        assertThat(page0.getTotalElements()).isEqualTo(5);
+        assertThat(page0.getTotalPages()).isEqualTo(3);
+        assertThat(page0.getNumber()).isZero();
+        assertThat(page0.getSize()).isEqualTo(2);
+        assertThat(page0.getContent()).hasSize(2);
+    }
+
+    @Test
+    void searchOwners_sortsByCityAscAndDesc() {
+        String marker = "zzcity";
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Madrid"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Berlin"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Lisbon"));
+        String pattern = "%" + marker + "%";
+
+        Page<Owner> asc = ownerRepository.searchOwners(
+            pattern, PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "city")));
+        assertThat(asc.getContent()).extracting(Owner::getCity)
+            .containsExactly("Berlin", "Lisbon", "Madrid");
+
+        Page<Owner> desc = ownerRepository.searchOwners(
+            pattern, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "city")));
+        assertThat(desc.getContent()).extracting(Owner::getCity)
+            .containsExactly("Madrid", "Lisbon", "Berlin");
+    }
+
+    @Test
+    void list_returnsPageEnvelope_withDefaultSize10() throws Exception {
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.number").value(0))
+            .andExpect(jsonPath("$.size").value(10))
+            .andExpect(jsonPath("$.totalElements").isNumber())
+            .andExpect(jsonPath("$.totalPages").isNumber());
+    }
+
+    @Test
+    void list_pagesWithExplicitPageAndSize() throws Exception {
+        String marker = "zzctrlpage";
+        for (int i = 0; i < 7; i++) {
+            ownerRepository.save(TestData.anOwner().setLastName(marker + i));
+        }
+        mockMvc.perform(get("/api/owners").param("q", marker).param("page", "1").param("size", "5"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(7))
+            .andExpect(jsonPath("$.number").value(1))
+            .andExpect(jsonPath("$.size").value(5))
+            .andExpect(jsonPath("$.content.length()").value(2));
+    }
+
+    @Test
+    void list_sortsByName_firstThenLast() throws Exception {
+        String marker = "zzname";
+        ownerRepository.save(TestData.anOwner().setFirstName("Charlie").setLastName(marker));
+        ownerRepository.save(TestData.anOwner().setFirstName("Alice").setLastName(marker));
+        ownerRepository.save(TestData.anOwner().setFirstName("Bob").setLastName(marker));
+
+        mockMvc.perform(get("/api/owners").param("q", marker).param("sort", "name,asc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].firstName").value("Alice"))
+            .andExpect(jsonPath("$.content[1].firstName").value("Bob"))
+            .andExpect(jsonPath("$.content[2].firstName").value("Charlie"));
+    }
+
+    @Test
+    void list_sortsByCity_ascAndDesc() throws Exception {
+        String marker = "zzctrlcity";
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Madrid"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Berlin"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Lisbon"));
+
+        mockMvc.perform(get("/api/owners").param("q", marker).param("sort", "city,asc"))
+            .andExpect(jsonPath("$.content[0].city").value("Berlin"))
+            .andExpect(jsonPath("$.content[2].city").value("Madrid"));
+        mockMvc.perform(get("/api/owners").param("q", marker).param("sort", "city,desc"))
+            .andExpect(jsonPath("$.content[0].city").value("Madrid"))
+            .andExpect(jsonPath("$.content[2].city").value("Berlin"));
+    }
+
+    @Test
+    void list_defaultOrder_isFirstNameThenLastName_whenSortOmitted() throws Exception {
+        String marker = "zzdef";
+        ownerRepository.save(TestData.anOwner().setFirstName("Zoe").setLastName(marker));
+        ownerRepository.save(TestData.anOwner().setFirstName("Ann").setLastName(marker));
+
+        mockMvc.perform(get("/api/owners").param("q", marker))
+            .andExpect(jsonPath("$.content[0].firstName").value("Ann"))
+            .andExpect(jsonPath("$.content[1].firstName").value("Zoe"));
+    }
+
+    @Test
+    void list_nonSortableColumn_fallsBackToDefaultOrder() throws Exception {
+        String marker = "zzfallback";
+        ownerRepository.save(TestData.anOwner().setFirstName("Zoe").setLastName(marker));
+        ownerRepository.save(TestData.anOwner().setFirstName("Ann").setLastName(marker));
+
+        mockMvc.perform(get("/api/owners").param("q", marker).param("sort", "telephone,asc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].firstName").value("Ann"))
+            .andExpect(jsonPath("$.content[1].firstName").value("Zoe"));
+    }
+
+    @Test
+    void list_searchSortAndPageCompose() throws Exception {
+        String marker = "zzcompose";
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Madrid"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Berlin"));
+        ownerRepository.save(TestData.anOwner().setLastName(marker).setCity("Lisbon"));
+        ownerRepository.save(TestData.anOwner().setLastName("zzother").setCity("Amsterdam"));
+
+        mockMvc.perform(get("/api/owners")
+                .param("q", marker).param("sort", "city,asc").param("page", "0").param("size", "2"))
+            .andExpect(jsonPath("$.totalElements").value(3))
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].city").value("Berlin"))
+            .andExpect(jsonPath("$.content[1].city").value("Lisbon"));
+    }
+
+    // request the whole result set (size large enough to defeat paging) so these
+    // "result contains X" assertions stay valid regardless of seed data and page slicing
     private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
+        return parseOwners(mockMvc.perform(get(uriTemplate).param("size", "2000")));
+    }
+
+    private List<OwnerDto> searchByQuery(String q) throws Exception {
+        return parseOwners(mockMvc.perform(get("/api/owners").param("q", q).param("size", "2000")));
+    }
+
+    private List<OwnerDto> parseOwners(ResultActions resultActions) throws Exception {
+        String responseJson = resultActions
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        JsonNode content = mapper.readTree(responseJson).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
         });
     }
 

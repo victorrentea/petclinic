@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -56,9 +59,43 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "q", defaultValue = "") String q) {
-        List<Owner> owners = ownerRepository.search(q);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "q", defaultValue = "") String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", required = false) String sort) {
+        Pageable pageable = PageRequest.of(page, size, resolveSort(sort));
+        Page<Owner> owners = ownerRepository.searchOwners(likePattern(q), pageable);
+        return owners.map(ownerMapper::toOwnerDto);
+    }
+
+    private static String likePattern(String q) {
+        String escaped = q.toLowerCase()
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_");
+        return "%" + escaped + "%";
+    }
+
+    // only Name (firstName, lastName) and city are sortable; anything else falls back to the default
+    private static Sort resolveSort(String sort) {
+        Sort byName = Sort.by("firstName", "lastName");
+        if (sort == null || sort.isBlank()) {
+            return byName;
+        }
+        String[] parts = sort.split(",");
+        String field = parts[0].trim();
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())) {
+            direction = Sort.Direction.DESC;
+        }
+        if ("name".equalsIgnoreCase(field)) {
+            return Sort.by(direction, "firstName", "lastName");
+        }
+        if ("city".equalsIgnoreCase(field)) {
+            return Sort.by(direction, "city").and(byName);
+        }
+        return byName;
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
