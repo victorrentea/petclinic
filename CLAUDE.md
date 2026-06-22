@@ -23,21 +23,7 @@ Each script is foreground; run them in separate terminals.
 ./start-observability.sh   # optional: Grafana LGTM (Ctrl+C tears it down)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-./mvnw spring-boot:run              # Run backend
-./mvnw test                         # Run tests
-./mvnw clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
+Frontend commands live in [petclinic-frontend/CLAUDE.md](petclinic-frontend/CLAUDE.md).
 
 ### Testing a Single Test (Backend)
 ```sh
@@ -46,26 +32,7 @@ npm run e2e                         # Protractor e2e tests
 
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `./mvnw clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
+Backend architecture (layers, MapStruct codegen, data flow, key patterns) lives in [petclinic-backend/CLAUDE.md](petclinic-backend/CLAUDE.md).
 
 ### Living Architecture & Guardrails
 
@@ -100,19 +67,6 @@ Backend exposes REST API at http://localhost:8080/api/
 - Users: `/api/users`
 
 OpenAPI docs: http://localhost:8080/swagger-ui.html
-
-## Development Notes
-
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use Lombok: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
 
 ## Task Modifiers
 - Write non-trivial code using TDD.
