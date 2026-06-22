@@ -1,7 +1,7 @@
 ---
 name: regen-manual
 description: Regenerate user-manual/manual.md from scratch by crawling the running PetClinic UI in a browser and writing each feature section from the bundled template. Explicit invocation only — user must type /regen-manual.
-disabledModelInvocation: true
+disable-model-invocation: true
 ---
 
 # Regenerate the user manual
