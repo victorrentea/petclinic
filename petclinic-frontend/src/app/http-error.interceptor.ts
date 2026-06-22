@@ -9,14 +9,33 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { LinkifySnackbarComponent } from './shared/linkify-snackbar/linkify-snackbar.component';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
   constructor(private snackBar: MatSnackBar) {}
 
+  private static readonly BACKEND_URL = 'http://localhost:8080';
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
+        // Backend unreachable: connection refused / network error.
+        // status === 0 covers it; error.error is a browser ProgressEvent/ErrorEvent
+        // here, which would otherwise serialize to the useless {"isTrusted":true}.
+        if (this.isBackendDown(error)) {
+          const url = HttpErrorInterceptor.BACKEND_URL;
+          const message =
+            `Backend is unreachable — the API server at ${url} appears to be down. ` +
+            `Open ${url} to view the backend's Swagger UI.`;
+          console.error(error);
+          this.snackBar.openFromComponent(LinkifySnackbarComponent, {
+            data: { message },
+            duration: 10000,
+          });
+          return throwError(() => error);
+        }
+
         // Derive a user-friendly message from the response
         let message = '';
 
@@ -64,11 +83,24 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
         // Show toast with the message (use a short default message if empty)
         const toast = message || 'Request failed';
-        this.snackBar.open(toast, 'Close', { duration: 5000 });
+        this.snackBar.openFromComponent(LinkifySnackbarComponent, {
+          data: { message: toast, action: 'Close' },
+          duration: 5000,
+        });
 
         // Re-throw the error so callers can still handle it if they want
         return throwError(() => error);
       })
     );
+  }
+
+  private isBackendDown(error: HttpErrorResponse): boolean {
+    if (error.status === 0) {
+      return true;
+    }
+    const cause = error.error;
+    const isProgressEvent =
+      typeof ProgressEvent !== 'undefined' && cause instanceof ProgressEvent;
+    return cause instanceof ErrorEvent || isProgressEvent;
   }
 }

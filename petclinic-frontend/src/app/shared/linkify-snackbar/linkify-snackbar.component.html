@@ -1,0 +1,10 @@
+<span class="linkify-snackbar-message">
+  <ng-container *ngFor="let segment of segments">
+    <a *ngIf="segment.isUrl; else plain"
+       [href]="segment.text"
+       target="_blank"
+       rel="noopener noreferrer">{{ segment.text }}</a>
+    <ng-template #plain>{{ segment.text }}</ng-template>
+  </ng-container>
+</span>
+<button mat-button class="linkify-snackbar-action" (click)="dismiss()">{{ action }}</button>

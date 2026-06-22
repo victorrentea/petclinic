@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.linkify-snackbar-message {
+  /* Match the default Material snackbar: light text on the dark surface */
+  color: rgba(255, 255, 255, 0.87);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.linkify-snackbar-message a,
+.linkify-snackbar-message a:visited {
+  color: #82b1ff; /* light accent blue, readable on the dark snackbar */
+  text-decoration: underline;
+}
+
+.linkify-snackbar-message a:hover {
+  color: #b3cdff;
+}
+
+.linkify-snackbar-action {
+  flex: 0 0 auto;
+  color: #ff4081; /* Material accent, matches default snackbar action colour */
+}
