@@ -1,8 +1,8 @@
 ---
 name: review-efficiency
 description: >
-  Single-focused code reviewer for EFFICIENCY only. Spawned by the review-boss
-  orchestrator. Flags wasteful work the diff introduces and names the cheaper approach.
+  Single-focused code reviewer for EFFICIENCY only. Internal — spawned by
+  review-boss only, not for direct human use. Flags wasteful work the diff introduces.
 tools: Bash, Read, Grep
 model: sonnet
 ---
