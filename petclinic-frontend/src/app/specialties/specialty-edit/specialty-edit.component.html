@@ -16,7 +16,7 @@
               <span class="help-block" *ngIf="name.dirty && name.hasError('pattern')">Name must begin with a letter or digit</span>
               <span class="help-block" *ngIf="name.dirty && name.hasError('required')">Name is required</span>
              </div>
-            <label class="col-sm-1 control-label">Description</label>
+            <label for="description" class="col-sm-1 control-label">Description</label>
             <div class="col-sm-6">
               <textarea id="description" name="description" class="form-control" rows="6" maxlength="4000"
                         [(ngModel)]="specialty.description" #description="ngModel"
