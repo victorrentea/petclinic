@@ -8,31 +8,27 @@
 # `gh run watch --exit-status` as a background Bash task; the harness re-invokes
 # the agent with the result when that task exits.
 #
-# The Bash command is parsed into a real shell AST by the `pushwatch` Go helper
-# (mvdan.cc/sh) rather than regex/shlex — so quoting, `cd` chains, and
-# `git -C <dir>` are interpreted correctly. The helper reports whether the
-# command is an actual `git push` and the working directory it runs in.
+# The Bash command is tokenized by the `pushwatch` Python helper (stdlib
+# shlex, punctuation-aware) rather than a regex — so quoting, comments,
+# `cd` chains, and `git -C <dir>` are interpreted correctly. The helper reports
+# whether the command is an actual `git push` and the working directory it runs in.
 set -uo pipefail
 
 INPUT=$(cat)
 
 # Cheap pre-filter: skip the (common) Bash calls that aren't a push at all,
-# before paying for the Go helper.
+# before paying for the helper.
 printf '%s' "$INPUT" | grep -q 'git push' || exit 0
 
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PW_DIR="$HOOK_DIR/pushwatch"
-BIN="$PW_DIR/pushwatch"
+HELPER="$PW_DIR/pushwatch.py"
 
-# Lazy build: compile the helper on first use (or when its source changed).
-# The binary is gitignored; a fresh clone pays the build cost once.
-if [ ! -x "$BIN" ] || [ "$PW_DIR/main.go" -nt "$BIN" ]; then
-  command -v go >/dev/null 2>&1 || exit 0
-  ( cd "$PW_DIR" && go build -o pushwatch . ) >/dev/null 2>&1 || exit 0
-fi
+# Parse with the Python helper (stdlib shlex — no build step, no binary).
+command -v python3 >/dev/null 2>&1 || exit 0
 
 # Helper output: line 1 = PUSH|NOPUSH, line 2 = effective working dir ("" = cwd).
-DECISION="$(printf '%s' "$INPUT" | "$BIN" 2>/dev/null)" || exit 0
+DECISION="$(printf '%s' "$INPUT" | python3 "$HELPER" 2>/dev/null)" || exit 0
 VERDICT="$(printf '%s\n' "$DECISION" | sed -n '1p')"
 WORKDIR="$(printf '%s\n' "$DECISION" | sed -n '2p')"
 [ "$VERDICT" = "PUSH" ] || exit 0

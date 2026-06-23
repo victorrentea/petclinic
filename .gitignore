@@ -72,9 +72,6 @@ __pycache__/
 /petclinic-database/.bootstrapped
 .claude/settings.local.json
 
-# Lazily-built CI-watch hook helper (mvdan.cc/sh parser)
-.claude/hooks/pushwatch/pushwatch
-
 # Chatbot on-disk RAG embedding cache (avoids re-embedding on restart) — match anywhere it lands
 rag-vector-store.json
 /petclinic-chatbot/rag-vector-store.json.meta.json
