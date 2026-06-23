@@ -16,7 +16,7 @@ public enum Service {
   DB("./start-database.sh", 5432, null),
   BE("./start-backend.sh", 8080, "/actuator/health"),
   FE("./start-frontend.sh", 4200, null),
-  OTEL("./start-observability.sh", 3300, null);
+  OTEL("./start-grafana.sh", 3300, null);
 
   private final String script;
   private final int port;
