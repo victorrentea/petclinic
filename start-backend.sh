@@ -38,7 +38,7 @@ if [[ -f "$AGENT_JAR" ]]; then
     export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
     OTEL_JVM_ARGS="-javaagent:$AGENT_JAR"
   else
-    echo "ℹ️  OTel collector not running on :4318 — telemetry disabled. Run ./start-observability.sh to enable."
+    echo "ℹ️  OTel collector not running on :4318 — telemetry disabled. Run ./start-grafana.sh to enable."
   fi
 fi
 

@@ -187,7 +187,7 @@ instrumentation for both backend and frontend, queryable from Claude Code via
 ### 1. Start the stack
 
 ```sh
-./start-observability.sh         # Grafana at http://localhost:3300 (admin/admin)
+./start-grafana.sh               # Grafana at http://localhost:3300 (admin/admin)
 ./start-database.sh              # if not already running
 ./start-backend.sh               # auto-downloads the OTel Java agent on first run
 ( cd petclinic-frontend && npm start )

@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-push-ci-watch.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/watch-ci-after-push.sh\""
           }
         ]
       }
