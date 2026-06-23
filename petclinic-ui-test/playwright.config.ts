@@ -11,7 +11,8 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:4200',
+    // 127.0.0.1 (not "localhost") to avoid Node IPv6 (::1) resolution surprises.
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:4200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
