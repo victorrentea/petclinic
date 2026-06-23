@@ -22,6 +22,12 @@ import sys
 # ends the current simple command and starts the next.
 _OPERATOR_CHARS = set(";&|()<>")
 
+# git global options that consume the FOLLOWING token as their value, so that
+# value must not be mistaken for the subcommand (e.g. the `core.x=y` in
+# `git -c core.x=y push`). `-C` is handled separately because we capture its dir.
+_GIT_VALUE_OPTS = {"-c", "--git-dir", "--work-tree", "--namespace",
+                   "--super-prefix", "--config-env", "--exec-path"}
+
 
 def _emit(push, workdir):
     print("PUSH" if push else "NOPUSH")
@@ -78,9 +84,12 @@ def _decide(command):
                     git_dir = _static(args[i + 1])
                     i += 2
                     continue
+                if a in _GIT_VALUE_OPTS and i + 1 < len(args):
+                    i += 2  # skip the option AND its value (e.g. `-c key=val`)
+                    continue
                 if a.startswith("-"):
                     i += 1
-                    continue  # skip other global flags
+                    continue  # skip other global flags (incl. --opt=value forms)
                 sub = a
                 break
             if sub == "push":

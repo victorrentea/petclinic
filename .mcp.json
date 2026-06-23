@@ -30,7 +30,7 @@
       "command": "npx",
       "args": [
         "@playwright/mcp@latest",
-        "--output-dir", "/tmp/playwright",
+        "--output-dir", "petclinic-ui-test/.playwright-mcp",
         "--save-session",
         "--save-trace"
       ]
