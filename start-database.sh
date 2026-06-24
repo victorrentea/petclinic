@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+printf '\033]0;DB\007'  # set terminal/tab title
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DB_DIR="$SCRIPT_DIR/petclinic-database"
 JAR="$DB_DIR/target/petclinic-database.jar"

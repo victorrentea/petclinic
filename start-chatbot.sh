@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+printf '\033]0;chat\007'  # set terminal/tab title
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHATBOT_DIR="$SCRIPT_DIR/petclinic-chatbot"
 

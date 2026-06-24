@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+printf '\033]0;Grafana\007'  # set terminal/tab title
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/petclinic-observability"
 

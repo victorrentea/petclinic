@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+printf '\033]0;BE\007'  # set terminal/tab title
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR/petclinic-backend"
 
