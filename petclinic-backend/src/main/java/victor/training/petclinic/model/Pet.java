@@ -38,6 +38,8 @@ public class Pet {
     @NotEmpty
     private String name;
 
+    private String color;
+
     @Column(name = "birth_date", columnDefinition = "DATE")
     @PastOrPresent(message = "Birth date must not be in the future")
     private LocalDate birthDate;
