@@ -14,6 +14,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `DomainModelExtractorTest` | Domain class diagram | Regenerates `docs/generated/DomainModel.puml` from the JPA annotations |
 | `JpaMatchesDBSchemaTest` | Entity ↔ migration drift | Test profile sets `ddl-auto=validate`; Hibernate fails context refresh if any `@Entity` column is missing from the Flyway-migrated schema |
 | `DbSchemaExtractorTest` | DB schema snapshot | Boots Postgres, runs Flyway, dumps the schema to `DB.sql`; fails on drift |
+| `DbSchema.puml` ER diagram | DB schema review legibility | A sqlglot-based pre-commit generator (`petclinic-backend/docs/scripts/`) renders `docs/generated/DbSchema.puml` from `DB.sql`, highlighting **this commit's** schema delta in red, and auto-stages it. pre-push blocks a `DB.sql` change whose pushed range lacks a regenerated diagram (catches `--no-verify`) |
 | TS ↔ OpenAPI sync | Stale generated frontend types | `npm run generate:api` regenerates `api-types.ts` from `openapi.yaml` in pre-commit + CI; auto-staged / auto-committed on drift |
 | `McpHttpSecurityTest`, `McpTomcatCustomizerTest` | MCP endpoint security | Assert the `/mcp` endpoint's authentication and Tomcat customization hold |
 

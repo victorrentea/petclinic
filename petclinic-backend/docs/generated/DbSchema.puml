@@ -6,7 +6,6 @@ skinparam linetype ortho
 
 entity "owners" as owners {
 {field} id : int <<PK>>
-  --
 {field} first_name : text
 {field} last_name : text
 {field} address : text
@@ -16,7 +15,6 @@ entity "owners" as owners {
 
 entity "pets" as pets {
 {field} id : int <<PK>>
-  --
 {field} name : text
 {field} birth_date : date
 {field} type_id : int <<FK>> not null
@@ -25,27 +23,23 @@ entity "pets" as pets {
 
 entity "roles" as roles {
 {field} id : int <<PK>>
-  --
 {field} username : varchar(20) <<FK>> not null
 {field} role : varchar(20) not null
 }
 
 entity "specialties" as specialties {
 {field} id : int <<PK>>
-  --
 {field} name : text
 {field} description : text
 }
 
 entity "types" as types {
 {field} id : int <<PK>>
-  --
 {field} name : text
 }
 
 entity "users" as users {
 {field} username : varchar(20) <<PK>>
-  --
 {field} password : varchar(60) not null
 {field} enabled : boolean not null
 }
@@ -57,14 +51,12 @@ entity "vet_specialties" as vet_specialties {
 
 entity "vets" as vets {
 {field} id : int <<PK>>
-  --
 {field} first_name : text
 {field} last_name : text
 }
 
 entity "visits" as visits {
 {field} id : int <<PK>>
-  --
 {field} pet_id : int <<FK>>
 {field} visit_date : date
 {field} description : text

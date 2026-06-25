@@ -81,4 +81,24 @@ if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
   fi
 fi
 
+# ── DB schema → ER diagram (red-highlighted commit changes) ────────────────
+# Gated: only run when DB.sql is staged — that's the sole input. Regenerates
+# docs/generated/DbSchema.puml (red = this commit's schema delta) and stages it
+# so the diagram is committed alongside the schema change.
+if git diff --cached --name-only | grep -qx 'DB.sql'; then
+  if command -v python3 >/dev/null 2>&1; then
+    DBDIAG_OUT=$(mktemp)
+    trap 'rm -f "$NPM_OUT" "$DBDIAG_OUT"' EXIT
+    if ! "$ROOT/petclinic-backend/docs/scripts/gen-db-schema-diagram.sh" --staged >"$DBDIAG_OUT" 2>&1; then
+      cat "$DBDIAG_OUT"
+      echo "[pre-commit] ❌ DB schema diagram generation failed — commit blocked."
+      exit 1
+    fi
+    git add "$ROOT/petclinic-backend/docs/generated/DbSchema.puml"
+  else
+    echo "[pre-commit] ⚠️  python3 missing — skipping DB schema diagram regen."
+    echo "[pre-commit]    Install Python 3 to keep DbSchema.puml in sync."
+  fi
+fi
+
 echo "✅ pre-commit"

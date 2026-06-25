@@ -221,10 +221,6 @@ def render_puml(cur: Schema, delta: Delta, base: Schema | None = None) -> str:
         changed_cols = delta.changed_cols.get(name, set())
         fk_cols = fk_cols_by_table.get(name, set())
 
-        cols = cur.tables[name]
-        pk_part = [c for c in cols if c.pk]
-        rest = [c for c in cols if not c.pk]
-
         def mark_for(c: Column) -> str | None:
             if is_new_table:
                 return None  # entity already fully red
@@ -234,11 +230,8 @@ def render_puml(cur: Schema, delta: Delta, base: Schema | None = None) -> str:
                 return "changed"
             return None
 
-        for c in pk_part:
-            out.append(_col_line(c, fk_cols, mark_for(c)))
-        if pk_part and rest:
-            out.append("  --")
-        for c in rest:
+        # Columns in declaration order; PK/FK shown inline via <<PK>>/<<FK>> tags.
+        for c in cur.tables[name]:
             out.append(_col_line(c, fk_cols, mark_for(c)))
 
         # Removed columns are gone from `cur`; pull their definition from `base`.
