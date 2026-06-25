@@ -19,6 +19,7 @@ entity "pets" as pets {
 {field} birth_date : date
 {field} type_id : int <<FK>> not null
 {field} owner_id : int <<FK>>
+{field} <color:red>color : text</color>
 }
 
 entity "roles" as roles {

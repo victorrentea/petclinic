@@ -17,6 +17,7 @@ class Owner {
 class Pet {
   id : Integer
   name : String
+  color : String
   birthDate : LocalDate
 }
 class PetType {
