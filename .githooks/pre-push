@@ -23,6 +23,17 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
   fi
 
+  # Guard: a DB.sql change in the pushed range must carry a regenerated
+  # DbSchema.puml (catches a `git commit --no-verify` that bypassed pre-commit).
+  if printf '%s\n' "$paths" | grep -qx 'DB.sql' \
+     && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DbSchema.puml'; then
+    echo "[pre-push] ❌ DB.sql changed but petclinic-backend/docs/generated/DbSchema.puml was not regenerated."
+    echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
+    echo "[pre-push]         git add petclinic-backend/docs/generated/DbSchema.puml"
+    echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
+    exit 1
+  fi
+
   if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|db\.sql$)'; then
     needs_check=1
     break
