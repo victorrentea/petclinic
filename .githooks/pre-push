@@ -34,7 +34,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     exit 1
   fi
 
-  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|db\.sql$)'; then
+  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|DB\.sql$)'; then
     needs_check=1
     break
   fi
@@ -70,7 +70,7 @@ fi
 DRIFT_PATHS=(
   "$ROOT/petclinic-backend/docs/generated"
   "$ROOT/openapi.yaml"
-  "$ROOT/db.sql"
+  "$ROOT/DB.sql"
 )
 if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
   echo "[pre-push] ❌ Generated artifacts drifted from committed state:"
