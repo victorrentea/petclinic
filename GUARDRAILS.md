@@ -42,7 +42,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | CODEOWNERS Elders review | Sensitive files | `@victorrentea/elders` review required for `.github/CODEOWNERS`, `.claude/settings.json`, `openapi.yaml`, `DB.sql`, `db/migration/`, `docs/packages.puml`, `docs/c4model.dsl`, `docs/generated/DomainModel.puml`, `**/pom.xml`, `petclinic-frontend/package.json`, `.github/workflows/ci.yml` |
 | `.claude/settings.json` ask | Local AI edits to sensitive files | Prompts Claude before Edit/Write of the CODEOWNERS-protected paths |
 | Pre-commit / pre-push hooks | Pre-push drift detection | Run `gitleaks`, the guardrail tests, and the TS regen; auto-stage regenerated artifacts |
-| CI workflow (`ci.yml`) | Push/PR drift detection | Runs `./mvnw test` + Javadoc + strict frontend build + SonarCloud scan/gate. Auto-commits regenerated artifacts with `[skip ci]`; fork PRs fail with an actionable error |
+| CI workflow (`ci.yml`) | Push/PR drift detection | Runs `mvn test` + Javadoc + strict frontend build + SonarCloud scan/gate. Auto-commits regenerated artifacts with `[skip ci]`; fork PRs fail with an actionable error |
 
 ## Considered, not scheduled
 

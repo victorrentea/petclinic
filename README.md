@@ -60,7 +60,7 @@ Located in `petclinic-backend/`
 
 ```sh
 cd petclinic-backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 ### Backend Tech Stack
@@ -123,7 +123,7 @@ Default user: `admin` / `admin`
 **Unit Tests**:
 ```sh
 cd petclinic-backend
-./mvnw test
+mvn test
 ```
 
 **Performance Tests (JMeter)**:
@@ -132,7 +132,7 @@ jmeter -n -t src/test/jmeter/petclinic-jmeter-crud-benchmark.jmx \
   -Jthreads=100 -Jduration=600 -l results/petclinic-test-results.jtl
 ```
 
-**Guardrail Tests** (`./mvnw test` covers them by default):
+**Guardrail Tests** (`mvn test` covers them by default):
 - `PackagesArchUnitTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
 - `C4ModelExtractorTest` — regenerates `petclinic-backend/docs/generated/C4.dsl` and the C4 PlantUML/SVG views
 - `DomainModelExtractorTest` — regenerates `petclinic-backend/docs/generated/DomainModel.{puml,png}` from JPA annotations
@@ -219,7 +219,7 @@ this directory. Then ask things like:
 
 - **IntelliJ play button** on `@SpringBootApplication` does NOT attach the
   OTel agent — it bypasses `start-backend.sh`. To use observability from
-  IntelliJ, either run via `./mvnw spring-boot:run` from the terminal, or set
+  IntelliJ, either run via `mvn spring-boot:run` from the terminal, or set
   the following in your Run Configuration's "VM options":
   ```
   -javaagent:./.tools/opentelemetry-javaagent.jar

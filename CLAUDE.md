@@ -27,7 +27,7 @@ Frontend commands live in [petclinic-frontend/CLAUDE.md](petclinic-frontend/CLAU
 
 ### Testing a Single Test (Backend)
 ```sh
-./mvnw test -Dtest=ClassName#methodName
+mvn test -Dtest=ClassName#methodName
 ```
 
 ## Architecture

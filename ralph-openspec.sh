@@ -34,7 +34,7 @@ DRY_RUN="${RALPH_DRY_RUN:-0}"              # 1 => print the prompt, never call c
 BASELINE_REF="${RALPH_BASELINE:-}"         # used only by `reset` to revert feature code
 
 # Verification commands per layer. Adjust to this project's real headless test cmd.
-VERIFY_BACKEND="${RALPH_VERIFY_BACKEND:-cd petclinic-backend && ./mvnw -q -B test}"
+VERIFY_BACKEND="${RALPH_VERIFY_BACKEND:-cd petclinic-backend && mvn -q -B test}"
 VERIFY_FRONTEND="${RALPH_VERIFY_FRONTEND:-cd petclinic-frontend && npm run test-headless}"
 
 # ----------------------------------------------------------------------------- helpers

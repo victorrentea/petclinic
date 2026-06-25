@@ -36,9 +36,9 @@ async function startBackend(): Promise<ChildProcess> {
     console.log('Starting backend...');
 
     const backendDir = path.join(__dirname, '..', '..', 'petclinic-backend');
-    const mvnw = process.platform === 'win32' ? 'mvnw.cmd' : './mvnw';
+    const mvnCmd = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
 
-    const backend = spawn(mvnw, ['spring-boot:run'], {
+    const backend = spawn(mvnCmd, ['spring-boot:run'], {
       cwd: backendDir,
       stdio: 'inherit',
       shell: true,

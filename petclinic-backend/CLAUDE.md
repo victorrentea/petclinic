@@ -12,7 +12,7 @@ Guidance for working in the Spring Boot 3.5 REST API (Java 21).
 
 **Generated Code:**
 - MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `./mvnw clean install`
+- Regenerate via `mvn clean install`
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
