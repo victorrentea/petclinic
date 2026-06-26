@@ -46,6 +46,10 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         List<String> errors = ValidationErrorExtractor.extract(ex);
+        if (errors.isEmpty() && ex.getMessage() != null) {
+            // programmatic checks (e.g. VisitDateValidator) carry their message on the exception, not as violations
+            errors = List.of(ex.getMessage());
+        }
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
