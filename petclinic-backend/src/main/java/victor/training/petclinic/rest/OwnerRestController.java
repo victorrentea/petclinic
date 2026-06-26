@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -56,9 +59,36 @@ public class OwnerRestController {
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "name") String sort,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction) {
+        int safePage = Math.max(0, page);
+        int safeSize = (size < 1 || size > 20) ? 10 : size;
+        Sort resolvedSort = buildSort(sort, direction);
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(
+                lastName, PageRequest.of(safePage, safeSize, resolvedSort));
+        return new PagedModel<>(owners.map(ownerMapper::toOwnerDto));
+    }
+
+    /** Maps the public sort key to JPA field(s); falls back to name (lastName, firstName) for unknown keys. */
+    private static Sort buildSort(String sort, String direction) {
+        Sort.Direction dir;
+        try {
+            dir = (direction == null || direction.isBlank())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.fromString(direction);
+        } catch (IllegalArgumentException e) {
+            dir = Sort.Direction.ASC;
+        }
+        return switch (sort == null ? "" : sort) {
+            case "address"   -> Sort.by(dir, "address");
+            case "city"      -> Sort.by(dir, "city");
+            case "telephone" -> Sort.by(dir, "telephone");
+            default          -> Sort.by(dir, "lastName", "firstName");
+        };
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

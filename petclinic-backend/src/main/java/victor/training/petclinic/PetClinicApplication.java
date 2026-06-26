@@ -8,9 +8,11 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 @SpringBootApplication
 @EnableCaching // backs the cached @GetMapping("/api/specialties/feed") so polling clients don't hit the DB
+@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class PetClinicApplication {
 
 	public static void main(String[] args) {

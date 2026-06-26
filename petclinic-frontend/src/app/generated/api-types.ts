@@ -170,6 +170,20 @@ export interface components {
        */
       telephone: string;
     };
+    PageMetadata: {
+      /** Format: int64 */
+      number?: number;
+      /** Format: int64 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int64 */
+      totalPages?: number;
+    };
+    PagedModelOwnerDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      page?: components["schemas"]["PageMetadata"];
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +572,17 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
+        direction?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["PagedModelOwnerDto"];
         };
       };
       /** @description Bad Request */

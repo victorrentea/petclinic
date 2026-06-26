@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,6 +35,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -156,8 +158,8 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        JsonNode root = mapper.readTree(responseJson);
+        return mapper.convertValue(root.get("content"), new TypeReference<List<OwnerDto>>() {});
     }
 
     @Test
@@ -308,6 +310,65 @@ public class OwnerTest {
                 .content(mapper.writeValueAsString(petDto))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isNotFound());
+    }
+
+    // ── Pagination / envelope tests ──────────────────────────────────────────
+
+    @Test
+    void listOwners_returnsPagedEnvelope() throws Exception {
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.page.size").exists())
+            .andExpect(jsonPath("$.page.number").exists())
+            .andExpect(jsonPath("$.page.totalElements").exists())
+            .andExpect(jsonPath("$.page.totalPages").exists())
+            .andExpect(jsonPath("$.totalElements").doesNotExist()); // not flat
+    }
+
+    @Test
+    void listOwners_pageSizeHonored() throws Exception {
+        mockMvc.perform(get("/api/owners?page=0&size=1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.size").value(1));
+    }
+
+    @Test
+    void listOwners_lastNameFilter_matchesExpected() throws Exception {
+        Owner extra = TestData.anOwner();
+        extra.setLastName("UniqueZZZ");
+        ownerRepository.save(extra);
+
+        mockMvc.perform(get("/api/owners?lastName=UniqueZZZ"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].lastName").value("UniqueZZZ"));
+    }
+
+    @Test
+    void listOwners_sortByCityDesc_returns200() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=city&direction=desc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    void listOwners_unknownSortKey_returns200NotError() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=pets"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void listOwners_sizeOver20_cappedAt20() throws Exception {
+        mockMvc.perform(get("/api/owners?size=1000"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.size", lessThanOrEqualTo(20)));
+    }
+
+    @Test
+    void listOwners_negativeSizeDefaultsTo10() throws Exception {
+        mockMvc.perform(get("/api/owners?size=-3"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.size").value(10));
     }
 
 }
