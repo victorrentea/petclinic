@@ -1,4 +1,4 @@
-import {test, expect} from '@playwright/test';
+import { test, expect } from './support/trace-fixture';
 import * as fs from 'fs';
 import * as path from 'path';
 import {VisitsPage} from './pages/VisitsPage';

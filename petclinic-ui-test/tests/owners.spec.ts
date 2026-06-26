@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/trace-fixture';
 import { OwnersPage } from './pages/OwnersPage';
 import { ApiClient } from './support/api-client';
 import * as fs from 'fs';
