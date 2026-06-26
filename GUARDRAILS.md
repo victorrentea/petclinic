@@ -13,8 +13,8 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `OpenApiExtractorTest` | REST API contract | Regenerates `openapi.yaml` from the running app's API docs; the CI drift check fails if it differs from the committed file |
 | `DomainModelExtractorTest` | Domain class diagram | Regenerates `docs/generated/DomainModel.puml` from the JPA annotations |
 | `JpaMatchesDBSchemaTest` | Entity ↔ migration drift | Test profile sets `ddl-auto=validate`; Hibernate fails context refresh if any `@Entity` column is missing from the Flyway-migrated schema |
-| `DbSchemaExtractorTest` | DB schema snapshot | Boots Postgres, runs Flyway, dumps the schema to `DB.sql`; fails on drift |
-| `DbSchema.puml` ER diagram | DB schema review legibility | A sqlglot-based pre-commit generator (`petclinic-backend/docs/scripts/`) renders `docs/generated/DbSchema.puml` from `DB.sql`, highlighting **this commit's** schema delta in red, and auto-stages it. pre-push blocks a `DB.sql` change whose pushed range lacks a regenerated diagram (catches `--no-verify`) |
+| `DbSchemaExtractorTest` | DB schema snapshot | Boots Postgres, runs Flyway, dumps the schema to `petclinic-backend/DB.sql`; fails on drift |
+| `DB.puml` ER diagram | DB schema review legibility | A sqlglot-based pre-commit generator (`petclinic-backend/docs/scripts/`) renders `docs/generated/DB.puml` from `petclinic-backend/DB.sql`, highlighting **this commit's** schema delta in red, and auto-stages it. pre-push blocks a `petclinic-backend/DB.sql` change whose pushed range lacks a regenerated diagram (catches `--no-verify`) |
 | TS ↔ OpenAPI sync | Stale generated frontend types | `npm run generate:api` regenerates `api-types.ts` from `openapi.yaml` in pre-commit + CI; auto-staged / auto-committed on drift |
 | `McpHttpSecurityTest`, `McpTomcatCustomizerTest` | MCP endpoint security | Assert the `/mcp` endpoint's authentication and Tomcat customization hold |
 
@@ -39,7 +39,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 |---|---|---|
 | Dependency discipline | Drive-by upgrades / known CVEs | Dependabot opens weekly batched (minor+patch) PRs per ecosystem; CVEs surface as Dependabot security alerts |
 | `gitleaks` (pre-commit) | Secrets in commits | Blocks commits containing detected secrets |
-| CODEOWNERS Elders review | Sensitive files | `@victorrentea/elders` review required for `.github/CODEOWNERS`, `.claude/settings.json`, `openapi.yaml`, `DB.sql`, `db/migration/`, `docs/packages.puml`, `docs/c4model.dsl`, `docs/generated/DomainModel.puml`, `**/pom.xml`, `petclinic-frontend/package.json`, `.github/workflows/ci.yml` |
+| CODEOWNERS Elders review | Sensitive files | `@victorrentea/elders` review required for `.github/CODEOWNERS`, `.claude/settings.json`, `openapi.yaml`, `petclinic-backend/DB.sql`, `db/migration/`, `docs/packages.puml`, `docs/c4model.dsl`, `docs/generated/DomainModel.puml`, `**/pom.xml`, `petclinic-frontend/package.json`, `.github/workflows/ci.yml` |
 | `.claude/settings.json` ask | Local AI edits to sensitive files | Prompts Claude before Edit/Write of the CODEOWNERS-protected paths |
 | Pre-commit / pre-push hooks | Pre-push drift detection | Run `gitleaks`, the guardrail tests, and the TS regen; auto-stage regenerated artifacts |
 | CI workflow (`ci.yml`) | Push/PR drift detection | Runs `mvn test` + Javadoc + strict frontend build + SonarCloud scan/gate. Auto-commits regenerated artifacts with `[skip ci]`; fork PRs fail with an actionable error |

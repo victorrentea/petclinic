@@ -17,18 +17,18 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
   fi
 
-  # Guard: a DB.sql change in the pushed range must carry a regenerated
-  # DbSchema.puml (catches a `git commit --no-verify` that bypassed pre-commit).
-  if printf '%s\n' "$paths" | grep -qx 'DB.sql' \
-     && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DbSchema.puml'; then
-    echo "[pre-push] ❌ DB.sql changed but petclinic-backend/docs/generated/DbSchema.puml was not regenerated."
+  # Guard: a petclinic-backend/DB.sql change in the pushed range must carry a regenerated
+  # DB.puml (catches a `git commit --no-verify` that bypassed pre-commit).
+  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
+     && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
+    echo "[pre-push] ❌ petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
     echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
-    echo "[pre-push]         git add petclinic-backend/docs/generated/DbSchema.puml"
+    echo "[pre-push]         git add petclinic-backend/docs/generated/DB.puml"
     echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
     exit 1
   fi
 
-  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|DB\.sql$)'; then
+  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$)'; then
     needs_check=1
     break
   fi
@@ -64,7 +64,7 @@ fi
 DRIFT_PATHS=(
   "$ROOT/petclinic-backend/docs/generated"
   "$ROOT/openapi.yaml"
-  "$ROOT/DB.sql"
+  "$ROOT/petclinic-backend/DB.sql"
 )
 if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
   echo "[pre-push] ❌ Generated artifacts drifted from committed state:"

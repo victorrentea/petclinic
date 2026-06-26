@@ -62,7 +62,7 @@ entity "visits" as visits {
 {field} visit_date : date
 {field} description : text
 {field} visit_time : time
-{field} <color:red>vet_id : int <<FK>></color>
+{field} vet_id : int <<FK>>
 }
 
 
@@ -72,6 +72,6 @@ specialties ||--o{ vet_specialties : specialty_id
 types ||--o{ pets : type_id
 users ||--o{ roles : username
 vets ||--o{ vet_specialties : vet_id
-vets ||-[#red]-o{ visits : <color:red>vet_id</color>
+vets ||--o{ visits : vet_id
 
 @enduml

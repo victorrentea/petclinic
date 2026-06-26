@@ -13,8 +13,8 @@ CREATE EXTENSION, identity ALTERs, gin indexes -- degrade to opaque Command
 nodes instead of failing). Output is deterministic for given inputs.
 
 Usage:
-    db_schema_to_puml.py --current DB.sql --baseline old.sql --out DbSchema.puml
-    db_schema_to_puml.py --current DB.sql --baseline '' --out DbSchema.puml   # bootstrap, no red
+    db_schema_to_puml.py --current DB.sql --baseline old.sql --out DB.puml
+    db_schema_to_puml.py --current DB.sql --baseline '' --out DB.puml   # bootstrap, no red
 """
 from __future__ import annotations
 
