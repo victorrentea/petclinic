@@ -21,6 +21,7 @@ import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
+import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -56,12 +57,14 @@ public class VisitTest {
 
     int visitId;
     int petId;
+    int ownerId;
     @Autowired
     private PetTypeRepository petTypeRepository;
 
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
+        ownerId = owner.getId();
         Pet pet = TestData.aPet()
             .setOwner(owner)
             .setType(petTypeRepository.save(new PetType().setName("dog")));
@@ -150,6 +153,67 @@ public class VisitTest {
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addVisitToOwner_rejectsDateBeforePetBirth() throws Exception {
+        VisitFieldsDto dto = new VisitFieldsDto();
+        dto.setDescription("x-ray");
+        dto.setDate(PetTest.BIRTH_DATE.minusDays(1));
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addVisitToOwner_rejectsDateMoreThanOneYearInFuture() throws Exception {
+        VisitFieldsDto dto = new VisitFieldsDto();
+        dto.setDescription("x-ray");
+        dto.setDate(LocalDate.now().plusYears(2));
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addVisitToOwner_acceptsDateWithinRange() throws Exception {
+        VisitFieldsDto dto = new VisitFieldsDto();
+        dto.setDescription("x-ray");
+        dto.setDate(LocalDate.now());
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createVisit_rejectsDateMoreThanOneYearInFuture() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDescription("x-ray");
+        newVisit.setDate(LocalDate.now().plusYears(2));
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateVisit_rejectsDateMoreThanOneYearInFuture() throws Exception {
+        VisitFieldsDto dto = new VisitFieldsDto();
+        dto.setDescription("x-ray");
+        dto.setDate(LocalDate.now().plusYears(2));
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(dto))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
