@@ -10,6 +10,18 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21)
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3)
 
+## Scale Assumptions (non-functional)
+
+The business targets ~1 million owners (and proportionally large pets/visits). Despite the
+tiny seed dataset, **treat data volume as large**: list screens MUST sort, filter, and
+paginate **server-side** and never load all rows into the client or memory. Prefer Spring Data
+`Pageable`/`Page`/`Sort` (or equivalent) over fetching full `List<>`s for any growable entity.
+
+**Never issue N+1 queries** (a query per row, in a loop) — the round-trips kill latency at scale.
+Load related collections in bulk: batch fetching (`hibernate.default_batch_fetch_size` / `@BatchSize`),
+a single `IN (...)` query, or a join. Also never `JOIN FETCH` a to-many together with pagination
+(Hibernate paginates in memory) — page the root scalar-only, then batch-load the children.
+
 ## Common Commands
 
 
