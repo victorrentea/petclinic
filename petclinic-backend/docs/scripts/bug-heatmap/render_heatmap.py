@@ -146,9 +146,9 @@ html = """<!doctype html>
   <div style="padding: 6px 4px 10px; font-size: 13px;">
     Color =
     <select id="num" style="margin: 0 4px;">
-      <option value="bugs" selected>bugs</option>
+      <option value="bugs">bugs</option>
       <option value="commits">commits</option>
-      <option value="complexity">complexity</option>
+      <option value="complexity" selected>complexity</option>
       <option value="fan_in">fan_in</option>
       <option value="fan_out">fan_out</option>
     </select>
@@ -225,12 +225,12 @@ Plotly.newPlot('treemap', [{
   values: TREE.values,
   customdata: TREE.customdata,
   marker: {
-    colors: computeRatio('bugs', 'lines'),
+    colors: computeRatio('complexity', 'lines'),
     colorscale: 'Reds',
     cmin: 0,
-    cmax: percentile(computeRatio('bugs', 'lines'), 0.95) || 1,
+    cmax: percentile(computeRatio('complexity', 'lines'), 0.95) || 1,
     showscale: true,
-    colorbar: { title: 'bugs / lines', thickness: 14 },
+    colorbar: { title: 'complexity / lines', thickness: 14 },
     line: { width: 0.5, color: '#fff' }
   },
   hovertemplate: TREE.hovertemplates,
