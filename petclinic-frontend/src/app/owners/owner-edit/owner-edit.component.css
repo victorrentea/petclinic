@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ── Owner-edit redesign: warm "clinic record card" ───────────────── */
+
+:host {
+  --oe-ink: #1f2a24;
+  --oe-muted: #6b7d74;
+  --oe-line: #d9e2db;
+  --oe-green: #3f7d54;
+  --oe-green-deep: #2f6440;
+  --oe-green-soft: #eef5ef;
+  --oe-bg-1: #f6f4ec;
+  --oe-bg-2: #eef3ec;
+  --oe-danger: #c0563f;
+
+  display: block;
+  font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+.oe-page {
+  min-height: calc(100vh - 64px);
+  padding: 56px 20px 72px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background:
+    radial-gradient(1100px 480px at 80% -12%, rgba(63, 125, 84, 0.10), transparent 60%),
+    radial-gradient(880px 460px at 8% 112%, rgba(63, 125, 84, 0.08), transparent 55%),
+    linear-gradient(160deg, var(--oe-bg-1), var(--oe-bg-2));
+}
+
+.oe-card {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border: 1px solid rgba(31, 42, 36, 0.06);
+  border-radius: 22px;
+  padding: 44px 48px 40px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 18px 50px -18px rgba(31, 42, 36, 0.28),
+    0 6px 18px -10px rgba(31, 42, 36, 0.18);
+}
+
+/* slim accent bar matching the app's green header */
+.oe-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--oe-green), #7bbf8d 60%, #cfe6d4);
+}
+
+.oe-eyebrow {
+  margin: 4px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--oe-green);
+}
+
+.oe-card h2 {
+  margin: 0 0 6px;
+  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  font-size: 38px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--oe-ink);
+}
+
+.oe-subtitle {
+  margin: 0 0 30px;
+  font-size: 15px;
+  color: var(--oe-muted);
+}
+
+/* ── form layout: stacked labels, drop bootstrap horizontal grid ──── */
+.oe-card .form-group {
+  position: relative;
+  display: block;
+  margin: 0 0 20px;
+}
+
+/* keep the hidden id field hidden (our display:block above would reveal it) */
+.oe-card .form-group[hidden] {
+  display: none;
+}
+
+.oe-card .control-label {
+  display: block;
+  width: 100%;
+  float: none;
+  padding: 0 0 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--oe-muted);
+}
+
+.oe-card .col-sm-2,
+.oe-card .col-sm-10 {
+  display: block;
+  width: 100%;
+  float: none;
+  padding: 0;
+}
+
+.oe-card .form-control {
+  height: 50px;
+  padding: 0 44px 0 16px;
+  border: 1.5px solid var(--oe-line);
+  border-radius: 12px;
+  background: #fbfdfb;
+  font-size: 16px;
+  color: var(--oe-ink);
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.oe-card .form-control:focus {
+  border-color: var(--oe-green);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(63, 125, 84, 0.14);
+  outline: none;
+}
+
+/* ── validation states ────────────────────────────────────────────── */
+.oe-card .has-success .form-control { border-color: #a9d3b8; }
+.oe-card .has-error .form-control { border-color: var(--oe-danger); }
+.oe-card .has-error .form-control:focus { box-shadow: 0 0 0 4px rgba(192, 86, 63, 0.14); }
+
+.oe-card .form-control-feedback {
+  top: 33px;
+  right: 13px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  color: var(--oe-green);
+}
+.oe-card .has-error .form-control-feedback { color: var(--oe-danger); }
+
+.oe-card .help-block {
+  margin: 7px 2px 0;
+  font-size: 13px;
+  color: var(--oe-danger);
+}
+
+/* ── actions ──────────────────────────────────────────────────────── */
+.oe-card .form-group:last-of-type {
+  margin: 32px 0 0;
+}
+.oe-card .col-sm-offset-2 { margin-left: 0; }
+
+.oe-card .oe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 22px;
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.oe-card .oe-btn-ghost {
+  background: #fff;
+  color: var(--oe-ink);
+  border-color: var(--oe-line);
+}
+.oe-card .oe-btn-ghost:hover {
+  border-color: var(--oe-green);
+  color: var(--oe-green-deep);
+  background: var(--oe-green-soft);
+}
+
+.oe-card .oe-btn-primary {
+  min-width: 172px;
+  margin-left: 12px;
+  background: linear-gradient(180deg, #4a8c60, var(--oe-green-deep));
+  color: #fff;
+  box-shadow: 0 10px 22px -10px rgba(47, 100, 64, 0.7);
+}
+.oe-card .oe-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -12px rgba(47, 100, 64, 0.8);
+}
+.oe-card .oe-btn-primary:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  box-shadow: none;
+}

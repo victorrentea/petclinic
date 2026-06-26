@@ -1,6 +1,8 @@
-<div class="container-fluid">
-    <div class="container xd-container">
+<div class="container-fluid oe-page">
+    <div class="container xd-container oe-card">
+      <p class="oe-eyebrow">Owner record</p>
       <h2>Edit Owner</h2>
+      <p class="oe-subtitle">Update this owner's contact details.</p>
       <div *ngIf="errorMessage" class="alert alert-danger">
         {{ errorMessage }}
       </div>
@@ -233,13 +235,13 @@
   
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button class="btn btn-default" (click)="gotoOwnerDetail(owner)">
+            <button class="btn btn-default oe-btn oe-btn-ghost" (click)="gotoOwnerDetail(owner)">
               Back
             </button>
             <button
               type="submit"
               [disabled]="!ownerForm.valid"
-              class="btn btn-default"
+              class="btn btn-default oe-btn oe-btn-primary"
             >
               Update Owner
             </button>

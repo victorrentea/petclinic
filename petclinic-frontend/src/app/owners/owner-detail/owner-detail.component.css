@@ -1,0 +1,11 @@
+/* Owner Information: shrink the striped table to its content so each value
+   sits right next to its label instead of being pushed to the far right by
+   the default full-width 2-column auto layout. */
+.owner-info {
+  width: auto;
+}
+
+.owner-info th {
+  text-align: right;
+  padding-right: 2.5rem;
+}
