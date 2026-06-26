@@ -6,7 +6,8 @@ import {PlaywrightWorld} from '../support/world';
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
 Given('an owner with at least one pet exists', async function (this: PlaywrightWorld) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  const owners = Array.isArray(data) ? data : data.content ?? [];
   const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
