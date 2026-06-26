@@ -1,0 +1,30 @@
+{
+  "batches": [
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "petclinic-frontend" } }
+      ] },
+      "scopeSpans": [ { "spans": [
+        { "traceId": "t1", "spanId": "f1", "name": "click",
+          "kind": "SPAN_KIND_INTERNAL", "startTimeUnixNano": "1000", "attributes": [] },
+        { "traceId": "t1", "spanId": "f2", "parentSpanId": "f1", "name": "HTTP POST",
+          "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1100", "attributes": [] }
+      ] } ]
+    },
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "petclinic-backend" } }
+      ] },
+      "scopeSpans": [ { "spans": [
+        { "traceId": "t1", "spanId": "b1", "parentSpanId": "f2", "name": "POST /api/visits",
+          "kind": "SPAN_KIND_SERVER", "startTimeUnixNano": "1200",
+          "attributes": [ { "key": "http.status_code", "value": { "intValue": "201" } } ] },
+        { "traceId": "t1", "spanId": "b2", "parentSpanId": "b1", "name": "book-visit",
+          "kind": "SPAN_KIND_INTERNAL", "startTimeUnixNano": "1300", "attributes": [] },
+        { "traceId": "t1", "spanId": "b3", "parentSpanId": "b2", "name": "INSERT petclinic.visits",
+          "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1400",
+          "attributes": [ { "key": "db.system", "value": { "stringValue": "postgresql" } } ] }
+      ] } ]
+    }
+  ]
+}
