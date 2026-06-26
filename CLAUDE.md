@@ -23,49 +23,13 @@ Each script is foreground; run them in separate terminals.
 ./start-grafana.sh         # optional: Grafana LGTM (Ctrl+C tears it down)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
-### Testing a Single Test (Backend)
-```sh
-mvn test -Dtest=ClassName#methodName
-```
 
 ## Architecture
 
 ### Backend Architecture
 
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
+Backend-specific layering, data flow, and patterns live in `petclinic-backend/CLAUDE.md`,
+auto-loaded by the harness when you read/write any file in that module.
 
 ### Living Architecture & Guardrails
 
@@ -90,33 +54,17 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
-
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+Backend exposes REST API as per `openapi.yaml` kept in sync with the code.
 
 ## Development Notes
 
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use Lombok: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
+### Java Style
+Java coding conventions live in the lazy-loaded `java-style` skill
+(`.claude/skills/java-style/`), invoked automatically when writing/reviewing Java.
 
 ## Task Modifiers
 - Write non-trivial code using TDD.
 - Keep comments concise, prefer explanatory variable/method names.
 - Auto-push after commit if git username is `victorrentea` and repo is `github.com/victorrentea/*`
-- Keep explanations concise
-- Challenge ambiguous/wrong prompts
+- Keep explanations concise because this team is mid-sr, with 5+ exp in Spring, and 1y exp in ng
+- Challenge ambiguous/wrong prompts; don't sycophancy me
