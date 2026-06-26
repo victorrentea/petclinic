@@ -2,57 +2,67 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
-
-    </form>
-
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
-        <thead>
-        <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
-          <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
-        </tr>
-        </tbody>
-      </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
+    <div class="search-bar">
+      <label class="control-label search-label">Last name</label>
+      <input class="form-control search-input" maxlength="80"
+             [(ngModel)]="lastName" (keyup.enter)="search()" />
+      <button class="btn btn-default" type="button" (click)="search()">Find Owner</button>
+      <button class="btn btn-default" type="button" (click)="addOwner()">Add Owner</button>
     </div>
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="owners" matSort
+             [matSortActive]="sortActive" [matSortDirection]="sortDirection"
+             (matSortChange)="onSort($event)"
+             class="owners-table">
+
+        <!-- Name Column (sortable) — rendered first-name-first, as the old grid -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let owner" class="ownerFullName">
+            <a [routerLink]="['/owners', owner.id]" (click)="onSelect(owner)">
+              {{owner.firstName}} {{owner.lastName}}
+            </a>
+          </td>
+        </ng-container>
+
+        <!-- Address Column (sortable) -->
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
+          <td mat-cell *matCellDef="let owner">{{owner.address}}</td>
+        </ng-container>
+
+        <!-- City Column (sortable) -->
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+          <td mat-cell *matCellDef="let owner">{{owner.city}}</td>
+        </ng-container>
+
+        <!-- Telephone Column (sortable) -->
+        <ng-container matColumnDef="telephone">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Telephone</th>
+          <td mat-cell *matCellDef="let owner">{{owner.telephone}}</td>
+        </ng-container>
+
+        <!-- Pets Column (NO sort affordance) — one pet per line, as the old grid -->
+        <ng-container matColumnDef="pets">
+          <th mat-header-cell *matHeaderCellDef>Pets</th>
+          <td mat-cell *matCellDef="let owner">
+            <div *ngFor="let pet of owner.pets">{{pet.name}}</div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="totalElements"
+      [pageSize]="size"
+      [pageSizeOptions]="[5, 10, 20]"
+      [pageIndex]="page"
+      (page)="onPage($event)">
+    </mat-paginator>
   </div>
 </div>

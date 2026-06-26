@@ -1,79 +1,118 @@
-#ownersByLastName
-{
-display:none;
+/* ── Search bar (kept — you liked this part) ─────────────────────── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: nowrap;
 }
 
-#nameGroup {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
+.search-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin: 0;
 }
 
-#addressGroup {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
+.search-input {
+  flex: 1 1 auto;
 }
 
-.owner-search-label {
-	margin: 0;
-	text-align: left;
-	min-width: 60px;
+.search-bar button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-.owner-search-input {
-	flex: 1;
+/* ── mat-table rendered pixel-identical to Bootstrap .table.table-striped ──
+   Every value below is copied verbatim from the petclinic theme
+   (assets/css/petclinic.css) so the grid is indistinguishable from the
+   other Bootstrap list screens. The ONLY intentional addition is the
+   matSort arrow on the four sortable headers.                          */
+
+.owners-table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;       /* .table override */
+  table-layout: fixed;             /* keeps columns from jumping on sort */
+  background: transparent;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;  /* body font */
+  font-size: 14px;
+  color: #34302d;
 }
 
-.owners-controls {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 16px;
+/* explicit per-column widths — required by table-layout: fixed */
+.owners-table .mat-column-name      { width: 22%; }
+.owners-table .mat-column-address   { width: 26%; }
+.owners-table .mat-column-city      { width: 16%; }
+.owners-table .mat-column-telephone { width: 16%; }
+.owners-table .mat-column-pets      { width: 20%; }
+
+/* Kill Material's fixed 52/56px row heights so rows are content-tall
+   like Bootstrap (padding 8px + line-height 1.428).                    */
+.owners-table .mat-mdc-header-row,
+.owners-table .mat-mdc-row {
+  height: auto;
+  min-height: 0;
 }
 
-.owners-pagination {
-	display: flex;
-	align-items: center;
-	gap: 12px;
+/* Header cells = petclinic `.table > thead > tr > th` override         */
+.owners-table .mat-mdc-header-cell {
+  box-sizing: border-box;
+  background-color: #3c3834;
+  color: #f1f1f1;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;  /* drop MDC Roboto */
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: normal;          /* drop MDC tracking */
+  line-height: 1.42857143;
+  padding: 8px;
+  text-align: left;
+  vertical-align: bottom;
+  border-top: 0;
+  border-bottom: 2px solid #34302d;
 }
 
-.owners-page-size {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+/* Body cells = petclinic `.table > tbody > tr > td`                     */
+.owners-table .mat-mdc-cell {
+  box-sizing: border-box;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;  /* drop MDC Roboto */
+  font-size: 14px;
+  letter-spacing: normal;
+  line-height: 1.42857143;
+  padding: 8px;
+  vertical-align: top;
+  color: #34302d;
+  border-top: 1px solid #34302d;
+  border-bottom: 0;                /* Bootstrap uses only border-top */
 }
 
-.owners-page-size .form-control {
-	width: auto;
+/* Owner name link = theme green (`a { color:#5fa134 }`)                 */
+.owners-table .mat-mdc-cell a {
+  color: #5fa134;
+  text-decoration: none;
+}
+
+/* Zebra striping = `.table-striped > tbody > tr:nth-of-type(odd)`       */
+.owners-table tr.mat-mdc-row:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+/* Hover = `.table-hover > tbody > tr:hover`                             */
+.owners-table tr.mat-mdc-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Make the sort arrow visible against the dark header                   */
+.owners-table .mat-sort-header-arrow {
+  color: #f1f1f1;
 }
 
 @media (max-width: 576px) {
-	#nameGroup {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
+  .search-bar {
+    flex-wrap: wrap;
+  }
 
-	#addressGroup {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	.owner-search-input {
-		width: 100%;
-	}
-
-	.owners-controls {
-		flex-direction: column;
-		align-items: flex-start;
-	}
+  .search-input {
+    width: 100%;
+  }
 }
