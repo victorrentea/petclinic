@@ -1,5 +1,6 @@
 package victor.training.petclinic.rest;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +38,22 @@ public class VisitRestController {
 
     @PostMapping
     public ResponseEntity<Void> addVisit(@RequestBody @Validated VisitDto visitDto) {
+        int id = bookVisit(visitDto);
+        return ResponseEntity.created(UriComponentsBuilder.fromPath("/api/visits/{id}")
+                        .buildAndExpand(id).toUri())
+                .build();
+    }
+
+    // Explicit span so the booking step shows up in the Tempo trace (and the
+    // generated sequence diagram) next to the auto-instrumented SERVER/JDBC spans.
+    // The OTel Java agent instruments @WithSpan at the bytecode level, so it works
+    // on a private, self-invoked method (Spring AOP would not) — keeping the
+    // repository-only, no-service-layer house style.
+    @WithSpan("book-visit")
+    private int bookVisit(VisitDto visitDto) {
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
-        return ResponseEntity.created(UriComponentsBuilder.fromPath("/api/visits/{id}")
-                        .buildAndExpand(visit.getId()).toUri())
-                .build();
+        return visit.getId();
     }
 
     @PutMapping("{visitId}")
