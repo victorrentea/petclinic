@@ -22,6 +22,8 @@ export class VisitEditComponent implements OnInit {
   currentPetType: PetType;
   updateSuccess = false;
   errorMessage: string;
+  minDate: Date | null = null;
+  maxDate: Date = moment().add(1, 'year').toDate();
 
   constructor(private visitService: VisitService,
               private petService: PetService,
@@ -43,6 +45,7 @@ export class VisitEditComponent implements OnInit {
           pet => {
             this.currentPet = pet;
             this.currentPetType = pet.type;
+            this.minDate = moment(pet.birthDate).toDate();
             this.ownerService.getOwnerById(pet.ownerId).subscribe(
               owner => {
                 this.currentOwner = owner;
