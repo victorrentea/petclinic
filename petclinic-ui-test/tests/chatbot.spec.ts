@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/trace-fixture';
 
 // The chatbot is a separate static page + streaming API on its own port (default 8082).
 // It must be running (./start-backend.sh + the chatbot app, with OPENAI_API_KEY on the server).

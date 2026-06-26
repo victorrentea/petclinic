@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  // After the suite, pull each test's trace from Tempo and render a PlantUML
+  // sequence diagram (best-effort; never fails the run).
+  globalTeardown: './tests/support/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
