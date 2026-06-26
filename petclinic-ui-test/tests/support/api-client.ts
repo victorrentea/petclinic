@@ -9,6 +9,11 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnerPage {
+  content: OwnerDto[];
+  page: { size: number; number: number; totalElements: number; totalPages: number };
+}
+
 export interface VisitDto {
   id: number;
   date: string;
@@ -32,15 +37,26 @@ export class ApiClient {
     });
   }
 
+  // GET /api/owners now returns a Spring page envelope { content, page: {...} },
+  // not a bare array. `size` is capped server-side at 20 (the seed dataset is tiny).
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    const page = await this.fetchOwnersPage({ size: 20 });
+    return page.content;
   }
 
+  // Mirrors exactly the page the UI shows for a prefix search: the default first page
+  // (size 10, sort name asc). Must match the UI's page size or the row-count assertions
+  // diverge when a prefix matches more than one page of owners.
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
-    });
+    const page = await this.fetchOwnersPage({ lastName: prefix, page: 0, size: 10, sort: 'name', direction: 'asc' });
+    return page.content;
+  }
+
+  // Raw page fetch — lets e2e assert server-driven order/paging against the same params the UI uses.
+  async fetchOwnersPage(params: {
+    lastName?: string; page?: number; size?: number; sort?: string; direction?: string;
+  } = {}): Promise<OwnerPage> {
+    const response = await this.client.get<OwnerPage>('/owners', { params });
     return response.data;
   }
 
@@ -49,6 +65,7 @@ export class ApiClient {
     return response.data;
   }
 
+  // The Owners grid renders the name first-name-first ("George Franklin"), as the legacy grid did.
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
       .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
@@ -63,12 +80,10 @@ export class ApiClient {
     return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
 
+  // First-name-first display: "George Franklin" → "Franklin" (last whitespace-delimited token).
   static extractLastName(fullName: string): string {
-    const firstSpace = fullName.indexOf(' ');
-    if (firstSpace < 0 || firstSpace === fullName.length - 1) {
-      return fullName;
-    }
-    return fullName.substring(firstSpace + 1);
+    const tokens = fullName.trim().split(/\s+/);
+    return tokens[tokens.length - 1] ?? '';
   }
 
   static choosePrefixFrom(owners: OwnerDto[]): string {
