@@ -73,7 +73,7 @@ function returnLabel(span: NormSpan): string {
     ?? 'return';
 }
 
-const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
+const PARTICIPANT_ORDER = ['Client', 'Browser', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));

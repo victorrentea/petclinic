@@ -38,6 +38,9 @@ if [[ -f "$AGENT_JAR" ]]; then
     export OTEL_METRICS_EXPORTER=otlp
     export OTEL_TRACES_EXPORTER=otlp
     export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
+    # Sample 100% of traces so every e2e request is captured for the sequence
+    # diagrams (this is the agent default, made explicit).
+    export OTEL_TRACES_SAMPLER=parentbased_always_on
     OTEL_JVM_ARGS="-javaagent:$AGENT_JAR"
   else
     echo "ℹ️  OTel collector not running on :4318 — telemetry disabled. Run ./start-grafana.sh to enable."
