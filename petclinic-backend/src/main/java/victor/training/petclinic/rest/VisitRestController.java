@@ -4,7 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.model.Pet;
 import victor.training.petclinic.model.Visit;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -22,6 +24,7 @@ import java.util.List;
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final PetRepository petRepository;
 
     @GetMapping
     public List<VisitDto> listVisits() {
@@ -37,6 +40,8 @@ public class VisitRestController {
 
     @PostMapping
     public ResponseEntity<Void> addVisit(@RequestBody @Validated VisitDto visitDto) {
+        Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
+        VisitDateValidator.validate(visitDto.getDate(), pet.getBirthDate());
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return ResponseEntity.created(UriComponentsBuilder.fromPath("/api/visits/{id}")
@@ -47,6 +52,7 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        VisitDateValidator.validate(visitDto.getDate(), currentVisit.getPet().getBirthDate());
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);

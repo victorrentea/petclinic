@@ -167,7 +167,10 @@ public class OwnerRestController {
 
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
-    public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId, @RequestBody VisitFieldsDto visitFieldsDto) {
+    public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
+                                                @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        VisitDateValidator.validate(visitFieldsDto.getDate(), pet.getBirthDate());
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         visit.setPet(new Pet().setId(petId));
         visitRepository.save(visit);
