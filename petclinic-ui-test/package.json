@@ -6,6 +6,7 @@
   "scripts": {
     "test": "playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
+    "trace:diagram": "ts-node src/trace-diagram/generate.ts",
     "test:cucumber": "SKIP_SERVER_START=1 cucumber-js",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
