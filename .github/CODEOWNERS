@@ -1,31 +1,26 @@
-# Require Elders review for manual architecture diagram updates.
-# Note: team format is @org/team-slug.
-
-# A PR touching this path must be approved by a member of this group.
-# Works in GitHub, GitLab, BitBucket ...
+# Any PR touching these paths must be approved by a 2nd (senior) human
+# Works everywhere: in GitHub, GitLab, BitBucket ...
 
 # GIT + Agent Settings
 /.github/CODEOWNERS              @victorrentea/elders
 /.claude/settings.json           @victorrentea/elders
+/.github/workflows/ci.yml        @victorrentea/elders
 
-# Contracts
+# API Contracts
 /openapi.yaml                    @victorrentea/elders
-/DB.sql                          @victorrentea/elders
 
-# Flyway incremental migrations — must be reviewed even when DB.sql doesn't drift.
-# DB.sql is a regenerated schema snapshot, so destructive runtime ops
-# (DELETE / TRUNCATE / DROP+re-CREATE that ends in an identical shape)
-# wouldn't change it and the /DB.sql owners rule above would miss them.
+# Persistence
+/DB.sql                          @victorrentea/elders
 /petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
 
-# Architecture
+# Domain Model
 /petclinic-backend/docs/generated/DomainModel.puml @victorrentea/elders
+
+# Logical Architecture
 /petclinic-backend/docs/packages.puml @victorrentea/elders
-/petclinic-backend/docs/c4model.dsl @victorrentea/elders
+/petclinic-backend/docs/c4model.dsl   @victorrentea/elders
 
-# Dependencies
-**/pom.xml                       @victorrentea/elders
-/petclinic-frontend/package.json @victorrentea/elders
+# Dependencies / SBOM
+**/pom.xml      @victorrentea/elders
+**/package.json @victorrentea/elders
 
-# CI Guards
-/.github/workflows/ci.yml @victorrentea/elders
