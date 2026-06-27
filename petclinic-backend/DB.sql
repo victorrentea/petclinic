@@ -168,6 +168,16 @@ ALTER TABLE ONLY public.visits
 
 CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
 
+CREATE INDEX idx_owners_address ON public.owners USING btree (address);
+
+CREATE INDEX idx_owners_city ON public.owners USING btree (city);
+
+CREATE INDEX idx_owners_last_name_first_name ON public.owners USING btree (last_name, first_name);
+
+CREATE INDEX idx_owners_last_name_pattern ON public.owners USING btree (last_name text_pattern_ops);
+
+CREATE INDEX idx_owners_telephone ON public.owners USING btree (telephone);
+
 CREATE INDEX pets_name_idx ON public.pets USING btree (name);
 
 CREATE INDEX pets_owner_id_idx ON public.pets USING btree (owner_id);
