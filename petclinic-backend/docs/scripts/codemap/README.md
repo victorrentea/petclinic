@@ -1,11 +1,14 @@
-# Bug Heatmap
+# Codemap
 
 An interactive, self-contained HTML heatmap of the codebase: a **treemap** (rectangle
 area = file bytes, color = a metric ratio you pick) plus a **log–log scatter**
 (lines vs bug-fix commits). Open the generated page in any browser — it pulls Plotly
 from a CDN and embeds all data inline, so there is no server.
 
-Output: [`../../generated/bug-heatmap/bug-heatmap.html`](../../generated/bug-heatmap/bug-heatmap.html)
+Output:
+
+- [`../../generated/codemap/codemap.html`](../../generated/codemap/codemap.html)
+- [`../../generated/codemap/codecity.html`](../../generated/codemap/codecity.html) Three.js CodeCity
 
 ## Run
 
@@ -15,7 +18,7 @@ pip install -r requirements.txt --target .pylibs   # one-time (vendors tree-sitt
 ```
 
 `generate.sh` analyzes the **whole git repo** (so commit paths line up with the file
-walk) and writes all artifacts into `petclinic-backend/docs/generated/bug-heatmap/`.
+walk) and writes all artifacts into `petclinic-backend/docs/generated/codemap/`.
 
 ## What each metric means
 
@@ -42,8 +45,22 @@ unsetting `HEATMAP_OPEN_IN`.
 | --- | --- | --- |
 | 1 | `compute_complexity.py` | `complexity-per-{class,file}.tsv` |
 | 2 | `compute_fanio.py` | `fanio-per-file.tsv` |
-| 3 | `build_heatmap.py` | `bug-heatmap.tsv` (joins git history + file size + steps 1–2) |
-| 4 | `render_heatmap.py` | `bug-heatmap.html` |
+| 3 | `build_heatmap.py` | `codemap.tsv` (joins git history + file size + steps 1–2) |
+| 4 | `render_heatmap.py` | `codemap.html` |
+| 5 | `render_codecity.py` | `codecity.html` |
+
+## CodeCity
+
+`codecity.html` renders the same TSV as a Three.js CodeCity. Drag to pan,
+Cmd/Ctrl-drag to rotate, scroll to zoom around the mouse cursor, and Cmd/Ctrl-double-click
+a building to open its Java file in VS Code. The 2D city layout is computed in-browser
+with D3 treemap; Three.js extrudes each file tile into a building.
+
+The page has independent selectors for all three visual axes:
+
+- area: building footprint
+- height: building height
+- color: building color
 
 `fetch_bugs.py` is the Spring-specific GitHub bug-label crawler from the original; it is
 kept for provenance but **not** used here (PetClinic has no `type: bug` labels, so the
@@ -68,9 +85,9 @@ Every script is repo-agnostic and driven by env vars (`generate.sh` sets them):
 ## Provenance
 
 These generators were originally written ad-hoc to produce the
-[Spring Framework bug heatmap](https://github.com/spring-projects/spring-framework) and
+[Spring Framework codemap](https://github.com/spring-projects/spring-framework) and
 were recovered from a Claude Code session transcript, then parameterized (paths/title via
 env, plus a Conventional-Commit bug mode) without changing their analysis logic. The
 recovered generators were verified to reproduce the original Spring artifacts
-byte-for-byte (`bug-heatmap.html`, both complexity TSVs, and `fanio-per-file.tsv`), and
-every deterministic column of `bug-heatmap.tsv`.
+byte-for-byte (`codemap.html`, both complexity TSVs, and `fanio-per-file.tsv`), and
+every deterministic column of `codemap.tsv`.

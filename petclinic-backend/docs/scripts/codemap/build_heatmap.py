@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build per-file bug heatmap for spring-framework.
+"""Build per-file codemap data.
 
 Inputs:
   - /tmp/claude/bug_issues.txt : one issue number per line
@@ -7,7 +7,7 @@ Inputs:
   - REPO_DIR working tree      : for current bytes/lines
 
 Output:
-  - REPO_DIR/bug-heatmap.tsv : path \t bytes \t lines \t commits \t bug_commits \t commits_per_kloc \t bugs_per_kloc \t bugs_per_commit
+  - OUT_DIR/codemap.tsv : path \t bytes \t lines \t commits \t bug_commits \t commits_per_kloc \t bugs_per_kloc \t bugs_per_commit
     Filtered to non-test .java files present in current tree.
     Sorted by bugs_per_kloc desc.
 """
@@ -34,7 +34,7 @@ BUG_FILE = os.environ.get("HEATMAP_BUG_FILE", os.path.join(OUT_DIR, "bug_issues.
 # conventional commits, e.g. HEATMAP_BUG_COMMIT_REGEX="^(fix|bugfix)(\\(|:|!)").
 _bug_subj_src = os.environ.get("HEATMAP_BUG_COMMIT_REGEX")
 BUG_SUBJECT_RE = re.compile(_bug_subj_src, re.IGNORECASE) if _bug_subj_src else None
-OUT_FILE = os.path.join(OUT_DIR, "bug-heatmap.tsv")
+OUT_FILE = os.path.join(OUT_DIR, "codemap.tsv")
 COMPLEXITY_FILE = os.path.join(OUT_DIR, "complexity-per-file.tsv")
 FANIO_FILE = os.path.join(OUT_DIR, "fanio-per-file.tsv")
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render bug-heatmap.tsv to a self-contained interactive HTML (Plotly via CDN).
+"""Render codemap.tsv to a self-contained interactive HTML (Plotly via CDN).
 
 Two views:
   1. Treemap: size=bytes, color=bugs_per_kloc (clamped), grouped by module > file.
@@ -11,9 +11,9 @@ import os
 
 _here = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.abspath(os.environ.get("HEATMAP_OUT") or os.environ.get("HEATMAP_REPO") or _here)
-TSV = os.path.join(OUT_DIR, "bug-heatmap.tsv")
-OUT = os.path.join(OUT_DIR, "bug-heatmap.html")
-TITLE = os.environ.get("HEATMAP_TITLE", 'Spring Framework — Bug Heatmap')
+TSV = os.path.join(OUT_DIR, "codemap.tsv")
+OUT = os.path.join(OUT_DIR, "codemap.html")
+TITLE = os.environ.get("HEATMAP_TITLE", 'Spring Framework Codemap')
 SUBTITLE = os.environ.get("HEATMAP_SUBTITLE", '5,476 non-test Java files · 31,509 commits walked · 1,760 linked to type:bug/regression issues (post-2019 only).')
 # Optional: ctrl/⌘-click a file tile to open it in an editor.
 #   HEATMAP_OPEN_IN  = "vscode" | "intellij"  (preselected default; an in-page picker is also shown)
