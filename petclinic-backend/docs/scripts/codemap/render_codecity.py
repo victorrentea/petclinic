@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import sys
+import urllib.parse
 from pathlib import Path
 
 
@@ -62,6 +63,7 @@ html = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__TITLE__</title>
+<link rel="icon" href="__FAVICON__">
 <script type="importmap">
 {
   "imports": {
@@ -101,6 +103,14 @@ html = """<!doctype html>
     margin: 0 0 3px;
     font-size: 17px;
     font-weight: 650;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h1 .logo {
+    flex: none;
+    width: 22px;
+    height: 22px;
   }
   .sub {
     margin: 0 0 11px;
@@ -156,12 +166,31 @@ html = """<!doctype html>
     font-size: 13px;
     margin-bottom: 3px;
   }
+  #hover .fqn {
+    display: block;
+    margin-bottom: 4px;
+    color: #aab4c8;
+    font-size: 11px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .city-label {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(17, 24, 39, 0.86);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
+  }
 </style>
 </head>
 <body>
 <div id="scene"></div>
 <section class="panel">
-  <h1>__TITLE__</h1>
+  <h1>__LOGO_SVG__<span>__TITLE__</span></h1>
   <p class="sub">Drag to pan, Cmd/Ctrl-drag to rotate, scroll to zoom. Cmd/Ctrl-double-click opens a file in VS Code.</p>
   <div class="controls">
     <label>
@@ -205,6 +234,7 @@ const REPO_ABS = __REPO_ABS__;
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const mount = document.getElementById("scene");
@@ -215,11 +245,12 @@ const colorSelect = document.getElementById("colorMetric");
 const citySize = 900;
 const districtGap = 14;
 const fileGap = 3;
+const districtStep = 6;
 const maxHeight = 190;
 const minHeight = 5;
 let buildings = [];
 let districts = [];
-let rotateModifierDown = false;
+let cityLabels = [];
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf4f5f7);
@@ -234,6 +265,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 mount.appendChild(renderer.domElement);
+renderer.domElement.style.cursor = "move";
+
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position = "fixed";
+labelRenderer.domElement.style.inset = "0";
+labelRenderer.domElement.style.pointerEvents = "none";
+mount.appendChild(labelRenderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -247,10 +286,9 @@ controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
 controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
 controls.update();
 
-function updateMouseMode() {
-  controls.mouseButtons.LEFT = rotateModifierDown ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
-}
-
+// OrbitControls inverts the LEFT action when a modifier is held: with LEFT=PAN,
+// Cmd/Ctrl-drag automatically becomes an orbit. We only re-center the pivot so the
+// orbit spins around the point in the middle of the viewport.
 function setRotationPivotToViewportCenter() {
   centerRaycaster.setFromCamera({ x: 0, y: 0 }, camera);
   if (centerRaycaster.ray.intersectPlane(groundPlane, rotationPivot)) {
@@ -261,17 +299,24 @@ function setRotationPivotToViewportCenter() {
 
 function onPointerDown(event) {
   if (event.metaKey || event.ctrlKey) {
-    rotateModifierDown = true;
     setRotationPivotToViewportCenter();
   }
-  updateMouseMode();
 }
 
-function onModifierKey(event) {
-  if (event.key === "Meta" || event.key === "Control") {
-    rotateModifierDown = event.type === "keydown";
-    updateMouseMode();
-  }
+// Move cursor by default (you can pan); a circular-arrow cursor while Cmd/Ctrl is
+// held to hint that dragging now orbits the camera.
+const ROTATE_CURSOR_SVG =
+  "<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'>" +
+  "<g fill='none' stroke-linecap='round' stroke-linejoin='round'>" +
+  "<path d='M21 8 A9 9 0 1 0 22.7 14' stroke='#ffffff' stroke-width='5'/>" +
+  "<path d='M21.4 2.6 21 8 15.8 7.4' stroke='#ffffff' stroke-width='5'/>" +
+  "<path d='M21 8 A9 9 0 1 0 22.7 14' stroke='#111827' stroke-width='2.4'/>" +
+  "<path d='M21.4 2.6 21 8 15.8 7.4' stroke='#111827' stroke-width='2.4'/>" +
+  "</g></svg>";
+const ROTATE_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(ROTATE_CURSOR_SVG)}") 14 14, grab`;
+
+function updateCursor(event) {
+  renderer.domElement.style.cursor = (event.metaKey || event.ctrlKey) ? ROTATE_CURSOR : "move";
 }
 
 function updatePointer(event) {
@@ -329,10 +374,38 @@ function metricMax(key) {
 
 function colorFor(value, max) {
   const t = Math.max(0, Math.min(1, value / (max || 1)));
-  const low = new THREE.Color(0x242a3f);
-  const mid = new THREE.Color(0x233b8f);
-  const high = new THREE.Color(0x001eff);
-  return t < 0.55 ? low.lerp(mid, t / 0.55) : mid.lerp(high, (t - 0.55) / 0.45);
+  // Light blue (0) -> blue (max), so the city reads light with hot spots in blue.
+  return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x0b27ff), t);
+}
+
+// A hatch pattern for a terrace top: parallel lines in the terrace edge colour,
+// their direction rotating with the nesting level so each floor is distinguishable.
+function hatchTexture(edgeColor, level) {
+  const size = 64;
+  const gap = 16;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#e8eefc";
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = "#" + edgeColor.getHexString();
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const dir = level % 4;
+  if (dir === 0) {
+    for (let y = gap / 2; y < size; y += gap) { ctx.moveTo(0, y); ctx.lineTo(size, y); }
+  } else if (dir === 2) {
+    for (let x = gap / 2; x < size; x += gap) { ctx.moveTo(x, 0); ctx.lineTo(x, size); }
+  } else if (dir === 1) {
+    for (let k = -size; k < size * 2; k += gap) { ctx.moveTo(k, size); ctx.lineTo(k + size, 0); }
+  } else {
+    for (let k = -size; k < size * 2; k += gap) { ctx.moveTo(k, 0); ctx.lineTo(k + size, size); }
+  }
+  ctx.stroke();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
 }
 
 function insertPackage(parent, parts, file, areaMetric) {
@@ -364,6 +437,11 @@ function buildHierarchy(areaMetric) {
 }
 
 function clearCity() {
+  for (const label of cityLabels) {
+    label.removeFromParent();
+    label.element.remove();
+  }
+  cityLabels = [];
   for (const entry of buildings) {
     scene.remove(entry.mesh);
     entry.mesh.geometry.dispose();
@@ -375,7 +453,11 @@ function clearCity() {
     if (object.userData.kind === "package") {
       scene.remove(object);
       object.geometry.dispose();
-      object.material.dispose();
+      if (Array.isArray(object.material)) {
+        object.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
+      } else {
+        object.material.dispose();
+      }
     }
   }
 }
@@ -395,6 +477,9 @@ function rebuildCity() {
     .round(true);
   const root = layout(buildHierarchy(areaMetric));
 
+  // Each package becomes a terraced platform: the deeper it is nested, the higher
+  // it rises, so a parent package (e.g. victor) visibly contains its children
+  // (rest, mapper, ...). A thin outline delimits every package from its siblings.
   for (const node of root.descendants()) {
     if (node === root || !node.children) {
       continue;
@@ -402,20 +487,39 @@ function rebuildCity() {
     const level = Math.max(0, node.depth - 1);
     const width = Math.max(2, node.x1 - node.x0);
     const depth = Math.max(2, node.y1 - node.y0);
+    const slab = districtStep + 2;
+    const topY = node.depth * districtStep;
+    const cx = node.x0 + width / 2 - citySize / 2;
+    const cz = node.y0 + depth / 2 - citySize / 2;
+    // Heat-colour the riser (vertical "height" faces) with the same scale as the
+    // buildings; hatch the light top surface with lines in that same edge colour,
+    // rotating the hatch direction per nesting level so each floor stands apart.
+    const leaves = node.leaves();
+    const avgColor = leaves.reduce((sum, l) => sum + (Number(l.data.file[colorMetric]) || 0), 0) / leaves.length;
+    const edgeColor = colorFor(avgColor, maxColor);
+    const sideMaterial = new THREE.MeshStandardMaterial({ color: edgeColor, roughness: 0.85 });
+    const topTexture = hatchTexture(edgeColor, level);
+    topTexture.repeat.set(width / 50, depth / 50);
+    const topMaterial = new THREE.MeshStandardMaterial({ map: topTexture, roughness: 0.9 });
     const block = new THREE.Mesh(
-      new THREE.BoxGeometry(width, 2 + level * 1.2, depth),
-      new THREE.MeshStandardMaterial({
-        color: level % 2 === 0 ? 0xd6d9dc : 0xc6ccd3,
-        roughness: 0.82,
-      })
+      new THREE.BoxGeometry(width, slab, depth),
+      [sideMaterial, sideMaterial, topMaterial, topMaterial, sideMaterial, sideMaterial]
     );
-    block.position.set(node.x0 + width / 2 - citySize / 2, -2 - level * 1.2, node.y0 + depth / 2 - citySize / 2);
+    block.position.set(cx, topY - slab / 2, cz);
     block.receiveShadow = true;
     block.userData.kind = "package";
     block.userData.name = node.data.packageName || node.data.name;
     block.userData.fileCount = node.leaves().length;
     scene.add(block);
     districts.push(block);
+
+    const outline = new THREE.LineSegments(
+      new THREE.EdgesGeometry(block.geometry),
+      new THREE.LineBasicMaterial({ color: 0xcdd6e4, transparent: true, opacity: 0.45 })
+    );
+    outline.position.copy(block.position);
+    outline.userData.kind = "package";
+    scene.add(outline);
   }
 
   for (const leaf of root.leaves()) {
@@ -432,9 +536,10 @@ function rebuildCity() {
       metalness: 0.06,
     });
     const mesh = new THREE.Mesh(geometry, material);
+    const baseY = leaf.parent.depth * districtStep;
     mesh.position.set(
       leaf.x0 + (leaf.x1 - leaf.x0) / 2 - citySize / 2,
-      height / 2,
+      baseY + height / 2,
       leaf.y0 + (leaf.y1 - leaf.y0) / 2 - citySize / 2
     );
     mesh.castShadow = true;
@@ -442,8 +547,9 @@ function rebuildCity() {
     mesh.userData.file = file;
     mesh.userData.baseColor = material.color.clone();
     scene.add(mesh);
-    buildings.push({ mesh, file });
+    buildings.push({ mesh, file, height });
   }
+  labelTopBuildings(areaMetric, heightMetric, colorMetric);
   window.__CODEMAP_3D_READY__ = {
     buildings: buildings.length,
     areaMetric,
@@ -452,11 +558,50 @@ function rebuildCity() {
   };
 }
 
+function addPermanentLabel(entry) {
+  const div = document.createElement("div");
+  div.className = "city-label";
+  div.textContent = entry.file.name;
+  const label = new CSS2DObject(div);
+  const top = entry.mesh.position.y + entry.height / 2;
+  label.position.set(entry.mesh.position.x, top + 16, entry.mesh.position.z);
+  label.center.set(0.5, 1);
+  scene.add(label);
+  cityLabels.push(label);
+}
+
+// Permanently label the standout buildings: the largest footprint, the tallest,
+// and the most intensely colored class for the currently selected metrics.
+function labelTopBuildings(areaMetric, heightMetric, colorMetric) {
+  const winners = new Set();
+  for (const metric of [areaMetric, heightMetric, colorMetric]) {
+    let best = null;
+    let bestValue = -Infinity;
+    for (const entry of buildings) {
+      const value = Number(entry.file[metric]) || 0;
+      if (value > bestValue) {
+        bestValue = value;
+        best = entry;
+      }
+    }
+    if (best) winners.add(best);
+  }
+  for (const entry of winners) {
+    addPermanentLabel(entry);
+  }
+}
+
+function qualifiedName(file) {
+  const module = file.path.includes("/src/") ? file.path.split("/src/")[0] : file.path.split("/")[0];
+  const fqn = file.district && file.district !== "root" ? `${file.district}.${file.name}` : file.name;
+  return `${module}/${fqn}`;
+}
+
 function formatHover(file) {
-  return `<b>${file.name}</b>${file.path}<br>` +
+  return `<b>${file.name}</b><span class="fqn">${qualifiedName(file)}</span>` +
     `lines: ${file.lines.toLocaleString()} | cyclomatic complexity: ${file.cognitive_complexity.toLocaleString()} | ` +
     `commits: ${file.commits.toLocaleString()} | bug commits: ${file.bug_commits.toLocaleString()}<br>` +
-    `fan in/out: ${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}`;
+    `coupling fan in/out: ${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}`;
 }
 
 function formatDistrictHover(district) {
@@ -482,6 +627,7 @@ function positionHoverNearObject(object) {
 }
 
 function onPointerMove(event) {
+  updateCursor(event);
   const hit = pickBuilding(event);
   for (const entry of buildings) {
     entry.mesh.material.emissive.setHex(0x000000);
@@ -519,6 +665,7 @@ function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 areaSelect.addEventListener("change", rebuildCity);
@@ -527,9 +674,9 @@ colorSelect.addEventListener("change", rebuildCity);
 window.addEventListener("resize", onResize);
 window.addEventListener("pointermove", onPointerMove);
 window.addEventListener("pointerdown", onPointerDown, true);
-window.addEventListener("pointerup", updateMouseMode);
-window.addEventListener("keydown", onModifierKey);
-window.addEventListener("keyup", onModifierKey);
+window.addEventListener("keydown", updateCursor);
+window.addEventListener("keyup", updateCursor);
+window.addEventListener("blur", () => { renderer.domElement.style.cursor = "move"; });
 window.addEventListener("dblclick", onDoubleClick);
 
 rebuildCity();
@@ -537,6 +684,7 @@ rebuildCity();
 function animate() {
   controls.update();
   renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
 animate();
@@ -545,8 +693,20 @@ animate();
 </html>
 """
 
+_LOGO_SHAPES = (
+    '<rect x="2.5" y="9" width="5.5" height="12.5" rx="1" fill="#5b8def"/>'
+    '<rect x="9" y="3.5" width="6" height="18" rx="1" fill="#1e3a8a"/>'
+    '<rect x="16" y="11.5" width="5.5" height="10" rx="1" fill="#3a86ff"/>'
+)
+LOGO_SVG = f'<svg class="logo" viewBox="0 0 24 24" aria-hidden="true">{_LOGO_SHAPES}</svg>'
+FAVICON = "data:image/svg+xml," + urllib.parse.quote(
+    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">{_LOGO_SHAPES}</svg>'
+)
+
 html = (html
         .replace("__TITLE__", TITLE)
+        .replace("__LOGO_SVG__", LOGO_SVG)
+        .replace("__FAVICON__", FAVICON)
         .replace("__FILES_JSON__", json.dumps(rows))
         .replace("__REPO_ABS__", json.dumps(str(REPO_ABS))))
 OUT.write_text(html)
