@@ -118,13 +118,6 @@ def test_removed_column_is_struck_red():
     assert "<color:red>" in puml
 
 
-def test_added_index_is_rendered_red():
-    cur = BASE + "\nCREATE INDEX idx_owners_first_name ON public.owners USING btree (first_name);\n"
-    puml = _gen(BASE, cur)
-    assert "-- indexes --" in puml
-    assert "<color:red>idx_owners_first_name : first_name</color>" in puml
-
-
 # ── Determinism ─────────────────────────────────────────────────────────────
 
 def test_deterministic_output():

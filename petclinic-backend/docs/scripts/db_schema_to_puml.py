@@ -19,7 +19,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from dataclasses import dataclass, field
 
@@ -49,18 +48,10 @@ class Fk:
         return (self.table, self.columns, self.ref_table, self.ref_columns)
 
 
-@dataclass(frozen=True)
-class Index:
-    name: str
-    table: str
-    columns: tuple
-
-
 @dataclass
 class Schema:
     tables: dict = field(default_factory=dict)   # name -> list[Column] (declaration order)
     fks: list = field(default_factory=list)      # list[Fk]
-    indexes: list = field(default_factory=list)  # list[Index]
 
 
 def _table_name(node) -> str:
@@ -133,23 +124,7 @@ def parse_schema(sql: str) -> Schema:
         f for f in schema.fks
         if f.table not in EXCLUDED_TABLES and f.ref_table not in EXCLUDED_TABLES
     ]
-    schema.indexes = _parse_indexes(sql)
     return schema
-
-
-def _parse_indexes(sql: str) -> list[Index]:
-    indexes = []
-    pattern = re.compile(
-        r"CREATE\s+(?:UNIQUE\s+)?INDEX\s+(\w+)\s+ON\s+(?:public\.)?(\w+)\s+"
-        r"(?:USING\s+\w+\s+)?\(([^;]+)\);",
-        re.IGNORECASE | re.MULTILINE,
-    )
-    for name, table, cols in pattern.findall(sql):
-        if table in EXCLUDED_TABLES:
-            continue
-        columns = tuple(c.strip() for c in cols.split(","))
-        indexes.append(Index(name, table, columns))
-    return indexes
 
 
 @dataclass
@@ -160,14 +135,11 @@ class Delta:
     removed_cols: dict = field(default_factory=dict)    # table -> set[col]
     new_fks: set = field(default_factory=set)           # set[fk.key()]
     removed_fks: set = field(default_factory=set)
-    new_indexes: set = field(default_factory=set)
-    removed_indexes: set = field(default_factory=set)
 
     def is_empty(self) -> bool:
         return not (
             self.new_tables or self.new_cols or self.changed_cols
             or self.removed_cols or self.new_fks or self.removed_fks
-            or self.new_indexes or self.removed_indexes
         )
 
 
@@ -198,10 +170,6 @@ def diff_schemas(base: Schema, cur: Schema) -> Delta:
     cur_fk = {f.key() for f in cur.fks}
     delta.new_fks = cur_fk - base_fk
     delta.removed_fks = base_fk - cur_fk
-    base_idx = {(i.table, i.name, i.columns) for i in base.indexes}
-    cur_idx = {(i.table, i.name, i.columns) for i in cur.indexes}
-    delta.new_indexes = cur_idx - base_idx
-    delta.removed_indexes = base_idx - cur_idx
     return delta
 
 
@@ -232,12 +200,10 @@ def render_puml(cur: Schema, delta: Delta, base: Schema | None = None) -> str:
     fk_cols_by_table: dict = {}
     for f in cur.fks:
         fk_cols_by_table.setdefault(f.table, set()).update(f.columns)
-    indexes_by_table: dict = {}
-    for idx in cur.indexes:
-        indexes_by_table.setdefault(idx.table, []).append(idx)
 
     out = [
         "@startuml",
+        "!pragma layout smetana",
         "title Database Schema (ER)",
         "caption Generated from DB.sql — red = changed in this commit",
         "hide circle",
@@ -268,15 +234,6 @@ def render_puml(cur: Schema, delta: Delta, base: Schema | None = None) -> str:
         # Columns in declaration order; PK/FK shown inline via <<PK>>/<<FK>> tags.
         for c in cur.tables[name]:
             out.append(_col_line(c, fk_cols, mark_for(c)))
-
-        table_indexes = indexes_by_table.get(name, [])
-        if table_indexes:
-            out.append("-- indexes --")
-            for idx in sorted(table_indexes, key=lambda x: x.name):
-                body = f"{idx.name} : {', '.join(idx.columns)}"
-                if (idx.table, idx.name, idx.columns) in delta.new_indexes:
-                    body = _red(body)
-                out.append(f"{{field}} {body}")
 
         # Removed columns are gone from `cur`; pull their definition from `base`.
         removed = delta.removed_cols.get(name, set())

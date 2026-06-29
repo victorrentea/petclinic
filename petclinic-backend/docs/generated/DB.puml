@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 title Database Schema (ER)
 caption Generated from DB.sql — red = changed in this commit
 hide circle
@@ -11,12 +12,6 @@ entity "owners" as owners {
 {field} address : text
 {field} city : text
 {field} telephone : text
--- indexes --
-{field} <color:red>idx_owners_address : address</color>
-{field} <color:red>idx_owners_city : city</color>
-{field} <color:red>idx_owners_last_name_first_name : last_name, first_name</color>
-{field} <color:red>idx_owners_last_name_pattern : last_name text_pattern_ops</color>
-{field} <color:red>idx_owners_telephone : telephone</color>
 }
 
 entity "pets" as pets {
@@ -25,9 +20,6 @@ entity "pets" as pets {
 {field} birth_date : date
 {field} type_id : int <<FK>> not null
 {field} owner_id : int <<FK>>
--- indexes --
-{field} pets_name_idx : name
-{field} pets_owner_id_idx : owner_id
 }
 
 entity "roles" as roles {
@@ -40,15 +32,11 @@ entity "specialties" as specialties {
 {field} id : int <<PK>>
 {field} name : text
 {field} description : text
--- indexes --
-{field} specialties_name_idx : name
 }
 
 entity "types" as types {
 {field} id : int <<PK>>
 {field} name : text
--- indexes --
-{field} types_name_idx : name
 }
 
 entity "users" as users {
@@ -66,8 +54,6 @@ entity "vets" as vets {
 {field} id : int <<PK>>
 {field} first_name : text
 {field} last_name : text
--- indexes --
-{field} vets_last_name_idx : last_name
 }
 
 entity "visits" as visits {
@@ -76,8 +62,6 @@ entity "visits" as visits {
 {field} visit_date : date
 {field} description : text
 {field} visit_time : time
--- indexes --
-{field} visits_pet_id_idx : pet_id
 }
 
 
