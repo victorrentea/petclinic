@@ -1,0 +1,16 @@
+@startuml
+hide footbox
+title add a visit to an existing pet
+participant Browser
+participant Backend
+participant DB
+Browser -> Backend: POST /api/visits
+activate Backend
+Backend -> Backend: book-visit
+Backend -> DB: INSERT petclinic.visits
+activate DB
+DB --> Backend: return
+deactivate DB
+Backend --> Browser: 201
+deactivate Backend
+@enduml

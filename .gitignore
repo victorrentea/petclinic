@@ -63,6 +63,10 @@ petclinic-backend/.tools/
 petclinic-backend/docs/generated/**/*.svg
 petclinic-backend/docs/generated/**/*.png
 
+# e2e trace sequence diagrams — commit the .puml sources, ignore local renders
+petclinic-ui-test/diagrams/*.png
+petclinic-ui-test/diagrams/*.svg
+
 # Bug-heatmap generated outputs — only the generator scripts are tracked
 # (docs/scripts/bug-heatmap/); regenerate the map with that folder's generate.sh
 petclinic-backend/docs/generated/bug-heatmap/
