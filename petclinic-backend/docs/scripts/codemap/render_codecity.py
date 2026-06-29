@@ -196,9 +196,9 @@ html = """<!doctype html>
     <label>
       Color
       <select id="colorMetric">
-        <option value="complexity_per_kloc" selected>cyclomatic complexity / KLOC</option>
+        <option value="complexity_per_kloc">cyclomatic complexity / KLOC</option>
         <option value="bugs_per_kloc">bugs / KLOC</option>
-        <option value="commits_per_kloc">commits / KLOC</option>
+        <option value="commits_per_kloc" selected>commits / KLOC</option>
         <option value="fan_in">fan in</option>
         <option value="fan_out">fan out</option>
       </select>
