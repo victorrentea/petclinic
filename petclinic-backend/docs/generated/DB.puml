@@ -12,11 +12,11 @@ entity "owners" as owners {
 {field} city : text
 {field} telephone : text
 -- indexes --
-{field} idx_owners_address : address
-{field} idx_owners_city : city
-{field} idx_owners_last_name_first_name : last_name, first_name
-{field} idx_owners_last_name_pattern : last_name text_pattern_ops
-{field} idx_owners_telephone : telephone
+{field} <color:red>idx_owners_address : address</color>
+{field} <color:red>idx_owners_city : city</color>
+{field} <color:red>idx_owners_last_name_first_name : last_name, first_name</color>
+{field} <color:red>idx_owners_last_name_pattern : last_name text_pattern_ops</color>
+{field} <color:red>idx_owners_telephone : telephone</color>
 }
 
 entity "pets" as pets {
