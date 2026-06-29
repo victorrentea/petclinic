@@ -101,4 +101,21 @@ if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
   fi
 fi
 
+# ── Unversioned-dependency surface (deps declared with no <version>) ────────
+# Gated: only when a pom.xml is staged — that's the sole input. Regenerates
+# unversioned-dependencies.txt and stages it so the managed-version surface is
+# reviewed (via CODEOWNERS) alongside the dependency change.
+if git diff --cached --name-only | grep -qE '(^|/)pom\.xml$'; then
+  if command -v python3 >/dev/null 2>&1; then
+    if ! DEPS_OUT=$(python3 "$ROOT/scripts/list-unversioned-deps.py" 2>&1); then
+      echo "$DEPS_OUT"
+      echo "[pre-commit] ❌ unversioned-deps list generation failed — commit blocked."
+      exit 1
+    fi
+    git add "$ROOT/unversioned-dependencies.txt"
+  else
+    echo "[pre-commit] ⚠️  python3 missing — skipping unversioned-deps list regen."
+  fi
+fi
+
 echo "✅ pre-commit"

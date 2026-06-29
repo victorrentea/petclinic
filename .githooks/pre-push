@@ -12,6 +12,18 @@ unset GIT_DIR GIT_WORK_TREE
 
 ZERO=0000000000000000000000000000000000000000
 
+# ── Unversioned-deps list must be in sync (ungated, fast — no Maven) ─────────
+# Backstops a `git commit --no-verify` that bypassed pre-commit. Ungated because
+# chatbot/database pom changes fall outside the backend-only path gate below.
+if command -v python3 >/dev/null 2>&1; then
+  if ! python3 "$ROOT/scripts/list-unversioned-deps.py" --check; then
+    echo "[pre-push] ❌ unversioned-dependencies.txt is stale — push blocked."
+    echo "[pre-push]    Run: python3 scripts/list-unversioned-deps.py"
+    echo "[pre-push]         git add unversioned-dependencies.txt"
+    exit 1
+  fi
+fi
+
 # ── Path gating: skip unless pushed commits touch backend / OpenAPI / schema ─
 needs_check=0
 while read -r local_ref local_sha remote_ref remote_sha; do
