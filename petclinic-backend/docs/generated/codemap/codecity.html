@@ -315,8 +315,8 @@ function metricMax(key) {
 
 function colorFor(value, max) {
   const t = Math.max(0, Math.min(1, value / (max || 1)));
-  // Light blue (0) -> blue (max), so the city reads light with hot spots in blue.
-  return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x0b27ff), t);
+  // Light blue (0) -> burgundy red (max): the city reads light with hot spots in red.
+  return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), t);
 }
 
 // A hatch pattern for a terrace top: parallel lines in the terrace edge colour,
@@ -574,7 +574,7 @@ function onPointerMove(event) {
     entry.mesh.material.emissive.setHex(0x000000);
   }
   if (hit) {
-    hit.object.material.emissive.setHex(0x182a66);
+    hit.object.material.emissive.setHex(0x5a0f1e);
     hover.innerHTML = formatHover(hit.object.userData.file);
     positionHoverNearObject(hit.object);
     hover.classList.add("visible");
