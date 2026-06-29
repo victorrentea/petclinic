@@ -1,7 +1,8 @@
 @startuml
+!pragma layout smetana
 
 title Domain Model
-caption Generated from JPA annotations
+caption Generated from JPA annotations — red = added in this commit
 
 hide empty members
 skinparam classAttributeIconSize 0

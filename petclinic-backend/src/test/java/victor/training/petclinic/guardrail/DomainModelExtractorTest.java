@@ -16,10 +16,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,8 +31,16 @@ class DomainModelExtractorTest {
     private static final String BASE_PKG          = "victor.training.petclinic";
     private static final String DOMAIN_MODEL_PKG  = BASE_PKG + ".model";
     private static final Path   GENERATED_DIR     = Paths.get("docs/generated");
+    private static final String BASELINE_REF      = "HEAD:petclinic-backend/docs/generated/DomainModel.puml";
+    private static final Pattern CLASS_HEADER     = Pattern.compile("^(?:class|enum)\\s+(\\w+)");
 
     private record Association(String fromClass, String fromCardinality, String toClass, String toCardinality, String label) {}
+
+    /** Structural fingerprint of the previously committed diagram, used to red-mark what this commit adds. */
+    private record Baseline(Set<String> classes, Map<String, Set<String>> members, Set<String> associations) {
+        static Baseline empty() { return new Baseline(Set.of(), Map.of(), Set.of()); }
+        boolean isEmpty() { return classes.isEmpty() && associations.isEmpty(); }
+    }
 
     @Test
     void generateDomainModelDiagram() throws IOException {
@@ -45,35 +56,46 @@ class DomainModelExtractorTest {
             .toList();
 
         List<Association> associations = collectAssociations(entities);
+        Baseline baseline = parseBaseline(readBaselinePuml());
 
         StringBuilder sb = new StringBuilder();
-        sb.append("@startuml\n\n");
+        sb.append("@startuml\n!pragma layout smetana\n\n");
         sb.append("title Domain Model\n");
-        sb.append("caption Generated from JPA annotations\n\n");
+        sb.append("caption Generated from JPA annotations — red = added in this commit\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n\n");
 
         for (Class<?> cls : entities) {
-            sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName());
+            String name = cls.getSimpleName();
+            boolean newClass = !baseline.isEmpty() && !baseline.classes().contains(name);
+            sb.append(cls.isEnum() ? "enum " : "class ").append(name);
+            if (newClass) sb.append(" #line:red;text:red");
+
             List<String> members = renderMembers(cls);
             if (members.isEmpty()) {
                 sb.append("\n");
             } else {
                 sb.append(" {\n");
-                for (String m : members) sb.append("  ").append(m).append("\n");
+                Set<String> baseMembers = baseline.members().getOrDefault(name, Set.of());
+                for (String m : members) {
+                    boolean added = !newClass && !baseline.isEmpty() && !baseMembers.contains(m);
+                    sb.append("  ").append(added ? red(m) : m).append("\n");
+                }
                 sb.append("}\n");
             }
         }
         sb.append("\n");
 
         for (Association a : associations) {
+            String label = (a.label() != null && !a.label().isBlank()) ? a.label() : null;
+            boolean added = !baseline.isEmpty() && !baseline.associations().contains(cleanAssociation(a, label));
             sb.append(a.fromClass())
               .append(" \"").append(a.fromCardinality()).append("\" ")
-              .append("--")
+              .append(added ? "-[#red]-" : "--")
               .append(" \"").append(a.toCardinality()).append("\" ")
               .append(a.toClass());
-            if (a.label() != null && !a.label().isBlank()) {
-                sb.append(" : ").append(a.label());
+            if (label != null) {
+                sb.append(" : ").append(added ? red(label) : label);
             }
             sb.append("\n");
         }
@@ -203,5 +225,61 @@ class DomainModelExtractorTest {
             return sb.append(">").toString();
         }
         return type.getTypeName();
+    }
+
+    // ── Commit-scoped diff: red-mark what this commit adds vs the last committed diagram ──────
+
+    private static String red(String text) {
+        return "<color:red>" + text + "</color>";
+    }
+
+    /** Clean (colour-free) form of an association line, matching what {@link #parseBaseline} stores. */
+    private String cleanAssociation(Association a, String label) {
+        String s = a.fromClass() + " \"" + a.fromCardinality() + "\" -- \"" + a.toCardinality() + "\" " + a.toClass();
+        return label != null ? s + " : " + label : s;
+    }
+
+    /** Previously committed DomainModel.puml, or null when absent (bootstrap / no git → no red). */
+    private String readBaselinePuml() {
+        try {
+            Process p = new ProcessBuilder("git", "show", BASELINE_REF).start();
+            String out = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            return p.waitFor() == 0 ? out : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Parse the baseline diagram into class/member/association sets, stripping any prior red markup. */
+    private Baseline parseBaseline(String puml) {
+        if (puml == null || puml.isBlank()) return Baseline.empty();
+        Set<String> classes = new HashSet<>();
+        Map<String, Set<String>> members = new HashMap<>();
+        Set<String> associations = new HashSet<>();
+        String current = null;
+        for (String raw : puml.lines().toList()) {
+            String line = stripMarkup(raw).strip();
+            if (line.isEmpty()) continue;
+            if (current == null) {
+                Matcher m = CLASS_HEADER.matcher(line);
+                if (m.find()) {
+                    current = m.group(1);
+                    classes.add(current);
+                    members.computeIfAbsent(current, k -> new HashSet<>());
+                    if (!line.endsWith("{")) current = null;  // member-less class has no body
+                    continue;
+                }
+            }
+            if (line.equals("}")) { current = null; continue; }
+            if (current != null) { members.get(current).add(line); continue; }
+            String assoc = line.replace("-[#red]-", "--");  // normalise red connector back to plain
+            if (assoc.contains("--")) associations.add(assoc);
+        }
+        return new Baseline(classes, members, associations);
+    }
+
+    private String stripMarkup(String s) {
+        return s.replace("<color:red>", "").replace("</color>", "")
+                .replace("<s>", "").replace("</s>", "");
     }
 }
