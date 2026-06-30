@@ -186,24 +186,67 @@ html = """<!doctype html>
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
   }
-  .panel-foot {
-    margin-top: 11px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(140, 148, 160, 0.3);
-  }
   .howto-toggle {
-    width: 100%;
-    border: 1px solid #1e3a8a;
-    border-radius: 6px;
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 3;
+    border: 1px solid #c2cad6;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1e3a8a;
+    font-size: 12px;
+    font-weight: 650;
+    padding: 7px 11px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .howto-toggle:hover { background: #1e3a8a; color: #fff; }
+  /* First-run intro overlay: an annotated building wired to the metric selectors. */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  #intro.visible { opacity: 1; }
+  #intro.hide { opacity: 0; }
+  #intro svg { position: absolute; inset: 0; }
+  #intro text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .intro-head {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(17, 24, 39, 0.9);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 650;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+  }
+  .intro-dismiss {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    cursor: pointer;
     background: #1e3a8a;
     color: #fff;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 8px 10px;
-    cursor: pointer;
-    transition: background 120ms ease;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 650;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
   }
-  .howto-toggle:hover { background: #16306e; }
+  .intro-dismiss:hover { background: #16306e; }
   .howto {
     position: fixed;
     inset: 0;
@@ -317,12 +360,10 @@ html = """<!doctype html>
       </select>
     </label>
   </div>
-  <div class="panel-foot">
-    <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
-      &#9874; Build this for your own repo&hellip;
-    </button>
-  </div>
 </section>
+<button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
+  &#9874; Build for your repo
+</button>
 <section class="howto" id="howto" hidden>
   <div class="howto-card" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
     <button class="howto-close" id="howtoClose" type="button" aria-label="Close">&times;</button>
@@ -789,6 +830,10 @@ function positionHoverNearObject(object) {
 
 function onPointerMove(event) {
   updateCursor(event);
+  if (introEl) {                      // keep the intro uncluttered: no hover tooltips while it is up
+    hover.classList.remove("visible");
+    return;
+  }
   const hit = pickBuilding(event);
   for (const entry of buildings) {
     entry.mesh.material.emissive.setHex(0x000000);
@@ -829,16 +874,202 @@ function onResize() {
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-areaSelect.addEventListener("change", rebuildCity);
-heightSelect.addEventListener("change", rebuildCity);
-colorSelect.addEventListener("change", rebuildCity);
+// ── First-run intro ────────────────────────────────────────────────────────
+// Annotate one real building so the three abstract selectors become concrete:
+// its FOOTPRINT = area metric, its HEIGHT = height metric, its COLOR = color metric.
+// Each annotation draws a leader to the building feature and a connector to the
+// <select> that drives it. It is a static, dismiss-on-first-interaction overlay.
+let introEl = null;
+let introDone = false;
+const INTRO_CHANNELS = [
+  { key: "height", color: "#0f766e", title: "HEIGHT", select: () => heightSelect },
+  { key: "color", color: "#9d174d", title: "COLOR", select: () => colorSelect },
+  { key: "area", color: "#b45309", title: "AREA", select: () => areaSelect },
+];
+
+function escapeXml(value) {
+  return String(value).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+}
+
+function metricLabel(select) {
+  return select.options[select.selectedIndex].textContent.trim();
+}
+
+function dismissIntro() {
+  if (!introEl) return;
+  const el = introEl;
+  introEl = null;
+  el.classList.add("hide");
+  setTimeout(() => el.remove(), 320);
+  for (const select of [colorSelect, heightSelect, areaSelect]) {
+    select.style.boxShadow = "";
+    select.style.borderColor = "";
+  }
+}
+
+function buildIntro() {
+  if (introDone || buildings.length === 0) return;
+  introDone = true;
+  hover.classList.remove("visible");   // drop any tooltip shown before the intro mounted
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  camera.updateMatrixWorld();
+  const project = (x, y, z) => {
+    const v = new THREE.Vector3(x, y, z).project(camera);
+    return { x: (v.x * 0.5 + 0.5) * W, y: (-v.y * 0.5 + 0.5) * H, z: v.z };
+  };
+
+  // Hero = the tallest building whose top projects into a clear right-of-panel area.
+  let hero = null;
+  let bestHeight = -Infinity;
+  for (const b of buildings) {
+    const top = project(b.mesh.position.x, b.mesh.position.y + b.height / 2, b.mesh.position.z);
+    const clear = top.z < 1 && top.x > W * 0.34 && top.x < W * 0.78 && top.y > H * 0.24 && top.y < H * 0.7;
+    if (clear && b.height > bestHeight) { bestHeight = b.height; hero = b; }
+  }
+  if (!hero) hero = buildings.reduce((a, b) => (b.height > a.height ? b : a));
+
+  const params = hero.mesh.geometry.parameters;
+  const px = hero.mesh.position.x;
+  const pz = hero.mesh.position.z;
+  const yBottom = hero.mesh.position.y - hero.height / 2;
+  const yTop = hero.mesh.position.y + hero.height / 2;
+  const hw = params.width / 2;
+  const hd = params.depth / 2;
+  const cornersXZ = [[px - hw, pz - hd], [px + hw, pz - hd], [px + hw, pz + hd], [px - hw, pz + hd]];
+  const base = cornersXZ.map(([x, z]) => project(x, yBottom, z));
+  const roof = cornersXZ.map(([x, z]) => project(x, yTop, z));         // top face = footprint, drawn on the roof
+  const roofCentroid = {
+    x: roof.reduce((s, p) => s + p.x, 0) / 4,
+    y: roof.reduce((s, p) => s + p.y, 0) / 4,
+  };
+  let ri = 0;
+  for (let i = 1; i < 4; i++) if (base[i].x > base[ri].x) ri = i;        // right-most vertical edge
+  const edgeBottom = base[ri];
+  const edgeTop = roof[ri];
+  const bodyMid = project(px, (yBottom + yTop) / 2, pz);
+  const heroRight = Math.max(...roof.map(p => p.x), ...base.map(p => p.x));
+  const swatch = "#" + hero.mesh.material.color.getHexString();
+
+  // Anchor each channel to the building feature it explains.
+  const anchors = {
+    height: { x: (edgeTop.x + edgeBottom.x) / 2, y: (edgeTop.y + edgeBottom.y) / 2 },
+    color: bodyMid,
+    area: roofCentroid,
+  };
+
+  // Stack the three label cards just right of the hero.
+  const LW = 200;
+  const LH = 50;
+  const lx = Math.min(heroRight + 46, W - LW - 18);
+  let ly = Math.max(70, Math.min(edgeTop.y - 12, H - 3 * (LH + 18) - 40));
+  const rows = INTRO_CHANNELS.map(ch => {
+    const select = ch.select();
+    const row = {
+      ...ch, select, sub: metricLabel(select), anchor: anchors[ch.key],
+      rect: select.getBoundingClientRect(), box: { x: lx, y: ly, w: LW, h: LH },
+    };
+    ly += LH + 18;
+    return row;
+  });
+
+  const parts = [];
+  parts.push(
+    '<defs><pattern id="introHatch" width="7" height="7" patternTransform="rotate(45)" ' +
+    'patternUnits="userSpaceOnUse">' +
+    '<line x1="0" y1="0" x2="0" y2="7" stroke="#b45309" stroke-width="1.4" opacity="0.85"/></pattern></defs>'
+  );
+  // AREA: hatched top face (the building's footprint, shown on the roof).
+  parts.push(
+    `<polygon points="${roof.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}" ` +
+    'fill="url(#introHatch)" stroke="#b45309" stroke-width="2" opacity="0.92"/>'
+  );
+  // HEIGHT: a dimension line with caps along the right vertical edge.
+  const ex = edgeTop.x - edgeBottom.x;
+  const ey = edgeTop.y - edgeBottom.y;
+  const elen = Math.hypot(ex, ey) || 1;
+  const capx = (-ey / elen) * 7;
+  const capy = (ex / elen) * 7;
+  const cap = p =>
+    `<line x1="${(p.x - capx).toFixed(1)}" y1="${(p.y - capy).toFixed(1)}" ` +
+    `x2="${(p.x + capx).toFixed(1)}" y2="${(p.y + capy).toFixed(1)}" stroke="#0f766e" stroke-width="2.5"/>`;
+  parts.push(
+    `<line x1="${edgeBottom.x.toFixed(1)}" y1="${edgeBottom.y.toFixed(1)}" ` +
+    `x2="${edgeTop.x.toFixed(1)}" y2="${edgeTop.y.toFixed(1)}" stroke="#0f766e" stroke-width="2.5"/>`,
+    cap(edgeBottom), cap(edgeTop)
+  );
+  // COLOR: a swatch dot in the building's own colour.
+  parts.push(
+    `<circle cx="${bodyMid.x.toFixed(1)}" cy="${bodyMid.y.toFixed(1)}" r="9" ` +
+    `fill="${swatch}" stroke="#fff" stroke-width="2.5"/>`
+  );
+
+  for (const row of rows) {
+    const box = row.box;
+    const rect = row.rect;
+    const boxLeft = { x: box.x, y: box.y + box.h / 2 };
+    const selBottom = { x: rect.left + rect.width / 2, y: rect.bottom };
+    // Connector: selector → label (dashed, channel colour).
+    parts.push(
+      `<path d="M ${selBottom.x} ${selBottom.y} ` +
+      `C ${selBottom.x} ${selBottom.y + 60}, ${box.x - 30} ${box.y - 20}, ${box.x + 22} ${box.y}" ` +
+      `fill="none" stroke="${row.color}" stroke-width="2" stroke-dasharray="5 5" opacity="0.65"/>`,
+      `<circle cx="${selBottom.x}" cy="${selBottom.y}" r="3.5" fill="${row.color}"/>`,
+      // Selector highlight.
+      `<rect x="${rect.left - 4}" y="${rect.top - 4}" width="${rect.width + 8}" height="${rect.height + 8}" ` +
+      `rx="8" fill="none" stroke="${row.color}" stroke-width="2.5"/>`
+    );
+    // Leader: label → building feature (solid, channel colour).
+    parts.push(
+      `<line x1="${boxLeft.x}" y1="${boxLeft.y}" x2="${row.anchor.x.toFixed(1)}" y2="${row.anchor.y.toFixed(1)}" ` +
+      `stroke="${row.color}" stroke-width="2.5"/>`,
+      `<circle cx="${row.anchor.x.toFixed(1)}" cy="${row.anchor.y.toFixed(1)}" r="4" fill="${row.color}"/>`
+    );
+    // Label card.
+    parts.push(
+      '<g>' +
+      `<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="9" ` +
+      `fill="#ffffff" stroke="${row.color}" stroke-width="2"/>` +
+      `<rect x="${box.x}" y="${box.y}" width="6" height="${box.h}" rx="3" fill="${row.color}"/>` +
+      `<text x="${box.x + 16}" y="${box.y + 21}" font-size="13" font-weight="700" fill="${row.color}">${row.title}</text>` +
+      `<text x="${box.x + 16}" y="${box.y + 39}" font-size="12.5" fill="#344054">${escapeXml(row.sub)}</text>` +
+      '</g>'
+    );
+  }
+
+  introEl = document.createElement("div");
+  introEl.id = "intro";
+  introEl.innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${parts.join("")}</svg>` +
+    '<div class="intro-head">What each building tells you</div>' +
+    '<button class="intro-dismiss" type="button">Got it &#10005;</button>';
+  document.body.appendChild(introEl);
+  requestAnimationFrame(() => { if (introEl) introEl.classList.add("visible"); });
+  introEl.querySelector(".intro-dismiss").addEventListener("click", dismissIntro);
+  for (const row of rows) {
+    row.select.style.boxShadow = `0 0 0 3px ${row.color}55`;
+    row.select.style.borderColor = row.color;
+  }
+}
+
+function onMetricChange() {
+  dismissIntro();
+  rebuildCity();
+}
+
+areaSelect.addEventListener("change", onMetricChange);
+heightSelect.addEventListener("change", onMetricChange);
+colorSelect.addEventListener("change", onMetricChange);
 window.addEventListener("resize", onResize);
+window.addEventListener("resize", dismissIntro);
 window.addEventListener("pointermove", onPointerMove);
 window.addEventListener("pointerdown", onPointerDown, true);
 window.addEventListener("keydown", updateCursor);
 window.addEventListener("keyup", updateCursor);
 window.addEventListener("blur", () => { renderer.domElement.style.cursor = "move"; });
 window.addEventListener("dblclick", onDoubleClick);
+renderer.domElement.addEventListener("pointerdown", dismissIntro);
+window.addEventListener("wheel", dismissIntro, { passive: true });
 
 rebuildCity();
 
@@ -846,6 +1077,7 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  if (!introDone) buildIntro();
   requestAnimationFrame(animate);
 }
 animate();

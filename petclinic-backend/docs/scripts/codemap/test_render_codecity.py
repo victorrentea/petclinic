@@ -75,6 +75,12 @@ class RenderCodecityTest(unittest.TestCase):
             # BUILD_CMD is JSON-embedded, so quotes are backslash-escaped in the HTML.
             self.assertIn(r'HEATMAP_REPO=\"$REPO\" HEATMAP_OUT=\"$REPO/.codecity\"', html)
             self.assertIn(str(SCRIPT_DIR), html)
+            # First-run intro: an annotated hero building wired to the metric selectors,
+            # with AREA drawn on the roof (top face), not the base.
+            self.assertIn("function buildIntro", html)
+            self.assertIn("What each building tells you", html)
+            self.assertIn("introHatch", html)
+            self.assertIn("top face = footprint, drawn on the roof", html)
 
 
 if __name__ == "__main__":

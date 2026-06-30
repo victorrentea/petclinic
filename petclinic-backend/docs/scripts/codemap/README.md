@@ -62,9 +62,16 @@ The page has independent selectors for all three visual axes:
 - height: building height
 - color: building color
 
-**Build it for your own repo:** the page has a **"⛏ Build this for your own repo…"**
-button (panel, bottom). It opens a copy-pasteable recipe that re-runs this exact pipeline
-against any other folder of Java sources and opens the resulting city — just edit `REPO`.
+**First-run intro:** on initial load the page draws a one-time overlay that annotates a
+single "hero" building to make the three selectors concrete — the hatched **roof** = the
+*area* metric, the **height** dimension line = the *height* metric, the **colour swatch** =
+the *colour* metric — each tied by a connector line to the `<select>` that drives it.
+Dismissed on the first drag/scroll/metric-change (or the "Got it" button).
+
+**Build it for your own repo:** the page has a compact **"⚒ Build for your repo"** button
+in the **bottom-left corner**. It opens a copy-pasteable recipe that re-runs this exact
+pipeline against any other folder of Java sources and opens the resulting city — just edit
+`REPO`.
 The recipe drives `generate.sh` via `HEATMAP_REPO` / `HEATMAP_OUT` / `CODECITY_TITLE`
 overrides, which `generate.sh` now honours (falling back to the PetClinic defaults when
 unset).
