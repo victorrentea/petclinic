@@ -1,5 +1,10 @@
 package victor.training.petclinic.rest;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.SpecialtyMapper;
@@ -24,6 +29,10 @@ public class SpecialtyRestController {
     private final SpecialtyFeed specialtyFeed; // invalidated on every mutation so the polling feed stays fresh
 
     @GetMapping("/specialties")
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = SpecialtyDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.SPECIALTIES)))
     public List<SpecialtyDto> listSpecialties() {
         List<Specialty> allSpecialties = specialtyRepository.findAll();
         return specialtyMapper.toSpecialtyDtos(allSpecialties);

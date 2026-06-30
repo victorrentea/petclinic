@@ -1191,7 +1191,7 @@ export interface operations {
       /** @description OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SpecialtyDto"][];
+          "application/json": components["schemas"]["SpecialtyDto"][];
         };
       };
       /** @description Bad Request */
@@ -1416,7 +1416,7 @@ export interface operations {
       /** @description OK */
       200: {
         content: {
-          "*/*": components["schemas"]["VetDto"][];
+          "application/json": components["schemas"]["VetDto"][];
         };
       };
       /** @description Bad Request */
@@ -1575,7 +1575,7 @@ export interface operations {
       /** @description OK */
       200: {
         content: {
-          "*/*": components["schemas"]["VisitDto"][];
+          "application/json": components["schemas"]["VisitDto"][];
         };
       };
       /** @description Bad Request */

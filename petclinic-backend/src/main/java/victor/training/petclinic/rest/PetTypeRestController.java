@@ -1,5 +1,10 @@
 package victor.training.petclinic.rest;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +32,10 @@ public class PetTypeRestController {
     private final PetTypeRepository petTypeRepository;
 
     @GetMapping(produces = "application/json")
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = PetTypeDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.PET_TYPES)))
     public List<PetTypeDto> listPetTypes() {
         List<PetType> petTypes = new ArrayList<>(petTypeRepository.findAll());
         return petTypeMapper.toPetTypeDtos(petTypes);

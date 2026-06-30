@@ -1,6 +1,11 @@
 package victor.training.petclinic.rest;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +30,10 @@ public class VisitRestController {
     private final VisitMapper visitMapper;
 
     @GetMapping
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = VisitDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.VISITS)))
     public List<VisitDto> listVisits() {
         List<Visit> visits = visitRepository.findAllWithPetAndOwner();
         return visitMapper.toVisitsDto(visits);

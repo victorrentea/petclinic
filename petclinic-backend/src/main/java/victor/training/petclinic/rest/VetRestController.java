@@ -1,5 +1,10 @@
 package victor.training.petclinic.rest;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +37,10 @@ public class VetRestController {
     private final SpecialtyRepository specialtyRepository;
 
     @GetMapping
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = VetDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.VETS)))
     public List<VetDto> listVets() {
         List<Vet> allVets = vetRepository.findAll();
         return vetMapper.toVetDtos(allVets);

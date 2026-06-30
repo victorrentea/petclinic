@@ -1,5 +1,10 @@
 package victor.training.petclinic.rest;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import victor.training.petclinic.mapper.PetMapper;
@@ -27,6 +32,10 @@ public class PetRestController {
     }
 
     @GetMapping(produces = "application/json")
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = PetDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.PETS)))
     public List<PetDto> listPets() {
         List<Pet> allPets = petRepository.findAll();
         return petMapper.toPetsDto(allPets);

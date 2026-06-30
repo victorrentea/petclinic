@@ -34,6 +34,11 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -55,6 +60,10 @@ public class OwnerRestController {
     private final VisitMapper visitMapper;
 
     @Operation(operationId = "listOwners", summary = "List owners")
+    @ApiResponse(responseCode = "200", description = "OK",
+        content = @Content(mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
     public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
         List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
