@@ -1,0 +1,94 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+
+    <h2><span class="glyphicon glyphicon-cloud" aria-hidden="true"></span> Mock Server</h2>
+    <p class="text-muted">
+      The WireMock stubs below are generated from the <strong>examples baked into the Swagger</strong>
+      (hard-coded in Java, exported into <code>openapi.yaml</code>). Start the mock to launch a real
+      WireMock process — via a shell command, on a free port — that serves those very examples.
+    </p>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+    <!-- WireMock process control -->
+    <div class="panel" [ngClass]="status.running ? 'panel-success' : 'panel-default'">
+      <div class="panel-heading">
+        <strong>WireMock process</strong>
+        <span *ngIf="status.running" class="label label-success">running</span>
+        <span *ngIf="!status.running" class="label label-default">stopped</span>
+      </div>
+      <div class="panel-body">
+        <div *ngIf="status.running">
+          <p>
+            Serving <strong>{{ status.stubCount }}</strong> stub(s) at
+            <a [href]="status.url" target="_blank" rel="noopener">{{ status.url }}</a>
+            (port {{ status.port }}).
+          </p>
+          <p class="text-muted">Started with the command:</p>
+          <pre>{{ status.command }}</pre>
+        </div>
+        <p *ngIf="!status.running" class="text-muted">
+          The mock is not running yet. Click <em>Start WireMock</em> to launch it.
+        </p>
+
+        <button class="btn btn-primary" (click)="start()" [disabled]="busy || status.running">
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Start WireMock
+        </button>
+        <button class="btn btn-default" (click)="stop()" [disabled]="busy || !status.running">
+          <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> Stop
+        </button>
+        <button class="btn btn-default" (click)="refreshStatus()" [disabled]="busy">
+          <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh
+        </button>
+        <span *ngIf="busy" class="text-muted">&nbsp; working…</span>
+      </div>
+    </div>
+
+    <!-- Generated stubs -->
+    <div class="panel panel-default" *ngIf="preview">
+      <div class="panel-heading">
+        <strong>Stubs generated from the Swagger</strong>
+        <span class="badge">{{ preview.stubs.length }}</span>
+        <span class="text-muted small"> &nbsp; source: <code>{{ preview.openApiPath }}</code></span>
+      </div>
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <ng-container *ngFor="let stub of preview.stubs">
+          <tr>
+            <td><span class="label label-primary">{{ stub.method }}</span></td>
+            <td><code>{{ stub.urlPath }}</code></td>
+            <td>{{ stub.status }}</td>
+            <td>
+              <button class="btn btn-xs btn-default" (click)="toggle(stub)">
+                {{ expanded[stub.name] ? 'Hide' : 'Show' }} JSON
+              </button>
+              <button class="btn btn-xs btn-default" (click)="tryOnMock(stub)"
+                      [disabled]="!status.running" title="GET this path on the live mock">
+                Try on mock
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="expanded[stub.name]">
+            <td colspan="4"><pre class="stub-json">{{ stub.json }}</pre></td>
+          </tr>
+          <tr *ngIf="tryResults[stub.name]">
+            <td colspan="4">
+              <span class="text-muted small">Response from the mock:</span>
+              <pre class="stub-json">{{ tryResults[stub.name] }}</pre>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
