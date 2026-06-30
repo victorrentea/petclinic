@@ -68,6 +68,13 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("object.getWorldPosition", html)
             self.assertIn("setRotationPivotToViewportCenter", html)
             self.assertIn("new THREE.Plane", html)
+            # "Build this for your own repo" recipe: button, overlay, baked-in command.
+            self.assertIn('id="howtoToggle"', html)
+            self.assertIn("Build a Code City for any source folder", html)
+            self.assertIn("const BUILD_CMD =", html)
+            # BUILD_CMD is JSON-embedded, so quotes are backslash-escaped in the HTML.
+            self.assertIn(r'HEATMAP_REPO=\"$REPO\" HEATMAP_OUT=\"$REPO/.codecity\"', html)
+            self.assertIn(str(SCRIPT_DIR), html)
 
 
 if __name__ == "__main__":

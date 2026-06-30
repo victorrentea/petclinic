@@ -62,6 +62,13 @@ The page has independent selectors for all three visual axes:
 - height: building height
 - color: building color
 
+**Build it for your own repo:** the page has a **"⛏ Build this for your own repo…"**
+button (panel, bottom). It opens a copy-pasteable recipe that re-runs this exact pipeline
+against any other folder of Java sources and opens the resulting city — just edit `REPO`.
+The recipe drives `generate.sh` via `HEATMAP_REPO` / `HEATMAP_OUT` / `CODECITY_TITLE`
+overrides, which `generate.sh` now honours (falling back to the PetClinic defaults when
+unset).
+
 `fetch_bugs.py` is the Spring-specific GitHub bug-label crawler from the original; it is
 kept for provenance but **not** used here (PetClinic has no `type: bug` labels, so the
 bug signal comes from Conventional-Commit `fix:` subjects instead — see `generate.sh`).

@@ -26,8 +26,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Code under analysis = the whole git repo (so git paths line up with the file walk);
 # generated artifacts land in their own subfolder under petclinic-backend/docs/generated.
-export HEATMAP_REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
-export HEATMAP_OUT="$(cd "$SCRIPT_DIR/../../generated" && pwd)/codemap"
+# Both honour a pre-set value, so the in-page "Build this for your own repo" recipe can
+# aim the same pipeline at any other checkout via HEATMAP_REPO=... HEATMAP_OUT=... .
+export HEATMAP_REPO="${HEATMAP_REPO:-$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)}"
+export HEATMAP_OUT="${HEATMAP_OUT:-$(cd "$SCRIPT_DIR/../../generated" && pwd)/codemap}"
 export HEATMAP_PYLIBS="$SCRIPT_DIR/.pylibs"
 
 # Exclude build outputs, IDE/agent metadata, and git worktrees
@@ -37,8 +39,8 @@ export HEATMAP_PRUNE="target,.claude,.conductor,node_modules,.idea,.venv,.codegr
 # Conventional-commit bug-fix detection.
 export HEATMAP_BUG_COMMIT_REGEX='^(fix|bugfix)(\(|:|!)'
 
-export HEATMAP_TITLE="Spring PetClinic Codemap"
-export CODECITY_TITLE="Code City"
+export HEATMAP_TITLE="${HEATMAP_TITLE:-Spring PetClinic Codemap}"
+export CODECITY_TITLE="${CODECITY_TITLE:-Code City}"
 
 # Ctrl/⌘-click a file tile to open it in an editor (in-page picker: VS Code / IntelliJ).
 # REPO_ABS defaults to HEATMAP_REPO, which is what the tsv paths are relative to.

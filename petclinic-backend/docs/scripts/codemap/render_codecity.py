@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 _here = Path(__file__).resolve().parent
+SCRIPTS_DIR = _here  # the codemap generators live here; baked into the in-page "build it yourself" recipe
 OUT_DIR = Path(os.environ.get("HEATMAP_OUT") or os.environ.get("HEATMAP_REPO") or _here).resolve()
 TSV = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else OUT_DIR / "codemap.tsv"
 OUT = OUT_DIR / "codecity.html"
@@ -185,6 +186,98 @@ html = """<!doctype html>
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
   }
+  .panel-foot {
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(140, 148, 160, 0.3);
+  }
+  .howto-toggle {
+    width: 100%;
+    border: 1px solid #1e3a8a;
+    border-radius: 6px;
+    background: #1e3a8a;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .howto-toggle:hover { background: #16306e; }
+  .howto {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(2px);
+  }
+  .howto[hidden] { display: none; }
+  .howto-card {
+    position: relative;
+    width: min(740px, calc(100vw - 40px));
+    max-height: calc(100vh - 60px);
+    overflow: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.4);
+    padding: 22px 24px 24px;
+  }
+  .howto-card h2 { margin: 0 0 4px; font-size: 18px; }
+  .howto-card h3 { margin: 18px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #475467; }
+  .howto-card p, .howto-card li { font-size: 13.5px; line-height: 1.5; color: #344054; }
+  .howto-card p { margin: 0 0 12px; }
+  .howto-card ol { margin: 0 0 12px; padding-left: 20px; }
+  .howto-card li { margin: 0 0 5px; }
+  .howto-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    color: #98a2b3;
+    cursor: pointer;
+  }
+  .howto-close:hover { color: #1f2933; }
+  .howto-cmd { position: relative; margin: 0 0 8px; }
+  .howto-cmd pre {
+    margin: 0;
+    padding: 14px 44px 14px 16px;
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .howto-copy {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .howto-copy:hover { background: #334155; }
+  .howto-note { font-size: 12px !important; color: #667085 !important; }
+  .howto code {
+    background: #eef1f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.92em;
+  }
 </style>
 </head>
 <body>
@@ -224,12 +317,80 @@ html = """<!doctype html>
       </select>
     </label>
   </div>
+  <div class="panel-foot">
+    <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
+      &#9874; Build this for your own repo&hellip;
+    </button>
+  </div>
+</section>
+<section class="howto" id="howto" hidden>
+  <div class="howto-card" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+    <button class="howto-close" id="howtoClose" type="button" aria-label="Close">&times;</button>
+    <h2 id="howtoTitle">Build a Code City for any source folder</h2>
+    <p>This page is a self-contained snapshot of one repository. The same generators
+      turn <em>any</em> folder of Java sources into this 3-D city &mdash; a building per
+      file, grouped into districts by package. Point the pipeline at another repo and
+      open the result:</p>
+    <div class="howto-cmd">
+      <button class="howto-copy" id="howtoCopy" type="button">Copy</button>
+      <pre id="howtoPre"></pre>
+    </div>
+    <h3>What it does</h3>
+    <ol>
+      <li><code>compute_complexity.py</code> / <code>compute_fanio.py</code> &mdash; per-file
+        cyclomatic complexity and internal fan-in/out (tree-sitter).</li>
+      <li><code>build_heatmap.py</code> &mdash; joins git history (commits, <code>fix:</code>
+        commits) and file size into <code>codemap.tsv</code>.</li>
+      <li><code>render_codecity.py</code> &mdash; extrudes each file into a building and
+        writes this self-contained <code>codecity.html</code> (Three.js, all data inline).</li>
+    </ol>
+    <p class="howto-note">Java sources only. Re-run anytime to refresh. <code>open</code> is
+      macOS &mdash; use <code>xdg-open</code> on Linux or <code>start</code> on Windows.
+      &#8984;/Ctrl-double-click a building in the city to jump to its file in VS Code.</p>
+  </div>
 </section>
 <div id="hover"></div>
 
 <script>
 const FILES = __FILES_JSON__;
 const REPO_ABS = __REPO_ABS__;
+const BUILD_CMD = __BUILD_CMD__;
+
+// "Build this for your own repo" overlay: reveal the copy-pasteable recipe and let the
+// reader run the very pipeline that produced this page against any other source folder.
+(function wireHowto() {
+  const howto = document.getElementById("howto");
+  const toggle = document.getElementById("howtoToggle");
+  const close = document.getElementById("howtoClose");
+  const copy = document.getElementById("howtoCopy");
+  document.getElementById("howtoPre").textContent = BUILD_CMD;
+
+  const open = () => { howto.hidden = false; toggle.setAttribute("aria-expanded", "true"); };
+  const dismiss = () => { howto.hidden = true; toggle.setAttribute("aria-expanded", "false"); };
+  toggle.addEventListener("click", open);
+  close.addEventListener("click", dismiss);
+  howto.addEventListener("click", (e) => { if (e.target === howto) dismiss(); });
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !howto.hidden) dismiss(); });
+
+  copy.addEventListener("click", () => {
+    const done = () => { copy.textContent = "Copied!"; setTimeout(() => { copy.textContent = "Copy"; }, 1400); };
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = BUILD_CMD;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (_) { /* ignore */ }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(BUILD_CMD).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  });
+})();
 </script>
 <script type="module">
 import * as THREE from "three";
@@ -703,11 +864,32 @@ FAVICON = "data:image/svg+xml," + urllib.parse.quote(
     f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">{_LOGO_SHAPES}</svg>'
 )
 
+# The recipe the in-page "Build this for your own repo" button reveals. SCRIPTS_DIR is
+# baked in so the command is runnable as-is; generate.sh honours the HEATMAP_*/CODECITY_*
+# overrides, so the only thing the reader edits is REPO.
+BUILD_CMD = f"""# 1. The folder you want to visualise (a git repo of Java sources):
+REPO="$HOME/workspace/your-repo"
+
+# 2. PetClinic's codemap generators do all the analysis & rendering:
+SCRIPTS="{SCRIPTS_DIR}"
+
+# 3. One-time: vendor the tree-sitter parsers used to measure complexity.
+[ -d "$SCRIPTS/.pylibs" ] || pip install -r "$SCRIPTS/requirements.txt" --target "$SCRIPTS/.pylibs"
+
+# 4. Run the pipeline on REPO, writing the report into REPO/.codecity/ .
+HEATMAP_REPO="$REPO" HEATMAP_OUT="$REPO/.codecity" \\
+  CODECITY_TITLE="Code City: $(basename "$REPO")" "$SCRIPTS/generate.sh"
+
+# 5. Open the city in your browser (macOS `open`; Linux `xdg-open`; Windows `start`).
+open "$REPO/.codecity/codecity.html"
+"""
+
 html = (html
         .replace("__TITLE__", TITLE)
         .replace("__LOGO_SVG__", LOGO_SVG)
         .replace("__FAVICON__", FAVICON)
         .replace("__FILES_JSON__", json.dumps(rows))
-        .replace("__REPO_ABS__", json.dumps(str(REPO_ABS))))
+        .replace("__REPO_ABS__", json.dumps(str(REPO_ABS)))
+        .replace("__BUILD_CMD__", json.dumps(BUILD_CMD)))
 OUT.write_text(html)
 print(f"wrote {OUT} ({OUT.stat().st_size / 1024:.1f} KB)")
