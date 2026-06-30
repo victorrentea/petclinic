@@ -34,3 +34,12 @@ test('spansToPuml renders browser→backend→DB with the custom span', () => {
   const deacts = (puml.match(/^deactivate /gm) ?? []).length;
   expect(acts).toBe(deacts);
 });
+
+test('spansToPuml captions the diagram (at the bottom) with which test generated it', () => {
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  // a PlantUML caption renders centered at the bottom — like the DB diagram
+  expect(puml).toContain('caption generated from test "add a visit"');
+  // the title stays a clean single line, no subtitle, no note
+  expect(puml).toContain('\ntitle add a visit\n');
+  expect(puml).not.toContain('note across');
+});

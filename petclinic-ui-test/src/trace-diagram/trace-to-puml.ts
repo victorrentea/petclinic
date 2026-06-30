@@ -128,6 +128,7 @@ export function renderPuml(title: string, traces: NormSpan[][]): string {
     '@startuml',
     'hide footbox',
     `title ${title}`,
+    `caption generated from test "${title}"`,
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   return [...header, ...body, '@enduml', ''].join('\n');

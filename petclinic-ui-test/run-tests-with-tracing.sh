@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
 # run-tests-with-tracing.sh — run the e2e tests against an ALREADY-RUNNING stack
-# so each scenario's browser↔backend↔DB trace is captured in Tempo and turned
-# into a PlantUML sequence diagram (petclinic-ui-test/diagrams/<test>.puml) by the
-# Playwright globalTeardown.
+# so each @generate_sequence scenario's browser↔backend↔DB trace is captured in
+# Tempo and turned into a PlantUML sequence diagram
+# (petclinic-ui-test/features/generated_sequences/<scenario>.puml) by the
+# Cucumber AfterAll hook.
 #
 # This script assumes the full telemetry stack is already up, started the
 # canonical way (so the backend has the OpenTelemetry Java agent attached):
@@ -14,8 +15,8 @@
 #     ./start-frontend.sh     # Angular dev server        :4200
 #
 # It does NOT start or stop anything — it only verifies the stack is reachable,
-# runs the suite with SKIP_SERVER_START=1 (so Playwright reuses the running apps
-# instead of booting its own agent-less ones), and reports the diagrams produced.
+# runs the Cucumber suite (which reuses the running apps), and reports the
+# diagrams produced.
 #
 # Usage:  ./run-tests-with-tracing.sh            (from petclinic-ui-test/)
 #
@@ -61,16 +62,15 @@ fi
 # --- run the suite ---------------------------------------------------------
 log "Running e2e tests with tracing…"
 cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
-SKIP_SERVER_START=1 npm test
+npm run test:cucumber
 test_status=$?
 
 # --- report the diagrams produced ------------------------------------------
 shopt -s nullglob
-diagrams=("$UI_TEST_DIR"/diagrams/*.puml)
+diagrams=("$UI_TEST_DIR"/features/generated_sequences/*.puml)
 if ((${#diagrams[@]})); then
   log "📊 Collected ${#diagrams[@]} sequence diagram(s):"
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done
-  log "Render to PNG:  plantuml -tpng petclinic-ui-test/diagrams/*.puml"
 else
   warn "No .puml collected — is the backend running WITH the OTel agent"
   warn "(./start-backend.sh while Grafana is up), so traces reached Tempo?"

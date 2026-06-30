@@ -47,7 +47,7 @@ export async function generateFromWindows(
 export async function runGenerate(): Promise<void> {
   const root = path.join(__dirname, '..', '..');
   const windowsFile = path.join(root, 'test-results', 'trace-windows.json');
-  const outDir = path.join(root, 'diagrams');
+  const outDir = path.join(root, 'features', 'generated_sequences');
 
   if (!fs.existsSync(windowsFile)) {
     console.warn(`ℹ️  ${windowsFile} not found — no diagrams generated.`);

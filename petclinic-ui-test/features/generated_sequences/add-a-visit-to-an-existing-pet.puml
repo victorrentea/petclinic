@@ -1,6 +1,7 @@
 @startuml
 hide footbox
 title add a visit to an existing pet
+caption generated from test "add a visit to an existing pet"
 participant Browser
 participant Backend
 participant DB
