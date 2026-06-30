@@ -1,0 +1,4 @@
+# Regenerated on every start.sh run from ../../openapi.yaml — not source.
+mappings/
+.cache/
+*.log

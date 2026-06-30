@@ -7,8 +7,8 @@ package victor.training.petclinic.rest;
  * <p>Each constant is referenced from an {@code @ExampleObject(value = ...)} on the matching
  * {@code GET} list endpoint, so springdoc copies it verbatim into the generated
  * {@code openapi.yaml} (under {@code responses.200.content.application/json.examples}). From
- * there the {@link WiremockStubGenerator} turns each example into a WireMock stub — so the
- * mock backend can never drift from the documented contract.
+ * there the optional dev tool {@code petclinic-frontend/wiremock/start.sh} turns each example
+ * into a WireMock stub — so a stand-in mock backend can never drift from the documented contract.
  *
  * <p>Annotation values must be compile-time constants, hence plain {@code String} text blocks
  * (not builder-constructed DTOs). The payloads are deliberately small but valid against the

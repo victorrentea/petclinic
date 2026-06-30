@@ -11,7 +11,6 @@ import {PetTypesModule} from './pettypes/pettypes.module';
 import {VetsModule} from './vets/vets.module';
 import {PartsModule} from './parts/parts.module';
 import {SpecialtiesModule} from './specialties/specialties.module';
-import {DevtoolsModule} from './devtools/devtools.module';
 import {HttpErrorHandler} from './error.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
@@ -31,7 +30,6 @@ import {HttpErrorInterceptor} from './http-error.interceptor';
     PetTypesModule,
     VetsModule,
     SpecialtiesModule,
-    DevtoolsModule,
     PartsModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
