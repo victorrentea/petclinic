@@ -23,6 +23,8 @@
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <spring-ai.version>1.1.2</spring-ai.version>
+        <!-- WireMock standalone jar, launched as an external process by the dev-tools mock server -->
+        <wiremock.version>3.9.1</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -257,6 +259,30 @@
                         <endWithNewline/>
                     </java>
                 </configuration>
+            </plugin>
+            <!-- Make the WireMock standalone jar available at a stable path (target/wiremock/) so the
+                 dev-tools "Mock Server" screen can launch it as an external process via a shell command. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-wiremock-standalone</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>copy</goal></goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wiremock</groupId>
+                                    <artifactId>wiremock-standalone</artifactId>
+                                    <version>${wiremock.version}</version>
+                                    <type>jar</type>
+                                    <outputDirectory>${project.build.directory}/wiremock</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
