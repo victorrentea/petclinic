@@ -85,7 +85,7 @@ fi
 # Gated: only run when petclinic-backend/DB.sql is staged — that's the sole input. Regenerates
 # docs/generated/DB.puml (red = this commit's schema delta) and stages it
 # so the diagram is committed alongside the schema change.
-if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
+if git diff --cached --name-only | grep -qx 'petclinic-backend/docs/generated/DB.sql'; then
   if command -v python3 >/dev/null 2>&1; then
     DBDIAG_OUT=$(mktemp)
     trap 'rm -f "$NPM_OUT" "$DBDIAG_OUT"' EXIT
@@ -107,12 +107,12 @@ fi
 # reviewed (via CODEOWNERS) alongside the dependency change.
 if git diff --cached --name-only | grep -qE '(^|/)pom\.xml$'; then
   if command -v python3 >/dev/null 2>&1; then
-    if ! DEPS_OUT=$(python3 "$ROOT/scripts/list-unversioned-deps.py" 2>&1); then
+    if ! DEPS_OUT=$(python3 "$ROOT/petclinic-backend/docs/scripts/list-unversioned-deps.py" 2>&1); then
       echo "$DEPS_OUT"
       echo "[pre-commit] ❌ unversioned-deps list generation failed — commit blocked."
       exit 1
     fi
-    git add "$ROOT/unversioned-dependencies.txt"
+    git add "$ROOT/petclinic-backend/docs/unversioned-dependencies.txt"
   else
     echo "[pre-commit] ⚠️  python3 missing — skipping unversioned-deps list regen."
   fi

@@ -16,10 +16,10 @@ ZERO=0000000000000000000000000000000000000000
 # Backstops a `git commit --no-verify` that bypassed pre-commit. Ungated because
 # chatbot/database pom changes fall outside the backend-only path gate below.
 if command -v python3 >/dev/null 2>&1; then
-  if ! python3 "$ROOT/scripts/list-unversioned-deps.py" --check; then
+  if ! python3 "$ROOT/petclinic-backend/docs/scripts/list-unversioned-deps.py" --check; then
     echo "[pre-push] ❌ unversioned-dependencies.txt is stale — push blocked."
-    echo "[pre-push]    Run: python3 scripts/list-unversioned-deps.py"
-    echo "[pre-push]         git add unversioned-dependencies.txt"
+    echo "[pre-push]    Run: python3 petclinic-backend/docs/scripts/list-unversioned-deps.py"
+    echo "[pre-push]         git add petclinic-backend/docs/unversioned-dependencies.txt"
     exit 1
   fi
 fi
@@ -30,16 +30,21 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$ZERO" ] && continue  # branch deletion — nothing to verify
 
   if [ "$remote_sha" = "$ZERO" ]; then
-    paths=$(git log --name-only --pretty=format: "$local_sha" --not --remotes="$REMOTE" 2>/dev/null || true)
+    range=("$local_sha" --not --remotes="$REMOTE")
   else
-    paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
+    range=("$remote_sha..$local_sha")
   fi
+  paths=$(git log --name-only --pretty=format: "${range[@]}" 2>/dev/null || true)
 
-  # Guard: a petclinic-backend/DB.sql change in the pushed range must carry a regenerated
-  # DB.puml (catches a `git commit --no-verify` that bypassed pre-commit).
-  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
+  # Guard: a schema *content* change to DB.sql in the pushed range must carry a
+  # regenerated DB.puml (catches a `git commit --no-verify` that bypassed pre-commit).
+  # Rename-aware (-M): a pure move of DB.sql is not a schema delta, so only trip on
+  # Modified/Added, never on a Renamed line.
+  db_content_changed=$(git log --name-status -M --pretty=format: "${range[@]}" 2>/dev/null \
+    | grep -E '^[MA][[:space:]]+petclinic-backend/docs/generated/DB\.sql$' || true)
+  if [ -n "$db_content_changed" ] \
      && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
-    echo "[pre-push] ❌ petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+    echo "[pre-push] ❌ petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
     echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
     echo "[pre-push]         git add petclinic-backend/docs/generated/DB.puml"
     echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
@@ -82,7 +87,6 @@ fi
 DRIFT_PATHS=(
   "$ROOT/petclinic-backend/docs/generated"
   "$ROOT/openapi.yaml"
-  "$ROOT/petclinic-backend/DB.sql"
 )
 if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
   echo "[pre-push] ❌ Generated artifacts drifted from committed state:"

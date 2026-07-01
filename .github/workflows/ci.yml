@@ -76,10 +76,12 @@ jobs:
           if [ "$before" = "$zero" ] || ! git cat-file -e "${before}^{commit}" 2>/dev/null; then
             before='HEAD~1'   # new branch / unknown base — check the tip commit
           fi
-          paths="$(git diff --name-only "${before}...HEAD" 2>/dev/null || git diff --name-only HEAD~1...HEAD)"
-          if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
-             && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
-            echo "::error::petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+          # Rename-aware (-M): a pure move of DB.sql isn't a schema delta, so only a
+          # Modified/Added DB.sql (not a Renamed one) requires a regenerated DB.puml.
+          status="$(git diff --name-status -M "${before}...HEAD" 2>/dev/null || git diff --name-status -M HEAD~1...HEAD)"
+          if printf '%s\n' "$status" | grep -qE '^[MA][[:space:]]+petclinic-backend/docs/generated/DB\.sql$' \
+             && ! printf '%s\n' "$status" | grep -qE '[[:space:]]petclinic-backend/docs/generated/DB\.puml$'; then
+            echo "::error::petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
             echo "::error::Run ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
             exit 1
           fi
@@ -164,23 +166,23 @@ jobs:
       # ── Hook parity: pre-commit regenerates unversioned-dependencies.txt when
       #    a pom changes. Regenerate here too so the committed file can't drift. ──
       - name: Regenerate unversioned-dependencies.txt
-        run: python3 scripts/list-unversioned-deps.py
+        run: python3 petclinic-backend/docs/scripts/list-unversioned-deps.py
 
       - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt; then
+          if git diff --quiet petclinic-backend/docs/generated petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/docs/unversioned-dependencies.txt; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt
+            git --no-pager diff --stat petclinic-backend/docs/generated petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/docs/unversioned-dependencies.txt
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated artifacts (docs/generated/, DB.sql, api-types.ts, or unversioned-dependencies.txt) are out of date."
-          echo "::error::Run 'cd petclinic-backend && mvn test', 'cd petclinic-frontend && npm run generate:api', and 'python3 scripts/list-unversioned-deps.py' locally and push the regenerated files."
+          echo "::error::Generated artifacts (docs/generated/ incl. DB.sql, api-types.ts, or unversioned-dependencies.txt) are out of date."
+          echo "::error::Run 'cd petclinic-backend && mvn test', 'cd petclinic-frontend && npm run generate:api', and 'python3 petclinic-backend/docs/scripts/list-unversioned-deps.py' locally and push the regenerated files."
           exit 1
 
       - name: Auto-commit regenerated artifacts
@@ -188,7 +190,7 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt
+          git add petclinic-backend/docs/generated petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/docs/unversioned-dependencies.txt
           git commit -m 'chore(guardrail): regenerate diagrams, DB.sql, api-types.ts, and unversioned-deps [skip ci]'
           git push
 

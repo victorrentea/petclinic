@@ -10,7 +10,7 @@
 /openapi.yaml                    @victorrentea/elders
 
 # Persistence
-/petclinic-backend/DB.sql        @victorrentea/elders
+/petclinic-backend/docs/generated/DB.sql @victorrentea/elders
 /petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
 
 # Domain Model
@@ -21,8 +21,9 @@
 /petclinic-backend/docs/c4model.dsl   @victorrentea/elders
 
 # Dependencies / SBOM
-**/pom.xml      @victorrentea/elders
 **/package.json @victorrentea/elders
-# Generated surface of deps declared with no <version> (inherited from a parent/BOM)
-/unversioned-dependencies.txt @victorrentea/elders
+# Maven deps aren't reviewed via **/pom.xml directly; instead the elders review the
+# collapsed surface of deps declared with no <version> (version inherited from a
+# parent/BOM), regenerated from every pom by list-unversioned-deps.py.
+/petclinic-backend/docs/unversioned-dependencies.txt @victorrentea/elders
 

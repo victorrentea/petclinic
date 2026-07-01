@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate petclinic-backend/docs/generated/DB.puml from petclinic-backend/DB.sql,
+# Regenerate petclinic-backend/docs/generated/DB.puml from petclinic-backend/docs/generated/DB.sql,
 # highlighting in red the schema changes vs the previous committed DB.sql.
 #
 # Usage:
@@ -10,7 +10,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
-DB_SQL="$ROOT/petclinic-backend/DB.sql"
+DB_SQL="$ROOT/petclinic-backend/docs/generated/DB.sql"
 OUT="$ROOT/petclinic-backend/docs/generated/DB.puml"
 VENV="$SCRIPT_DIR/.venv"
 
@@ -37,7 +37,7 @@ BASE="$TMP_DIR/baseline.sql"
 
 # ── Resolve current schema ──────────────────────────────────────────────────
 if [ "$MODE" = "staged" ]; then
-  git -C "$ROOT" show :petclinic-backend/DB.sql >"$CUR" 2>/dev/null || cp "$DB_SQL" "$CUR"
+  git -C "$ROOT" show :petclinic-backend/docs/generated/DB.sql >"$CUR" 2>/dev/null || cp "$DB_SQL" "$CUR"
 else
   cp "$DB_SQL" "$CUR"
 fi
@@ -45,7 +45,7 @@ fi
 # ── Resolve baseline schema (previous committed DB.sql) ─────────────────────
 BASE_ARG=""
 if [ "$MODE" != "bootstrap" ]; then
-  if git -C "$ROOT" show HEAD:petclinic-backend/DB.sql >"$BASE" 2>/dev/null; then
+  if git -C "$ROOT" show HEAD:petclinic-backend/docs/generated/DB.sql >"$BASE" 2>/dev/null; then
     BASE_ARG="$BASE"
   fi
 fi

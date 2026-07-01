@@ -4,7 +4,7 @@ import os
 import db_schema_to_puml as m
 
 HERE = os.path.dirname(__file__)
-DB_SQL = os.path.join(HERE, "..", "..", "DB.sql")
+DB_SQL = os.path.join(HERE, "..", "generated", "DB.sql")
 
 
 def _real_schema_sql():
