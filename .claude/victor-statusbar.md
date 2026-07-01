@@ -116,5 +116,78 @@ Two parts: **last turn**, then **session total** (`∑`).
 
 ---
 
+## Implementation tricks
+
+The interesting engineering isn't in *what* is shown but in squeezing accurate,
+per-turn numbers out of an input that only ever gives a running **session**
+total, and doing it cheaply enough to re-render every second. Highlights:
+
+### Deriving a *per-turn* cost from a session-total-only input
+- `.cost.total_cost_usd` is authoritative (matches `/usage`, includes subagents)
+  but is a **monotonic session total**. The transcript stores no per-message cost
+  (`costUSD` is `null`), so the turn cost can't be read — it's computed as the
+  **delta** of the total since the turn began, with the baseline snapshotted in a
+  per-session `/tmp` state file keyed by the last user prompt's UUID.
+- When a new prompt appears, the just-finished turn's cost is snapshotted as
+  "previous turn" **before** rolling the baseline forward — so the gap before the
+  new turn's usage lands shows the old number instead of **flashing $0.00**.
+
+### Token counting that doesn't over-count
+- Tokens are summed from the transcript JSONL, **deduped by `requestId`** via
+  `group_by`. Streaming logs the *same* `usage` object on several lines per API
+  request, so a naive sum inflates by ~2–3×.
+- A jq predicate isolates the **last real user prompt** — excluding sidechain,
+  meta, and messages whose content is only a `tool_result` — so "this turn" starts
+  at the right message.
+
+### Making `refreshInterval: 1` affordable
+- The `jq -s` that slurps the **entire** (often multi-MB) transcript is far too
+  costly to run every second. Its one-line output is **cached against the
+  transcript's mtime**; while the file is untouched the cache is reused, and any
+  new message bumps the mtime and forces a re-parse. This is what lets the idle
+  "N ago" clock tick per-second for free.
+
+### Layered turn-state resolution (three fallbacks)
+Knowing whether the agent is *thinking* or *waiting on you* — and when the last
+turn ended — is hard because the status JSON has no live signal. Resolved in
+priority order:
+1. **Hook state (authoritative):** a `Stop` / `UserPromptSubmit` hook
+   (`~/.claude/hooks/turn-state.sh`) writes a state file that marks boundaries
+   reliably for *every* storage format.
+2. **Transcript fallback:** `stop_reason != "tool_use"` + no trailing user
+   message ⇒ idle; age from the last assistant `timestamp`.
+3. **Cost-clock heuristic:** for Claude Code 2.1.x sessions whose `<id>.jsonl`
+   path doesn't exist, turn state is inferred purely from the **cost clock** —
+   cost rises while working, flat between turns. Flat ≥ `IDLE_GRACE` (3s) ⇒ idle;
+   flat ≥ `NEW_TURN_GAP` (30s) ⇒ genuinely new turn (so a mid-turn tool pause
+   doesn't split one turn in two).
+
+### Context-aware idle warning
+- The "N ago" clock turns **orange only past the ~5-min prompt-cache TTL** *and*
+  only when context ≥ 100K tokens — because only then is the post-TTL uncached
+  re-send of your next message expensive enough to be worth flagging.
+
+### Cheap shell/rendering touches
+- ANSI colors are built once from `printf '\033'`; thresholds recolor each field
+  (context %, quota left, burn arrow, idle age) inline.
+- The `/effort` suffix is spliced **around** the model's `(context)` label using
+  pure shell parameter expansion (`${model%% (*}` / `${model#* (}`) — no subshell.
+- Size label comes from either the model's `(1M)` suffix (sed) or is computed from
+  `context_window_size` (bc), then abbreviated K/M.
+- **Burn-rate arrow** (`↑↗↘↓`): awk ratio `r = quota_left_frac / time_left_frac`
+  over the hardcoded 18000s window, with reciprocal-symmetric bands so surplus and
+  deficit are treated evenly; no arrow when on-track.
+- The whole spend segment is **suppressed** when the session total rounds to
+  `$0.00`.
+- The 🌿 worktree name appears **only inside a linked worktree** (git-dir under
+  `.git/worktrees/<name>`), never in the main working tree.
+
+> **Note:** the *Example* and format details in §2–§3 above predate the current
+> script — live output now uses `↑↗↘↓` arrows, `•` separators, a `💸` total, an
+> idle "N ago" clock, and the worktree segment. The tricks below reflect the
+> script as it stands.
+
+---
+
 *Maintained by Victor. The script is global (`~/.claude/`), not part of this
 repo — this file is documentation only.*
