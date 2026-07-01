@@ -126,6 +126,41 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
   }
+  /* Drill-down breadcrumb: the path from the whole repo to the package now in view. */
+  .breadcrumb {
+    position: fixed;
+    left: 16px;
+    top: calc(16px + var(--panel-h, 132px));
+    z-index: 3;
+    max-width: min(430px, calc(100vw - 32px));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(140, 148, 160, 0.45);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+    padding: 6px 8px;
+  }
+  .breadcrumb[hidden] { display: none; }
+  .crumb {
+    border: none;
+    background: transparent;
+    color: #1e3a8a;
+    font-size: 12px;
+    font-weight: 650;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    padding: 2px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .crumb:hover { background: #e6edfb; }
+  .crumb-current { color: #1f2933; cursor: default; }
+  .crumb-current:hover { background: transparent; }
+  .crumb-sep { color: #9aa5b5; font-size: 12px; }
   .howto-toggle {
     position: fixed;
     left: 16px;
@@ -267,40 +302,42 @@
 <div id="scene"></div>
 <section class="panel">
   <h1><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="9" width="5.5" height="12.5" rx="1" fill="#5b8def"/><rect x="9" y="3.5" width="6" height="18" rx="1" fill="#1e3a8a"/><rect x="16" y="11.5" width="5.5" height="10" rx="1" fill="#3a86ff"/></svg><span>Code City</span></h1>
-  <p class="sub">Drag to pan, Cmd/Ctrl-drag to rotate, scroll to zoom. Cmd/Ctrl-double-click opens a file in VS Code.</p>
+  <p class="sub">Drag to pan, Cmd/Ctrl-drag to rotate, scroll to zoom. Shift-click a package floor or building to zoom in; Shift-click the surrounding floor (or Esc / the breadcrumb) to step out. Cmd/Ctrl-double-click opens a file in VS Code.</p>
   <div class="controls">
     <label>
       Color
       <select id="colorMetric">
         <option value="complexity_per_kloc">cyclomatic complexity / KLOC</option>
-        <option value="bugs_per_kloc">bugs / KLOC</option>
-        <option value="commits_per_kloc" selected>commits / KLOC</option>
-        <option value="fan_in">fan in</option>
-        <option value="fan_out">fan out</option>
+        <option value="bugs_per_kloc">bugfix commits / KLOC</option>
+        <option value="commits_per_kloc" selected>total commits / KLOC</option>
+        <option value="fan_in">incoming coupling (fan in)</option>
+        <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
     <label>
       Height
       <select id="heightMetric">
-        <option value="lines">lines</option>
+        <option value="lines">lines of code (LOC)</option>
         <option value="cognitive_complexity" selected>cyclomatic complexity</option>
-        <option value="commits">commits</option>
-        <option value="bug_commits">bug commits</option>
-        <option value="fan_out">fan out</option>
+        <option value="bug_commits">bugfix commits</option>
+        <option value="commits">total commits</option>
+        <option value="fan_in">incoming coupling (fan in)</option>
+        <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
     <label>
       Area
       <select id="areaMetric">
-        <option value="bytes" selected>bytes</option>
-        <option value="lines">lines</option>
+        <option value="bytes" selected>file size</option>
+        <option value="lines">lines of code (LOC)</option>
         <option value="cognitive_complexity">cyclomatic complexity</option>
-        <option value="commits">commits</option>
-        <option value="fan_out">fan out</option>
+        <option value="commits">total commits</option>
+        <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
   </div>
 </section>
+<nav id="breadcrumb" class="breadcrumb" hidden aria-label="package scope"></nav>
 <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
   &#9874; Build for your repo
 </button>
@@ -394,6 +431,28 @@ let buildings = [];
 let districts = [];
 let cityLabels = [];
 
+// Drill-down scope: the dotted package the city is currently restricted to ("" = whole repo).
+// Clicking a floor/building re-roots the treemap here so the chosen package fills the full plot.
+const breadcrumbEl = document.getElementById("breadcrumb");
+let scopePath = "";
+let pointerDownAt = null;   // screen coords of the last pointerdown, to tell a click from a drag
+let lastScopeAt = -1e9;     // timestamp of the last drill, to swallow the 2nd click of a double-click
+let districtByName = new Map();   // full package path -> its platform mesh (for hover glow)
+let glowingDistrict = null;       // the platform currently lit while Shift previews a drill target
+const NAV_KEY = "shiftKey";       // hold Shift + click to enter/leave a package
+
+function inScope(file) {
+  return scopePath === "" || file.district === scopePath || file.district.startsWith(scopePath + ".");
+}
+
+// Package segments of `file` *below* the current scope (so nesting depth resets when drilled in).
+function scopedParts(file) {
+  const d = file.district;
+  if (scopePath === "") return d ? d.split(".") : [];
+  if (d === scopePath) return [];
+  return d.slice(scopePath.length + 1).split(".");
+}
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf4f5f7);
 scene.fog = new THREE.Fog(0xf4f5f7, 900, 2200);
@@ -440,6 +499,7 @@ function setRotationPivotToViewportCenter() {
 }
 
 function onPointerDown(event) {
+  pointerDownAt = { x: event.clientX, y: event.clientY };
   if (event.metaKey || event.ctrlKey) {
     setRotationPivotToViewportCenter();
   }
@@ -569,9 +629,13 @@ function insertPackage(parent, parts, file, areaMetric) {
 }
 
 function buildHierarchy(areaMetric) {
-  const root = { name: "root", packageName: "", children: [] };
+  // Seed the root's packageName with the scope so every district still carries its
+  // absolute dotted path (needed for further drill-in and hover labels), while the
+  // *layout* depth restarts at the scope so a drilled-in package fills the plot.
+  const root = { name: "root", packageName: scopePath, children: [] };
   for (const file of FILES) {
-    insertPackage(root, file.district.split("."), file, areaMetric);
+    if (!inScope(file)) continue;
+    insertPackage(root, scopedParts(file), file, areaMetric);
   }
   return d3.hierarchy(root)
     .sum(d => d.value || 0)
@@ -580,8 +644,8 @@ function buildHierarchy(areaMetric) {
 
 function clearCity() {
   for (const label of cityLabels) {
-    label.removeFromParent();
-    label.element.remove();
+    label.obj.removeFromParent();
+    label.el.remove();
   }
   cityLabels = [];
   for (const entry of buildings) {
@@ -591,6 +655,8 @@ function clearCity() {
   }
   buildings = [];
   districts = [];
+  districtByName = new Map();
+  glowingDistrict = null;
   for (const object of [...scene.children]) {
     if (object.userData.kind === "package") {
       scene.remove(object);
@@ -654,6 +720,7 @@ function rebuildCity() {
     block.userData.fileCount = node.leaves().length;
     scene.add(block);
     districts.push(block);
+    districtByName.set(block.userData.name, block);
 
     const outline = new THREE.LineSegments(
       new THREE.EdgesGeometry(block.geometry),
@@ -691,7 +758,7 @@ function rebuildCity() {
     scene.add(mesh);
     buildings.push({ mesh, file, height });
   }
-  labelTopBuildings(areaMetric, heightMetric, colorMetric);
+  setupLabels(areaMetric, heightMetric, colorMetric);
   window.__CODEMAP_3D_READY__ = {
     buildings: buildings.length,
     areaMetric,
@@ -700,54 +767,97 @@ function rebuildCity() {
   };
 }
 
-function addPermanentLabel(entry) {
+const MAX_LABELS = 30;        // most class names shown at once
+const LABEL_GAP = 4;          // px breathing room required between two labels
+// Measure label width without touching the DOM (matches the .city-label font).
+const _labelMeasure = document.createElement("canvas").getContext("2d");
+_labelMeasure.font = "650 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+function makeLabel(entry, priority) {
   const div = document.createElement("div");
   div.className = "city-label";
   div.textContent = entry.file.name;
-  const label = new CSS2DObject(div);
-  const top = entry.mesh.position.y + entry.height / 2;
-  label.position.set(entry.mesh.position.x, top + 16, entry.mesh.position.z);
-  label.center.set(0.5, 1);
-  scene.add(label);
-  cityLabels.push(label);
+  const obj = new CSS2DObject(div);
+  obj.position.set(entry.mesh.position.x, entry.mesh.position.y + entry.height / 2 + 16, entry.mesh.position.z);
+  obj.center.set(0.5, 1);
+  obj.visible = false;        // shown later, only if it survives de-overlap
+  scene.add(obj);
+  cityLabels.push({
+    obj, el: div, priority,
+    w: _labelMeasure.measureText(entry.file.name).width + 16,   // + .city-label horizontal padding
+    h: 22,
+  });
 }
 
-// Permanently label the standout buildings: the largest footprint, the tallest,
-// and the most intensely colored class for the currently selected metrics.
-function labelTopBuildings(areaMetric, heightMetric, colorMetric) {
-  const winners = new Set();
+// Candidate labels: the per-metric standouts (always) plus the tallest buildings, up to MAX_LABELS.
+// Visibility is resolved per-frame in updateLabelVisibility so labels never overlap from any angle.
+function setupLabels(areaMetric, heightMetric, colorMetric) {
+  const chosen = new Set();
   for (const metric of [areaMetric, heightMetric, colorMetric]) {
-    let best = null;
-    let bestValue = -Infinity;
+    let best = null, bestValue = -Infinity;
     for (const entry of buildings) {
       const value = Number(entry.file[metric]) || 0;
-      if (value > bestValue) {
-        bestValue = value;
-        best = entry;
-      }
+      if (value > bestValue) { bestValue = value; best = entry; }
     }
-    if (best) winners.add(best);
+    if (best) chosen.add(best);
   }
-  for (const entry of winners) {
-    addPermanentLabel(entry);
+  for (const entry of [...buildings].sort((a, b) => b.height - a.height)) {
+    if (chosen.size >= MAX_LABELS) break;
+    chosen.add(entry);
+  }
+  let priority = 0;
+  for (const entry of chosen) makeLabel(entry, priority++);   // standouts first = highest priority
+}
+
+// Greedy screen-space de-overlap: walk candidates by priority, show one only if its
+// box clears every higher-priority box already shown; hide the rest. Runs each frame.
+const _labelNdc = new THREE.Vector3();
+function updateLabelVisibility() {
+  if (introEl) {                                  // keep the intro screen clean
+    for (const L of cityLabels) L.obj.visible = false;
+    return;
+  }
+  const W = window.innerWidth, H = window.innerHeight;
+  const placed = [];
+  for (const L of cityLabels) {
+    _labelNdc.copy(L.obj.position).project(camera);
+    if (_labelNdc.z < -1 || _labelNdc.z > 1) { L.obj.visible = false; continue; }
+    const x = (_labelNdc.x * 0.5 + 0.5) * W;
+    const y = (-_labelNdc.y * 0.5 + 0.5) * H;
+    const box = { left: x - L.w / 2, right: x + L.w / 2, top: y - L.h, bottom: y };
+    let clash = false;
+    for (const p of placed) {
+      if (box.left < p.right + LABEL_GAP && box.right > p.left - LABEL_GAP &&
+          box.top < p.bottom + LABEL_GAP && box.bottom > p.top - LABEL_GAP) { clash = true; break; }
+    }
+    L.obj.visible = !clash;
+    if (!clash) placed.push(box);
   }
 }
 
 function qualifiedName(file) {
   const module = file.path.includes("/src/") ? file.path.split("/src/")[0] : file.path.split("/")[0];
-  const fqn = file.district && file.district !== "root" ? `${file.district}.${file.name}` : file.name;
+  let pkg = file.district && file.district !== "root" ? file.district : "";
+  // When zoomed into a package, drop the shared prefix so the name reads relative to it.
+  if (scopePath && pkg === scopePath) {
+    pkg = "";
+  } else if (scopePath && pkg.startsWith(scopePath + ".")) {
+    pkg = pkg.slice(scopePath.length + 1);
+  }
+  const fqn = pkg ? `${pkg}.${file.name}` : file.name;
   return `${module}/${fqn}`;
 }
 
 function formatHover(file) {
+  // Coupling shown directionally: →N references coming in, N→ going out.
   return `<b>${file.name}</b><span class="fqn">${qualifiedName(file)}</span>` +
     `lines: ${file.lines.toLocaleString()} | cyclomatic complexity: ${file.cognitive_complexity.toLocaleString()} | ` +
-    `commits: ${file.commits.toLocaleString()} | bug commits: ${file.bug_commits.toLocaleString()}<br>` +
-    `coupling fan in/out: ${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}`;
+    `commits: ${file.commits.toLocaleString()} | bugfix commits: ${file.bug_commits.toLocaleString()}<br>` +
+    `coupling &rarr;${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}&rarr;`;
 }
 
 function formatDistrictHover(district) {
-  return `<b>package: ${district.userData.name}</b>` +
+  return `<b>${district.userData.name}</b>` +
     `${district.userData.fileCount.toLocaleString()} Java files`;
 }
 
@@ -774,25 +884,136 @@ function onPointerMove(event) {
     hover.classList.remove("visible");
     return;
   }
+  const navKey = event[NAV_KEY] && !event.metaKey && !event.ctrlKey && !event.altKey;
   const hit = pickBuilding(event);
   for (const entry of buildings) {
     entry.mesh.material.emissive.setHex(0x000000);
   }
+  let tooltipObj = null;
+  let tooltipIsDistrict = false;
+  let glowFloor = null;       // platform to light as the would-be drill target
+  let cursor = "move";
+
   if (hit) {
     hit.object.material.emissive.setHex(0x5a0f1e);
-    hover.innerHTML = formatHover(hit.object.userData.file);
-    positionHoverNearObject(hit.object);
-    hover.classList.add("visible");
+    tooltipObj = hit.object;
+    if (navKey) { glowFloor = districtByName.get(hit.object.userData.file.district) || null; cursor = "zoom-in"; }
   } else {
     const districtHit = raycaster.intersectObjects(districts, false)[0];
     if (districtHit) {
-      hover.innerHTML = formatDistrictHover(districtHit.object);
-      positionHoverNearObject(districtHit.object);
-      hover.classList.add("visible");
-    } else {
-      hover.classList.remove("visible");
+      tooltipObj = districtHit.object;
+      tooltipIsDistrict = true;
+      if (navKey) { glowFloor = districtHit.object; cursor = "zoom-in"; }
+    } else if (navKey && scopePath !== "" && raycaster.intersectObject(ground, false).length) {
+      cursor = "zoom-out";    // hovering the surrounding floor while zoomed in: a click steps out
     }
   }
+
+  if (tooltipObj) {
+    hover.innerHTML = tooltipIsDistrict ? formatDistrictHover(tooltipObj) : formatHover(tooltipObj.userData.file);
+    positionHoverNearObject(tooltipObj);
+    hover.classList.add("visible");
+  } else {
+    hover.classList.remove("visible");
+  }
+  setFloorGlow(glowFloor);
+  if (!event.metaKey && !event.ctrlKey) {        // leave the orbit cursor alone while Cmd/Ctrl is held
+    renderer.domElement.style.cursor = cursor;
+  }
+}
+
+// Light a single package platform blue to preview the drill target; clears the previous one.
+// Swap the base colour (not just emissive) so the highlight reads clearly against the light slabs.
+function applyGlow(floor, on) {
+  if (!floor) return;
+  const mats = Array.isArray(floor.material) ? floor.material : [floor.material];
+  const seen = new Set();
+  for (const m of mats) {
+    if (!m || seen.has(m)) continue;
+    seen.add(m);
+    if (on) {
+      if (!m.userData.glowSaved) { m.userData.glowSaved = m.color.clone(); }
+      m.color.setHex(0x2f6df0);
+      if (m.emissive) { m.emissive.setHex(0x1e40af); m.emissiveIntensity = 0.55; }
+    } else {
+      if (m.userData.glowSaved) { m.color.copy(m.userData.glowSaved); m.userData.glowSaved = null; }
+      if (m.emissive) { m.emissive.setHex(0x000000); m.emissiveIntensity = 1; }
+    }
+  }
+}
+
+function setFloorGlow(floor) {
+  if (glowingDistrict === floor) return;
+  applyGlow(glowingDistrict, false);
+  applyGlow(floor, true);
+  glowingDistrict = floor;
+}
+
+// ── Drill-down: Shift-click a floor/building to enter it; the surrounding floor to step out ──
+function targetAtPointer(event) {
+  const building = pickBuilding(event);            // also leaves `raycaster` aimed at this pointer
+  if (building) return { kind: "enter", pkg: building.object.userData.file.district };
+  const districtHit = raycaster.intersectObjects(districts, false)[0];
+  if (districtHit) return { kind: "enter", pkg: districtHit.object.userData.name };
+  if (scopePath !== "" && raycaster.intersectObject(ground, false).length) return { kind: "out" };
+  return null;
+}
+
+function scopeTo(pkg) {
+  if (pkg === scopePath) return;
+  scopePath = pkg;
+  lastScopeAt = performance.now();
+  rebuildCity();
+  frameCity();
+  updateBreadcrumb();
+}
+
+function scopeUp() {
+  if (scopePath === "") return;
+  const cut = scopePath.lastIndexOf(".");
+  scopeTo(cut < 0 ? "" : scopePath.slice(0, cut));
+}
+
+// Snap the camera back to a clean overview of whatever city is now laid out.
+function frameCity() {
+  camera.position.set(720, 620, 760);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+function updateBreadcrumb() {
+  if (scopePath === "") {
+    breadcrumbEl.hidden = true;
+    breadcrumbEl.innerHTML = "";
+    return;
+  }
+  const segs = scopePath.split(".");
+  const parts = ['<button class="crumb" data-scope="">&#127961; all</button>'];
+  let acc = "";
+  segs.forEach((seg, i) => {
+    acc = acc ? `${acc}.${seg}` : seg;
+    const current = i === segs.length - 1;
+    parts.push('<span class="crumb-sep">&rsaquo;</span>');
+    parts.push(
+      `<button class="crumb${current ? " crumb-current" : ""}" data-scope="${acc}">${escapeXml(seg)}</button>`
+    );
+  });
+  breadcrumbEl.innerHTML = parts.join("");
+  breadcrumbEl.hidden = false;
+}
+
+function onSceneClick(event) {
+  if (introEl || event.target !== renderer.domElement) return;   // ignore UI / overlay clicks
+  if (!event[NAV_KEY] || event.metaKey || event.ctrlKey || event.altKey) return;   // navigation is Shift-gated
+  if (performance.now() - lastScopeAt < 350) return;             // swallow the 2nd click of a double-click
+  if (pointerDownAt) {
+    const moved = Math.hypot(event.clientX - pointerDownAt.x, event.clientY - pointerDownAt.y);
+    if (moved > 6) return;                                        // it was a drag (pan/orbit), not a click
+  }
+  const target = targetAtPointer(event);
+  if (!target) return;
+  if (target.kind === "out") scopeUp();
+  else scopeTo(target.pkg);
 }
 
 function onDoubleClick(event) {
@@ -822,9 +1043,9 @@ function onResize() {
 let introEl = null;
 let introDone = false;
 const INTRO_CHANNELS = [
+  { key: "area", color: "#b45309", title: "AREA", select: () => areaSelect },
   { key: "height", color: "#0f766e", title: "HEIGHT", select: () => heightSelect },
   { key: "color", color: "#9d174d", title: "COLOR", select: () => colorSelect },
-  { key: "area", color: "#b45309", title: "AREA", select: () => areaSelect },
 ];
 
 function escapeXml(value) {
@@ -1008,14 +1229,31 @@ window.addEventListener("keydown", updateCursor);
 window.addEventListener("keyup", updateCursor);
 window.addEventListener("blur", () => { renderer.domElement.style.cursor = "move"; });
 window.addEventListener("dblclick", onDoubleClick);
+window.addEventListener("click", onSceneClick);
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !introEl && document.getElementById("howto").hidden) scopeUp();
+});
+breadcrumbEl.addEventListener("click", (e) => {
+  const crumb = e.target.closest(".crumb");
+  if (crumb) scopeTo(crumb.getAttribute("data-scope"));
+});
 renderer.domElement.addEventListener("pointerdown", dismissIntro);
 window.addEventListener("wheel", dismissIntro, { passive: true });
+
+// Park the breadcrumb just under the control panel, tracking its real height.
+function positionBreadcrumb() {
+  const panel = document.querySelector(".panel");
+  if (panel) document.documentElement.style.setProperty("--panel-h", `${panel.offsetHeight + 14}px`);
+}
+positionBreadcrumb();
+window.addEventListener("resize", positionBreadcrumb);
 
 rebuildCity();
 
 function animate() {
   controls.update();
   renderer.render(scene, camera);
+  updateLabelVisibility();        // resolve which class labels are non-overlapping from this angle
   labelRenderer.render(scene, camera);
   if (!introDone) buildIntro();
   requestAnimationFrame(animate);

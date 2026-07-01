@@ -51,8 +51,15 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("event.metaKey", html)
             self.assertIn("event.ctrlKey", html)
             self.assertIn("CSS2DRenderer", html)
-            self.assertIn("labelTopBuildings", html)
+            # Class labels: up to MAX_LABELS candidates, de-overlapped in screen space each frame.
+            self.assertIn("setupLabels", html)
+            self.assertIn("updateLabelVisibility", html)
             self.assertIn("city-label", html)
+            # Drill-down: Shift-click a floor/building to scope in, breadcrumb / ground to step out.
+            self.assertIn('id="breadcrumb"', html)
+            self.assertIn("let scopePath", html)
+            self.assertIn("function targetAtPointer", html)
+            self.assertIn("function scopeUp", html)
             self.assertIn("function qualifiedName", html)
             self.assertIn("districtStep", html)
             self.assertIn('rel="icon"', html)
