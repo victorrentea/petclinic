@@ -1,5 +1,14 @@
 workspace "PetClinic" "Veterinary practice management system" {
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # C1 + C2 — human-maintained, STABLE.
+    # People, containers and their high-level wiring cannot be derived from code
+    # (the backend can't introspect the Angular SPA or PostgreSQL), so they live
+    # here and change rarely.  The code-coupled C3 layer — component ↔ package
+    # mapping and component dependencies — is split into c4model.c3.dsl, which
+    # C3ArchTest validates against the real Java packages on every build.
+    # ─────────────────────────────────────────────────────────────────────────
+
     model {
         petOwner = person "Pet Owner" "Manages their pets and appointments"
         veterinarian = person "Veterinarian" "Provides veterinary care"
@@ -7,12 +16,8 @@ workspace "PetClinic" "Veterinary practice management system" {
         petClinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "Angular"
             backend = container "Backend" "REST API" "Java / Spring Boot" {
-                restLayer = component "REST Layer" "[rest.**] HTTP endpoints, DTOs, error handlers" "Spring MVC" "pkg:rest.**"
-                domainModel = component "Domain Model" "[model] JPA entities" "JPA" "pkg:model"
-                repositoryLayer = component "Repository Layer" "[repository] Spring Data JPA repositories" "Spring Data" "pkg:repository"
-                mapperLayer = component "Mapper Layer" "[mapper] MapStruct mappers" "MapStruct" "pkg:mapper"
-                security = component "Security" "[security] Spring Security configuration" "Spring Security" "pkg:security"
-                mcp = component "MCP" "[mcp] Spring AI MCP server (SSE) — tools and resources for pet owners" "Spring AI" "pkg:mcp"
+                # C3 components + edges — arch-tested vs code
+                !include c4model.c3.dsl
             }
             database = container "Database" "Stores all data" "PostgreSQL"
         }
@@ -23,15 +28,6 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
-
-        restLayer -> mapperLayer "uses"
-        restLayer -> domainModel "uses"
-        restLayer -> repositoryLayer "uses"
-        mapperLayer -> restLayer "uses"
-        mapperLayer -> domainModel "uses"
-        repositoryLayer -> domainModel "uses"
-        mcp -> domainModel "uses"
-        mcp -> repositoryLayer "uses"
     }
 
     views {
@@ -55,6 +51,5 @@ workspace "PetClinic" "Veterinary practice management system" {
             include ->mapperLayer->
             autoLayout
         }
-
     }
 }
