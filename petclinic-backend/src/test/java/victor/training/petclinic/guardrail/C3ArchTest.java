@@ -35,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class C3ArchTest {
 
     private static final String BASE_PKG = "victor.training.petclinic";
+    // Stable human C1/C2; !includes the code-coupled C3 fragment (docs/c4model.c3.dsl),
+    // which the parser merges in, so the checks below see the whole composed workspace.
     private static final Path DSL_FILE   = Paths.get("docs/c4model.dsl");
     private static final Path VIEWS_DIR  = Paths.get("docs/generated/c4views");
     private static final String BACKEND_CONTAINER = "Backend";
