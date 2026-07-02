@@ -14,11 +14,13 @@ Source: [`packages.puml`](packages.puml). Validated by `PackagesArchTest`: every
 
 ### C4 model (workspace, containers, components)
 
-Source: [`c4model.dsl`](c4model.dsl). Hand-written Structurizr DSL. Open in [structurizr.com/dsl](https://structurizr.com/dsl) or the Structurizr CLI for the interactive view. The C3 (component) layer is validated by `C3ArchTest`:
+Source: hand-written Structurizr DSL, split by stability:
+- [`c4model.dsl`](c4model.dsl) — **stable, human-maintained** C1/C2: people, containers and their high-level wiring. Purely declarative — the backend can't introspect the Angular SPA or PostgreSQL.
+- [`c4model.c3.dsl`](c4model.c3.dsl) — **code-coupled** C3: Backend components + their dependencies, `!include`d into the Backend container. Every line is unit-tested against the real code, so this is the file that changes when packages/dependencies do.
+
+Open `c4model.dsl` (which pulls in the C3 fragment) in [structurizr.com/dsl](https://structurizr.com/dsl), `./start-structurizr.sh`, or the Structurizr CLI for the interactive view. The C3 layer is validated by `C3ArchTest`:
 - Every code package must match one component's `pkg:<pattern>` tag.
 - Every component-to-component edge in the DSL must correspond to a real cross-package dependency, and vice versa.
-
-C1/C2 (people, containers) are purely declarative — the backend can't introspect the Angular SPA or PostgreSQL.
 
 ## Generated diagrams
 

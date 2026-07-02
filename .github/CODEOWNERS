@@ -18,7 +18,8 @@
 
 # Logical Architecture
 /petclinic-backend/docs/packages.puml @victorrentea/elders
-/petclinic-backend/docs/c4model.dsl   @victorrentea/elders
+/petclinic-backend/docs/c4model.dsl    @victorrentea/elders
+/petclinic-backend/docs/c4model.c3.dsl @victorrentea/elders
 
 # Dependencies / SBOM
 **/package.json @victorrentea/elders
