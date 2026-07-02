@@ -1,6 +1,6 @@
 ---
 name: multi-review
-description: Review the current diff via the review-boss agent, auto-apply the safe quality cleanups, then tell the human which areas to review first. Explicit invocation only — user types /multi-review.
+description: Review the current diff by fanning out to three single-focused reviewer subagents in parallel, auto-apply the safe quality cleanups, then tell the human which areas to review first. Explicit invocation only — user types /multi-review.
 disable-model-invocation: true
 ---
 
@@ -14,10 +14,13 @@ fixes yourself, and end by pointing the human at what still needs their eyes.
 1. **Confirm there's something to review.** Run `git --no-pager diff --stat HEAD`.
    If empty, say "Nothing to review." and stop.
 
-2. **Get the report.** Spawn the `review-boss` agent (Agent tool, `subagent_type:
-   review-boss`) with: *"Review the current working-tree diff and return your
-   aggregated findings grouped by dimension (Reuse / Simplification / Efficiency)."*
-   review-boss fans out to its three reviewers in parallel and returns one report.
+2. **Fan out in parallel.** In ONE message, make THREE `Agent` calls at once (so they
+   run concurrently — never one after another): `reviewer-reuse`,
+   `reviewer-simplification`, `reviewer-efficiency`. Give each the same task:
+   *"Review the current working-tree change (`git --no-pager diff HEAD`) for your single
+   dimension. Return findings as a short list of `file:line — issue → suggestion`. If clean, say so."*
+   Collect the three results into one set of findings grouped by dimension
+   (Reuse / Simplification / Efficiency), dropping duplicates.
 
 3. **Triage each finding:**
    - **Auto-fix** — mechanical, low-risk, clearly correct (dead code, obvious

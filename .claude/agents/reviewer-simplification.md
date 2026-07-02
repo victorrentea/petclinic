@@ -2,7 +2,7 @@
 name: reviewer-simplification
 description: >
   Single-focused code reviewer for SIMPLIFICATION only. Internal — spawned by
-  review-boss only, not for direct human use. Flags unnecessary complexity the diff adds.
+  the /multi-review skill only, not for direct human use. Flags unnecessary complexity the diff adds.
 tools: Bash, Read, Grep
 model: sonnet
 ---

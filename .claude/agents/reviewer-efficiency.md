@@ -2,7 +2,7 @@
 name: reviewer-efficiency
 description: >
   Single-focused code reviewer for EFFICIENCY only. Internal — spawned by
-  review-boss only, not for direct human use. Flags wasteful work the diff introduces.
+  the /multi-review skill only, not for direct human use. Flags wasteful work the diff introduces.
 tools: Bash, Read, Grep
 model: sonnet
 ---

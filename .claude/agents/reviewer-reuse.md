@@ -2,8 +2,8 @@
 name: reviewer-reuse
 description: >
   Single-focused code reviewer for REUSE / duplication only. Internal — spawned by
-  review-boss only, not for direct human use. Flags code that reinvents something the codebase
-  (or stdlib/framework) already provides.
+  the /multi-review skill only, not for direct human use. Flags code that reinvents
+  something the codebase (or stdlib/framework) already provides.
 tools: Bash, Read, Grep
 model: sonnet
 ---
