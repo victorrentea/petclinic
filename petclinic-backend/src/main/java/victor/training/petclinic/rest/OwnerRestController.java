@@ -1,8 +1,12 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -34,11 +38,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -59,15 +58,40 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
-        content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    static final int MAX_PAGE_SIZE = 100;
+
+    // Only these two logical sort keys are exposed; everything else falls back to the default.
+    // 'name' orders by last name then first name, matching the surname-first display in the grid.
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Order.asc("lastName"), Sort.Order.asc("firstName"));
+
+    @Operation(operationId = "listOwners", summary = "List owners (paged)")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerDto> listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        int effectivePage = Math.max(page, 0);
+        int effectiveSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        Pageable pageable = PageRequest.of(effectivePage, effectiveSize, resolveSort(sort));
+        Page<OwnerDto> owners = ownerRepository.findByLastNameStartingWith(lastName, pageable)
+            .map(ownerMapper::toOwnerDto);
+        return new PagedModel<>(owners);
+    }
+
+    private Sort resolveSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return DEFAULT_SORT;
+        }
+        String[] parts = sort.split(",");
+        String key = parts[0].trim();
+        Sort.Direction direction = parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
+            ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return switch (key) {
+            case "name" -> Sort.by(new Sort.Order(direction, "lastName"), new Sort.Order(direction, "firstName"));
+            case "city" -> Sort.by(new Sort.Order(direction, "city"));
+            default -> DEFAULT_SORT;
+        };
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
