@@ -21,54 +21,14 @@ Each script is foreground; run them in separate terminals.
 ./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # optional: Grafana LGTM (Ctrl+C tears it down)
-```
-
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
-### Testing a Single Test (Backend)
-```sh
-mvn test -Dtest=ClassName#methodName
+./start-structurizr.sh     # optional: Structurizr Lite view of the C4 model (localhost:8081)
 ```
 
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
-
 ### Living Architecture & Guardrails
 
+[//]: # (@include GLOSSARY.md)
 See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living architecture diagrams, and CI drift checks.
 
 ### Database
@@ -81,6 +41,12 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
 - Default user: `admin`/`admin`
 
+## Data Volume / Scale
+
+- **Owners table holds ~1 million rows.** Never assume the owner list is small:
+  no loading the full list into memory (browser or backend), no client-side
+  filtering, and any owner search/list must be paginated and filtered in SQL.
+
 ## Domain Model (ER Model)
 
 Core entities and relationships:
@@ -89,34 +55,22 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
+## API
 
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+The REST API is described by its OpenAPI spec — the single source of truth.
+Browse it at http://localhost:8080/swagger-ui.html (don't duplicate the endpoint
+list here; it drifts).
 
 ## Development Notes
 
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use Lombok: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
+### Owner's Code Preferences
+Java/Spring conventions live in the `java` skill (`.claude/skills/java/`), which
+loads automatically when reviewing or rewriting backend Java.
 
 ## Task Modifiers
 - Write non-trivial code using TDD.
 - Keep comments concise, prefer explanatory variable/method names.
+- Never ask before running tests after refactoring.
 - Auto-push after commit if git username is `victorrentea` and repo is `github.com/victorrentea/*`
-- Keep explanations concise
+- Keep explanations concise we are experience spring java devs
 - Challenge ambiguous/wrong prompts
