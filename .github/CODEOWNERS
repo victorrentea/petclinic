@@ -27,5 +27,5 @@
 **/pom.xml      @victorrentea/elders
 **/package.json @victorrentea/elders
 # Generated surface of deps declared with no <version> (inherited from a parent/BOM)
-/unversioned-dependencies.txt @victorrentea/elders
+/petclinic-backend/pom-libs.txt @victorrentea/elders
 

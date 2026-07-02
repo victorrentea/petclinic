@@ -161,25 +161,25 @@ jobs:
         working-directory: petclinic-frontend
         run: npm run build
 
-      # ── Hook parity: pre-commit regenerates unversioned-dependencies.txt when
+      # ── Hook parity: pre-commit regenerates petclinic-backend/pom-libs.txt when
       #    a pom changes. Regenerate here too so the committed file can't drift. ──
-      - name: Regenerate unversioned-dependencies.txt
+      - name: Regenerate petclinic-backend/pom-libs.txt
         run: python3 scripts/list-unversioned-deps.py
 
       - name: Detect drift in regenerated artifacts
         id: drift
         run: |
-          if git diff --quiet petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt; then
+          if git diff --quiet petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt; then
             echo "drift=false" >> "$GITHUB_OUTPUT"
           else
             echo "drift=true"  >> "$GITHUB_OUTPUT"
-            git --no-pager diff --stat petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt
+            git --no-pager diff --stat petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt
           fi
 
       - name: Fail fork PRs that have drift
         if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
         run: |
-          echo "::error::Generated artifacts (docs/generated/, DB.sql, api-types.ts, or unversioned-dependencies.txt) are out of date."
+          echo "::error::Generated artifacts (docs/generated/, DB.sql, api-types.ts, or petclinic-backend/pom-libs.txt) are out of date."
           echo "::error::Run 'cd petclinic-backend && mvn test', 'cd petclinic-frontend && npm run generate:api', and 'python3 scripts/list-unversioned-deps.py' locally and push the regenerated files."
           exit 1
 
@@ -188,7 +188,7 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts unversioned-dependencies.txt
+          git add petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt
           git commit -m 'chore(guardrail): regenerate diagrams, DB.sql, api-types.ts, and unversioned-deps [skip ci]'
           git push
 

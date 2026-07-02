@@ -5,11 +5,11 @@ Such dependencies inherit their version from a parent POM / BOM (e.g.
 spring-boot-starter-parent). That makes the *set* of version-managed dependencies
 invisible — it is spread across several poms and the version is never shown. This
 script collapses that surface into one committed, reviewable file
-(``unversioned-dependencies.txt``) so the elders can keep an eye on it via CODEOWNERS:
+(``petclinic-backend/pom-libs.txt``) so the elders can keep an eye on it via CODEOWNERS:
 adding or removing a versionless dependency shows up as a one-line diff.
 
 Usage:
-    list-unversioned-deps.py            # regenerate unversioned-dependencies.txt
+    list-unversioned-deps.py            # regenerate petclinic-backend/pom-libs.txt
     list-unversioned-deps.py --check    # exit 1 (with a diff) if the file is stale
 
 Stdlib only — no Maven, no network. Safe to run in a pre-commit hook and in CI.
@@ -24,7 +24,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-OUTPUT_FILE = REPO_ROOT / "unversioned-dependencies.txt"
+OUTPUT_FILE = REPO_ROOT / "petclinic-backend" / "pom-libs.txt"
 
 # Directories that never contain source poms we care about (build output, deps,
 # and the throw-away git worktrees under .claude/worktrees).

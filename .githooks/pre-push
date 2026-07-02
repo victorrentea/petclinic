@@ -17,9 +17,9 @@ ZERO=0000000000000000000000000000000000000000
 # chatbot/database pom changes fall outside the backend-only path gate below.
 if command -v python3 >/dev/null 2>&1; then
   if ! python3 "$ROOT/scripts/list-unversioned-deps.py" --check; then
-    echo "[pre-push] ❌ unversioned-dependencies.txt is stale — push blocked."
+    echo "[pre-push] ❌ petclinic-backend/pom-libs.txt is stale — push blocked."
     echo "[pre-push]    Run: python3 scripts/list-unversioned-deps.py"
-    echo "[pre-push]         git add unversioned-dependencies.txt"
+    echo "[pre-push]         git add petclinic-backend/pom-libs.txt"
     exit 1
   fi
 fi
