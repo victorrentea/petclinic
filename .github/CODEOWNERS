@@ -9,11 +9,8 @@
 # API Contracts
 /openapi.yaml                    @victorrentea/elders
 
-# Persistence
+# Persistence / Domain Model
 /petclinic-backend/docs/generated/DB.sql @victorrentea/elders
-/petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
-
-# Domain Model
 /petclinic-backend/docs/generated/DomainModel.puml @victorrentea/elders
 
 # Logical Architecture

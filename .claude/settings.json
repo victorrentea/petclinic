@@ -3,6 +3,9 @@
     "petclinic-mcp"
   ],
   "permissions": {
+    "//": "Bash(git commit --no-verify)❌",
+    "//": "Bash(git commit -m yolo --no-verify)✅😱😱😱😱😱",
+    "//": "Bash(cd subdi && git commit --no-verify)✅😱😱😱😱😱",
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)"
