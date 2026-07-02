@@ -11,6 +11,7 @@
 - **BE tuning:** Make backend tests run faster (I know it might take you some serious time & tokens)
 - **BI dream:** Export an Excel pie chart of the pet types, from my postgres-db
 - **FE bug:** reproduce bug gh#40 in browser, write a failing e2e playwright test, fix bug -> test passes
+- **QA:** explore the application using playwright test agents at https://playwright.dev/docs/test-agents 
 - **Mandated docs:** /regen-user-manual to update the [user manual](user-manual/manual.md)
 - **Ops for all:** create a Grafana dashboard with things to monitor in this app, then open it in browser. start-grafana.sh if it's not started yet.
 - **Time Tracing:** break down the time budget for a click on search owners button, extracting this from recorded traces in Grafana
