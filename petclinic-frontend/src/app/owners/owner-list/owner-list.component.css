@@ -3,6 +3,48 @@
 display:none;
 }
 
+/* Re-theme the Angular Material table to match the app's Bootstrap 3 tables:
+   striped rows (#f9f9f9), #ddd borders, bold left-aligned headers. Fixed layout
+   with explicit per-column widths so toggling a sort never reflows the columns. */
+.owners-table {
+	width: 100%;
+	table-layout: fixed;
+	background: #fff;
+	margin-bottom: 20px;
+}
+
+.owners-table .mat-mdc-header-cell,
+.owners-table .mat-mdc-cell {
+	padding: 8px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+	color: inherit;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.owners-table .mat-mdc-header-cell {
+	font-weight: bold;
+	border-bottom-width: 2px;
+	white-space: nowrap;
+}
+
+.owners-table tr.mat-mdc-row:nth-child(odd) {
+	background-color: #f9f9f9;
+}
+
+/* one explicit width per column (must total 100%) */
+.owners-table .mat-column-name { width: 22%; }
+.owners-table .mat-column-address { width: 26%; }
+.owners-table .mat-column-city { width: 16%; }
+.owners-table .mat-column-telephone { width: 16%; }
+.owners-table .mat-column-pets { width: 20%; }
+
+/* keep the paginator's page-size / range text consistent with the app */
+.owners-table + mat-paginator {
+	background: transparent;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;

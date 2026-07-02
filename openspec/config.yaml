@@ -1,0 +1,24 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+rules:
+  proposal:
+    # The proposal is read aloud to non-technical stakeholders (product owners,
+    # clinic managers) who do not know what JSON, YAML, or a database index is.
+    # Keep it 100% business/outcome language.
+    - Audience is non-technical stakeholders. Write about user-facing outcomes and business value, never implementation.
+    - Do NOT use code identifiers (class, method, file, field, package names), HTTP verbs/paths, query params, or SQL.
+    - Do NOT name technologies or formats such as JSON, YAML, REST, SQL, JPA, Angular, Spring, Pageable, PagedModel, ORDER BY, JOIN FETCH, indexes, or DTOs.
+    - Describe a breaking change by its user/consumer effect (e.g. "other software reading this list must be updated"), not by the technical shape that changed.
+    - Push ALL such technical detail into design.md; in the proposal, reference it with a short pointer like "(technical detail in design.md)".
+    - The only unavoidable technical token is the kebab-case capability id under Capabilities; give it a plain-language description.

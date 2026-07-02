@@ -94,6 +94,12 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Expected Volumetrics
+- **Owners: ~1 million rows.** Any listing/search/sort/export over owners MUST be
+  server-side paginated and backed by appropriate indexes — never load the full
+  owners table into memory or ship it to the browser. Assume the other entities
+  (pets, visits) scale roughly with owners.
+
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 - Owners: `/api/owners`, `/api/owners/{id}`
