@@ -34,17 +34,22 @@ The active hooks (read them — they're short shell scripts):
 
 - `.githooks/pre-commit` — gitleaks secrets scan, custom `secrets.env` value
   scan, and TypeScript types regen when `openapi.yaml` is staged.
-- `.githooks/pre-push` — when backend / `openapi.yaml` / `db.sql` changed:
-  runs the 6 architecture/extractor guardrail tests, checks generated
-  artifacts haven't drifted, and lints `openapi.yaml` with Spectral.
+- `.githooks/pre-push` — when backend / `openapi.yaml` / `DB.sql` changed:
+  runs the architecture/extractor guardrail tests (see [GUARDRAILS.md](GUARDRAILS.md)),
+  checks generated artifacts haven't drifted, and lints `openapi.yaml` with Spectral.
 
 To bypass once: `git commit --no-verify` / `git push --no-verify`. To
 disable persistently: `git config --unset core.hooksPath`.
 
 ## Quick Start - Run Full Stack
 
+There is no aggregate launcher — each script is foreground, so run them in
+separate terminals:
+
 ```sh
-./run-all.sh
+./start-database.sh        # embedded Postgres on localhost:5432
+./start-backend.sh         # Spring Boot on localhost:8080
+./start-frontend.sh        # Angular dev server on localhost:4200
 ```
 
 Then access:
@@ -59,8 +64,9 @@ Located in `petclinic-backend/`
 ### Run Backend Only
 
 ```sh
-cd petclinic-backend
-mvn spring-boot:run
+./start-backend.sh                # preferred: also attaches the OTel agent
+# or, without observability:
+cd petclinic-backend && mvn spring-boot:run
 ```
 
 ### Backend Tech Stack
@@ -79,14 +85,17 @@ API documentation (OAS 3.1): [http://localhost:8080/v3/api-docs](http://localhos
 
 Browse the live endpoint catalogue in Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
 
-### API First
+### API: code-first
 
-The backend follows the [API First](https://swagger.io/resources/articles/adopting-an-api-first-approach/) approach: the OpenAPI spec at [`petclinic-backend/src/main/resources/openapi.yml`](petclinic-backend/src/main/resources/openapi.yml) is the source of truth. Build-time code generation produces:
+The backend is **code-first**, not API-first: the controllers and the
+hand-written DTOs under `victor.training.petclinic.rest.dto` are the source of
+truth. springdoc derives the OpenAPI spec from them, and `OpenApiExtractorTest`
+snapshots it to [`openapi.yaml`](openapi.yaml) at the repo root — a **generated**
+artifact that a guardrail checks for drift, not a hand-edited spec. Browse the
+live spec in Swagger UI (below).
 
-- DTO classes under `victor.training.petclinic.rest.dto`
-- API template interfaces that controllers implement
-
-Generated code lives in `target/generated-sources/`; controllers wire concrete behaviour onto the generated interfaces.
+The only backend code generated at build time is the MapStruct mapper
+implementations (into `target/generated-sources/`).
 
 ### Database Configuration
 
@@ -96,12 +105,6 @@ Generated code lives in `target/generated-sources/`; controllers wire concrete b
 ```
 
 **Tests** use an embedded PostgreSQL that starts automatically — no setup needed.
-
-Or use docker-compose:
-```sh
-cd petclinic-backend
-docker-compose --profile postgres up
-```
 
 ### Security Configuration
 
@@ -132,12 +135,13 @@ jmeter -n -t src/test/jmeter/petclinic-jmeter-crud-benchmark.jmx \
   -Jthreads=100 -Jduration=600 -l results/petclinic-test-results.jtl
 ```
 
-**Guardrail Tests** (`mvn test` covers them by default):
-- `PackagesArchUnitTest` — ArchUnit rules enforce package dependencies match `petclinic-backend/docs/packages.puml`
-- `C4ModelExtractorTest` — regenerates `petclinic-backend/docs/generated/C4.dsl` and the C4 PlantUML/SVG views
+**Guardrail Tests** (`mvn test` covers them by default) — see
+[GUARDRAILS.md](GUARDRAILS.md) for the full list. A few examples:
+- `PackagesArchTest` — ArchUnit enforces package dependencies match `petclinic-backend/docs/packages.puml`
+- `C3ArchTest` — parses the hand-written `petclinic-backend/docs/c4model.dsl` (which `!include`s `c4model.c3.dsl`), asserts the C4 components/edges match the code, and re-exports the C4 PlantUML views
 - `DomainModelExtractorTest` — regenerates `petclinic-backend/docs/generated/DomainModel.{puml,png}` from JPA annotations
 
-CI (`.github/workflows/architecture.yml`) auto-commits drift in `docs/generated/` back to the branch with `[skip ci]`; failures in `packages.puml` (hand-edited) fail the build.
+CI (`.github/workflows/ci.yml`) mirrors the local hooks and auto-commits regenerated `docs/generated/` artifacts with `[skip ci]`; hand-edited sources like `packages.puml` fail the build on drift.
 
 ## Frontend (Angular SPA)
 
@@ -232,14 +236,14 @@ this directory. Then ask things like:
 - Default credentials (`admin/admin`) are local-demo only. Never publish.
 - The host port for Grafana is **3300** (not 3000) because port 3000 was
   already taken on the dev machine; container internal port is unchanged.
-- The stack is **opt-in** — it's not part of `start-all.sh`. Students without
+- The stack is **opt-in** — no launcher starts it for you. Students without
   Docker can ignore everything in this section.
 
 ### Stop
 
-```sh
-./stop-observability.sh
-```
+Press **Ctrl+C** in the `./start-grafana.sh` terminal — its cleanup trap runs
+`docker compose down` and tears the LGTM stack down (data persists in the
+`lgtm-data` volume).
 
 ## Development
 
@@ -249,8 +253,9 @@ Some backend classes are generated during build time:
 
 | Package | Tool |
 |---------|------|
-| `victor.training.petclinic.mapper` | MapStruct |
-| `victor.training.petclinic.rest.dto` | OpenAPI Generator |
+| `victor.training.petclinic.mapper` (impls → `target/generated-sources/`) | MapStruct |
+
+(REST DTOs in `victor.training.petclinic.rest.dto` are **hand-written**, not generated.)
 
 Run to generate:
 ```sh
@@ -262,11 +267,11 @@ mvn clean install
 
 | Component | Location |
 |-----------|----------|
-| Backend REST controllers | [petclinic-backend/src/main/java/.../rest](petclinic-backend/src/main/java/org/springframework/samples/petclinic/rest) |
-| Backend repositories | [petclinic-backend/src/main/java/.../repository](petclinic-backend/src/main/java/org/springframework/samples/petclinic/repository) |
-| Backend domain model | [petclinic-backend/src/main/java/.../model](petclinic-backend/src/main/java/org/springframework/samples/petclinic/model) |
+| Backend REST controllers | [petclinic-backend/src/main/java/.../rest](petclinic-backend/src/main/java/victor/training/petclinic/rest) |
+| Backend repositories | [petclinic-backend/src/main/java/.../repository](petclinic-backend/src/main/java/victor/training/petclinic/repository) |
+| Backend domain model | [petclinic-backend/src/main/java/.../model](petclinic-backend/src/main/java/victor/training/petclinic/model) |
 | Frontend components | [petclinic-frontend/src/app](petclinic-frontend/src/app) |
-| OpenAPI spec | [petclinic-backend/src/main/resources/openapi.yml](petclinic-backend/src/main/resources/openapi.yml) |
+| OpenAPI spec (generated) | [openapi.yaml](openapi.yaml) |
 
 ## Related Projects
 
