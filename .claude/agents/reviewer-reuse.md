@@ -1,5 +1,5 @@
 ---
-name: review-reuse
+name: reviewer-reuse
 description: >
   Single-focused code reviewer for REUSE / duplication only. Internal — spawned by
   review-boss only, not for direct human use. Flags code that reinvents something the codebase

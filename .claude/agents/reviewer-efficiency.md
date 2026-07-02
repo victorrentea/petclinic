@@ -1,5 +1,5 @@
 ---
-name: review-efficiency
+name: reviewer-efficiency
 description: >
   Single-focused code reviewer for EFFICIENCY only. Internal — spawned by
   review-boss only, not for direct human use. Flags wasteful work the diff introduces.
