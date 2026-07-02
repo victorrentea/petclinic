@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # PostToolUse hook (Bash): after a successful `git push` to this repo's
-# github.com/victorrentea/* remote, tell Claude to start a BACKGROUND watch of
-# the resulting CI run so it can report pass/fail when the run finishes.
+# github.com/victorrentea/* remote, this tripwire tells Claude to start
+# a BACKGROUND watch of the resulting CI run to fix it in case it FAILED,
+# staying in the loop until CI is GREEN✅
+#
+###### Implementation #####
 #
 # A hook can only return context synchronously — it cannot call back later when
 # CI completes. So instead of watching here, it instructs the agent to launch

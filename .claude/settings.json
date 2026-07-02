@@ -9,26 +9,8 @@
     ],
     "ask": [
       "Edit(.claude/settings.json)",
-      "Write(.claude/settings.json)",
-      "Edit(.claude/settings.local.json)",
-      "Write(.claude/settings.local.json)",
-      "Edit(.githooks/*)",
-      "Write(.githooks/*)",
-      "Bash(git add .githooks*)",
-      "Edit(.github/workflows/*)",
-      "Write(.github/workflows/*)",
-      "Edit(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
-      "Write(petclinic-backend/src/test/java/victor/training/petclinic/guardrail/*)",
-      "Edit(.github/CODEOWNERS)",
-      "Write(.github/CODEOWNERS)",
-      "Edit(**/pom.xml)",
-      "Write(**/pom.xml)",
-      "Edit(**/package.json)",
-      "Write(**/package.json)"
+      "Write(.claude/settings.json)"
     ]
-  },
-  "skillOverrides": {
-    "add-field": "user-invocable-only"
   },
   "hooks": {
     "SessionStart": [
@@ -36,10 +18,12 @@
         "matcher": "startup|resume",
         "hooks": [
           {
+            "//": "auto-setup githooks",
             "type": "command",
             "command": "test \"$(git config --get core.hooksPath)\" = .githooks || { git config core.hooksPath .githooks && echo 'restored core.hooksPath -> .githooks (project hooks were disabled)'; }"
           },
           {
+            "//": "auto-feed Claude the latest git changes",
             "type": "command",
             "command": "echo \"## Repo state\\nBranch: $(git branch --show-current)\\n\\nUncommitted changes:\\n$(git status --short)\\n\\nLast 5 commits:\\n$(git log --oneline -5)\""
           }
@@ -51,6 +35,7 @@
         "matcher": "Write|Edit",
         "hooks": [
           {
+            "//": "automatically watch and fix the CI after a push",
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-java-edit.sh\""
           }

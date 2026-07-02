@@ -4,7 +4,9 @@
 # GIT + Agent Settings
 /.github/CODEOWNERS              @victorrentea/elders
 /.claude/settings.json           @victorrentea/elders
-/.github/workflows/ci.yml        @victorrentea/elders
+/.github/workflows/*             @victorrentea/elders
+/.github/githooks/*             @victorrentea/elders
+/petclinic-backend/src/test/java/victor/training/petclinic/guardrail/** @victorrentea/elders
 
 # API Contracts
 /openapi.yaml                    @victorrentea/elders
