@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -128,7 +129,8 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        // size=100 keeps this deterministic regardless of how the seed data paginates
+        List<OwnerDto> owners = search("/api/owners?size=100");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -156,7 +158,9 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        // /api/owners now returns a paged body: { content: [...], page: {...} }
+        JsonNode content = mapper.readTree(responseJson).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
         });
     }
 
