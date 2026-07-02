@@ -44,11 +44,24 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     | grep -E '^[MA][[:space:]]+petclinic-backend/docs/generated/DB\.sql$' || true)
   if [ -n "$db_content_changed" ] \
      && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
-    echo "[pre-push] ❌ petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
-    echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
-    echo "[pre-push]         git add petclinic-backend/docs/generated/DB.puml"
-    echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
-    exit 1
+    # The ER diagram models tables/columns/keys/relations — NOT indexes (indexes
+    # degrade to opaque Command nodes in db_schema_to_puml.py). An index-only DB.sql
+    # change therefore yields no diagram delta and legitimately leaves DB.puml
+    # unchanged, so requiring a regenerated diagram for it is a false positive.
+    # Only trip when the change touches something the diagram actually draws.
+    db_nonindex_change=$(git log -p -M --pretty=format: "${range[@]}" \
+        -- petclinic-backend/docs/generated/DB.sql 2>/dev/null \
+      | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | sed -E 's/^[+-][[:space:]]*//' \
+      | grep -vE '^[[:space:]]*$' \
+      | grep -viE '^(CREATE( UNIQUE)? INDEX|DROP INDEX)' || true)
+    if [ -n "$db_nonindex_change" ]; then
+      echo "[pre-push] ❌ petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+      echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
+      echo "[pre-push]         git add petclinic-backend/docs/generated/DB.puml"
+      echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
+      exit 1
+    fi
+    echo "[pre-push] ℹ️  DB.sql change is index-only (indexes aren't drawn in the ER diagram) — DB.puml unchanged is expected."
   fi
 
   if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$)'; then

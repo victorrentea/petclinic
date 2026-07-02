@@ -81,9 +81,20 @@ jobs:
           status="$(git diff --name-status -M "${before}...HEAD" 2>/dev/null || git diff --name-status -M HEAD~1...HEAD)"
           if printf '%s\n' "$status" | grep -qE '^[MA][[:space:]]+petclinic-backend/docs/generated/DB\.sql$' \
              && ! printf '%s\n' "$status" | grep -qE '[[:space:]]petclinic-backend/docs/generated/DB\.puml$'; then
-            echo "::error::petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
-            echo "::error::Run ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
-            exit 1
+            # Indexes aren't drawn in the ER diagram (see db_schema_to_puml.py), so an
+            # index-only DB.sql change produces no diagram delta and legitimately needs
+            # no DB.puml update. Only trip when the change touches something the diagram
+            # draws (tables/columns/keys/relations).
+            nonindex="$(git diff "${before}...HEAD" -- petclinic-backend/docs/generated/DB.sql 2>/dev/null \
+              | grep -E '^[+-]' | grep -Ev '^(\+\+\+|---)' | sed -E 's/^[+-][[:space:]]*//' \
+              | grep -vE '^[[:space:]]*$' \
+              | grep -viE '^(CREATE( UNIQUE)? INDEX|DROP INDEX)' || true)"
+            if [ -n "$nonindex" ]; then
+              echo "::error::petclinic-backend/docs/generated/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+              echo "::error::Run ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
+              exit 1
+            fi
+            echo "index-only DB.sql change (indexes aren't drawn in the ER diagram) — DB.puml unchanged is expected"
           fi
           echo "DB.sql ↔ DB.puml consistency: OK"
 
