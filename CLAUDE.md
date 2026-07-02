@@ -114,7 +114,7 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - MapStruct for DTO mapping
 - Global exception handling in `@RestControllerAdvice`
 - `@Validated` on `@RequestBody`
-- Use Lombok: `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
+- Use only Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
 - Keep line length ≤ 120 chars
 - Never ask before running tests after refactoring
 - Builder chains: one property per line, unless only 2 properties total
