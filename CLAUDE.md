@@ -21,7 +21,11 @@ Each script is foreground; run them in separate terminals.
 ./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh
-./start-structurizr.sh     # optional: Structurizr Lite view of the C4 model (localhost:8081)
+```
+
+The C4 model viewer now lives with the backend docs it serves:
+```sh
+petclinic-backend/docs/scripts/start-structurizr.sh   # optional: Structurizr view of the C4 model (localhost:8081)
 ```
 
 ### Backend (petclinic-backend/)

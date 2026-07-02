@@ -2,7 +2,7 @@
 set -euo pipefail
 printf '\033]0;Structurizr\007'  # set terminal/tab title
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCS_DIR="$SCRIPT_DIR/petclinic-backend/docs"
+DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"  # petclinic-backend/docs (this script lives in docs/scripts)
 DSL="$DOCS_DIR/c4model.dsl"  # hand-written C4 source (!includes c4model.c3.dsl)
 
 if ! command -v docker >/dev/null 2>&1; then
