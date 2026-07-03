@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# PostToolUse hook (Bash): after a successful `git push` to this repo's
-# github.com/victorrentea/* remote, this tripwire tells Claude to start
-# a BACKGROUND watch of the resulting CI run to fix it in case it FAILED,
+# PostToolUse hook (Bash): after a successful `git push`,
+# this tripwire tells Claude to start a BACKGROUND watch
+# of the resulting CI run to fix it in case it FAILED❌,
 # staying in the loop until CI is GREEN✅
 #
 ###### Implementation #####

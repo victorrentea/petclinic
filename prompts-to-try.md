@@ -3,10 +3,10 @@
 - Replace in CLAUDE.md the redundant (soon drifting) "## API Endpoints" with a pointer to the openapi.yaml (auto-kept in sync by tests)
 - Extract from CLAUDE.md the backend-related rules into a nested petclinic-backend/CLAUDE.md (which will be injected automatically in your context when stepping in that subfolder)
 - Extract from CLAUDE.md the "### Java Code Style" into a java/SKILL.md since those rules are only required when writing or reviewing .java. To guarantee the skill activates before touching any java file, add to the skill's frontmatter "paths: petclinic-backend/**/*.java"
-- Replace the drifting "## Domain Model (ER Model)" with an url that renders a plantuml image from petclinic-backend/docs/generated/DomainModel.md
+- Replace the drifting "## Domain Model" with an url that renders a plantuml image from petclinic-backend/docs/generated/DomainModel.md
 - Check CLAUDE.md is non-contradictory and in sync with recent code changes
  
-### Tools & MCPs (after accepting .mcp.json) 
+### Tools & MCPs (after accepting .mcp.json)   
 - **UI Layout bug:** align the labels and values in owner details screen via playwright screenshots
 - **BE tuning:** Make backend tests run faster (I know it might take you some serious time & tokens)
 - **BI dream:** Export an Excel pie chart of the pet types, from my postgres-db
