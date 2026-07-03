@@ -1,10 +1,10 @@
 ### Context Hygiene & Progressive Disclosure Pattern
-- Remove from CLAUDE.md the obvious mvn and npm instructions that any LLM knows from its training data
-- Replace in CLAUDE.md the redundant (soon drifting) "## API Endpoints" with a pointer to the openapi.yaml (auto-kept in sync by tests)
-- Extract from CLAUDE.md the backend-related rules into a nested petclinic-backend/CLAUDE.md (which will be injected automatically in your context when stepping in that subfolder)
-- Extract from CLAUDE.md the "### Java Code Style" into a java/SKILL.md since those rules are only required when writing or reviewing .java. To guarantee the skill activates before touching any java file, add to the skill's frontmatter "paths: petclinic-backend/**/*.java"
+- Remove from AGENTS.md the obvious mvn and npm instructions that any LLM knows from its training data
+- Replace in AGENTS.md the redundant (soon drifting) "## API Endpoints" with a pointer to the openapi.yaml (auto-kept in sync by tests)
+- Extract from AGENTS.md the backend-related rules into a nested petclinic-backend/AGENTS.md (which will be injected automatically in your context when stepping in that subfolder)
+- Extract from AGENTS.md the "### Java Code Style" into a java/SKILL.md since those rules are only required when writing or reviewing .java. To guarantee the skill activates before touching any java file, add to the skill's frontmatter "paths: petclinic-backend/**/*.java"
 - Replace the drifting "## Domain Model" with an url that renders a plantuml image from petclinic-backend/docs/generated/DomainModel.md
-- Check CLAUDE.md is non-contradictory and in sync with recent code changes
+- Check AGENTS.md is non-contradictory and in sync with recent code changes
  
 ### Tools & MCPs (after accepting .mcp.json)   
 - **UI Layout bug:** align the labels and values in owner details screen via playwright screenshots

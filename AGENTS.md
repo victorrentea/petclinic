@@ -1,102 +1,128 @@
-# AGENTS.md
+# CLAUDE.md
 
 Guidance for AI coding agents (GitHub Copilot CLI, and any `AGENTS.md`-aware tool)
-working in this repository. This is the vendor-neutral companion to `CLAUDE.md`;
-keep the two in sync when project conventions change.
+working in this repository.
 
-## Project overview
+## Project Overview
 
-Full-stack **PetClinic**: an Angular frontend and a Spring Boot backend that manage
-veterinary-clinic operations (owners, pets, vets, visits, specialties).
+Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
 
-- `petclinic-backend/` — Spring Boot 3.5 REST API (Java 21)
-- `petclinic-frontend/` — Angular 16 SPA (Angular Material + Bootstrap 3)
+**Structure:**
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21)
+- `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3)
 
-## Commands
+## Common Commands
 
-Full stack — each script is foreground; run them in separate terminals:
 
+### Full Stack
+Each script is foreground; run them in separate terminals.
 ```sh
-./install-all.sh        # one-time: mvn install + npm install for all modules
-./start-database.sh     # embedded Postgres on localhost:5432
-./start-backend.sh      # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
-./start-frontend.sh     # Angular dev server on localhost:4200
+./install-all.sh           # one-time: mvn install + npm install for all modules
+./start-database.sh        # embedded Postgres on localhost:5432
+./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
+./start-frontend.sh        # Angular dev server on localhost:4200
+./start-grafana.sh
 ```
 
-Backend (`petclinic-backend/`):
-
+The C4 model viewer now lives with the backend docs it serves:
 ```sh
-mvn spring-boot:run                    # run backend
-mvn test                               # run tests
-mvn clean install                      # build + regenerate MapStruct mappers
-mvn test -Dtest=ClassName#methodName   # run a single test
+petclinic-backend/docs/scripts/start-structurizr.sh   # optional: Structurizr view of the C4 model (localhost:8081)
 ```
 
-Frontend (`petclinic-frontend/`):
-
+### Backend (petclinic-backend/)
 ```sh
-npm start               # dev server on localhost:4200
-npm run build           # production build
-npm run test-headless   # headless Chrome unit tests
-npm run e2e             # Protractor e2e tests
+mvn spring-boot:run              # Run backend
+mvn test                         # Run tests
+mvn clean install                # Build + regenerate MapStruct mappers
+```
+
+### Frontend (petclinic-frontend/)
+```sh
+npm start                           # Dev server on localhost:4200
+npm run build                       # Production build
+npm test                            # Karma tests
+npm run test-headless               # Headless Chrome tests
+npm run e2e                         # Protractor e2e tests
+```
+
+### Testing a Single Test (Backend)
+```sh
+mvn test -Dtest=ClassName#methodName
 ```
 
 ## Architecture
 
-**Backend — layered, no service layer:**
+### Backend Architecture
 
-1. REST Controllers (`.../rest/`) — expose API endpoints
-2. Mappers (`mapper/`) — MapStruct entity↔DTO conversion
-3. Repositories (`repository/`) — Spring Data JPA interfaces
-4. Domain model (`model/`) — JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
+**Layered Structure:**
+1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
+2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
+3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
+4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
 
-Data flow: `Request → Controller → Repository / Mapper → JPA Entity` and back.
+**Generated Code:**
+- MapStruct mapper implementations → `target/generated-sources/annotations/`
+- Regenerate via `mvn clean install`
 
-- DTOs are hand-written in `.../rest/dto/` (not generated).
-- MapStruct mapper implementations are generated into `target/generated-sources/annotations/`;
-  regenerate with `mvn clean install`.
-- `openapi.yaml` at the repo root is **generated output** (from `OpenApiExtractorTest`), not a
-  source spec — do not hand-edit it.
+**Data Flow:**
+Request → REST Controller → Repository / Mapper → JPA Entity
+Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 
-**Domain relationships:** Owner 1→N Pet N→1 PetType · Pet 1→N Visit · Vet N↔N Specialty
-(via `vet_specialties`) · User 1→N Role.
+**Key Patterns:**
+- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
+- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
+- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
-**API:** REST at `http://localhost:8080/api/` (`/owners`, `/pets`, `/vets`, `/visits`,
-`/pettypes`, `/specialties`, `/users`). OpenAPI UI at `/swagger-ui.html`.
+### Living Architecture & Guardrails
 
-## Database
+See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living architecture diagrams, and CI drift checks.
 
-- **Dev:** embedded PostgreSQL via `./start-database.sh` (localhost:5432).
-- **Tests:** embedded PostgreSQL, auto-started in-process — no setup needed.
+### Database
+- **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
+- **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
 
-## Security
+### Security
+- Disabled by default
+- Enable via `petclinic.security.enable=true`
+- Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
+- Default user: `admin`/`admin`
 
-Disabled by default. Enable with `petclinic.security.enable=true`. Roles: `OWNER_ADMIN`,
-`VET_ADMIN`, `ADMIN`. Default dev user: `admin`/`admin`.
+## Domain Model (ER Model)
 
-## Code conventions (owner's preferences)
+Core entities and relationships:
+- **Owner** 1→N **Pet** N→1 **PetType**
+- **Pet** 1→N **Visit**
+- **Vet** N→N **Specialty** (via `vet_specialties` join table)
+- **User** 1→N **Role**
 
-- **Constructor injection** for production code (`@RequiredArgsConstructor`); `@Autowired`
-  only in tests.
-- `@Transactional` **only when strictly necessary**.
-- **MapStruct** for all DTO mapping.
-- Global exception handling in a single `@RestControllerAdvice`.
-- `@Validated` on `@RequestBody`.
-- Lombok: only `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, and `@Getter`/`@Setter`
-  (used selectively).
-- Line length ≤ 120 chars.
-- Builder chains: one property per line, unless there are only 2 properties total.
+## API Endpoints
+Backend exposes REST API at http://localhost:8080/api/
+- Owners: `/api/owners`, `/api/owners/{id}`
+- Pets: `/api/pets`, `/api/pets/{id}`
+- Vets: `/api/vets`, `/api/vets/{id}`
+- Visits: `/api/visits`
+- PetTypes: `/api/pettypes`
+- Specialties: `/api/specialties`
+- Users: `/api/users`
 
-## Working agreements
+OpenAPI docs: http://localhost:8080/swagger-ui.html
 
-- Write non-trivial code using **TDD**.
-- **Always run tests after any refactoring** — never ask first.
-- Keep comments concise; prefer explanatory variable/method names over comments.
-- Keep explanations concise.
-- **Challenge ambiguous prompts** and say so when a request looks wrong.
-- Never bypass verification: `git commit --no-verify` / `git push --no-verify` are forbidden.
+## Development Notes
 
-## Guardrails & living architecture
+### Owner's Code Preferences (from copilot-instructions.md)
+- Constructor injection for production, `@Autowired` only in tests
+- `@Transactional` only when strictly necessary
+- MapStruct for DTO mapping
+- Global exception handling in `@RestControllerAdvice`
+- `@Validated` on `@RequestBody`
+- Use only Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
+- Keep line length ≤ 120 chars
+- Never ask before running tests after refactoring
+- Builder chains: one property per line, unless only 2 properties total
 
-See [GUARDRAILS.md](GUARDRAILS.md) for guardrail tests, living-architecture diagrams, and
-CI drift checks. The pre-commit hook lives in `.githooks/` (`git config core.hooksPath .githooks`).
+## Task Modifiers
+- Write non-trivial code using TDD
+- Keep comments concise, prefer explanatory variable/method names.
+- Always run tests after any refactoring
+- Keep explanations concise
+- Challenge ambiguous prompts. Tell me when I'm wrong!  
