@@ -4,10 +4,13 @@ title add a visit to an existing pet
 caption generated from test "add a visit to an existing pet"
 participant Browser
 participant Backend
+participant "Entitlements Service" as EntitlementsService
 participant DB
 Browser -> Backend: POST /api/visits
 activate Backend
 Backend -> Backend: book-visit
+Backend -> EntitlementsService: check booking permission
+EntitlementsService --> Backend: allowed
 Backend -> DB: INSERT petclinic.visits
 activate DB
 DB --> Backend: return
