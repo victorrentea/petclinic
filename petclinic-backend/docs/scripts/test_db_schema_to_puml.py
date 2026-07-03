@@ -43,85 +43,34 @@ def test_not_null_detected():
     assert users["username"].not_null is True
 
 
-# ── Diff + render: no change ⇒ no red ───────────────────────────────────────
+# ── Render: plain snapshot, never any diff markup ───────────────────────────
 
-def test_no_change_no_red():
-    sql = _real_schema_sql()
-    cur = m.parse_schema(sql)
-    puml = m.render_puml(cur, m.diff_schemas(cur, cur), cur)
-    assert "color:red" not in puml
-    assert "#line:red" not in puml
-    assert "#red" not in puml
+def _has_diff_markup(puml: str) -> bool:
+    return any(t in puml for t in ("color:red", "#line:red", "#red", "<s>", "(removed)"))
+
+
+def test_render_is_plain_snapshot():
+    puml = m.generate(_real_schema_sql())
+    assert not _has_diff_markup(puml)                        # never bakes a diff into the snapshot
     assert 'entity "owners"' in puml
     assert "owners ||--o{ pets" in puml
+    assert "{field} id : int <<PK>>" in puml
 
 
-def _has_red_markup(puml: str) -> bool:
-    return ("color:red" in puml) or ("#line:red" in puml) or ("#red" in puml)
+def test_caption_makes_no_diff_claim():
+    puml = m.generate(_real_schema_sql())
+    assert "caption Generated from DB.sql" in puml
+    assert "red" not in puml.lower()
 
 
-def test_bootstrap_generate_has_no_red():
-    sql = _real_schema_sql()
-    puml = m.generate(sql, "")  # empty baseline
-    assert not _has_red_markup(puml)
-
-
-# ── Diff cases ──────────────────────────────────────────────────────────────
-
-BASE = """
-CREATE TABLE public.owners (id integer NOT NULL, first_name text);
-CREATE TABLE public.pets (id integer NOT NULL, owner_id integer);
-ALTER TABLE ONLY public.owners ADD CONSTRAINT owners_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.pets ADD CONSTRAINT pets_pkey PRIMARY KEY (id);
-"""
-
-
-def _gen(base_sql, cur_sql):
-    base = m.parse_schema(base_sql)
-    cur = m.parse_schema(cur_sql)
-    return m.render_puml(cur, m.diff_schemas(base, cur), base)
-
-
-def test_added_column_is_red():
-    cur = BASE.replace(
-        "CREATE TABLE public.owners (id integer NOT NULL, first_name text);",
-        "CREATE TABLE public.owners (id integer NOT NULL, first_name text, city text);",
-    )
-    puml = _gen(BASE, cur)
-    assert "<color:red>city : text" in puml
-    assert "<color:red>first_name" not in puml          # unchanged stays black
-
-
-def test_added_table_is_red_entity():
-    cur = BASE + "\nCREATE TABLE public.visits (id integer NOT NULL);\nALTER TABLE ONLY public.visits ADD CONSTRAINT visits_pkey PRIMARY KEY (id);"
-    puml = _gen(BASE, cur)
-    assert 'entity "visits" as visits #line:red;text:red' in puml
-    assert 'entity "owners" as owners {' in puml          # existing entity not red
-
-
-def test_added_fk_is_red_line():
-    cur = BASE + "\nALTER TABLE ONLY public.pets ADD CONSTRAINT pets_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.owners(id);"
-    puml = _gen(BASE, cur)
-    assert "owners ||-[#red]-o{ pets" in puml
-
-
-def test_changed_column_type_is_red():
-    cur = BASE.replace("first_name text", "first_name varchar(50)")
-    puml = _gen(BASE, cur)
-    assert "<color:red>first_name : varchar(50)" in puml
-
-
-def test_removed_column_is_struck_red():
-    cur = BASE.replace(", first_name text", "")
-    puml = _gen(BASE, cur)
-    assert "<s>first_name : text</s>" in puml
-    assert "<color:red>" in puml
+def test_columns_render_in_declaration_order():
+    # owners is the first entity; its columns declared id, first_name, last_name, …
+    after_owners = m.generate(_real_schema_sql()).split('entity "owners"', 1)[1]
+    assert after_owners.index("{field} id ") < after_owners.index("{field} first_name ")
 
 
 # ── Determinism ─────────────────────────────────────────────────────────────
 
 def test_deterministic_output():
     sql = _real_schema_sql()
-    a = m.generate(sql, "")
-    b = m.generate(sql, "")
-    assert a == b
+    assert m.generate(sql) == m.generate(sql)

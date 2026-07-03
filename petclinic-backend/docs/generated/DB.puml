@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
 title Database Schema (ER)
-caption Generated from DB.sql — red = changed in this commit
+caption Generated from DB.sql
 hide circle
 skinparam linetype ortho
 
