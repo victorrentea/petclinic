@@ -119,6 +119,7 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - Keep line length ≤ 120 chars
 - Never ask before running tests after refactoring
 - Builder chains: one property per line, unless only 2 properties total
+- For production-scale tables (for example Owners can reach ~1M rows), grids must use server-side pagination and sorting, never client-side.
 
 ## Task Modifiers
 - Write non-trivial code using TDD
