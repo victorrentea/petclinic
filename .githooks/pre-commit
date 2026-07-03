@@ -81,9 +81,9 @@ if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
   fi
 fi
 
-# ── DB schema → ER diagram (red-highlighted commit changes) ────────────────
+# ── DB schema → ER diagram (plain projection of the current schema) ─────────
 # Gated: only run when petclinic-backend/DB.sql is staged — that's the sole input. Regenerates
-# docs/generated/DB.puml (red = this commit's schema delta) and stages it
+# docs/generated/DB.puml (a plain ER projection of the schema) and stages it
 # so the diagram is committed alongside the schema change.
 if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
   if command -v python3 >/dev/null 2>&1; then

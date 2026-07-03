@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Regenerate petclinic-backend/docs/generated/DB.puml from petclinic-backend/DB.sql,
-# highlighting in red the schema changes vs the previous committed DB.sql.
+# Regenerate petclinic-backend/docs/generated/DB.puml from petclinic-backend/DB.sql
+# as a plain projection of the current schema (no cross-commit diffing —
+# comparing revisions is a separate tool's job).
 #
 # Usage:
-#   gen-db-schema-diagram.sh              # current = working-tree DB.sql, baseline = HEAD:DB.sql
-#   gen-db-schema-diagram.sh --staged     # current = staged DB.sql (for the pre-commit hook)
-#   gen-db-schema-diagram.sh --no-baseline # bootstrap snapshot, no red highlights
+#   gen-db-schema-diagram.sh              # source = working-tree DB.sql
+#   gen-db-schema-diagram.sh --staged     # source = staged DB.sql (for the pre-commit hook)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,7 +18,6 @@ MODE="working"
 for arg in "$@"; do
   case "$arg" in
     --staged) MODE="staged" ;;
-    --no-baseline) MODE="bootstrap" ;;
     *) echo "[db-schema-diagram] unknown arg: $arg" >&2; exit 2 ;;
   esac
 done
@@ -33,24 +32,14 @@ fi
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 CUR="$TMP_DIR/current.sql"
-BASE="$TMP_DIR/baseline.sql"
 
-# ── Resolve current schema ──────────────────────────────────────────────────
+# ── Resolve source schema ───────────────────────────────────────────────────
 if [ "$MODE" = "staged" ]; then
   git -C "$ROOT" show :petclinic-backend/DB.sql >"$CUR" 2>/dev/null || cp "$DB_SQL" "$CUR"
 else
   cp "$DB_SQL" "$CUR"
 fi
 
-# ── Resolve baseline schema (previous committed DB.sql) ─────────────────────
-BASE_ARG=""
-if [ "$MODE" != "bootstrap" ]; then
-  if git -C "$ROOT" show HEAD:petclinic-backend/DB.sql >"$BASE" 2>/dev/null; then
-    BASE_ARG="$BASE"
-  fi
-fi
-
-"$VENV/bin/python" "$SCRIPT_DIR/db_schema_to_puml.py" \
-  --current "$CUR" --baseline "$BASE_ARG" --out "$OUT"
+"$VENV/bin/python" "$SCRIPT_DIR/db_schema_to_puml.py" --current "$CUR" --out "$OUT"
 
 echo "[db-schema-diagram] wrote $OUT" >&2
