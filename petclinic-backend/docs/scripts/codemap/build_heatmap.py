@@ -54,7 +54,8 @@ HASH_RE = re.compile(r'(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)\b', re
 # walk git log
 SENT = "___COMMIT___"
 FSENT = "___FILES___"
-fmt = f"{SENT}%n%H%n%s%n%b%n{FSENT}"
+# %ae = author email (stable identity for counting DISTINCT committers per file)
+fmt = f"{SENT}%n%H%n%ae%n%s%n%b%n{FSENT}"
 proc = subprocess.Popen(
     ["git", "-C", REPO_DIR, "log", "--no-merges", "--name-only", f"--pretty=format:{fmt}"],
     stdout=subprocess.PIPE, text=True, errors="replace",
@@ -63,12 +64,45 @@ assert proc.stdout
 
 commits_per_file = defaultdict(int)
 bug_commits_per_file = defaultdict(int)
+committers_per_file = defaultdict(set)   # distinct author identities (emails) per file
 total_commits = 0
 total_bug_commits = 0
+
+# Per-package (district) aggregates for the Code City "package mode". Sets so the
+# counts are EXACT distinct values (a commit/author touching several files in a
+# package counts once) — not obtainable by summing the per-file counts.
+commits_per_package = defaultdict(set)      # distinct commit SHAs per package
+bug_commits_per_package = defaultdict(set)  # distinct bugfix commit SHAs per package
+committers_per_package = defaultdict(set)   # distinct author identities per package
+
+
+def _district(path):
+    """Dotted Java package for a repo-relative path (mirrors render_codecity._district)."""
+    parts = path.split("/")
+    if "java" in parts:
+        j = parts.index("java")
+        pkg = parts[j + 1:-1]
+        if pkg:
+            return ".".join(pkg)
+    if len(parts) > 1:
+        return parts[-2]
+    return "root"
+
+
+def _counts_toward_diagram(fp):
+    """Same inclusion rule as the file walk below: non-test .java, no package-info."""
+    if not fp.endswith(".java") or fp.rsplit("/", 1)[-1] == "package-info.java":
+        return False
+    segs = fp.split("/")
+    for i in range(len(segs) - 1):
+        if segs[i] == "src" and segs[i + 1] in ("test", "testFixtures"):
+            return False
+    return True
 
 buf = []
 state = "expect_sent"
 sha = None
+author = None
 msg_lines = []
 file_lines = []
 
@@ -91,20 +125,34 @@ def flush_commit():
         if not fp:
             continue
         commits_per_file[fp] += 1
+        if author:
+            committers_per_file[fp].add(author)
         if is_bug:
             bug_commits_per_file[fp] += 1
+    # Roll this commit up to each distinct package it touched (exact, deduped).
+    for pkg in {_district(fp) for fp in file_lines if fp and _counts_toward_diagram(fp)}:
+        commits_per_package[pkg].add(sha)
+        if author:
+            committers_per_package[pkg].add(author)
+        if is_bug:
+            bug_commits_per_package[pkg].add(sha)
 
 for raw in proc.stdout:
     line = raw.rstrip("\n")
     if line == SENT:
         flush_commit()
         sha = None
+        author = None
         msg_lines = []
         file_lines = []
         state = "expect_sha"
         continue
     if state == "expect_sha":
         sha = line
+        state = "expect_author"
+        continue
+    if state == "expect_author":
+        author = line
         state = "in_msg"
         continue
     if state == "in_msg":
@@ -140,6 +188,8 @@ for root, dirs, files in os.walk(REPO_DIR):
         dirs[:] = []
         continue
     for fn in files:
+        if fn == "package-info.java":
+            continue  # only package annotations/Javadoc — keep it out of the diagram
         if fn.endswith(".java"):
             java_files.append(os.path.join(root, fn))
 
@@ -183,6 +233,7 @@ for ap in java_files:
         continue
     commits = commits_per_file.get(rel, 0)
     bug_commits = bug_commits_per_file.get(rel, 0)
+    committers = len(committers_per_file.get(rel, ()))
     cog = complexity.get(rel, 0)
     fi = fan_in_map.get(rel, 0)
     fo = fan_out_map.get(rel, 0)
@@ -191,13 +242,51 @@ for ap in java_files:
     bugs_per_kloc = (bug_commits / kloc) if kloc else 0
     bugs_per_commit = (bug_commits / commits) if commits else 0
     cog_per_kloc = (cog / kloc) if kloc else 0
-    rows.append((rel, sz, lines, commits, bug_commits, commits_per_kloc, bugs_per_kloc, bugs_per_commit, cog, cog_per_kloc, fi, fo))
+    rows.append((rel, sz, lines, commits, bug_commits, commits_per_kloc, bugs_per_kloc, bugs_per_commit, cog, cog_per_kloc, fi, fo, committers))
 
 rows.sort(key=lambda r: (r[6], r[4], r[3]), reverse=True)
 
 with open(OUT_FILE, "w") as f:
-    f.write("path\tbytes\tlines\tcommits\tbug_commits\tcommits_per_kloc\tbugs_per_kloc\tbugs_per_commit\tcognitive_complexity\tcomplexity_per_kloc\tfan_in\tfan_out\n")
+    f.write("path\tbytes\tlines\tcommits\tbug_commits\tcommits_per_kloc\tbugs_per_kloc\tbugs_per_commit\tcognitive_complexity\tcomplexity_per_kloc\tfan_in\tfan_out\tcommitters\n")
     for r in rows:
-        f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{r[5]:.2f}\t{r[6]:.2f}\t{r[7]:.3f}\t{r[8]}\t{r[9]:.2f}\t{r[10]}\t{r[11]}\n")
+        f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{r[5]:.2f}\t{r[6]:.2f}\t{r[7]:.3f}\t{r[8]}\t{r[9]:.2f}\t{r[10]}\t{r[11]}\t{r[12]}\n")
 
 print(f"wrote {len(rows)} rows to {OUT_FILE}", file=sys.stderr)
+
+# ── Per-package aggregates for Code City "package mode" ──────────────────────
+# Additive metrics (size, LOC, complexity, coupling) sum over the package's
+# files; commits / bug_commits / committers are EXACT distinct counts from the
+# per-package sets built during the git walk. Ratios recompute from the totals.
+OUT_FILE_PKG = os.path.join(OUT_DIR, "codemap-packages.tsv")
+pkg_agg = {}  # package -> [files, bytes, lines, cog, fan_in, fan_out]
+for r in rows:
+    pkg = _district(r[0])
+    a = pkg_agg.setdefault(pkg, [0, 0, 0, 0, 0, 0])
+    a[0] += 1        # files
+    a[1] += r[1]     # bytes
+    a[2] += r[2]     # lines
+    a[3] += r[8]     # cognitive_complexity
+    a[4] += r[10]    # fan_in
+    a[5] += r[11]    # fan_out
+
+pkg_rows = []
+for pkg, (files, sz, lines, cog, fi, fo) in pkg_agg.items():
+    commits = len(commits_per_package.get(pkg, ()))
+    bug_commits = len(bug_commits_per_package.get(pkg, ()))
+    committers = len(committers_per_package.get(pkg, ()))
+    kloc = lines / 1000.0 if lines else 0
+    commits_per_kloc = (commits / kloc) if kloc else 0
+    bugs_per_kloc = (bug_commits / kloc) if kloc else 0
+    bugs_per_commit = (bug_commits / commits) if commits else 0
+    cog_per_kloc = (cog / kloc) if kloc else 0
+    pkg_rows.append((pkg, files, sz, lines, commits, bug_commits, commits_per_kloc,
+                     bugs_per_kloc, bugs_per_commit, cog, cog_per_kloc, fi, fo, committers))
+
+pkg_rows.sort(key=lambda r: (r[6], r[5], r[4]), reverse=True)
+
+with open(OUT_FILE_PKG, "w") as f:
+    f.write("package\tfiles\tbytes\tlines\tcommits\tbug_commits\tcommits_per_kloc\tbugs_per_kloc\tbugs_per_commit\tcognitive_complexity\tcomplexity_per_kloc\tfan_in\tfan_out\tcommitters\n")
+    for r in pkg_rows:
+        f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{r[5]}\t{r[6]:.2f}\t{r[7]:.2f}\t{r[8]:.3f}\t{r[9]}\t{r[10]:.2f}\t{r[11]}\t{r[12]}\t{r[13]}\n")
+
+print(f"wrote {len(pkg_rows)} package rows to {OUT_FILE_PKG}", file=sys.stderr)

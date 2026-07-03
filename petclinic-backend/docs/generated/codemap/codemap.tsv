@@ -1,85 +1,88 @@
-path	bytes	lines	commits	bug_commits	commits_per_kloc	bugs_per_kloc	bugs_per_commit	cognitive_complexity	complexity_per_kloc	fan_in	fan_out
-petclinic-backend/src/main/java/victor/training/petclinic/security/CorsConfig.java	980	21	2	1	95.24	47.62	0.500	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyFeed.java	1794	46	3	1	65.22	21.74	0.333	0	0.00	2	2
-petclinic-backend/src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java	10487	220	8	0	36.36	0.00	0.000	17	77.27	0	7
-petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java	635	25	6	0	240.00	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerDto.java	1803	56	6	0	107.14	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java	7005	150	5	0	33.33	0.00	0.000	0	0.00	0	15
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/SpecialtyDto.java	780	23	5	0	217.39	0.00	0.000	0	0.00	4	0
-petclinic-database/src/main/java/ro/victorrentea/petclinic/db/PostgresLauncher.java	3100	79	5	0	63.29	0.00	0.000	5	63.29	0	1
-petclinic-backend/src/main/java/victor/training/petclinic/mcp/McpSecurity.java	4895	108	4	0	37.04	0.00	0.000	6	55.56	1	0
-petclinic-backend/src/main/java/victor/training/petclinic/model/Specialty.java	447	22	4	0	181.82	0.00	0.000	0	0.00	6	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyRestController.java	2813	64	4	0	62.50	0.00	0.000	0	0.00	1	5
-petclinic-backend/src/main/java/victor/training/petclinic/PetClinicApplication.java	1060	30	3	0	100.00	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/model/Pet.java	1906	67	3	0	44.78	0.00	0.000	0	0.00	7	3
-petclinic-backend/src/main/java/victor/training/petclinic/model/Owner.java	2608	95	3	0	31.58	0.00	0.000	1	10.53	5	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerFieldsDto.java	1041	36	3	0	83.33	0.00	0.000	0	0.00	2	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ExceptionControllerAdvice.java	4195	85	3	0	35.29	0.00	0.000	0	0.00	0	2
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/ChatbotApp.java	1400	33	2	0	60.61	0.00	0.000	0	0.00	0	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/Service.java	1559	48	2	0	41.67	0.00	0.000	0	0.00	5	2
-petclinic-backend/src/main/java/victor/training/petclinic/security/BasicAuthenticationConfig.java	2256	56	2	0	35.71	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/security/DisableSecurityConfig.java	1124	29	2	0	68.97	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/model/Visit.java	784	34	2	0	58.82	0.00	0.000	0	0.00	6	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/RootRestController.java	643	22	2	0	90.91	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetTypeDto.java	450	19	2	0	105.26	0.00	0.000	0	0.00	5	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VisitFieldsDto.java	698	23	2	0	86.96	0.00	0.000	0	0.00	3	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetTypeFieldsDto.java	333	12	2	0	166.67	0.00	0.000	0	0.00	2	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VisitDto.java	1621	44	2	0	45.45	0.00	0.000	0	0.00	3	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/UserDto.java	876	31	2	0	64.52	0.00	0.000	0	0.00	2	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/JudgeGuard.java	6168	124	1	0	8.06	0.00	0.000	3	24.19	1	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/SecurityConfig.java	3921	75	1	0	13.33	0.00	0.000	1	13.33	1	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/OwnerJwtPrincipal.java	2411	62	1	0	16.13	0.00	0.000	8	129.03	3	2
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/ChatHistory.java	1753	50	1	0	20.00	0.00	0.000	2	40.00	1	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/TokenCostMeter.java	3496	84	1	0	11.90	0.00	0.000	6	71.43	1	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/RemoteToolsConfig.java	3410	63	1	0	15.87	0.00	0.000	3	47.62	1	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/LocalTools.java	2210	49	1	0	20.41	0.00	0.000	2	40.82	1	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/RagIngestion.java	5974	150	1	0	6.67	0.00	0.000	21	140.00	0	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/Assistant.java	12311	229	1	0	4.37	0.00	0.000	2	8.73	1	5
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/diagram/AgentStateDiagram.java	5207	129	1	0	7.75	0.00	0.000	26	201.55	0	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/ServiceHealth.java	233	4	1	0	250.00	0.00	0.000	0	0.00	2	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterGuard.java	5729	139	1	0	7.19	0.00	0.000	10	71.94	5	3
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/MetricsSnapshot.java	238	6	1	0	166.67	0.00	0.000	0	0.00	2	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/ProcessControl.java	909	24	1	0	41.67	0.00	0.000	0	0.00	4	2
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/RealProcessControl.java	3408	87	1	0	11.49	0.00	0.000	6	68.97	2	2
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterAgent.java	8233	179	1	0	5.59	0.00	0.000	18	100.56	1	10
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterController.java	1637	38	1	0	26.32	0.00	0.000	0	0.00	0	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/HealthProbe.java	3524	90	1	0	11.11	0.00	0.000	7	77.78	1	3
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/GrafanaFindings.java	698	17	1	0	58.82	0.00	0.000	0	0.00	2	0
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/RestartResult.java	874	18	1	0	55.56	0.00	0.000	0	0.00	2	2
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/GrafanaClient.java	4241	108	1	0	9.26	0.00	0.000	6	55.56	1	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/triage/TriageController.java	1418	35	1	0	28.57	0.00	0.000	0	0.00	0	1
-petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/triage/PetTriageAgent.java	4509	101	1	0	9.90	0.00	0.000	4	39.60	1	0
-petclinic-backend/src/main/java/victor/training/petclinic/repository/PetRepository.java	602	25	1	0	40.00	0.00	0.000	0	0.00	3	2
-petclinic-backend/src/main/java/victor/training/petclinic/repository/PetTypeRepository.java	421	19	1	0	52.63	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java	612	24	1	0	41.67	0.00	0.000	0	0.00	3	1
-petclinic-backend/src/main/java/victor/training/petclinic/repository/UserRepository.java	245	8	1	0	125.00	0.00	0.000	0	0.00	1	1
-petclinic-backend/src/main/java/victor/training/petclinic/repository/SpecialtyRepository.java	528	22	1	0	45.45	0.00	0.000	0	0.00	3	1
-petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java	589	21	1	0	47.62	0.00	0.000	0	0.00	1	1
-petclinic-backend/src/main/java/victor/training/petclinic/repository/package-info.java	83	2	1	0	500.00	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/security/Roles.java	288	11	1	0	90.91	0.00	0.000	0	0.00	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/VetMapper.java	565	21	1	0	47.62	0.00	0.000	0	0.00	1	4
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/SpecialtyMapper.java	521	19	1	0	52.63	0.00	0.000	0	0.00	3	2
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/PetMapper.java	1125	37	1	0	27.03	0.00	0.000	0	0.00	4	6
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/PetTypeMapper.java	627	21	1	0	47.62	0.00	0.000	0	0.00	1	3
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/UserMapper.java	307	14	1	0	71.43	0.00	0.000	0	0.00	1	2
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/OwnerMapper.java	619	22	1	0	45.45	0.00	0.000	0	0.00	1	4
-petclinic-backend/src/main/java/victor/training/petclinic/mapper/VisitMapper.java	1097	31	1	0	32.26	0.00	0.000	0	0.00	3	4
-petclinic-backend/src/main/java/victor/training/petclinic/mcp/McpTomcatCustomizer.java	1943	42	1	0	23.81	0.00	0.000	3	71.43	0	0
-petclinic-backend/src/main/java/victor/training/petclinic/model/Vet.java	1048	47	1	0	21.28	0.00	0.000	0	0.00	3	1
-petclinic-backend/src/main/java/victor/training/petclinic/model/User.java	737	37	1	0	27.03	0.00	0.000	1	27.03	4	1
-petclinic-backend/src/main/java/victor/training/petclinic/model/Role.java	549	26	1	0	38.46	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/model/PetType.java	367	19	1	0	52.63	0.00	0.000	0	0.00	6	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/VetRestController.java	3099	83	1	0	12.05	0.00	0.000	2	24.10	0	7
-petclinic-backend/src/main/java/victor/training/petclinic/rest/UserRestController.java	1767	49	1	0	20.41	0.00	0.000	7	142.86	0	5
-petclinic-backend/src/main/java/victor/training/petclinic/rest/PetTypeRestController.java	2971	72	1	0	13.89	0.00	0.000	1	13.89	0	5
-petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyFeedController.java	1516	36	1	0	27.78	0.00	0.000	1	27.78	0	2
-petclinic-backend/src/main/java/victor/training/petclinic/rest/PetRestController.java	1693	51	1	0	19.61	0.00	0.000	0	0.00	0	4
-petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java	2321	61	1	0	16.39	0.00	0.000	0	0.00	0	5
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VetDto.java	1108	37	1	0	27.03	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetDto.java	1449	46	1	0	21.74	0.00	0.000	0	0.00	4	2
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetFieldsDto.java	769	29	1	0	34.48	0.00	0.000	0	0.00	2	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/RoleDto.java	372	16	1	0	62.50	0.00	0.000	0	0.00	1	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VetFieldsDto.java	838	29	1	0	34.48	0.00	0.000	0	0.00	1	1
-petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ValidationErrorExtractor.java	2806	74	1	0	13.51	0.00	0.000	22	297.30	1	0
-petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ValidationErrorFieldExtractor.java	2118	53	1	0	18.87	0.00	0.000	19	358.49	1	0
-petclinic-database/src/main/java/ro/victorrentea/petclinic/db/NetworkLatencyProxy.java	3330	114	1	0	8.77	0.00	0.000	11	96.49	1	0
+path	bytes	lines	commits	bug_commits	commits_per_kloc	bugs_per_kloc	bugs_per_commit	cognitive_complexity	complexity_per_kloc	fan_in	fan_out	committers
+petclinic-backend/src/main/java/victor/training/petclinic/security/CorsConfig.java	980	21	2	1	95.24	47.62	0.500	0	0.00	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyFeed.java	1794	46	3	1	65.22	21.74	0.333	0	0.00	2	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java	10487	220	8	0	36.36	0.00	0.000	17	77.27	0	7	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java	801	27	7	0	259.26	0.00	0.000	0	0.00	2	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java	8867	185	7	0	37.84	0.00	0.000	4	21.62	0	17	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerDto.java	1803	56	6	0	107.14	0.00	0.000	0	0.00	3	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyRestController.java	3387	73	5	0	68.49	0.00	0.000	0	0.00	1	6	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/SpecialtyDto.java	780	23	5	0	217.39	0.00	0.000	0	0.00	4	0	1
+petclinic-database/src/main/java/ro/victorrentea/petclinic/db/PostgresLauncher.java	3100	79	5	0	63.29	0.00	0.000	5	63.29	0	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/mcp/McpSecurity.java	4895	108	4	0	37.04	0.00	0.000	6	55.56	1	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Specialty.java	447	22	4	0	181.82	0.00	0.000	0	0.00	6	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Owner.java	2678	97	4	0	41.24	0.00	0.000	1	10.31	5	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ExceptionControllerAdvice.java	4706	93	4	0	43.01	0.00	0.000	0	0.00	0	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/PetClinicApplication.java	1060	30	3	0	100.00	0.00	0.000	0	0.00	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Pet.java	1906	67	3	0	44.78	0.00	0.000	0	0.00	7	3	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/ApiExamples.java	3909	89	3	0	33.71	0.00	0.000	0	0.00	6	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java	3467	82	3	0	36.59	0.00	0.000	0	0.00	0	6	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerFieldsDto.java	1041	36	3	0	83.33	0.00	0.000	0	0.00	2	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/ChatbotApp.java	1400	33	2	0	60.61	0.00	0.000	0	0.00	0	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/Service.java	1559	48	2	0	41.67	0.00	0.000	0	0.00	5	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/security/BasicAuthenticationConfig.java	2256	56	2	0	35.71	0.00	0.000	0	0.00	0	0	2
+petclinic-backend/src/main/java/victor/training/petclinic/security/DisableSecurityConfig.java	1124	29	2	0	68.97	0.00	0.000	0	0.00	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Visit.java	784	34	2	0	58.82	0.00	0.000	0	0.00	6	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/RootRestController.java	643	22	2	0	90.91	0.00	0.000	0	0.00	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/VetRestController.java	3660	92	2	0	21.74	0.00	0.000	2	21.74	0	8	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/PetTypeRestController.java	3541	81	2	0	24.69	0.00	0.000	1	12.35	0	6	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/PetRestController.java	2254	60	2	0	33.33	0.00	0.000	0	0.00	0	5	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetTypeDto.java	450	19	2	0	105.26	0.00	0.000	0	0.00	5	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VisitFieldsDto.java	698	23	2	0	86.96	0.00	0.000	0	0.00	3	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetTypeFieldsDto.java	333	12	2	0	166.67	0.00	0.000	0	0.00	2	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VisitDto.java	1621	44	2	0	45.45	0.00	0.000	0	0.00	3	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/UserDto.java	876	31	2	0	64.52	0.00	0.000	0	0.00	2	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/JudgeGuard.java	6168	124	1	0	8.06	0.00	0.000	3	24.19	1	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/SecurityConfig.java	3921	75	1	0	13.33	0.00	0.000	1	13.33	1	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/OwnerJwtPrincipal.java	2411	62	1	0	16.13	0.00	0.000	8	129.03	3	2	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/ChatHistory.java	1753	50	1	0	20.00	0.00	0.000	2	40.00	1	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/TokenCostMeter.java	3496	84	1	0	11.90	0.00	0.000	6	71.43	1	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/RemoteToolsConfig.java	3410	63	1	0	15.87	0.00	0.000	3	47.62	1	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/LocalTools.java	2210	49	1	0	20.41	0.00	0.000	2	40.82	1	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/RagIngestion.java	5974	150	1	0	6.67	0.00	0.000	21	140.00	0	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/assistant/Assistant.java	12311	229	1	0	4.37	0.00	0.000	2	8.73	1	5	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/diagram/AgentStateDiagram.java	5207	129	1	0	7.75	0.00	0.000	26	201.55	0	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/ServiceHealth.java	233	4	1	0	250.00	0.00	0.000	0	0.00	2	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterGuard.java	5729	139	1	0	7.19	0.00	0.000	10	71.94	5	3	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/MetricsSnapshot.java	238	6	1	0	166.67	0.00	0.000	0	0.00	2	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/ProcessControl.java	909	24	1	0	41.67	0.00	0.000	0	0.00	4	2	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/RealProcessControl.java	3408	87	1	0	11.49	0.00	0.000	6	68.97	2	2	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterAgent.java	8233	179	1	0	5.59	0.00	0.000	18	100.56	1	10	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/FirefighterController.java	1637	38	1	0	26.32	0.00	0.000	0	0.00	0	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/HealthProbe.java	3524	90	1	0	11.11	0.00	0.000	7	77.78	1	3	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/GrafanaFindings.java	698	17	1	0	58.82	0.00	0.000	0	0.00	2	0	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/RestartResult.java	874	18	1	0	55.56	0.00	0.000	0	0.00	2	2	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/firefighter/GrafanaClient.java	4241	108	1	0	9.26	0.00	0.000	6	55.56	1	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/triage/TriageController.java	1418	35	1	0	28.57	0.00	0.000	0	0.00	0	1	1
+petclinic-chatbot/src/main/java/victor/training/petclinic/chatbot/triage/PetTriageAgent.java	4509	101	1	0	9.90	0.00	0.000	4	39.60	1	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/PetRepository.java	602	25	1	0	40.00	0.00	0.000	0	0.00	3	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/PetTypeRepository.java	421	19	1	0	52.63	0.00	0.000	0	0.00	2	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java	612	24	1	0	41.67	0.00	0.000	0	0.00	3	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/UserRepository.java	245	8	1	0	125.00	0.00	0.000	0	0.00	1	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/SpecialtyRepository.java	528	22	1	0	45.45	0.00	0.000	0	0.00	3	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java	589	21	1	0	47.62	0.00	0.000	0	0.00	1	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/security/Roles.java	288	11	1	0	90.91	0.00	0.000	0	0.00	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/VetMapper.java	565	21	1	0	47.62	0.00	0.000	0	0.00	1	4	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/SpecialtyMapper.java	521	19	1	0	52.63	0.00	0.000	0	0.00	3	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/PetMapper.java	1125	37	1	0	27.03	0.00	0.000	0	0.00	4	6	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/PetTypeMapper.java	627	21	1	0	47.62	0.00	0.000	0	0.00	1	3	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/UserMapper.java	307	14	1	0	71.43	0.00	0.000	0	0.00	1	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/OwnerMapper.java	619	22	1	0	45.45	0.00	0.000	0	0.00	1	4	1
+petclinic-backend/src/main/java/victor/training/petclinic/mapper/VisitMapper.java	1097	31	1	0	32.26	0.00	0.000	0	0.00	3	4	1
+petclinic-backend/src/main/java/victor/training/petclinic/mcp/McpTomcatCustomizer.java	1943	42	1	0	23.81	0.00	0.000	3	71.43	0	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Vet.java	1048	47	1	0	21.28	0.00	0.000	0	0.00	3	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/User.java	737	37	1	0	27.03	0.00	0.000	1	27.03	4	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/Role.java	549	26	1	0	38.46	0.00	0.000	0	0.00	2	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/model/PetType.java	367	19	1	0	52.63	0.00	0.000	0	0.00	6	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/UserRestController.java	1767	49	1	0	20.41	0.00	0.000	7	142.86	0	5	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyFeedController.java	1516	36	1	0	27.78	0.00	0.000	1	27.78	0	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/SortDetails.java	186	10	1	0	100.00	0.00	0.000	0	0.00	2	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PageableDetails.java	270	13	1	0	76.92	0.00	0.000	0	0.00	1	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VetDto.java	1108	37	1	0	27.03	0.00	0.000	0	0.00	2	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetDto.java	1449	46	1	0	21.74	0.00	0.000	0	0.00	4	2	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerPage.java	593	21	1	0	47.62	0.00	0.000	0	0.00	1	3	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetFieldsDto.java	769	29	1	0	34.48	0.00	0.000	0	0.00	2	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/RoleDto.java	372	16	1	0	62.50	0.00	0.000	0	0.00	1	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VetFieldsDto.java	838	29	1	0	34.48	0.00	0.000	0	0.00	1	1	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ValidationErrorExtractor.java	2806	74	1	0	13.51	0.00	0.000	22	297.30	1	0	1
+petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ValidationErrorFieldExtractor.java	2118	53	1	0	18.87	0.00	0.000	19	358.49	1	0	1
+petclinic-database/src/main/java/ro/victorrentea/petclinic/db/NetworkLatencyProxy.java	3330	114	1	0	8.77	0.00	0.000	11	96.49	1	0	1
