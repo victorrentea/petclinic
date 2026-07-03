@@ -1,9 +1,16 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springdoc.core.annotations.ParameterObject;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
 import victor.training.petclinic.mapper.VisitMapper;
@@ -16,6 +23,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPage;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -30,11 +38,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +55,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Set<String> SUPPORTED_SORT_FIELDS = Set.of("id", "firstName", "lastName", "address", "city", "telephone");
+    private static final Sort DEFAULT_SORT = Sort.by(
+        Sort.Order.asc("lastName"),
+        Sort.Order.asc("firstName"),
+        Sort.Order.asc("id"));
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -62,12 +75,15 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
         content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+            schema = @Schema(implementation = OwnerPage.class),
             examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @ParameterObject
+            @PageableDefault(size = 5) Pageable pageable) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, validateAndNormalize(pageable));
+        return owners.map(ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
@@ -155,5 +171,15 @@ public class OwnerRestController {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow();
         Pet pet = owner.getPetById(petId).orElseThrow();
         return petMapper.toPetDto(pet);
+    }
+
+    private Pageable validateAndNormalize(Pageable pageable) {
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : DEFAULT_SORT;
+        for (Sort.Order order : sort) {
+            if (!SUPPORTED_SORT_FIELDS.contains(order.getProperty())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported sort: " + order.getProperty());
+            }
+        }
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
     }
 }
