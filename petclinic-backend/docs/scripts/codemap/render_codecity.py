@@ -39,6 +39,12 @@ with TSV.open() as f:
     reader = csv.DictReader(f, delimiter="\t")
     for row in reader:
         path = row["path"].lstrip("./")
+        # package-info.java carries only package annotations/Javadoc, no real
+        # code — keep it out of the diagram entirely.
+        if path.rsplit("/", 1)[-1] == "package-info.java":
+            continue
+        fan_in = _number(row, "fan_in", int)    # afferent coupling Ca (references coming in)
+        fan_out = _number(row, "fan_out", int)  # efferent coupling Ce (references going out)
         rows.append({
             "path": path,
             "name": path.rsplit("/", 1)[-1].replace(".java", ""),
@@ -52,8 +58,13 @@ with TSV.open() as f:
             "bugs_per_commit": _number(row, "bugs_per_commit"),
             "cognitive_complexity": _number(row, "cognitive_complexity", int),
             "complexity_per_kloc": _number(row, "complexity_per_kloc"),
-            "fan_in": _number(row, "fan_in", int),
-            "fan_out": _number(row, "fan_out", int),
+            "fan_in": fan_in,
+            "fan_out": fan_out,
+            "committers": _number(row, "committers", int),
+            # Instability I = Ce / (Ce + Ca) = fan_out / (fan_out + fan_in), in [0,1]
+            # (Robert C. Martin's package metric): 0 = maximally stable (only
+            # depended upon), 1 = maximally unstable (only depends on others).
+            "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
         })
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -174,6 +185,26 @@ html = """<!doctype html>
     font-size: 11px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
+  /* Colour-legend line in the hover tooltip: a swatch of this building's exact
+     colour + which metric (and value) put it there — so the colour is never a
+     mystery. */
+  #hover .colorline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    color: #cbd5e1;
+    font-size: 11px;
+  }
+  #hover .colorline .sw {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
   .city-label {
     padding: 3px 8px;
     border-radius: 6px;
@@ -182,10 +213,14 @@ html = """<!doctype html>
     font-size: 12px;
     font-weight: 650;
     white-space: nowrap;
+    text-align: center;
+    line-height: 1.25;
     pointer-events: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
   }
+  .city-label .cl-name { font-weight: 700; }
+  .city-label .cl-sub { font-weight: 500; font-size: 10.5px; opacity: 0.82; }
   /* Drill-down breadcrumb: the path from the whole repo to the package now in view. */
   .breadcrumb {
     position: fixed;
@@ -367,9 +402,11 @@ html = """<!doctype html>
     <label>
       Color
       <select id="colorMetric">
-        <option value="complexity_per_kloc">cyclomatic complexity / KLOC</option>
+        <option value="complexity_per_kloc">cognitive complexity / KLOC</option>
         <option value="bugs_per_kloc">bugfix commits / KLOC</option>
         <option value="commits_per_kloc" selected>total commits / KLOC</option>
+        <option value="committers">committers</option>
+        <option value="instability">instability Ce/(Ce+Ca)</option>
         <option value="fan_in">incoming coupling (fan in)</option>
         <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
@@ -378,11 +415,13 @@ html = """<!doctype html>
       Height
       <select id="heightMetric">
         <option value="lines">lines of code (LOC)</option>
-        <option value="cognitive_complexity" selected>cyclomatic complexity</option>
+        <option value="cognitive_complexity" selected>cognitive complexity</option>
         <option value="bug_commits">bugfix commits</option>
         <option value="commits">total commits</option>
+        <option value="committers">committers</option>
         <option value="fan_in">incoming coupling (fan in)</option>
         <option value="fan_out">outgoing coupling (fan out)</option>
+        <option value="instability">instability Ce/(Ce+Ca)</option>
       </select>
     </label>
     <label>
@@ -390,8 +429,9 @@ html = """<!doctype html>
       <select id="areaMetric">
         <option value="bytes" selected>file size</option>
         <option value="lines">lines of code (LOC)</option>
-        <option value="cognitive_complexity">cyclomatic complexity</option>
+        <option value="cognitive_complexity">cognitive complexity</option>
         <option value="commits">total commits</option>
+        <option value="committers">committers</option>
         <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
@@ -416,7 +456,7 @@ html = """<!doctype html>
     <h3>What it does</h3>
     <ol>
       <li><code>compute_complexity.py</code> / <code>compute_fanio.py</code> &mdash; per-file
-        cyclomatic complexity and internal fan-in/out (tree-sitter).</li>
+        cognitive complexity (Sonar-style) and internal fan-in/out (tree-sitter).</li>
       <li><code>build_heatmap.py</code> &mdash; joins git history (commits, <code>fix:</code>
         commits) and file size into <code>codemap.tsv</code>.</li>
       <li><code>render_codecity.py</code> &mdash; extrudes each file into a building and
@@ -433,6 +473,11 @@ html = """<!doctype html>
 const FILES = __FILES_JSON__;
 const REPO_ABS = __REPO_ABS__;
 const BUILD_CMD = __BUILD_CMD__;
+
+// Active COLOR metric + its p95 scale max, mirrored out of rebuildCity so the
+// hover tooltip can explain *why* a building is the colour it is.
+let activeColorMetric = "commits_per_kloc";
+let activeColorMax = 1;
 
 // "Build this for your own repo" overlay: reveal the copy-pasteable recipe and let the
 // reader run the very pipeline that produced this page against any other source folder.
@@ -737,6 +782,8 @@ function rebuildCity() {
   const colorMetric = colorSelect.value;
   const maxMetric = metricMax(heightMetric);
   const maxColor = metricMax(colorMetric);
+  activeColorMetric = colorMetric;   // remembered for the hover tooltip's colour legend
+  activeColorMax = maxColor;
 
   const layout = d3.treemap()
     .size([citySize, citySize])
@@ -831,12 +878,29 @@ const MAX_LABELS = 30;        // most class names shown at once
 const LABEL_GAP = 4;          // px breathing room required between two labels
 // Measure label width without touching the DOM (matches the .city-label font).
 const _labelMeasure = document.createElement("canvas").getContext("2d");
-_labelMeasure.font = "650 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+_labelMeasure.font = "700 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const _subMeasure = document.createElement("canvas").getContext("2d");   // smaller commits line
+_subMeasure.font = "500 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+// Second label line: git activity — "commits: N (by M devs)".
+function labelCommitsLine(file) {
+  const commits = (Number(file.commits) || 0).toLocaleString();
+  const devs = (Number(file.committers) || 0).toLocaleString();
+  return `commits: ${commits} (by ${devs} devs)`;
+}
 
 function makeLabel(entry, priority) {
   const div = document.createElement("div");
   div.className = "city-label";
-  div.textContent = entry.file.name;
+  const nameEl = document.createElement("div");
+  nameEl.className = "cl-name";
+  nameEl.textContent = entry.file.name;
+  const subEl = document.createElement("div");
+  subEl.className = "cl-sub";
+  const sub = labelCommitsLine(entry.file);
+  subEl.textContent = sub;
+  div.appendChild(nameEl);
+  div.appendChild(subEl);
   const obj = new CSS2DObject(div);
   obj.position.set(entry.mesh.position.x, entry.mesh.position.y + entry.height / 2 + 16, entry.mesh.position.z);
   obj.center.set(0.5, 1);
@@ -844,8 +908,9 @@ function makeLabel(entry, priority) {
   scene.add(obj);
   cityLabels.push({
     obj, el: div, priority,
-    w: _labelMeasure.measureText(entry.file.name).width + 16,   // + .city-label horizontal padding
-    h: 22,
+    // Widest of the two lines + .city-label horizontal padding.
+    w: Math.max(_labelMeasure.measureText(entry.file.name).width, _subMeasure.measureText(sub).width) + 16,
+    h: 36,                    // two stacked lines
   });
 }
 
@@ -908,12 +973,36 @@ function qualifiedName(file) {
   return `${module}/${fqn}`;
 }
 
+// Integers plain; ratios to 2 decimals.
+function fmtMetric(v) {
+  return Number.isInteger(v)
+    ? v.toLocaleString()
+    : v.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+// The exact building colour for a normalised value (mirrors colorFor's ramp),
+// as a CSS hex — used for the swatch in the hover tooltip.
+function swatchCss(t) {
+  const c = new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), Math.max(0, Math.min(1, t)));
+  return "#" + c.getHexString();
+}
+
 function formatHover(file) {
   // Coupling shown directionally: →N references coming in, N→ going out.
+  // Colour legend: a swatch of THIS building's colour + which metric/value put
+  // it there, so the colour is self-explanatory. t = value / p95, clamped 0..1.
+  const cVal = Number(file[activeColorMetric]) || 0;
+  const t = Math.max(0, Math.min(1, cVal / (activeColorMax || 1)));
+  const pct = Math.round(t * 100);
   return `<b>${file.name}</b><span class="fqn">${qualifiedName(file)}</span>` +
-    `lines: ${file.lines.toLocaleString()} | cyclomatic complexity: ${file.cognitive_complexity.toLocaleString()} | ` +
-    `commits: ${file.commits.toLocaleString()} | bugfix commits: ${file.bug_commits.toLocaleString()}<br>` +
-    `coupling &rarr;${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}&rarr;`;
+    `lines: ${file.lines.toLocaleString()} | cognitive complexity: ${file.cognitive_complexity.toLocaleString()} | ` +
+    `committers: ${file.committers.toLocaleString()}<br>` +
+    `commits: ${file.commits.toLocaleString()} (${file.bug_commits.toLocaleString()} bugfixes) | ` +
+    `coupling &rarr;${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}&rarr; | ` +
+    `instability: ${file.instability.toFixed(2)}` +
+    `<span class="colorline"><span class="sw" style="background:${swatchCss(t)}"></span>` +
+    `colour = ${metricLabel(colorSelect)}: <b>${fmtMetric(cVal)}</b> &middot; ${pct}% up the low&rarr;high scale ` +
+    `(light&rarr;red, capped at the 95th percentile)</span>`;
 }
 
 function formatDistrictHover(district) {

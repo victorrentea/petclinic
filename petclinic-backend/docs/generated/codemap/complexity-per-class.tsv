@@ -28,6 +28,7 @@ petclinic-backend/src/main/java/victor/training/petclinic/repository/SpecialtyRe
 petclinic-backend/src/main/java/victor/training/petclinic/repository/UserRepository.java	victor.training.petclinic.repository.UserRepository	0	1
 petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java	victor.training.petclinic.repository.VetRepository	0	4
 petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java	victor.training.petclinic.repository.VisitRepository	0	6
+petclinic-backend/src/main/java/victor/training/petclinic/rest/ApiExamples.java	victor.training.petclinic.rest.ApiExamples	0	1
 petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java	victor.training.petclinic.rest.OwnerRestController	0	10
 petclinic-backend/src/main/java/victor/training/petclinic/rest/PetRestController.java	victor.training.petclinic.rest.PetRestController	0	4
 petclinic-backend/src/main/java/victor/training/petclinic/rest/PetTypeRestController.java	victor.training.petclinic.rest.PetTypeRestController	1	5
@@ -38,7 +39,7 @@ petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyFeedCont
 petclinic-backend/src/main/java/victor/training/petclinic/rest/SpecialtyRestController.java	victor.training.petclinic.rest.SpecialtyRestController	0	5
 petclinic-backend/src/main/java/victor/training/petclinic/rest/UserRestController.java	victor.training.petclinic.rest.UserRestController	7	1
 petclinic-backend/src/main/java/victor/training/petclinic/rest/VetRestController.java	victor.training.petclinic.rest.VetRestController	2	6
-petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java	victor.training.petclinic.rest.VisitRestController	0	5
+petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java	victor.training.petclinic.rest.VisitRestController	0	6
 petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerDto.java	victor.training.petclinic.rest.dto.OwnerDto	0	1
 petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/OwnerFieldsDto.java	victor.training.petclinic.rest.dto.OwnerFieldsDto	0	0
 petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/PetDto.java	victor.training.petclinic.rest.dto.PetDto	0	0
