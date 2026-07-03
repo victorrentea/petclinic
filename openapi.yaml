@@ -195,6 +195,31 @@ paths:
         schema:
           type: string
           default: ""
+      - description: Zero-based page index (0..N)
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - description: The size of the page to be returned
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          default: 5
+          minimum: 1
+      - description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       responses:
         "200":
           content:
@@ -203,32 +228,53 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
+                    pageable:
+                      pageNumber: 0
+                      pageSize: 5
+                      sort:
+                        empty: false
+                        sorted: true
+                        unsorted: false
+                      offset: 0
+                      paged: true
+                      unpaged: false
+                    last: false
+                    totalPages: 3
+                    totalElements: 12
+                    size: 5
+                    number: 0
+                    sort:
+                      empty: false
+                      sorted: true
+                      unsorted: false
+                    first: true
+                    numberOfElements: 2
+                    empty: false
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPage"
           description: OK
         "400":
           content:
@@ -1684,6 +1730,57 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPage:
+      type: object
+      description: Spring-style paged response containing owner rows.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableDetails"
+        size:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortDetails"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PageableDetails:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
+        sort:
+          $ref: "#/components/schemas/SortDetails"
+        unpaged:
+          type: boolean
     PetDto:
       type: object
       properties:
@@ -1804,6 +1901,15 @@ components:
           minLength: 1
       required:
       - name
+    SortDetails:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
     SpecialtyDto:
       type: object
       properties:

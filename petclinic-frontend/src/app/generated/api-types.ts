@@ -170,6 +170,36 @@ export interface components {
        */
       telephone: string;
     };
+    /** @description Spring-style paged response containing owner rows. */
+    OwnerPage: {
+      content?: components["schemas"]["OwnerDto"][];
+      empty?: boolean;
+      first?: boolean;
+      last?: boolean;
+      /** Format: int32 */
+      number?: number;
+      /** Format: int32 */
+      numberOfElements?: number;
+      pageable?: components["schemas"]["PageableDetails"];
+      /** Format: int32 */
+      size?: number;
+      sort?: components["schemas"]["SortDetails"];
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
+    PageableDetails: {
+      /** Format: int64 */
+      offset?: number;
+      /** Format: int32 */
+      pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      paged?: boolean;
+      sort?: components["schemas"]["SortDetails"];
+      unpaged?: boolean;
+    };
     PetDto: {
       /**
        * Format: date
@@ -250,6 +280,11 @@ export interface components {
        * @example admin
        */
       name: string;
+    };
+    SortDetails: {
+      empty?: boolean;
+      sorted?: boolean;
+      unsorted?: boolean;
     };
     SpecialtyDto: {
       /**
@@ -558,13 +593,19 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index (0..N) */
+        page?: number;
+        /** @description The size of the page to be returned */
+        size?: number;
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPage"];
         };
       };
       /** @description Bad Request */

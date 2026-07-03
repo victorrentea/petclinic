@@ -30,14 +30,33 @@ public final class ApiExamples {
         ]""";
 
     public static final String OWNERS = """
-        [
-          { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
-            "city": "Madison", "telephone": "6085551023",
-            "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                        "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
-          { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
-            "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
-        ]""";
+        {
+          "content": [
+            { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
+              "city": "Madison", "telephone": "6085551023",
+              "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
+                          "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+            { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
+              "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
+          ],
+          "pageable": {
+            "pageNumber": 0,
+            "pageSize": 5,
+            "sort": { "empty": false, "sorted": true, "unsorted": false },
+            "offset": 0,
+            "paged": true,
+            "unpaged": false
+          },
+          "last": false,
+          "totalPages": 3,
+          "totalElements": 12,
+          "size": 5,
+          "number": 0,
+          "sort": { "empty": false, "sorted": true, "unsorted": false },
+          "first": true,
+          "numberOfElements": 2,
+          "empty": false
+        }""";
 
     public static final String PETS = """
         [
