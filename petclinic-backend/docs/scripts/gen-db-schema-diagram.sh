@@ -11,7 +11,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 DB_SQL="$ROOT/petclinic-backend/DB.sql"
-OUT="$ROOT/petclinic-backend/docs/generated/DB.puml"
+# OUT defaults to the committed diagram, but can be redirected (e.g. the pre-push hook
+# regenerates to a temp file to verify DB.puml is in sync without touching the work tree).
+OUT="${DB_PUML_OUT:-$ROOT/petclinic-backend/docs/generated/DB.puml}"
 VENV="$SCRIPT_DIR/.venv"
 
 MODE="working"
