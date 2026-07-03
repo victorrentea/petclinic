@@ -10,6 +10,7 @@ import java.util.Set;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
+import org.hibernate.annotations.BatchSize;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -57,6 +58,7 @@ public class Owner {
     private String telephone;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     private Set<Pet> pets = new HashSet<>();
 
     public List<Pet> getPets() {
