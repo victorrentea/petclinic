@@ -10,6 +10,7 @@
 - **UI Layout bug:** align the labels and values in owner details screen via playwright screenshots
 - **BE tuning:** Make backend tests run faster (I know it might take you some serious time & tokens)
 - **BI dream:** Export an Excel pie chart of the pet types, from my postgres-db
+- **Query tuning:** the "search owners by last name" query does a full table scan — profile it with the postgres-db MCP (EXPLAIN ANALYZE) and optimize its performance
 - **FE+BE bug:** reproduce bug gh#40 in browser, write a failing e2e playwright test, fix bug -> test passes
 - **QA:** explore the application using playwright test agents at https://playwright.dev/docs/test-agents 
 - **Mandated docs:** /regen-user-manual to update the [user manual](user-manual/manual.md)
