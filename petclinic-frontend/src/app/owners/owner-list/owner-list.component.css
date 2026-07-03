@@ -39,6 +39,14 @@ display:none;
 	margin-bottom: 16px;
 }
 
+.owners-footer-right {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 16px;
+	margin-left: auto;
+}
+
 .owners-pagination {
 	display: flex;
 	align-items: center;
@@ -75,5 +83,12 @@ display:none;
 	.owners-controls {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.owners-footer-right {
+		width: 100%;
+		flex-direction: column;
+		align-items: flex-start;
+		margin-left: 0;
 	}
 }
