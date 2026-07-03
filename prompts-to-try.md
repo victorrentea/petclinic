@@ -20,13 +20,13 @@
 - **SQL:** Make backend tests run faster (I know it might take you some serious time & tokens)
 - **Life:** Get issues assigned to me on this Git repo - help me connect you to the tools you need. Write a skill ± script to get them faster tomorrow.
 - **Logs:** Get last errors from staging environment.
+- **Harness tweak:** Set me up an End hook that plays a sound when you end your turn
 
 ### Bring to your project❤️
 
 Start agent in YOUR project's folder and tell it:
 
 From https://github.com/victorrentea/petclinic repo...
-
 - ... get the mechanism to keep package.puml in sync with code
 - ... get the mechanism to generate DomainModel.puml from code
 - ... get the DB.puml from the incremental scripts
@@ -38,4 +38,3 @@ From https://github.com/victorrentea/petclinic repo...
 - ... adopt the CODEOWNERS for protecting critical files, forcing review by the tech lead, to prevent dev's fatigue-LGTM
 - ... get the 'generated_sequences/*.puml' idea and help me set it up in my cross-microservices e2e tests in staging / my cross-module e2e tests of my modulith
 - ... create me 3 functional .feature tests for the most critical business rules of this project (in your opinion) to be able to confirm them with business and QA
-- Set me up an End hook that plays a sound when you end your turn
