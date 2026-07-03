@@ -1,0 +1,31 @@
+schema: spec-driven
+
+rules:
+  proposal:
+    - Keep proposal.md stakeholder-facing and non-technical.
+    - Write for product owners, business analysts, and reviewers of functional scope.
+    - Focus on problem, user-visible behavior, scope, business impact, and non-goals.
+    - Do not include API shapes, persistence/query strategy, ORM choices, batching/fetching, generated artifacts, framework mechanics, or test strategy.
+    - If a change has technical or protocol-breaking consequences, describe only the high-level scope/consumer impact here and defer the mechanics to design.md.
+  design:
+    - Use design.md for technical decisions and engineering trade-offs.
+    - Capture API contracts, persistence/query strategy, performance decisions, batching/fetching, generated artifacts, migration mechanics, and test strategy in design.md.
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
