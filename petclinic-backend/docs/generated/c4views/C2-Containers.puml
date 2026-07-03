@@ -17,17 +17,21 @@ left to right direction
 
 Person(PetOwner, "Pet Owner", $descr="Manages their pets and appointments", $tags="", $link="")
 Person(Veterinarian, "Veterinarian", $descr="Provides veterinary care", $tags="", $link="")
+System(NotificationService, "Notification Service", $descr="Consumes events from the Redis queue and dispatches notifications (e-mail, SMS, push) to pet owners", $tags="", $link="")
 
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container(PetClinic.Database, "Database", $techn="PostgreSQL", $descr="Stores all data", $tags="", $link="")
+  Container(PetClinic.Redis, "Redis", $techn="Redis", $descr="Distributed cache (shared across backend instances) and message queue for async notifications", $tags="", $link="")
   Container(PetClinic.Frontend, "Frontend", $techn="Angular", $descr="Single-page application", $tags="", $link="")
-  Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API", $tags="", $link="")
+  Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API — horizontally scaled (multiple instances)", $tags="", $link="")
 }
 
 Rel(PetOwner, PetClinic.Frontend, "Uses", $techn="", $tags="", $link="")
 Rel(Veterinarian, PetClinic.Frontend, "Uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Frontend, PetClinic.Backend, "REST API calls", $techn="HTTPS/JSON", $tags="", $link="")
 Rel(PetClinic.Backend, PetClinic.Database, "Reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.Backend, PetClinic.Redis, "Reads/writes cache; enqueues notification events", $techn="Redis protocol", $tags="", $link="")
+Rel(NotificationService, PetClinic.Redis, "Subscribes to / polls notification events", $techn="Redis Pub/Sub / List queue", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

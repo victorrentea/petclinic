@@ -15,12 +15,15 @@ workspace "PetClinic" "Veterinary practice management system" {
 
         petClinic = softwareSystem "PetClinic" "Veterinary practice management system" {
             frontend = container "Frontend" "Single-page application" "Angular"
-            backend = container "Backend" "REST API" "Java / Spring Boot" {
+            backend = container "Backend" "REST API — horizontally scaled (multiple instances)" "Java / Spring Boot" {
                 # C3 components + edges — arch-tested vs code
                 !include c4model.c3.dsl
             }
             database = container "Database" "Stores all data" "PostgreSQL"
+            redis = container "Redis" "Distributed cache (shared across backend instances) and message queue for async notifications" "Redis" "NoSQL"
         }
+
+        notificationService = softwareSystem "Notification Service" "Consumes events from the Redis queue and dispatches notifications (e-mail, SMS, push) to pet owners" "Microservice"
 
         petOwner -> petClinic "Manages pets and visits"
         veterinarian -> petClinic "Manages appointments and records"
@@ -28,15 +31,19 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
+        backend -> redis "Reads/writes cache; enqueues notification events" "Redis protocol"
+        notificationService -> redis "Subscribes to / polls notification events" "Redis Pub/Sub / List queue"
     }
 
     views {
-        systemContext petClinic "C1-Context" "Who uses PetClinic" {
+        systemContext petClinic "C1-Context" "Who uses PetClinic and its neighbours" {
             include *
+            include notificationService
             autoLayout
         }
         container petClinic "C2-Containers" "Containers inside PetClinic" {
             include *
+            include notificationService
             autoLayout
         }
         component backend "C3-Components-All" "All components inside Backend" {
