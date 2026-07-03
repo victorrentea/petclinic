@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -128,11 +129,13 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        JsonNode ownersPage = searchPage("/api/owners");
 
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-            .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+        assertThat(ownersPage.path("content").isArray()).isTrue();
+        assertThat(ownersPage.path("content").size()).isLessThanOrEqualTo(5);
+        assertThat(ownersPage.path("size").asInt()).isEqualTo(5);
+        assertThat(ownersPage.path("number").asInt()).isZero();
+        assertThat(ownersPage.path("totalElements").asInt()).isPositive();
     }
 
     @Test
@@ -141,11 +144,46 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        JsonNode ownersPage = searchPage("/api/owners?lastName=Java");
 
-        assertThat(owners)
-            .extracting(OwnerDto::getId, OwnerDto::getLastName)
+        assertThat(ownersPage.path("content"))
+            .extracting(node -> node.path("id").asInt(), node -> node.path("lastName").asText())
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
+    }
+
+    @Test
+    void getAllSupportsPaging() throws Exception {
+        ownerRepository.save(TestData.anOwner().setLastName("PagedA"));
+        ownerRepository.save(TestData.anOwner().setLastName("PagedB"));
+        ownerRepository.save(TestData.anOwner().setLastName("PagedC"));
+        ownerRepository.save(TestData.anOwner().setLastName("PagedD"));
+        ownerRepository.save(TestData.anOwner().setLastName("PagedE"));
+
+        JsonNode ownersPage = searchPage("/api/owners?page=1&size=2");
+
+        assertThat(ownersPage.path("number").asInt()).isEqualTo(1);
+        assertThat(ownersPage.path("size").asInt()).isEqualTo(2);
+        assertThat(ownersPage.path("content")).hasSize(2);
+        assertThat(ownersPage.path("totalElements").asInt()).isGreaterThanOrEqualTo(6);
+    }
+
+    @Test
+    void getAllSupportsSortingByTelephone() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Amy");
+        owner2.setLastName("Alpha");
+        owner2.setTelephone("0000000001");
+        ownerRepository.save(owner2);
+
+        JsonNode ownersPage = searchPage("/api/owners?sort=telephone,asc");
+
+        assertThat(ownersPage.path("content").get(0).path("telephone").asText()).isEqualTo("0000000001");
+    }
+
+    @Test
+    void getAllRejectsSortingByPets() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=pets,asc"))
+            .andExpect(status().isBadRequest());
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
@@ -160,11 +198,22 @@ public class OwnerTest {
         });
     }
 
+    private JsonNode searchPage(String uriTemplate) throws Exception {
+        String responseJson = mockMvc.perform(get(uriTemplate))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        return mapper.readTree(responseJson);
+    }
+
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        JsonNode results = searchPage("/api/owners?lastName=NonExistent");
 
-        assertThat(results).isEmpty();
+        assertThat(results.path("content")).isEmpty();
     }
 
     @Test
