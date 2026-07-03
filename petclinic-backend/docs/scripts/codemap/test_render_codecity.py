@@ -41,7 +41,11 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn('id="areaMetric"', html)
             self.assertIn("const areaSelect", html)
             self.assertIn("areaMetric", html)
-            self.assertIn("cyclomatic complexity", html)
+            self.assertIn("cognitive complexity", html)
+            self.assertNotIn("cyclomatic", html)   # the metric is Sonar cognitive complexity, not cyclomatic
+            self.assertIn(">committers</option>", html)   # committers-per-file metric (short label)
+            self.assertIn("commits: ${commits} (by ${devs} devs)", html)   # class label commits line
+            self.assertIn("instability", html)           # Ce/(Ce+Ca) metric
             self.assertLess(html.index('id="colorMetric"'), html.index('id="heightMetric"'))
             self.assertLess(html.index('id="heightMetric"'), html.index('id="areaMetric"'))
             self.assertIn("PetClinicMcp.java", html)
