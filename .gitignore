@@ -75,7 +75,11 @@ petclinic-backend/docs/generated/bug-heatmap/
 
 # misc
 __pycache__/
-.github/skills
+# Victor's personal/central skills live here (symlinked in); keep them out of the repo,
+# but DO commit the two project skills so course participants get them.
+.github/skills/*
+!.github/skills/multi-review/
+!.github/skills/regen-user-manual/
 .playwright-mcp/
 /petclinic-database/.bootstrapped
 .claude/settings.local.json
