@@ -35,15 +35,40 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
   fi
 
-  # Guard: a petclinic-backend/DB.sql change in the pushed range must carry a regenerated
-  # DB.puml (catches a `git commit --no-verify` that bypassed pre-commit).
-  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
-     && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
-    echo "[pre-push] ❌ petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
-    echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
-    echo "[pre-push]         git add petclinic-backend/docs/generated/DB.puml"
-    echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
-    exit 1
+  # Guard: after a petclinic-backend/DB.sql change in the pushed range, the committed
+  # DB.puml must be IN SYNC with DB.sql (catches a `git commit --no-verify` that bypassed
+  # pre-commit). We verify by regenerating the diagram and comparing content — NOT by
+  # requiring DB.puml to also appear in the changed paths: an index-only DB.sql change
+  # legitimately leaves the ER diagram untouched (it deliberately omits indexes), so a
+  # path-based check would false-positive.
+  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql'; then
+    PUML='petclinic-backend/docs/generated/DB.puml'
+    if command -v python3 >/dev/null 2>&1; then
+      GEN_TMP="$(mktemp)"
+      if ! DB_PUML_OUT="$GEN_TMP" \
+           "$ROOT/petclinic-backend/docs/scripts/gen-db-schema-diagram.sh" >/dev/null 2>&1; then
+        rm -f "$GEN_TMP"
+        echo "[pre-push] ❌ Could not regenerate DB.puml to verify it is in sync — push blocked."
+        echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
+        exit 1
+      fi
+      if ! cmp -s "$ROOT/$PUML" "$GEN_TMP"; then
+        rm -f "$GEN_TMP"
+        echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML is stale (out of sync with DB.sql)."
+        echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
+        echo "[pre-push]         git add $PUML"
+        echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
+        exit 1
+      fi
+      rm -f "$GEN_TMP"
+    elif ! printf '%s\n' "$paths" | grep -qx "$PUML"; then
+      # Degraded fallback (no python3 to regenerate): keep the original path-based backstop.
+      echo "[pre-push] ⚠️  python3 missing — cannot verify DB.puml content; using path-based backstop."
+      echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML was not regenerated."
+      echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh"
+      echo "[pre-push]         git add $PUML"
+      exit 1
+    fi
   fi
 
   if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$)'; then
