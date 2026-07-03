@@ -9,6 +9,14 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnerPageDto {
+  content: OwnerDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export interface VisitDto {
   id: number;
   date: string;
@@ -33,15 +41,15 @@ export class ApiClient {
   }
 
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    const response = await this.client.get<OwnerPageDto>('/owners');
+    return response.data.content;
   }
 
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
+    const response = await this.client.get<OwnerPageDto>('/owners', {
       params: { lastName: prefix }
     });
-    return response.data;
+    return response.data.content;
   }
 
   async fetchVisits(): Promise<VisitDto[]> {
@@ -51,7 +59,7 @@ export class ApiClient {
 
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
-      .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
+      .map(owner => `${owner.lastName} ${owner.firstName}`.trim())
       .filter(name => name.length > 0);
   }
 
@@ -65,10 +73,10 @@ export class ApiClient {
 
   static extractLastName(fullName: string): string {
     const firstSpace = fullName.indexOf(' ');
-    if (firstSpace < 0 || firstSpace === fullName.length - 1) {
+    if (firstSpace <= 0) {
       return fullName;
     }
-    return fullName.substring(firstSpace + 1);
+    return fullName.substring(0, firstSpace);
   }
 
   static choosePrefixFrom(owners: OwnerDto[]): string {

@@ -12,7 +12,7 @@ export class OwnersPage {
     this.page = page;
     this.pageTitle = page.locator('h2:has-text("Owners")');
     this.lastNameInput = page.locator('#lastName');
-    this.findOwnerButton = page.locator('#search-owner-form button[type="submit"]');
+    this.findOwnerButton = page.locator('#search-owner-form button');
     this.ownerNameCells = page.locator('#ownersTable td.ownerFullName');
     this.ownersTable = page.locator('#ownersTable');
   }
