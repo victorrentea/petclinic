@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+import { OwnerPage } from './owner-page';
 
 @Injectable()
 export class OwnerService {
+  private static readonly DEFAULT_SORT = ['lastName,asc', 'firstName,asc', 'id,asc'];
   entityUrl = environment.REST_API_URL + 'owners';
 
   private readonly handlerError: HandleError;
@@ -19,10 +21,24 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwners(lastName: string = '', page: number = 0, size: number = 5,
+            sort: string[] = OwnerService.DEFAULT_SORT): Observable<OwnerPage> {
+    let params = new HttpParams()
+      .set('lastName', lastName)
+      .set('page', page.toString())
+      .set('size', size.toString());
+    sort.forEach(sortField => {
+      params = params.append('sort', sortField);
+    });
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(catchError(this.handlerError('getOwners', {
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        number: page,
+        size
+      } as OwnerPage)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -50,13 +66,8 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+  searchOwners(lastName: string, page: number = 0, size: number = 5,
+               sort: string[] = OwnerService.DEFAULT_SORT): Observable<OwnerPage> {
+    return this.getOwners(lastName, page, size, sort);
   }
 }
