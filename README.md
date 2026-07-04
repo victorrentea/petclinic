@@ -83,7 +83,7 @@ Prompts to try on this repo — each a paste-ready instruction (the former
 - **Staging errors** — get the last errors from the staging environment.
 - **End-of-turn sound** — set up an End/Stop hook that plays a sound when the agent finishes its turn.
 
-### Bring the ideas to your own project ❤️
+### Bring the ideas from `petclinic` to your own project ❤️
 
 Start an agent in **your** project and ask it — *"From the https://github.com/victorrentea/petclinic repo…"*:
 
