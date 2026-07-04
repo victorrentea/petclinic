@@ -205,7 +205,15 @@ html = """<!doctype html>
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
-  /* "Code City of:" — a dropdown right under the title choosing what a building is. */
+  /* View switch (Classes / Packages / Modules) sits inline in the title row. */
+  h1 .titleView {
+    flex: none;
+    font-size: 13px; font-weight: 650; padding: 3px 8px;
+    color: #1e3a8a; border: 1px solid #b9c4d6; border-radius: 6px;
+    background: #fff; text-transform: none;
+  }
+  h1 .titleView option:disabled { color: #aab4c8; }
+  /* Inline label+select rows (e.g. "Package labels:") under the title. */
   .viewOf {
     display: flex; align-items: center; gap: 8px; margin: 5px 0 10px;
     font-size: 13px; font-weight: 600; color: #1f2933;
@@ -232,9 +240,9 @@ html = """<!doctype html>
   }
   .filterRow button:hover { background: #eef1f5; color: #1f2933; }
   .filterCount { flex: none; font-size: 11px; color: #667085; min-width: 46px; text-align: right; }
-  /* Shortcuts help, pinned top-right, out of the way of the control panel. */
+  /* Shortcuts help, pinned bottom-right, clear of the metrics tooltip (top-right). */
   #shortcuts {
-    position: fixed; top: 16px; right: 16px; z-index: 2;
+    position: fixed; bottom: 16px; right: 16px; z-index: 2;
     max-width: 340px; text-align: right;
     font-size: 11.5px; line-height: 1.5; color: #52606d;
     background: rgba(255, 255, 255, 0.82);
@@ -262,12 +270,16 @@ html = """<!doctype html>
     font-size: 13px;
     padding: 6px 8px;
   }
+  /* Class-metrics tooltip: pinned to the top-right corner (was cursor-following).
+     The hovered class's fully-qualified name is split out into #classTitle below. */
   #hover {
     position: fixed;
-    left: 0;
-    top: 0;
+    top: 16px;
+    right: 16px;
+    left: auto;
+    bottom: auto;
     z-index: 2;
-    max-width: min(520px, calc(100vw - 32px));
+    max-width: min(320px, calc(100vw - 32px));
     pointer-events: none;
     background: rgba(17, 24, 39, 0.84);
     color: #fff;
@@ -276,12 +288,39 @@ html = """<!doctype html>
     font-size: 12px;
     line-height: 1.45;
     opacity: 0;
-    transform: translate(-50%, calc(-100% - 12px));
+    transform: translateY(-6px);
     transition: opacity 120ms ease, transform 120ms ease;
   }
   #hover.visible {
     opacity: 1;
-    transform: translate(-50%, calc(-100% - 18px));
+    transform: translateY(0);
+  }
+  /* Fully-qualified name of the hovered building: a top-center banner. */
+  #classTitle {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    z-index: 3;
+    max-width: min(42vw, 620px);
+    pointer-events: none;
+    background: rgba(17, 24, 39, 0.84);
+    color: #fff;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    line-height: 1.3;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
+    opacity: 0;
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  #classTitle.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
   #hover b {
     display: block;
@@ -563,15 +602,12 @@ html = """<!doctype html>
   Cmd/Ctrl-double-click opens a file in VS Code
 </aside>
 <section class="panel">
-  <h1>__LOGO_SVG__<span>__TITLE__</span></h1>
-  <div class="viewOf">
-    <span>Code City of:</span>
-    <select id="viewMode" aria-label="what a building represents">
+  <h1>__LOGO_SVG__<span>__TITLE__</span><select id="viewMode" class="titleView"
+      aria-label="what a building represents">
       <option value="classes" selected>Classes</option>
       <option value="packages" id="packageOpt">Packages</option>
       <option value="modules" id="moduleOpt">Modules (Maven/Gradle)</option>
-    </select>
-  </div>
+    </select></h1>
   <div class="controls">
     <label>
       Color
@@ -620,7 +656,7 @@ html = """<!doctype html>
     <span>Package labels:</span>
     <select id="pkgLabelMode" aria-label="package label style">
       <option value="floating" selected>floating tags</option>
-      <option value="floor">on the floor (corners)</option>
+      <option value="floor">on the floor (edges)</option>
       <option value="off">off</option>
     </select>
   </div>
@@ -655,6 +691,7 @@ html = """<!doctype html>
       &#8984;/Ctrl-double-click a building in the city to jump to its file in VS Code.</p>
   </div>
 </section>
+<div id="classTitle"></div>
 <div id="hover"></div>
 
 <script>
@@ -712,10 +749,11 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const mount = document.getElementById("scene");
 const hover = document.getElementById("hover");
+const classTitle = document.getElementById("classTitle");   // top-center FQN banner
 const areaSelect = document.getElementById("areaMetric");
 const heightSelect = document.getElementById("heightMetric");
 const colorSelect = document.getElementById("colorMetric");
-const viewSelect = document.getElementById("viewMode");   // the "Code City of:" dropdown
+const viewSelect = document.getElementById("viewMode");   // the title-row view switch
 const packageOpt = document.getElementById("packageOpt");
 const moduleOpt = document.getElementById("moduleOpt");
 const pkgLabelSelect = document.getElementById("pkgLabelMode");
@@ -1034,6 +1072,7 @@ function rebuildCity() {
   // it rises, so a parent package (e.g. victor) visibly contains its children
   // (rest, mapper, ...). A thin outline delimits every package from its siblings.
   _floorLabelBudget = 240;   // cap flat floor-text planes per rebuild (perf on big cities)
+  _floorLabelBoxes = [];     // fresh overlap map for this rebuild's floor labels
   for (const node of root.descendants()) {
     if (node === root || !node.children) {
       continue;
@@ -1189,10 +1228,12 @@ function updateLabelVisibility() {
 // ── Package-name labels (two switchable styles) ──────────────────────────────
 // "floating": a deep-blue capsule (see .district-label) hovering over the floor —
 //   deliberately unlike the dark class pills so a package never reads as a class.
-// "floor": the name laid FLAT on the platform top, at each corner and in BOTH the
-//   X and Z reading directions, so it stays legible from any orbit angle.
+// "floor": the name laid FLAT on the platform top, centered along its EDGES (and,
+//   when it still fits without colliding, its corners), read along X or Z so it
+//   stays legible from any orbit angle. A global overlap check keeps labels apart.
 const _floorTexCache = new Map();   // "name|hex" -> {tex,w,h}; kept across rebuilds
 let _floorLabelBudget = 0;          // reset per rebuild in rebuildCity (perf cap)
+let _floorLabelBoxes = [];          // XZ AABBs of placed floor labels this rebuild — prevents overlap
 
 function floorTextTexture(text) {
   const hit = _floorTexCache.get(text);
@@ -1228,29 +1269,59 @@ function addFloorName(text, cx, cz, topY, width, depth) {
   const { tex, w, h } = floorTextTexture(text);
   const worldH = Math.min(16, depth * 0.16, width * 0.16);
   const worldW = worldH * (w / h);
-  if (worldW > width * 0.92) return;                 // wouldn't fit along an edge
-  const halfW = width / 2, halfD = depth / 2;
-  for (const sx of [-1, 1]) {
-    for (const sz of [-1, 1]) {
-      for (const yaw of [0, Math.PI / 2]) {          // both reading directions at every corner
-        if (_floorLabelBudget <= 0) return;
-        _floorLabelBudget--;
-        const mesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(worldW, worldH),
-          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
-        );
-        mesh.rotation.x = -Math.PI / 2;              // lay flat on the platform top
-        mesh.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), yaw);   // run along X (0) or Z (90°)
-        const alongX = yaw === 0;
-        const marginX = alongX ? worldW / 2 : worldH / 2;
-        const marginZ = alongX ? worldH / 2 : worldW / 2;
-        mesh.position.set(cx + sx * (halfW - marginX - 2), topY + 0.6, cz + sz * (halfD - marginZ - 2));
-        mesh.renderOrder = 3;
-        mesh.userData.kind = "package";              // disposed by clearCity's package sweep
-        scene.add(mesh);
-      }
-    }
+  const fitsX = worldW <= width * 0.92;              // fits when read along X (yaw 0)
+  const fitsZ = worldW <= depth * 0.92;              // fits when read along Z (yaw 90°)
+  if (!fitsX && !fitsZ) return;                      // wouldn't fit along any edge
+  const halfW = width / 2, halfD = depth / 2, inset = 2;
+  const offX = halfW - worldH / 2 - inset;           // center-to-edge offset, perpendicular to the label
+  const offZ = halfD - worldH / 2 - inset;
+  // Preferred: one label centered on each edge that can hold it, running parallel to it.
+  const candidates = [];
+  if (fitsX) {
+    candidates.push({ x: cx, z: cz - offZ, yaw: 0 });               // bottom edge, reads along X
+    candidates.push({ x: cx, z: cz + offZ, yaw: 0 });               // top edge, reads along X
   }
+  if (fitsZ) {
+    candidates.push({ x: cx - offX, z: cz, yaw: Math.PI / 2 });     // left edge, reads along Z
+    candidates.push({ x: cx + offX, z: cz, yaw: Math.PI / 2 });     // right edge, reads along Z
+  }
+  // Corners are a bonus: only taken when the label still fits there without colliding.
+  const cyaw = fitsX ? 0 : Math.PI / 2;
+  const cmX = cyaw === 0 ? worldW / 2 : worldH / 2;
+  const cmZ = cyaw === 0 ? worldH / 2 : worldW / 2;
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    candidates.push({ x: cx + sx * (halfW - cmX - inset), z: cz + sz * (halfD - cmZ - inset), yaw: cyaw });
+  }
+  let placed = 0;
+  for (const c of candidates) {
+    if (placed >= 4 || _floorLabelBudget <= 0) return;
+    if (placeFloorLabelMesh(tex, worldW, worldH, c.x, c.z, c.yaw, topY)) placed++;
+  }
+}
+
+// Lay one flat label plane only if its footprint clears every floor label already placed
+// this rebuild — the global overlap guard that keeps package names from crowding.
+function placeFloorLabelMesh(tex, worldW, worldH, x, z, yaw, topY) {
+  const alongX = yaw === 0;
+  const spanX = alongX ? worldW : worldH;
+  const spanZ = alongX ? worldH : worldW;
+  const box = { minX: x - spanX / 2, maxX: x + spanX / 2, minZ: z - spanZ / 2, maxZ: z + spanZ / 2 };
+  for (const b of _floorLabelBoxes) {
+    if (box.minX < b.maxX && box.maxX > b.minX && box.minZ < b.maxZ && box.maxZ > b.minZ) return false;
+  }
+  _floorLabelBudget--;
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(worldW, worldH),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
+  );
+  mesh.rotation.x = -Math.PI / 2;                    // lay flat on the platform top
+  mesh.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), yaw);   // run along X (0) or Z (90°)
+  mesh.position.set(x, topY + 0.6, z);
+  mesh.renderOrder = 3;
+  mesh.userData.kind = "package";                    // disposed by clearCity's package sweep
+  scene.add(mesh);
+  _floorLabelBoxes.push(box);
+  return true;
 }
 
 function addPackageLabel(node, cx, cz, topY, width, depth) {
@@ -1319,11 +1390,11 @@ const HOVER_PROPS = [
 ];
 
 // Trailing marker(s) for whichever of area / height / colour this metric drives:
-//   AREA → orange square · HEIGHT → up/down arrow · COLOUR → a light→red scale bar
+//   AREA → left/right arrow · HEIGHT → up/down arrow · COLOUR → a light→red scale bar
 //   with a tick at this building's spot (value / 95th-percentile, clamped 0..1).
 function marksFor(file, key) {
   const marks = [];
-  if (key === areaSelect.value) marks.push('<span class="mk-area" title="area / footprint">&#x1F7E7;</span>');
+  if (key === areaSelect.value) marks.push('<span class="mk-area" title="area / footprint">&#x2194;&#xFE0F;</span>');
   if (key === heightSelect.value) marks.push('<span class="mk-height" title="height">&#x2195;&#xFE0F;</span>');
   if (key === colorSelect.value) {
     const t = Math.max(0, Math.min(1, (Number(file[key]) || 0) / (activeColorMax || 1)));
@@ -1342,36 +1413,19 @@ function formatHover(file) {
     const on = active.has(p.key);
     items.push(`<li class="${on ? "on" : ""}"><span>${p.label}: <b>${val}</b></span>${marksFor(file, p.key)}</li>`);
   }
-  return `<b>${file.name}</b><span class="fqn">${qualifiedName(file)}</span>` +
-    `<ul class="props">${items.join("")}</ul>`;
+  // Name/FQN live in the top-center #classTitle banner now — box carries metrics only.
+  return `<ul class="props">${items.join("")}</ul>`;
 }
 
 function formatDistrictHover(district) {
-  return `<b>${district.userData.name}</b>` +
-    `${district.userData.fileCount.toLocaleString()} Java files`;
-}
-
-function positionHoverNearObject(object) {
-  const center = new THREE.Vector3();
-  object.getWorldPosition(center);
-  if (object.geometry && object.geometry.boundingBox === null) {
-    object.geometry.computeBoundingBox();
-  }
-  const height = object.geometry?.boundingBox
-    ? object.geometry.boundingBox.max.y - object.geometry.boundingBox.min.y
-    : 0;
-  center.y += height / 2 + 10;
-  center.project(camera);
-  const x = (center.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-center.y * 0.5 + 0.5) * window.innerHeight;
-  hover.style.left = `${Math.max(24, Math.min(window.innerWidth - 24, x))}px`;
-  hover.style.top = `${Math.max(24, Math.min(window.innerHeight - 24, y))}px`;
+  return `${district.userData.fileCount.toLocaleString()} Java files`;
 }
 
 function onPointerMove(event) {
   updateCursor(event);
   if (introEl) {                      // keep the intro uncluttered: no hover tooltips while it is up
     hover.classList.remove("visible");
+    classTitle.classList.remove("visible");
     return;
   }
   const navKey = event[NAV_KEY] && !event.metaKey && !event.ctrlKey && !event.altKey;
@@ -1400,10 +1454,17 @@ function onPointerMove(event) {
   }
 
   if (tooltipObj) {
-    hover.innerHTML = tooltipIsDistrict ? formatDistrictHover(tooltipObj) : formatHover(tooltipObj.userData.file);
-    positionHoverNearObject(tooltipObj);
+    if (tooltipIsDistrict) {
+      classTitle.textContent = tooltipObj.userData.name;
+      hover.innerHTML = formatDistrictHover(tooltipObj);
+    } else {
+      classTitle.textContent = qualifiedName(tooltipObj.userData.file);
+      hover.innerHTML = formatHover(tooltipObj.userData.file);
+    }
+    classTitle.classList.add("visible");
     hover.classList.add("visible");
   } else {
+    classTitle.classList.remove("visible");
     hover.classList.remove("visible");
   }
   setFloorGlow(glowFloor);
@@ -1562,6 +1623,7 @@ function buildIntro() {
   if (introDone || buildings.length === 0) return;
   introDone = true;
   hover.classList.remove("visible");   // drop any tooltip shown before the intro mounted
+  classTitle.classList.remove("visible");
   const W = window.innerWidth;
   const H = window.innerHeight;
   camera.updateMatrixWorld();
