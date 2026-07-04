@@ -45,6 +45,12 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertNotIn("cyclomatic", html)   # the metric is Sonar cognitive complexity, not cyclomatic
             self.assertIn(">committers</option>", html)   # committers-per-file metric (short label)
             self.assertIn("commits: ${commits} (by ${devs} devs)", html)   # class label commits line
+            # Classes ⇄ Packages view switch: radios after the title feed the same city machinery.
+            self.assertIn('name="viewMode" value="classes" checked', html)
+            self.assertIn('value="packages" id="packageMode"', html)
+            self.assertIn("const PACKAGES =", html)
+            self.assertIn("function activeDataset", html)
+            self.assertIn('id="shortcuts"', html)   # controls help pinned top-right
             self.assertIn("instability", html)           # Ce/(Ce+Ca) metric
             self.assertLess(html.index('id="colorMetric"'), html.index('id="heightMetric"'))
             self.assertLess(html.index('id="heightMetric"'), html.index('id="areaMetric"'))
