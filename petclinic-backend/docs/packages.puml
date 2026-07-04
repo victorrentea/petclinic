@@ -2,6 +2,7 @@
 
 title Logical Architecture
 caption All lines are ArchUnit-tested to be reflected in code.
+footer petclinic-backend/docs/packages.puml
 
 [Model] <<..model>>
 [Repository] <<..repository>>

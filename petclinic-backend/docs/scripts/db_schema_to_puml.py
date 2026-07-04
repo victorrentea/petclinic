@@ -145,6 +145,7 @@ def render_puml(cur: Schema) -> str:
         "!pragma layout smetana",
         "title Database Schema (ER)",
         "caption Generated from DB.sql",
+        "footer petclinic-backend/docs/generated/DB.puml",
         "hide circle",
         "skinparam linetype ortho",
         "",

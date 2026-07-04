@@ -49,7 +49,8 @@ class DomainModelExtractorTest {
         StringBuilder sb = new StringBuilder();
         sb.append("@startuml\n!pragma layout smetana\n\n");
         sb.append("title Domain Model\n");
-        sb.append("caption Generated from JPA annotations\n\n");
+        sb.append("caption Generated from JPA annotations\n");
+        sb.append("footer petclinic-backend/docs/generated/DomainModel.puml\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n\n");
 

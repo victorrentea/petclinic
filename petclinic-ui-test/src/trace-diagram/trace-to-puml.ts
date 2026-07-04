@@ -116,7 +116,7 @@ function emitTrace(spans: NormSpan[], lines: string[], present: Set<string>): vo
   for (const root of roots) walk(root);
 }
 
-export function renderPuml(title: string, traces: NormSpan[][]): string {
+export function renderPuml(title: string, traces: NormSpan[][], footerPath?: string): string {
   const body: string[] = [];
   const present = new Set<string>();
   traces.forEach((spans, i) => {
@@ -129,6 +129,8 @@ export function renderPuml(title: string, traces: NormSpan[][]): string {
     'hide footbox',
     `title ${title}`,
     `caption generated from test "${title}"`,
+    // footer marks the diagram's own repo-relative source path in the render
+    ...(footerPath ? [`footer ${footerPath}`] : []),
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   return [...header, ...body, '@enduml', ''].join('\n');

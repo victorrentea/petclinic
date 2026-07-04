@@ -3,6 +3,7 @@
 
 title Domain Model
 caption Generated from JPA annotations
+footer petclinic-backend/docs/generated/DomainModel.puml
 
 hide empty members
 skinparam classAttributeIconSize 0

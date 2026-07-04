@@ -2,6 +2,7 @@
 hide footbox
 title add a visit to an existing pet
 caption generated from test "add a visit to an existing pet"
+footer petclinic-ui-test/features/generated_sequences/add-a-visit-to-an-existing-pet.puml
 participant Browser
 participant Backend
 participant DB

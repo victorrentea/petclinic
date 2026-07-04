@@ -35,8 +35,11 @@ export async function generateFromWindows(
     for (const id of ids) {
       traces.push(parseTempoTrace(await deps.getTrace(id)));
     }
-    const puml = renderPuml(w.title, traces);
-    const filePath = `${outDir}/${slugify(w.title)}.puml`;
+    const slug = slugify(w.title);
+    const filePath = `${outDir}/${slug}.puml`;
+    // Embed the diagram's own repo-relative source path so the render is self-identifying.
+    const footerPath = `petclinic-ui-test/features/generated_sequences/${slug}.puml`;
+    const puml = renderPuml(w.title, traces, footerPath);
     deps.writeFile(filePath, puml);
     deps.log(`✅ "${w.title}": ${ids.length} trace(s) → ${filePath}`);
     written.push(filePath);
