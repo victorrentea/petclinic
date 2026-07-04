@@ -24,6 +24,8 @@ public class Vet {
     @NotEmpty
     protected String lastName;
 
+    private String phone;
+
     @ManyToMany
     @JoinTable(name = "vet_specialties",
         joinColumns = @JoinColumn(name = "vet_id"),

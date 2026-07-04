@@ -1,12 +1,10 @@
 package victor.training.petclinic.mcp;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +65,10 @@ class CreateVisitToolTest {
 
     @Test
     void books_visit_directly_without_any_elicitation() {
-        String result = petClinicMcp.createVisit(petId, future, LocalTime.of(10, 30), "Vaccination");
+        String result = petClinicMcp.createVisit(petId, future, "Vaccination");
 
         assertThat(result).contains("Created visit").contains("Rex")
-            .contains(future.toString()).contains("10:30");
+            .contains(future.toString());
         assertThat(visitRepository.findByPetId(petId))
             .extracting(v -> v.getDescription())
             .contains("Vaccination");
@@ -78,7 +76,7 @@ class CreateVisitToolTest {
 
     @Test
     void unknown_pet_is_rejected() {
-        assertThatThrownBy(() -> petClinicMcp.createVisit(999_999, future, LocalTime.of(10, 30), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(999_999, future, "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Pet not found");
     }
@@ -98,7 +96,7 @@ class CreateVisitToolTest {
         other.addPet(otherPet);
         ownerRepository.save(other);
 
-        assertThatThrownBy(() -> petClinicMcp.createVisit(otherPet.getId(), future, LocalTime.of(10, 30), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(otherPet.getId(), future, "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not belong to owner");
     }
@@ -107,7 +105,7 @@ class CreateVisitToolTest {
     void past_date_is_rejected() {
         LocalDate past = LocalDate.now().minusDays(1);
 
-        assertThatThrownBy(() -> petClinicMcp.createVisit(petId, past, LocalTime.of(10, 30), "Checkup"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(petId, past, "Checkup"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
@@ -116,27 +114,15 @@ class CreateVisitToolTest {
     void rejects_booking_when_pet_already_has_max_upcoming_visits() {
         // Fill the pet up to the cap with future visits, on distinct future days.
         for (int i = 0; i < PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET; i++) {
-            petClinicMcp.createVisit(petId, LocalDate.now().plusDays(i + 1), LocalTime.of(10, 0), "Booking " + i);
+            petClinicMcp.createVisit(petId, LocalDate.now().plusDays(i + 1), "Booking " + i);
         }
 
         // One more must be rejected as service abuse.
         assertThatThrownBy(() ->
-            petClinicMcp.createVisit(petId, future.plusDays(100), LocalTime.of(9, 0), "One too many"))
+            petClinicMcp.createVisit(petId, future.plusDays(100), "One too many"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("already has the maximum")
             .hasMessageContaining(String.valueOf(PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET));
-    }
-
-    @Test
-    void today_with_already_passed_time_is_rejected() {
-        // minusHours(1) wraps past midnight to 23:xx (a future time today) — skip in that window
-        Assumptions.assumeTrue(LocalTime.now().isAfter(LocalTime.of(1, 0)));
-        LocalDate today = LocalDate.now();
-        LocalTime pastTime = LocalTime.now().minusHours(1).withSecond(0).withNano(0);
-
-        assertThatThrownBy(() -> petClinicMcp.createVisit(petId, today, pastTime, "Checkup"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Visit time must be in the future");
     }
 
     private static void authenticateAs(int ownerId) {

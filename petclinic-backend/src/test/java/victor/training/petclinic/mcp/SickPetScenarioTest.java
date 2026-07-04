@@ -1,7 +1,6 @@
 package victor.training.petclinic.mcp;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,20 +61,18 @@ class SickPetScenarioTest {
         // step 2: the LLM extracts the pet id from the resource text
         int petId = extractPetId(profile, "Mițică");
 
-        // step 3: the LLM calls create_visit for tomorrow at 08:00 (books directly, no elicitation)
-        String result = petClinicMcp.createVisit(petId, tomorrow, LocalTime.of(8, 0),
-            "Mițică is sick");
+        // step 3: the LLM calls create_visit for tomorrow (books directly, no elicitation)
+        String result = petClinicMcp.createVisit(petId, tomorrow, "Mițică is sick");
 
         assertThat(result).contains("Created visit").contains("Mițică")
-            .contains(tomorrow.toString()).contains("08:00");
+            .contains(tomorrow.toString());
 
-        // then: the visit is persisted for tomorrow at 08:00 local time
+        // then: the visit is persisted for tomorrow
         List<Visit> visits = visitRepository.findByPetId(petId);
         assertThat(visits)
             .singleElement()
             .satisfies(v -> {
                 assertThat(v.getDate()).isEqualTo(tomorrow);
-                assertThat(v.getTime()).isEqualTo(LocalTime.of(8, 0));
                 assertThat(v.getDescription()).contains("sick");
             });
     }

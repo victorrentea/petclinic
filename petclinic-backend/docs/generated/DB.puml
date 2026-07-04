@@ -55,6 +55,7 @@ entity "vets" as vets {
 {field} id : int <<PK>>
 {field} first_name : text
 {field} last_name : text
+{field} phone : text
 }
 
 entity "visits" as visits {
@@ -62,7 +63,7 @@ entity "visits" as visits {
 {field} pet_id : int <<FK>>
 {field} visit_date : date
 {field} description : text
-{field} visit_time : time
+{field} vet_id : int <<FK>>
 }
 
 
@@ -72,5 +73,6 @@ specialties ||--o{ vet_specialties : specialty_id
 types ||--o{ pets : type_id
 users ||--o{ roles : username
 vets ||--o{ vet_specialties : vet_id
+vets ||--o{ visits : vet_id
 
 @enduml

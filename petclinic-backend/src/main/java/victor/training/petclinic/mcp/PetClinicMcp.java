@@ -1,8 +1,6 @@
 package victor.training.petclinic.mcp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,7 +75,7 @@ public class PetClinicMcp {
         return "- id=%d — %s (%s), born %s".formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());
     }
 
-    public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description) {}
+    public record VisitView(int id, int petId, String petName, LocalDate date, String description) {}
 
     public record AmbulanceAddressInput(String address) {}
 
@@ -95,7 +93,7 @@ public class PetClinicMcp {
         for (Pet pet : owner.getPets()) {
             // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.
             for (Visit v : pet.getVisitsSortedByDate()) {
-                result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(), v.getDescription()));
+                result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getDescription()));
             }
         }
         return result;
@@ -104,14 +102,13 @@ public class PetClinicMcp {
     @McpTool(
         name = "create_visit",
         description = "Create a new vet visit for one of the authenticated owner's pets "
-            + "(date/time, pet, description). Books the visit directly — no confirmation prompt.",
+            + "(date, pet, description). Books the visit directly — no confirmation prompt.",
         annotations = @McpAnnotations(destructiveHint = true)
     )
     @Transactional
     public String createVisit(
             @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
             @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future", required = true) LocalDate visitDate,
-            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00", required = true) LocalTime visitTime,
             @McpToolParam(description = "Visit description (reason, diagnosis, notes...)", required = true) String description) {
         int ownerId = McpSecurity.currentOwnerId();
         Pet pet = petRepository.findById(petId)
@@ -120,19 +117,14 @@ public class PetClinicMcp {
             throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
         }
         requireFutureDate(visitDate);
-        if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
-        }
         requireUnderUpcomingVisitCap(pet);
 
         Visit v = new Visit();
         v.setDate(visitDate);
-        v.setTime(visitTime);
         v.setDescription(description);
         pet.addVisit(v);   // maintain both sides of the Pet<->Visit association
         Visit saved = visitRepository.save(v);
-        return "Created visit id=" + saved.getId() + " for pet '" + pet.getName() + "' on " + visitDate
-            + " at " + visitTime;
+        return "Created visit id=" + saved.getId() + " for pet '" + pet.getName() + "' on " + visitDate;
     }
 
     @McpTool(

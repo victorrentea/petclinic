@@ -9,7 +9,12 @@ participant DB
 Browser -> Backend: POST /api/visits
 activate Backend
 Backend -> Backend: book-visit
-Backend -> DB: INSERT petclinic.visits
+Backend -> DB: SELECT petclinic.vets (resolve performing vet)
+activate DB
+DB --> Backend: vet
+deactivate DB
+note over Backend: link the visit to the performing vet (vet_id)
+Backend -> DB: INSERT petclinic.visits (pet_id, vet_id)
 activate DB
 DB --> Backend: return
 deactivate DB

@@ -5,7 +5,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+# Discover the repo root. Unset the git env vars git exports when this runs from a
+# hook: a leaked GIT_DIR makes `rev-parse --show-toplevel` return $SCRIPT_DIR (the
+# cwd) instead of the work tree, which then mangles the DB.sql path (esp. in worktrees).
+ROOT="$(unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE; git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 DB_SQL="$ROOT/petclinic-backend/DB.sql"
 # OUT defaults to the committed diagram, but can be redirected (e.g. the pre-push hook
 # regenerates to a temp file to verify DB.puml is in sync without touching the work tree).

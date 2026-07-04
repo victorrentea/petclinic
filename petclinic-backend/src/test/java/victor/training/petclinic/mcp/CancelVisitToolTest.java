@@ -1,7 +1,6 @@
 package victor.training.petclinic.mcp;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -91,7 +90,7 @@ class CancelVisitToolTest {
         authenticateAs(owner.getId());
 
         String result = petClinicMcp.createVisit(pet.getId(),
-            LocalDate.now().plusDays(7), LocalTime.of(10, 30), "Test visit");
+            LocalDate.now().plusDays(7), "Test visit");
 
         assertThat(result).contains("Created visit").contains("Whiskers");
         assertThat(visitRepository.findByPetId(pet.getId()))
@@ -107,7 +106,7 @@ class CancelVisitToolTest {
         authenticateAs(owner1.getId());
 
         assertThatThrownBy(() -> petClinicMcp.createVisit(petOfOwner2.getId(),
-                LocalDate.now().plusDays(7), LocalTime.of(10, 30), "Attempt"))
+                LocalDate.now().plusDays(7), "Attempt"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not belong to owner");
     }
@@ -118,7 +117,7 @@ class CancelVisitToolTest {
         authenticateAs(owner.getId());
 
         assertThatThrownBy(() -> petClinicMcp.createVisit(999_999,
-                LocalDate.now().plusDays(7), LocalTime.of(10, 30), "Visit"))
+                LocalDate.now().plusDays(7), "Visit"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Pet not found");
     }
@@ -129,7 +128,7 @@ class CancelVisitToolTest {
         Pet pet = owner.getPets().get(0);
         authenticateAs(owner.getId());
 
-        assertThatThrownBy(() -> petClinicMcp.createVisit(pet.getId(), LocalDate.of(2020, 1, 1), LocalTime.of(10, 30), "Old visit"))
+        assertThatThrownBy(() -> petClinicMcp.createVisit(pet.getId(), LocalDate.of(2020, 1, 1), "Old visit"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must be today or in the future");
     }
