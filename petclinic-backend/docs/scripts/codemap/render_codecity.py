@@ -67,6 +67,41 @@ with TSV.open() as f:
             "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
         })
 
+# ── Per-package rows for "package mode" ──────────────────────────────────────
+# A package is shaped exactly like a file row (same field names) so the existing
+# treemap/floor/building machinery renders it as a building nested under its
+# PARENT package (its `district`). Aggregated metrics come from
+# codemap-packages.tsv (emitted by build_heatmap.py); if it's absent, package
+# mode is simply empty and the toggle falls back to the class view.
+pkg_rows = []
+PKG_TSV = TSV.with_name("codemap-packages.tsv")
+if PKG_TSV.exists():
+    with PKG_TSV.open() as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            pkg = row["package"]
+            parent = pkg.rsplit(".", 1)[0] if "." in pkg else ""
+            fan_in = _number(row, "fan_in", int)
+            fan_out = _number(row, "fan_out", int)
+            pkg_rows.append({
+                "path": pkg,
+                "name": pkg.rsplit(".", 1)[-1],   # last segment is the building label
+                "district": parent,               # parent package = the floor it stands on
+                "files": _number(row, "files", int),
+                "bytes": _number(row, "bytes", int),
+                "lines": _number(row, "lines", int),
+                "commits": _number(row, "commits", int),
+                "bug_commits": _number(row, "bug_commits", int),
+                "commits_per_kloc": _number(row, "commits_per_kloc"),
+                "bugs_per_kloc": _number(row, "bugs_per_kloc"),
+                "bugs_per_commit": _number(row, "bugs_per_commit"),
+                "cognitive_complexity": _number(row, "cognitive_complexity", int),
+                "complexity_per_kloc": _number(row, "complexity_per_kloc"),
+                "fan_in": fan_in,
+                "fan_out": fan_out,
+                "committers": _number(row, "committers", int),
+                "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
+            })
+
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 html = """<!doctype html>
@@ -135,6 +170,30 @@ html = """<!doctype html>
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
+  /* Classes ⇄ Packages view switch — radios right under the title. */
+  .viewMode {
+    display: flex; gap: 16px; margin: 5px 0 10px;
+  }
+  .viewMode label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: #1f2933;
+    text-transform: none; letter-spacing: 0; cursor: pointer;
+  }
+  .viewMode input { width: 15px; height: 15px; cursor: pointer; accent-color: #1e3a8a; }
+  .viewMode input:disabled + *, .viewMode label:has(input:disabled) { color: #aab4c8; cursor: not-allowed; }
+  /* Shortcuts help, pinned top-right, out of the way of the control panel. */
+  #shortcuts {
+    position: fixed; top: 16px; right: 16px; z-index: 2;
+    max-width: 340px; text-align: right;
+    font-size: 11.5px; line-height: 1.5; color: #52606d;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(140, 148, 160, 0.4);
+    border-radius: 8px; padding: 9px 12px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+  }
+  @media (max-width: 720px) { #shortcuts { display: none; } }
   label {
     display: grid;
     gap: 3px;
@@ -395,9 +454,17 @@ html = """<!doctype html>
 </head>
 <body>
 <div id="scene"></div>
+<aside id="shortcuts" aria-label="controls help">
+  Drag to pan &middot; Cmd/Ctrl-drag to rotate &middot; scroll to zoom<br>
+  Shift-click a floor/building to zoom in &middot; Shift-click the ground (or Esc / breadcrumb) to step out<br>
+  Cmd/Ctrl-double-click opens a file in VS Code
+</aside>
 <section class="panel">
   <h1>__LOGO_SVG__<span>__TITLE__</span></h1>
-  <p class="sub">Drag to pan, Cmd/Ctrl-drag to rotate, scroll to zoom. Shift-click a package floor or building to zoom in; Shift-click the surrounding floor (or Esc / the breadcrumb) to step out. Cmd/Ctrl-double-click opens a file in VS Code.</p>
+  <div class="viewMode" role="radiogroup" aria-label="what a building represents">
+    <label><input type="radio" name="viewMode" value="classes" checked> Classes</label>
+    <label><input type="radio" name="viewMode" value="packages" id="packageMode"> Packages</label>
+  </div>
   <div class="controls">
     <label>
       Color
@@ -471,6 +538,7 @@ html = """<!doctype html>
 
 <script>
 const FILES = __FILES_JSON__;
+const PACKAGES = __PACKAGES_JSON__;   // per-package rows (same shape) for package mode
 const REPO_ABS = __REPO_ABS__;
 const BUILD_CMD = __BUILD_CMD__;
 
@@ -526,6 +594,14 @@ const hover = document.getElementById("hover");
 const areaSelect = document.getElementById("areaMetric");
 const heightSelect = document.getElementById("heightMetric");
 const colorSelect = document.getElementById("colorMetric");
+const packageToggle = document.getElementById("packageMode");   // the "Packages" radio
+if (packageToggle && !PACKAGES.length) packageToggle.disabled = true;   // no package data → keep Classes
+// Package mode feeds the same treemap/floor/building machinery package rows
+// instead of class rows: each package becomes a building on its parent-package
+// floor. Falls back to classes when off or when no package data was generated.
+function activeDataset() {
+  return (packageToggle && packageToggle.checked && PACKAGES.length) ? PACKAGES : FILES;
+}
 const citySize = 900;
 const districtGap = 14;
 const fileGap = 3;
@@ -676,7 +752,7 @@ function percentile(values, p) {
 }
 
 function metricMax(key) {
-  return percentile(FILES.map(f => Number(f[key]) || 0), 0.95);
+  return percentile(activeDataset().map(f => Number(f[key]) || 0), 0.95);
 }
 
 function colorFor(value, max) {
@@ -738,7 +814,7 @@ function buildHierarchy(areaMetric) {
   // absolute dotted path (needed for further drill-in and hover labels), while the
   // *layout* depth restarts at the scope so a drilled-in package fills the plot.
   const root = { name: "root", packageName: scopePath, children: [] };
-  for (const file of FILES) {
+  for (const file of activeDataset()) {
     if (!inScope(file)) continue;
     insertPackage(root, scopedParts(file), file, areaMetric);
   }
@@ -1370,6 +1446,16 @@ function onMetricChange() {
 areaSelect.addEventListener("change", onMetricChange);
 heightSelect.addEventListener("change", onMetricChange);
 colorSelect.addEventListener("change", onMetricChange);
+// A radio fires "change" only on the newly-selected input, so listen on both.
+document.querySelectorAll('input[name="viewMode"]').forEach((r) => {
+  r.addEventListener("change", () => {
+    dismissIntro();
+    scopePath = "";            // class and package hierarchies differ — reset the drill scope
+    updateBreadcrumb();
+    rebuildCity();
+    frameCity();               // recenter: the whole city changed
+  });
+});
 window.addEventListener("resize", onResize);
 window.addEventListener("resize", dismissIntro);
 window.addEventListener("pointermove", onPointerMove);
@@ -1448,6 +1534,7 @@ html = (html
         .replace("__LOGO_SVG__", LOGO_SVG)
         .replace("__FAVICON__", FAVICON)
         .replace("__FILES_JSON__", json.dumps(rows))
+        .replace("__PACKAGES_JSON__", json.dumps(pkg_rows))
         .replace("__REPO_ABS__", json.dumps(str(REPO_ABS)))
         .replace("__BUILD_CMD__", json.dumps(BUILD_CMD)))
 OUT.write_text(html)
