@@ -1,0 +1,70 @@
+@startuml
+!pragma layout smetana
+title Database Schema (ER)
+footer petclinic-backend/docs/generated/DB.puml
+hide circle
+skinparam linetype ortho
+caption <color:red>red</color> = added · <color:red><s>struck</s></color> = removed (vs previous snapshot)
+
+entity "owners" as owners {
+  {field} id : int <<PK>>
+  {field} first_name : text
+  {field} last_name : text
+  {field} address : text
+  {field} city : text
+  {field} telephone : text
+}
+entity "pets" as pets {
+  {field} id : int <<PK>>
+  {field} name : text
+  {field} birth_date : date
+  {field} type_id : int <<FK>> not null
+  {field} owner_id : int <<FK>>
+}
+entity "roles" as roles {
+  {field} id : int <<PK>>
+  {field} username : varchar(20) <<FK>> not null
+  {field} role : varchar(20) not null
+}
+entity "specialties" as specialties {
+  {field} id : int <<PK>>
+  {field} name : text
+  {field} description : text
+}
+entity "types" as types {
+  {field} id : int <<PK>>
+  {field} name : text
+}
+entity "users" as users {
+  {field} username : varchar(20) <<PK>>
+  {field} password : varchar(60) not null
+  {field} enabled : boolean not null
+}
+entity "vet_specialties" as vet_specialties {
+  {field} vet_id : int <<FK>> not null
+  {field} specialty_id : int <<FK>> not null
+}
+entity "vets" as vets {
+  {field} id : int <<PK>>
+  {field} first_name : text
+  {field} last_name : text
+  <color:red>{field} phone : text</color>
+}
+entity "visits" as visits {
+  {field} id : int <<PK>>
+  {field} pet_id : int <<FK>>
+  {field} visit_date : date
+  {field} description : text
+  <color:red>{field} vet_id : int <<FK>></color>
+  <color:red><s>{field} visit_time : time</s></color>
+}
+
+owners ||--o{ pets : owner_id
+pets ||--o{ visits : pet_id
+specialties ||--o{ vet_specialties : specialty_id
+types ||--o{ pets : type_id
+users ||--o{ roles : username
+vets ||--o{ vet_specialties : vet_id
+vets ||-[#red]-o{ visits : <color:red>vet_id</color>
+
+@enduml

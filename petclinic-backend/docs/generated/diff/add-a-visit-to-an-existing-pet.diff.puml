@@ -1,0 +1,20 @@
+@startuml
+hide footbox
+title add a visit to an existing pet
+footer petclinic-ui-test/features/generated_sequences/add-a-visit-to-an-existing-pet.puml
+participant Browser
+participant Backend
+participant DB
+caption <color:red>red</color> = added · <color:red><s>struck</s></color> = removed (vs previous snapshot)
+
+
+Browser -> Backend: POST /api/visits
+Backend -> Backend: book-visit
+Backend -[#red]> DB: SELECT petclinic.vets (resolve performing vet)
+DB -[#red]-> Backend: vet
+Backend -[#red]> DB: INSERT petclinic.visits (pet_id, vet_id)
+DB --> Backend: return
+Backend --> Browser: 201
+Backend -[#red]> DB: INSERT petclinic.visits : <color:red><s>(removed)</s></color>
+
+@enduml
