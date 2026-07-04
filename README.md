@@ -65,8 +65,7 @@ Per-module commands, tech stack, testing, and Docker: see
 
 ## Prompts to try
 
-Paste-ready prompts to run against this repo (the former `prompts-to-try.md`,
-folded in here).
+Paste-ready prompts to run against this repo:
 
 ### Context hygiene & progressive disclosure
 
@@ -90,9 +89,12 @@ Some require tools from the project's `.mcp.json` (which should autoload).
 - **Query tuning** — optimize the "search owners by last name" query.
 - **Ad-hoc BI** — export an Excel pie chart of pet types straight from `postgres-db`.
 - **Faster tests** — make the backend tests run faster.
-- **Automate a chore** — fetch the issues assigned to you on this repo, then capture the how-to as a reusable skill/script.
-- **Staging errors** — get the last errors from the staging environment.
-- **End-of-turn sound** — set up an End/Stop hook that plays a sound when the agent finishes its turn.
+
+### Agentify YOUR 🫵 Environment 
+Tell agent help you grant it access to these capabilities:
+- **Issues** — fetch the issues assigned to me on this repo, then capture the how-to as a reusable skill/script.
+- **Logs** — get the last errors from the staging environment log.
+- **Browser** – reproduce a recent FE bug in a browser: does it reproduce?
 
 ### Bring the ideas from `petclinic` to your own project ❤️
 
@@ -102,10 +104,11 @@ Start an agent in **your** project and ask it — *"From the https://github.com/
 - **Domain model from code** — get the mechanism that generates `DomainModel.puml` from code.
 - **DB diagram from migrations** — get `DB.puml` built from the incremental SQL scripts.
 - **Code City** — run the Code City visualization on your own sources.
-- **Statusline** — configure your agent CLI's status bar per `victor-statusbar.md`.
 - **API ↔ code in sync** — keep the backend Java in sync with `openapi.yaml` and the frontend `api-types.ts`.
 - **Broken-build tripwire** — if a push breaks the build, keep looping until CI is green.
 - **Guardrail git hooks** — run critical tests before every push and again in CI, blocking `--no-verify` pushes.
 - **CODEOWNERS** — protect critical files behind tech-lead review to prevent fatigue-LGTM.
 - **Trace-based sequences** — adopt the `generated_sequences/*.puml` idea for your cross-service/module e2e tests.
 - **Critical `.feature` tests** — generate 3 functional tests for the most critical business rules, to confirm with business/QA.
+- **Statusline** — configure your agent CLI's status bar per `victor-statusbar.md`.
+- **Hooks demo** – set up an End/Stop hook that plays a sound when the agent finishes its turn.
