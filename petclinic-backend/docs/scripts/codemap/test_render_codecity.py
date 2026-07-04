@@ -47,16 +47,18 @@ class RenderCodecityTest(unittest.TestCase):
             # Persistent labels show ONLY the class name now — the commits sub-line is gone.
             self.assertNotIn("by ${devs} devs", html)
             self.assertIn("Persistent labels show ONLY the class name", html)
-            # "Code City of:" dropdown — Classes / Packages / Modules feed the same city machinery.
-            self.assertIn("Code City of:", html)
-            self.assertIn('<select id="viewMode"', html)
+            # View switch (Classes / Packages / Modules) now lives INLINE in the title
+            # row (h1), not on a separate "Code City of:" row under the title.
+            h1 = html[html.index("<h1>"):html.index("</h1>")]
+            self.assertIn('<select id="viewMode"', h1)
+            self.assertNotIn("Code City of:", html)
             self.assertIn('value="classes" selected', html)
             self.assertIn('value="packages" id="packageOpt"', html)
             self.assertIn('value="modules" id="moduleOpt">Modules (Maven/Gradle)', html)
             self.assertIn("const PACKAGES =", html)
             self.assertIn("const MODULES =", html)
             self.assertIn("function activeDataset", html)
-            self.assertIn('id="shortcuts"', html)   # controls help pinned top-right
+            self.assertIn('id="shortcuts"', html)   # controls help pinned bottom-right
             self.assertIn("Drag to pan<br>", html)  # shortcuts one-per-line
             # Hover: a bullet list of every metric, with area/height/colour markers.
             self.assertIn('class="props"', html)
@@ -64,16 +66,21 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("function marksFor", html)
             self.assertIn("mk-area", html)
             self.assertIn("mk-height", html)
+            self.assertIn("&#x2194;&#xFE0F;", html)   # area marker is the left/right arrow now
+            self.assertNotIn("&#x1F7E7;", html)        # not the old orange square
+            self.assertIn("&#x2195;&#xFE0F;", html)   # height marker unchanged (up/down arrow)
             self.assertIn("cbar-mark", html)
             # Package-pattern filter (victor..*Service · ..repo.. · *Service).
             self.assertIn('id="pkgFilter"', html)
             self.assertIn("function patternToRegExp", html)
             self.assertIn("function filteredDataset", html)
-            # Package-name labels: switchable floating tags vs. on-the-floor corners.
+            # Package-name labels: switchable floating tags vs. on-the-floor edges.
             self.assertIn('id="pkgLabelMode"', html)
+            self.assertIn("on the floor (edges)", html)
             self.assertIn("district-label", html)
             self.assertIn("function addFloorName", html)
             self.assertIn("function addPackageLabel", html)
+            self.assertIn("function placeFloorLabelMesh", html)   # global no-overlap floor-label guard
             self.assertIn("instability", html)           # Ce/(Ce+Ca) metric
             self.assertLess(html.index('id="colorMetric"'), html.index('id="heightMetric"'))
             self.assertLess(html.index('id="heightMetric"'), html.index('id="areaMetric"'))
@@ -104,8 +111,10 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("function openInEditor", html)
             self.assertIn("vscode://file", html)
             self.assertIn('window.addEventListener("dblclick", onDoubleClick)', html)
-            self.assertIn("positionHoverNearObject", html)
-            self.assertIn("object.getWorldPosition", html)
+            # Hover UI: metrics box pinned top-right, FQN split into a top-center banner.
+            self.assertIn('id="classTitle"', html)
+            self.assertIn("classTitle.textContent = qualifiedName", html)
+            self.assertNotIn("positionHoverNearObject", html)   # tooltip is CSS-pinned, not cursor-following
             self.assertIn("setRotationPivotToViewportCenter", html)
             self.assertIn("new THREE.Plane", html)
             # "Build this for your own repo" recipe: button, overlay, baked-in command.
