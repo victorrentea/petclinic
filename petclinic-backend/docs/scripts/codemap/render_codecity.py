@@ -102,6 +102,41 @@ if PKG_TSV.exists():
                 "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
             })
 
+# ── Per-module rows for "module mode" (Maven/Gradle) ─────────────────────────
+# Same shape as a file/package row, so the same treemap machinery renders each
+# Maven/Gradle module as a building on its parent-module floor. Aggregates come
+# from codemap-modules.tsv (emitted by build_heatmap.py); if it's absent, module
+# mode is empty and the dropdown option greys out.
+mod_rows = []
+MOD_TSV = TSV.with_name("codemap-modules.tsv")
+if MOD_TSV.exists():
+    repo_name = REPO_ABS.name or "root"
+    with MOD_TSV.open() as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            mod = row["module"]                       # repo-relative dir; "" = the repo-root module
+            segs = mod.split("/") if mod else []
+            fan_in = _number(row, "fan_in", int)
+            fan_out = _number(row, "fan_out", int)
+            mod_rows.append({
+                "path": mod or ".",
+                "name": segs[-1] if segs else repo_name,   # building label
+                "district": ".".join(segs[:-1]),           # parent dir (dotted) = the floor it stands on
+                "files": _number(row, "files", int),
+                "bytes": _number(row, "bytes", int),
+                "lines": _number(row, "lines", int),
+                "commits": _number(row, "commits", int),
+                "bug_commits": _number(row, "bug_commits", int),
+                "commits_per_kloc": _number(row, "commits_per_kloc"),
+                "bugs_per_kloc": _number(row, "bugs_per_kloc"),
+                "bugs_per_commit": _number(row, "bugs_per_commit"),
+                "cognitive_complexity": _number(row, "cognitive_complexity", int),
+                "complexity_per_kloc": _number(row, "complexity_per_kloc"),
+                "fan_in": fan_in,
+                "fan_out": fan_out,
+                "committers": _number(row, "committers", int),
+                "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
+            })
+
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 html = """<!doctype html>
@@ -170,17 +205,33 @@ html = """<!doctype html>
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
-  /* Classes ⇄ Packages view switch — radios right under the title. */
-  .viewMode {
-    display: flex; gap: 16px; margin: 5px 0 10px;
-  }
-  .viewMode label {
-    display: flex; align-items: center; gap: 6px;
+  /* "Code City of:" — a dropdown right under the title choosing what a building is. */
+  .viewOf {
+    display: flex; align-items: center; gap: 8px; margin: 5px 0 10px;
     font-size: 13px; font-weight: 600; color: #1f2933;
-    text-transform: none; letter-spacing: 0; cursor: pointer;
+    text-transform: none; letter-spacing: 0;
   }
-  .viewMode input { width: 15px; height: 15px; cursor: pointer; accent-color: #1e3a8a; }
-  .viewMode input:disabled + *, .viewMode label:has(input:disabled) { color: #aab4c8; cursor: not-allowed; }
+  .viewOf select {
+    font-size: 13px; font-weight: 650; padding: 4px 8px;
+    color: #1e3a8a; border-color: #b9c4d6;
+  }
+  .viewOf option:disabled { color: #aab4c8; }
+  .pkgRow { margin: 10px 0 0; }
+  /* Package-pattern filter: AspectJ-style globs (victor..*Service, ..repo.., *Service). */
+  .filterRow { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; }
+  .filterRow input {
+    flex: 1 1 auto; min-width: 0;
+    border: 1px solid #c8d0da; border-radius: 6px; background: #fff;
+    color: #1f2933; font-size: 12.5px; padding: 6px 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .filterRow input.bad { border-color: #d14343; background: #fff5f5; }
+  .filterRow button {
+    flex: none; border: 1px solid #c8d0da; border-radius: 6px; background: #fff;
+    color: #52606d; font-size: 14px; line-height: 1; cursor: pointer; padding: 4px 8px;
+  }
+  .filterRow button:hover { background: #eef1f5; color: #1f2933; }
+  .filterCount { flex: none; font-size: 11px; color: #667085; min-width: 46px; text-align: right; }
   /* Shortcuts help, pinned top-right, out of the way of the control panel. */
   #shortcuts {
     position: fixed; top: 16px; right: 16px; z-index: 2;
@@ -244,25 +295,60 @@ html = """<!doctype html>
     font-size: 11px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-  /* Colour-legend line in the hover tooltip: a swatch of this building's exact
-     colour + which metric (and value) put it there — so the colour is never a
-     mystery. */
-  #hover .colorline {
+  /* Hover body: every metric on its own bullet. The three metrics currently
+     driving the city (area / height / colour) carry a trailing marker so the
+     encoding reads straight off the list. */
+  #hover .props {
+    list-style: none;
+    margin: 5px 0 0;
+    padding: 5px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  }
+  #hover .props li {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-top: 5px;
-    padding-top: 5px;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 1px 0;
     color: #cbd5e1;
-    font-size: 11px;
+    font-size: 11.5px;
   }
-  #hover .colorline .sw {
+  /* Values are inline here — override the block/large styling #hover b gives the name. */
+  #hover .props b { display: inline; font-size: inherit; margin: 0; font-weight: 700; }
+  #hover .props li::before {
+    content: "\\2022";
+    color: #64748b;
     flex: none;
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    text-align: center;
+  }
+  #hover .props li.on { color: #f1f5f9; font-weight: 600; }
+  #hover .props .marks {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding-left: 12px;
+  }
+  #hover .props .mk-area, #hover .props .mk-height { font-size: 12.5px; line-height: 1; }
+  /* Colour metric marker: a mini light->red scale with a tick at this building's spot. */
+  #hover .cbar {
+    position: relative;
+    display: inline-block;
+    width: 56px;
+    height: 11px;
     border-radius: 3px;
     border: 1px solid rgba(255, 255, 255, 0.5);
+    background: linear-gradient(to right, #e8eefc, #800020);
+  }
+  #hover .cbar-mark {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 3px;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #0f172a;
+    border-radius: 1px;
   }
   .city-label {
     padding: 3px 8px;
@@ -278,8 +364,22 @@ html = """<!doctype html>
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
   }
-  .city-label .cl-name { font-weight: 700; }
-  .city-label .cl-sub { font-weight: 500; font-size: 10.5px; opacity: 0.82; }
+  /* Floating package tag — deliberately a different look from the dark class pills:
+     a deep-blue rounded capsule so a package name never reads as a class name. */
+  .district-label {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(30, 58, 138, 0.92);
+    color: #eaf1ff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
   /* Drill-down breadcrumb: the path from the whole repo to the package now in view. */
   .breadcrumb {
     position: fixed;
@@ -455,15 +555,22 @@ html = """<!doctype html>
 <body>
 <div id="scene"></div>
 <aside id="shortcuts" aria-label="controls help">
-  Drag to pan &middot; Cmd/Ctrl-drag to rotate &middot; scroll to zoom<br>
-  Shift-click a floor/building to zoom in &middot; Shift-click the ground (or Esc / breadcrumb) to step out<br>
+  Drag to pan<br>
+  Cmd/Ctrl-drag to rotate<br>
+  Scroll to zoom<br>
+  Shift-click a floor/building to zoom in<br>
+  Shift-click the ground (or Esc / breadcrumb) to step out<br>
   Cmd/Ctrl-double-click opens a file in VS Code
 </aside>
 <section class="panel">
   <h1>__LOGO_SVG__<span>__TITLE__</span></h1>
-  <div class="viewMode" role="radiogroup" aria-label="what a building represents">
-    <label><input type="radio" name="viewMode" value="classes" checked> Classes</label>
-    <label><input type="radio" name="viewMode" value="packages" id="packageMode"> Packages</label>
+  <div class="viewOf">
+    <span>Code City of:</span>
+    <select id="viewMode" aria-label="what a building represents">
+      <option value="classes" selected>Classes</option>
+      <option value="packages" id="packageOpt">Packages</option>
+      <option value="modules" id="moduleOpt">Modules (Maven/Gradle)</option>
+    </select>
   </div>
   <div class="controls">
     <label>
@@ -503,6 +610,20 @@ html = """<!doctype html>
       </select>
     </label>
   </div>
+  <div class="filterRow">
+    <input id="pkgFilter" type="text" spellcheck="false" autocomplete="off"
+           placeholder="filter e.g. victor..*Service &middot; ..repo.. &middot; *Service">
+    <button id="pkgFilterClear" type="button" title="clear filter" hidden>&times;</button>
+    <span id="pkgFilterCount" class="filterCount"></span>
+  </div>
+  <div class="viewOf pkgRow">
+    <span>Package labels:</span>
+    <select id="pkgLabelMode" aria-label="package label style">
+      <option value="floating" selected>floating tags</option>
+      <option value="floor">on the floor (corners)</option>
+      <option value="off">off</option>
+    </select>
+  </div>
 </section>
 <nav id="breadcrumb" class="breadcrumb" hidden aria-label="package scope"></nav>
 <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
@@ -539,12 +660,12 @@ html = """<!doctype html>
 <script>
 const FILES = __FILES_JSON__;
 const PACKAGES = __PACKAGES_JSON__;   // per-package rows (same shape) for package mode
+const MODULES = __MODULES_JSON__;     // per-Maven/Gradle-module rows (same shape) for module mode
 const REPO_ABS = __REPO_ABS__;
 const BUILD_CMD = __BUILD_CMD__;
 
-// Active COLOR metric + its p95 scale max, mirrored out of rebuildCity so the
-// hover tooltip can explain *why* a building is the colour it is.
-let activeColorMetric = "commits_per_kloc";
+// The active COLOR metric's p95 scale max, mirrored out of rebuildCity so the
+// hover tooltip's colour-scale marker can place this building on the ramp.
 let activeColorMax = 1;
 
 // "Build this for your own repo" overlay: reveal the copy-pasteable recipe and let the
@@ -594,13 +715,49 @@ const hover = document.getElementById("hover");
 const areaSelect = document.getElementById("areaMetric");
 const heightSelect = document.getElementById("heightMetric");
 const colorSelect = document.getElementById("colorMetric");
-const packageToggle = document.getElementById("packageMode");   // the "Packages" radio
-if (packageToggle && !PACKAGES.length) packageToggle.disabled = true;   // no package data → keep Classes
-// Package mode feeds the same treemap/floor/building machinery package rows
-// instead of class rows: each package becomes a building on its parent-package
-// floor. Falls back to classes when off or when no package data was generated.
+const viewSelect = document.getElementById("viewMode");   // the "Code City of:" dropdown
+const packageOpt = document.getElementById("packageOpt");
+const moduleOpt = document.getElementById("moduleOpt");
+const pkgLabelSelect = document.getElementById("pkgLabelMode");
+const filterInput = document.getElementById("pkgFilter");
+const filterClearBtn = document.getElementById("pkgFilterClear");
+const filterCountEl = document.getElementById("pkgFilterCount");
+if (packageOpt && !PACKAGES.length) packageOpt.disabled = true;   // no package data → option greyed
+if (moduleOpt && MODULES.length < 2) moduleOpt.disabled = true;   // <2 modules → nothing to compare
+// The dropdown swaps which rows the treemap/floor/building machinery renders:
+// class rows, package rows (a building per package on its parent-package floor),
+// or module rows (a building per Maven/Gradle module). Falls back to classes.
 function activeDataset() {
-  return (packageToggle && packageToggle.checked && PACKAGES.length) ? PACKAGES : FILES;
+  const v = viewSelect ? viewSelect.value : "classes";
+  if (v === "packages" && PACKAGES.length) return PACKAGES;
+  if (v === "modules" && MODULES.length) return MODULES;
+  return FILES;
+}
+
+// ── Package-pattern filter ───────────────────────────────────────────────────
+// AspectJ-ish globs over the row's fully-qualified name: '..' and '*' are
+// wildcards (any run of chars), '.' is a literal dot; whole-string, case-insensitive.
+// e.g. victor..*Service · ..repo.. · *Service
+let filterRe = null;
+function rowFqn(file) {
+  const d = file.district && file.district !== "root" ? file.district : "";
+  return d ? d + "." + file.name : file.name;
+}
+function patternToRegExp(pat) {
+  let re = "";
+  for (let i = 0; i < pat.length; i++) {
+    const ch = pat[i];
+    if (ch === "." && pat[i + 1] === ".") { re += ".*"; i++; }    // '..' → any packages, incl. dots
+    else if (ch === ".") { re += "\\."; }                        // literal dot between segments
+    else if (ch === "*") { re += ".*"; }                          // '*' → any chars
+    else if (ch === "$") { re += "\\$"; }                        // literal $ (nested-class separator)
+    else re += ch;
+  }
+  return new RegExp("^" + re + "$", "i");
+}
+function filteredDataset() {
+  const data = activeDataset();
+  return filterRe ? data.filter(f => filterRe.test(rowFqn(f))) : data;
 }
 const citySize = 900;
 const districtGap = 14;
@@ -611,6 +768,7 @@ const minHeight = 5;
 let buildings = [];
 let districts = [];
 let cityLabels = [];
+let districtLabels = [];   // floating package tags (CSS2DObjects), when pkgLabelMode = "floating"
 
 // Drill-down scope: the dotted package the city is currently restricted to ("" = whole repo).
 // Clicking a floor/building re-roots the treemap here so the chosen package fills the full plot.
@@ -752,7 +910,7 @@ function percentile(values, p) {
 }
 
 function metricMax(key) {
-  return percentile(activeDataset().map(f => Number(f[key]) || 0), 0.95);
+  return percentile(filteredDataset().map(f => Number(f[key]) || 0), 0.95);
 }
 
 function colorFor(value, max) {
@@ -814,7 +972,7 @@ function buildHierarchy(areaMetric) {
   // absolute dotted path (needed for further drill-in and hover labels), while the
   // *layout* depth restarts at the scope so a drilled-in package fills the plot.
   const root = { name: "root", packageName: scopePath, children: [] };
-  for (const file of activeDataset()) {
+  for (const file of filteredDataset()) {
     if (!inScope(file)) continue;
     insertPackage(root, scopedParts(file), file, areaMetric);
   }
@@ -829,6 +987,11 @@ function clearCity() {
     label.el.remove();
   }
   cityLabels = [];
+  for (const label of districtLabels) {
+    label.removeFromParent();
+    if (label.element) label.element.remove();
+  }
+  districtLabels = [];
   for (const entry of buildings) {
     scene.remove(entry.mesh);
     entry.mesh.geometry.dispose();
@@ -858,8 +1021,7 @@ function rebuildCity() {
   const colorMetric = colorSelect.value;
   const maxMetric = metricMax(heightMetric);
   const maxColor = metricMax(colorMetric);
-  activeColorMetric = colorMetric;   // remembered for the hover tooltip's colour legend
-  activeColorMax = maxColor;
+  activeColorMax = maxColor;   // remembered for the hover tooltip's colour-scale marker
 
   const layout = d3.treemap()
     .size([citySize, citySize])
@@ -871,6 +1033,7 @@ function rebuildCity() {
   // Each package becomes a terraced platform: the deeper it is nested, the higher
   // it rises, so a parent package (e.g. victor) visibly contains its children
   // (rest, mapper, ...). A thin outline delimits every package from its siblings.
+  _floorLabelBudget = 240;   // cap flat floor-text planes per rebuild (perf on big cities)
   for (const node of root.descendants()) {
     if (node === root || !node.children) {
       continue;
@@ -912,6 +1075,8 @@ function rebuildCity() {
     outline.position.copy(block.position);
     outline.userData.kind = "package";
     scene.add(outline);
+
+    addPackageLabel(node, cx, cz, topY, width, depth);
   }
 
   for (const leaf of root.leaves()) {
@@ -942,6 +1107,7 @@ function rebuildCity() {
     buildings.push({ mesh, file, height });
   }
   setupLabels(areaMetric, heightMetric, colorMetric);
+  if (filterCountEl) filterCountEl.textContent = filterRe ? buildings.length + " shown" : "";
   window.__CODEMAP_3D_READY__ = {
     buildings: buildings.length,
     areaMetric,
@@ -950,33 +1116,16 @@ function rebuildCity() {
   };
 }
 
-const MAX_LABELS = 30;        // most class names shown at once
 const LABEL_GAP = 4;          // px breathing room required between two labels
 // Measure label width without touching the DOM (matches the .city-label font).
 const _labelMeasure = document.createElement("canvas").getContext("2d");
 _labelMeasure.font = "700 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-const _subMeasure = document.createElement("canvas").getContext("2d");   // smaller commits line
-_subMeasure.font = "500 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
-// Second label line: git activity — "commits: N (by M devs)".
-function labelCommitsLine(file) {
-  const commits = (Number(file.commits) || 0).toLocaleString();
-  const devs = (Number(file.committers) || 0).toLocaleString();
-  return `commits: ${commits} (by ${devs} devs)`;
-}
-
+// Persistent labels show ONLY the class name — every metric lives in the hover now.
 function makeLabel(entry, priority) {
   const div = document.createElement("div");
   div.className = "city-label";
-  const nameEl = document.createElement("div");
-  nameEl.className = "cl-name";
-  nameEl.textContent = entry.file.name;
-  const subEl = document.createElement("div");
-  subEl.className = "cl-sub";
-  const sub = labelCommitsLine(entry.file);
-  subEl.textContent = sub;
-  div.appendChild(nameEl);
-  div.appendChild(subEl);
+  div.textContent = entry.file.name;
   const obj = new CSS2DObject(div);
   obj.position.set(entry.mesh.position.x, entry.mesh.position.y + entry.height / 2 + 16, entry.mesh.position.z);
   obj.center.set(0.5, 1);
@@ -984,14 +1133,14 @@ function makeLabel(entry, priority) {
   scene.add(obj);
   cityLabels.push({
     obj, el: div, priority,
-    // Widest of the two lines + .city-label horizontal padding.
-    w: Math.max(_labelMeasure.measureText(entry.file.name).width, _subMeasure.measureText(sub).width) + 16,
-    h: 36,                    // two stacked lines
+    w: _labelMeasure.measureText(entry.file.name).width + 16,   // + .city-label horizontal padding
+    h: 22,                    // single line
   });
 }
 
-// Candidate labels: the per-metric standouts (always) plus the tallest buildings, up to MAX_LABELS.
-// Visibility is resolved per-frame in updateLabelVisibility so labels never overlap from any angle.
+// Candidate labels: the per-metric standouts (always) plus the tallest buildings, up to a
+// generous cap. Visibility is resolved per-frame in updateLabelVisibility, so the more the
+// camera zooms into an area (buildings spread apart on screen), the more names surface.
 function setupLabels(areaMetric, heightMetric, colorMetric) {
   const chosen = new Set();
   for (const metric of [areaMetric, heightMetric, colorMetric]) {
@@ -1002,8 +1151,9 @@ function setupLabels(areaMetric, heightMetric, colorMetric) {
     }
     if (best) chosen.add(best);
   }
+  const cap = Math.min(buildings.length, 400);   // many candidates → de-overlap reveals more on zoom
   for (const entry of [...buildings].sort((a, b) => b.height - a.height)) {
-    if (chosen.size >= MAX_LABELS) break;
+    if (chosen.size >= cap) break;
     chosen.add(entry);
   }
   let priority = 0;
@@ -1036,6 +1186,93 @@ function updateLabelVisibility() {
   }
 }
 
+// ── Package-name labels (two switchable styles) ──────────────────────────────
+// "floating": a deep-blue capsule (see .district-label) hovering over the floor —
+//   deliberately unlike the dark class pills so a package never reads as a class.
+// "floor": the name laid FLAT on the platform top, at each corner and in BOTH the
+//   X and Z reading directions, so it stays legible from any orbit angle.
+const _floorTexCache = new Map();   // "name|hex" -> {tex,w,h}; kept across rebuilds
+let _floorLabelBudget = 0;          // reset per rebuild in rebuildCity (perf cap)
+
+function floorTextTexture(text) {
+  const hit = _floorTexCache.get(text);
+  if (hit) return hit;
+  const font = 44, pad = 10;
+  const canvas = document.createElement("canvas");
+  const measure = canvas.getContext("2d");
+  measure.font = `700 ${font}px ui-monospace, Menlo, monospace`;
+  const w = Math.ceil(measure.measureText(text).width) + pad * 2;
+  const h = font + pad * 2;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.font = `700 ${font}px ui-monospace, Menlo, monospace`;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  // Dark ink + thick white halo: reads on the light floor whatever the package's metric colour.
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+  ctx.strokeText(text, w / 2, h / 2);
+  ctx.fillStyle = "#1f2937";
+  ctx.fillText(text, w / 2, h / 2);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const entry = { tex, w, h };
+  _floorTexCache.set(text, entry);
+  return entry;
+}
+
+function addFloorName(text, cx, cz, topY, width, depth) {
+  if (width < 46 || depth < 46) return;              // too small to hold the text — skip
+  const { tex, w, h } = floorTextTexture(text);
+  const worldH = Math.min(16, depth * 0.16, width * 0.16);
+  const worldW = worldH * (w / h);
+  if (worldW > width * 0.92) return;                 // wouldn't fit along an edge
+  const halfW = width / 2, halfD = depth / 2;
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      for (const yaw of [0, Math.PI / 2]) {          // both reading directions at every corner
+        if (_floorLabelBudget <= 0) return;
+        _floorLabelBudget--;
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(worldW, worldH),
+          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
+        );
+        mesh.rotation.x = -Math.PI / 2;              // lay flat on the platform top
+        mesh.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), yaw);   // run along X (0) or Z (90°)
+        const alongX = yaw === 0;
+        const marginX = alongX ? worldW / 2 : worldH / 2;
+        const marginZ = alongX ? worldH / 2 : worldW / 2;
+        mesh.position.set(cx + sx * (halfW - marginX - 2), topY + 0.6, cz + sz * (halfD - marginZ - 2));
+        mesh.renderOrder = 3;
+        mesh.userData.kind = "package";              // disposed by clearCity's package sweep
+        scene.add(mesh);
+      }
+    }
+  }
+}
+
+function addPackageLabel(node, cx, cz, topY, width, depth) {
+  const mode = pkgLabelSelect ? pkgLabelSelect.value : "floating";
+  if (mode === "off") return;
+  const full = node.data.packageName || node.data.name || "";
+  const shortName = full.split(".").pop();
+  if (!shortName) return;
+  if (mode === "floor") {
+    addFloorName(shortName, cx, cz, topY, width, depth);
+    return;
+  }
+  const div = document.createElement("div");     // "floating"
+  div.className = "district-label";
+  div.textContent = shortName;
+  const obj = new CSS2DObject(div);
+  obj.position.set(cx, topY + 12, cz);
+  obj.center.set(0.5, 1);
+  scene.add(obj);
+  districtLabels.push(obj);
+}
+
 function qualifiedName(file) {
   const module = file.path.includes("/src/") ? file.path.split("/src/")[0] : file.path.split("/")[0];
   let pkg = file.district && file.district !== "root" ? file.district : "";
@@ -1056,29 +1293,57 @@ function fmtMetric(v) {
     : v.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-// The exact building colour for a normalised value (mirrors colorFor's ramp),
-// as a CSS hex — used for the swatch in the hover tooltip.
-function swatchCss(t) {
-  const c = new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), Math.max(0, Math.min(1, t)));
-  return "#" + c.getHexString();
+function humanBytes(n) {
+  n = Number(n) || 0;
+  if (n < 1024) return n + " B";
+  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+  return (n / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+// Every metric on its own bullet in the hover. `opt` rows only render for package/
+// module rows (which carry a `files` count); class rows skip them.
+const HOVER_PROPS = [
+  { key: "files", label: "files", opt: true },
+  { key: "bytes", label: "size", fmt: humanBytes },
+  { key: "lines", label: "lines of code" },
+  { key: "cognitive_complexity", label: "cognitive complexity" },
+  { key: "complexity_per_kloc", label: "cognitive complexity / KLOC" },
+  { key: "commits", label: "commits" },
+  { key: "commits_per_kloc", label: "commits / KLOC" },
+  { key: "bug_commits", label: "bugfix commits" },
+  { key: "bugs_per_kloc", label: "bugfix commits / KLOC" },
+  { key: "committers", label: "committers" },
+  { key: "fan_in", label: "incoming coupling (fan in)" },
+  { key: "fan_out", label: "outgoing coupling (fan out)" },
+  { key: "instability", label: "instability Ce/(Ce+Ca)" },
+];
+
+// Trailing marker(s) for whichever of area / height / colour this metric drives:
+//   AREA → orange square · HEIGHT → up/down arrow · COLOUR → a light→red scale bar
+//   with a tick at this building's spot (value / 95th-percentile, clamped 0..1).
+function marksFor(file, key) {
+  const marks = [];
+  if (key === areaSelect.value) marks.push('<span class="mk-area" title="area / footprint">&#x1F7E7;</span>');
+  if (key === heightSelect.value) marks.push('<span class="mk-height" title="height">&#x2195;&#xFE0F;</span>');
+  if (key === colorSelect.value) {
+    const t = Math.max(0, Math.min(1, (Number(file[key]) || 0) / (activeColorMax || 1)));
+    marks.push('<span class="cbar" title="colour scale (light-&gt;red, capped at 95th pct)">' +
+      `<span class="cbar-mark" style="left:${(t * 100).toFixed(1)}%"></span></span>`);
+  }
+  return marks.length ? `<span class="marks">${marks.join("")}</span>` : "";
 }
 
 function formatHover(file) {
-  // Coupling shown directionally: →N references coming in, N→ going out.
-  // Colour legend: a swatch of THIS building's colour + which metric/value put
-  // it there, so the colour is self-explanatory. t = value / p95, clamped 0..1.
-  const cVal = Number(file[activeColorMetric]) || 0;
-  const t = Math.max(0, Math.min(1, cVal / (activeColorMax || 1)));
-  const pct = Math.round(t * 100);
+  const active = new Set([areaSelect.value, heightSelect.value, colorSelect.value]);
+  const items = [];
+  for (const p of HOVER_PROPS) {
+    if (p.opt && (file[p.key] === undefined || file[p.key] === null)) continue;
+    const val = p.fmt ? p.fmt(file[p.key]) : fmtMetric(Number(file[p.key]) || 0);
+    const on = active.has(p.key);
+    items.push(`<li class="${on ? "on" : ""}"><span>${p.label}: <b>${val}</b></span>${marksFor(file, p.key)}</li>`);
+  }
   return `<b>${file.name}</b><span class="fqn">${qualifiedName(file)}</span>` +
-    `lines: ${file.lines.toLocaleString()} | cognitive complexity: ${file.cognitive_complexity.toLocaleString()} | ` +
-    `committers: ${file.committers.toLocaleString()}<br>` +
-    `commits: ${file.commits.toLocaleString()} (${file.bug_commits.toLocaleString()} bugfixes) | ` +
-    `coupling &rarr;${file.fan_in.toLocaleString()} / ${file.fan_out.toLocaleString()}&rarr; | ` +
-    `instability: ${file.instability.toFixed(2)}` +
-    `<span class="colorline"><span class="sw" style="background:${swatchCss(t)}"></span>` +
-    `colour = ${metricLabel(colorSelect)}: <b>${fmtMetric(cVal)}</b> &middot; ${pct}% up the low&rarr;high scale ` +
-    `(light&rarr;red, capped at the 95th percentile)</span>`;
+    `<ul class="props">${items.join("")}</ul>`;
 }
 
 function formatDistrictHover(district) {
@@ -1446,16 +1711,36 @@ function onMetricChange() {
 areaSelect.addEventListener("change", onMetricChange);
 heightSelect.addEventListener("change", onMetricChange);
 colorSelect.addEventListener("change", onMetricChange);
-// A radio fires "change" only on the newly-selected input, so listen on both.
-document.querySelectorAll('input[name="viewMode"]').forEach((r) => {
-  r.addEventListener("change", () => {
-    dismissIntro();
-    scopePath = "";            // class and package hierarchies differ — reset the drill scope
-    updateBreadcrumb();
-    rebuildCity();
-    frameCity();               // recenter: the whole city changed
-  });
+viewSelect.addEventListener("change", () => {
+  dismissIntro();
+  scopePath = "";              // class / package / module hierarchies differ — reset the drill scope
+  updateBreadcrumb();
+  rebuildCity();
+  frameCity();                 // recenter: the whole city changed
 });
+// Package-label style only swaps the floor/floating labels — re-render in place.
+pkgLabelSelect.addEventListener("change", () => { dismissIntro(); rebuildCity(); });
+
+// Package-pattern filter: recompile on every keystroke, flag invalid patterns,
+// reset the drill scope (the visible set changed) and reframe.
+function applyFilter() {
+  const raw = filterInput.value.trim();
+  filterClearBtn.hidden = raw === "";
+  if (!raw) {
+    filterRe = null;
+    filterInput.classList.remove("bad");
+  } else {
+    try { filterRe = patternToRegExp(raw); filterInput.classList.remove("bad"); }
+    catch (_) { filterRe = null; filterInput.classList.add("bad"); }
+  }
+  dismissIntro();
+  scopePath = "";
+  updateBreadcrumb();
+  rebuildCity();
+  frameCity();
+}
+filterInput.addEventListener("input", applyFilter);
+filterClearBtn.addEventListener("click", () => { filterInput.value = ""; applyFilter(); filterInput.focus(); });
 window.addEventListener("resize", onResize);
 window.addEventListener("resize", dismissIntro);
 window.addEventListener("pointermove", onPointerMove);
@@ -1535,6 +1820,7 @@ html = (html
         .replace("__FAVICON__", FAVICON)
         .replace("__FILES_JSON__", json.dumps(rows))
         .replace("__PACKAGES_JSON__", json.dumps(pkg_rows))
+        .replace("__MODULES_JSON__", json.dumps(mod_rows))
         .replace("__REPO_ABS__", json.dumps(str(REPO_ABS)))
         .replace("__BUILD_CMD__", json.dumps(BUILD_CMD)))
 OUT.write_text(html)

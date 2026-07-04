@@ -75,6 +75,11 @@ commits_per_package = defaultdict(set)      # distinct commit SHAs per package
 bug_commits_per_package = defaultdict(set)  # distinct bugfix commit SHAs per package
 committers_per_package = defaultdict(set)   # distinct author identities per package
 
+# Same, per Maven/Gradle module (Code City "module mode").
+commits_per_module = defaultdict(set)
+bug_commits_per_module = defaultdict(set)
+committers_per_module = defaultdict(set)
+
 
 def _district(path):
     """Dotted Java package for a repo-relative path (mirrors render_codecity._district)."""
@@ -87,6 +92,46 @@ def _district(path):
     if len(parts) > 1:
         return parts[-2]
     return "root"
+
+
+# ── Maven/Gradle module map ──────────────────────────────────────────────────
+# A module = a directory holding a build descriptor: pom.xml (Maven) or any
+# *.gradle / *.gradle.kts (Gradle — note Spring names its per-module script after
+# the module, e.g. spring-core/spring-core.gradle, not build.gradle). Each file
+# belongs to its NEAREST such ancestor; files under none fall to "" (repo root).
+# Discovered from the working tree, honouring the same prunes. Descriptor-only
+# dirs with no source (e.g. a shared gradle/ script folder) yield empty modules
+# that are simply never emitted.
+def _is_build_descriptor(fn):
+    return fn == "pom.xml" or fn.endswith(".gradle") or fn.endswith(".gradle.kts")
+
+
+def _discover_module_dirs():
+    dirs = set()
+    for root, subdirs, files in os.walk(REPO_DIR):
+        parts = root.split(os.sep)
+        if any(p == ".git" for p in parts) or any(p in EXTRA_PRUNE for p in parts):
+            subdirs[:] = []
+            continue
+        if any(_is_build_descriptor(fn) for fn in files):
+            rel = os.path.relpath(root, REPO_DIR)
+            dirs.add("" if rel == "." else rel.replace(os.sep, "/"))
+    return dirs
+
+
+MODULE_DIRS = _discover_module_dirs()
+# Longest first, so the nearest (deepest) enclosing module wins.
+_MODULE_DIRS_SORTED = sorted((m for m in MODULE_DIRS if m), key=len, reverse=True)
+print(f"discovered {len(MODULE_DIRS)} Maven/Gradle module dir(s)", file=sys.stderr)
+
+
+def _module(path):
+    """Repo-relative dir of the nearest ancestor module ('' = the repo-root module)."""
+    d = path.rsplit("/", 1)[0] if "/" in path else ""
+    for m in _MODULE_DIRS_SORTED:
+        if d == m or d.startswith(m + "/"):
+            return m
+    return ""
 
 
 def _counts_toward_diagram(fp):
@@ -136,6 +181,13 @@ def flush_commit():
             committers_per_package[pkg].add(author)
         if is_bug:
             bug_commits_per_package[pkg].add(sha)
+    # ...and to each distinct Maven/Gradle module it touched.
+    for mod in {_module(fp) for fp in file_lines if fp and _counts_toward_diagram(fp)}:
+        commits_per_module[mod].add(sha)
+        if author:
+            committers_per_module[mod].add(author)
+        if is_bug:
+            bug_commits_per_module[mod].add(sha)
 
 for raw in proc.stdout:
     line = raw.rstrip("\n")
@@ -290,3 +342,40 @@ with open(OUT_FILE_PKG, "w") as f:
         f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{r[5]}\t{r[6]:.2f}\t{r[7]:.2f}\t{r[8]:.3f}\t{r[9]}\t{r[10]:.2f}\t{r[11]}\t{r[12]}\t{r[13]}\n")
 
 print(f"wrote {len(pkg_rows)} package rows to {OUT_FILE_PKG}", file=sys.stderr)
+
+# ── Per-module aggregates for Code City "module mode" ────────────────────────
+# Additive metrics sum over the module's files; commits / bug_commits / committers
+# are EXACT distinct counts from the per-module sets built during the git walk.
+OUT_FILE_MOD = os.path.join(OUT_DIR, "codemap-modules.tsv")
+mod_agg = {}  # module -> [files, bytes, lines, cog, fan_in, fan_out]
+for r in rows:
+    mod = _module(r[0])
+    a = mod_agg.setdefault(mod, [0, 0, 0, 0, 0, 0])
+    a[0] += 1        # files
+    a[1] += r[1]     # bytes
+    a[2] += r[2]     # lines
+    a[3] += r[8]     # cognitive_complexity
+    a[4] += r[10]    # fan_in
+    a[5] += r[11]    # fan_out
+
+mod_rows = []
+for mod, (files, sz, lines, cog, fi, fo) in mod_agg.items():
+    commits = len(commits_per_module.get(mod, ()))
+    bug_commits = len(bug_commits_per_module.get(mod, ()))
+    committers = len(committers_per_module.get(mod, ()))
+    kloc = lines / 1000.0 if lines else 0
+    commits_per_kloc = (commits / kloc) if kloc else 0
+    bugs_per_kloc = (bug_commits / kloc) if kloc else 0
+    bugs_per_commit = (bug_commits / commits) if commits else 0
+    cog_per_kloc = (cog / kloc) if kloc else 0
+    mod_rows.append((mod, files, sz, lines, commits, bug_commits, commits_per_kloc,
+                     bugs_per_kloc, bugs_per_commit, cog, cog_per_kloc, fi, fo, committers))
+
+mod_rows.sort(key=lambda r: (r[3], r[4]), reverse=True)   # by lines, then commits
+
+with open(OUT_FILE_MOD, "w") as f:
+    f.write("module\tfiles\tbytes\tlines\tcommits\tbug_commits\tcommits_per_kloc\tbugs_per_kloc\tbugs_per_commit\tcognitive_complexity\tcomplexity_per_kloc\tfan_in\tfan_out\tcommitters\n")
+    for r in mod_rows:
+        f.write(f"{r[0]}\t{r[1]}\t{r[2]}\t{r[3]}\t{r[4]}\t{r[5]}\t{r[6]:.2f}\t{r[7]:.2f}\t{r[8]:.3f}\t{r[9]}\t{r[10]:.2f}\t{r[11]}\t{r[12]}\t{r[13]}\n")
+
+print(f"wrote {len(mod_rows)} module rows to {OUT_FILE_MOD}", file=sys.stderr)

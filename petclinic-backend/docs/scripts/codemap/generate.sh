@@ -32,9 +32,10 @@ export HEATMAP_REPO="${HEATMAP_REPO:-$(git -C "$SCRIPT_DIR" rev-parse --show-top
 export HEATMAP_OUT="${HEATMAP_OUT:-$(cd "$SCRIPT_DIR/../../generated" && pwd)/codemap}"
 export HEATMAP_PYLIBS="$SCRIPT_DIR/.pylibs"
 
-# Exclude build outputs, IDE/agent metadata, and git worktrees
-# (.claude/worktrees and .conductor hold full duplicate copies of the repo).
-export HEATMAP_PRUNE="target,.claude,.conductor,node_modules,.idea,.venv,.codegraph,.serena,__pycache__,dist"
+# Exclude build outputs (Maven target/, Gradle build/out/.gradle), IDE/agent
+# metadata, and git worktrees (.claude/worktrees and .conductor hold full
+# duplicate copies of the repo). Honour a pre-set value so callers can tune it.
+export HEATMAP_PRUNE="${HEATMAP_PRUNE:-target,build,out,.gradle,.claude,.conductor,node_modules,.idea,.venv,.codegraph,.serena,__pycache__,dist}"
 
 # Conventional-commit bug-fix detection.
 export HEATMAP_BUG_COMMIT_REGEX='^(fix|bugfix)(\(|:|!)'

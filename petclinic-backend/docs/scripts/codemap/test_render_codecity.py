@@ -44,13 +44,36 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("cognitive complexity", html)
             self.assertNotIn("cyclomatic", html)   # the metric is Sonar cognitive complexity, not cyclomatic
             self.assertIn(">committers</option>", html)   # committers-per-file metric (short label)
-            self.assertIn("commits: ${commits} (by ${devs} devs)", html)   # class label commits line
-            # Classes ⇄ Packages view switch: radios after the title feed the same city machinery.
-            self.assertIn('name="viewMode" value="classes" checked', html)
-            self.assertIn('value="packages" id="packageMode"', html)
+            # Persistent labels show ONLY the class name now — the commits sub-line is gone.
+            self.assertNotIn("by ${devs} devs", html)
+            self.assertIn("Persistent labels show ONLY the class name", html)
+            # "Code City of:" dropdown — Classes / Packages / Modules feed the same city machinery.
+            self.assertIn("Code City of:", html)
+            self.assertIn('<select id="viewMode"', html)
+            self.assertIn('value="classes" selected', html)
+            self.assertIn('value="packages" id="packageOpt"', html)
+            self.assertIn('value="modules" id="moduleOpt">Modules (Maven/Gradle)', html)
             self.assertIn("const PACKAGES =", html)
+            self.assertIn("const MODULES =", html)
             self.assertIn("function activeDataset", html)
             self.assertIn('id="shortcuts"', html)   # controls help pinned top-right
+            self.assertIn("Drag to pan<br>", html)  # shortcuts one-per-line
+            # Hover: a bullet list of every metric, with area/height/colour markers.
+            self.assertIn('class="props"', html)
+            self.assertIn("const HOVER_PROPS", html)
+            self.assertIn("function marksFor", html)
+            self.assertIn("mk-area", html)
+            self.assertIn("mk-height", html)
+            self.assertIn("cbar-mark", html)
+            # Package-pattern filter (victor..*Service · ..repo.. · *Service).
+            self.assertIn('id="pkgFilter"', html)
+            self.assertIn("function patternToRegExp", html)
+            self.assertIn("function filteredDataset", html)
+            # Package-name labels: switchable floating tags vs. on-the-floor corners.
+            self.assertIn('id="pkgLabelMode"', html)
+            self.assertIn("district-label", html)
+            self.assertIn("function addFloorName", html)
+            self.assertIn("function addPackageLabel", html)
             self.assertIn("instability", html)           # Ce/(Ce+Ca) metric
             self.assertLess(html.index('id="colorMetric"'), html.index('id="heightMetric"'))
             self.assertLess(html.index('id="heightMetric"'), html.index('id="areaMetric"'))
