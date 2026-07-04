@@ -11,7 +11,7 @@ engineering techniques you can lift into your own projects.
   code and diagram drift apart. See [GUARDRAILS.md](GUARDRAILS.md).
 - **Diagrams generated from code, rendered from source.** `.puml` files are
   committed and rendered live via the public PlantUML proxy straight off
-  GitHub raw — no build step to view them (see [Architecture](#architecture)).
+  GitHub raw — no build step to view them (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **C4 model** as versioned Structurizr DSL: stable, human C1/C2 + a
   *code-coupled* C3 that is unit-tested against the real packages.
 - **Code City** — a 3D visualization of the codebase (size = LOC, height =
@@ -30,31 +30,8 @@ engineering techniques you can lift into your own projects.
 
 ## Architecture
 
-Diagrams are **generated from code** and rendered live via the
-[PlantUML proxy](https://plantuml.com/) from the GitHub-hosted `.puml` sources.
-Each source file carries a `footer` naming its own repo path, so every render
-is self-identifying.
-
-#### Domain model
-![Domain model](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/DomainModel.puml)
-
-#### Database (ER)
-![Database](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/DB.puml)
-
-#### Packages (logical architecture)
-![Packages](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/packages.puml)
-
-#### E2E sequence (from real traces)
-![E2E sequence](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-ui-test/features/generated_sequences/add-a-visit-to-an-existing-pet.puml)
-
-#### C4 — System Context
-![C4 System Context](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C1-Context.puml)
-
-#### Code City (3D)
-[Open the Code City in your browser →](https://htmlpreview.github.io/?https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/codemap/codecity.html)
-
-> More C4 views (containers, per-component focus) live in
-> [`petclinic-backend/docs/README.md`](petclinic-backend/docs/README.md).
+Generated, self-identifying diagrams (domain model, DB, packages, E2E sequence,
+C4, Code City) live in **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
 ## Quickstart
 
@@ -79,20 +56,45 @@ Per-module commands, tech stack, testing, and Docker: see
 
 ## Miscellaneous
 
-Reusable prompts (harness tweaks) from [prompts-to-try.md](prompts-to-try.md):
+Prompts to try on this repo — each a paste-ready instruction (the former
+`prompts-to-try.md`, folded in here).
 
-#### Set up the status bar (statusline)
-> Configure my agent CLI's status bar as per `victor-statusbar.md`.
+### Context hygiene & progressive disclosure
 
-Copies/sets up a Claude Code statusline from a reference spec.
+- **Trim boilerplate** — remove from CLAUDE.md the mvn/npm instructions any LLM already knows.
+- **Point at generated sources** — replace CLAUDE.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
+- **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/CLAUDE.md` that loads only there.
+- **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md` with frontmatter `paths: petclinic-backend/**/*.java`, so it activates before any `.java` edit.
+- **Prose → live diagram** — replace the drifting `## Domain Model` text with a URL that renders `DomainModel.puml`.
+- **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
-#### Ring a sound when Claude ends its turn
-> Set me up a `Stop` hook that plays a sound every time you end your turn.
+### Tools (after accepting `.mcp.json`)
 
-Registers a harness `Stop` hook so each finished turn is audible.
+- **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
+- **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
+- **Exploratory QA** — explore the app using [Playwright test agents](https://playwright.dev/docs/test-agents).
+- **Regenerate docs** — run `/regen-user-manual` to update the [user manual](user-manual/manual.md).
+- **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
+- **Latency from traces** — break down the time budget of a "search owners" click from recorded Grafana traces.
+- **Query tuning** — optimize the "search owners by last name" query.
+- **Ad-hoc BI** — export an Excel pie chart of pet types straight from `postgres-db`.
+- **Faster tests** — make the backend tests run faster.
+- **Automate a chore** — fetch the issues assigned to you on this repo, then capture the how-to as a reusable skill/script.
+- **Staging errors** — get the last errors from the staging environment.
+- **End-of-turn sound** — set up an End/Stop hook that plays a sound when the agent finishes its turn.
 
-#### Watch the build after every push
-> After you push, watch CI. If the push broke the build, stay in a loop until
-> CI is green again.
+### Bring the ideas to your own project ❤️
 
-A tripwire that keeps the agent accountable for the pushes it makes.
+Start an agent in **your** project and ask it — *"From the https://github.com/victorrentea/petclinic repo…"*:
+
+- **Package diagram in sync** — get the mechanism that keeps `packages.puml` in sync with code.
+- **Domain model from code** — get the mechanism that generates `DomainModel.puml` from code.
+- **DB diagram from migrations** — get `DB.puml` built from the incremental SQL scripts.
+- **Code City** — run the Code City visualization on your own sources.
+- **Statusline** — configure your agent CLI's status bar per `victor-statusbar.md`.
+- **API ↔ code in sync** — keep the backend Java in sync with `openapi.yaml` and the frontend `api-types.ts`.
+- **Broken-build tripwire** — if a push breaks the build, keep looping until CI is green.
+- **Guardrail git hooks** — run critical tests before every push and again in CI, blocking `--no-verify` pushes.
+- **CODEOWNERS** — protect critical files behind tech-lead review to prevent fatigue-LGTM.
+- **Trace-based sequences** — adopt the `generated_sequences/*.puml` idea for your cross-service/module e2e tests.
+- **Critical `.feature` tests** — generate 3 functional tests for the most critical business rules, to confirm with business/QA.
