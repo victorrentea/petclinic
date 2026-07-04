@@ -20,7 +20,7 @@ each carries a `footer` with its own repo path, so the render is self-identifyin
 ![C4 System Context](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C1-Context.puml)
 
 #### Code City (3D)
-[Open the Code City in your browser →](https://htmlpreview.github.io/?https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/codemap/codecity.html)
+[Open the Code City in your browser →](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codemap/codecity.html)
 
 > More C4 views (containers, per-component focus) live in
 > [`petclinic-backend/docs/README.md`](petclinic-backend/docs/README.md).

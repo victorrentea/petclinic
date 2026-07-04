@@ -9,13 +9,20 @@ engineering techniques you can lift into your own projects.
 - **Living architecture, kept honest by guardrail tests.** Diagrams and specs
   are *generated from the code*; ArchUnit + extractor tests fail the build when
   code and diagram drift apart. See [GUARDRAILS.md](GUARDRAILS.md).
+- **Snapshot now, diff at review.** Committed diagrams stay a clean picture of
+  *current* reality; the red add/remove delta is computed on demand from two git
+  snapshots (`puml-diff`), and a whole PR's architecture change is reviewable as
+  a gallery of delta images (`architecture-diff.sh`).
 - **Diagrams generated from code, rendered from source.** `.puml` files are
-  committed and rendered live via the public PlantUML proxy straight off
-  GitHub raw — no build step to view them (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+  committed and rendered live via the PlantUML proxy straight off GitHub raw —
+  no build step to view them; each render carries a `footer` naming its own
+  source (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **C4 model** as versioned Structurizr DSL: stable, human C1/C2 + a
   *code-coupled* C3 that is unit-tested against the real packages.
-- **Code City** — a 3D visualization of the codebase (size = LOC, height =
-  complexity) generated from source metrics.
+- **[Code City](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codemap/codecity.html)** —
+  a 3D view of the codebase (size = LOC, height = complexity, colour = churn)
+  across Classes / Packages / Modules lenses, with commits/committers mined from
+  git history.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
   run are replayed into a PlantUML sequence diagram.
 - **MCP server** hosted by the backend at `/mcp` (Spring AI) — tools/resources
@@ -23,8 +30,10 @@ engineering techniques you can lift into your own projects.
 - **Code-first OpenAPI.** The spec is *extracted* from the controllers
   (`OpenApiExtractorTest` → `openapi.yaml`); the frontend's TS types are
   regenerated from it. Both drift-checked.
-- **Hooks + CI backstop + CODEOWNERS.** Every advisory git hook is mirrored as
-  an unavoidable CI gate; sensitive files require elder review.
+- **Hooks + CI backstop + CODEOWNERS.** Guardrail hooks run before every push,
+  mirrored as unavoidable CI gates (blocking `--no-verify`), and compare
+  *regenerated content* — not file paths — so they can't be gamed; sensitive
+  files need elder review.
 - **Observability.** Zero-code OpenTelemetry → Grafana LGTM, queryable from
   Claude Code via `mcp-grafana`.
 
@@ -54,10 +63,10 @@ Each script is foreground — run in separate terminals:
 Per-module commands, tech stack, testing, and Docker: see
 [CLAUDE.md](CLAUDE.md) and [GUARDRAILS.md](GUARDRAILS.md).
 
-## Miscellaneous
+## Prompts to try
 
-Prompts to try on this repo — each a paste-ready instruction (the former
-`prompts-to-try.md`, folded in here).
+Paste-ready prompts to run against this repo (the former `prompts-to-try.md`,
+folded in here).
 
 ### Context hygiene & progressive disclosure
 
@@ -68,7 +77,9 @@ Prompts to try on this repo — each a paste-ready instruction (the former
 - **Prose → live diagram** — replace the drifting `## Domain Model` text with a URL that renders `DomainModel.puml`.
 - **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
-### Tools (after accepting `.mcp.json`)
+### Tasks with Tools
+
+Some require tools from the project's `.mcp.json` (which should autoload).
 
 - **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
 - **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
