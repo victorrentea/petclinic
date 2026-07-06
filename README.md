@@ -67,7 +67,7 @@ Per-module commands, tech stack, testing, and Docker: see
 
 Paste-ready prompts to run against this repo:
 
-### Context hygiene & progressive disclosure
+### Context Engineering
 
 - **Trim boilerplate** — remove from CLAUDE.md the mvn/npm instructions any LLM already knows.
 - **Point at generated sources** — replace CLAUDE.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
@@ -76,9 +76,9 @@ Paste-ready prompts to run against this repo:
 - **Prose → live diagram** — replace the drifting `## Domain Model` text with a URL that renders `DomainModel.puml`.
 - **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
-### Tasks with Tools
+### Tasks to try
 
-Some require tools from the project's `.mcp.json` (which should autoload).
+Some require tools from the project's `.mcp.json` (which Claude Code should autoload).
 
 - **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
 - **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
@@ -90,16 +90,19 @@ Some require tools from the project's `.mcp.json` (which should autoload).
 - **Ad-hoc BI** — export an Excel pie chart of pet types straight from `postgres-db`.
 - **Faster tests** — make the backend tests run faster.
 
-### Agentify YOUR 🫵 Environment 
-Tell agent help you grant it access to these capabilities:
-- **Issues** — fetch the issues assigned to me on this repo, then capture the how-to as a reusable skill/script.
-- **Logs** — get the last errors from the staging environment log.
-- **Browser** – reproduce a recent FE bug in a browser: does it reproduce?
+### Tool-up YOUR 🫵 Agent 
+Start YOUR agent in your work project, and tell it to help you grant it access to:
+- **Issues** — fetch the issues assigned to me on this git repo
+- **CI** — find out how much time did the tests took in the last CI run 
+- **Logs** — get the last errors from the staging environment log
+- **Browser** – reproduce a recent FE bug in a browser
+- **DB** - which db tables have most rows in my dev DB?
+- **Turn lessons into a skill** – capture the steps needed as a reusable skill/script. 
 
-### Bring the ideas from `petclinic` to your own project ❤️
+### Adopt ideas from `petclinic` into your own project ❤️
 
-Start an agent in **your** project and ask it — *"From the https://github.com/victorrentea/petclinic repo…"*:
-
+Start an agent in **your** project and tell it 
+*"From the https://github.com/victorrentea/petclinic repo…"*:
 - **Package diagram in sync** — get the mechanism that keeps `packages.puml` in sync with code.
 - **Domain model from code** — get the mechanism that generates `DomainModel.puml` from code.
 - **DB diagram from migrations** — get `DB.puml` built from the incremental SQL scripts.

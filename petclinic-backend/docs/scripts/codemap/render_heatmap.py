@@ -25,10 +25,39 @@ COMMITS_CLAMP = 150.0
 COMPLEXITY_CLAMP = 200.0
 COLOR_CLAMP = BUGS_CLAMP  # alias used in scatter
 
+# The full metric palette the 3D Code City exposes, so the 2D codemap can drive
+# BOTH of its visual channels — SURFACE (tile area) and COLOUR — off any of them,
+# instead of a fixed area=bytes / colour=ratio pair. Order = dropdown order.
+METRIC_KEYS = [
+    "bytes", "lines", "cognitive_complexity", "commits", "bug_commits",
+    "committers", "fan_in", "fan_out",
+    "commits_per_kloc", "bugs_per_kloc", "complexity_per_kloc",
+    "bugs_per_commit", "instability",
+]
+METRIC_LABELS = {
+    "bytes": "file size (bytes)",
+    "lines": "lines of code (LOC)",
+    "cognitive_complexity": "cognitive complexity",
+    "commits": "total commits",
+    "bug_commits": "bugfix commits",
+    "committers": "committers",
+    "fan_in": "incoming coupling (fan in)",
+    "fan_out": "outgoing coupling (fan out)",
+    "commits_per_kloc": "total commits / KLOC",
+    "bugs_per_kloc": "bugfix commits / KLOC",
+    "complexity_per_kloc": "cognitive complexity / KLOC",
+    "bugs_per_commit": "bugs / commit",
+    "instability": "instability Ce/(Ce+Ca)",
+}
+DEFAULT_SURFACE = "bytes"
+DEFAULT_COLOUR = "complexity_per_kloc"
+
 rows = []
 with open(TSV) as f:
     reader = csv.DictReader(f, delimiter="\t")
     for r in reader:
+        fan_in = int(r.get("fan_in", 0) or 0)
+        fan_out = int(r.get("fan_out", 0) or 0)
         rows.append({
             "path": r["path"].lstrip("./"),
             "bytes": int(r["bytes"]),
@@ -40,14 +69,19 @@ with open(TSV) as f:
             "bugs_per_commit": float(r["bugs_per_commit"]),
             "cognitive_complexity": int(r.get("cognitive_complexity", 0) or 0),
             "complexity_per_kloc": float(r.get("complexity_per_kloc", 0) or 0),
-            "fan_in": int(r.get("fan_in", 0) or 0),
-            "fan_out": int(r.get("fan_out", 0) or 0),
+            "fan_in": fan_in,
+            "fan_out": fan_out,
+            "committers": int(r.get("committers", 0) or 0),
+            # Instability I = Ce / (Ce + Ca) — Robert C. Martin's package metric.
+            "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
         })
 
 # Treemap data: path = ["modules", module, filename]. Use file basename to keep labels short.
 modules = sorted({r["path"].split("/", 1)[0] for r in rows})
-ids, labels, parents, values, customdata, hovertemplates = [], [], [], [], [], []
-metric_lines, metric_commits, metric_bugs, metric_complexity, metric_fan_in, metric_fan_out = [], [], [], [], [], []
+ids, labels, parents, customdata, hovertemplates = [], [], [], [], []
+# One parallel array per metric (module rows carry 0 so they add no area/colour),
+# indexed to line up with ids — the client restyles values/colours from these.
+metrics = {k: [] for k in METRIC_KEYS}
 
 FILE_TEMPLATE = (
     "<b>%{customdata[0]}</b><br>"
@@ -60,8 +94,9 @@ FILE_TEMPLATE = (
 MODULE_TEMPLATE = " <extra></extra>"  # space-only suppresses the box visually
 
 for m in modules:
-    ids.append(m); labels.append(m); parents.append(""); values.append(0); customdata.append(["", "", "", "", "", "", "", "", "", ""]); hovertemplates.append(MODULE_TEMPLATE)
-    metric_lines.append(0); metric_commits.append(0); metric_bugs.append(0); metric_complexity.append(0); metric_fan_in.append(0); metric_fan_out.append(0)
+    ids.append(m); labels.append(m); parents.append(""); customdata.append([""] * 10); hovertemplates.append(MODULE_TEMPLATE)
+    for k in METRIC_KEYS:
+        metrics[k].append(0)
 
 for r in rows:
     mod = r["path"].split("/", 1)[0]
@@ -70,7 +105,6 @@ for r in rows:
     ids.append(node_id)
     labels.append(basename)
     parents.append(mod)
-    values.append(r["bytes"])
     customdata.append([
         r["path"],
         f"{r['lines']:,}",
@@ -83,12 +117,8 @@ for r in rows:
         f"{r['fan_in']:,}",
         f"{r['fan_out']:,}",
     ])
-    metric_lines.append(r["lines"])
-    metric_commits.append(r["commits"])
-    metric_bugs.append(r["bug_commits"])
-    metric_complexity.append(r["cognitive_complexity"])
-    metric_fan_in.append(r["fan_in"])
-    metric_fan_out.append(r["fan_out"])
+    for k in METRIC_KEYS:
+        metrics[k].append(r[k])
     hovertemplates.append(FILE_TEMPLATE)
 
 # Scatter data: log-log lines vs bug_commits+1
@@ -97,6 +127,7 @@ sx = [r["lines"] for r in scatter_rows]
 sy = [r["bug_commits"] + 1 for r in scatter_rows]  # offset so 0 plots on log
 sc = [min(r["bugs_per_kloc"], COLOR_CLAMP) for r in scatter_rows]
 ssize = [max(4, min(40, (r["bytes"] / 5000) ** 0.5 * 3)) for r in scatter_rows]
+spaths = [r["path"] for r in scatter_rows]   # for cross-view hover linking
 stext = [
     f"{r['path']}<br>lines: {r['lines']:,} | commits: {r['commits']} | bug_commits: {r['bug_commits']}<br>bugs/KLOC: {r['bugs_per_kloc']:.2f}"
     for r in scatter_rows
@@ -110,19 +141,25 @@ for r in scatter_rows:
         slabels.append("")
 
 treemap_data = {
-    "ids": ids, "labels": labels, "parents": parents, "values": values,
+    "ids": ids, "labels": labels, "parents": parents,
     "customdata": customdata,
-    "metrics": {
-        "lines": metric_lines,
-        "commits": metric_commits,
-        "bugs": metric_bugs,
-        "complexity": metric_complexity,
-        "fan_in": metric_fan_in,
-        "fan_out": metric_fan_out,
-    },
+    "metrics": metrics,
+    "metricKeys": METRIC_KEYS,
+    "metricLabels": METRIC_LABELS,
+    "defaultSurface": DEFAULT_SURFACE,
+    "defaultColour": DEFAULT_COLOUR,
     "hovertemplates": hovertemplates,
 }
-scatter_data = {"x": sx, "y": sy, "color": sc, "size": ssize, "text": stext, "labels": slabels}
+scatter_data = {"x": sx, "y": sy, "color": sc, "size": ssize, "text": stext, "labels": slabels, "paths": spaths}
+
+SURF_OPTIONS = "".join(
+    f'<option value="{k}"{" selected" if k == DEFAULT_SURFACE else ""}>{METRIC_LABELS[k]}</option>'
+    for k in METRIC_KEYS
+)
+COL_OPTIONS = "".join(
+    f'<option value="{k}"{" selected" if k == DEFAULT_COLOUR else ""}>{METRIC_LABELS[k]}</option>'
+    for k in METRIC_KEYS
+)
 
 html = """<!doctype html>
 <html lang="en">
@@ -144,27 +181,14 @@ html = """<!doctype html>
 
 <div class="chart">
   <div style="padding: 6px 4px 10px; font-size: 13px;">
-    Color =
-    <select id="num" style="margin: 0 4px;">
-      <option value="bugs">bugs</option>
-      <option value="commits">commits</option>
-      <option value="complexity" selected>complexity</option>
-      <option value="fan_in">fan_in</option>
-      <option value="fan_out">fan_out</option>
-    </select>
-    per
-    <select id="den" style="margin: 0 4px;">
-      <option value="lines" selected>lines</option>
-      <option value="commits">commits</option>
-      <option value="bugs">bugs</option>
-      <option value="complexity">complexity</option>
-      <option value="fan_in">fan_in</option>
-      <option value="fan_out">fan_out</option>
-    </select>
+    Surface (tile area) =
+    <select id="surf" style="margin: 0 4px;">__SURF_OPTIONS__</select>
+    &nbsp;&nbsp; Colour =
+    <select id="col" style="margin: 0 4px;">__COL_OPTIONS__</select>
     <span id="ratio-label" style="color: #888; margin-left: 8px;"></span>
   </div>
   <div id="treemap" style="height: 720px;"></div>
-  <div class="legend">Treemap: rectangle area = file bytes. Color = ratio chosen above (clamped at p95 to keep tails from washing the scale). Click a module to zoom; hover a file for stats.</div>
+  <div class="legend">Treemap: rectangle area = the <em>surface</em> metric, colour = the <em>colour</em> metric (clamped at p95 so tails don't wash the scale). Both channels pick any metric — the same palette the 3D Code City offers. Click a module to zoom; hover a file for stats.</div>
 </div>
 
 <div class="chart">
@@ -183,37 +207,28 @@ function percentile(arr, p) {
   return sorted[Math.min(idx, sorted.length - 1)];
 }
 
-function computeRatio(numKey, denKey) {
-  const num = TREE.metrics[numKey];
-  const den = TREE.metrics[denKey];
-  const out = new Array(num.length);
-  for (let i = 0; i < num.length; i++) {
-    out[i] = (den[i] > 0) ? (num[i] / den[i]) : 0;
-  }
-  return out;
+const LABELS = TREE.metricLabels;
+const N = TREE.ids.length;
+
+// Per-node border arrays for the cross-view highlight: the selected file gets a
+// thick cyan outline, everything else the default thin white gridline.
+const BASE_LINE_W = TREE.ids.map(() => 0.5);
+const BASE_LINE_C = TREE.ids.map(() => '#fff');
+
+function applySurface() {
+  const key = document.getElementById('surf').value;
+  Plotly.restyle('treemap', { values: [TREE.metrics[key]] });
 }
 
-function applyMetric() {
-  const numKey = document.getElementById('num').value;
-  const denKey = document.getElementById('den').value;
-  // disable same-on-same in denominator
-  for (const opt of document.getElementById('den').options) {
-    opt.disabled = (opt.value === numKey);
-  }
-  if (denKey === numKey) {
-    // force den to first non-conflicting option
-    const den = document.getElementById('den');
-    for (const opt of den.options) { if (!opt.disabled) { den.value = opt.value; break; } }
-  }
-  const den2 = document.getElementById('den').value;
-  const ratio = computeRatio(numKey, den2);
-  const cmax = percentile(ratio, 0.95) || 1;
-  const title = `${numKey} / ${den2}`;
-  document.getElementById('ratio-label').textContent = `(p95 = ${cmax.toExponential(2)})`;
+function applyColour() {
+  const key = document.getElementById('col').value;
+  const colours = TREE.metrics[key];
+  const cmax = percentile(colours, 0.95) || 1;
+  document.getElementById('ratio-label').textContent = `(colour p95 = ${cmax.toExponential(2)})`;
   Plotly.restyle('treemap', {
-    'marker.colors': [ratio],
+    'marker.colors': [colours],
     'marker.cmax': cmax,
-    'marker.colorbar.title': title
+    'marker.colorbar.title': LABELS[key] || key
   });
 }
 
@@ -222,16 +237,16 @@ Plotly.newPlot('treemap', [{
   ids: TREE.ids,
   labels: TREE.labels,
   parents: TREE.parents,
-  values: TREE.values,
+  values: TREE.metrics[TREE.defaultSurface],
   customdata: TREE.customdata,
   marker: {
-    colors: computeRatio('complexity', 'lines'),
+    colors: TREE.metrics[TREE.defaultColour],
     colorscale: 'Reds',
     cmin: 0,
-    cmax: percentile(computeRatio('complexity', 'lines'), 0.95) || 1,
+    cmax: percentile(TREE.metrics[TREE.defaultColour], 0.95) || 1,
     showscale: true,
-    colorbar: { title: 'complexity / lines', thickness: 14 },
-    line: { width: 0.5, color: '#fff' }
+    colorbar: { title: LABELS[TREE.defaultColour], thickness: 14 },
+    line: { width: BASE_LINE_W.slice(), color: BASE_LINE_C.slice() }
   },
   hovertemplate: TREE.hovertemplates,
   textposition: 'middle center',
@@ -240,9 +255,9 @@ Plotly.newPlot('treemap', [{
   margin: { t: 8, l: 8, r: 8, b: 8 }
 }, { displaylogo: false });
 
-document.getElementById('num').addEventListener('change', applyMetric);
-document.getElementById('den').addEventListener('change', applyMetric);
-applyMetric();
+document.getElementById('surf').addEventListener('change', applySurface);
+document.getElementById('col').addEventListener('change', applyColour);
+applyColour();
 
 Plotly.newPlot('scatter', [{
   type: 'scatter',
@@ -265,19 +280,74 @@ Plotly.newPlot('scatter', [{
     line: { width: 0.3, color: '#333' },
     opacity: 0.75
   }
+}, {
+  // Overlay ring that jumps to the file the Code City is pointing at (cross-view link).
+  type: 'scatter', mode: 'markers', x: [], y: [], hoverinfo: 'skip', showlegend: false,
+  marker: { size: 26, color: 'rgba(0,0,0,0)', line: { width: 3, color: '#00b3cc' } }
 }], {
   xaxis: { type: 'log', title: 'lines (log)', gridcolor: '#eee' },
   yaxis: { type: 'log', title: 'bug_commits + 1 (log)', gridcolor: '#eee' },
   margin: { t: 24, l: 60, r: 20, b: 50 },
   plot_bgcolor: '#fff',
-  hovermode: 'closest'
+  hovermode: 'closest',
+  showlegend: false
 }, { displaylogo: false });
+
+// ── Cross-view link with the 3D Code City (when embedded side by side) ────────
+// Announce which file the pointer is over to the parent hub, and highlight the
+// file the city announces back — the SAME file, in both directions.
+const EMBEDDED = window.parent && window.parent !== window;
+let lastPosted = undefined;
+
+function postMapHover(path) {
+  if (!EMBEDDED || path === lastPosted) return;
+  lastPosted = path;
+  window.parent.postMessage({ codemapLink: true, from: 'codemap', path: path || null }, '*');
+}
+
+// Highlight a file in BOTH codemap views: thick cyan border on its treemap tile,
+// and a ring on its scatter point. path=null clears the highlight.
+function highlightMapFile(path) {
+  const w = BASE_LINE_W.slice();
+  const c = BASE_LINE_C.slice();
+  if (path) {
+    const i = TREE.ids.indexOf(path);
+    if (i !== -1) { w[i] = 4; c[i] = '#00b3cc'; }
+  }
+  Plotly.restyle('treemap', { 'marker.line.width': [w], 'marker.line.color': [c] });
+  const si = path ? SCAT.paths.indexOf(path) : -1;
+  Plotly.restyle('scatter',
+    (si !== -1) ? { x: [[SCAT.x[si]]], y: [[SCAT.y[si]]] } : { x: [[]], y: [[]] },
+    [1]);
+}
+
+document.getElementById('treemap').on('plotly_hover', (d) => {
+  const id = d && d.points && d.points[0] && d.points[0].id;
+  postMapHover(id && id.indexOf('/') !== -1 ? id : null);
+});
+document.getElementById('treemap').on('plotly_unhover', () => postMapHover(null));
+document.getElementById('scatter').on('plotly_hover', (d) => {
+  const pt = d && d.points && d.points[0];
+  const path = pt && pt.curveNumber === 0 ? SCAT.paths[pt.pointNumber] : null;
+  postMapHover(path || null);
+});
+document.getElementById('scatter').on('plotly_unhover', () => postMapHover(null));
+
+if (EMBEDDED) {
+  window.addEventListener('message', (ev) => {
+    const m = ev.data;
+    if (!m || m.codemapLink !== true || m.from === 'codemap') return;   // ignore our own echoes
+    highlightMapFile(m.path || null);
+  });
+}
 </script>
 </body>
 </html>
 """
 
 html = (html
+        .replace("__SURF_OPTIONS__", SURF_OPTIONS)
+        .replace("__COL_OPTIONS__", COL_OPTIONS)
         .replace("__TREE_JSON__", json.dumps(treemap_data))
         .replace("__SCAT_JSON__", json.dumps(scatter_data))
         .replace("__CLAMP__", str(COLOR_CLAMP))

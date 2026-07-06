@@ -130,7 +130,8 @@
     padding: 6px 8px;
   }
   /* Class-metrics tooltip: pinned to the top-right corner (was cursor-following).
-     The hovered class's fully-qualified name is split out into #classTitle below. */
+     An identity header (class name / folder / package) sits above the metrics list;
+     max-width bounds the panel so a long package wraps instead of widening it. */
   #hover {
     position: fixed;
     top: 16px;
@@ -154,32 +155,41 @@
     opacity: 1;
     transform: translateY(0);
   }
-  /* Fully-qualified name of the hovered building: a top-center banner. */
-  #classTitle {
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-6px);
-    z-index: 3;
-    max-width: min(42vw, 620px);
-    pointer-events: none;
-    background: rgba(17, 24, 39, 0.84);
-    color: #fff;
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 12.5px;
+  /* Identity header above the metrics: class name (bold) / folder / package.
+     The class + package used to live in a top-center #classTitle banner; that
+     banner is gone and its info now lives here, inside the metrics panel. */
+  #hover .idhdr {
+    margin: 0 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  }
+  #hover .idhdr .cls {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 3px;
+  }
+  /* Module + source-root prefix (dir minus the Java package): dimmer, smaller. */
+  #hover .idhdr .folder {
+    color: #8b98ad;
+    font-size: 10.5px;
+    line-height: 1.3;
+    margin: 0 0 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+  /* Dotted package: MUST wrap within the fixed panel width, never widen #hover. */
+  #hover .idhdr .pkg {
+    color: #aab4c8;
+    font-size: 11px;
     line-height: 1.3;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
-    opacity: 0;
-    transition: opacity 120ms ease, transform 120ms ease;
-  }
-  #classTitle.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
   }
   #hover b {
     display: block;
@@ -550,7 +560,6 @@
       &#8984;/Ctrl-double-click a building in the city to jump to its file in VS Code.</p>
   </div>
 </section>
-<div id="classTitle"></div>
 <div id="hover"></div>
 
 <script>
@@ -608,7 +617,6 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const mount = document.getElementById("scene");
 const hover = document.getElementById("hover");
-const classTitle = document.getElementById("classTitle");   // top-center FQN banner
 const areaSelect = document.getElementById("areaMetric");
 const heightSelect = document.getElementById("heightMetric");
 const colorSelect = document.getElementById("colorMetric");
@@ -666,6 +674,48 @@ let buildings = [];
 let districts = [];
 let cityLabels = [];
 let districtLabels = [];   // floating package tags (CSS2DObjects), when pkgLabelMode = "floating"
+
+// ── Cross-view link with the 2D codemap (when embedded side by side) ──────────
+// The parent "combined" page bridges hover selection between this city and the
+// Plotly codemap: hovering a file in one highlights the SAME file in the other.
+// We speak only to window.parent (a hub) and stay silent/inert when opened alone.
+const EMBEDDED = window.parent && window.parent !== window;
+let externalHighlightPath = null;   // file the codemap is currently pointing at
+let lastPostedPath = undefined;     // dedupe: only announce hover changes, not every mousemove
+
+function postCityHover(path) {
+  if (!EMBEDDED || path === lastPostedPath) return;
+  lastPostedPath = path;
+  window.parent.postMessage({ codemapLink: true, from: "city", path: path || null }, "*");
+}
+
+// Paint the externally-selected building with a distinct gold emissive so it
+// stands apart from the burgundy local-hover glow. No-op if it isn't on screen.
+function applyExternalHighlight() {
+  if (!externalHighlightPath) return;
+  for (const entry of buildings) {
+    if (entry.file.path === externalHighlightPath) entry.mesh.material.emissive.setHex(0xd4a017);
+  }
+}
+
+if (EMBEDDED) {
+  window.addEventListener("message", (ev) => {
+    const d = ev.data;
+    if (!d || d.codemapLink !== true || d.from === "city") return;   // ignore our own echoes
+    externalHighlightPath = d.path || null;
+    for (const entry of buildings) entry.mesh.material.emissive.setHex(0x000000);
+    applyExternalHighlight();
+  });
+}
+
+// Testability hook: the emissive hex of a building by file path (gold "d4a017"
+// when the codemap is spotlighting it). Mirrors the existing __CODEMAP_3D_READY__.
+window.__cityEmissiveOf = (path) => {
+  for (const entry of buildings) {
+    if (entry.file.path === path) return entry.mesh.material.emissive.getHexString();
+  }
+  return null;
+};
 
 // Drill-down scope: the dotted package the city is currently restricted to ("" = whole repo).
 // Clicking a floor/building re-roots the treemap here so the chosen package fills the full plot.
@@ -1203,17 +1253,48 @@ function addPackageLabel(node, cx, cz, topY, width, depth) {
   districtLabels.push(obj);
 }
 
-function qualifiedName(file) {
-  const module = file.path.includes("/src/") ? file.path.split("/src/")[0] : file.path.split("/")[0];
-  let pkg = file.district && file.district !== "root" ? file.district : "";
-  // When zoomed into a package, drop the shared prefix so the name reads relative to it.
-  if (scopePath && pkg === scopePath) {
-    pkg = "";
-  } else if (scopePath && pkg.startsWith(scopePath + ".")) {
-    pkg = pkg.slice(scopePath.length + 1);
+// The dotted Java package of a class row lives in `district` ("root" means none).
+function packageOf(file) {
+  return file.district && file.district !== "root" ? file.district : "";
+}
+
+// Folder = the file's repo-relative directory MINUS the trailing segments that
+// spell out its Java package, i.e. the module + source root that precedes the
+// package. e.g. path ".../ModulabGoldServerWeb/src/main/java/com/systelab/.../request"
+// with package "com.systelab...request" → "ModulabGoldServerWeb/src/main/java".
+// No package (or no dir) → fall back to the whole directory.
+function folderPrefix(path, pkg) {
+  const slash = path.lastIndexOf("/");
+  const dir = slash >= 0 ? path.slice(0, slash) : "";
+  if (!dir) return "";
+  if (!pkg) return dir;
+  const dirSegs = dir.split("/");
+  const keep = dirSegs.length - pkg.split(".").length;
+  return keep > 0 ? dirSegs.slice(0, keep).join("/") : dir;
+}
+
+// The 3-line identity header shown above the metrics: class name (bold), the
+// module/source-root folder (dimmer), and the dotted package (wraps in-panel).
+// Folder/package lines only render when non-empty.
+function identityHeader(name, folder, pkg) {
+  let html = `<b class="cls">${escapeXml(name)}</b>`;
+  if (folder) html += `<div class="folder">${escapeXml(folder)}</div>`;
+  if (pkg) html += `<div class="pkg">${escapeXml(pkg)}</div>`;
+  return `<div class="idhdr">${html}</div>`;
+}
+
+// Header for a building. In Classes view the building is a file: name is the
+// simple class name, folder is its module+source root, package is the dotted
+// package. In Packages/Modules view the building IS a package/module: show its
+// name as the title and its full dotted/dir path as the package line, no folder.
+function hoverHeaderForFile(file) {
+  const view = viewSelect ? viewSelect.value : "classes";
+  if (view === "classes") {
+    const pkg = packageOf(file);
+    return identityHeader(file.name, folderPrefix(file.path, pkg), pkg);
   }
-  const fqn = pkg ? `${pkg}.${file.name}` : file.name;
-  return `${module}/${fqn}`;
+  const fullPath = file.path && file.path !== "." ? file.path : "";
+  return identityHeader(file.name, "", fullPath);
 }
 
 // Integers plain; ratios to 2 decimals.
@@ -1272,19 +1353,23 @@ function formatHover(file) {
     const on = active.has(p.key);
     items.push(`<li class="${on ? "on" : ""}"><span>${p.label}: <b>${val}</b></span>${marksFor(file, p.key)}</li>`);
   }
-  // Name/FQN live in the top-center #classTitle banner now — box carries metrics only.
-  return `<ul class="props">${items.join("")}</ul>`;
+  // Identity header (class / folder / package) on top, metrics list below.
+  return hoverHeaderForFile(file) + `<ul class="props">${items.join("")}</ul>`;
 }
 
 function formatDistrictHover(district) {
-  return `${district.userData.fileCount.toLocaleString()} Java files`;
+  // A package platform (floor): its userData.name is the full dotted package.
+  const pkg = district.userData.name || "";
+  const shortName = pkg.includes(".") ? pkg.slice(pkg.lastIndexOf(".") + 1) : pkg;
+  const count = district.userData.fileCount.toLocaleString();
+  return identityHeader(shortName, "", pkg) +
+    `<ul class="props"><li><span>Java files: <b>${count}</b></span></li></ul>`;
 }
 
 function onPointerMove(event) {
   updateCursor(event);
   if (introEl) {                      // keep the intro uncluttered: no hover tooltips while it is up
     hover.classList.remove("visible");
-    classTitle.classList.remove("visible");
     return;
   }
   const navKey = event[NAV_KEY] && !event.metaKey && !event.ctrlKey && !event.altKey;
@@ -1292,6 +1377,8 @@ function onPointerMove(event) {
   for (const entry of buildings) {
     entry.mesh.material.emissive.setHex(0x000000);
   }
+  applyExternalHighlight();   // keep the codemap-linked building lit even while moving over the city
+  postCityHover(hit && hit.object.userData.file ? hit.object.userData.file.path : null);
   let tooltipObj = null;
   let tooltipIsDistrict = false;
   let glowFloor = null;       // platform to light as the would-be drill target
@@ -1314,16 +1401,12 @@ function onPointerMove(event) {
 
   if (tooltipObj) {
     if (tooltipIsDistrict) {
-      classTitle.textContent = tooltipObj.userData.name;
       hover.innerHTML = formatDistrictHover(tooltipObj);
     } else {
-      classTitle.textContent = qualifiedName(tooltipObj.userData.file);
       hover.innerHTML = formatHover(tooltipObj.userData.file);
     }
-    classTitle.classList.add("visible");
     hover.classList.add("visible");
   } else {
-    classTitle.classList.remove("visible");
     hover.classList.remove("visible");
   }
   setFloorGlow(glowFloor);
@@ -1482,7 +1565,6 @@ function buildIntro() {
   if (introDone || buildings.length === 0) return;
   introDone = true;
   hover.classList.remove("visible");   // drop any tooltip shown before the intro mounted
-  classTitle.classList.remove("visible");
   const W = window.innerWidth;
   const H = window.innerHeight;
   camera.updateMatrixWorld();

@@ -100,7 +100,6 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("let scopePath", html)
             self.assertIn("function targetAtPointer", html)
             self.assertIn("function scopeUp", html)
-            self.assertIn("function qualifiedName", html)
             self.assertIn("districtStep", html)
             self.assertIn('rel="icon"', html)
             self.assertIn("formatDistrictHover", html)
@@ -111,12 +110,31 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("function openInEditor", html)
             self.assertIn("vscode://file", html)
             self.assertIn('window.addEventListener("dblclick", onDoubleClick)', html)
-            # Hover UI: metrics box pinned top-right, FQN split into a top-center banner.
-            self.assertIn('id="classTitle"', html)
-            self.assertIn("classTitle.textContent = qualifiedName", html)
+            # Hover UI: metrics box pinned top-right, now led by a 3-line identity
+            # header (class name / folder / package). The old top-center FQN banner
+            # (#classTitle) is gone; its info lives in the header instead.
+            self.assertNotIn('id="classTitle"', html)          # banner element removed
+            self.assertNotIn("#classTitle {", html)            # and its CSS rule
+            self.assertIn("function folderPrefix", html)       # dir minus package = module+source root
+            self.assertIn("function identityHeader", html)
+            self.assertIn("function hoverHeaderForFile", html)
+            self.assertIn('class="idhdr"', html)
+            self.assertIn('class="cls"', html)                 # bold simple class name
+            self.assertIn('class="folder"', html)              # dimmer module/source-root prefix
+            self.assertIn('class="pkg"', html)                 # dotted package
+            self.assertIn("hoverHeaderForFile(file) +", html)  # header sits above the metrics list
+            # The long dotted package MUST wrap inside the panel, never widen it.
+            self.assertIn("overflow-wrap: anywhere", html)
+            self.assertIn("word-break: break-word", html)
             self.assertNotIn("positionHoverNearObject", html)   # tooltip is CSS-pinned, not cursor-following
             self.assertIn("setRotationPivotToViewportCenter", html)
             self.assertIn("new THREE.Plane", html)
+            # Cross-view link with the 2D codemap when embedded side by side: announce the
+            # hovered file to the parent hub and spotlight the file the codemap points back at.
+            self.assertIn("function postCityHover", html)
+            self.assertIn("function applyExternalHighlight", html)
+            self.assertIn('codemapLink: true, from: "city"', html)
+            self.assertIn('d.from === "city"', html)             # ignore our own echoes
             # "Build this for your own repo" recipe: button, overlay, baked-in command.
             self.assertIn('id="howtoToggle"', html)
             self.assertIn("Build a Code City for any source folder", html)

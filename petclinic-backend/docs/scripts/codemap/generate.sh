@@ -16,6 +16,7 @@
 #   build_heatmap.py       -> codemap.tsv                       (joins git history + size + above)
 #   render_heatmap.py      -> codemap.html                      (self-contained Plotly page)
 #   render_codecity.py     -> codecity.html                     (Three.js CodeCity)
+#   render_combined.py     -> combined.html                     (2D codemap <-> 3D city, linked)
 #
 # Bug signal: PetClinic has no GitHub "type: bug" labels like Spring, but it uses
 # Conventional Commits, so a commit is counted as a bug-fix when its subject matches
@@ -68,8 +69,12 @@ export HEATMAP_SUBTITLE="${FILES} source Java files · ${COMMITS} commits walked
 echo "[4/5] render interactive HTML..."
 python3 render_heatmap.py
 
-echo "[5/5] render Code City HTML..."
+echo "[5/6] render Code City HTML..."
 HEATMAP_TITLE="$CODECITY_TITLE" python3 render_codecity.py
+
+echo "[6/6] render combined side-by-side (2D codemap <-> 3D city)..."
+python3 render_combined.py
 
 echo "done -> $HEATMAP_OUT/codemap.html"
 echo "city -> $HEATMAP_OUT/codecity.html"
+echo "both -> $HEATMAP_OUT/combined.html"
