@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import * as moment from 'moment';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -86,6 +87,7 @@ describe('VisitAddComponent', () => {
     };
     petService = fixture.debugElement.injector.get(PetService);
     visitService = fixture.debugElement.injector.get(VisitService);
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
     spy = spyOn(petService, 'addPet')
       .and.returnValue(of(testPet));
 
@@ -106,6 +108,13 @@ describe('VisitAddComponent', () => {
     expect(visit.id).toBeNull();
     expect(component.addedSuccess).toBeTrue();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('sets visit date bounds from the current pet and today plus one year', () => {
+    expect(moment.isMoment(component.minVisitDate)).toBeTrue();
+    expect(component.minVisitDate.format('YYYY-MM-DD')).toBe('2010-09-07');
+    expect(moment.isMoment(component.maxVisitDate)).toBeTrue();
+    expect(component.maxVisitDate.format('YYYY-MM-DD')).toBe(moment().add(1, 'year').format('YYYY-MM-DD'));
   });
 
   it('should navigate to owner detail via gotoOwnerDetail', () => {

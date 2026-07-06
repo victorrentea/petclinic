@@ -10,22 +10,31 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.model.Pet;
 import victor.training.petclinic.model.Visit;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestController
 @RequestMapping("/api/visits")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class VisitRestController {
+    private static final long MAX_YEARS_IN_FUTURE = 1;
+
+    private final PetRepository petRepository;
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
 
@@ -47,6 +56,10 @@ public class VisitRestController {
 
     @PostMapping
     public ResponseEntity<Void> addVisit(@RequestBody @Validated VisitDto visitDto) {
+        if (visitDto.getDate() != null) {
+            Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
+            validateVisitDate(visitDto.getDate(), pet.getBirthDate());
+        }
         int id = bookVisit(visitDto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath("/api/visits/{id}")
                         .buildAndExpand(id).toUri())
@@ -68,6 +81,9 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        if (visitDto.getDate() != null) {
+            validateVisitDate(visitDto.getDate(), currentVisit.getPet().getBirthDate());
+        }
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
@@ -78,5 +94,14 @@ public class VisitRestController {
     public void deleteVisit(@PathVariable int visitId) {
         Visit visit = visitRepository.findById(visitId).orElseThrow();
         visitRepository.delete(visit);
+    }
+
+    private void validateVisitDate(LocalDate visitDate, LocalDate petBirthDate) {
+        if (visitDate.isBefore(petBirthDate)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Visit date must not be before the pet birth date");
+        }
+        if (visitDate.isAfter(LocalDate.now().plusYears(MAX_YEARS_IN_FUTURE))) {
+            throw new ResponseStatusException(BAD_REQUEST, "Visit date must not be more than 1 year in the future");
+        }
     }
 }

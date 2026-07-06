@@ -34,6 +34,23 @@ When(
   },
 );
 
+When(
+  'I fill in a visit date more than one year in the future and a unique description',
+  async function (this: PlaywrightWorld) {
+    this.visitDescription = `Annual check-up ${Date.now()}`;
+    const invalidDateValue = new Date();
+    invalidDateValue.setFullYear(invalidDateValue.getFullYear() + 1);
+    invalidDateValue.setDate(invalidDateValue.getDate() + 1);
+    const invalidDate = [
+      invalidDateValue.getFullYear().toString().padStart(4, '0'),
+      (invalidDateValue.getMonth() + 1).toString().padStart(2, '0'),
+      invalidDateValue.getDate().toString().padStart(2, '0'),
+    ].join('/');
+    await this.page.locator('input[name="date"]').fill(invalidDate);
+    await this.page.locator('input#description').fill(this.visitDescription);
+  },
+);
+
 When('I submit the visit form', async function (this: PlaywrightWorld) {
   await this.page.locator('button[type="submit"]:has-text("Add Visit")').click();
 });
@@ -54,3 +71,8 @@ Then(
     await expect(row).toBeVisible({timeout: 10_000});
   },
 );
+
+Then('the visit form blocks the invalid date with a clear message', async function (this: PlaywrightWorld) {
+  await expect(this.page.getByRole('button', {name: 'Add Visit'})).toBeDisabled();
+  await expect(this.page.locator('.help-block')).toContainText(/birth date|within one year|future/i);
+});

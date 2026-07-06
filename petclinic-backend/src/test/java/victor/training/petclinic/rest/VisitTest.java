@@ -155,6 +155,32 @@ public class VisitTest {
     }
 
     @Test
+    void create_rejectsDateBeforePetBirthDate() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        newVisit.setDescription("too early");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_rejectsDateMoreThanOneYearInFuture() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        newVisit.setDescription("too late");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void update_invalid() throws Exception {
         VisitDto existing = callGet(visitId);
         existing.setDescription(null); // invalid description
@@ -163,6 +189,17 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(existing))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void update_rejectsDateBeforePetBirthDate() throws Exception {
+        VisitDto existing = callGet(visitId);
+        existing.setDate(PetTest.BIRTH_DATE.minusDays(1));
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(existing))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

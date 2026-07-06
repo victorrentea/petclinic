@@ -21,6 +21,8 @@ export class VisitAddComponent implements OnInit {
   currentPet: Pet;
   currentOwner: Owner;
   currentPetType: PetType;
+  minVisitDate: moment.Moment;
+  maxVisitDate: moment.Moment;
   addedSuccess = false;
   errorMessage: string;
 
@@ -44,6 +46,7 @@ export class VisitAddComponent implements OnInit {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
+        this.setVisitDateBounds();
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
           owner => {
             this.currentOwner = owner;
@@ -72,6 +75,11 @@ export class VisitAddComponent implements OnInit {
 
   gotoOwnerDetail() {
     this.router.navigate(['/owners', this.currentOwner.id]);
+  }
+
+  private setVisitDateBounds() {
+    this.minVisitDate = moment(this.currentPet.birthDate, 'YYYY-MM-DD', true);
+    this.maxVisitDate = moment().add(1, 'year').startOf('day');
   }
 
 }

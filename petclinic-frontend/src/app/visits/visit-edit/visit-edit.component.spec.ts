@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
+import * as moment from 'moment';
 
 const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
@@ -92,8 +93,10 @@ describe('VisitEditComponent', () => {
     };
 
     visitService = fixture.debugElement.injector.get(VisitService);
+    const petService = fixture.debugElement.injector.get(PetService);
     spy = spyOn(visitService, 'getVisitById')
       .and.returnValue(of(testVisit));
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
 
     fixture.detectChanges();
   });
@@ -110,6 +113,13 @@ describe('VisitEditComponent', () => {
     const visit: Visit = { id: 1, date: '2023-05-01', description: 'updated', pet: testPet };
     component.onSubmit(visit);
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('sets visit date bounds from the current pet and today plus one year', () => {
+    expect(moment.isMoment(component.minVisitDate)).toBeTrue();
+    expect(component.minVisitDate.format('YYYY-MM-DD')).toBe('2010-09-07');
+    expect(moment.isMoment(component.maxVisitDate)).toBeTrue();
+    expect(component.maxVisitDate.format('YYYY-MM-DD')).toBe(moment().add(1, 'year').format('YYYY-MM-DD'));
   });
 
   it('should navigate to owner detail via gotoOwnerDetail', () => {
