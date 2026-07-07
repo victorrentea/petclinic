@@ -34,24 +34,37 @@ export class RouterStub {
 export class ActivatedRouteStub {
 
   // ActivatedRoute.params is Observable
-  private subject = new BehaviorSubject(this.testParams);
-  params = this.subject.asObservable();
+  private paramsSubject = new BehaviorSubject(this.testParams);
+  params = this.paramsSubject.asObservable();
+  private queryParamsSubject = new BehaviorSubject(this.testQueryParams);
+  queryParams = this.queryParamsSubject.asObservable();
 
   // Test parameters
   // tslint:disable-next-line:variable-name
   private _testParams: {};
+  private _testQueryParams: {};
   get testParams() {
     return this._testParams;
   }
 
   set testParams(params: {}) {
     this._testParams = params;
-    this.subject.next(params);
+    this.paramsSubject.next(params);
+  }
+
+  get testQueryParams() {
+    return this._testQueryParams;
+  }
+
+  set testQueryParams(params: {}) {
+    this._testQueryParams = params;
+    this.queryParamsSubject.next(params);
   }
 
   // ActivatedRoute.snapshot.params
   get snapshot() {
-    this.testParams = {id: 1};
-    return {params: this.testParams};
+    this.testParams = this.testParams || {id: 1};
+    this.testQueryParams = this.testQueryParams || {};
+    return {params: this.testParams, queryParams: this.testQueryParams};
   }
 }
