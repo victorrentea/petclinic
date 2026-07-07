@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -136,6 +137,99 @@ public class OwnerTest {
     }
 
     @Test
+    void getAll_returnsFirstPageWithMetadata() throws Exception {
+        mockMvc.perform(get("/api/owners"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("$.page").value(1))
+            .andExpect(jsonPath("$.pageSize").value(10))
+            .andExpect(jsonPath("$.totalItems").value(ownerRepository.count()))
+            .andExpect(jsonPath("$.totalPages").value((int) Math.ceil(ownerRepository.count() / 10.0)))
+            .andExpect(jsonPath("$.sort.field").value("name"))
+            .andExpect(jsonPath("$.sort.direction").value("asc"))
+            .andExpect(jsonPath("$.items.length()").value(Math.min(ownerRepository.count(), 10)));
+    }
+
+    @Test
+    void getAll_supportsRequestedPageSize() throws Exception {
+        mockMvc.perform(get("/api/owners?pageSize=5"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page").value(1))
+            .andExpect(jsonPath("$.pageSize").value(5))
+            .andExpect(jsonPath("$.totalPages").value((int) Math.ceil(ownerRepository.count() / 5.0)))
+            .andExpect(jsonPath("$.items.length()").value(5));
+    }
+
+    @Test
+    void getAll_normalizesUnsupportedPageSizeToDefault() throws Exception {
+        mockMvc.perform(get("/api/owners?pageSize=1000000"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page").value(1))
+            .andExpect(jsonPath("$.pageSize").value(10))
+            .andExpect(jsonPath("$.items.length()").value(Math.min(ownerRepository.count(), 10)));
+    }
+
+    @Test
+    void getAll_sortsFilteredResultsByName() throws Exception {
+        saveOwner("Aaron", "PagingAlpha", "Cluj", "1234567891");
+        saveOwner("Mira", "PagingBeta", "Bucharest", "1234567892");
+        saveOwner("Zed", "PagingGamma", "Arad", "1234567893");
+
+        JsonNode response = listOwners("/api/owners?lastName=Paging&sort=name&direction=desc&pageSize=20");
+
+        assertThat(response.get("items"))
+            .extracting(item -> item.get("lastName").asText())
+            .containsExactly("PagingGamma", "PagingBeta", "PagingAlpha");
+    }
+
+    @Test
+    void getAll_sortsFilteredResultsByCity() throws Exception {
+        saveOwner("Ana", "PagingCityA", "Zurich", "1234567894");
+        saveOwner("Bob", "PagingCityB", "Amsterdam", "1234567895");
+        saveOwner("Cia", "PagingCityC", "Berlin", "1234567896");
+
+        JsonNode response = listOwners("/api/owners?lastName=PagingCity&sort=city&direction=asc&pageSize=20");
+
+        assertThat(response.get("items"))
+            .extracting(item -> item.get("city").asText())
+            .containsExactly("Amsterdam", "Berlin", "Zurich");
+    }
+
+    @Test
+    void getAll_pagesWithinFilteredResults() throws Exception {
+        saveOwner("Ana", "PagingPageAlpha", "Zurich", "1234567801");
+        saveOwner("Bob", "PagingPageBeta", "Amsterdam", "1234567802");
+        saveOwner("Cia", "PagingPageGamma", "Berlin", "1234567803");
+        saveOwner("Dan", "PagingPageDelta", "Paris", "1234567804");
+        saveOwner("Ema", "PagingPageEpsilon", "Rome", "1234567805");
+        saveOwner("Flo", "PagingPageZeta", "Madrid", "1234567806");
+
+        JsonNode response = listOwners("/api/owners?lastName=PagingPage&page=2&pageSize=5&sort=name&direction=asc");
+
+        assertThat(response.get("page").asInt()).isEqualTo(2);
+        assertThat(response.get("pageSize").asInt()).isEqualTo(5);
+        assertThat(response.get("totalItems").asInt()).isEqualTo(6);
+        assertThat(response.get("totalPages").asInt()).isEqualTo(2);
+        assertThat(response.get("items"))
+            .extracting(item -> item.get("lastName").asText())
+            .containsExactly("PagingPageZeta");
+    }
+
+    @Test
+    void getAll_normalizesInvalidSortToDefaultNameSort() throws Exception {
+        saveOwner("Aaron", "PagingInvalidAlpha", "Cluj", "1234567897");
+        saveOwner("Zed", "PagingInvalidGamma", "Arad", "1234567898");
+
+        JsonNode response = listOwners("/api/owners?lastName=PagingInvalid&sort=unknown&direction=sideways&pageSize=20");
+
+        assertThat(response.get("sort").get("field").asText()).isEqualTo("name");
+        assertThat(response.get("sort").get("direction").asText()).isEqualTo("asc");
+        assertThat(response.get("items"))
+            .extracting(item -> item.get("lastName").asText())
+            .containsExactly("PagingInvalidAlpha", "PagingInvalidGamma");
+    }
+
+    @Test
     void getAllWithAddressFilter() throws Exception {
         Owner owner2 = TestData.anOwner();
         owner2.setLastName("JavaBeans");
@@ -149,6 +243,12 @@ public class OwnerTest {
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
+        JsonNode response = listOwners(uriTemplate);
+        return mapper.readerFor(new TypeReference<List<OwnerDto>>() {
+        }).readValue(response.get("items"));
+    }
+
+    private JsonNode listOwners(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -156,8 +256,16 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readTree(responseJson);
+    }
+
+    private int saveOwner(String firstName, String lastName, String city, String telephone) {
+        Owner owner = TestData.anOwner();
+        owner.setFirstName(firstName);
+        owner.setLastName(lastName);
+        owner.setCity(city);
+        owner.setTelephone(telephone);
+        return ownerRepository.save(owner).getId();
     }
 
     @Test

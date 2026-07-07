@@ -170,6 +170,23 @@ export interface components {
        */
       telephone: string;
     };
+    OwnerSortDto: {
+      direction?: string;
+      field?: string;
+    };
+    OwnersPageDto: {
+      items?: components["schemas"]["OwnerDto"][];
+      lastName?: string;
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      pageSize?: number;
+      sort?: components["schemas"]["OwnerSortDto"];
+      /** Format: int64 */
+      totalItems?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +575,17 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        pageSize?: number;
+        sort?: string;
+        direction?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnersPageDto"];
         };
       };
       /** @description Bad Request */

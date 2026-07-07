@@ -30,14 +30,22 @@ public final class ApiExamples {
         ]""";
 
     public static final String OWNERS = """
-        [
-          { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
-            "city": "Madison", "telephone": "6085551023",
-            "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                        "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
-          { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
-            "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
-        ]""";
+        {
+          "page": 1,
+          "pageSize": 10,
+          "totalItems": 2,
+          "totalPages": 1,
+          "lastName": "",
+          "sort": { "field": "name", "direction": "asc" },
+          "items": [
+            { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
+              "city": "Madison", "telephone": "6085551023",
+              "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
+                          "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+            { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
+              "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
+          ]
+        }""";
 
     public static final String PETS = """
         [

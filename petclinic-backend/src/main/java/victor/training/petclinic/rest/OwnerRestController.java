@@ -2,7 +2,12 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +21,8 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnersPageDto;
+import victor.training.petclinic.rest.dto.OwnerSortDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -34,7 +41,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -62,12 +68,63 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
         content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+            schema = @Schema(implementation = OwnersPageDto.class),
             examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnersPageDto listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @RequestParam(name = "page", defaultValue = "1") int page,
+        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+        @RequestParam(name = "sort", defaultValue = "name") String sortField,
+        @RequestParam(name = "direction", defaultValue = "asc") String sortDirection
+    ) {
+        int normalizedPage = Math.max(page, 1);
+        int normalizedPageSize = normalizePageSize(pageSize);
+        OwnerSortDto normalizedSort = normalizeSort(sortField, sortDirection);
+
+        Pageable pageable = PageRequest.of(
+            normalizedPage - 1,
+            normalizedPageSize,
+            toSpringSort(normalizedSort)
+        );
+        Page<Owner> ownersPage = ownerRepository.findByLastNameStartingWith(lastName, pageable);
+
+        OwnersPageDto response = new OwnersPageDto();
+        response.setPage(normalizedPage);
+        response.setPageSize(normalizedPageSize);
+        response.setTotalItems(ownersPage.getTotalElements());
+        response.setTotalPages(ownersPage.getTotalPages());
+        response.setLastName(lastName);
+        response.setSort(normalizedSort);
+        response.setItems(ownerMapper.toOwnerDtoCollection(ownersPage.getContent()));
+        return response;
+    }
+
+    private int normalizePageSize(int pageSize) {
+        if (pageSize == 5 || pageSize == 10 || pageSize == 20) {
+            return pageSize;
+        }
+        return 10;
+    }
+
+    // Single source of truth for the sortable columns: maps the API sort field to the entity properties it sorts by.
+    private static final Map<String, List<String>> SORT_PROPERTIES = Map.of(
+        "name", List.of("lastName", "firstName"),
+        "city", List.of("city")
+    );
+    private static final String DEFAULT_SORT_FIELD = "name";
+
+    private OwnerSortDto normalizeSort(String sortField, String sortDirection) {
+        OwnerSortDto sort = new OwnerSortDto();
+        sort.setField(SORT_PROPERTIES.containsKey(sortField) ? sortField : DEFAULT_SORT_FIELD);
+        sort.setDirection("desc".equalsIgnoreCase(sortDirection) ? "desc" : "asc");
+        return sort;
+    }
+
+    private Sort toSpringSort(OwnerSortDto sort) {
+        Sort.Direction direction = Sort.Direction.fromString(sort.getDirection());
+        List<String> properties = SORT_PROPERTIES.get(sort.getField());
+        return Sort.by(direction, properties.toArray(new String[0]));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

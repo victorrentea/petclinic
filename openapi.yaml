@@ -195,6 +195,32 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - in: query
+        name: pageSize
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: name
+      - in: query
+        name: direction
+        required: false
+        schema:
+          type: string
+          default: asc
       responses:
         "200":
           content:
@@ -203,32 +229,39 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    page: 1
+                    pageSize: 10
+                    totalItems: 2
+                    totalPages: 1
+                    lastName: ""
+                    sort:
+                      field: name
+                      direction: asc
+                    items:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnersPageDto"
           description: OK
         "400":
           content:
@@ -1684,6 +1717,36 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerSortDto:
+      type: object
+      properties:
+        direction:
+          type: string
+        field:
+          type: string
+    OwnersPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        lastName:
+          type: string
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/OwnerSortDto"
+        totalItems:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
     PetDto:
       type: object
       properties:
