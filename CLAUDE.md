@@ -28,27 +28,6 @@ The C4 model viewer now lives with the backend docs it serves:
 petclinic-backend/docs/scripts/start-structurizr.sh   # optional: Structurizr view of the C4 model (localhost:8081)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
-### Testing a Single Test (Backend)
-```sh
-mvn test -Dtest=ClassName#methodName
-```
-
 ## Architecture
 
 ### Backend Architecture
@@ -96,32 +75,18 @@ Core entities and relationships:
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
+For the exact apis, see openapi.yaml which is kept in sync with BE Java code via a test.
 
 OpenAPI docs: http://localhost:8080/swagger-ui.html
 
 ## Development Notes
 
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use only Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
+
 
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names.
 - Always run tests after any refactoring
+- When tightening validation or authorization (anything that reduces what the system accepts or allows), implement the backend enforcement first; only after the backend rejects it should the frontend prevent it with a clear user-facing message.
 - Keep explanations concise
 - Challenge ambiguous prompts. Tell me when I'm wrong!  
