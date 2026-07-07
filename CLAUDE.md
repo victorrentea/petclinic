@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Project Memory
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
 
@@ -11,7 +11,6 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3)
 
 ## Common Commands
-
 
 ### Full Stack
 Each script is foreground; run them in separate terminals.
