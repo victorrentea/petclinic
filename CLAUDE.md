@@ -1,6 +1,6 @@
-# Project Memory
+# Project Memory - AGENTS.md ~ CLAUDE.md
 
-This file is auto-loaded in any conversation you have with an agent in this folder.
+This file is automatically loaded in any conversation you have with an agent in this folder. It's the most important file in any repo, pushed on git, improved on any AI fail, reviewed every sprint, symlinked to AGENTS.md for inclusiveness.
 
 ## Project Overview
 
