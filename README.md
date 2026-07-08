@@ -87,21 +87,24 @@ Start YOUR agent in your work project, and tell it to help you grant it access t
 - **Logs** — get the last errors from the staging environment log
 - **Browser** – reproduce a recent FE bug in a browser
 - **DB** - which db tables have most rows in my dev DB?
-- **Turn lessons into a skill** – capture the steps needed as a reusable skill/script. 
+- **Metrics** - What is the endpoint with highest latency?
+Patiently guide the agent to setup its tools, then - Turn the lessons you learned into a reusable skill**, ideally scripting as much work you can. 
 
 ### Adopt ideas from `petclinic` into your own project ❤️
 
-Start an agent in **your** project and tell it 
-*"From the https://github.com/victorrentea/petclinic repo…"*:
-- **Package diagram in sync** — get the mechanism that keeps `packages.puml` in sync with code.
-- **Domain model from code** — get the mechanism that generates `DomainModel.puml` from code.
-- **DB diagram from migrations** — get `DB.puml` built from the incremental SQL scripts.
-- **Code City** — run the Code City visualization on your own sources.
-- **API ↔ code in sync** — keep the backend Java in sync with `openapi.yaml` and the frontend `api-types.ts`.
-- **Broken-build tripwire** — if a push breaks the build, keep looping until CI is green.
-- **Guardrail git hooks** — run critical tests before every push and again in CI, blocking `--no-verify` pushes.
-- **CODEOWNERS** — protect critical files behind tech-lead review to prevent fatigue-LGTM.
-- **Trace-based sequences** — adopt the `generated_sequences/*.puml` idea for your cross-service/module e2e tests.
-- **Critical `.feature` tests** — generate 3 functional tests for the most critical business rules, to confirm with business/QA.
-- **Statusline** — configure your agent CLI's status bar per `victor-statusbar.md`.
-- **Hooks demo** – set up an End/Stop hook that plays a sound when the agent finishes its turn.
+Start an agent in **your** project and tell it: 
+From the https://github.com/victorrentea/petclinic repo…
+- get the mechanism that keeps `packages.puml` in sync with code structure.
+- get the mechanism that generates `DomainModel.puml` from code.
+- adopt the database migrations scripts technique
+- get the mechanism to auto-build `DB.puml` from the incremental DB scripts.
+- run the Code City 3D visualization on the sources of my projec XYZ. 
+- copy the idea to keep the backend Java in sync with `openapi.yaml`, and the frontend `api-types.ts` - prove that a change in a backend Dto fails the FE build, ran automatically prepush and on CI.
+- get the way agent is kept in a loop to fix CI its push broke.
+- get how to run critical tests before every push and again remotely in CI.
+- copy the CODEOWNERS idea to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
+- write 3 .feature tests for the most critical flows of my app XYZ
+- adopt the technique to generate sequence diagrams from key e2e tests, as in `generated_sequences/*.puml`.
+- get the code review skill using local sonar scanner and multi-agent review
+- configure yourself, my dear agent CLI's, a status bar inspired from `victor-statusbar.md`.
+- set up an End/Stop hook that plays a sound when the agent finishes its turn.
