@@ -80,7 +80,7 @@ Some require tools from the project's `.mcp.json` (which should autoload).
 - **Ad-hoc BI** — export an Excel pie chart of pet types straight from `postgres-db`.
 - **Faster tests** — make the backend tests run faster.
 
-### Tool-up YOUR 🫵 Agent 
+### Tool-up Your Agent 
 Start YOUR agent in your work project, and tell it to help you grant it access to:
 - **Issues** — fetch the issues assigned to me on this git repo, put a test comment on last one
 - **CI** — find out how much time did the tests took in the last CI run 
