@@ -37,43 +37,33 @@ engineering techniques you can lift into your own projects.
 - **Observability.** Zero-code OpenTelemetry → Grafana LGTM, queryable from
   Claude Code via `mcp-grafana`.
 
-## Architecture
-
-Generated, self-identifying diagrams (domain model, DB, packages, E2E sequence,
-C4, Code City) live in **[ARCHITECTURE.md](ARCHITECTURE.md)**.
-
 ## Quickstart
 
-One-time: `./install-all.sh` — installs all Maven/npm deps **and** wires git to
-`.githooks/` (guardrail hooks; bypass once with `--no-verify`).
+A) Tell your agent: `start db,be,fe,grafana`
 
-Each script is foreground — run in separate terminals:
-
+B) Manual: Run in separate terminals:
 ```sh
 ./start-database.sh   # embedded Postgres        :5432
 ./start-backend.sh    # Spring Boot (+OTel, MCP)  :8080
 ./start-frontend.sh   # Angular dev server        :4200
+./start-grafana.sh   # Requires Docker        :3300
 ```
 
-- App: http://localhost:4200 · Swagger: http://localhost:8080/swagger-ui.html
-- Security is off by default (`petclinic.security.enable=true`; `admin`/`admin`).
-- Observability (optional): `./start-grafana.sh` (Grafana at :3300), then query
-  it from Claude Code via `mcp-grafana`.
-
-Per-module commands, tech stack, testing, and Docker: see
-[CLAUDE.md](CLAUDE.md) and [GUARDRAILS.md](GUARDRAILS.md).
+- UI: http://localhost:4200 
+- BE Swagger: http://localhost:8080/swagger-ui.html
 
 ## Prompts to try
 
-Paste-ready prompts to run against this repo:
+Tell an agent running in this repo:
 
 ### Context Engineering
 
 - **Trim boilerplate** — remove from CLAUDE.md the mvn/npm instructions any LLM already knows.
 - **Point at generated sources** — replace CLAUDE.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
 - **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/CLAUDE.md` that loads only there.
-- **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md` with frontmatter `paths: petclinic-backend/**/*.java`, so it activates before any `.java` edit.
-- **Prose → live diagram** — replace the drifting `## Domain Model` text with a URL that renders `DomainModel.puml`.
+- **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md`
+- **Force load a skill for by file paths**: Add to skill's frontmatter `paths: petclinic-backend/**/*.java`, so it 100% activates before any `.java` edit.
+- **Reference drift-safe knowledge** — replace the drifting `## Domain Model` chapter with a link to the in-sync `DomainModel.puml`. Add a link to DB.sql and openapi.yaml
 - **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
 ### Tasks to try
