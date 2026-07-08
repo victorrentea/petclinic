@@ -1,6 +1,6 @@
 # Project Memory
 
-This file provides guidance to coding agents when working with code in this repository.
+This file is auto-loaded in any conversation you have with an agent in this folder.
 
 ## Project Overview
 

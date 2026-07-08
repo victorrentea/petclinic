@@ -68,7 +68,7 @@ Tell an agent running in this repo:
 
 ### Tasks to try
 
-Some require tools from the project's `.mcp.json` (which Claude Code should autoload).
+Some require tools from the project's `.mcp.json` (which should autoload).
 
 - **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
 - **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
