@@ -87,7 +87,9 @@ Start YOUR agent in your work project, and tell it to help you grant it access t
 - **Logs** — get the last errors from the dev environment log
 - **Browser** – reproduce a recent FE bug in a browser
 - **DB** - which db tables have most rows in my dev DB?
-- **Metrics** - What is the endpoint with highest latency?
+- **Metrics** - What is the endpoint with highest latency in Grafana?
+
+
 Patiently guide the agent to setup its tools, then - Turn the lessons you learned into a reusable skill**, ideally scripting as much work you can. 
 
 ### Adopt ideas from `petclinic` into your own project ❤️
