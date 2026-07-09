@@ -1,8 +1,9 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -34,10 +35,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,15 +56,22 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
-        content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @Operation(operationId = "listOwners",
+        summary = "List owners, paginated and sorted",
+        description = "Returns one page of owners. Query params: lastName (case-insensitive prefix filter), "
+            + "page (>=0, default 0), size (one of 5/10/20, default 10), sort (one of name/city, default name), "
+            + "dir (asc/desc, default asc). Out-of-whitelist size/sort/dir yield 400.")
+    @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "sort", defaultValue = "name") String sort,
+        @RequestParam(name = "dir", defaultValue = "asc") String dir) {
+        Pageable pageable = OwnerListParams.toPageable(page, size, sort, dir);
+        return ownerRepository.findPageByLastNamePrefix(lastName, pageable)
+            .map(ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

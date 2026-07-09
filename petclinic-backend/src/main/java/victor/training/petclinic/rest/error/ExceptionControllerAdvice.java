@@ -11,7 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,7 +39,7 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
           pd.setDetail(detail);
-        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
+        pd.setType(URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
@@ -62,6 +64,17 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    // Honor the status carried by a ResponseStatusException (e.g. the owners-list param whitelist
+    // throwing 400) instead of letting the catch-all below turn it into a 500. More specific than
+    // Exception.class, so Spring picks this handler for that type.
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ProblemDetail> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        log.warn("Request rejected: {} - {}", status, ex.getReason());
+        ProblemDetail pd = buildProblemDetail(status.getReasonPhrase(), ex.getReason(), status, request);
+        return ResponseEntity.status(status).body(pd);
     }
 
     @ExceptionHandler(Exception.class)

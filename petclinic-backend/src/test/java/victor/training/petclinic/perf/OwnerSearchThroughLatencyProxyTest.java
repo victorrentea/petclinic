@@ -52,8 +52,8 @@ class OwnerSearchThroughLatencyProxyTest {
   @JUnitPerfTest(threads = 4, durationMs = 5_000, warmUpMs = 1_000)
   @JUnitPerfTestRequirement(percentiles = "95:200,99:500", executionsPerSec = 20)
   void ownerSearchThroughProxy() throws Exception {
-    mockMvc.perform(get("/api/owners"))
+    mockMvc.perform(get("/api/owners?size=20"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(10))));
+        .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(10))));
   }
 }
