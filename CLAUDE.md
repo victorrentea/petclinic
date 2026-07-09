@@ -86,36 +86,19 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 
 ## Domain Model (ER Model)
 
-Core entities and relationships:
-- **Owner** 1→N **Pet** N→1 **PetType**
-- **Pet** 1→N **Visit**
-- **Vet** N→N **Specialty** (via `vet_specialties` join table)
-- **User** 1→N **Role**
+The class diagram lives in [`petclinic-backend/docs/generated/DomainModel.puml`](petclinic-backend/docs/generated/DomainModel.puml)
+— the source of truth. Don't hand-maintain the entity/relationship list here; it drifts.
+`DomainModelExtractorTest` regenerates it from the JPA annotations and CI fails on drift
+(see [GUARDRAILS.md](GUARDRAILS.md)).
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
 
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+The full REST API contract lives in [`openapi.yaml`](openapi.yaml) — the source of truth.
+Don't hand-maintain an endpoint list here; it drifts. `OpenApiExtractorTest` regenerates
+`openapi.yaml` from the running app and CI fails on drift (see [GUARDRAILS.md](GUARDRAILS.md)).
 
-## Development Notes
-
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use only Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
+- Base URL: http://localhost:8080/api/
+- Interactive docs (app running): http://localhost:8080/swagger-ui.html
 
 ## Task Modifiers
 - Write non-trivial code using TDD
