@@ -1,36 +1,4 @@
-#ownersByLastName
-{
-display:none;
-}
-
-#nameGroup {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
-}
-
-#addressGroup {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
-}
-
-.owner-search-label {
-	margin: 0;
-	text-align: left;
-	min-width: 60px;
-}
-
-.owner-search-input {
-	flex: 1;
-}
-
+/* Search controls -------------------------------------------------------- */
 .owners-controls {
 	display: flex;
 	align-items: center;
@@ -39,30 +7,86 @@ display:none;
 	margin-bottom: 16px;
 }
 
-.owners-pagination {
+#nameGroup {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 16px;
 }
 
-.owners-page-size {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+.owner-search-label {
+	margin: 0;
+	text-align: left;
+	min-width: 60px;
+	flex: 0 0 auto;
+	white-space: nowrap;
 }
 
-.owners-page-size .form-control {
-	width: auto;
+.owner-search-input {
+	flex: 1 1 auto;
+}
+
+#nameGroup .btn {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+/* Material table re-themed to match the Bootstrap PetClinic tables ---------
+   Colors pulled from assets/css/petclinic.css: dark #34302d, stripe #f9f9f9. */
+.owners-table {
+	width: 100%;
+	/* fixed layout + explicit widths so sort toggles never reflow columns */
+	table-layout: fixed;
+	background-color: #fff;
+	margin-bottom: 16px;
+}
+
+.owners-table .mat-column-name { width: 24%; }
+.owners-table .mat-column-address { width: 26%; }
+.owners-table .mat-column-city { width: 16%; }
+.owners-table .mat-column-telephone { width: 16%; }
+.owners-table .mat-column-pets { width: 18%; }
+
+.owners-table .mat-mdc-header-cell {
+	background-color: #fff;
+	color: #34302d;
+	font-weight: bold;
+	border-bottom: 2px solid #34302d;
+	padding: 8px;
+}
+
+.owners-table .mat-mdc-cell {
+	background-color: inherit;
+	border-top: 1px solid #34302d;
+	padding: 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Zebra striping like .table-striped */
+.owners-table tr.mat-mdc-row:nth-child(odd) {
+	background-color: #f9f9f9;
+}
+
+.owners-table tr.mat-mdc-row:nth-child(even) {
+	background-color: #fff;
+}
+
+.owners-table a {
+	color: #337ab7;
+}
+
+.owner-pet:not(:last-child)::after {
+	content: ', ';
+}
+
+/* Keep the paginator on the app's light background */
+.mat-mdc-paginator {
+	background-color: transparent;
 }
 
 @media (max-width: 576px) {
 	#nameGroup {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	#addressGroup {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 8px;

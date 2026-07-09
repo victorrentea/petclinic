@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { Component, OnInit } from '@angular/core';
+import { OwnerService } from '../owner.service';
+import { Owner } from '../owner';
+import { Router } from '@angular/router';
+import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-owner-list',
@@ -10,63 +11,75 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
+  // Only Name and City are sortable server-side (index-backed); the rest render without a sort header.
+  readonly displayedColumns = ['name', 'address', 'city', 'telephone', 'pets'];
+  readonly pageSizeOptions = [5, 10, 20];
+
+  owners: Owner[] = [];
+  totalElements = 0;
+  pageIndex = 0;
+  pageSize = 10;
+  sort: 'name' | 'city' = 'name';
+  dir: 'asc' | 'desc' = 'asc';
+  lastName = '';
+  errorMessage = '';
+  isOwnersDataReceived = false;
 
   constructor(private router: Router, private ownerService: OwnerService) {
-
   }
 
-  ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
+  ngOnInit(): void {
+    this.load();
+  }
+
+  private load(): void {
+    this.ownerService.getOwners({
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: this.sort,
+      dir: this.dir,
+      lastName: this.lastName
+    }).subscribe({
+      next: page => {
+        this.owners = page.content;
+        this.totalElements = page.totalElements;
         this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+      },
+      error: err => {
+        this.errorMessage = err as string;
+        this.isOwnersDataReceived = true;
+      }
+    });
   }
 
-  onSelect(owner: Owner) {
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.load();
+  }
+
+  onSort(event: Sort): void {
+    if (!event.direction) {
+      this.sort = 'name';
+      this.dir = 'asc';
+    } else {
+      this.sort = event.active as 'name' | 'city';
+      this.dir = event.direction;
+    }
+    this.pageIndex = 0; // a changed sort invalidates the current page offset
+    this.load();
+  }
+
+  search(): void {
+    this.pageIndex = 0; // a changed filter invalidates the current page offset
+    this.load();
+  }
+
+  onSelect(owner: Owner): void {
     this.router.navigate(['/owners', owner.id]);
   }
 
-  addOwner() {
+  addOwner(): void {
     this.router.navigate(['/owners/add']);
   }
-
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
-
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
-      );
-
-      }
-  }
-
-
 }

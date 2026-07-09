@@ -1,33 +1,31 @@
 /* tslint:disable:no-unused-variable */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
-import {OwnerListComponent} from './owner-list.component';
-import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import { OwnerListComponent } from './owner-list.component';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { OwnerService } from '../owner.service';
-import {Owner} from '../owner';
-import {Observable, of} from 'rxjs';
-import {RouterTestingModule} from '@angular/router/testing';
-import {CommonModule} from '@angular/common';
-import {PartsModule} from '../../parts/parts.module';
-import {ActivatedRouteStub} from '../../testing/router-stubs';
-import {OwnerDetailComponent} from '../owner-detail/owner-detail.component';
-import {OwnersModule} from '../owners.module';
-import {DummyComponent} from '../../testing/dummy.component';
-import {OwnerAddComponent} from '../owner-add/owner-add.component';
-import {OwnerEditComponent} from '../owner-edit/owner-edit.component';
+import { Owner } from '../owner';
+import { OwnerPage } from '../owner-page';
+import { Observable, of } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
+import { CommonModule } from '@angular/common';
+import { PartsModule } from '../../parts/parts.module';
+import { ActivatedRouteStub } from '../../testing/router-stubs';
+import { OwnerDetailComponent } from '../owner-detail/owner-detail.component';
+import { OwnersModule } from '../owners.module';
+import { DummyComponent } from '../../testing/dummy.component';
+import { OwnerAddComponent } from '../owner-add/owner-add.component';
+import { OwnerEditComponent } from '../owner-edit/owner-edit.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
+  getOwners(): Observable<OwnerPage> {
     return of();
   }
 }
@@ -38,10 +36,6 @@ describe('OwnerListComponent', () => {
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
-  let de: DebugElement;
-  let el: HTMLElement;
-
 
   const testOwner: Owner = {
     id: 1,
@@ -52,13 +46,20 @@ describe('OwnerListComponent', () => {
     telephone: '6085551023',
     pets: []
   };
-  let testOwners: Owner[];
+
+  const testPage: OwnerPage = {
+    content: [testOwner],
+    totalElements: 1,
+    totalPages: 1,
+    number: 0,
+    size: 10,
+  };
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DummyComponent],
       schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
+      imports: [CommonModule, FormsModule, PartsModule, OwnersModule, BrowserAnimationsModule,
         RouterTestingModule.withRoutes(
           [{path: 'owners', component: OwnerListComponent},
             {path: 'owners/add', component: OwnerAddComponent},
@@ -74,56 +75,77 @@ describe('OwnerListComponent', () => {
   }));
 
   beforeEach(() => {
-    testOwners = [testOwner];
-
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
-
+    getOwnersSpy = spyOn(ownerService, 'getOwners').and.returnValue(of(testPage));
   });
 
   it('should create OwnerListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call ngOnInit() method', () => {
+  it('ngOnInit loads the first page with default params', () => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    expect(getOwnersSpy).toHaveBeenCalled();
+    expect(getOwnersSpy.calls.mostRecent().args[0]).toEqual(
+      jasmine.objectContaining({ page: 0, size: 10, sort: 'name', dir: 'asc' }));
+    expect(component.owners).toEqual([testOwner]);
+    expect(component.totalElements).toBe(1);
   });
 
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
+  it('renders the Name column as "Last, First"', waitForAsync(() => {
     fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
-      de = fixture.debugElement.query(By.css('.ownerFullName'));
-      el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      const de = fixture.debugElement.query(By.css('.ownerFullName'));
+      expect(de.nativeElement.textContent.trim()).toContain('Franklin, George');
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
+  it('search() resets to the first page and filters by last name', () => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+    component.pageIndex = 3;
+    component.lastName = 'Fr';
 
-    component.searchByLastName('');
+    component.search();
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+    expect(component.pageIndex).toBe(0);
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 0, lastName: 'Fr' }));
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
+  it('onSort() sets sort/dir and resets to the first page', () => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+    component.pageIndex = 2;
 
-    component.searchByLastName('Fr');
+    component.onSort({ active: 'city', direction: 'desc' });
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    expect(component.sort).toBe('city');
+    expect(component.dir).toBe('desc');
+    expect(component.pageIndex).toBe(0);
+    expect(getOwnersSpy).toHaveBeenCalled();
+  });
+
+  it('onSort() with no direction falls back to name asc', () => {
+    fixture.detectChanges();
+    component.onSort({ active: 'city', direction: '' });
+    expect(component.sort).toBe('name');
+    expect(component.dir).toBe('asc');
+  });
+
+  it('onPage() updates page index and size', () => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+
+    component.onPage({ pageIndex: 2, pageSize: 20, length: 100 });
+
+    expect(component.pageIndex).toBe(2);
+    expect(component.pageSize).toBe(20);
+    expect(getOwnersSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ page: 2, size: 20 }));
   });
 
 });

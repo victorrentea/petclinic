@@ -1,10 +1,28 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+/** Whitelisted server-side listing params (mirrors the backend contract). */
+export interface OwnerQuery {
+  page?: number;
+  size?: number;
+  sort?: 'name' | 'city';
+  dir?: 'asc' | 'desc';
+  lastName?: string;
+}
+
+const EMPTY_PAGE: OwnerPage = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  number: 0,
+  size: 0,
+};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +37,17 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  /** One server-side page of owners. The list is ~1M rows in prod, so it is never fetched whole. */
+  getOwners(query: OwnerQuery = {}): Observable<OwnerPage> {
+    let params = new HttpParams();
+    if (query.page != null) { params = params.set('page', query.page); }
+    if (query.size != null) { params = params.set('size', query.size); }
+    if (query.sort) { params = params.set('sort', query.sort); }
+    if (query.dir) { params = params.set('dir', query.dir); }
+    if (query.lastName) { params = params.set('lastName', query.lastName); }
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(catchError(this.handlerError('getOwners', EMPTY_PAGE)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -37,7 +62,6 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('addOwner', owner)));
   }
 
-
   updateOwner(ownerId: string, owner: Owner): Observable<{}> {
     return this.http
       .put<Owner>(this.entityUrl + '/' + ownerId, owner)
@@ -48,15 +72,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }
