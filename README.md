@@ -59,7 +59,7 @@ Tell an agent running in this repo:
 ### Context Engineering
 
 - **Trim boilerplate** — remove from CLAUDE.md the mvn/npm instructions any LLM already knows.
-- **Point at generated sources** — replace CLAUDE.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
+- **Point at generated knowledge sources** — replace `## API Endpoints` CLAUDE.md's with a pointer to the `openapi.yaml` auto-synced with code.
 - **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/CLAUDE.md` that loads only there.
 - **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md`
 - **Force load a skill for by file paths**: Add to skill's frontmatter `paths: petclinic-backend/**/*.java`, so it 100% activates before any `.java` edit.
