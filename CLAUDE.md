@@ -1,13 +1,13 @@
 # Project Memory - AGENTS.md ~ CLAUDE.md
 
-This file is automatically loaded in any conversation you have with an agent in this folder. It's the most important file in any repo, pushed on git, improved on any AI fail, reviewed every sprint, symlinked to AGENTS.md for inclusiveness.
+This file is automatically loaded in any conversation you have with an agent in this folder. It's the most important file in any repo, pushed on git, improved on any AI fail, mob-reviewed every sprint, symlinked to AGENTS.md for inclusiveness.
 
 ## Project Overview
 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
 
 **Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21)
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21) built with Maven
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3)
 
 ## Common Commands
@@ -62,5 +62,5 @@ Don't hand-maintain an endpoint list here; it drifts. `OpenApiExtractorTest` reg
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names.
 - Always run tests after any refactoring
-- Keep explanations concise
+- Keep explanations concise, the team is senior BE with exp in Spring.
 - Challenge ambiguous prompts. Tell me when I'm wrong!  
