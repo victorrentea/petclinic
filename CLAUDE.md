@@ -36,6 +36,9 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
 
+### Production Data Scale
+- **Owners:** ~1,000,000 rows in production. 
+
 ### Security
 - Disabled by default
 - Enable via `petclinic.security.enable=true`
