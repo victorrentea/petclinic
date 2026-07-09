@@ -88,6 +88,7 @@ Start YOUR agent in your work project, and tell it to help you grant it access t
 - **Browser** – reproduce a recent FE bug in a browser
 - **DB** - which db tables have most rows in my dev DB?
 - **Metrics** - What is the endpoint with highest latency in Grafana?
+- **Token Saving** - Configure me headroom or at least RTK to save tokens.
 
 
 Patiently guide the agent to setup its tools, then - Turn the lessons you learned into a reusable skill**, ideally scripting as much work you can. 
