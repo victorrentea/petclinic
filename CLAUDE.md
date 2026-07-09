@@ -26,27 +26,6 @@ The C4 model viewer now lives with the backend docs it serves:
 petclinic-backend/docs/scripts/start-structurizr.sh   # optional: Structurizr view of the C4 model (localhost:8081)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
-### Testing a Single Test (Backend)
-```sh
-mvn test -Dtest=ClassName#methodName
-```
-
 ## Architecture
 
 ### Living Architecture & Guardrails
