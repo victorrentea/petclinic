@@ -80,8 +80,10 @@ Some require tools from the project's `.mcp.json` (which should autoload).
 - **Ad-hoc BI** — export an Excel pie chart of pet types straight from `postgres-db`.
 - **Faster tests** — make the backend tests run faster.
 
-### Tool-up Your Agent 
-Start YOUR agent in your work project, and tell it to help you grant it access to:
+### Tools
+Start YOUR agent in YOUR🫵 work project, and tell it:
+
+"Help me grant you access to:..."
 - **Issues** — fetch the issues assigned to me on this git repo, put a test comment on last one
 - **CI** — find out how much time did the tests took in the last CI run 
 - **Logs** — get the last errors from the dev environment log
@@ -90,8 +92,13 @@ Start YOUR agent in your work project, and tell it to help you grant it access t
 - **Metrics** - What is the endpoint with highest latency in Grafana?
 - **Token Saving** - Configure me headroom or at least RTK to save tokens.
 
+Patiently guide the agent through this setup, then tell it: Turn the lessons you learned into a reusable skill, ideally scripting as much work you can. 
 
-Patiently guide the agent to setup its tools, then - Turn the lessons you learned into a reusable skill**, ideally scripting as much work you can. 
+### Tool for Agentic Lifestyle
+- (Wispr Flow)[https://wisprflow.ai] to dictate .
+- (Codex Bar)[https://codexbar.app] to show remaining quota.
+- (Screen Brush)[https://apps.apple.com/us/app/screenbrush/id1233965871] to draw on screen before screenshot to agent. 
+- Configure yourself, my dear CLI agent, a status bar inspired from `victor-statusbar.md`.
 
 ### Adopt ideas from `petclinic` into your own project ❤️
 
@@ -109,5 +116,4 @@ From the https://github.com/victorrentea/petclinic repo…
 - write 3 .feature tests for the most critical flows of my app XYZ
 - adopt the technique to generate sequence diagrams from key e2e tests, as in `generated_sequences/*.puml`.
 - get the code review skill using local sonar scanner and multi-agent review
-- configure yourself, my dear agent CLI's, a status bar inspired from `victor-statusbar.md`.
 - set up an End/Stop hook that plays a sound when the agent finishes its turn.
