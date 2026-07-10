@@ -28,6 +28,15 @@
             "command": "echo \"## Repo state\\nBranch: $(git branch --show-current)\\n\\nUncommitted changes:\\n$(git status --short)\\n\\nLast 5 commits:\\n$(git log --oneline -5)\""
           }
         ]
+      },
+      {
+        "//": "warn when other Claude Code sessions share this checkout; suggest EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/detect-concurrent-sessions.sh\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
