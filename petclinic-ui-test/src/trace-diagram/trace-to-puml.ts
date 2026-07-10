@@ -67,10 +67,11 @@ function participantOf(span: NormSpan): string {
   return span.serviceName || 'unknown';
 }
 
-function returnLabel(span: NormSpan): string {
+// Only a meaningful label (e.g. an HTTP status) is worth a return arrow;
+// a bare "return" carries no information, so callers skip the line when undefined.
+function returnLabel(span: NormSpan): string | undefined {
   return span.attributes['http.status_code']
-    ?? span.attributes['http.response.status_code']
-    ?? 'return';
+    ?? span.attributes['http.response.status_code'];
 }
 
 const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
@@ -99,13 +100,19 @@ function emitTrace(spans: NormSpan[], lines: string[], present: Set<string>): vo
       lines.push(`${pp} -> ${p}: ${span.name}`);
       lines.push(`activate ${p}`);
     } else if (selfCustom) {
+      // a self-span (e.g. @WithSpan) opens a nested activation so its own
+      // children — DB calls, downstream requests — render inside its lifetime
       lines.push(`${p} -> ${p}: ${span.name}`);
+      lines.push(`activate ${p}`);
     }
 
     for (const child of childrenOf(span.spanId)) walk(child);
 
     if (crossing) {
-      lines.push(`${p} --> ${pp}: ${returnLabel(span)}`);
+      const label = returnLabel(span);
+      if (label) lines.push(`${p} --> ${pp}: ${label}`);
+      lines.push(`deactivate ${p}`);
+    } else if (selfCustom) {
       lines.push(`deactivate ${p}`);
     }
   };
@@ -128,7 +135,7 @@ export function renderPuml(title: string, traces: NormSpan[][], footerPath?: str
     '@startuml',
     'hide footbox',
     `title ${title}`,
-    `caption generated from test "${title}"`,
+    'caption generated from a @generate_sequence marked .feature test',
     // footer marks the diagram's own repo-relative source path in the render
     ...(footerPath ? [`footer ${footerPath}`] : []),
     ...orderedParticipants(present).map((p) => `participant ${p}`),

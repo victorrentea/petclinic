@@ -35,10 +35,26 @@ test('spansToPuml renders browser→backend→DB with the custom span', () => {
   expect(acts).toBe(deacts);
 });
 
-test('spansToPuml captions the diagram (at the bottom) with which test generated it', () => {
+test('spansToPuml nests a self-span\'s DB call inside the self-span activation', () => {
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  // book-visit (@WithSpan) opens its own activation; the INSERT it triggers
+  // must be drawn inside that activation, then the activation closes.
+  expect(puml).toContain(
+    'Backend -> Backend: book-visit\n' +
+    'activate Backend\n' +
+    'Backend -> DB: INSERT petclinic.visits\n' +
+    'activate DB\n' +
+    'deactivate DB\n' +
+    'deactivate Backend\n',
+  );
+  // the DB call carries no meaningful return value, so no return arrow is drawn
+  expect(puml).not.toContain('DB --> Backend: return');
+});
+
+test('spansToPuml captions the diagram (at the bottom) with how it was generated', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
   // a PlantUML caption renders centered at the bottom — like the DB diagram
-  expect(puml).toContain('caption generated from test "add a visit"');
+  expect(puml).toContain('caption generated from a @generate_sequence marked .feature test');
   // the title stays a clean single line, no subtitle, no note
   expect(puml).toContain('\ntitle add a visit\n');
   expect(puml).not.toContain('note across');
