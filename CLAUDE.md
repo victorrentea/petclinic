@@ -63,6 +63,11 @@ Don't hand-maintain an endpoint list here; it drifts. `OpenApiExtractorTest` reg
 
 ## Task Modifiers
 - Write non-trivial code using TDD
+- **Validations/constraints/permission restrictions: backend first, then frontend.**
+  When adding a validation, tightening a constraint, or restricting a permission,
+  implement it in the **backend first** (write the test, see it fail, make it pass),
+  and only then mirror it in the **frontend** (write the test, see it fail, make it pass).
+  The server is the source of truth; a frontend-first order hides the backend gap.
 - Keep comments concise, prefer explanatory variable/method names.
 - Always run tests after any refactoring
 - Keep explanations concise, the team is senior BE with exp in Spring.

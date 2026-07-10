@@ -165,6 +165,67 @@ public class VisitTest {
             .andExpect(status().is4xxClientError());
     }
 
+    // --- Visit date range: [pet birth date, today + 1 year] (issue #40) ---
+
+    private VisitDto newVisitDto(LocalDate date) {
+        VisitDto dto = new VisitDto();
+        dto.setPetId(petId);
+        dto.setDescription("rabies shot");
+        dto.setDate(date);
+        return dto;
+    }
+
+    @Test
+    void create_dateBeforePetBirthDate_rejected() throws Exception {
+        VisitDto newVisit = newVisitDto(PetTest.BIRTH_DATE.minusDays(1)); // a visit can't predate the pet
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_dateMoreThanOneYearInFuture_rejected() throws Exception {
+        VisitDto newVisit = newVisitDto(LocalDate.now().plusYears(1).plusDays(1));
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_onPetBirthDate_ok() throws Exception {
+        VisitDto newVisit = newVisitDto(PetTest.BIRTH_DATE); // min boundary is inclusive
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void create_validDate_ok() throws Exception {
+        VisitDto newVisit = newVisitDto(LocalDate.now());
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void update_dateBeforePetBirthDate_rejected() throws Exception {
+        VisitDto existing = callGet(visitId);
+        existing.setDate(PetTest.BIRTH_DATE.minusYears(1));
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(existing))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
     @Test
     void delete_ok() throws Exception {
         mockMvc.perform(delete("/api/visits/" + visitId))
