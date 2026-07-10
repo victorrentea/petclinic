@@ -72,7 +72,7 @@ Some require tools from the project's `.mcp.json` (which should autoload).
 
 - **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
 - **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
-- **Exploratory QA** — explore the app using [Playwright test agents](https://playwright.dev/docs/test-agents) and write 10 significant automated .feature e2e tests.
+- **Exploratory QA** — download and explore the app using [Playwright test agents](https://playwright.dev/docs/test-agents) and write 10 significant automated .feature e2e tests.
 - **Regenerate docs** — run `/regen-user-manual` to update the [user manual](user-manual/manual.md).
 - **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
 - **Latency from traces** — break down the time budget of a "search owners" click from recorded Grafana traces.
