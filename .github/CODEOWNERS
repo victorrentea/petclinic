@@ -8,12 +8,11 @@
 /.github/githooks/*             @victorrentea/elders
 /petclinic-backend/src/test/java/victor/training/petclinic/guardrail/** @victorrentea/elders
 
-# API Contracts
+# API Contracts in sync with code
 /openapi.yaml                    @victorrentea/elders
 
 # Persistence
 /petclinic-backend/DB.sql        @victorrentea/elders
-/petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
 
 # Domain Model
 /petclinic-backend/docs/generated/DomainModel.puml @victorrentea/elders
