@@ -59,6 +59,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "//": "ring a bell when a turn ends, so you hurry back before the prompt cache expires (macOS; no-op elsewhere)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v afplay >/dev/null 2>&1 && afplay /System/Library/Sounds/Glass.aiff",
+            "async": true
+          }
+        ]
+      }
     ]
   }
 }
