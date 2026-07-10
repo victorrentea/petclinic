@@ -16,14 +16,6 @@ export interface OwnerQuery {
   lastName?: string;
 }
 
-const EMPTY_PAGE: OwnerPage = {
-  content: [],
-  totalElements: 0,
-  totalPages: 0,
-  number: 0,
-  size: 0,
-};
-
 @Injectable()
 export class OwnerService {
   entityUrl = environment.REST_API_URL + 'owners';
@@ -40,14 +32,12 @@ export class OwnerService {
   /** One server-side page of owners. The list is ~1M rows in prod, so it is never fetched whole. */
   getOwners(query: OwnerQuery = {}): Observable<OwnerPage> {
     let params = new HttpParams();
-    if (query.page != null) { params = params.set('page', query.page); }
-    if (query.size != null) { params = params.set('size', query.size); }
-    if (query.sort) { params = params.set('sort', query.sort); }
-    if (query.dir) { params = params.set('dir', query.dir); }
-    if (query.lastName) { params = params.set('lastName', query.lastName); }
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null && value !== '') { params = params.set(key, value); }
+    }
     return this.http
       .get<OwnerPage>(this.entityUrl, { params })
-      .pipe(catchError(this.handlerError('getOwners', EMPTY_PAGE)));
+      .pipe(catchError(this.handlerError('getOwners', {} as OwnerPage)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {

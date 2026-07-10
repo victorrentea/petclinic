@@ -54,11 +54,8 @@ final class OwnerListParams {
         if (dir == null || dir.isBlank()) {
             return Direction.ASC;
         }
-        return switch (dir.toLowerCase()) {
-            case "asc" -> Direction.ASC;
-            case "desc" -> Direction.DESC;
-            default -> throw badRequest("dir must be 'asc' or 'desc'");
-        };
+        return Direction.fromOptionalString(dir)
+            .orElseThrow(() -> badRequest("dir must be 'asc' or 'desc'"));
     }
 
     private static ResponseStatusException badRequest(String message) {
