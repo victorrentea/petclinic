@@ -3,6 +3,7 @@
     "petclinic-mcp"
   ],
   "permissions": {
+    "//": "deny e degaba, iar ask intreupe loopul",
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)"
