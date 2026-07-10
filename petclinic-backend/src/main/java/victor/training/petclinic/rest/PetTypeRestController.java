@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.PetTypeMapper;
-import victor.training.petclinic.model.PetType;
+import victor.training.petclinic.domain.PetType;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import victor.training.petclinic.rest.dto.PetTypeFieldsDto;

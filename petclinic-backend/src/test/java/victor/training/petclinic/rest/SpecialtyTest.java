@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import victor.training.petclinic.model.Specialty;
+import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.repository.SpecialtyRepository;
 import victor.training.petclinic.rest.dto.SpecialtyDto;
 import org.springframework.security.test.context.support.WithMockUser;

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import victor.training.petclinic.mapper.PetMapper;
-import victor.training.petclinic.model.Pet;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.rest.dto.PetDto;
 import org.springframework.security.access.prepost.PreAuthorize;

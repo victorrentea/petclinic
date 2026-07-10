@@ -4,7 +4,7 @@ import os
 import db_schema_to_puml as m
 
 HERE = os.path.dirname(__file__)
-DB_SQL = os.path.join(HERE, "..", "..", "DB.sql")
+DB_SQL = os.path.join(HERE, "..", "..", "..", "DB.sql")
 
 
 def _real_schema_sql():
@@ -57,9 +57,9 @@ def test_render_is_plain_snapshot():
     assert "{field} id : int <<PK>>" in puml
 
 
-def test_caption_makes_no_diff_claim():
+def test_footer_credits_generator_and_makes_no_diff_claim():
     puml = m.generate(_real_schema_sql())
-    assert "caption Generated from DB.sql" in puml
+    assert "footer Generated from DB.sql by db_schema_to_puml.py" in puml
     assert "red" not in puml.lower()
 
 

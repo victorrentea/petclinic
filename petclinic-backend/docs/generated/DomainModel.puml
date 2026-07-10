@@ -2,8 +2,7 @@
 !pragma layout smetana
 
 title Domain Model
-caption Generated from JPA annotations
-footer petclinic-backend/docs/generated/DomainModel.puml
+footer Generated via reflection from domain/*.java by DomainModelExtractorTest
 
 hide empty members
 skinparam classAttributeIconSize 0
@@ -51,10 +50,10 @@ class Visit {
   description : String
 }
 
-PetType "1" -- "0..*" Pet : type
 Owner "1" -- "0..*" Pet : owner
-User "1" -- "0..*" Role : user
-Vet "0..*" -- "0..*" Specialty : specialties
 Pet "1" -- "0..*" Visit : pet
+PetType "1" -- "0..*" Pet : type
+User "1" -- "0..*" Role : user
+Vet "1" -- "0..*" Specialty : specialties
 
 @enduml

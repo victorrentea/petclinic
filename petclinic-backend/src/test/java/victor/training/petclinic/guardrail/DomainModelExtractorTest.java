@@ -4,14 +4,9 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -23,41 +18,53 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Generates docs/generated/DomainModel.puml from the domain classes using PLAIN
+ * JAVA REFLECTION — no JPA (or any other) annotations — so it works on models that
+ * express relationships with ordinary fields, not @OneToMany/@ManyToOne. Rules,
+ * inferred from field types alone:
+ * <ul>
+ *   <li>a field whose (element) type is another domain class → an association;
+ *       every other non-static field → an attribute;</li>
+ *   <li>a collection field ⇒ the target end is "0..*"; a single reference ⇒ "1";</li>
+ *   <li>when only one side declares the reference (unidirectional), the missing end
+ *       defaults to the classic foreign-key shape: a lone single ref implies "0..*"
+ *       referrers; a lone collection implies a single "1" owner.</li>
+ * </ul>
+ * The price of dropping annotations: a unidirectional collection can't be told apart
+ * from a many-to-many join table, so it renders as one-to-many.
+ */
 class DomainModelExtractorTest {
 
-    private static final String BASE_PKG          = "victor.training.petclinic";
-    private static final String DOMAIN_MODEL_PKG  = BASE_PKG + ".model";
-    private static final Path   GENERATED_DIR     = Paths.get("docs/generated");
+    private static final String BASE_PKG         = "victor.training.petclinic";
+    private static final String DOMAIN_MODEL_PKG = BASE_PKG + ".domain";
+    private static final Path   GENERATED_DIR    = Paths.get("docs/generated");
 
-    private record Association(String fromClass, String fromCardinality, String toClass, String toCardinality, String label) {}
+    private static final String ONE  = "1";
+    private static final String MANY = "0..*";
+
+    /** A field that points at another domain class. */
+    private record Ref(Class<?> owner, Class<?> target, boolean many, String field) {}
+
+    private record Association(String left, String leftCardinality,
+                               String right, String rightCardinality, String label) {}
 
     @Test
     void generateDomainModelDiagram() throws IOException {
-        JavaClasses classes = new ClassFileImporter()
-            .withImportOption(new ImportOption.DoNotIncludeTests())
-            .importPackages(DOMAIN_MODEL_PKG);
-
-        List<Class<?>> entities = classes.stream()
-            .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
-            .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
-            .<Class<?>>map(JavaClass::reflect)
-            .sorted(Comparator.comparing(Class::getSimpleName))
-            .toList();
-
+        List<Class<?>> entities = discoverDomainClasses();
         List<Association> associations = collectAssociations(entities);
 
         StringBuilder sb = new StringBuilder();
         sb.append("@startuml\n!pragma layout smetana\n\n");
         sb.append("title Domain Model\n");
-        sb.append("caption Generated from JPA annotations\n");
-        sb.append("footer petclinic-backend/docs/generated/DomainModel.puml\n\n");
+        sb.append("footer Generated via reflection from domain/*.java by DomainModelExtractorTest\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n\n");
 
         for (Class<?> cls : entities) {
             sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName());
 
-            List<String> members = renderMembers(cls);
+            List<String> members = renderMembers(cls, entities);
             if (members.isEmpty()) {
                 sb.append("\n");
             } else {
@@ -71,13 +78,12 @@ class DomainModelExtractorTest {
         sb.append("\n");
 
         for (Association a : associations) {
-            String label = (a.label() != null && !a.label().isBlank()) ? a.label() : null;
-            sb.append(a.fromClass())
-              .append(" \"").append(a.fromCardinality()).append("\" -- \"")
-              .append(a.toCardinality()).append("\" ")
-              .append(a.toClass());
-            if (label != null) {
-                sb.append(" : ").append(label);
+            sb.append(a.left())
+              .append(" \"").append(a.leftCardinality()).append("\" -- \"")
+              .append(a.rightCardinality()).append("\" ")
+              .append(a.right());
+            if (a.label() != null && !a.label().isBlank()) {
+                sb.append(" : ").append(a.label());
             }
             sb.append("\n");
         }
@@ -90,88 +96,92 @@ class DomainModelExtractorTest {
         assertThat(GENERATED_DIR.resolve("DomainModel.puml")).exists();
     }
 
+    private List<Class<?>> discoverDomainClasses() {
+        JavaClasses classes = new ClassFileImporter()
+            .withImportOption(new ImportOption.DoNotIncludeTests())
+            .importPackages(DOMAIN_MODEL_PKG);
+        return classes.stream()
+            .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
+            .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
+            .<Class<?>>map(JavaClass::reflect)
+            .sorted(Comparator.comparing(Class::getSimpleName))
+            .toList();
+    }
+
+    // ── Associations: derived from field types alone, no annotations ───────────
+
     private List<Association> collectAssociations(List<Class<?>> entities) {
-        Set<Class<?>> entitySet = new HashSet<>(entities);
-        List<Association> result = new ArrayList<>();
-        Set<String> emittedPairs = new HashSet<>();
+        Set<Class<?>> domain = new HashSet<>(entities);
 
+        // All directed field references A.field → B, grouped by the unordered {A,B} pair.
+        Map<String, List<Ref>> byPair = new LinkedHashMap<>();
         for (Class<?> cls : entities) {
-            for (Field field : cls.getDeclaredFields()) {
-                Class<?> targetType = associationTargetType(field, entitySet);
-                if (targetType == null) continue;
-
-                OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-                ManyToOne manyToOne = field.getAnnotation(ManyToOne.class);
-                ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
-                OneToOne oneToOne = field.getAnnotation(OneToOne.class);
-
-                if (oneToMany != null && !oneToMany.mappedBy().isBlank()) continue;
-                if (manyToMany != null && !manyToMany.mappedBy().isBlank()) continue;
-                if (oneToOne != null && !oneToOne.mappedBy().isBlank()) continue;
-
-                String pairKey = pairKey(cls, targetType);
-
-                if (manyToOne != null) {
-                    boolean bidirectional = hasInverse(targetType, OneToMany.class, field.getName());
-                    if (bidirectional && !emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(targetType.getSimpleName(), "1", cls.getSimpleName(), "0..*", field.getName()));
-                } else if (oneToMany != null) {
-                    if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "1", targetType.getSimpleName(), "0..*", field.getName()));
-                } else if (manyToMany != null) {
-                    if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "0..*", targetType.getSimpleName(), "0..*", field.getName()));
-                } else if (oneToOne != null) {
-                    if (!emittedPairs.add(pairKey)) continue;
-                    result.add(new Association(cls.getSimpleName(), "1", targetType.getSimpleName(), "1", field.getName()));
-                }
+            for (Field f : cls.getDeclaredFields()) {
+                if (isSkippable(f)) continue;
+                Class<?> target = referencedDomainClass(f, domain);
+                if (target == null || target.equals(cls)) continue;   // skip self-references
+                byPair.computeIfAbsent(pairKey(cls, target), k -> new ArrayList<>())
+                      .add(new Ref(cls, target, isCollection(f.getType()), f.getName()));
             }
         }
+
+        List<Association> result = new ArrayList<>();
+        for (List<Ref> refs : byPair.values()) {
+            result.add(associationFor(refs));
+        }
+        result.sort(Comparator.comparing(Association::left).thenComparing(Association::right));
         return result;
     }
 
-    private Class<?> associationTargetType(Field field, Set<Class<?>> entitySet) {
-        if (field.getAnnotation(OneToMany.class) == null
-            && field.getAnnotation(ManyToOne.class) == null
-            && field.getAnnotation(ManyToMany.class) == null
-            && field.getAnnotation(OneToOne.class) == null) {
-            return null;
-        }
-        Class<?> raw = field.getType();
-        if (entitySet.contains(raw)) return raw;
-        Type generic = field.getGenericType();
-        if (generic instanceof ParameterizedType pt) {
-            for (Type arg : pt.getActualTypeArguments()) {
-                if (arg instanceof Class<?> c && entitySet.contains(c)) return c;
-            }
-        }
-        return null;
+    private Association associationFor(List<Ref> refs) {
+        Class<?> c1 = refs.get(0).owner();
+        Class<?> c2 = refs.get(0).target();
+        Class<?> a = c1.getSimpleName().compareTo(c2.getSimpleName()) <= 0 ? c1 : c2;
+        Class<?> b = a.equals(c1) ? c2 : c1;
+
+        Ref aToB = directed(refs, a, b);
+        Ref bToA = directed(refs, b, a);
+
+        String aPerB = countPerOne(bToA, aToB);   // how many A relate to one B
+        String bPerA = countPerOne(aToB, bToA);   // how many B relate to one A
+
+        // Put the parent ("1" side with a "0..*" child) on the left; otherwise keep A left.
+        boolean bIsParent = aPerB.equals(MANY) && bPerA.equals(ONE);
+        Class<?> left  = bIsParent ? b : a;
+        Class<?> right = bIsParent ? a : b;
+        String leftMult  = left.equals(a) ? aPerB : bPerA;   // count of LEFT per one RIGHT
+        String rightMult = left.equals(a) ? bPerA : aPerB;   // count of RIGHT per one LEFT
+
+        return new Association(left.getSimpleName(), leftMult,
+                               right.getSimpleName(), rightMult, chooseLabel(refs));
     }
 
-    private boolean hasInverse(Class<?> target, Class<? extends Annotation> annotationType, String fieldName) {
-        for (Field f : target.getDeclaredFields()) {
-            Annotation a = f.getAnnotation(annotationType);
-            if (a == null) continue;
-            String mappedBy = mappedByOf(a);
-            if (fieldName.equals(mappedBy)) return true;
-        }
-        return false;
+    /** Multiplicity at one end: read the counterpart's field to us, else a reverse default. */
+    private String countPerOne(Ref counterpartToThis, Ref thisToCounterpart) {
+        if (counterpartToThis != null) return counterpartToThis.many() ? MANY : ONE;
+        if (thisToCounterpart != null) return thisToCounterpart.many() ? ONE : MANY;
+        return ONE;
     }
 
-    private String mappedByOf(Annotation a) {
-        if (a instanceof OneToMany o) return o.mappedBy();
-        if (a instanceof ManyToMany m) return m.mappedBy();
-        if (a instanceof OneToOne o) return o.mappedBy();
-        return "";
+    private Ref directed(List<Ref> refs, Class<?> from, Class<?> to) {
+        return refs.stream()
+            .filter(r -> r.owner().equals(from) && r.target().equals(to))
+            .findFirst().orElse(null);
     }
 
-    private String pairKey(Class<?> a, Class<?> b) {
-        String x = a.getSimpleName();
-        String y = b.getSimpleName();
-        return x.compareTo(y) <= 0 ? x + "|" + y : y + "|" + x;
+    /** Label the edge with a field name, preferring the to-one side (owner, pet, user…). */
+    private String chooseLabel(List<Ref> refs) {
+        return refs.stream()
+            .sorted(Comparator.comparing(Ref::many)                      // to-one (false) first
+                              .thenComparing(r -> r.owner().getSimpleName()))
+            .map(Ref::field)
+            .findFirst().orElse(null);
     }
 
-    private List<String> renderMembers(Class<?> cls) {
+    // ── Members: every non-static field that is not itself an association ──────
+
+    private List<String> renderMembers(Class<?> cls, List<Class<?>> entities) {
+        Set<Class<?>> domain = new HashSet<>(entities);
         List<String> lines = new ArrayList<>();
         if (cls.isEnum()) {
             for (Object value : cls.getEnumConstants()) {
@@ -179,18 +189,41 @@ class DomainModelExtractorTest {
             }
             return lines;
         }
-        for (Field field : cls.getDeclaredFields()) {
-            int mods = field.getModifiers();
-            if (Modifier.isStatic(mods) || Modifier.isTransient(mods) || field.isSynthetic()) continue;
-            if (field.getAnnotation(OneToMany.class) != null
-                || field.getAnnotation(ManyToOne.class) != null
-                || field.getAnnotation(ManyToMany.class) != null
-                || field.getAnnotation(OneToOne.class) != null) {
-                continue;
-            }
-            lines.add(field.getName() + " : " + typeName(field.getGenericType()));
+        for (Field f : cls.getDeclaredFields()) {
+            if (isSkippable(f)) continue;
+            if (referencedDomainClass(f, domain) != null) continue;   // association, not attribute
+            lines.add(f.getName() + " : " + typeName(f.getGenericType()));
         }
         return lines;
+    }
+
+    // ── Reflection helpers ─────────────────────────────────────────────────────
+
+    /** The domain class a field points at (directly or as a collection element), or null. */
+    private Class<?> referencedDomainClass(Field field, Set<Class<?>> domain) {
+        Class<?> raw = field.getType();
+        if (domain.contains(raw)) return raw;
+        if (isCollection(raw) && field.getGenericType() instanceof ParameterizedType pt) {
+            for (Type arg : pt.getActualTypeArguments()) {
+                if (arg instanceof Class<?> c && domain.contains(c)) return c;
+            }
+        }
+        return null;
+    }
+
+    private boolean isCollection(Class<?> type) {
+        return Collection.class.isAssignableFrom(type);
+    }
+
+    private boolean isSkippable(Field f) {
+        int m = f.getModifiers();
+        return Modifier.isStatic(m) || Modifier.isTransient(m) || f.isSynthetic();
+    }
+
+    private String pairKey(Class<?> a, Class<?> b) {
+        String x = a.getSimpleName();
+        String y = b.getSimpleName();
+        return x.compareTo(y) <= 0 ? x + "|" + y : y + "|" + x;
     }
 
     private String typeName(Type type) {

@@ -11,7 +11,7 @@ import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.http.MediaType;
-import victor.training.petclinic.model.Vet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.rest.dto.VetDto;
 import org.springframework.security.test.context.support.WithMockUser;

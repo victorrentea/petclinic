@@ -1,4 +1,4 @@
-package victor.training.petclinic.model;
+package victor.training.petclinic.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

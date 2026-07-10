@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.SpecialtyMapper;
-import victor.training.petclinic.model.Specialty;
+import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.repository.SpecialtyRepository;
 import victor.training.petclinic.rest.dto.SpecialtyDto;
 import org.springframework.transaction.annotation.Transactional;

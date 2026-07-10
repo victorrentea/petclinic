@@ -1,7 +1,7 @@
 package victor.training.petclinic.rest;
 
-import victor.training.petclinic.model.Owner;
-import victor.training.petclinic.model.Pet;
+import victor.training.petclinic.domain.Owner;
+import victor.training.petclinic.domain.Pet;
 
 public class TestData {
     public static Owner anOwner() {

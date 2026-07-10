@@ -1,7 +1,7 @@
 package victor.training.petclinic.mapper;
 
 import org.mapstruct.Mapper;
-import victor.training.petclinic.model.Specialty;
+import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.rest.dto.SpecialtyDto;
 
 import java.util.List;

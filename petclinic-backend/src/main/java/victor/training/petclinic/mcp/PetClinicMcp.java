@@ -18,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 
-import victor.training.petclinic.model.Owner;
-import victor.training.petclinic.model.Pet;
-import victor.training.petclinic.model.Visit;
+import victor.training.petclinic.domain.Owner;
+import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;

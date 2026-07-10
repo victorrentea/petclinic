@@ -202,8 +202,7 @@ def _render_relationship(rel, mark) -> str:
 def diff(old: Diagram, new: Diagram) -> str:
     out = ["@startuml"]
     out += [ln for ln in new.preamble if not ln.strip().startswith("caption")]
-    out.append("caption <color:red>red</color> = added · "
-               "<color:red><s>struck</s></color> = removed (vs previous snapshot)")
+    out.append("caption <color:red>added</color> or <color:red><s>removed</s></color>")
     out.append("")
 
     # ── Elements present in NEW (red header if the whole element is new) ──────

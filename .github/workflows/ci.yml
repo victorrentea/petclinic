@@ -80,7 +80,7 @@ jobs:
           if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
              && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
             echo "::error::petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
-            echo "::error::Run ./petclinic-backend/docs/scripts/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
+            echo "::error::Run ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
             exit 1
           fi
           echo "DB.sql ↔ DB.puml consistency: OK"

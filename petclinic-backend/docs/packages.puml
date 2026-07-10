@@ -1,10 +1,10 @@
 @startuml
 
 title Logical Architecture
-caption All lines are ArchUnit-tested to be reflected in code.
+caption All lines are ArchUnit-tested vs code by PackagesArchTest
 footer petclinic-backend/docs/packages.puml
 
-[Model] <<..model>>
+[Domain] <<..domain>>
 [Repository] <<..repository>>
 [DTO] <<..rest.dto>>
 [REST Error] <<..rest.error>>
@@ -13,14 +13,14 @@ footer petclinic-backend/docs/packages.puml
 [Security] <<..security>>
 [MCP] <<..mcp>>
 
-[Repository] --> [Model]
-[Mapper] --> [Model]
+[Repository] --> [Domain]
+[Mapper] --> [Domain]
 [Mapper] --> [DTO]
-[REST] --> [Model]
+[REST] --> [Domain]
 [REST] --> [Repository]
 [REST] --> [Mapper]
 [REST] --> [DTO]
-[MCP] --> [Model]
+[MCP] --> [Domain]
 [MCP] --> [Repository]
 
 @enduml

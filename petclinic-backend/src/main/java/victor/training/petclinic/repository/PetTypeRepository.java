@@ -1,7 +1,7 @@
 package victor.training.petclinic.repository;
 
 import org.springframework.data.repository.Repository;
-import victor.training.petclinic.model.PetType;
+import victor.training.petclinic.domain.PetType;
 
 import java.util.List;
 import java.util.Optional;

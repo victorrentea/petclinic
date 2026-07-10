@@ -89,7 +89,7 @@ if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
   if command -v python3 >/dev/null 2>&1; then
     DBDIAG_OUT=$(mktemp)
     trap 'rm -f "$NPM_OUT" "$DBDIAG_OUT"' EXIT
-    if ! "$ROOT/petclinic-backend/docs/scripts/gen-db-schema-diagram.sh" >"$DBDIAG_OUT" 2>&1; then
+    if ! "$ROOT/petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh" >"$DBDIAG_OUT" 2>&1; then
       cat "$DBDIAG_OUT"
       echo "[pre-commit] ❌ DB schema diagram generation failed — commit blocked."
       exit 1

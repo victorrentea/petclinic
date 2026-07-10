@@ -2,7 +2,7 @@ package victor.training.petclinic.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import victor.training.petclinic.model.Visit;
+import victor.training.petclinic.domain.Visit;
 
 import java.util.List;
 import java.util.Optional;

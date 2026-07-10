@@ -2,7 +2,7 @@ package victor.training.petclinic.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import victor.training.petclinic.model.Vet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.rest.dto.VetDto;
 import victor.training.petclinic.rest.dto.VetFieldsDto;
 

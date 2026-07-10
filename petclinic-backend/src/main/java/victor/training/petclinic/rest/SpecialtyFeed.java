@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import victor.training.petclinic.model.Specialty;
+import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.repository.SpecialtyRepository;
 
 import java.util.List;
