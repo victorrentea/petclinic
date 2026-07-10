@@ -28,6 +28,24 @@ _OPERATOR_CHARS = set(";&|()<>")
 _GIT_VALUE_OPTS = {"-c", "--git-dir", "--work-tree", "--namespace",
                    "--super-prefix", "--config-env", "--exec-path"}
 
+# Transparent command wrappers that delegate to the real tool underneath.
+# The environment's PreToolUse hook rewrites `git push` -> `rtk git push`
+# (RTK, a token-reduction proxy), so the `git` we care about is one token in.
+# Without peeling this prefix the head reads as `rtk` and a real push looks
+# like NOPUSH — silently skipping the CI watch. `rtk proxy <cmd>` runs the raw
+# command that follows, so that marker is peeled too.
+_WRAPPERS = {"rtk"}
+
+
+def _unwrap(cmd):
+    """Strip a leading transparent-wrapper prefix (e.g. `rtk`, `rtk proxy`)
+    so the real command underneath is evaluated."""
+    while cmd and cmd[0] in _WRAPPERS:
+        cmd = cmd[1:]
+        if cmd and cmd[0] == "proxy":
+            cmd = cmd[1:]
+    return cmd
+
 
 def _emit(push, workdir):
     print("PUSH" if push else "NOPUSH")
@@ -65,6 +83,7 @@ def _decide(command):
         same way the AST walk did — so the last `cd` before the push wins.
         """
         nonlocal workdir
+        cmd = _unwrap(cmd)
         if not cmd:
             return False
         head = cmd[0]
