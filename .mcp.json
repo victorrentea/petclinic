@@ -8,6 +8,7 @@
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs"
       }
     },
+
     "postgres-db": {
       "command": "npx",
       "args": [
@@ -17,6 +18,7 @@
         "--dsn", "postgres://petclinic:petclinic@localhost:5432/petclinic"
       ]
     },
+
     "grafana": {
       "command": "uvx",
       "args": ["mcp-grafana"],
@@ -26,6 +28,7 @@
         "GRAFANA_PASSWORD": "admin"
       }
     },
+
     "playwright": {
       "command": "npx",
       "args": [
@@ -35,6 +38,7 @@
         "--save-trace"
       ]
     },
+
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
