@@ -123,7 +123,7 @@ function emitTrace(spans: NormSpan[], lines: string[], present: Set<string>): vo
   for (const root of roots) walk(root);
 }
 
-export function renderPuml(title: string, traces: NormSpan[][], footerPath?: string): string {
+export function renderPuml(title: string, traces: NormSpan[][]): string {
   const body: string[] = [];
   const present = new Set<string>();
   traces.forEach((spans, i) => {
@@ -135,9 +135,8 @@ export function renderPuml(title: string, traces: NormSpan[][], footerPath?: str
     '@startuml',
     'hide footbox',
     `title ${title}`,
-    'caption generated from a @generate_sequence marked .feature test',
-    // footer marks the diagram's own repo-relative source path in the render
-    ...(footerPath ? [`footer ${footerPath}`] : []),
+    // footer (bottom of every page) states the diagram's provenance
+    'footer @generate_sequence Scenario in a .feature test',
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   return [...header, ...body, '@enduml', ''].join('\n');

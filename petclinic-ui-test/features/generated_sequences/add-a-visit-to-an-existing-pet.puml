@@ -1,8 +1,7 @@
 @startuml
 hide footbox
 title add a visit to an existing pet
-caption generated from a @generate_sequence marked .feature test
-footer petclinic-ui-test/features/generated_sequences/add-a-visit-to-an-existing-pet.puml
+footer @generate_sequence Scenario in a .feature test
 participant Browser
 participant Backend
 participant DB

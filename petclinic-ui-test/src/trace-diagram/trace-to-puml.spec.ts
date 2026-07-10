@@ -51,11 +51,12 @@ test('spansToPuml nests a self-span\'s DB call inside the self-span activation',
   expect(puml).not.toContain('DB --> Backend: return');
 });
 
-test('spansToPuml captions the diagram (at the bottom) with how it was generated', () => {
+test('spansToPuml footers the diagram with its provenance', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
-  // a PlantUML caption renders centered at the bottom — like the DB diagram
-  expect(puml).toContain('caption generated from a @generate_sequence marked .feature test');
-  // the title stays a clean single line, no subtitle, no note
+  // a PlantUML footer renders at the very bottom — provenance, not diagram content
+  expect(puml).toContain('footer @generate_sequence Scenario in a .feature test');
+  // the title stays a clean single line, no subtitle, no note, no caption
   expect(puml).toContain('\ntitle add a visit\n');
   expect(puml).not.toContain('note across');
+  expect(puml).not.toContain('caption');
 });
