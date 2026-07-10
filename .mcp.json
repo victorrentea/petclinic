@@ -34,8 +34,7 @@
       "args": [
         "@playwright/mcp@latest",
         "--output-dir", "petclinic-ui-test/.playwright-mcp",
-        "--save-session",
-        "--save-trace"
+        "--save-session"
       ]
     },
 
