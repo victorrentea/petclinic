@@ -22,4 +22,19 @@ describe('makeTestNameSpanProcessor', () => {
     proc.onStart(span as any, {} as any);
     expect(span.attrs['test.name']).toBeUndefined();
   });
+
+  it('onEnd does not throw', () => {
+    const proc = makeTestNameSpanProcessor(() => 'test');
+    expect(() => proc.onEnd({} as any)).not.toThrow();
+  });
+
+  it('forceFlush resolves', async () => {
+    const proc = makeTestNameSpanProcessor(() => undefined);
+    await expectAsync(proc.forceFlush()).toBeResolved();
+  });
+
+  it('shutdown resolves', async () => {
+    const proc = makeTestNameSpanProcessor(() => undefined);
+    await expectAsync(proc.shutdown()).toBeResolved();
+  });
 });

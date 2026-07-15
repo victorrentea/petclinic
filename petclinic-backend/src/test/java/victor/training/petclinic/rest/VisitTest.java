@@ -21,10 +21,12 @@ import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
+import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -126,7 +128,7 @@ public class VisitTest {
             .getContentAsString();
         VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
 
-        VisitDto created = java.util.Arrays.stream(visits)
+        VisitDto created = Arrays.stream(visits)
             .filter(v -> v.getId() == visitId)
             .findFirst()
             .orElseThrow();
@@ -178,6 +180,37 @@ public class VisitTest {
     void delete_notFound() throws Exception {
         mockMvc.perform(delete("/api/visits/9999"))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void create_ok() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now());
+        newVisit.setDescription("annual checkup");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+
+        assertThat(visitRepository.findAll())
+            .anyMatch(v -> "annual checkup".equals(v.getDescription()));
+    }
+
+    @Test
+    void update_ok() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.now().plusDays(1));
+        update.setDescription("updated description");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        Visit updated = visitRepository.findById(visitId).orElseThrow();
+        assertThat(updated.getDescription()).isEqualTo("updated description");
     }
 
     @Test
