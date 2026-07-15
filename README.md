@@ -66,9 +66,9 @@ Tell an agent running in this repo:
 - **Reference drift-safe knowledge** — replace the drifting `## Domain Model` chapter with a link to the in-sync `DomainModel.puml`. Add a link to DB.sql and openapi.yaml
 - **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
-### Tasks to try
+### Tasks
 
-Some require tools from the project's `.mcp.json` (which should autoload).
+Some tasks require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
 
 - **UI layout fix** — align the labels and values in the owner-details screen via Playwright screenshots.
 - **Full-stack bug (TDD)** — reproduce bug gh#40 in the browser, write a failing e2e Playwright test, fix until green.
