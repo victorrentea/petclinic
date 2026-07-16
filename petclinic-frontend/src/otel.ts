@@ -4,7 +4,7 @@ import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
 import { resourceFromAttributes } from '@opentelemetry/resources';
-import { makeTestNameSpanProcessor } from './test-name-span-processor';
+import { makeTestNameSpanProcessor } from './e2e-span-processor';
 
 async function isCollectorReachable(): Promise<boolean> {
   const ctl = new AbortController();

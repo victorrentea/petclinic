@@ -1,4 +1,4 @@
-import { makeTestNameSpanProcessor } from './test-name-span-processor';
+import { makeTestNameSpanProcessor } from './e2e-span-processor';
 
 function fakeSpan() {
   const attrs: Record<string, unknown> = {};
