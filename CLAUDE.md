@@ -102,19 +102,6 @@ REST API under http://localhost:8080/api/. Paths, schemas, DTOs → **[`openapi.
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Raw spec: http://localhost:8080/v3/api-docs.yaml
 
-## Development Notes
-
-### Owner's Code Preferences (from copilot-instructions.md)
-- Constructor injection for production, `@Autowired` only in tests
-- `@Transactional` only when strictly necessary
-- MapStruct for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- `@Validated` on `@RequestBody`
-- Use only Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter` selectively
-- Keep line length ≤ 120 chars
-- Never ask before running tests after refactoring
-- Builder chains: one property per line, unless only 2 properties total
-
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names.
