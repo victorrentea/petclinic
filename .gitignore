@@ -84,3 +84,5 @@ rag-vector-store.json
 /petclinic-chatbot/rag-vector-store.json.meta.json
 /.codegraph/
 /.serena/
+/~$*.xlsx
+
