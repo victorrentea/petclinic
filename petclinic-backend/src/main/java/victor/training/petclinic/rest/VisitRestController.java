@@ -10,15 +10,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.InvalidVisitDateException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,6 +32,7 @@ import java.util.List;
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final PetRepository petRepository;
 
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",
@@ -60,6 +65,10 @@ public class VisitRestController {
     // repository-only, no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
+        LocalDate petBirthDate = petRepository.findById(visitDto.getPetId())
+                .map(Pet::getBirthDate)
+                .orElse(null);
+        validateVisitDate(visitDto.getDate(), petBirthDate);
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return visit.getId();
@@ -68,9 +77,31 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        LocalDate petBirthDate = currentVisit.getPet() == null ? null : currentVisit.getPet().getBirthDate();
+        validateVisitDate(visitDto.getDate(), petBirthDate);
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
+    }
+
+    /**
+     * Enforces the visit-date window (Issue #40): a visit may not predate the pet's birth date,
+     * nor be booked more than one year into the future. A null date is left to the field-level
+     * validation on the DTO.
+     */
+    private void validateVisitDate(LocalDate date, LocalDate petBirthDate) {
+        if (date == null) {
+            return;
+        }
+        LocalDate latestAllowed = LocalDate.now().plusYears(1);
+        if (date.isAfter(latestAllowed)) {
+            throw new InvalidVisitDateException(
+                    "Visit date must not be more than one year in the future (after " + latestAllowed + ")");
+        }
+        if (petBirthDate != null && date.isBefore(petBirthDate)) {
+            throw new InvalidVisitDateException(
+                    "Visit date must not be before the pet's birth date (" + petBirthDate + ")");
+        }
     }
 
     @Transactional

@@ -24,6 +24,10 @@ export class VisitAddComponent implements OnInit {
   addedSuccess = false;
   errorMessage: string;
 
+  // Visit date bounds (Issue #40): not before the pet's birth date, not more than a year ahead.
+  minDate: moment.Moment | undefined;
+  maxDate = moment().add(1, 'years');
+
   constructor(private visitService: VisitService,
               private petService: PetService,
               private ownerService: OwnerService,
@@ -44,6 +48,7 @@ export class VisitAddComponent implements OnInit {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
+        this.minDate = this.currentPet.birthDate ? moment(this.currentPet.birthDate) : undefined;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
           owner => {
             this.currentOwner = owner;

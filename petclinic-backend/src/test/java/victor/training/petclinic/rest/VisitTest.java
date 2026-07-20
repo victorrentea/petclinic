@@ -199,6 +199,70 @@ public class VisitTest {
     }
 
     @Test
+    void create_dateBeforePetBirth_rejected() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.of(9, 7, 20)); // the issue's absurd "year 0009", before the pet's birth
+        newVisit.setDescription("time-travelling checkup");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findAll())
+            .noneMatch(v -> "time-travelling checkup".equals(v.getDescription()));
+    }
+
+    @Test
+    void create_dateTooFarInFuture_rejected() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1)); // just past the one-year horizon
+        newVisit.setDescription("way-too-early booking");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_dateExactlyAtBounds_ok() throws Exception {
+        VisitDto atBirth = new VisitDto();
+        atBirth.setPetId(petId);
+        atBirth.setDate(PetTest.BIRTH_DATE); // lower bound (inclusive)
+        atBirth.setDescription("visit on birth date");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(atBirth))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+
+        VisitDto atHorizon = new VisitDto();
+        atHorizon.setPetId(petId);
+        atHorizon.setDate(LocalDate.now().plusYears(1)); // upper bound (inclusive)
+        atHorizon.setDescription("visit one year out");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(atHorizon))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void update_dateBeforePetBirth_rejected() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.of(9, 7, 20));
+        update.setDescription("time-travelling checkup");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void update_ok() throws Exception {
         VisitFieldsDto update = new VisitFieldsDto();
         update.setDate(LocalDate.now().plusDays(1));
