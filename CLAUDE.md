@@ -97,16 +97,10 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
+REST API under http://localhost:8080/api/. Paths, schemas, DTOs → **[`openapi.yaml`](openapi.yaml)** (root).
 
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- Raw spec: http://localhost:8080/v3/api-docs.yaml
 
 ## Development Notes
 
