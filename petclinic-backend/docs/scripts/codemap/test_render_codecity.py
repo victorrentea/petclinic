@@ -70,6 +70,19 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertNotIn("&#x1F7E7;", html)        # not the old orange square
             self.assertIn("&#x2195;&#xFE0F;", html)   # height marker unchanged (up/down arrow)
             self.assertIn("cbar-mark", html)
+            # Per-KLOC densities are folded onto their base metric's line, dimmed.
+            self.assertIn('class="perkloc"', html)
+            self.assertIn("/ KLOC)", html)
+            # Colour ramp can be linear or log; skewed /KLOC metrics default to log.
+            self.assertIn('id="colorScale"', html)
+            self.assertIn("function wantsLog", html)
+            self.assertIn("function colorT", html)
+            self.assertIn("Math.log1p", html)
+            self.assertIn("LOG_DEFAULT_METRICS", html)
+            # Tooltip title is the real filename, incl. extension.
+            self.assertIn("file.path.slice(file.path.lastIndexOf", html)
+            # Package labels now default to on-the-floor edges.
+            self.assertIn('value="floor" selected', html)
             # Package-pattern filter (victor..*Service · ..repo.. · *Service).
             self.assertIn('id="pkgFilter"', html)
             self.assertIn("function patternToRegExp", html)
