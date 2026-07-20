@@ -77,8 +77,8 @@ Tell an agent running in this repo:
 - **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
 - **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
 - **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is the time lost.
+- **SQL** — export an Excel pie chart of pet types querying `postgres-db`, and open it when ready.
 - **Query tuning** — optimize the "search owners by last name" query.
-- **Ad-hoc BI** — export an Excel pie chart of pet types querying `postgres-db`.
 - **Speedup tests** — make the backend tests run faster.
   
 Some tasks above require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
