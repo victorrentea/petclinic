@@ -7,8 +7,12 @@ This file is automatically loaded in any conversation you have with an agent in 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
 
 **Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21)
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21); also hosts the Spring AI MCP server at `/mcp`
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3)
+- `petclinic-chatbot/` - Spring AI triage assistant (Java 21): RAG over a specialty knowledge base + MCP client that books visits via the backend; streams markdown to the browser (OpenAI)
+- `petclinic-database/` - Embedded PostgreSQL launcher packaged as a runnable jar (dev/workshop DB)
+- `petclinic-observability/` - OpenTelemetry Collector + Grafana observability stack (docker-compose)
+- `petclinic-ui-test/` - Playwright + Cucumber E2E tests (TypeScript)
 
 ## Common Commands
 
