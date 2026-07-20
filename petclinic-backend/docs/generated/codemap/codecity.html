@@ -222,6 +222,9 @@
   }
   /* Values are inline here — override the block/large styling #hover b gives the name. */
   #hover .props b { display: inline; font-size: inherit; margin: 0; font-weight: 700; }
+  /* The folded-in /KLOC density: same line as its base metric, dimmed. */
+  #hover .props .perkloc { color: #94a3b8; font-weight: 400; }
+  #hover .props li.on .perkloc { color: #cbd5e1; }
   #hover .props li::before {
     content: "\2022";
     color: #64748b;
@@ -491,6 +494,14 @@
       </select>
     </label>
     <label>
+      Scale
+      <select id="colorScale" aria-label="colour scale">
+        <option value="auto" selected>auto (log for /KLOC)</option>
+        <option value="linear">linear</option>
+        <option value="log">log</option>
+      </select>
+    </label>
+    <label>
       Height
       <select id="heightMetric">
         <option value="lines">lines of code (LOC)</option>
@@ -524,8 +535,8 @@
   <div class="viewOf pkgRow">
     <span>Package labels:</span>
     <select id="pkgLabelMode" aria-label="package label style">
-      <option value="floating" selected>floating tags</option>
-      <option value="floor">on the floor (edges)</option>
+      <option value="floating">floating tags</option>
+      <option value="floor" selected>on the floor (edges)</option>
       <option value="off">off</option>
     </select>
   </div>
@@ -572,6 +583,7 @@ const BUILD_CMD = "# 1. The folder you want to visualise (a git repo of Java sou
 // The active COLOR metric's p95 scale max, mirrored out of rebuildCity so the
 // hover tooltip's colour-scale marker can place this building on the ramp.
 let activeColorMax = 1;
+let activeColorLog = false;   // whether the active colour metric is on a log ramp
 
 // "Build this for your own repo" overlay: reveal the copy-pasteable recipe and let the
 // reader run the very pipeline that produced this page against any other source folder.
@@ -620,6 +632,7 @@ const hover = document.getElementById("hover");
 const areaSelect = document.getElementById("areaMetric");
 const heightSelect = document.getElementById("heightMetric");
 const colorSelect = document.getElementById("colorMetric");
+const colorScaleSelect = document.getElementById("colorScale");   // linear vs log colour ramp
 const viewSelect = document.getElementById("viewMode");   // the title-row view switch
 const packageOpt = document.getElementById("packageOpt");
 const moduleOpt = document.getElementById("moduleOpt");
@@ -860,10 +873,32 @@ function metricMax(key) {
   return percentile(filteredDataset().map(f => Number(f[key]) || 0), 0.95);
 }
 
+// Density/ratio metrics (per-KLOC) are heavily right-skewed: a few tiny files
+// blow the top out and everything else stays pale. In "auto" scale we colour
+// those on a log ramp so the crowded low end spreads across the palette;
+// evenly-distributed metrics (instability, couplings) stay linear.
+const LOG_DEFAULT_METRICS = new Set(["commits_per_kloc", "bugs_per_kloc", "complexity_per_kloc"]);
+function wantsLog(metric) {
+  const mode = colorScaleSelect ? colorScaleSelect.value : "auto";
+  if (mode === "log") return true;
+  if (mode === "linear") return false;
+  return LOG_DEFAULT_METRICS.has(metric);   // "auto"
+}
+
+// Normalised colour position t in [0,1]. Shared by the buildings and the hover
+// colour-scale tick so the tick always matches the building's shade.
+function colorT(value, max) {
+  const m = max || 1;
+  const v = Math.max(0, Number(value) || 0);
+  const t = activeColorLog
+    ? Math.log1p(v) / Math.log1p(m)
+    : v / m;
+  return Math.max(0, Math.min(1, t));
+}
+
 function colorFor(value, max) {
-  const t = Math.max(0, Math.min(1, value / (max || 1)));
   // Light blue (0) -> burgundy red (max): the city reads light with hot spots in red.
-  return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), t);
+  return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), colorT(value, max));
 }
 
 // A hatch pattern for a terrace top: parallel lines in the terrace edge colour,
@@ -969,6 +1004,7 @@ function rebuildCity() {
   const maxMetric = metricMax(heightMetric);
   const maxColor = metricMax(colorMetric);
   activeColorMax = maxColor;   // remembered for the hover tooltip's colour-scale marker
+  activeColorLog = wantsLog(colorMetric);   // ditto: log vs linear for the tick position
 
   const layout = d3.treemap()
     .size([citySize, citySize])
@@ -1291,7 +1327,9 @@ function hoverHeaderForFile(file) {
   const view = viewSelect ? viewSelect.value : "classes";
   if (view === "classes") {
     const pkg = packageOf(file);
-    return identityHeader(file.name, folderPrefix(file.path, pkg), pkg);
+    // Title shows the real filename (Specialty.java), not the bare class name.
+    const fileName = file.path ? file.path.slice(file.path.lastIndexOf("/") + 1) : file.name;
+    return identityHeader(fileName, folderPrefix(file.path, pkg), pkg);
   }
   const fullPath = file.path && file.path !== "." ? file.path : "";
   return identityHeader(file.name, "", fullPath);
@@ -1317,12 +1355,9 @@ const HOVER_PROPS = [
   { key: "files", label: "files", opt: true },
   { key: "bytes", label: "size", fmt: humanBytes },
   { key: "lines", label: "lines of code" },
-  { key: "cognitive_complexity", label: "cognitive complexity" },
-  { key: "complexity_per_kloc", label: "cognitive complexity / KLOC" },
-  { key: "commits", label: "commits" },
-  { key: "commits_per_kloc", label: "commits / KLOC" },
-  { key: "bug_commits", label: "bugfix commits" },
-  { key: "bugs_per_kloc", label: "bugfix commits / KLOC" },
+  { key: "cognitive_complexity", label: "cognitive complexity", sub: "complexity_per_kloc" },
+  { key: "commits", label: "commits", sub: "commits_per_kloc" },
+  { key: "bug_commits", label: "bugfix commits", sub: "bugs_per_kloc" },
   { key: "committers", label: "committers" },
   { key: "fan_in", label: "incoming coupling (fan in)" },
   { key: "fan_out", label: "outgoing coupling (fan out)" },
@@ -1332,14 +1367,17 @@ const HOVER_PROPS = [
 // Trailing marker(s) for whichever of area / height / colour this metric drives:
 //   AREA → left/right arrow · HEIGHT → up/down arrow · COLOUR → a light→red scale bar
 //   with a tick at this building's spot (value / 95th-percentile, clamped 0..1).
-function marksFor(file, key) {
+function marksFor(file, ...keys) {
   const marks = [];
-  if (key === areaSelect.value) marks.push('<span class="mk-area" title="area / footprint">&#x2194;&#xFE0F;</span>');
-  if (key === heightSelect.value) marks.push('<span class="mk-height" title="height">&#x2195;&#xFE0F;</span>');
-  if (key === colorSelect.value) {
-    const t = Math.max(0, Math.min(1, (Number(file[key]) || 0) / (activeColorMax || 1)));
-    marks.push('<span class="cbar" title="colour scale (light-&gt;red, capped at 95th pct)">' +
-      `<span class="cbar-mark" style="left:${(t * 100).toFixed(1)}%"></span></span>`);
+  for (const key of keys) {
+    if (!key) continue;
+    if (key === areaSelect.value) marks.push('<span class="mk-area" title="area / footprint">&#x2194;&#xFE0F;</span>');
+    if (key === heightSelect.value) marks.push('<span class="mk-height" title="height">&#x2195;&#xFE0F;</span>');
+    if (key === colorSelect.value) {
+      const t = colorT(Number(file[key]) || 0, activeColorMax);
+      marks.push('<span class="cbar" title="colour scale (light-&gt;red, capped at 95th pct)">' +
+        `<span class="cbar-mark" style="left:${(t * 100).toFixed(1)}%"></span></span>`);
+    }
   }
   return marks.length ? `<span class="marks">${marks.join("")}</span>` : "";
 }
@@ -1350,8 +1388,14 @@ function formatHover(file) {
   for (const p of HOVER_PROPS) {
     if (p.opt && (file[p.key] === undefined || file[p.key] === null)) continue;
     const val = p.fmt ? p.fmt(file[p.key]) : fmtMetric(Number(file[p.key]) || 0);
-    const on = active.has(p.key);
-    items.push(`<li class="${on ? "on" : ""}"><span>${p.label}: <b>${val}</b></span>${marksFor(file, p.key)}</li>`);
+    let label = `${p.label}: <b>${val}</b>`;
+    let on = active.has(p.key);
+    if (p.sub) {   // fold the /KLOC density onto the same line: "commits: 4 (181.82 / KLOC)"
+      const subVal = fmtMetric(Number(file[p.sub]) || 0);
+      label += ` <span class="perkloc">(${subVal} / KLOC)</span>`;
+      on = on || active.has(p.sub);
+    }
+    items.push(`<li class="${on ? "on" : ""}"><span>${label}</span>${marksFor(file, p.key, p.sub)}</li>`);
   }
   // Identity header (class / folder / package) on top, metrics list below.
   return hoverHeaderForFile(file) + `<ul class="props">${items.join("")}</ul>`;
@@ -1714,6 +1758,7 @@ function onMetricChange() {
 areaSelect.addEventListener("change", onMetricChange);
 heightSelect.addEventListener("change", onMetricChange);
 colorSelect.addEventListener("change", onMetricChange);
+if (colorScaleSelect) colorScaleSelect.addEventListener("change", onMetricChange);
 viewSelect.addEventListener("change", () => {
   dismissIntro();
   scopePath = "";              // class / package / module hierarchies differ — reset the drill scope
