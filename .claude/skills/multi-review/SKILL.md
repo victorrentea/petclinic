@@ -1,7 +1,6 @@
 ---
 name: multi-review
 description: Review the current diff — first a cheap deterministic SonarQube-in-Docker pre-pass (fix + re-scan until clean), then fan out to three single-focused reviewer subagents in parallel, auto-apply the safe quality cleanups, and tell the human which areas to review first. Explicit invocation only — user types /multi-review.
-disable-model-invocation: true
 ---
 
 # /multi-review — review, fix, hand off

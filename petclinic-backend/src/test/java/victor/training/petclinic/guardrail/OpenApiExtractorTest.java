@@ -25,7 +25,8 @@ public class OpenApiExtractorTest {
 
     @Test
     void generateOpenApiYaml() throws Exception {
-        String yaml = mockMvc.perform(get("/v3/api-docs.yaml")).andReturn().getResponse().getContentAsString();
+        String yaml = mockMvc.perform(get("/v3/api-docs.yaml"))
+            .andReturn().getResponse().getContentAsString();
         Path target = Path.of("../openapi.yaml");
         Files.createDirectories(target.getParent());
         Files.writeString(target, yaml, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);

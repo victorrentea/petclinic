@@ -30,49 +30,8 @@ The C4 model viewer now lives with the backend docs it serves:
 petclinic-backend/docs/scripts/start-structurizr.sh   # optional: Structurizr view of the C4 model (localhost:8081)
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
-### Testing a Single Test (Backend)
-```sh
-mvn test -Dtest=ClassName#methodName
-```
-
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
 ### Living Architecture & Guardrails
 
@@ -101,6 +60,9 @@ REST API under http://localhost:8080/api/. Paths, schemas, DTOs → **[`openapi.
 
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Raw spec: http://localhost:8080/v3/api-docs.yaml
+
+## Scale & Data Volume
+- **Owners will grow to thousands in production (planned, within months).** List endpoints (esp. `/api/owners`) must paginate/sort/filter **server-side** — never load all rows into the client.
 
 ## Task Modifiers
 - Write non-trivial code using TDD
