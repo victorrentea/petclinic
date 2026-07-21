@@ -1,8 +1,12 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -15,10 +19,12 @@ import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.InvalidSortException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,9 +40,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
@@ -59,15 +63,56 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    /**
+     * Sortable grid columns exposed to the client, each mapped to the entity fields it orders by.
+     * The client sends only a logical column name ({@code name} / {@code city}) — never entity fields —
+     * so the API contract stays stable and arbitrary/injected sort keys are impossible.
+     */
+    private static final Map<String, String[]> SORTABLE_COLUMNS = Map.of(
+        "name", new String[]{"lastName", "firstName"},
+        "city", new String[]{"city"});
+
+    @Operation(operationId = "listOwners", summary = "List owners (paginated, sortable, filterable)")
     @ApiResponse(responseCode = "200", description = "OK",
         content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+            schema = @Schema(implementation = OwnerPageDto.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size,
+        @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageable);
+        return toOwnerPageDto(owners);
+    }
+
+    private Sort parseSort(String sort) {
+        String[] parts = sort.split(",", 2);
+        String column = parts[0].trim();
+        String[] fields = SORTABLE_COLUMNS.get(column);
+        if (fields == null) {
+            throw new InvalidSortException(
+                "Unsupported sort column '" + column + "'. Allowed: " + SORTABLE_COLUMNS.keySet());
+        }
+        try {
+            Sort.Direction direction = parts.length > 1
+                ? Sort.Direction.fromString(parts[1].trim())
+                : Sort.Direction.ASC;
+            return Sort.by(direction, fields);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidSortException("Invalid sort direction in '" + sort + "'. Allowed: asc, desc");
+        }
+    }
+
+    private OwnerPageDto toOwnerPageDto(Page<Owner> owners) {
+        OwnerPageDto dto = new OwnerPageDto();
+        dto.setContent(ownerMapper.toOwnerDtoCollection(owners.getContent()));
+        dto.setTotalElements(owners.getTotalElements());
+        dto.setPage(owners.getNumber());
+        dto.setSize(owners.getSize());
+        dto.setTotalPages(owners.getTotalPages());
+        return dto;
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

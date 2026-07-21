@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,7 +38,7 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
           pd.setDetail(detail);
-        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
+        pd.setType(URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
@@ -49,6 +50,15 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(InvalidSortException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleInvalidSort(InvalidSortException ex, HttpServletRequest request) {
+        log.warn("Bad request: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Bad Request", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
     }
 

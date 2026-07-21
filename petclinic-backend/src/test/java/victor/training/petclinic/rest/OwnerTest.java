@@ -28,12 +28,12 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -148,7 +148,7 @@ public class OwnerTest {
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private OwnerPageDto searchPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
             .andExpect(status().isOk())
             .andExpect(content().contentType("application/json"))
@@ -156,8 +156,11 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageDto.class);
+    }
+
+    private List<OwnerDto> search(String uriTemplate) throws Exception {
+        return searchPage(uriTemplate).getContent();
     }
 
     @Test
@@ -165,6 +168,60 @@ public class OwnerTest {
         List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
+    }
+
+    @Test
+    void list_defaultPageAndSize() throws Exception {
+        OwnerPageDto page = searchPage("/api/owners");
+
+        assertThat(page.getPage()).isZero();
+        assertThat(page.getSize()).isEqualTo(10);
+        assertThat(page.getContent()).hasSizeLessThanOrEqualTo(10);
+        assertThat(page.getTotalElements()).isEqualTo(ownerRepository.count());
+    }
+
+    @Test
+    void list_defaultSortByNameAscending() throws Exception {
+        Owner aardvark = TestData.anOwner();
+        aardvark.setLastName("Aardvark");
+        aardvark.setFirstName("Zed");
+        ownerRepository.save(aardvark);
+
+        List<String> lastNames = searchPage("/api/owners?size=200").getContent()
+            .stream().map(OwnerDto::getLastName).toList();
+
+        assertThat(lastNames).isSorted();
+    }
+
+    @Test
+    void list_sortByCity() throws Exception {
+        List<String> cities = searchPage("/api/owners?size=200&sort=city,asc").getContent()
+            .stream().map(OwnerDto::getCity).toList();
+
+        assertThat(cities).isSorted();
+    }
+
+    @Test
+    void list_unsupportedSortColumn_rejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=telephone,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void list_rawEntityFieldAsSort_rejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=lastName,asc"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void list_lastNameFilterComposesWithPaging() throws Exception {
+        OwnerPageDto page = searchPage("/api/owners?lastName=Frank&page=0&size=5");
+
+        assertThat(page.getContent())
+            .extracting(OwnerDto::getLastName)
+            .allMatch(ln -> ln.startsWith("Frank"));
+        assertThat(page.getTotalElements())
+            .isEqualTo(ownerRepository.findByLastNameStartingWith("Frank").size());
     }
 
     @Test
