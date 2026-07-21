@@ -195,40 +195,32 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "name,asc"
       responses:
         "200":
           content:
             application/json:
-              examples:
-                sample:
-                  description: sample
-                  value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
-                    - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -248,7 +240,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: "List owners (paginated, sortable, filterable)"
       tags:
       - owner-rest-controller
     post:
@@ -1684,6 +1676,34 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        page:
+          type: integer
+          format: int32
+          description: Zero-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Number of owners requested per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of owners matching the filter (across all pages).
+          example: 42
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages for the current filter.
+          example: 5
     PetDto:
       type: object
       properties:
