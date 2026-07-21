@@ -1,79 +1,81 @@
-#ownersByLastName
-{
-display:none;
+/* Material grid restyled to match the app's Bootstrap look (spring-* theme). */
+
+.owners-grid {
+	width: 100%;
+	/* Fixed layout + explicit per-column widths: toggling sort never reflows columns. */
+	table-layout: fixed;
+	background: #fff;
+	border: 1px solid #34302D; /* @table-border-color: @spring-brown */
+	margin-bottom: 12px;
 }
 
-#nameGroup {
+/* Header — dark brown bar with light text, like sibling Bootstrap tables. */
+:host ::ng-deep .owners-grid .mat-mdc-header-row {
+	background-color: #393532; /* lighten(@spring-brown, 3%) */
+}
+
+:host ::ng-deep .owners-grid .mat-mdc-header-cell {
+	color: #f1f1f1; /* @spring-light-grey */
+	font-weight: bold;
+	white-space: nowrap;
+	padding: 8px;
+	border-bottom: 2px solid #34302D;
+	border-right: 1px solid #34302D;
+}
+
+:host ::ng-deep .owners-grid .mat-mdc-cell {
+	color: #34302D; /* @spring-brown */
+	padding: 8px;
+	border-bottom: 1px solid #34302D;
+	border-right: 1px solid #34302D;
+	/* Long values truncate with an ellipsis instead of widening/reflowing the column. */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+:host ::ng-deep .owners-grid .mat-mdc-header-cell:last-of-type,
+:host ::ng-deep .owners-grid .mat-mdc-cell:last-of-type {
+	border-right: none;
+}
+
+/* Zebra striping — Bootstrap default stripe colour. */
+:host ::ng-deep .owners-grid .mat-mdc-row:nth-child(odd) {
+	background-color: #f9f9f9;
+}
+
+/* Sort affordance stays legible on the dark header. */
+:host ::ng-deep .owners-grid .mat-sort-header-arrow,
+:host ::ng-deep .owners-grid .mat-mdc-header-cell .mat-sort-header-content {
+	color: #f1f1f1;
+}
+
+/* Fixed per-column widths (chosen from the real owner data: longest name
+   "Wensleydale, Wallace" ~20, address "62 West Wallaby Street" ~22, city
+   "Ottery St Catchpole" ~19, telephone 13 digits, pets rarely > 2 names). */
+:host ::ng-deep .owners-grid .mat-column-name { width: 24%; }
+:host ::ng-deep .owners-grid .mat-column-address { width: 24%; }
+:host ::ng-deep .owners-grid .mat-column-city { width: 20%; }
+:host ::ng-deep .owners-grid .mat-column-telephone { width: 16%; }
+:host ::ng-deep .owners-grid .mat-column-pets { width: 16%; }
+
+/* Keep the paginator visually neutral against the light-grey app background. */
+:host ::ng-deep .mat-mdc-paginator {
+	background: transparent;
+}
+
+.owners-empty {
+	padding: 12px 0;
+}
+
+/* Top toolbar: Add Owner (left) then Find Owner, with breathing room between. */
+.owners-toolbar {
 	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
-}
-
-#addressGroup {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-left: 0;
-	margin-right: 0;
-	padding-left: 0;
-}
-
-.owner-search-label {
-	margin: 0;
-	text-align: left;
-	min-width: 60px;
-}
-
-.owner-search-input {
-	flex: 1;
-}
-
-.owners-controls {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	margin-bottom: 16px;
-}
-
-.owners-pagination {
-	display: flex;
-	align-items: center;
 	gap: 12px;
-}
-
-.owners-page-size {
-	display: flex;
 	align-items: center;
-	gap: 8px;
 }
 
-.owners-page-size .form-control {
-	width: auto;
-}
-
-@media (max-width: 576px) {
-	#nameGroup {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	#addressGroup {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 8px;
-	}
-
-	.owner-search-input {
-		width: 100%;
-	}
-
-	.owners-controls {
-		flex-direction: column;
-		align-items: flex-start;
-	}
+/* Buttons and labels must never wrap to a second line. */
+#search-owner-form .btn-default {
+	white-space: nowrap;
 }
