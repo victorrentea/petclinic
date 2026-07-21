@@ -16,21 +16,25 @@ The `GET /api/owners` endpoint SHALL return a single page of owners using server
 - **WHEN** a client requests a `page` index past the last page
 - **THEN** `content` is empty and `totalElements` still reflects the true total
 
-### Requirement: Server-side sorting with a whitelist
+### Requirement: Server-side sorting by logical grid column
 
-The endpoint SHALL sort results server-side according to a `sort` parameter. Only the properties `lastName`, `firstName`, and `city` MUST be accepted as sort keys; any other requested sort property MUST be rejected rather than applied. When no `sort` is supplied, results MUST default to ascending order by `lastName` then `firstName`. Sorting by the "Name" column MUST order by `lastName` then `firstName`.
+The endpoint SHALL accept a **single** sort criterion made of a **grid column name** and a direction. The only accepted column names MUST be `name` and `city`; any other value — including a raw entity field name like `lastName` — MUST be rejected rather than passed through. The backend MUST own the mapping from column to entity fields: `name` orders by last name then first name; `city` orders by city. When no sort is supplied, results MUST default to `name` ascending. The client MUST send only the grid column name, never entity field names, and never more than one criterion.
 
 #### Scenario: Default sort is Name ascending
-- **WHEN** a client requests owners without a `sort` parameter
-- **THEN** owners are ordered ascending by `lastName`, ties broken by `firstName`
+- **WHEN** a client requests owners with no sort criterion
+- **THEN** owners are ordered ascending by last name, ties broken by first name
 
-#### Scenario: Sort by city
+#### Scenario: Sort by the city column
 - **WHEN** a client requests `sort=city,asc`
-- **THEN** owners are ordered ascending by `city`
+- **THEN** owners are ordered ascending by city
 
-#### Scenario: Unsupported sort key rejected
-- **WHEN** a client requests `sort=telephone,asc`
-- **THEN** the request is rejected (the arbitrary sort key is not applied)
+#### Scenario: Sort by the name column expands to two fields
+- **WHEN** a client requests `sort=name,desc`
+- **THEN** owners are ordered descending by last name, ties broken by first name
+
+#### Scenario: Non-column sort value rejected
+- **WHEN** a client requests a sort whose column is not `name` or `city` (e.g. `telephone`, or a raw field like `lastName`)
+- **THEN** the request is rejected and the arbitrary sort is not applied
 
 ### Requirement: Last-name filter composes with paging and sorting
 

@@ -1,30 +1,28 @@
 ## Why
 
-The Owners screen loads **every** owner in one unsorted Bootstrap table (`GET /api/owners` returns the full array). With thousands of owners planned in production within months, this does not scale and offers no way to sort or page. Issue #25 asks for a grid that is sortable and paginated in pages of 5/10/20.
+The Owners screen shows **every** owner at once, in a plain list you cannot sort or page through. The clinic expects to reach **thousands of owners in the coming months**, and showing them all on one screen will become slow and hard to use. This change turns the list into something you browse one page at a time, that you can sort and search.
 
 ## What Changes
 
-- **BREAKING** `GET /api/owners` becomes paginated: it accepts `page`, `size`, `sort`, and the existing `lastName` filter, and returns a `PageDto` envelope (`{ content, totalElements, page, size, totalPages }`) instead of a bare `OwnerDto[]`.
-- Server-side pagination + sorting via Spring Data `Pageable`; sorting is restricted to a whitelist of **`lastName`, `firstName`, `city`** (other sort keys rejected).
-- The `lastName` search is preserved as a server-side filter that composes with paging/sorting and resets to page 0 on a new search.
-- Owners grid migrates from the Bootstrap table to Angular Material **`mat-table` + `matSort` + `mat-paginator`**, styled to match the surrounding Bootstrap look (page-size options 5/10/20, default 10; default sort Name ascending).
-- The **Name** column is corrected to display `lastName firstName` (as `"Franklin, George"`); only **Name** and **City** are sortable (Address, Telephone, Pets are not — they carry no meaningful order).
-- List state (`page`/`size`/`sort`/`lastName`) lives in the **URL query params** as the source of truth (deep-linkable, back/forward/refresh safe).
-- New Flyway migration `V9` adds indexes on `owners(last_name, first_name)` and `owners(city)` for scale.
-- Regenerate `openapi.yaml` and the frontend generated `api-types.ts` from the new contract.
+- The Owners list shows a fixed number of rows per page — **5, 10, or 20** (10 by default) — with next/previous page controls, instead of everything at once.
+- You can **sort** the list by clicking the **Name** or **City** column heading. Address, telephone, and pets are not sortable — putting those in order wouldn't help anyone find an owner.
+- The existing **"find owner by last name"** search stays and now works together with sorting and paging; starting a new search jumps back to the first page.
+- The **Name** column is corrected to read **"Last name, First name"** (e.g. *"Franklin, George"*). Today it is shown the wrong way round.
+- The screen **remembers where you are**: the current page, sorting, and search are kept in the web address, so refreshing the page, using the browser's back/forward buttons, or sharing the link brings you back to exactly the same view.
+- Because the list now arrives one page at a time, it stays **fast even with thousands of owners**.
+- **Breaking change:** since the list no longer comes back as one big block, the other places that read the owners list must be updated to expect a single page at a time.
 
 ## Capabilities
 
 ### New Capabilities
-- `owners-listing`: server-paginated, sortable, filterable listing of owners exposed by the REST API and rendered by the Owners grid (pagination, sort whitelist, lastName filter, URL-state, page-size options, response envelope).
+- `owners-listing`: showing owners as a sortable, searchable list that arrives one page at a time (choose how many rows per page, sort by Name or City, search by last name, and keep your place when you refresh or share the link).
 
 ### Modified Capabilities
-<!-- None — openspec/specs/ is empty; no existing spec-level behavior to modify. -->
+<!-- None — there is no existing described behaviour to change. -->
 
 ## Impact
 
-- **API (breaking):** `GET /api/owners` response shape (`OwnerDto[]` → `OwnerPageDto`); new query params `page`/`size`/`sort`. Consumers to update: frontend `owner.service.ts` + generated `api-types.ts`, backend tests (`OwnerTest`, functional `owners.feature`/`OwnerSteps`, perf `OwnerSearchThroughLatencyProxyTest` + jmeter, `BasicAuthenticationConfigTest`), `petclinic-chatbot` `AssistantFlowTest`, `petclinic-ui-test` Playwright (`OwnersPage.ts`, `api-client.ts`). MCP (`PetClinicMcp`) is unaffected (uses the repository directly).
-- **Backend:** `OwnerRestController.listOwners`, new `OwnerPageDto`, `OwnerRepository.findByLastNameStartingWith(String, Pageable)`, Flyway `V9`, regenerated `openapi.yaml`.
-- **Frontend:** `owner-list` component (`.ts`/`.html`/`.css`), `owner.service.ts`, `owners.module.ts` (Material modules), regenerated `generated/api-types.ts`.
-- **DB:** two new indexes (no-op at 28 rows, correct for the planned scale).
-- **Scope:** Owners grid only (not Vets/Pets).
+- **Who sees the difference:** anyone using the Owners screen — it now pages, sorts, and remembers your place.
+- **What we touch:** the Owners screen itself, the behind-the-scenes part that supplies its data, and the automated checks (including the browser tests) that need to expect a page instead of the whole list.
+- **Scale:** the list is prepared to stay fast as the clinic grows to thousands of owners.
+- **Left untouched:** only the Owners screen changes — the Vets and Pets screens are not affected.
