@@ -26,58 +26,76 @@ test.describe('Owners Page', () => {
     console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
-  test('shows all owners on initial load', async ({ page }) => {
+  test('shows the first page of owners sorted by name', async ({ page }) => {
     const ownersPage = new OwnersPage(page);
 
-    // Fetch expected owners from API
-    const expectedOwners = await apiClient.fetchOwners();
-    const expectedFullNames = ApiClient.getFullNames(expectedOwners);
+    // The grid loads page 0, size 10, sorted by name asc — mirror that from the API.
+    const expectedPage = await apiClient.fetchFirstPage();
+    const expectedNames = ApiClient.getFullNames(expectedPage.content);
 
-    // Open the owners page
     await ownersPage.open();
+    await ownersPage.waitForOwnersCount(expectedNames.length);
 
-    // Wait for the expected number of owners
-    await ownersPage.waitForOwnersCount(expectedFullNames.length);
+    const actualNames = await ownersPage.getOwnerFullNames();
 
-    // Get actual owner names from the page
-    const actualFullNames = await ownersPage.getOwnerFullNames();
-
-    // Assert that all expected owners are displayed
-    expect(ApiClient.sorted(actualFullNames)).toEqual(ApiClient.sorted(expectedFullNames));
+    // Default sort is name asc, so order must match exactly (not just as a set).
+    expect(actualNames).toEqual(expectedNames);
   });
 
   test('filters owners by last name prefix', async ({ page }) => {
-    // Fetch all owners and choose a prefix
-    const allOwners = await apiClient.fetchOwners();
-    const prefix = ApiClient.choosePrefixFrom(allOwners);
+    const firstPage = await apiClient.fetchFirstPage();
+    const prefix = ApiClient.choosePrefixFrom(firstPage.content);
 
-    // Fetch filtered owners from API
-    const expectedFilteredOwners = await apiClient.fetchOwnersByPrefix(prefix);
-    const expectedFilteredFullNames = ApiClient.getFullNames(expectedFilteredOwners);
+    const expectedFiltered = await apiClient.fetchFirstPage(prefix);
+    const expectedNames = ApiClient.getFullNames(expectedFiltered.content);
 
-    // Open the owners page
     const ownersPage = new OwnersPage(page);
     await ownersPage.open();
 
-    // Perform search
     await ownersPage.searchByLastNamePrefix(prefix);
-    await ownersPage.waitForOwnersCount(expectedFilteredFullNames.length);
+    await ownersPage.waitForOwnersCount(expectedNames.length);
 
-    // Get filtered results
-    const actualFilteredFullNames = await ownersPage.getOwnerFullNames();
+    const actualNames = await ownersPage.getOwnerFullNames();
+    expect(actualNames.length).toBeGreaterThan(0);
 
-    // Assertions
-    expect(actualFilteredFullNames.length).toBeGreaterThan(0);
-
-    // Verify all results match the prefix
-    for (const fullName of actualFilteredFullNames) {
+    // Every displayed last name must start with the prefix.
+    for (const fullName of actualNames) {
       const lastName = ApiClient.extractLastName(fullName);
       expect(lastName.toLowerCase()).toMatch(new RegExp(`^${prefix.toLowerCase()}`));
     }
 
-    // Verify exact match with API results
-    expect(ApiClient.sorted(actualFilteredFullNames)).toEqual(
-      ApiClient.sorted(expectedFilteredFullNames)
-    );
+    expect(actualNames).toEqual(expectedNames);
+  });
+
+  test('sorts by the City column', async ({ page }) => {
+    const ownersPage = new OwnersPage(page);
+    await ownersPage.open();
+
+    await ownersPage.sortBy('city');
+
+    const cities = await ownersPage.getCities();
+    expect(cities.length).toBeGreaterThan(0);
+
+    // Cities on the page must be in ascending order (backend collation is C = byte order).
+    const ascending = [...cities].sort();
+    expect(cities).toEqual(ascending);
+  });
+
+  test('pages through owners with the paginator', async ({ page }) => {
+    const firstPage = await apiClient.fetchFirstPage();
+    test.skip(firstPage.totalElements <= firstPage.size, 'Not enough owners to paginate');
+
+    const ownersPage = new OwnersPage(page);
+    await ownersPage.open();
+    const firstPageNames = await ownersPage.getOwnerFullNames();
+
+    await ownersPage.goToNextPage();
+    const secondPageNames = await ownersPage.getOwnerFullNames();
+
+    expect(secondPageNames.length).toBeGreaterThan(0);
+    // Pages must be disjoint — no owner appears on both.
+    for (const name of secondPageNames) {
+      expect(firstPageNames).not.toContain(name);
+    }
   });
 });
