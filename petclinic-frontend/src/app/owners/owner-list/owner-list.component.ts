@@ -1,8 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort} from '@angular/material/sort';
+
+const DEFAULT_SORT = 'name,asc';
+const DEFAULT_SIZE = 10;
 
 @Component({
   selector: 'app-owner-list',
@@ -10,24 +14,83 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
+  readonly displayedColumns = ['name', 'address', 'city', 'telephone', 'pets'];
+  readonly pageSizeOptions = [5, 10, 20];
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  owners: Owner[] = [];
+  totalElements = 0;
+  pageIndex = 0;
+  pageSize = DEFAULT_SIZE;
+  sortActive = 'name';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  lastName = '';
+  errorMessage = '';
+  isOwnersDataReceived = false;
 
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private ownerService: OwnerService
+  ) {
   }
 
+  // URL query params are the source of truth: every paging/sort/search action
+  // navigates (merging params) and a single load() rebuilds the request from them,
+  // so refresh, back/forward and deep-links reproduce the same view.
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
+    this.route.queryParams.subscribe(params => this.load(params));
+  }
+
+  private load(params: Params) {
+    this.pageIndex = +params['page'] || 0;
+    this.pageSize = +params['size'] || DEFAULT_SIZE;
+    const [active, direction] = (params['sort'] || DEFAULT_SORT).split(',');
+    this.sortActive = active;
+    this.sortDirection = direction === 'desc' ? 'desc' : 'asc';
+    this.lastName = params['lastName'] || '';
+
+    this.ownerService.listOwners({
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: `${this.sortActive},${this.sortDirection}`,
+      lastName: this.lastName
+    }).subscribe({
+      next: page => {
+        this.owners = page.content ?? [];
+        this.totalElements = page.totalElements ?? 0;
         this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+      },
+      error: err => {
+        this.errorMessage = err;
+        this.isOwnersDataReceived = true;
+      }
+    });
+  }
+
+  petNames(owner: Owner): string {
+    return (owner.pets ?? []).map(pet => pet.name).join(', ');
+  }
+
+  onPage(event: PageEvent) {
+    this.navigate({page: event.pageIndex, size: event.pageSize});
+  }
+
+  onSortChange(sort: Sort) {
+    // New sort restarts from the first page.
+    this.navigate({sort: `${sort.active},${sort.direction || 'asc'}`, page: 0});
+  }
+
+  search() {
+    // New search resets to the first page.
+    this.navigate({lastName: this.lastName || null, page: 0});
+  }
+
+  private navigate(queryParams: Params) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    });
   }
 
   onSelect(owner: Owner) {
@@ -37,36 +100,4 @@ export class OwnerListComponent implements OnInit {
   addOwner() {
     this.router.navigate(['/owners/add']);
   }
-
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-      this.ownerService.getOwners()
-      .subscribe(
-            (owners) => {
-             this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-      this.ownerService.searchOwners(lastName)
-      .subscribe(
-      (owners) => {
-
-       this.owners = owners;
-       console.log('this.owners ' + this.owners);
-
-       },
-       (error) =>
-       {
-         this.owners = null;
-       }
-      );
-
-      }
-  }
-
-
 }

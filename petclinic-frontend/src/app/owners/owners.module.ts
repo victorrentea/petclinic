@@ -8,13 +8,19 @@ import {OwnerAddComponent} from './owner-add/owner-add.component';
 import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
 import {PetsModule} from '../pets/pets.module';
+import {MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatSortModule} from '@angular/material/sort';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     OwnersRoutingModule,
-    PetsModule
+    PetsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule
   ],
   declarations: [
     OwnerListComponent,
