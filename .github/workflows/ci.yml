@@ -64,11 +64,14 @@ jobs:
             gitleaks git --redact --no-banner --log-opts="${base}..HEAD" .
           fi
 
-      # ── Hook parity: pre-push blocks a DB.sql change that lacks a regenerated
-      #    DB.puml. Re-run that guard here so `git push --no-verify` can't bypass
-      #    it. We assert (not regenerate) because the diagram bakes in a per-commit
-      #    red delta-highlight that a CI regen would strip. ───────────────────
-      - name: Guard — DB.sql changes must carry a regenerated DB.puml
+      # ── Hook parity: the pre-push hook blocks a DB.sql change whose committed
+      #    DB.puml is out of sync. It verifies by REGENERATING the diagram and
+      #    comparing content — NOT by requiring DB.puml to also appear in the
+      #    changed paths, because an index-only DB.sql change legitimately leaves
+      #    the ER diagram untouched (it deliberately omits indexes), so a path
+      #    check would false-positive. Mirror that content-sync check here so
+      #    `git push --no-verify` can't bypass it. ────────────────────────────
+      - name: Guard — DB.puml must stay in sync with DB.sql
         if: github.event_name == 'push'
         run: |
           before='${{ github.event.before }}'
@@ -77,13 +80,24 @@ jobs:
             before='HEAD~1'   # new branch / unknown base — check the tip commit
           fi
           paths="$(git diff --name-only "${before}...HEAD" 2>/dev/null || git diff --name-only HEAD~1...HEAD)"
-          if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
-             && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
-            echo "::error::petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+          if ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql'; then
+            echo "DB.sql unchanged in this push — nothing to verify."
+            exit 0
+          fi
+          puml='petclinic-backend/docs/generated/DB.puml'
+          gen_tmp="$(mktemp)"
+          if ! DB_PUML_OUT="$gen_tmp" \
+               ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh >/dev/null 2>&1; then
+            echo "::error::Could not regenerate DB.puml to verify it is in sync with DB.sql."
+            echo "::error::Run ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh locally."
+            exit 1
+          fi
+          if ! cmp -s "$puml" "$gen_tmp"; then
+            echo "::error::petclinic-backend/DB.sql changed but $puml is stale (out of sync with DB.sql)."
             echo "::error::Run ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
             exit 1
           fi
-          echo "DB.sql ↔ DB.puml consistency: OK"
+          echo "DB.sql ↔ DB.puml consistency: OK (content in sync)"
 
       - name: Set up Java 21
         uses: actions/setup-java@v5
