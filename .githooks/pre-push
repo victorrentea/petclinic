@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+REMOTE="$1"
+
+# Git exports GIT_DIR (absolute, the worktree's gitdir) into hooks. Once we `cd` into a
+# subdir below, git would infer the work-tree as that subdir and reject repo-root pathspecs
+# with "openapi.yaml is outside repository" — breaking this hook in any git worktree. Drop the
+# inherited git env so every git call auto-discovers the real work-tree (normal AND worktrees).
+unset GIT_DIR GIT_WORK_TREE
+
+ZERO=0000000000000000000000000000000000000000
+
+# ── Unversioned-deps list must be in sync (ungated, fast — no Maven) ─────────
+# Backstops a `git commit --no-verify` that bypassed pre-commit. Ungated because
+# chatbot/database pom changes fall outside the backend-only path gate below.
+if command -v python3 >/dev/null 2>&1; then
+  if ! python3 "$ROOT/scripts/list-unversioned-deps.py" --check; then
+    echo "[pre-push] ❌ petclinic-backend/pom-libs.txt is stale — push blocked."
+    echo "[pre-push]    Run: python3 scripts/list-unversioned-deps.py"
+    echo "[pre-push]         git add petclinic-backend/pom-libs.txt"
+    exit 1
+  fi
+fi
+
+# ── Path gating: skip unless pushed commits touch backend / OpenAPI / schema ─
+needs_check=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$ZERO" ] && continue  # branch deletion — nothing to verify
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    paths=$(git log --name-only --pretty=format: "$local_sha" --not --remotes="$REMOTE" 2>/dev/null || true)
+  else
+    paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
+  fi
+
+  # Guard: after a petclinic-backend/DB.sql change in the pushed range, the committed
+  # DB.puml must be IN SYNC with DB.sql (catches a `git commit --no-verify` that bypassed
+  # pre-commit). We verify by regenerating the diagram and comparing content — NOT by
+  # requiring DB.puml to also appear in the changed paths: an index-only DB.sql change
+  # legitimately leaves the ER diagram untouched (it deliberately omits indexes), so a
+  # path-based check would false-positive.
+  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql'; then
+    PUML='petclinic-backend/docs/generated/DB.puml'
+    if command -v python3 >/dev/null 2>&1; then
+      GEN_TMP="$(mktemp)"
+      if ! DB_PUML_OUT="$GEN_TMP" \
+           "$ROOT/petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh" >/dev/null 2>&1; then
+        rm -f "$GEN_TMP"
+        echo "[pre-push] ❌ Could not regenerate DB.puml to verify it is in sync — push blocked."
+        echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh"
+        exit 1
+      fi
+      if ! cmp -s "$ROOT/$PUML" "$GEN_TMP"; then
+        rm -f "$GEN_TMP"
+        echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML is stale (out of sync with DB.sql)."
+        echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh"
+        echo "[pre-push]         git add $PUML"
+        echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
+        exit 1
+      fi
+      rm -f "$GEN_TMP"
+    elif ! printf '%s\n' "$paths" | grep -qx "$PUML"; then
+      # Degraded fallback (no python3 to regenerate): keep the original path-based backstop.
+      echo "[pre-push] ⚠️  python3 missing — cannot verify DB.puml content; using path-based backstop."
+      echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML was not regenerated."
+      echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh"
+      echo "[pre-push]         git add $PUML"
+      exit 1
+    fi
+  fi
+
+  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$)'; then
+    needs_check=1
+    break
+  fi
+done
+
+if [ "$needs_check" -eq 0 ]; then
+  echo "[pre-push] ✓ No backend / OpenAPI / schema changes — skipping guardrail tests."
+  echo "✅ pre-push"
+  exit 0
+fi
+
+# ── Architecture artifacts + OpenAPI/JPA sync ──────────────────────────────
+cd "$ROOT/petclinic-backend"
+MVN_OUT=$(mktemp)
+trap 'rm -f "$MVN_OUT"' EXIT
+TESTS=(
+  OpenApiExtractorTest
+  PackagesArchTest
+  C3ArchTest
+  DomainModelExtractorTest
+  DbSchemaExtractorTest
+  JpaMatchesDBSchemaTest
+)
+TESTS_CSV=$(IFS=,; echo "${TESTS[*]}")
+echo "[pre-push] Running guardrail tests (this may take ~20s)…"
+if ! mvn -q test -Dtest="$TESTS_CSV" >"$MVN_OUT" 2>&1; then
+  cat "$MVN_OUT"
+  echo "[pre-push] ❌ Guardrail tests failed — push blocked."
+  exit 1
+fi
+
+# ── Drift detection: regenerated artifacts must match HEAD ─────────────────
+DRIFT_PATHS=(
+  "$ROOT/petclinic-backend/docs/generated"
+  "$ROOT/openapi.yaml"
+  "$ROOT/petclinic-backend/DB.sql"
+)
+if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
+  echo "[pre-push] ❌ Generated artifacts drifted from committed state:"
+  git diff --stat HEAD -- "${DRIFT_PATHS[@]}"
+  echo ""
+  echo "[pre-push]    Commit the regenerated files and push again."
+  exit 1
+fi
+
+# ── Spectral lint of the freshly regenerated openapi.yaml ──────────────────
+if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules/@stoplight/spectral-cli" ]; then
+  SPECTRAL_OUT=$(mktemp)
+  trap 'rm -f "$MVN_OUT" "$SPECTRAL_OUT" "${BUILD_OUT:-}"' EXIT
+  if ! npm --prefix "$ROOT/petclinic-frontend" run lint:openapi --silent >"$SPECTRAL_OUT" 2>&1; then
+    cat "$SPECTRAL_OUT"
+    echo "[pre-push] ❌ Spectral found errors in openapi.yaml — push blocked."
+    exit 1
+  fi
+else
+  echo "[pre-push] ⚠️  Spectral CLI missing — skipping OpenAPI lint."
+  echo "[pre-push]    Install with: cd petclinic-frontend && npm install"
+fi
+
+# ── Frontend chain: openapi.yaml → api-types.ts → ng build ─────────────────
+# Regenerates api-types.ts from the freshly-extracted openapi.yaml, then ng build.
+# Any field add/rename on the Java side surfaces here as a TS error against stale
+# frontend usages of the old type — push blocked.
+if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
+  BUILD_OUT=$(mktemp)
+  trap 'rm -f "$MVN_OUT" "$SPECTRAL_OUT" "$BUILD_OUT"' EXIT
+  echo "[pre-push] Running npm run build (regenerates api-types.ts, then ng build)…"
+  if ! npm --prefix "$ROOT/petclinic-frontend" run build --silent >"$BUILD_OUT" 2>&1; then
+    tail -200 "$BUILD_OUT"
+    echo "[pre-push] ❌ Frontend build failed against regenerated api-types.ts — push blocked."
+    exit 1
+  fi
+  # Drift: api-types.ts in HEAD must match what generate:api just produced.
+  if ! git diff --quiet HEAD -- "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"; then
+    git diff --stat HEAD -- "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"
+    echo "[pre-push] ❌ api-types.ts drifted from committed state — commit the regenerated file and push again."
+    exit 1
+  fi
+else
+  echo "[pre-push] ⚠️  npm or petclinic-frontend/node_modules missing — skipping api-types regen + ng build."
+  echo "[pre-push]    Install with: cd petclinic-frontend && npm install"
+fi
+
+echo "[pre-push] ✓ Guardrails passed."
+echo "✅ pre-push"

@@ -1,0 +1,25 @@
+@startuml
+' Generated from victor.training.petclinic.chatbot.firefighter.FirefighterAgent
+' DETERMINISTIC, OFFLINE: derived by reflection over @Action method signatures.
+title FirefighterAgent
+state GrafanaFindings
+state HealthSnapshot
+state Incident
+state IncidentReport
+state MetricsSnapshot
+state RecoveryOutcome
+GrafanaFindings --> IncidentReport : report
+GrafanaFindings --> RecoveryOutcome : recover
+HealthSnapshot --> GrafanaFindings : queryGrafana
+HealthSnapshot --> IncidentReport : report
+HealthSnapshot --> MetricsSnapshot : readMetrics
+HealthSnapshot --> RecoveryOutcome : recover
+Incident --> HealthSnapshot : assessHealth
+Incident --> IncidentReport : report
+Incident --> RecoveryOutcome : recover
+IncidentReport --> [*]
+MetricsSnapshot --> IncidentReport : report
+MetricsSnapshot --> RecoveryOutcome : recover
+RecoveryOutcome --> IncidentReport : report
+[*] --> Incident
+@enduml

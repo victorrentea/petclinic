@@ -1,0 +1,76 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-wrapper {
+  flex: 1;
+}
+
+div.navbar-header {
+  padding: inherit;
+}
+
+::ng-deep .navbar > .container-fluid {
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .navbar .navbar-nav {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .navbar .navbar-nav > li > a {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 70px;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .navbar a.navbar-brand.brand-emoji {
+  background: none !important;
+  width: auto !important;
+  height: 70px !important;
+  margin: 0 !important;
+  padding: 0 1rem !important;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+::ng-deep .navbar a.navbar-brand.brand-emoji span {
+  background: none !important;
+  text-indent: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  opacity: 1 !important;
+  font-size: 64px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.content-wrapper {
+  min-height: calc(100% - 8rem);
+}
+
+.footer-wrapper {
+  background-color: #f8f9fa;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 8rem;
+}
+
+@media screen and (max-width: 768px) {
+  .content-wrapper {
+    margin-bottom: calc(8rem - 30px);
+
+  }
+}

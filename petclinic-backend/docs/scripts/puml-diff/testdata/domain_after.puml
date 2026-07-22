@@ -1,0 +1,60 @@
+@startuml
+!pragma layout smetana
+
+title Domain Model
+caption Generated from JPA annotations
+
+hide empty members
+skinparam classAttributeIconSize 0
+
+class Owner {
+  id : Integer
+  firstName : String
+  lastName : String
+  address : String
+  city : String
+  telephone : String
+  email : String
+}
+class Pet {
+  id : Integer
+  name : String
+  birthDate : LocalDate
+}
+class PetType {
+  id : Integer
+  name : String
+}
+class Specialty {
+  id : Integer
+  name : String
+  description : String
+}
+class User {
+  username : String
+  password : String
+  enabled : Boolean
+}
+class Vet {
+  id : Long
+  firstName : String
+  lastName : String
+}
+class Visit {
+  id : Integer
+  date : LocalDate
+  description : String
+}
+class Invoice {
+  id : Integer
+  amount : BigDecimal
+  issued : LocalDate
+}
+
+PetType "1" -- "0..*" Pet : type
+Owner "1" -- "0..*" Pet : owner
+Vet "0..*" -- "0..*" Specialty : specialties
+Pet "1" -- "0..*" Visit : pet
+Owner "1" -- "0..*" Invoice : invoices
+
+@enduml

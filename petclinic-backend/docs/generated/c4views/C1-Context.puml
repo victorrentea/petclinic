@@ -1,0 +1,26 @@
+@startuml
+title <size:24>System Context View: PetClinic</size>\n<size:24>Who uses PetClinic</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+
+Person(PetOwner, "Pet Owner", $descr="Manages their pets and appointments", $tags="", $link="")
+Person(Veterinarian, "Veterinarian", $descr="Provides veterinary care", $tags="", $link="")
+System(PetClinic, "PetClinic", $descr="Veterinary practice management system", $tags="", $link="")
+
+Rel(PetOwner, PetClinic, "Manages pets and visits", $techn="", $tags="", $link="")
+Rel(Veterinarian, PetClinic, "Manages appointments and records", $techn="", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml

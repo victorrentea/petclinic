@@ -1,0 +1,18 @@
+@startuml
+hide footbox
+title add a visit to an existing pet
+footer @generate_sequence Scenario in a .feature test
+participant Browser
+participant Backend
+participant DB
+Browser -> Backend: POST /api/visits
+activate Backend
+Backend -> Backend: book-visit
+activate Backend
+Backend -> DB: INSERT petclinic.visits
+activate DB
+deactivate DB
+deactivate Backend
+Backend --> Browser: 201
+deactivate Backend
+@enduml

@@ -1,0 +1,64 @@
+{
+  "enabledMcpjsonServers": [
+    "petclinic-mcp"
+  ],
+  "permissions": {
+    "deny": [
+      "Bash(git commit --no-verify*)",
+      "Bash(git push --no-verify*)"
+    ],
+    "ask": [
+      "Edit(.claude/settings.json)",
+      "Write(.claude/settings.json)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "//": "auto-setup githooks",
+            "type": "command",
+            "command": "test \"$(git config --get core.hooksPath)\" = .githooks || { git config core.hooksPath .githooks && echo 'restored core.hooksPath -> .githooks (project hooks were disabled)'; }"
+          },
+          {
+            "//": "auto-feed Claude the latest git changes",
+            "type": "command",
+            "command": "echo \"## Repo state\\nBranch: $(git branch --show-current)\\n\\nUncommitted changes:\\n$(git status --short)\\n\\nLast 5 commits:\\n$(git log --oneline -5)\""
+          }
+        ]
+      },
+      {
+        "//": "warn when other Claude Code sessions share this checkout; suggest EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/detect-concurrent-sessions.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "//": "automatically watch and fix the CI after a push",
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-java-edit.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/watch-ci-after-push.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

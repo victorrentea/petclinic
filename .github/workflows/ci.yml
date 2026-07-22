@@ -1,0 +1,205 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+# Cancel an in-progress run when the same branch is pushed again.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Branch pushes already cover same-repo PRs; only run the pull_request
+    # event for forks (whose push events we never see).
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # On pull_request events, head_ref is the PR's source branch.
+          # On push events, ref_name is the pushed branch (main or a feature branch).
+          ref: ${{ github.head_ref || github.ref_name }}
+          # fetch-depth: 0 ensures we have enough history to push back without rejection
+          # and gives SonarCloud accurate SCM blame info.
+          fetch-depth: 0
+
+      # ── Hook parity: gitleaks runs in pre-commit; CI re-runs it so a
+      #    `git commit --no-verify` can't slip a secret past review. ──────────
+      - name: Install gitleaks
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          url=$(curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+                 https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+               | grep -o 'https://[^"]*linux_x64.tar.gz' | head -1)
+          echo "Downloading $url"
+          curl -sSfL "$url" | sudo tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      # Scan only the commits this push/PR introduces — mirroring the pre-commit
+      # hook, which scans the staged diff (`gitleaks protect --staged`), not all of
+      # history. A full-history scan would re-surface pre-gitleaks historical findings
+      # and break every run; `--log-opts` scopes it to the new commits.
+      - name: Secret scan (gitleaks) — backstops the pre-commit hook
+        run: |
+          zero='0000000000000000000000000000000000000000'
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          if [ -z "$base" ] || [ "$base" = "$zero" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "No usable base ref — scanning the tip commit only."
+            gitleaks git --redact --no-banner --log-opts="-1 HEAD" .
+          else
+            echo "Scanning pushed range ${base}..HEAD"
+            gitleaks git --redact --no-banner --log-opts="${base}..HEAD" .
+          fi
+
+      # ── Hook parity: pre-push blocks a DB.sql change that lacks a regenerated
+      #    DB.puml. Re-run that guard here so `git push --no-verify` can't bypass
+      #    it. We assert (not regenerate) because the diagram bakes in a per-commit
+      #    red delta-highlight that a CI regen would strip. ───────────────────
+      - name: Guard — DB.sql changes must carry a regenerated DB.puml
+        if: github.event_name == 'push'
+        run: |
+          before='${{ github.event.before }}'
+          zero='0000000000000000000000000000000000000000'
+          if [ "$before" = "$zero" ] || ! git cat-file -e "${before}^{commit}" 2>/dev/null; then
+            before='HEAD~1'   # new branch / unknown base — check the tip commit
+          fi
+          paths="$(git diff --name-only "${before}...HEAD" 2>/dev/null || git diff --name-only HEAD~1...HEAD)"
+          if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql' \
+             && ! printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.puml'; then
+            echo "::error::petclinic-backend/DB.sql changed but petclinic-backend/docs/generated/DB.puml was not regenerated."
+            echo "::error::Run ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh and commit DB.puml (avoid --no-verify)."
+            exit 1
+          fi
+          echo "DB.sql ↔ DB.puml consistency: OK"
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: petclinic-frontend/package-lock.json
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Install frontend dependencies
+        working-directory: petclinic-frontend
+        run: npm ci
+
+      - name: Install PostgreSQL 16 client (pg_dump for DbSchemaSyncTest)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsS -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+          pg_dump --version
+
+      # ── Hook parity: pre-commit runs `spotless:apply` + re-stages. Spotless
+      #    has no lifecycle binding, so `mvn test` won't catch unformatted Java —
+      #    enforce it here as a fail-gate (run `mvn spotless:apply` locally to fix). ─
+      - name: Verify Java formatting (Spotless) — backstops the pre-commit hook
+        working-directory: petclinic-backend
+        run: mvn -B -ntp -DskipTests spotless:check
+
+      - name: Run backend tests (+ JaCoCo report)
+        working-directory: petclinic-backend
+        run: mvn -B -ntp test
+
+      - name: Verify Javadoc
+        working-directory: petclinic-backend
+        run: mvn -B -ntp -DskipTests -Dmaven.javadoc.failOnError=true javadoc:javadoc
+
+      # Chatbot module: compile it and run its tests. The OpenAI integration tests
+      # (AssistantFlowTest) are @EnabledIfEnvironmentVariable(OPENAI_API_KEY) and SKIP here
+      # because we deliberately do NOT provide the key on CI — those tests cost money and are
+      # run locally only. This step just guards the module against compile drift.
+      - name: Compile chatbot module (OpenAI tests skip without the key)
+        run: mvn -B -ntp -f petclinic-chatbot/pom.xml test
+
+      - name: Regenerate TS types from openapi.yaml
+        working-directory: petclinic-frontend
+        run: npm run generate:api --silent
+
+      # ── Hook parity: pre-push lints the freshly extracted openapi.yaml with
+      #    Spectral; re-run it here so `git push --no-verify` can't bypass it. ──
+      - name: Lint openapi.yaml (Spectral) — backstops the pre-push hook
+        working-directory: petclinic-frontend
+        run: npm run lint:openapi --silent
+
+      - name: Run frontend tests (Karma + ChromeHeadlessCI)
+        working-directory: petclinic-frontend
+        run: npm run test-headless -- --code-coverage
+
+      - name: Strict frontend build (fails on any webpack warning)
+        working-directory: petclinic-frontend
+        run: npm run build
+
+      # ── Hook parity: pre-commit regenerates petclinic-backend/pom-libs.txt when
+      #    a pom changes. Regenerate here too so the committed file can't drift. ──
+      - name: Regenerate petclinic-backend/pom-libs.txt
+        run: python3 scripts/list-unversioned-deps.py
+
+      - name: Detect drift in regenerated artifacts
+        id: drift
+        run: |
+          if git diff --quiet petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=true"  >> "$GITHUB_OUTPUT"
+            git --no-pager diff --stat petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt
+          fi
+
+      - name: Fail fork PRs that have drift
+        if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork == true
+        run: |
+          echo "::error::Generated artifacts (docs/generated/, DB.sql, api-types.ts, or petclinic-backend/pom-libs.txt) are out of date."
+          echo "::error::Run 'cd petclinic-backend && mvn test', 'cd petclinic-frontend && npm run generate:api', and 'python3 scripts/list-unversioned-deps.py' locally and push the regenerated files."
+          exit 1
+
+      - name: Auto-commit regenerated artifacts
+        if: steps.drift.outputs.drift == 'true' && github.event.pull_request.head.repo.fork != true
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add petclinic-backend/docs/generated petclinic-backend/DB.sql petclinic-frontend/src/app/generated/api-types.ts petclinic-backend/pom-libs.txt
+          git commit -m 'chore(guardrail): regenerate diagrams, DB.sql, api-types.ts, and unversioned-deps [skip ci]'
+          git push
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: SonarCloud Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

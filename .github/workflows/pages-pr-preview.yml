@@ -1,0 +1,131 @@
+name: PR architecture preview
+
+# Publishes this PR's architecture *delta* as a browsable page at
+#   https://victorrentea.github.io/petclinic/pr/<number>/
+# and deletes it again when the PR closes.
+#
+# The point is that the gallery is a review artifact, not a source artifact: it
+# is committed (to gh-pages, which Pages serves) but structurally incapable of
+# reaching main, because nothing ever merges gh-pages. When the PR closes the
+# folder is removed, so the branch does not accumulate dead previews.
+#
+# SVGs are rendered on the runner and committed next to the page rather than
+# linked through plantuml.com: a gallery that silently turns into broken images
+# the day the public server is slow is worse than no gallery.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pages-mirror        # serialise with pages-mirror.yml — same branch
+  cancel-in-progress: false
+
+env:
+  PAGES_URL: https://victorrentea.github.io/petclinic
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Fork PRs get a read-only token, so both the gh-pages push and the comment
+    # would fail. Skip rather than show a red check on someone's first PR.
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      # plantuml pulls graphviz, which packages.puml needs — it has no
+      # `!pragma layout smetana`, unlike the generated diagrams.
+      - name: Install PlantUML
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends plantuml
+
+      - name: Compute the architecture delta
+        id: delta
+        run: |
+          set -euo pipefail
+          ./scripts/architecture-diff.sh "origin/${{ github.base_ref }}"
+          count=$(find pr-diff -name '*.diff.puml' | wc -l | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Render the deltas to SVG
+        if: steps.delta.outputs.count != '0'
+        run: plantuml -tsvg pr-diff/*.diff.puml && ls -la pr-diff/
+
+      - name: Build the gallery page
+        if: steps.delta.outputs.count != '0'
+        run: python3 scripts/build_pr_gallery.py pr-diff
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_BASE: ${{ github.base_ref }}
+          REPO: ${{ github.repository }}
+
+      - name: Publish to gh-pages under pr/<number>/
+        if: steps.delta.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          bash scripts/gh-pages-publish.sh "pr/$PR_NUMBER" pr-diff \
+            "docs(pages): architecture delta for PR #$PR_NUMBER"
+
+      - name: Link the gallery from a sticky comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          COUNT: ${{ steps.delta.outputs.count }}
+        run: |
+          set -euo pipefail
+          {
+            echo '<!-- architecture-preview -->'
+            echo '### 📐 Architecture delta'
+            echo
+            if [ "$COUNT" = '0' ]; then
+              echo 'No architecture diagram changed on this branch.'
+            else
+              echo "[**Open the gallery**]($PAGES_URL/pr/$PR/) — $COUNT diagram(s) changed."
+              echo
+              echo 'Red = added, red struck-through = removed. Rebuilt on every push; removed when this PR closes.'
+              echo
+              for svg in pr-diff/*.diff.svg; do
+                [ -e "$svg" ] || continue
+                name="$(basename "${svg%.diff.svg}")"
+                echo "![$name]($PAGES_URL/pr/$PR/$(basename "$svg"))"
+                echo
+              done
+            fi
+          } > comment.md
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+                 --jq 'map(select(.body | startswith("<!-- architecture-preview -->"))) | .[0].id // empty')
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@comment.md --silent
+          elif [ "$COUNT" != '0' ]; then
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@comment.md --silent
+          fi
+
+  cleanup:
+    runs-on: ubuntu-latest
+    # Runs whether the PR merged or was abandoned: either way the preview is spent.
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Drop pr/<number>/ from gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          bash scripts/gh-pages-publish.sh --remove "pr/$PR_NUMBER" \
+            "chore(pages): drop spent architecture preview for PR #$PR_NUMBER"

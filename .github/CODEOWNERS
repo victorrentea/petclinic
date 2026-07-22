@@ -1,0 +1,31 @@
+# Any PR touching these paths must be approved by a 2nd (senior) human
+# Works everywhere: in GitHub, GitLab, BitBucket ...
+
+# GIT + Agent Settings
+/.github/CODEOWNERS              @victorrentea/elders
+/.claude/settings.json           @victorrentea/elders
+/.github/workflows/*             @victorrentea/elders
+/.github/githooks/*             @victorrentea/elders
+/petclinic-backend/src/test/java/victor/training/petclinic/guardrail/** @victorrentea/elders
+
+# API Contracts
+/openapi.yaml                    @victorrentea/elders
+
+# Persistence
+/petclinic-backend/DB.sql        @victorrentea/elders
+/petclinic-backend/src/main/resources/db/migration/ @victorrentea/elders
+
+# Domain Model
+/petclinic-backend/docs/generated/DomainModel.puml @victorrentea/elders
+
+# Logical Architecture
+/petclinic-backend/docs/packages.puml @victorrentea/elders
+/petclinic-backend/docs/c4model.dsl    @victorrentea/elders
+/petclinic-backend/docs/c4model.c3.dsl @victorrentea/elders
+
+# Dependencies / SBOM
+**/pom.xml      @victorrentea/elders
+**/package.json @victorrentea/elders
+# Generated surface of deps declared with no <version> (inherited from a parent/BOM)
+/petclinic-backend/pom-libs.txt @victorrentea/elders
+

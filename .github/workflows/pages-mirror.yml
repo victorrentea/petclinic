@@ -1,0 +1,77 @@
+name: Pages mirror
+
+# Keeps `gh-pages` a faithful copy of main's tree, so the Pages source can be
+# switched from `main` to `gh-pages` without stranding a single URL that is
+# served today (the Code City link in README.md, every committed .puml, …).
+#
+# Why the indirection at all: PR preview galleries must never land on main, but
+# Pages serves only one branch. Pointing Pages at a *derived* branch lets main
+# stay the clean source of truth while `pr/<n>/` previews live alongside the
+# mirror — see pages-pr-preview.yml.
+#
+# The `pr/` directory is deliberately preserved on every mirror: it is owned by
+# the preview workflow, not by main, and a naive force-push would wipe every
+# open PR's gallery.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-mirror        # serialise with the preview workflow's pushes
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Mirror main's tree onto gh-pages, preserving pr/
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          src="$PWD"
+          work="$(mktemp -d)"
+
+          git config --global user.name  'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git clone --branch gh-pages --single-branch --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$work"
+          else
+            echo "gh-pages does not exist yet — creating it as an orphan branch."
+            git clone --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$work"
+            git -C "$work" checkout --orphan gh-pages
+            git -C "$work" rm -rq --cached . || true
+            find "$work" -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+          fi
+
+          # --delete makes this a mirror, not an accumulation; pr/ and .git survive.
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude 'pr/' \
+            "$src"/ "$work"/
+
+          # Pages' legacy build runs Jekyll, which silently drops files and folders
+          # whose names start with an underscore. main already carries .nojekyll.
+          touch "$work/.nojekyll"
+
+          cd "$work"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "gh-pages already matches main — nothing to mirror."
+            exit 0
+          fi
+          git commit -m "chore(pages): mirror main@${GITHUB_SHA::7}"
+          git push origin gh-pages

@@ -1,0 +1,292 @@
+/* extracted styles for assistant page */
+.prompt::before { content: "Send: "; }
+/* adversarial / abuse test prompts — flagged red + a purple devil so they read as guardrail probes */
+.prompt.attack { color: #e5484d; }
+.prompt.attack::before { content: "😈 Send: "; }
+/* pre-canned prompt links: tight vertical rhythm, each on its own line. display:table shrinks the
+   anchor to its text width so only the text is clickable (not the whole line). */
+.prompt { display: table; margin: 2px 0; line-height: 1.3; cursor: pointer; }
+.prompt + br { display: none; } /* prompts are block-level already; drop the <br> spacers between them */
+/* light mode defaults */
+:root {
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --link: #0b61ff;
+    /* overlay color defaults for spinner */
+    --overlay: rgba(255,255,255,0.7);
+    --spinner-track: rgba(0,0,0,0.12);
+}
+
+html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 8px; /* reduced from 16px to 8px */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* full-height column that fits the viewport EXACTLY — the page itself never scrolls; only the
+   message history scrolls internally (see .message-history overflow). */
+body {
+    box-sizing: border-box;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top controls: name + restart */
+.top-controls {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end; /* identity sits at the right edge */
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.signed-in-user { font-size: 0.9em; }
+.signed-in-name { font-weight: 600; }
+.signed-in-email { margin-left: 6px; color: #6b7280; }
+
+/* chat-row: message input + send button aligned to right */
+.chat-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 20px; /* breathing room down to the pre-canned prompt links */
+}
+
+.chat-row input[type="text"]#assistantInput {
+    flex: 1 1 auto; /* take remaining width */
+    min-width: 0; /* allow shrinking in flex */
+    font-size: 1.5em; /* 50% larger than default, incl. the "Type a message" placeholder */
+}
+
+.chat-row button#assistantSend {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+a {
+    color: var(--link);
+}
+
+input, button, label {
+    color: var(--text);
+}
+
+input, button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+/* clickable controls get the hand cursor so Send / Embabel triage / Clear feel like buttons */
+button { cursor: pointer; }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0b1220;
+        --panel: #09101a;
+        --text: #e6eef8;
+        --muted: #94a3b8;
+        --border: #203040;
+        --link: #7cc7ff;
+        --overlay: rgba(0,0,0,0.5);
+        --spinner-track: rgba(255,255,255,0.08);
+    }
+
+    /* more visible chat bubbles in dark mode (the light-mode defaults blend into the dark page) */
+    .message.user {
+        background: rgba(11, 97, 255, 0.22);
+        border-color: rgba(124, 199, 255, 0.40);
+    }
+    .message.assistant {
+        background: #18222f; /* a surface clearly lighter than the --bg page */
+        border-color: #314357;
+    }
+}
+
+/* spinner overlay styles (placed inside message-history) */
+.spinner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--overlay);
+    transition: opacity 150ms ease-in-out, visibility 150ms ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 999;
+    pointer-events: none; /* allow clicks when not visible */
+}
+
+.spinner-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid var(--spinner-track);
+    border-top-color: var(--link);
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 8px rgba(0,0,0,0.12);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* message history styles */
+.message-history {
+    flex: 1 1 auto; /* grow to fill the viewport between header and input row */
+    min-height: 0; /* allow shrinking so the page never overflows; content scrolls inside */
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 12px;
+    position: relative; /* so spinner-overlay can be positioned inside */
+}
+
+.message {
+    margin: 8px 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    line-height: 1.3;
+    word-break: break-word;
+    max-width: 85%;
+}
+
+.message.user {
+    background: linear-gradient(180deg, rgba(11,97,255,0.08), rgba(11,97,255,0.04));
+    border: 1px solid rgba(11,97,255,0.12);
+    color: var(--text);
+    /* user messages should be left-side now */
+    margin-right: auto;
+    text-align: left;
+}
+
+.message.assistant {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    /* assistant (AI) messages should be right-side visually; bubble aligned right but text flows left-to-right */
+    margin-left: auto;
+    text-align: left; /* ensure progressive streaming flows left-to-right */
+    direction: ltr; /* explicit left-to-right text direction */
+}
+
+.message small.meta {
+    display: block;
+    font-size: 0.75em;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+/* the assistant bubble sits on the right, so its timestamp reads better right-aligned */
+.message.assistant small.meta {
+    text-align: right;
+}
+
+/* messages that have aged OUT of the model's memory window — dimmed so the demo shows what's
+   "forgotten" (still on screen, but no longer in the LLM's context). */
+.message.forgotten {
+    opacity: .45;
+}
+
+/* small responsive tweak */
+@media (max-width: 600px) {
+    .message-history { height: 40vh; }
+}
+
+/* search results grid */
+.search-container {
+    margin-top: 12px;
+}
+
+.search-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.search-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 6px;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.search-item a.title {
+    font-weight: 600;
+    color: var(--link);
+    text-decoration: none;
+    margin-bottom: 6px;
+}
+
+.search-item .snippet {
+    color: var(--muted);
+    font-size: 0.9em;
+}
+
+/* table view for search results */
+.search-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.search-table th,
+.search-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.search-table th {
+    background: rgba(0,0,0,0.03);
+    font-weight: 600;
+}
+
+.search-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* responsive tweak: stack into single column on very small screens */
+@media (max-width: 420px) {
+    .search-table th, .search-table td { display: block; width: 100%; }
+    .search-table thead { display: none; }
+}

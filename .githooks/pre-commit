@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+# ── Secrets scan (gitleaks) ────────────────────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! GITLEAKS_OUT=$(gitleaks protect --staged --redact --no-banner 2>&1); then
+    echo "$GITLEAKS_OUT"
+    echo ""
+    echo "[pre-commit] ❌ Secrets detected in staged changes — commit blocked."
+    echo "[pre-commit]    Remove the secret, rotate it if it was real, then re-stage."
+    exit 1
+  fi
+else
+  echo "[pre-commit] ⚠️  gitleaks not installed — skipping secret scan."
+  echo "[pre-commit]    Install with: brew install gitleaks"
+fi
+
+# ── Project-local secrets scan (catches custom-shape secrets gitleaks misses) ─
+SECRETS_FILE="$ROOT/secrets.env"
+if [ -f "$SECRETS_FILE" ]; then
+  STAGED_ADDITIONS=$(git diff --cached -U0 --no-color -- ':!secrets.env' | grep -E '^\+[^+]' || true)
+  if [ -n "$STAGED_ADDITIONS" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+      [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || continue
+      key="${BASH_REMATCH[1]}"
+      value="${BASH_REMATCH[2]}"
+      value="${value%$'\r'}"
+      value="${value%"${value##*[![:space:]]}"}"
+      if [[ "$value" =~ ^\"(.*)\"$ ]] || [[ "$value" =~ ^\'(.*)\'$ ]]; then
+        value="${BASH_REMATCH[1]}"
+      fi
+      [[ ${#value} -ge 8 ]] || continue
+      if printf '%s\n' "$STAGED_ADDITIONS" | grep -F -q -- "$value"; then
+        echo ""
+        echo "[pre-commit] ❌ Value of \$$key (from secrets.env) appears in staged additions — commit blocked."
+        echo "[pre-commit]    Rotate the secret if it was real, scrub it from your changes, then re-stage."
+        exit 1
+      fi
+    done <"$SECRETS_FILE"
+  fi
+fi
+
+# ── Backend: Spotless-format staged Java files ─────────────────────────────
+# (moved here from .claude/hooks/post-java-edit.sh — formatting on every edit
+#  invalidated Claude's read cache)
+STAGED_JAVA=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^petclinic-backend/.*\.java$' || true)
+if [ -n "$STAGED_JAVA" ]; then
+  if command -v mvn >/dev/null 2>&1; then
+    if ! SPOTLESS_OUT=$(cd "$ROOT/petclinic-backend" && mvn spotless:apply -q 2>&1); then
+      echo "$SPOTLESS_OUT"
+      echo "[pre-commit] ❌ Spotless failed — commit blocked."
+      exit 1
+    fi
+    # Re-stage the formatted files so the commit contains the formatted version.
+    while IFS= read -r f; do
+      git add "$ROOT/$f"
+    done <<<"$STAGED_JAVA"
+  else
+    echo "[pre-commit] ⚠️  mvn not on PATH — skipping Spotless formatting."
+  fi
+fi
+
+# ── Frontend: regenerate TS types from openapi.yaml ────────────────────────
+# Gated: only run when openapi.yaml is staged — that's the sole input.
+if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
+  if command -v npm >/dev/null 2>&1 && [ -d "$ROOT/petclinic-frontend/node_modules" ]; then
+    NPM_OUT=$(mktemp)
+    trap 'rm -f "$NPM_OUT"' EXIT
+    if ! npm --prefix "$ROOT/petclinic-frontend" run generate:api --silent >"$NPM_OUT" 2>&1; then
+      cat "$NPM_OUT"
+      echo "[pre-commit] ❌ TS-types regeneration failed — commit blocked."
+      exit 1
+    fi
+    git add "$ROOT/petclinic-frontend/src/app/generated/api-types.ts"
+  else
+    echo "[pre-commit] ⚠️  npm or petclinic-frontend/node_modules missing — skipping TS-types regen."
+    echo "[pre-commit]    Install with: cd petclinic-frontend && npm install"
+  fi
+fi
+
+# ── DB schema → ER diagram (plain snapshot) ────────────────────────────────
+# Gated: only run when petclinic-backend/DB.sql is staged — that's the sole input. Regenerates
+# docs/generated/DB.puml as a plain snapshot of the current schema and stages it
+# so the diagram is committed alongside the schema change.
+if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
+  if command -v python3 >/dev/null 2>&1; then
+    DBDIAG_OUT=$(mktemp)
+    trap 'rm -f "$NPM_OUT" "$DBDIAG_OUT"' EXIT
+    if ! "$ROOT/petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh" >"$DBDIAG_OUT" 2>&1; then
+      cat "$DBDIAG_OUT"
+      echo "[pre-commit] ❌ DB schema diagram generation failed — commit blocked."
+      exit 1
+    fi
+    git add "$ROOT/petclinic-backend/docs/generated/DB.puml"
+  else
+    echo "[pre-commit] ⚠️  python3 missing — skipping DB schema diagram regen."
+    echo "[pre-commit]    Install Python 3 to keep DB.puml in sync."
+  fi
+fi
+
+# ── Unversioned-dependency surface (deps declared with no <version>) ────────
+# Gated: only when a pom.xml is staged — that's the sole input. Regenerates
+# petclinic-backend/pom-libs.txt and stages it so the managed-version surface is
+# reviewed (via CODEOWNERS) alongside the dependency change.
+if git diff --cached --name-only | grep -qE '(^|/)pom\.xml$'; then
+  if command -v python3 >/dev/null 2>&1; then
+    if ! DEPS_OUT=$(python3 "$ROOT/scripts/list-unversioned-deps.py" 2>&1); then
+      echo "$DEPS_OUT"
+      echo "[pre-commit] ❌ unversioned-deps list generation failed — commit blocked."
+      exit 1
+    fi
+    git add "$ROOT/petclinic-backend/pom-libs.txt"
+  else
+    echo "[pre-commit] ⚠️  python3 missing — skipping unversioned-deps list regen."
+  fi
+fi
+
+echo "✅ pre-commit"

@@ -1,0 +1,91 @@
+# Secrets (defense-in-depth; gitleaks is the primary guard in pre-commit)
+*.env
+!**/.env.example
+
+# OS / IDE (apply to any module)
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.classpath
+.serena
+.project
+.settings/
+.factorypath
+.java-version
+.tool-versions
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Maven / Java build output (any module)
+target/
+**/.jqwik-database
+
+# Node (any module)
+node_modules/
+
+# git worktrees
+.worktrees/
+.claude/worktrees/
+
+# petclinic-database (embedded Postgres)
+petclinic-database/data/
+petclinic-database/dependency-reduced-pom.xml
+
+# petclinic-ui-test (Playwright)
+petclinic-ui-test/test-results/
+petclinic-ui-test/playwright-report/
+petclinic-ui-test/playwright/.cache/
+
+# petclinic-frontend (Angular)
+petclinic-frontend/dist
+petclinic-frontend/tmp
+petclinic-frontend/out-tsc
+petclinic-frontend/.angular
+petclinic-frontend/.angular/cache
+petclinic-frontend/.sass-cache
+petclinic-frontend/.c9/
+petclinic-frontend/connect.lock
+petclinic-frontend/coverage
+petclinic-frontend/libpeerconnection.log
+petclinic-frontend/npm-debug.log
+petclinic-frontend/testem.log
+petclinic-frontend/typings
+
+# petclinic-backend
+petclinic-backend/src/test/postman/reports/
+petclinic-backend/.tools/
+
+# Generated diagram renders — sources (.puml/.dsl) are tracked; renders viewed via PlantUML proxy URLs (see docs/generated/INDEX.md)
+petclinic-backend/docs/generated/**/*.svg
+petclinic-backend/docs/generated/**/*.png
+
+# e2e trace sequence diagrams: the .puml sources under
+# petclinic-ui-test/features/generated_sequences/ are tracked (no PNG renders).
+
+# Bug-heatmap generated outputs — only the generator scripts are tracked
+# (docs/scripts/bug-heatmap/); regenerate the map with that folder's generate.sh
+petclinic-backend/docs/generated/bug-heatmap/
+
+# qa
+/qa/test-results/screenshots/
+
+# misc
+__pycache__/
+.playwright-mcp/
+/petclinic-database/.bootstrapped
+.claude/settings.local.json
+
+# Chatbot on-disk RAG embedding cache (avoids re-embedding on restart) — match anywhere it lands
+rag-vector-store.json
+/petclinic-chatbot/rag-vector-store.json.meta.json
+/.codegraph/
+/.serena/
+/~$*.xlsx
+
+
+# Review-time architecture delta (scripts/architecture-diff.sh) — regenerate, never commit
+/pr-diff/
