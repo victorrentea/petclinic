@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,62 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  const expectedPage: OwnerPage = {
+    content: expectedOwners,
+    totalElements: 28,
+    totalPages: 3,
+    number: 0,
+    size: 10
+  };
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+  it('should return a page of owners with its totals', () => {
+    ownerService
+      .getOwners({page: 0, size: 10, sort: 'name,asc', lastName: ''})
+      .subscribe((page) => {
+        expect(page.content).toEqual(expectedOwners);
+        expect(page.totalElements).toEqual(28);
+        expect(page.totalPages).toEqual(3);
+        expect(page.number).toEqual(0);
+        expect(page.size).toEqual(10);
+      }, fail);
+
+    const req = httpTestingController.expectOne(
+      (request) => request.url === ownerService.entityUrl
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expect(req.request.params.get('page')).toEqual('0');
+    expect(req.request.params.get('size')).toEqual('10');
+    expect(req.request.params.get('sort')).toEqual('name,asc');
+    req.flush(expectedPage);
+  });
+
+  it('should send the lastName filter only when one is set', () => {
+    ownerService
+      .getOwners({page: 2, size: 20, sort: 'city,desc', lastName: 'Dav'})
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners), fail);
+
+    const req = httpTestingController.expectOne(
+      (request) => request.url === ownerService.entityUrl
+    );
+    expect(req.request.params.get('lastName')).toEqual('Dav');
+    expect(req.request.params.get('page')).toEqual('2');
+    expect(req.request.params.get('size')).toEqual('20');
+    expect(req.request.params.get('sort')).toEqual('city,desc');
+    req.flush(expectedPage);
+  });
+
+  it('should surface an error rather than silently showing an empty grid', () => {
+    let reportedError: string;
+    ownerService
+      .getOwners({page: 0, size: 10, sort: 'name,asc', lastName: ''})
+      .subscribe(() => fail('expected the failure to propagate'), (error) => reportedError = error);
+
+    const req = httpTestingController.expectOne(
+      (request) => request.url === ownerService.entityUrl
+    );
+    req.flush('boom', {status: 500, statusText: 'Server Error'});
+
+    expect(reportedError).toContain('500');
   });
 
   it('search the owner by id', () => {
@@ -132,14 +181,15 @@ describe('OwnerService', () => {
   });
 
   it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
+    ownerService
+      .getOwners({page: 0, size: 10, sort: 'name,asc', lastName: 'Fr'})
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners));
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
+      (request) => request.url === ownerService.entityUrl
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expect(req.request.params.get('lastName')).toEqual('Fr');
+    req.flush(expectedPage);
   });
 });

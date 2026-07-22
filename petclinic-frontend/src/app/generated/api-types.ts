@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description Returns one page of owners. Sortable by 'name' or 'city' only; any other sort key is rejected with 400. Page size defaults to 10 and is clamped to a maximum of 20 â a larger requested size is silently reduced, and the returned 'size' reports what was actually applied.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,35 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, plus the totals needed to render a paginator. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content?: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based index of this page.
+       * @example 0
+       */
+      number?: number;
+      /**
+       * Format: int32
+       * @description Page size actually applied, after clamping.
+       * @example 10
+       */
+      size?: number;
+      /**
+       * Format: int64
+       * @description Total owners matching the query, across all pages.
+       * @example 28
+       */
+      totalElements?: number;
+      /**
+       * Format: int32
+       * @description Total number of pages available.
+       * @example 3
+       */
+      totalPages?: number;
     };
     PetDto: {
       /**
@@ -553,24 +585,33 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description Returns one page of owners. Sortable by 'name' or 'city' only; any other sort key is rejected with 400. Page size defaults to 10 and is clamped to a maximum of 20 â a larger requested size is silently reduced, and the returned 'size' reports what was actually applied.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index (0..N) */
+        page?: number;
+        /** @description The size of the page to be returned */
+        size?: number;
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Sort key outside the whitelist */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */

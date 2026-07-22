@@ -7,6 +7,14 @@ export class OwnersPage {
   readonly findOwnerButton: Locator;
   readonly ownerNameCells: Locator;
   readonly ownersTable: Locator;
+  readonly cityCells: Locator;
+  readonly paginator: Locator;
+  readonly paginatorRangeLabel: Locator;
+  readonly nextPageButton: Locator;
+  readonly previousPageButton: Locator;
+  readonly pageSizeSelect: Locator;
+  readonly nameHeader: Locator;
+  readonly cityHeader: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -15,6 +23,45 @@ export class OwnersPage {
     this.findOwnerButton = page.locator('#search-owner-form button[type="submit"]');
     this.ownerNameCells = page.locator('#ownersTable td.ownerFullName');
     this.ownersTable = page.locator('#ownersTable');
+    this.cityCells = page.locator('#ownersTable td.mat-column-city');
+    this.paginator = page.locator('mat-paginator');
+    this.paginatorRangeLabel = page.locator('.mat-mdc-paginator-range-label');
+    this.nextPageButton = page.locator('button.mat-mdc-paginator-navigation-next');
+    this.previousPageButton = page.locator('button.mat-mdc-paginator-navigation-previous');
+    this.pageSizeSelect = page.locator('mat-paginator mat-select');
+    this.nameHeader = page.locator('#ownersTable th.mat-column-name');
+    this.cityHeader = page.locator('#ownersTable th.mat-column-city');
+  }
+
+  async goToNextPage() {
+    await this.nextPageButton.click();
+  }
+
+  async sortByCity() {
+    await this.cityHeader.click();
+  }
+
+  async selectPageSize(size: number) {
+    await this.pageSizeSelect.click();
+    await this.page.locator(`mat-option:has-text("${size}")`).first().click();
+  }
+
+  async getCities(): Promise<string[]> {
+    const cells = await this.cityCells.all();
+    const cities: string[] = [];
+    for (const cell of cells) {
+      const text = await cell.textContent();
+      if (text && text.trim()) {
+        cities.push(text.trim());
+      }
+    }
+    return cities;
+  }
+
+  async getTotalFromPaginator(): Promise<number> {
+    const label = await this.paginatorRangeLabel.textContent();
+    const match = label?.match(/of\s+(\d+)/);
+    return match ? Number(match[1]) : 0;
   }
 
   async open() {

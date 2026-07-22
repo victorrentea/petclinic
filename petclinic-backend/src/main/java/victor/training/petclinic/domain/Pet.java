@@ -10,6 +10,7 @@ import java.util.Set;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
+import org.hibernate.annotations.BatchSize;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,6 +51,9 @@ public class Pet {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    /** Batched for the same reason as Owner.pets: an owners page serializes pets *with their visits*,
+     *  so an unbatched collection here is an N+1 one level deeper. */
+    @BatchSize(size = 20)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
     private Set<Visit> visits = new HashSet<>();
 

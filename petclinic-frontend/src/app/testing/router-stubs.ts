@@ -37,6 +37,14 @@ export class ActivatedRouteStub {
   private subject = new BehaviorSubject(this.testParams);
   params = this.subject.asObservable();
 
+  // ActivatedRoute.queryParams is Observable — list screens read page/size/sort/filter from it
+  private queryParamsSubject = new BehaviorSubject<{ [key: string]: any }>({});
+  queryParams = this.queryParamsSubject.asObservable();
+
+  setQueryParams(params: { [key: string]: any }) {
+    this.queryParamsSubject.next(params);
+  }
+
   // Test parameters
   // tslint:disable-next-line:variable-name
   private _testParams: {};

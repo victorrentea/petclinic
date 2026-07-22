@@ -26,24 +26,73 @@ test.describe('Owners Page', () => {
     console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
-  test('shows all owners on initial load', async ({ page }) => {
+  test('shows the first page of owners', async ({ page }) => {
     const ownersPage = new OwnersPage(page);
 
-    // Fetch expected owners from API
-    const expectedOwners = await apiClient.fetchOwners();
-    const expectedFullNames = ApiClient.getFullNames(expectedOwners);
+    // The grid asks for exactly what it shows: the default first page of 10
+    const firstPage = await apiClient.fetchOwnerPage({ page: 0, size: 10, sort: 'name,asc' });
+    const expectedFullNames = ApiClient.getFullNames(firstPage.content);
 
-    // Open the owners page
     await ownersPage.open();
-
-    // Wait for the expected number of owners
     await ownersPage.waitForOwnersCount(expectedFullNames.length);
 
-    // Get actual owner names from the page
     const actualFullNames = await ownersPage.getOwnerFullNames();
 
-    // Assert that all expected owners are displayed
-    expect(ApiClient.sorted(actualFullNames)).toEqual(ApiClient.sorted(expectedFullNames));
+    expect(actualFullNames.length).toBe(10);
+    expect(actualFullNames).toEqual(expectedFullNames);
+
+    // ...while the paginator still reports how many owners exist in total
+    expect(await ownersPage.getTotalFromPaginator()).toBe(firstPage.totalElements);
+    expect(firstPage.totalElements).toBeGreaterThan(10);
+  });
+
+  test('navigates to the second page', async ({ page }) => {
+    const ownersPage = new OwnersPage(page);
+
+    const firstPage = await apiClient.fetchOwnerPage({ page: 0, size: 10, sort: 'name,asc' });
+    const secondPage = await apiClient.fetchOwnerPage({ page: 1, size: 10, sort: 'name,asc' });
+    const firstPageNames = ApiClient.getFullNames(firstPage.content);
+    const secondPageNames = ApiClient.getFullNames(secondPage.content);
+
+    await ownersPage.open();
+    await ownersPage.waitForOwnersCount(firstPageNames.length);
+    await ownersPage.goToNextPage();
+    await ownersPage.waitForOwnersCount(secondPageNames.length);
+
+    const actualNames = await ownersPage.getOwnerFullNames();
+
+    expect(actualNames).toEqual(secondPageNames);
+    // no owner from page 1 reappears on page 2
+    expect(actualNames.filter((name) => firstPageNames.includes(name))).toEqual([]);
+    expect(page.url()).toContain('page=1');
+  });
+
+  test('sorts by city', async ({ page }) => {
+    const ownersPage = new OwnersPage(page);
+
+    await ownersPage.open();
+    await ownersPage.waitForOwnersCount(10);
+
+    await ownersPage.sortByCity();
+    await page.waitForURL(/sort=city,asc/);
+
+    const cities = await ownersPage.getCities();
+
+    expect(cities.length).toBeGreaterThan(0);
+    expect(cities).toEqual([...cities].sort((a, b) => a.localeCompare(b, 'en')));
+  });
+
+  test('changes the page size to 20', async ({ page }) => {
+    const ownersPage = new OwnersPage(page);
+
+    await ownersPage.open();
+    await ownersPage.waitForOwnersCount(10);
+
+    await ownersPage.selectPageSize(20);
+    await page.waitForURL(/size=20/);
+    await ownersPage.waitForOwnersCount(20);
+
+    expect((await ownersPage.getOwnerFullNames()).length).toBe(20);
   });
 
   test('filters owners by last name prefix', async ({ page }) => {

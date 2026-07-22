@@ -9,6 +9,24 @@ export interface OwnerDto {
   telephone?: string;
 }
 
+export interface OwnerPage {
+  content: OwnerDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface OwnerPageParams {
+  lastName?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+/** The backend clamps page size to 20; asking for more silently yields 20. */
+export const MAX_PAGE_SIZE = 20;
+
 export interface VisitDto {
   id: number;
   date: string;
@@ -32,16 +50,32 @@ export class ApiClient {
     });
   }
 
+  /** The endpoint is paged, so walk every page when the whole set is needed. */
   async fetchOwners(): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners');
-    return response.data;
+    return this.fetchAllPages({});
   }
 
   async fetchOwnersByPrefix(prefix: string): Promise<OwnerDto[]> {
-    const response = await this.client.get<OwnerDto[]>('/owners', {
-      params: { lastName: prefix }
-    });
+    return this.fetchAllPages({ lastName: prefix });
+  }
+
+  /** One page exactly as the grid would request it. */
+  async fetchOwnerPage(params: OwnerPageParams): Promise<OwnerPage> {
+    const response = await this.client.get<OwnerPage>('/owners', { params });
     return response.data;
+  }
+
+  private async fetchAllPages(params: OwnerPageParams): Promise<OwnerDto[]> {
+    const owners: OwnerDto[] = [];
+    let page = 0;
+    let totalPages = 1;
+    do {
+      const body = await this.fetchOwnerPage({ ...params, page, size: MAX_PAGE_SIZE });
+      owners.push(...body.content);
+      totalPages = body.totalPages;
+      page++;
+    } while (page < totalPages);
+    return owners;
   }
 
   async fetchVisits(): Promise<VisitDto[]> {
@@ -49,10 +83,11 @@ export class ApiClient {
     return response.data;
   }
 
+  /** The grid renders "Last, First" — it sorts by last name, so the eye must see it first. */
   static getFullNames(owners: OwnerDto[]): string[] {
     return owners
-      .map(owner => `${owner.firstName} ${owner.lastName}`.trim())
-      .filter(name => name.length > 0);
+      .map(owner => `${owner.lastName}, ${owner.firstName}`.trim())
+      .filter(name => name.length > 2);
   }
 
   static sorted(values: string[]): string[] {
@@ -63,12 +98,10 @@ export class ApiClient {
     return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
 
+  /** Cells read "Last, First", so the last name is everything before the comma. */
   static extractLastName(fullName: string): string {
-    const firstSpace = fullName.indexOf(' ');
-    if (firstSpace < 0 || firstSpace === fullName.length - 1) {
-      return fullName;
-    }
-    return fullName.substring(firstSpace + 1);
+    const comma = fullName.indexOf(',');
+    return comma < 0 ? fullName : fullName.substring(0, comma).trim();
   }
 
   static choosePrefixFrom(owners: OwnerDto[]): string {

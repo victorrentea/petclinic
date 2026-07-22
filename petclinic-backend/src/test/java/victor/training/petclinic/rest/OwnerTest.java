@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -34,6 +35,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -148,16 +150,28 @@ public class OwnerTest {
             .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
+    /** The endpoint returns one page at a time, so walk every page: these tests assert that an owner
+     *  is present in the result set, which is a statement about the whole set, not about page 1. */
     private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType("application/json"))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+        String separator = uriTemplate.contains("?") ? "&" : "?";
+        List<OwnerDto> all = new ArrayList<>();
+        int pageNumber = 0;
+        int totalPages;
+        do {
+            String responseJson = mockMvc.perform(get(uriTemplate + separator + "page=" + pageNumber))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+            JsonNode page = mapper.readTree(responseJson);
+            all.addAll(mapper.convertValue(page.get("content"), new TypeReference<List<OwnerDto>>() {
+            }));
+            totalPages = page.get("totalPages").asInt();
+            pageNumber++;
+        } while (pageNumber < totalPages);
+        return all;
     }
 
     @Test

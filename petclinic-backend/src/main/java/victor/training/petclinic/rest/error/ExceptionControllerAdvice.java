@@ -64,6 +64,15 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.badRequest().body(pd);
     }
 
+    @ExceptionHandler(InvalidSortException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleInvalidSort(InvalidSortException ex, HttpServletRequest request) {
+        log.warn("Rejected sort key: {}", ex.getRejectedKey());
+        ProblemDetail pd = buildProblemDetail("Invalid Sort", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("acceptedSortKeys", ex.getAcceptedKeys());
+        return ResponseEntity.badRequest().body(pd);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

@@ -1,8 +1,12 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +20,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -34,7 +39,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,15 +63,31 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners",
+        description = "Returns one page of owners. Sortable by 'name' or 'city' only; any other sort key is "
+            + "rejected with 400. Page size defaults to 10 and is clamped to a maximum of 20 — a larger "
+            + "requested size is silently reduced, and the returned 'size' reports what was actually applied.")
     @ApiResponse(responseCode = "200", description = "OK",
         content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+            schema = @Schema(implementation = OwnerPageDto.class),
+            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS_PAGE)))
+    @ApiResponse(responseCode = "400", description = "Sort key outside the whitelist",
+        content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @ParameterObject Pageable pageable) {
+        Pageable whitelistedPageable = PageRequest.of(
+            pageable.getPageNumber(), pageable.getPageSize(), OwnerSortWhitelist.toEntitySort(pageable.getSort()));
+
+        Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName, whitelistedPageable);
+
+        return new OwnerPageDto(
+            ownerMapper.toOwnerDtoCollection(ownerPage.getContent()),
+            ownerPage.getTotalElements(),
+            ownerPage.getTotalPages(),
+            ownerPage.getNumber(),
+            ownerPage.getSize());
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

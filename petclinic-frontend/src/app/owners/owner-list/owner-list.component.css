@@ -3,6 +3,99 @@
 display:none;
 }
 
+/* ---------------------------------------------------------------------------
+   Material table restyled to the PetClinic Bootstrap theme.
+   The values below are copied from assets/css/petclinic.css (the app re-themes
+   Bootstrap's greys: header #3c3834 on #f1f1f1 text, borders #34302d, Spring
+   green #6db33f on buttons), so this grid is indistinguishable from the Vets
+   screen next to it. Do not substitute Material's defaults.
+   --------------------------------------------------------------------------- */
+.owners-table {
+	width: 100%;
+	max-width: 100%;
+	margin-bottom: 20px;
+	background: transparent;
+	/* fixed layout + explicit widths below: without them every sort click
+	   re-measures cell content and the column boundaries jump sideways */
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+.owners-table .mat-mdc-header-cell {
+	background-color: #3c3834;
+	color: #f1f1f1;
+	font-weight: bold;
+	font-size: 14px;
+	padding: 8px;
+	line-height: 1.42857143;
+	vertical-align: bottom;
+	border-bottom: 2px solid #34302d;
+	white-space: nowrap;
+}
+
+/* the sort arrow and header label must stay legible on the dark header */
+.owners-table .mat-mdc-header-cell .mat-sort-header-arrow {
+	color: #f1f1f1;
+}
+
+.owners-table .mat-mdc-header-cell:hover {
+	color: #ffffff;
+}
+
+.owners-table .mat-mdc-cell {
+	padding: 8px;
+	line-height: 1.42857143;
+	vertical-align: top;
+	border-top: 1px solid #34302d;
+	border-bottom: none;
+	font-size: 14px;
+	color: inherit;
+}
+
+.owners-table tr.mat-mdc-row {
+	height: auto;
+}
+
+.owners-table tr.mat-mdc-row:nth-child(odd) {
+	background-color: #f9f9f9;
+}
+
+/* one explicit width per column, so sorting never shifts the boundaries */
+.owners-table .mat-column-name {
+	width: 22%;
+}
+
+.owners-table .mat-column-address {
+	width: 28%;
+}
+
+.owners-table .mat-column-city {
+	width: 18%;
+}
+
+.owners-table .mat-column-telephone {
+	width: 17%;
+}
+
+.owners-table .mat-column-pets {
+	width: 15%;
+}
+
+.mat-mdc-paginator {
+	background: transparent;
+	font-family: inherit;
+}
+
+/* labels and buttons must never wrap onto a second line */
+.mat-mdc-paginator .mat-mdc-paginator-range-label,
+.mat-mdc-paginator .mat-mdc-paginator-page-size-label {
+	white-space: nowrap;
+}
+
+#ownersTable .btn-default {
+	white-space: nowrap;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;
