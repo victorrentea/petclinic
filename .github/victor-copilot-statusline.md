@@ -3,7 +3,7 @@
 A rich one-line status bar for **GitHub Copilot CLI**. Example:
 
 ```
-🤖 opus-4.8 · high · 55K/1M | 6759 AIC (96%)↗ left | for 7d 4h
+🤖 opus-4.8 · high · 55K/1M | 6759 AIC (96%)↗ left | resets in 7d 4h
 ```
 
 Three ` | `-separated segments:
@@ -60,7 +60,7 @@ The relevant snapshot is `quota_snapshots.premium_interactions`
 ```bash
 #!/usr/bin/env bash
 # Copilot CLI status line. Example output:
-#   🤖 opus-4.8 · high · 55K/1M | 6759 AIC (96%)↗ left | for 7d 4h
+#   🤖 opus-4.8 · high · 55K/1M | 6759 AIC (96%)↗ left | resets in 7d 4h
 #
 #   • model: display_name with the "claude-" prefix stripped; the " · N context"
 #     tail is replaced by "<used>/<limit>" context tokens (used count coloured
@@ -228,7 +228,7 @@ if reset_dt:
     if secs > 0:
         dd, hh = secs // 86400, (secs % 86400) // 3600
         wd = sum(1 for i in range(dd) if (now + timedelta(days=i)).weekday() < 5)
-        parts.append(f"for {wd}d {hh}h" if wd else f"for {hh}h")
+        parts.append(f"resets in {wd}d {hh}h" if wd else f"resets in {hh}h")
 
 print(" | ".join(parts))
 PY
@@ -321,7 +321,7 @@ Based on `used/limit`: **≥95% → red**, **≥65% → yellow**, else default.
 
 ### Working-days countdown
 
-`for Nd Hh` counts only Mon–Fri days between now and the reset instant; the `Hh`
+`resets in Nd Hh` counts only Mon–Fri days between now and the reset instant; the `Hh`
 is the leftover hours of the partial day.
 
 ---
