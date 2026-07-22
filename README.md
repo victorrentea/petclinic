@@ -99,9 +99,9 @@ Start YOUR agent in YOUR🫵 work project, and tell it:
 Patiently guide the agent through this setup, then tell it: Turn the lessons you learned into a reusable skill, ideally scripting as much work you can. 
 
 ### Tools for Agentic Lifestyle
-- (Wispr Flow)[https://wisprflow.ai] to dictate .
-- (Codex Bar)[https://codexbar.app] to show remaining quota.
-- (Screen Brush)[https://apps.apple.com/us/app/screenbrush/id1233965871] to draw on screen before screenshot to agent. 
+- [Wispr Flow](https://wisprflow.ai) to dictate .
+- [Codex Bar](https://codexbar.app) to show remaining quota.
+- [Screen Brush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before screenshot to agent. 
 - Configure yourself, my dear CLI agent, a status bar inspired from `victor-statusbar.md`.
 
 ### Adopt ideas from `petclinic` into your own project ❤️
