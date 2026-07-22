@@ -319,9 +319,12 @@ html = """<!doctype html>
     font-size: 12px;
     line-height: 1.35;
   }
+  /* Two columns: the colour pair (metric + its scale) stacks on the left, the
+     geometry pair (height, area) on the right — so the scale sits directly under
+     the metric it scales, instead of reading as a fourth independent knob. */
   .controls {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
   /* View switch (Classes / Packages / Modules) sits inline in the title row. */
@@ -332,7 +335,7 @@ html = """<!doctype html>
     background: #fff; text-transform: none;
   }
   h1 .titleView option:disabled { color: #aab4c8; }
-  /* Inline label+select rows (e.g. "Package labels:") under the title. */
+  /* Inline label+select rows (e.g. "Package names:") under the title. */
   .viewOf {
     display: flex; align-items: center; gap: 8px; margin: 5px 0 10px;
     font-size: 13px; font-weight: 600; color: #1f2933;
@@ -754,14 +757,6 @@ html = """<!doctype html>
       </select>
     </label>
     <label>
-      Scale
-      <select id="colorScale" aria-label="colour scale">
-        <option value="auto" selected>auto (log for /KLOC)</option>
-        <option value="linear">linear</option>
-        <option value="log">log</option>
-      </select>
-    </label>
-    <label>
       Height
       <select id="heightMetric">
         <option value="lines">lines of code (LOC)</option>
@@ -772,6 +767,14 @@ html = """<!doctype html>
         <option value="fan_in">incoming coupling (fan in)</option>
         <option value="fan_out">outgoing coupling (fan out)</option>
         <option value="instability">instability Ce/(Ce+Ca)</option>
+      </select>
+    </label>
+    <label>
+      Color scale
+      <select id="colorScale" aria-label="colour scale">
+        <option value="auto" selected>auto (log for /KLOC)</option>
+        <option value="linear">linear</option>
+        <option value="log">log</option>
       </select>
     </label>
     <label>
@@ -793,7 +796,7 @@ html = """<!doctype html>
     <span id="pkgFilterCount" class="filterCount"></span>
   </div>
   <div class="viewOf pkgRow">
-    <span>Package labels:</span>
+    <span>Package names:</span>
     <select id="pkgLabelMode" aria-label="package label style">
       <option value="floating">floating tags</option>
       <option value="floor" selected>on the floor (edges)</option>
@@ -803,8 +806,8 @@ html = """<!doctype html>
   <div class="viewOf pkgRow">
     <span>Change set:</span>
     <select id="changeMode" aria-label="change-set filter">
-      <option value="off" selected>show everything</option>
-      <option value="highlight">highlight changed</option>
+      <option value="off">show everything</option>
+      <option value="highlight" selected>highlight changed</option>
       <option value="hide">only changed</option>
     </select>
     <span id="changeCount" class="filterCount"></span>
@@ -915,8 +918,11 @@ const filterCountEl = document.getElementById("pkgFilterCount");
 if (packageOpt && !PACKAGES.length) packageOpt.disabled = true;   // no package data → option greyed
 if (moduleOpt && MODULES.length < 2) moduleOpt.disabled = true;   // <2 modules → nothing to compare
 // Nothing in the change set → the highlight/hide modes have nothing to act on.
+// "highlight changed" is the default, so fall back to "off" as well: leaving the
+// disabled value selected would drain the whole city to grey with nothing lit.
 if (changeSelect && !HAS_CHANGES) {
   for (const opt of changeSelect.options) if (opt.value !== "off") opt.disabled = true;
+  changeSelect.value = "off";
   changeSelect.title = "no files in the current git change set";
 }
 function changeMode() { return changeSelect ? changeSelect.value : "off"; }
@@ -966,7 +972,6 @@ const districtStep = 6;
 const maxHeight = 190;
 const minHeight = 5;
 let buildings = [];
-let changeOutlines = [];   // thick black shells around changed buildings (highlight mode)
 let districts = [];
 let cityLabels = [];
 let districtLabels = [];   // floating package tags (CSS2DObjects), when pkgLabelMode = "floating"
@@ -1270,12 +1275,6 @@ function clearCity() {
     entry.mesh.material.dispose();
   }
   buildings = [];
-  for (const o of changeOutlines) {
-    scene.remove(o);
-    o.geometry.dispose();
-    o.material.dispose();
-  }
-  changeOutlines = [];
   districts = [];
   districtByName = new Map();
   glowingDistrict = null;
@@ -1402,40 +1401,22 @@ function rebuildCity() {
   };
 }
 
-// "highlight changed" mode: keep the change set in full colour and ring each
-// changed building with a thick black border so it pops; drain every unchanged
-// building to grey and drop it to 50% opacity so it recedes. Every rebuild makes
-// fresh meshes/materials, so this only ever needs to *apply* — no undo pass.
+// "highlight changed" mode: leave the change set exactly as it is and drain every
+// unchanged building to grey at 50% opacity so it recedes. The contrast between
+// solid colour and translucent grey carries the signal on its own — an added
+// border only crowded the city. Every rebuild makes fresh meshes/materials, so
+// this only ever needs to *apply* — no undo pass.
 // (In "off" and "hide" modes there is nothing to restyle.)
 function styleForChanges() {
   if (changeMode() !== "highlight") return;
   for (const entry of buildings) {
-    if (entry.file.changed) {
-      addChangeOutline(entry);
-    } else {
-      const m = entry.mesh.material;
-      m.color.copy(grayFor(entry.colorValue, entry.maxColor));
-      m.transparent = true;
-      m.opacity = 0.5;
-      m.depthWrite = false;
-    }
+    if (entry.file.changed) continue;
+    const m = entry.mesh.material;
+    m.color.copy(grayFor(entry.colorValue, entry.maxColor));
+    m.transparent = true;
+    m.opacity = 0.5;
+    m.depthWrite = false;
   }
-}
-
-// A black shell one border-width larger than the building, drawn back-face-only
-// so only its rim shows around the (opaque, full-colour) changed building —
-// a reliable thick outline where GL line width is capped at 1px. ~3x a hairline.
-const CHANGE_OUTLINE = 3;   // border half-thickness in world units
-function addChangeOutline(entry) {
-  const p = entry.mesh.geometry.parameters;
-  const shell = new THREE.Mesh(
-    new THREE.BoxGeometry(p.width + CHANGE_OUTLINE * 2, p.height + CHANGE_OUTLINE * 2, p.depth + CHANGE_OUTLINE * 2),
-    new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide })
-  );
-  shell.position.copy(entry.mesh.position);
-  shell.renderOrder = 1;
-  scene.add(shell);
-  changeOutlines.push(shell);
 }
 
 const LABEL_GAP = 4;          // px breathing room required between two labels
@@ -1464,17 +1445,24 @@ function makeLabel(entry, priority) {
 // generous cap. Visibility is resolved per-frame in updateLabelVisibility, so the more the
 // camera zooms into an area (buildings spread apart on screen), the more names surface.
 function setupLabels(areaMetric, heightMetric, colorMetric) {
+  // In "highlight changed" mode only the change set is a label candidate: naming
+  // the drained-out buildings would put the reader's attention back on exactly
+  // what the mode is trying to push away — and it frees the de-overlap budget so
+  // more of the changed names actually surface.
+  const labelPool = changeMode() === "highlight"
+    ? buildings.filter(entry => entry.file.changed)
+    : buildings;
   const chosen = new Set();
   for (const metric of [areaMetric, heightMetric, colorMetric]) {
     let best = null, bestValue = -Infinity;
-    for (const entry of buildings) {
+    for (const entry of labelPool) {
       const value = Number(entry.file[metric]) || 0;
       if (value > bestValue) { bestValue = value; best = entry; }
     }
     if (best) chosen.add(best);
   }
-  const cap = Math.min(buildings.length, 400);   // many candidates → de-overlap reveals more on zoom
-  for (const entry of [...buildings].sort((a, b) => b.height - a.height)) {
+  const cap = Math.min(labelPool.length, 400);   // many candidates → de-overlap reveals more on zoom
+  for (const entry of [...labelPool].sort((a, b) => b.height - a.height)) {
     if (chosen.size >= cap) break;
     chosen.add(entry);
   }

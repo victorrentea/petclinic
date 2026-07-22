@@ -168,12 +168,22 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn('>only changed</option>', html)
             self.assertIn("const HAS_CHANGES =", html)
             self.assertIn('"changed":', html)                 # baked per-building flag
-            self.assertIn("function styleForChanges", html)   # grey-out + outline pass
-            self.assertIn("function addChangeOutline", html)  # thick black border on changed
+            self.assertIn("function styleForChanges", html)   # grey-out pass
             self.assertIn("function grayFor", html)           # grey ramp for unchanged
             self.assertIn("function changeMode", html)
             self.assertIn('changeMode() === "hide"', html)    # "only changed" filters the dataset
-            self.assertIn("THREE.BackSide", html)             # outline shell is a back-face box
+            # Translucency alone carries the signal — no border shell around changed
+            # buildings, which only crowded the city.
+            self.assertNotIn("addChangeOutline", html)
+            self.assertNotIn("THREE.BackSide", html)
+            # "highlight changed" is the default view…
+            self.assertIn('<option value="highlight" selected>', html)
+            # …but an empty change set must fall back, or the whole city greys out
+            # with nothing lit.
+            self.assertIn('changeSelect.value = "off"', html)
+            # Unchanged buildings are not label candidates in highlight mode.
+            self.assertIn("entry.file.changed)", html)
+            self.assertIn("const labelPool", html)
 
     def test_change_set_auto_detects_pr_branch(self):
         """With NO config, a feature branch is recognised as a PR and its whole
