@@ -27,6 +27,10 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
+  // Set by the owner-search scenario: the last-name part typed into the filter
+  // and the owner full names the API returns for it (the expected result set).
+  searchPrefix?: string;
+  expectedFullNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
