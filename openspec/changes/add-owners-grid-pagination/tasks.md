@@ -80,4 +80,9 @@
 - [x] 10.1 Update `user-manual/manual.md` line 46 — *"The list shows **every** registered owner"* is now false
 - [x] 10.2 Retake `user-manual/screenshots/owners-list.png` with the paginated grid
 - [ ] 10.3 Open the PR referencing #25 with normal concise commits; flag the CODEOWNERS-elders files (migration, `openapi.yaml`, `DB.sql`, `DB.puml`)
+  - Branch `feat/25-owners-grid-pagination` is pushed and CI-green; **opening the PR was deliberately left to the repo owner.**
+  - Elders-review files in the diff: `V9__owner_grid_sorting.sql`, `openapi.yaml`, `DB.sql`, plus two the plan did not anticipate — `petclinic-backend/docs/packages.puml` (new `[REST] --> [REST Error]` edge) and `.github/workflows/ci.yml` (DB.puml guard made content-based). `DB.puml` itself is unchanged: the ER diagram omits indexes and collation.
 - [ ] 10.4 File the two out-of-scope follow-up issues: case-sensitive `lastName` filter; `Owner.telephone` `@Pattern`/`@NotEmpty` contradicting the live data (13-digit numbers, one NULL)
+  - Not filed — left to the repo owner. Drafts:
+  - **(a) `lastName` filter is case-sensitive.** `?lastName=dav` returns nothing while `Dav` works. Now that the column carries an ICU collation, a fix wants a case-insensitive comparison (`LOWER()`/citext) plus a matching expression index — a plain btree on the collated column cannot serve it.
+  - **(b) `Owner.telephone` validation contradicts the live data.** The entity declares `@NotEmpty @Digits(integer = 10) @Pattern("^[0-9]{10}$")`, but the database holds 13-digit numbers (e.g. `0442079372121`) and one NULL, so updating an otherwise-untouched owner fails validation. Decide whether the data or the constraint is wrong.
