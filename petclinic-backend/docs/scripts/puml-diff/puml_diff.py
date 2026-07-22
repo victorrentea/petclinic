@@ -40,6 +40,13 @@ ELEMENT_KEYWORDS = {
 # A connector is a run of line-drawing characters; these substrings mark one.
 _CONNECTOR = re.compile(r"--|\.\.|->|<-|<\||\|>|\*-|-\*|o-|-o")
 
+# PlantUML's component shorthand — `[Domain] <<..domain>>`, as packages.puml uses.
+# Without this, such a declaration matches no keyword, falls through to the
+# preamble, and is copied verbatim from NEW: an added component would never be
+# highlighted. Relationship lines also open with `[`, but parse() tries
+# _split_relationship first, so they are consumed before this is consulted.
+_BRACKET_COMPONENT = re.compile(r"^\[([^\]]+)\]")
+
 
 def _strip_markup(s: str) -> str:
     """Normalise a line to its plain content: drop any diff colouring/strikeout."""
@@ -65,6 +72,14 @@ def _struck_header(header: str) -> str:
     `class Role` -> `class "<struck>Role</struck>" as Role`;
     `entity "owners" as owners` -> `entity "<struck>owners</struck>" as owners`.
     """
+    bracket = _BRACKET_COMPONENT.match(header)
+    if bracket:                                # [Notification] <<..notification>>
+        name = bracket.group(1)
+        # Switch to the `component "display" as Alias` form: a struck name inside
+        # the brackets would declare a *differently named* component, so the
+        # relationships still pointing at [Notification] would spawn a second box.
+        rest = header[bracket.end():].strip()
+        return f'component "{_struck(name)}" as {name}' + (f" {rest}" if rest else "")
     if '"' in header:                          # already has a quoted display name
         before, disp, after = header.split('"', 2)
         return f'{before}"{_struck(disp)}"{after}'
@@ -77,6 +92,9 @@ def _struck_header(header: str) -> str:
 def _element_name(header: str) -> str:
     """Extract the identity of an element from its (clean) header line."""
     h = header.strip()
+    bracket = _BRACKET_COMPONENT.match(h)
+    if bracket:                           # [Domain] <<..domain>>
+        return f"[{bracket.group(1)}]"    # keyed as written, so relationships resolve
     if " as " in h:                       # entity "owners" as owners
         return h.split(" as ")[-1].strip()
     if '"' in h:                          # package "com.x.y" / entity "owners"
@@ -86,7 +104,9 @@ def _element_name(header: str) -> str:
 
 def _is_element_header(clean: str) -> bool:
     tokens = clean.split()
-    return bool(tokens) and tokens[0] in ELEMENT_KEYWORDS
+    if tokens and tokens[0] in ELEMENT_KEYWORDS:
+        return True
+    return bool(_BRACKET_COMPONENT.match(clean))
 
 
 def _split_relationship(clean: str):

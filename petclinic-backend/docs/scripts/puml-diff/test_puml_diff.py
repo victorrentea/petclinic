@@ -89,3 +89,46 @@ if __name__ == "__main__":
         globals()[name]()
         print("PASS", name)
     print(f"--- all {len(tests)} tests passed ---")
+
+
+# ── Component shorthand: `[Name] <<stereotype>>`, as packages.puml uses ──────
+
+_PKG_BEFORE = """@startuml
+title Logical Architecture
+[Domain] <<..domain>>
+[Repository] <<..repository>>
+[Repository] --> [Domain]
+@enduml
+"""
+
+_PKG_AFTER = """@startuml
+title Logical Architecture
+[Domain] <<..domain>>
+[Notification] <<..notification>>
+[Notification] --> [Domain]
+@enduml
+"""
+
+
+def _pkg_diff():
+    return m.diff(m.parse(_PKG_BEFORE), m.parse(_PKG_AFTER))
+
+
+def test_bracket_component_parsed_as_element_not_preamble():
+    d = m.parse(_PKG_BEFORE)
+    assert set(d.elements) == {"[Domain]", "[Repository]"}
+    assert not any("[Domain]" in line for line in d.preamble)
+
+
+def test_added_bracket_component_gets_red_header():
+    assert "[Notification] <<..notification>> #line:red;text:red" in _pkg_diff()
+
+
+def test_unchanged_bracket_component_stays_plain():
+    assert "\n[Domain] <<..domain>>\n" in _pkg_diff()
+
+
+def test_removed_bracket_component_struck_but_keeps_alias():
+    # Aliased so relationships still pointing at [Repository] resolve to the
+    # struck box instead of spawning a second, unstyled one.
+    assert 'component "<color:red><s>Repository</s></color>" as Repository' in _pkg_diff()

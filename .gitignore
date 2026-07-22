@@ -86,3 +86,6 @@ rag-vector-store.json
 /.serena/
 /~$*.xlsx
 
+
+# Review-time architecture delta (scripts/architecture-diff.sh) — regenerate, never commit
+/pr-diff/
