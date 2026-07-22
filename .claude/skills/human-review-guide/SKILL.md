@@ -34,17 +34,39 @@ Create the output dir: `review/assets/`.
 
 ## Step 1 — PlantUML diagram deltas (only if any `*.puml` changed)
 
-For each changed `*.puml` under `petclinic-backend/docs/generated/` (grep `CHANGED`):
+One command covers all three architecture diagrams — domain model, DB schema, and
+packages — diffing each against the merge-base with `$BASE`:
 
 ```sh
-petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh <file.puml> $BASE
+scripts/architecture-diff.sh $BASE
 ```
 
-It writes `<name>.diff.puml` + renders `<name>.diff.png` (additions red, removals
-struck-through) to a temp dir. Copy each PNG into `review/assets/` and embed it in
-review.md under **## Architecture deltas**, one subsection per diagram, with a
+It writes `pr-diff/<name>.diff.puml` per *changed* diagram (unchanged ones are
+skipped, and it exits cleanly having written only a "nothing changed" summary),
+plus `pr-diff/SUMMARY.md`. Additions render red, removals red + struck-through.
+
+Render them and fold them into review.md:
+
+```sh
+plantuml -tsvg pr-diff/*.diff.puml && cp pr-diff/*.diff.svg review/assets/
+```
+
+Embed under **## Architecture deltas**, one subsection per diagram, each with a
 one-line plain-English note on what structurally changed (new entity, dropped
-relation, moved component). If no `.puml` changed, omit this section entirely.
+relation, moved component). If nothing changed, omit the section entirely.
+
+Notes:
+- Prefer this over calling `puml-diff-vs-git.sh` per file — that script is the
+  single-diagram primitive; this is the change-set-wide tool built on it.
+- If `plantuml` is not on PATH, fall back to the encoded remote URLs already in
+  `pr-diff/SUMMARY.md` (`scripts/plantuml_url.py` generates them) and embed those
+  instead — no local render needed, but the images then depend on plantuml.com.
+- **PR mode:** CI already publishes this same gallery to
+  `https://victorrentea.github.io/petclinic/pr/<n>/` and links it from a sticky
+  comment. Link that page from review.md rather than duplicating the prose — but
+  still embed the images locally, since the published gallery is deleted when the
+  PR closes.
+- `pr-diff/` is git-ignored and safe to regenerate; never commit it.
 
 ## Step 2 — Screenshots of impacted screens (only if frontend changed)
 
