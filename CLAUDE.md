@@ -121,5 +121,5 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names.
 - Always run tests after any refactoring
-- Keep explanations concise
+- Keep explanations concise, we are experienced be developers.
 - Challenge ambiguous prompts. Tell me when I'm wrong!  
