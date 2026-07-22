@@ -3,6 +3,7 @@
 import csv
 import json
 import os
+import subprocess
 import sys
 import urllib.parse
 from pathlib import Path
@@ -32,6 +33,77 @@ def _district(path):
     if len(parts) > 1:
         return parts[-2]
     return "root"
+
+
+# ── Current change set (git) ─────────────────────────────────────────────────
+# Which files count as "changed right now", baked into the page so the city can
+# grey out / hide everything else. Computed against REPO_ABS (the tree the tsv
+# paths are relative to), so the flags line up with the building rows.
+def _run_git(args):
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(REPO_ABS), *args], text=True, stderr=subprocess.DEVNULL
+        )
+    except Exception:
+        return ""
+
+
+def _porcelain_paths(out):
+    """Repo-relative paths from `git status --porcelain` (rename -> new name)."""
+    paths = set()
+    for line in out.splitlines():
+        p = line[3:].strip() if len(line) > 3 else ""
+        if p:
+            paths.add(p.split(" -> ")[-1].strip().strip('"'))
+    return paths
+
+
+def _changed_files():
+    """Files in the CURRENT change set, the way a developer thinks of "what am I
+    working on right now":
+
+      1. HEATMAP_CHANGED_BASE set -> this branch vs that base (the PR case:
+         `git diff base...HEAD`) plus any uncommitted edits layered on top.
+      2. else, uncommitted work   -> staged + unstaged + untracked vs HEAD
+         ("you haven't committed yet: you see the files you've changed").
+      3. else, the last commit     -> HEAD~1..HEAD
+         ("you just committed, not in a PR: you see the last commit").
+    """
+    base = os.environ.get("HEATMAP_CHANGED_BASE", "").strip()
+    if base:
+        diff = _run_git(["diff", "--name-only", f"{base}...HEAD"])
+        files = {l.strip() for l in diff.splitlines() if l.strip()}
+        return files | _porcelain_paths(_run_git(["status", "--porcelain"]))
+    working = _porcelain_paths(_run_git(["status", "--porcelain"]))
+    if working:
+        return working
+    last = {l.strip() for l in _run_git(["diff", "--name-only", "HEAD~1", "HEAD"]).splitlines() if l.strip()}
+    if last:
+        return last
+    # root commit (no parent): everything committed is "new".
+    show = _run_git(["show", "--name-only", "--pretty=format:", "HEAD"])
+    return {l.strip() for l in show.splitlines() if l.strip()}
+
+
+CHANGED_FILES = _changed_files()
+
+# Ancestor Java packages that contain a changed file (package mode "changed").
+_changed_districts = set()
+for _cf in CHANGED_FILES:
+    _d = _district(_cf)
+    if _d and _d != "root":
+        _segs = _d.split(".")
+        for _i in range(len(_segs)):
+            _changed_districts.add(".".join(_segs[: _i + 1]))
+
+# Ancestor directories that contain a changed file (module mode "changed").
+_changed_dirs = {""}
+for _cf in CHANGED_FILES:
+    _dir = _cf.rsplit("/", 1)[0] if "/" in _cf else ""
+    _acc = ""
+    for _seg in (_dir.split("/") if _dir else []):
+        _acc = f"{_acc}/{_seg}" if _acc else _seg
+        _changed_dirs.add(_acc)
 
 
 rows = []
@@ -65,6 +137,8 @@ with TSV.open() as f:
             # (Robert C. Martin's package metric): 0 = maximally stable (only
             # depended upon), 1 = maximally unstable (only depends on others).
             "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
+            # In the current git change set (drives the change-set filter).
+            "changed": path in CHANGED_FILES,
         })
 
 # ── Per-package rows for "package mode" ──────────────────────────────────────
@@ -100,6 +174,7 @@ if PKG_TSV.exists():
                 "fan_out": fan_out,
                 "committers": _number(row, "committers", int),
                 "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
+                "changed": pkg in _changed_districts,
             })
 
 # ── Per-module rows for "module mode" (Maven/Gradle) ─────────────────────────
@@ -135,6 +210,7 @@ if MOD_TSV.exists():
                 "fan_out": fan_out,
                 "committers": _number(row, "committers", int),
                 "instability": (fan_out / (fan_in + fan_out)) if (fan_in + fan_out) else 0.0,
+                "changed": mod in _changed_dirs,
             })
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -681,6 +757,15 @@ html = """<!doctype html>
       <option value="off">off</option>
     </select>
   </div>
+  <div class="viewOf pkgRow">
+    <span>Change set:</span>
+    <select id="changeMode" aria-label="change-set filter">
+      <option value="off" selected>show everything</option>
+      <option value="highlight">highlight changed</option>
+      <option value="hide">only changed</option>
+    </select>
+    <span id="changeCount" class="filterCount"></span>
+  </div>
 </section>
 <nav id="breadcrumb" class="breadcrumb" hidden aria-label="package scope"></nav>
 <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howto">
@@ -720,6 +805,7 @@ const PACKAGES = __PACKAGES_JSON__;   // per-package rows (same shape) for packa
 const MODULES = __MODULES_JSON__;     // per-Maven/Gradle-module rows (same shape) for module mode
 const REPO_ABS = __REPO_ABS__;
 const BUILD_CMD = __BUILD_CMD__;
+const HAS_CHANGES = __HAS_CHANGES__;  // any file in the current git change set?
 
 // The active COLOR metric's p95 scale max, mirrored out of rebuildCity so the
 // hover tooltip's colour-scale marker can place this building on the ramp.
@@ -778,11 +864,19 @@ const viewSelect = document.getElementById("viewMode");   // the title-row view 
 const packageOpt = document.getElementById("packageOpt");
 const moduleOpt = document.getElementById("moduleOpt");
 const pkgLabelSelect = document.getElementById("pkgLabelMode");
+const changeSelect = document.getElementById("changeMode");   // off / highlight / hide unchanged
+const changeCountEl = document.getElementById("changeCount");
 const filterInput = document.getElementById("pkgFilter");
 const filterClearBtn = document.getElementById("pkgFilterClear");
 const filterCountEl = document.getElementById("pkgFilterCount");
 if (packageOpt && !PACKAGES.length) packageOpt.disabled = true;   // no package data → option greyed
 if (moduleOpt && MODULES.length < 2) moduleOpt.disabled = true;   // <2 modules → nothing to compare
+// Nothing in the change set → the highlight/hide modes have nothing to act on.
+if (changeSelect && !HAS_CHANGES) {
+  for (const opt of changeSelect.options) if (opt.value !== "off") opt.disabled = true;
+  changeSelect.title = "no files in the current git change set";
+}
+function changeMode() { return changeSelect ? changeSelect.value : "off"; }
 // The dropdown swaps which rows the treemap/floor/building machinery renders:
 // class rows, package rows (a building per package on its parent-package floor),
 // or module rows (a building per Maven/Gradle module). Falls back to classes.
@@ -815,8 +909,12 @@ function patternToRegExp(pat) {
   return new RegExp("^" + re + "$", "i");
 }
 function filteredDataset() {
-  const data = activeDataset();
-  return filterRe ? data.filter(f => filterRe.test(rowFqn(f))) : data;
+  let data = activeDataset();
+  if (filterRe) data = data.filter(f => filterRe.test(rowFqn(f)));
+  // "only changed" drops unchanged rows from the layout entirely, so the treemap
+  // reclaims their space and the city collapses to just the change set.
+  if (changeMode() === "hide") data = data.filter(f => f.changed);
+  return data;
 }
 const citySize = 900;
 const districtGap = 14;
@@ -825,6 +923,7 @@ const districtStep = 6;
 const maxHeight = 190;
 const minHeight = 5;
 let buildings = [];
+let changeOutlines = [];   // thick black shells around changed buildings (highlight mode)
 let districts = [];
 let cityLabels = [];
 let districtLabels = [];   // floating package tags (CSS2DObjects), when pkgLabelMode = "floating"
@@ -1042,6 +1141,13 @@ function colorFor(value, max) {
   return new THREE.Color(0xe8eefc).lerp(new THREE.Color(0x800020), colorT(value, max));
 }
 
+// Same ramp, drained of hue: light grey (0) -> slate grey (max). Used for the
+// unchanged buildings in "highlight changed" mode so the change set keeps the
+// only real colour on screen.
+function grayFor(value, max) {
+  return new THREE.Color(0xdfe3e8).lerp(new THREE.Color(0x6b7280), colorT(value, max));
+}
+
 // A hatch pattern for a terrace top: parallel lines in the terrace edge colour,
 // their direction rotating with the nesting level so each floor is distinguishable.
 function hatchTexture(edgeColor, level) {
@@ -1121,6 +1227,12 @@ function clearCity() {
     entry.mesh.material.dispose();
   }
   buildings = [];
+  for (const o of changeOutlines) {
+    scene.remove(o);
+    o.geometry.dispose();
+    o.material.dispose();
+  }
+  changeOutlines = [];
   districts = [];
   districtByName = new Map();
   glowingDistrict = null;
@@ -1229,16 +1341,58 @@ function rebuildCity() {
     mesh.userData.file = file;
     mesh.userData.baseColor = material.color.clone();
     scene.add(mesh);
-    buildings.push({ mesh, file, height });
+    buildings.push({ mesh, file, height, colorValue, maxColor });
   }
+  styleForChanges();
   setupLabels(areaMetric, heightMetric, colorMetric);
   if (filterCountEl) filterCountEl.textContent = filterRe ? buildings.length + " shown" : "";
+  if (changeCountEl) {
+    const n = activeDataset().filter(f => f.changed).length;
+    changeCountEl.textContent = HAS_CHANGES ? n + " changed" : "no changes";
+  }
   window.__CODEMAP_3D_READY__ = {
     buildings: buildings.length,
     areaMetric,
     heightMetric,
     colorMetric,
+    changeMode: changeMode(),
   };
+}
+
+// "highlight changed" mode: keep the change set in full colour and ring each
+// changed building with a thick black border so it pops; drain every unchanged
+// building to grey and drop it to 50% opacity so it recedes. Every rebuild makes
+// fresh meshes/materials, so this only ever needs to *apply* — no undo pass.
+// (In "off" and "hide" modes there is nothing to restyle.)
+function styleForChanges() {
+  if (changeMode() !== "highlight") return;
+  for (const entry of buildings) {
+    if (entry.file.changed) {
+      addChangeOutline(entry);
+    } else {
+      const m = entry.mesh.material;
+      m.color.copy(grayFor(entry.colorValue, entry.maxColor));
+      m.transparent = true;
+      m.opacity = 0.5;
+      m.depthWrite = false;
+    }
+  }
+}
+
+// A black shell one border-width larger than the building, drawn back-face-only
+// so only its rim shows around the (opaque, full-colour) changed building —
+// a reliable thick outline where GL line width is capped at 1px. ~3x a hairline.
+const CHANGE_OUTLINE = 3;   // border half-thickness in world units
+function addChangeOutline(entry) {
+  const p = entry.mesh.geometry.parameters;
+  const shell = new THREE.Mesh(
+    new THREE.BoxGeometry(p.width + CHANGE_OUTLINE * 2, p.height + CHANGE_OUTLINE * 2, p.depth + CHANGE_OUTLINE * 2),
+    new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide })
+  );
+  shell.position.copy(entry.mesh.position);
+  shell.renderOrder = 1;
+  scene.add(shell);
+  changeOutlines.push(shell);
 }
 
 const LABEL_GAP = 4;          // px breathing room required between two labels
@@ -1910,6 +2064,14 @@ viewSelect.addEventListener("change", () => {
 // Package-label style only swaps the floor/floating labels — re-render in place.
 pkgLabelSelect.addEventListener("change", () => { dismissIntro(); rebuildCity(); });
 
+// Change-set filter. "hide" changes the visible set, so reset the drill scope and
+// reframe (like the package filter); "highlight"/"off" just re-render in place.
+if (changeSelect) changeSelect.addEventListener("change", () => {
+  dismissIntro();
+  if (changeSelect.value === "hide") { scopePath = ""; updateBreadcrumb(); rebuildCity(); frameCity(); }
+  else rebuildCity();
+});
+
 // Package-pattern filter: recompile on every keystroke, flag invalid patterns,
 // reset the drill scope (the visible set changed) and reframe.
 function applyFilter() {
@@ -2011,6 +2173,7 @@ html = (html
         .replace("__PACKAGES_JSON__", json.dumps(pkg_rows))
         .replace("__MODULES_JSON__", json.dumps(mod_rows))
         .replace("__REPO_ABS__", json.dumps(str(REPO_ABS)))
-        .replace("__BUILD_CMD__", json.dumps(BUILD_CMD)))
+        .replace("__BUILD_CMD__", json.dumps(BUILD_CMD))
+        .replace("__HAS_CHANGES__", json.dumps(bool(CHANGED_FILES))))
 OUT.write_text(html)
 print(f"wrote {OUT} ({OUT.stat().st_size / 1024:.1f} KB)")

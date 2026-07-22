@@ -62,6 +62,27 @@ The page has independent selectors for all three visual axes:
 - height: building height
 - color: building color
 
+**Change-set filter:** a **Change set** selector focuses the city on the files in the
+*current git change set*, baked in when the page is generated. Three modes:
+
+1. **show everything** — the normal city (default).
+2. **highlight changed** — unchanged buildings drain to grey and drop to 50% opacity;
+   changed buildings keep their full colour and get a thick black border so they pop.
+3. **only changed** — unchanged buildings are removed from the layout entirely, so the
+   treemap collapses to just the change set.
+
+What counts as "changed" (in precedence order, computed against `HEATMAP_REPO`):
+
+- `HEATMAP_CHANGED_BASE` set → this branch vs that base (`git diff base...HEAD`) plus any
+  uncommitted edits — the **PR** case (`HEATMAP_CHANGED_BASE=origin/main`).
+- else, uncommitted work (staged + unstaged + untracked vs `HEAD`) — *you haven't
+  committed yet, so you see the files you've changed*.
+- else, the last commit (`HEAD~1..HEAD`) — *you just committed, not in a PR, so you see
+  the last commit*.
+
+When the change set is empty the highlight/hide modes are disabled and the selector
+reads "no changes".
+
 **First-run intro:** on initial load the page draws a one-time overlay that annotates a
 single "hero" building to make the three selectors concrete — the hatched **roof** = the
 *area* metric, the **height** dimension line = the *height* metric, the **colour swatch** =
@@ -95,6 +116,7 @@ Every script is repo-agnostic and driven by env vars (`generate.sh` sets them):
 | `HEATMAP_TITLE` / `HEATMAP_SUBTITLE` | page heading text |
 | `HEATMAP_OPEN_IN` | `vscode` / `intellij` to enable ⌘/Ctrl-click-to-open (empty = off) |
 | `HEATMAP_REPO_ABS` | absolute repo root for editor links (default: `HEATMAP_REPO`) |
+| `HEATMAP_CHANGED_BASE` | base ref for the Code City change-set filter (e.g. `origin/main` for a PR); unset = uncommitted work, else last commit |
 
 ## Provenance
 
