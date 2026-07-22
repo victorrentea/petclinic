@@ -1,20 +1,43 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Full-stack PetClinic: Spring Boot 3.5 / Java 21 backend, Angular 16 frontend, PostgreSQL.
+  Production scale is ~10 000 owners — list endpoints page, sort and filter server-side.
+  Non-trivial code is written test-first.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      AUDIENCE: Business stakeholders with NO technical background. The proposal is read
+      aloud in a review meeting with people who do not know what JSON is. Write it so a
+      clinic manager can approve or reject it without asking a developer what a word means.
+    - >-
+      BANNED from proposal.md — these belong in design.md, with no exceptions:
+      code identifiers (class, method, field, file, table, column names), URLs and endpoint
+      paths, HTTP verbs and status codes, query parameters, JSON/SQL/code snippets or
+      fragments, database and ORM vocabulary (index, collation, migration, N+1, join, lazy
+      loading), framework and library names, HTTP/REST/API jargon, and file-extension
+      references (.ts, .sql, .yaml, ...).
+    - >-
+      Say what changes for the PERSON USING the product and what it costs the business —
+      not how it is built. "The list will show 10 owners at a time, and you can page through
+      them" — not "the endpoint returns a paginated envelope".
+    - >-
+      Describe breaking changes by their user-visible or operational consequence
+      ("the screen and the server must be released together"), never by naming the contract
+      that breaks.
+    - >-
+      The Impact section stays business-level: which parts of the product change, who must
+      review, what documentation or training material goes stale. Point to design.md for the
+      technical inventory instead of listing files.
+    - Keep it to one page. If a sentence needs a developer to translate it, it is in the wrong file.
+  design:
+    - >-
+      This is where ALL technical detail lives — everything banned from the proposal belongs
+      here. Record measurements taken against the real database rather than assumptions.
+    - Every decision states the alternatives considered and why they were rejected.
+    - >-
+      Include a blast-radius section listing generated artifacts to regenerate, tests that
+      break, and docs that go stale, with the gate that enforces each.
+  tasks:
+    - Order tasks so tests come before the implementation they cover.
