@@ -109,7 +109,7 @@ Patiently guide the agent through this setup, then tell it: Turn the lessons you
 - [Wispr Flow](https://wisprflow.ai) to dictate .
 - [Codex Bar](https://codexbar.app) to show remaining quota.
 - [Screen Brush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before screenshot to agent. 
-- Configure yourself, my dear CLI agent, a status bar inspired from `victor-statusbar.md`.
+- Configure yourself, my dear CLI agent, a status bar inspired from `victor-claude-statusline.md`.
 
 ### Adopt ideas from `petclinic` into your own project ❤️
 

@@ -240,7 +240,7 @@ To reproduce this exact status line: save the script below to `~/.claude/statusl
 # MAINTENANCE RULE: whenever this script changes (format, segments, colors,
 # thresholds, turn-state logic — anything that alters behaviour), update its
 # companion reference in the same change:
-#   ~/workspace/petclinic/.claude/victor-statusbar.md   ("Victor Status Bar")
+#   ~/workspace/petclinic/.claude/victor-claude-statusline.md   ("Victor Status Bar")
 # The two are one unit; a behaviour change not reflected there is a bug in the
 # change, not a follow-up.
 input=$(cat)
