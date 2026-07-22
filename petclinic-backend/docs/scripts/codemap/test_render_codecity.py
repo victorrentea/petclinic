@@ -175,6 +175,52 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn('changeMode() === "hide"', html)    # "only changed" filters the dataset
             self.assertIn("THREE.BackSide", html)             # outline shell is a back-face box
 
+    def test_change_set_auto_detects_pr_branch(self):
+        """With NO config, a feature branch is recognised as a PR and its whole
+        branch diff (vs the base branch) becomes the change set."""
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+
+            def git(*args):
+                subprocess.run(["git", "-C", str(repo), *args], check=True,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            git("init", "-b", "main")
+            git("config", "user.email", "t@example.com")
+            git("config", "user.name", "t")
+            src = repo / "src/main/java/app"
+            src.mkdir(parents=True)
+            (src / "Base.java").write_text("class Base {}\n")
+            git("add", "-A")
+            git("commit", "-m", "base")
+            git("checkout", "-b", "feature")               # a PR-like feature branch
+            (src / "Feature.java").write_text("class Feature {}\n")
+            git("add", "-A")
+            git("commit", "-m", "feat")
+
+            hdr = ("path\tbytes\tlines\tcommits\tbug_commits\tcommits_per_kloc\tbugs_per_kloc\t"
+                   "bugs_per_commit\tcognitive_complexity\tcomplexity_per_kloc\tfan_in\tfan_out\tcommitters\n")
+            row = lambda p: f"{p}\t100\t5\t1\t0\t0\t0\t0\t0\t0\t0\t0\t1\n"
+            tsv = repo / "codemap.tsv"
+            tsv.write_text(hdr + row("src/main/java/app/Base.java") + row("src/main/java/app/Feature.java"))
+
+            env = os.environ.copy()
+            env["HEATMAP_REPO"] = str(repo)                 # REPO_ABS -> the temp repo
+            env["HEATMAP_OUT"] = str(repo)
+            env.pop("HEATMAP_CHANGED_BASE", None)           # rely purely on auto-detection
+            env.pop("GITHUB_BASE_REF", None)
+            subprocess.run(["python3", str(SCRIPT_DIR / "render_codecity.py"), str(tsv)],
+                           check=True, cwd=str(repo), env=env)
+
+            html = (repo / "codecity.html").read_text()
+            import json
+            import re
+            files = json.loads(re.search(r"const FILES = (\[.*?\]);\nconst PACKAGES", html, re.S).group(1))
+            by_path = {f["path"]: f for f in files}
+            self.assertTrue(by_path["src/main/java/app/Feature.java"]["changed"])   # branch-only file
+            self.assertFalse(by_path["src/main/java/app/Base.java"]["changed"])     # also on the base
+            self.assertIn("const HAS_CHANGES = true", html)
+
 
 if __name__ == "__main__":
     unittest.main()
