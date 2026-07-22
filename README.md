@@ -37,6 +37,13 @@ engineering techniques you can lift into your own projects.
 - **Observability.** Zero-code OpenTelemetry → Grafana LGTM, queryable from
   Claude Code via `mcp-grafana`.
 
+For example, this domain class diagram is generated from the code by
+`DomainModelExtractorTest` and rendered live from the committed
+[`DomainModel.puml`](petclinic-backend/docs/generated/DomainModel.puml) — see
+[ARCHITECTURE.md](ARCHITECTURE.md) for the rest:
+
+![Domain model](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/DomainModel.puml)
+
 ## Quickstart
 
 A) Tell your agent: `start db,be,fe,grafana`
