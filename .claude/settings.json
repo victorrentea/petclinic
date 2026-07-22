@@ -59,18 +59,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "//": "audible ding when Claude finishes a turn",
-            "type": "command",
-            "command": "afplay /System/Library/Sounds/Glass.aiff",
-            "async": true
-          }
-        ]
-      }
     ]
   }
 }
