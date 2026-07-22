@@ -76,7 +76,7 @@ The relevant snapshot is `quota_snapshots.premium_interactions`
 # from `gh api copilot_internal/user`. See victor-copilot-statusline.md.
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 CACHE="$HOME/.copilot/quota-cache.json"
-TTL=900   # refresh the quota cache at most once every 15 minutes
+TTL=60    # refresh the quota cache at most once per minute (keeps AIC current)
 
 INPUT="$(cat 2>/dev/null)"
 
