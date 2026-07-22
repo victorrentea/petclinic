@@ -58,23 +58,66 @@ def _porcelain_paths(out):
     return paths
 
 
-def _changed_files():
-    """Files in the CURRENT change set, the way a developer thinks of "what am I
-    working on right now":
+def _ref_exists(ref):
+    return bool(_run_git(["rev-parse", "--verify", "--quiet", ref]).strip())
 
-      1. HEATMAP_CHANGED_BASE set -> this branch vs that base (the PR case:
-         `git diff base...HEAD`) plus any uncommitted edits layered on top.
-      2. else, uncommitted work   -> staged + unstaged + untracked vs HEAD
-         ("you haven't committed yet: you see the files you've changed").
-      3. else, the last commit     -> HEAD~1..HEAD
-         ("you just committed, not in a PR: you see the last commit").
+
+def _current_branch():
+    return _run_git(["rev-parse", "--abbrev-ref", "HEAD"]).strip()
+
+
+def _base_branch():
+    """Auto-detect the branch this one would be a PR against, or "" if none.
+
+    - CI: GitHub Actions sets GITHUB_BASE_REF on pull_request events -> the base
+      branch, no guessing needed.
+    - Local: the remote's default branch (origin/HEAD -> origin/main), falling
+      back to the usual names.
     """
-    base = os.environ.get("HEATMAP_CHANGED_BASE", "").strip()
+    gh_base = os.environ.get("GITHUB_BASE_REF", "").strip()
+    if gh_base:
+        return next((r for r in (f"origin/{gh_base}", gh_base) if _ref_exists(r)), gh_base)
+    head = _run_git(["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).strip()
+    if head:
+        return head.split("refs/remotes/", 1)[-1]          # e.g. "origin/main"
+    return next((r for r in ("origin/main", "origin/master", "main", "master") if _ref_exists(r)), "")
+
+
+def _pr_base():
+    """The base ref to diff against when this checkout looks like a PR / feature
+    branch (there ARE commits ahead of the base and we're NOT sitting on the base
+    branch itself), else "" so the caller falls back to working-tree / last-commit."""
+    base = _base_branch()
+    if not base:
+        return ""
+    branch = _current_branch()
+    if not branch or branch == "HEAD" or branch == base.split("/")[-1]:
+        return ""                                          # on the base branch (or detached) — not a PR
+    ahead = _run_git(["rev-list", "--count", f"{base}..HEAD"]).strip()
+    return base if ahead.isdigit() and int(ahead) > 0 else ""
+
+
+def _changed_files():
+    """Files in the CURRENT change set, auto-detecting how to read "what am I
+    working on right now" — no configuration needed:
+
+      1. On a PR / feature branch (commits ahead of the base branch, detected
+         from GITHUB_BASE_REF or origin's default branch, or forced via
+         HEATMAP_CHANGED_BASE) -> the whole branch diff `base...HEAD`, plus any
+         uncommitted edits on top. "Everything this PR touches."
+      2. else, uncommitted work -> staged + unstaged + untracked vs HEAD.
+         "You haven't committed yet: the files you've changed."
+      3. else, the last commit  -> HEAD~1..HEAD.
+         "You just committed, not in a PR: the last commit."
+
+    HEATMAP_CHANGED_BASE only overrides the auto-detected base (e.g. to diff
+    against a release branch); it is never required.
+    """
+    working = _porcelain_paths(_run_git(["status", "--porcelain"]))
+    base = os.environ.get("HEATMAP_CHANGED_BASE", "").strip() or _pr_base()
     if base:
         diff = _run_git(["diff", "--name-only", f"{base}...HEAD"])
-        files = {l.strip() for l in diff.splitlines() if l.strip()}
-        return files | _porcelain_paths(_run_git(["status", "--porcelain"]))
-    working = _porcelain_paths(_run_git(["status", "--porcelain"]))
+        return {l.strip() for l in diff.splitlines() if l.strip()} | working
     if working:
         return working
     last = {l.strip() for l in _run_git(["diff", "--name-only", "HEAD~1", "HEAD"]).splitlines() if l.strip()}

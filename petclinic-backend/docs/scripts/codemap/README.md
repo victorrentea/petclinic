@@ -71,14 +71,22 @@ The page has independent selectors for all three visual axes:
 3. **only changed** — unchanged buildings are removed from the layout entirely, so the
    treemap collapses to just the change set.
 
-What counts as "changed" (in precedence order, computed against `HEATMAP_REPO`):
+What counts as "changed" is **auto-detected** — no configuration needed (computed
+against `HEATMAP_REPO`, in precedence order):
 
-- `HEATMAP_CHANGED_BASE` set → this branch vs that base (`git diff base...HEAD`) plus any
-  uncommitted edits — the **PR** case (`HEATMAP_CHANGED_BASE=origin/main`).
-- else, uncommitted work (staged + unstaged + untracked vs `HEAD`) — *you haven't
+- On a **PR / feature branch** (there are commits ahead of the base branch) → the whole
+  branch diff `base...HEAD` plus any uncommitted edits: *everything this PR touches*. The
+  base branch is detected from `GITHUB_BASE_REF` in GitHub Actions, otherwise from the
+  remote's default branch (`origin/HEAD` → `origin/main`). Sitting **on** the base branch
+  (e.g. `main`) is not a PR.
+- else, **uncommitted work** (staged + unstaged + untracked vs `HEAD`) — *you haven't
   committed yet, so you see the files you've changed*.
-- else, the last commit (`HEAD~1..HEAD`) — *you just committed, not in a PR, so you see
-  the last commit*.
+- else, the **last commit** (`HEAD~1..HEAD`) — *you just committed, not in a PR, so you
+  see the last commit*.
+
+`HEATMAP_CHANGED_BASE` is **optional** — it only *overrides* the auto-detected base (e.g.
+to diff against a release branch instead of `main`); you never need to set it for the
+normal PR / dirty-tree / last-commit flow.
 
 When the change set is empty the highlight/hide modes are disabled and the selector
 reads "no changes".
@@ -116,7 +124,7 @@ Every script is repo-agnostic and driven by env vars (`generate.sh` sets them):
 | `HEATMAP_TITLE` / `HEATMAP_SUBTITLE` | page heading text |
 | `HEATMAP_OPEN_IN` | `vscode` / `intellij` to enable ⌘/Ctrl-click-to-open (empty = off) |
 | `HEATMAP_REPO_ABS` | absolute repo root for editor links (default: `HEATMAP_REPO`) |
-| `HEATMAP_CHANGED_BASE` | base ref for the Code City change-set filter (e.g. `origin/main` for a PR); unset = uncommitted work, else last commit |
+| `HEATMAP_CHANGED_BASE` | **optional** override of the auto-detected base ref for the change-set filter (e.g. `origin/release-1.x`); unset = auto-detect PR base → uncommitted work → last commit |
 
 ## Provenance
 
