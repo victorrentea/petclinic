@@ -161,6 +161,19 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("What each building tells you", html)
             self.assertIn("introHatch", html)
             self.assertIn("top face = footprint, drawn on the roof", html)
+            # Change-set filter: off / highlight changed / only changed. Each file row
+            # carries a boolean `changed` flag computed from the current git change set.
+            self.assertIn('id="changeMode"', html)
+            self.assertIn('value="highlight"', html)
+            self.assertIn('>only changed</option>', html)
+            self.assertIn("const HAS_CHANGES =", html)
+            self.assertIn('"changed":', html)                 # baked per-building flag
+            self.assertIn("function styleForChanges", html)   # grey-out + outline pass
+            self.assertIn("function addChangeOutline", html)  # thick black border on changed
+            self.assertIn("function grayFor", html)           # grey ramp for unchanged
+            self.assertIn("function changeMode", html)
+            self.assertIn('changeMode() === "hide"', html)    # "only changed" filters the dataset
+            self.assertIn("THREE.BackSide", html)             # outline shell is a back-face box
 
 
 if __name__ == "__main__":
