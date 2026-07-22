@@ -39,7 +39,6 @@ Anything else (`@Data`, `@AllArgsConstructor`, `@SneakyThrows`, …) is out.
 
 ## Formatting
 
-- Line length **≤ 120 chars**.
 - **Builder chains: one property per line** — unless the chain sets only 2 properties, which may
   stay on one line.
 
@@ -57,7 +56,6 @@ PetType.builder().id(1).name("dog").build();
 
 ## Working style
 
-- Write non-trivial code using **TDD**.
 - Prefer explanatory variable and method names over comments; keep any comment short.
 - **Run the tests after refactoring — never ask permission first.**
   - whole suite: `mvn test`

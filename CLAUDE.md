@@ -57,6 +57,21 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Production scale — never assume the demo dataset
+
+Production has **~10,000 owners** (the seed data's ~50 is not representative). So:
+- **Never** load a whole table into memory or ship it to the browser: list endpoints
+  page, sort and filter **server-side** (Spring Data `Pageable`), and grids are
+  server-side paginated.
+- Don't ask whether client-side paging "would be enough" — it isn't.
+
+## Go look at the data
+
+Before reasoning about volumes, cardinality, sort/index choices or UX trade-offs,
+**query the real database** (`postgres-db` MCP, or the running backend's API) instead of
+guessing from the seed migrations. If the DB is down or you need access you don't have,
+**ask for it** — asking to run a query is always cheaper than a wrong assumption.
+
 ## API Endpoints
 
 Backend exposes its REST API under http://localhost:8080/api/.
