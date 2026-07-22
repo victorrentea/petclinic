@@ -80,7 +80,7 @@ Tell an agent running in this repo:
 - **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
 - **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots.
 - **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
-- **Exploratory QA** — download and explore the app using [Playwright test agents](https://playwright.dev/docs/test-agents) and write 10 significant automated .feature e2e tests.
+- **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests.
 - **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
 - **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
 - **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is the time lost.
@@ -92,24 +92,24 @@ Some tasks above require tools from the project's `.mcp.json`, which should auto
 
 
 ### Tools
-Start YOUR agent in YOUR🫵 work project, and tell it:
+Start YOUR agent in YOUR🫵 work project and tell it:
 
 "Help me grant you access to:..."
-- **Issues** — fetch the issues assigned to me on this git repo, put a test comment on last one
-- **CI** — find out how much time did the tests took in the last CI run 
+- **Issues** — fetch the issues assigned to me on this git repo, put a test comment on the last one
+- **CI** — find out how much time the tests took in the last CI run 
 - **Logs** — get the last errors from the dev environment log
 - **Browser** – reproduce a recent FE bug in a browser
-- **DB** - which db tables have most rows in my dev DB?
-- **Metrics** - What is the endpoint with highest latency in Grafana?
+- **DB** - which database tables have the most rows in my dev DB?
+- **Metrics** - What is the endpoint with the highest latency in Grafana?
 - **Token Saving** - Configure me headroom or at least RTK to save tokens.
 
 Patiently guide the agent through this setup, then tell it: Turn the lessons you learned into a reusable skill, ideally scripting as much work you can. 
 
 ### Tools for Agentic Lifestyle
-- [Wispr Flow](https://wisprflow.ai) to dictate .
-- [Codex Bar](https://codexbar.app) to show remaining quota.
+- [Wispr Flow](https://wisprflow.ai) to dictate.
+- [Codex Bar](https://codexbar.app) to see the remaining Claude/Codex/Copilot quota.
 - [Screen Brush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before screenshot to agent. 
-- Configure yourself, my dear CLI agent, a status bar inspired from `victor-claude-statusline.md`.
+- Custom statusline: My dear CLI agent, configure yourself a status bar inspired from `victor-claude-statusline.md` or `victor-copilot-statusline.md`.
 
 ### Adopt ideas from `petclinic` into your own project ❤️
 
