@@ -1,0 +1,103 @@
+name: Diagram preview
+
+# Renders the PR branch's own .puml diagrams into a sticky PR comment.
+#
+# Why this exists: the committed READMEs embed PlantUML-proxy URLs that hardcode
+# `main`, so a diagram viewed from a branch always shows main's version. Markdown
+# has no notion of "current branch" and GitHub does not rewrite absolute URLs.
+# Rather than commit rendered images (which would add a generated binary to git
+# that must be kept in lockstep), we render the branch on demand at review time —
+# where the change actually needs to be seen. The committed READMEs stay a picture
+# of shipped reality; this comment is the picture of the proposal.
+#
+# The proxy URL points at the branch ref (not the head SHA) on purpose: the CI
+# job may push a `chore(guardrail): regenerate diagrams` commit of its own, and a
+# SHA-pinned URL would render the pre-regeneration diagram.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: diagram-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    # Fork PRs get a read-only GITHUB_TOKEN regardless of the block above, so the
+    # comment would fail. Skip them rather than fail the check.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Collect the .puml files this PR touches
+        id: collect
+        run: |
+          # checkout with fetch-depth:0 already brought every branch, so origin/<base> is local.
+          base="origin/${{ github.base_ref }}"
+          # --diff-filter=d drops deletions: a removed diagram has nothing to render.
+          git diff --name-only --diff-filter=d "${base}...HEAD" -- '*.puml' > changed.txt || : > changed.txt
+          echo "count=$(wc -l < changed.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
+          echo "Changed diagrams:"; cat changed.txt
+
+      - name: Build the comment body
+        run: |
+          branch='${{ github.head_ref }}'
+          repo='${{ github.repository }}'
+          proxy='https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com'
+
+          {
+            echo '<!-- diagram-preview -->'
+            echo '### 📐 Diagrams as of this branch'
+            echo
+            if [ '${{ steps.collect.outputs.count }}' = '0' ]; then
+              echo "No \`.puml\` file changed in this PR — nothing to preview."
+            else
+              echo "Rendered live from \`$branch\`, so these update on every push."
+              echo
+              while IFS= read -r f; do
+                [ -n "$f" ] || continue
+                echo "#### \`$f\`"
+                echo "![$f]($proxy/$repo/$branch/$f)"
+                echo
+              done < changed.txt
+              echo '<details><summary>See only what changed (red delta), locally</summary>'
+              echo
+              echo '```sh'
+              while IFS= read -r f; do
+                [ -n "$f" ] || continue
+                echo "./petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh $f origin/${{ github.base_ref }}"
+              done < changed.txt
+              echo '```'
+              echo '</details>'
+            fi
+          } > body.md
+          cat body.md
+
+      - name: Post or update the sticky comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # One comment per PR, edited in place — repeated pushes must not spam the thread.
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+                 --jq 'map(select(.body | startswith("<!-- diagram-preview -->"))) | .[0].id // empty')
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@body.md --silent
+            echo "Updated comment $id"
+          elif [ '${{ steps.collect.outputs.count }}' = '0' ]; then
+            echo "No diagrams changed and no existing comment — staying quiet."
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@body.md --silent
+            echo "Created comment"
+          fi
