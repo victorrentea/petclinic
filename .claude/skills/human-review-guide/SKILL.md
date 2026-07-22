@@ -34,39 +34,46 @@ Create the output dir: `review/assets/`.
 
 ## Step 1 — PlantUML diagram deltas (only if any `*.puml` changed)
 
-One command covers all three architecture diagrams — domain model, DB schema, and
-packages — diffing each against the merge-base with `$BASE`:
+One bundled script covers all three architecture diagrams — domain model, DB
+schema, and packages — diffing each against the merge-base with `$BASE`,
+rendering them, and dropping everything into `review/assets/`:
 
 ```sh
-scripts/architecture-diff.sh $BASE
+.claude/skills/human-review-guide/scripts/collect-review-artifacts.sh $BASE
 ```
 
-It writes `pr-diff/<name>.diff.puml` per *changed* diagram (unchanged ones are
-skipped, and it exits cleanly having written only a "nothing changed" summary),
-plus `pr-diff/SUMMARY.md`. Additions render red, removals red + struck-through.
+It produces, when the change set warrants it:
 
-Render them and fold them into review.md:
+| Artifact | Use in review.md |
+| --- | --- |
+| `review/assets/<name>.diff.svg` | embed one per changed diagram |
+| `review/assets/architecture.html` | standalone gallery — link it, don't inline it |
+| `review/assets/SUMMARY.md` | same deltas as remote-rendered markdown (fallback) |
 
-```sh
-plantuml -tsvg pr-diff/*.diff.puml && cp pr-diff/*.diff.svg review/assets/
-```
+Additions render red, removals red + struck-through. Embed under
+**## Architecture deltas**, one subsection per diagram, each with a one-line
+plain-English note on what structurally changed (new entity, dropped relation,
+moved component).
 
-Embed under **## Architecture deltas**, one subsection per diagram, each with a
-one-line plain-English note on what structurally changed (new entity, dropped
-relation, moved component). If nothing changed, omit the section entirely.
+**If it prints `no architecture diagram changed`, omit the section entirely** —
+that is a clean exit (0), not a failure. Do not retry it or diff the `.puml`
+files by hand.
 
 Notes:
-- Prefer this over calling `puml-diff-vs-git.sh` per file — that script is the
-  single-diagram primitive; this is the change-set-wide tool built on it.
-- If `plantuml` is not on PATH, fall back to the encoded remote URLs already in
-  `pr-diff/SUMMARY.md` (`scripts/plantuml_url.py` generates them) and embed those
-  instead — no local render needed, but the images then depend on plantuml.com.
-- **PR mode:** CI already publishes this same gallery to
+- The script is a thin orchestrator over `scripts/architecture-diff.sh`,
+  `puml_diff.py`, and `scripts/build_pr_gallery.py`. Call it rather than those
+  directly, and never copy their logic into the skill — a second fork of the
+  review pipeline would drift silently.
+- `puml-diff-vs-git.sh` remains the *single-diagram* primitive. Reach for it only
+  when you want one specific diagram against an unusual ref.
+- Without `plantuml` on PATH the script skips local rendering and says so; fall
+  back to the encoded plantuml.com URLs already in `SUMMARY.md`. The section
+  survives, but the images then need the network.
+- **PR mode:** CI publishes this same gallery to
   `https://victorrentea.github.io/petclinic/pr/<n>/` and links it from a sticky
-  comment. Link that page from review.md rather than duplicating the prose — but
-  still embed the images locally, since the published gallery is deleted when the
-  PR closes.
-- `pr-diff/` is git-ignored and safe to regenerate; never commit it.
+  comment. Link that page — but still embed the SVGs locally, because the
+  published gallery is deleted when the PR closes.
+- `pr-diff/` is git-ignored scratch space and safe to regenerate; never commit it.
 
 ## Step 2 — Screenshots of impacted screens (only if frontend changed)
 
