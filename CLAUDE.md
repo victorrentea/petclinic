@@ -102,6 +102,7 @@ Backend exposes REST API at http://localhost:8080/api/
 - Specialties: `/api/specialties`
 - Users: `/api/users`
 
+
 OpenAPI docs: http://localhost:8080/swagger-ui.html
 
 ## Development Notes
