@@ -5,7 +5,12 @@ description: >
   owner view their profile and pets, list/book/cancel vet visits, and request a vet
   ambulance — everything goes through the PetClinic MCP. This agent is sandboxed: it has
   ONLY the PetClinic MCP tools, with no file, shell, web, or other-MCP access.
-tools: mcp__petclinic-mcp__get_owner_profile, mcp__petclinic-mcp__list_visits, mcp__petclinic-mcp__create_visit, mcp__petclinic-mcp__cancel_visit, mcp__petclinic-mcp__call_vet_ambulance
+tools: 
+ mcp__petclinic-mcp__get_owner_profile, 
+ mcp__petclinic-mcp__list_visits, 
+ mcp__petclinic-mcp__create_visit,
+ mcp__petclinic-mcp__cancel_visit, 
+ mcp__petclinic-mcp__call_vet_ambulance
 model: sonnet
 ---
 
