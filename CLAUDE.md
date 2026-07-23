@@ -53,6 +53,18 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 
 ## Domain Model (ER Model)
 
+### Query the data, don't guess
+Never reason about "what the data probably looks like". A `postgres-db` MCP connector is
+wired to the dev database — **query it** whenever there is any doubt about column types,
+nullability, cardinality, duplicates, formats, collation or realistic row counts. Assumptions
+about data have already produced wrong designs here; a `SELECT` is always cheaper.
+
+### Production data volumes
+The dev seed data (28 owners) is **not** representative. Production is planned for
+**~10,000 owners**. Never design a list screen or endpoint that loads all owners
+(or all of any owner-scale collection) into memory — paginate, sort and filter
+**server-side**, and watch for N+1 queries on `Owner.pets`.
+
 Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**
 - **Pet** 1→N **Visit**
