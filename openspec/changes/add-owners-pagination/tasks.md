@@ -1,8 +1,10 @@
 ## 1. Database — collation and indexes
 
-- [ ] 1.1 Write a failing test asserting the `ro-RO-x-icu` collation is available on the embedded PostgreSQL used by the test suite (fail fast before building on D6)
-- [ ] 1.2 Write a failing test that inserts `van Helsing`, `Ștefănescu`, `Zorro`, `de Gaulle`, `Adams`, `Ionescu` and asserts ICU ordering (`Adams, de Gaulle, Ionescu, Ștefănescu, van Helsing, Zorro`)
-- [ ] 1.3 Add `V9__recollate_and_index_owners.sql`: recollate `owners.last_name`, `owners.first_name`, `owners.city` to `ro-RO-x-icu` (leave `address` and `telephone` alone)
+- [ ] 1.1 Write a failing test asserting the `und-x-icu` collation is available on the embedded PostgreSQL used by the test suite (verified present on dev; fail fast before building on D6)
+- [ ] 1.2 Write a failing test that inserts `Bakker`, `de Vries`, `Gogh`, `Szabó`, `Ștefănescu`, `Tudor`, `van Gogh` and asserts that exact ascending order
+- [ ] 1.2a Write a test asserting the configured collation yields the same order as `nl-x-icu` (the Netherlands is the primary market — this is the guard on D6)
+- [ ] 1.2b Write a test pinning the accepted Hungarian divergence (`Csaba, Cukor, Czako`, not `Cukor, Czako, Csaba`) so a future move to per-locale ordering is deliberate
+- [ ] 1.3 Add `V9__recollate_and_index_owners.sql`: recollate `owners.last_name`, `owners.first_name`, `owners.city` to `und-x-icu` (leave `address` and `telephone` alone)
 - [ ] 1.4 In the same migration create `owners_sort_idx (last_name, first_name, id)` and `owners_city_sort_idx (city, last_name, id)`
 - [ ] 1.5 In the same migration create `owners_search_idx (last_name text_pattern_ops)` so the existing `LIKE 'prefix%'` search stays index-servable after recollation
 - [ ] 1.6 Tests 1.1–1.2 green; existing `findByLastNameStartingWith` tests still green
@@ -52,12 +54,13 @@
 - [ ] 7.3 Update `owner.service.ts` to send `page`, `size`, `sort`, `lastName` and return the page envelope
 - [ ] 7.4 Make `ActivatedRoute.queryParams` the component's source of truth (`page`, `size`, `sort`, `direction`, `lastName`); every interaction does `router.navigate` with merged params
 - [ ] 7.5 Set UI defaults to page 0, size 10, Name ascending — identical to the server defaults
-- [ ] 7.6 Write a failing test that changing `lastName` resets `page` to 0 while preserving `size` and `sort`; then make it pass
-- [ ] 7.7 Tests 7.1 and 7.6 green
+- [ ] 7.6 Write failing tests that changing `lastName`, sort column, sort direction and `size` each reset `page` to 0 while preserving the other parameters, and that the pager itself does not reset anything
+- [ ] 7.7 Implement the reset as one rule in the navigation helper — drop `page` unless `page` is what changed — rather than four special cases at four call sites
+- [ ] 7.8 Tests 7.1 and 7.6 green
 
 ## 8. Frontend — grid rendering
 
-- [ ] 8.1 Write a failing test that the Name cell renders `lastName firstName`; then render it that way
+- [ ] 8.1 Write a failing test that the Name cell renders `lastName, firstName` (`Potter, Harry`); then render it that way in the template, leaving the two name fields separate in the DTO
 - [ ] 8.2 Write a failing test that an empty result renders the no-owners message; rework `*ngIf="!owners"` to test the result count (an empty `content` array is truthy)
 - [ ] 8.3 Make Name and City headers clickable sort toggles with an asc/desc indicator, on the existing Bootstrap `table table-striped` markup — no `mat-table`
 - [ ] 8.4 Leave Address, Telephone and Pets headers visibly inert — no hover, no pointer cursor, no sort affordance

@@ -90,21 +90,32 @@ no single request can retrieve an unbounded number of owners.
 - **WHEN** the UI offers page sizes 5, 10 and 20
 - **THEN** every offered size is accepted by the server without clamping
 
-### Requirement: Locale-correct ordering of owner names and cities
+### Requirement: Locale-neutral alphabetical ordering of owner names and cities
 Owner ordering SHALL follow linguistic collation rather than byte order. A Flyway migration SHALL
-recollate `owners.last_name`, `owners.first_name` and `owners.city` to `ro-RO-x-icu`, so that
-lowercase-initial surnames and diacritics sort where a human expects.
+recollate `owners.last_name`, `owners.first_name` and `owners.city` to `und-x-icu` (ICU root), so
+that lowercase-initial surnames and accented letters sort where a human expects. The root collation
+is chosen because it is byte-identical to `nl-x-icu`, and the Netherlands is the primary market.
 
-#### Scenario: Mixed-case and diacritic surnames
-- **WHEN** owners `Adams`, `de Gaulle`, `Ionescu`, `Ștefănescu`, `van Helsing`, `Zorro` exist and
+#### Scenario: Mixed-case and accented surnames
+- **WHEN** owners `Bakker`, `de Vries`, `Gogh`, `Szabó`, `Ștefănescu`, `Tudor`, `van Gogh` exist and
   the list is sorted by name ascending
-- **THEN** they are returned in exactly that order, not in the `C`-collation order
-  `Adams, Ionescu, Zorro, de Gaulle, van Helsing, Ștefănescu`
+- **THEN** they are returned in exactly that order, and **not** in the `C`-collation order, which
+  places every lowercase-initial name after all uppercase-initial ones and every accented name last
+
+#### Scenario: Ordering matches Dutch expectations exactly
+- **WHEN** any set of owner names is sorted under the configured collation
+- **THEN** the result is identical to the same set sorted under `nl-x-icu`
 
 #### Scenario: Collation is available where the migration runs
 - **WHEN** the migration runs against the embedded PostgreSQL used by the test suite and by
   `./start-database.sh`
-- **THEN** it succeeds — the `ro-RO-x-icu` collation is present on both
+- **THEN** it succeeds — the `und-x-icu` collation is present on both
+
+#### Scenario: Accepted divergence for the secondary markets
+- **WHEN** Hungarian names `Cukor`, `Czako`, `Csaba` are sorted ascending
+- **THEN** they are returned in root order `Csaba, Cukor, Czako`, not Hungarian order
+  `Cukor, Czako, Csaba` — a known, product-owner-accepted limitation, asserted here so that a
+  future switch to per-locale ordering is a deliberate spec change and not an accident
 
 ### Requirement: Bounded query count per page
 Serving one page of owners SHALL NOT issue a query per owner. Pets and visits SHALL be loaded with

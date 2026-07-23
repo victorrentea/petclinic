@@ -8,8 +8,12 @@ State established by reading the code and **querying the live database** (not as
 | # | Finding | Consequence |
 |---|---|---|
 | 1 | Exactly 4 consumers of the endpoint, all in this repo: `owner.service.ts`, generated `api-types.ts`, `openapi.yaml`, `petclinic-ui-test/tests/support/api-client.ts` | A breaking change is fully contained — do it now, while that is still true |
-| 2 | DB collation is `C` (byte order), PostgreSQL 16.2 | `ORDER BY last_name` yields `Adams, Ionescu, Zorro, de Gaulle, van Helsing, Ștefănescu`. Invisible in the ASCII seed; glaring with 10k Romanian names |
-| 3 | `ro-RO-x-icu` is available on this server; verified to produce `Adams, de Gaulle, Ionescu, Ștefănescu, van Helsing, Zorro` | The fix is available in place |
+| 2 | DB collation is `C` (byte order), PostgreSQL 16.2 | `ORDER BY last_name` puts every lowercase-initial surname (`de Vries`, `van Gogh`) after all uppercase-initial ones, and every accented surname (`Szabó`, `Ștefănescu`) after those. Invisible in the ASCII seed; glaring with 10k Dutch, Hungarian and Romanian names |
+| 3 | VERIFIED by querying `pg_collation` on the dev server: `und-x-icu`, `nl-x-icu`, `nl-NL-x-icu`, `hu-x-icu`, `hu-HU-x-icu`, `ro-x-icu`, `ro-RO-x-icu`, `en-x-icu` all present | Any of them is available in place; the choice is a product decision, not an availability one |
+| 3a | VERIFIED: **`nl-x-icu` output is byte-identical to `und-x-icu`** on a mixed nl/hu/ro name set | Dutch order *is* the ICU root order — the top market needs no locale-specific collation |
+| 3b | VERIFIED: `hu-x-icu` gives `Cukor, Czako, Csaba` where root gives `Csaba, Cukor, Czako` — "cs"/"sz"/"zs" are single letters sorting after the base | Hungarian genuinely diverges from root; visible in any Hungarian name list |
+| 3c | VERIFIED: `ro-x-icu` places `Ștefănescu` after `Szabó` and `Țucă` after `Tudor`; root interleaves them with the plain S/T names | Romanian genuinely diverges from root |
+| 3d | VERIFIED: under **every** collation tested, `van Gogh` and `van der Berg` sort under V and `de Vries` under D | No collation implements the Dutch *tussenvoegsel* filing convention — it is a data-model problem, not a collation setting |
 | 4 | No sortable column is unique — `city`: London ×7, Hogsmeade ×3; `last_name`: Potter ×2, Darling ×2 | Non-unique `ORDER BY` + `LIMIT/OFFSET` lets PostgreSQL reorder ties between requests → rows duplicate on one page and vanish from another |
 | 5 | `telephone` is nullable `text`, 27/28 populated, lengths 10–13, mixed international formats (`0119084455`, `0442074860707`, `0032225112233`) | Sorting it is deterministic but meaningless to a human |
 | 6 | `address` is free text with leading house numbers; real `ORDER BY address` output is `14…, 221B…, 26…, 27…, 30…, 4…, 62…`, and a third have no number at all (`The Burrow`, `Diagon Alley`) | `4` after `30` is correct string sorting that reads as a bug |
@@ -65,14 +69,43 @@ Findings 5 and 6. A sort that produces visible nonsense reads as broken, not as 
 is a 1→N collection with no agreed ordering meaning. This is a **conscious deviation from the
 written issue** ("any column") and must be confirmed on the PR.
 
-### D5 — Name displays as `lastName firstName`, sorts `last_name, first_name, id`
-Matches the last-name prefix search already on the screen.
+### D5 — Name displays as `lastName, firstName`, sorts `last_name, first_name, id`
+Matches the last-name prefix search already on the screen. The comma separator is presentation
+only — it is never part of a sorted or searched value, so the display format and the sort chain
+stay independent. Rendered in the template, not concatenated in the DTO, so the API keeps the two
+name fields separate for any other consumer.
 
-### D6 — Fix the `C` collation now, in a Flyway migration
-`V9__recollate_and_index_owners.sql` recollates `last_name`, `first_name`, `city` to `ro-RO-x-icu`.
+### D6 — Fix the `C` collation now, to `und-x-icu` (ICU root), in a Flyway migration
+`V9__recollate_and_index_owners.sql` recollates `last_name`, `first_name`, `city` to **`und-x-icu`**.
 `address` and `telephone` are left alone — they are not sorted (D4). Costs nothing on 28 rows; a
-`REINDEX` on 10k+ later is not free. *Alternative:* `ORDER BY x COLLATE "ro-RO-x-icu"` in the query
-— pushes the concern into every query site forever and defeats plain indexes.
+`REINDEX` on 10k+ later is not free.
+
+Market priority is **Netherlands > Hungary > Romania**. Finding 3a is decisive: `nl-x-icu` output is
+*byte-identical* to `und-x-icu`, so the root collation is exactly correct for the top market while
+staying language-neutral for the other two. Picking `nl-x-icu` would buy nothing over root and would
+falsely imply the schema is Dutch-specific.
+
+*Alternative rejected — `ro-RO-x-icu`* (the original choice, made before market priority was known):
+it is now the *third* market, and it actively misorders nothing for Dutch but signals the wrong
+intent. *Alternative rejected — per-locale collation chosen at query time:* one b-tree index serves
+exactly one collation, so this means one index per supported locale plus a locale-aware query path
+and a locale-aware `Pageable`. Real cost, no payoff until Hungary is a live market. *Alternative
+rejected — `ORDER BY x COLLATE …` in the query:* pushes the concern into every call site forever and
+defeats the plain index.
+
+**Accepted limitation:** Hungarian (3b) and Romanian (3c) users see a mildly wrong order. Product
+owner sign-off is requested in the proposal. Revisit when Hungary is material.
+
+### D6a — Dutch *tussenvoegsel* filing is out of scope, but must be surfaced now
+Finding 3d: no collation files `van Gogh` under G. Dutch convention does. Implementing it requires
+storing the prefix separately (a `tussenvoegsel` column, standard in Dutch systems) or a persisted
+sort key — a change to the owner data model and to every create/edit form, not a sort tweak.
+
+Out of scope for #25, but it is raised in the proposal as an explicit product-owner decision,
+because with the Netherlands as first market it is likely to be requested, and retrofitting a name
+split across 10,000 existing owners is far more expensive than deciding before they exist. If the
+answer is "yes, plan it", the sort chain becomes `(surname_sort_key, first_name, id)` and D6's
+collation choice is unaffected.
 
 ### D7 — Spring `Pageable` + springdoc `@ParameterObject` for request params
 Idiomatic, least code. *Alternative considered and rejected by the owner:* an explicit sort enum,
@@ -119,8 +152,13 @@ clicking. Server and UI defaults are stated in both places and must be kept equa
 ### D15 — Page sizes exactly `[5, 10, 20]`, matching `max-page-size=20`
 Per the issue. The two must not disagree, or the UI offers an option the server rejects.
 
-### D16 — Changing `lastName` resets `page` to 0, preserving `size` and `sort`
-Staying on page 4 after narrowing to 3 results shows a confusing empty grid.
+### D16 — Every parameter change except the pager resets `page` to 0
+`lastName`, sort column, sort direction and `size` all reset `page` to 0, preserving the other
+parameters; only the pager changes `page`. Narrowing to 3 results while on page 4 shows a confusing
+empty grid, and re-sorting or resizing makes the current page index meaningless — the row that was
+at that position is no longer there. Implementation note: this is one rule at the navigation
+helper, not four special cases at four call sites — the helper takes the changed params and drops
+`page` unless `page` is itself what changed.
 
 ### D17 — Rework the empty state to test the result count
 Today `owners` is `null` when there are no results and the template tests `*ngIf="!owners"`. It
@@ -144,11 +182,49 @@ must stay green; a pagination scenario is worth adding.
 Test-first for each of: envelope shape and totals across pages; default sort when no `sort` given;
 **page stability across ties** (sort by `city`, London ×7 — assert no owner on two pages and none
 skipped; this is the D9 regression test); name-sort expansion (Beatrix Potter before Harry Potter);
-`?size=100000` clamped and `?sort=bogus` → 400; ICU ordering with `van Helsing` / `Ștefănescu` /
-`Zorro` inserted; query count per page ≈3 not ≈46. Frontend
+`?size=100000` clamped and `?sort=bogus` → 400; ICU ordering over a mixed nl/hu/ro fixture
+(`Bakker`, `de Vries`, `Gogh`, `Szabó`, `Ștefănescu`, `Tudor`, `van Gogh`), plus the two D6 guards —
+configured collation equals `nl-x-icu`, and the accepted Hungarian divergence is pinned; query count
+per page ≈3 not ≈46. Frontend
 (`owner-list.component.spec.ts`): reads initial state from query params, navigates with merged
-params, search resets page (D16), empty result renders the message (D17), Name cell renders
-`lastName firstName` (D5).
+params, search/sort/direction/size each reset page while the pager does not (D16), empty result
+renders the message (D17), Name cell renders
+`lastName, firstName` (D5).
+
+## Affected Code
+
+The proposal states the user-visible change in business terms; this is the implementation surface.
+
+**API contract change — BREAKING**
+
+`GET /api/owners` returns `PageDto<OwnerDto>` — `{content, totalElements, totalPages, number, size}`
+— instead of a bare `List<OwnerDto>`, and gains the `page` / `size` / `sort` query parameters
+alongside the existing `lastName` filter. All four consumers are in this repo and are updated in
+this change; there are no external consumers.
+
+**Backend** (`petclinic-backend`)
+- `OwnerController` — `@ParameterObject Pageable`, sort expansion, `id` tiebreaker
+- Owner service + repository query methods — paged query, `lastName` prefix filter pushed to SQL
+- New `PageDto<T>` record in `rest/dto/`
+- `@RestControllerAdvice` — map `PropertyReferenceException` → 400
+- `application.properties` — `spring.data.web.pageable.max-page-size=20`,
+  `spring.data.web.pageable.default-page-size=10`,
+  `spring.jpa.properties.hibernate.default_batch_fetch_size=50`
+- New migration `V9__recollate_and_index_owners.sql`
+
+**Contract artifacts** — regenerated, never hand-edited (both CI drift-checked per `GUARDRAILS.md`)
+- `openapi.yaml` ← `OpenApiExtractorTest`
+- `petclinic-frontend/src/app/generated/api-types.ts` ← `npm run generate:api`
+
+**Frontend** (`petclinic-frontend`)
+- `owner.service.ts`, `owner-list.component.{ts,html,css}`
+- Adopts the already-present unused `owners/owner-page.ts` interface and the `.owners-controls` /
+  `.owners-pagination` / `.owners-page-size` CSS left by the earlier attempt (finding 10)
+- Latent bug this change introduces if unhandled: the no-results message tests `*ngIf="!owners"`,
+  and an empty `content` array is truthy — see D17
+
+**UI tests** (`petclinic-ui-test`)
+- `tests/support/api-client.ts` unwraps `.content`; `owner-search.feature` must stay green
 
 ## Risks / Trade-offs
 
@@ -166,9 +242,22 @@ At 28 rows PostgreSQL seq-scans regardless and this is completely invisible.
 → **Mitigation: `EXPLAIN` against a 10,000-row dataset before considering #25 done.** This is the
 single largest unresolved item; without it, the fix for one problem quietly creates another.
 
-**[The embedded test PostgreSQL may lack `ro-RO-x-icu`]** — it is the same 16.2 jar as dev, so it
-should have it, but a migration that fails only in CI is a bad surprise.
+**[The embedded test PostgreSQL may lack `und-x-icu`]** — verified present on the dev server
+(finding 3); it is the same 16.2 jar, so it should be present in tests too, but a migration that
+fails only in CI is a bad surprise.
 → Mitigation: assert collation availability in a migration test as the first task of implementation.
+
+**[Market priority may shift again]** — the collation was chosen for Netherlands-first (D6). If
+Hungary becomes primary, root ordering is visibly wrong for the largest user base, and the fix
+means a per-locale index plus a locale-aware query path, retrofitted onto a live 10k-row table.
+→ Mitigation: task 1.2b pins the current Hungarian behaviour in a test, so the day it becomes
+unacceptable the failing expectation is already written and the change is deliberate, not archaeology.
+
+**[Dutch name filing is deferred, not solved]** — finding 3d. `van Gogh` files under V, Dutch
+convention says G. Deferring is cheap now and expensive after 10,000 Dutch owners are recorded with
+the prefix glued into `last_name`.
+→ Mitigation: raised as an explicit product-owner decision in the proposal *before* the owner list
+grows, rather than discovered during a later Netherlands rollout. See D6a.
 
 **[`JOIN FETCH` regression risk]** — a future well-meaning "fix the N+1 properly" commit that adds
 `JOIN FETCH pets` to the paged query reintroduces in-memory pagination silently.
@@ -201,5 +290,11 @@ places by design. If they diverge, the UI offers something the server rejects.
 1. **The `EXPLAIN`-at-10k verification** (first risk above) — the one item that must be resolved
    during implementation, not deferred.
 2. Sign-off on D4's deviation from the issue's "any column".
-3. Whether to add a dedicated pagination scenario to `owner-search.feature` or only keep the
+3. **Product-owner sign-off on D6's accepted divergence** — one neutral order, exactly right for
+   the Netherlands, mildly wrong for Hungary and Romania. If this is refused, per-locale ordering
+   moves in scope and brings a per-locale index and a locale-aware query path with it.
+4. **Product-owner decision on D6a** — whether Dutch *tussenvoegsel* filing (`van Gogh` under G) is
+   planned now. Out of scope for #25 regardless, but the answer determines whether owner name
+   capture should be split before the table grows to 10,000 rows.
+5. Whether to add a dedicated pagination scenario to `owner-search.feature` or only keep the
    existing scenarios green (D20).

@@ -2,19 +2,80 @@ schema: spec-driven
 
 # Project context (optional)
 # This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Audience split — this is the most important convention in this project:
+    - proposal.md is reviewed with the PRODUCT OWNER, who is non-technical.
+    - design.md is reviewed with the DEVELOPERS.
+  Every artifact must be written for the people who will read it out loud in that meeting.
+
+  Tech stack (for design.md, specs and tasks — never for proposal.md):
+  Spring Boot 3.5 / Java 21 backend, Angular 16 + Bootstrap 3 frontend, PostgreSQL + Flyway,
+  Playwright + Cucumber UI tests. See CLAUDE.md and GUARDRAILS.md.
 
 # Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      AUDIENCE: a non-technical product owner. They will read this document in a review meeting.
+      Nothing in it may require knowing how software is built. Write so they are never lost, and
+      so the author is never embarrassed to project it on a screen.
+    - >-
+      BANNED from proposal.md — move every one of these to design.md instead: code identifiers
+      (class, method, field, file or package names), file paths, HTTP endpoints and verbs, JSON or
+      any other payload shape, SQL, DDL, query or index names, config keys and property values,
+      library/framework/tool names, CLI commands, error codes and HTTP status codes, database
+      column or table names, and version numbers.
+    - >-
+      Say WHAT changes for the people using the system and WHY it matters to the business —
+      never HOW it is built. "The list is shown one page at a time" belongs here; the name of the
+      object that carries that page does not.
+    - >-
+      Where a technical fact drives the decision, translate it into its business consequence and
+      keep the concrete evidence: user-visible symptoms, real example values, counts, volumes and
+      money. "Sorted addresses read 14, 221B, 26, 30, 4, 62 — the 4 lands after the 30" is good;
+      naming the collation that causes it is not.
+    - >-
+      Structure: Why / What Changes / Capabilities / Impact. Under Impact, state separately the
+      effect on users of the system, the effect on the team, risks worth the product owner
+      knowing about, and — as an explicit numbered list — the decisions actually needed FROM the
+      product owner.
+    - >-
+      Capability names are the one unavoidable technical token (they name spec folders). Keep the
+      kebab-case name, but describe each one in a plain sentence a product owner can evaluate.
+    - >-
+      Call out every deliberate departure from what the issue or the stakeholder asked for,
+      explain the reasoning in user terms, and ask for agreement explicitly. Never let a
+      scope reduction reach the product owner disguised as a technical detail.
+    - Keep it under two pages. No tables of findings; those belong in design.md.
+  design:
+    - >-
+      AUDIENCE: fellow developers. This is where ALL technical detail belongs — including
+      everything that was deliberately kept out of proposal.md. Be specific and concrete.
+    - >-
+      State the investigation findings that constrain the design, and mark which were VERIFIED
+      (code read, database queried, command run) versus assumed. Never present an assumption
+      about data as a fact — query it.
+    - >-
+      For every decision, give the rationale AND the alternative that was rejected, with the
+      reason it lost. A decision without its discarded alternative is not reviewable.
+    - >-
+      Include an "Affected Code" section: the contract change, and the file/module-level surface
+      per module, so a reviewer can see the blast radius without reading the diff.
+    - >-
+      Record risks as [Risk] -> Mitigation. A risk that is invisible at current data volume but
+      real at production volume must say so explicitly, and name the check that would catch it.
+    - >-
+      Where a decision was made by the developer rather than the owner, say so, so it can be
+      challenged cheaply later.
+  specs:
+    - >-
+      Scenarios are potential test cases — make each one concrete enough to implement directly,
+      using real example values from this project's data rather than placeholders.
+  tasks:
+    - Break tasks into chunks of at most 2 hours.
+    - >-
+      Order tasks test-first, per CLAUDE.md — the failing test is its own task, before the code
+      that makes it pass.
+    - >-
+      Any verification that cannot be done at development data volume gets its own explicit task
+      with the dataset it needs, rather than a note buried in another task.
