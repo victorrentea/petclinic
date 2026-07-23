@@ -21,7 +21,8 @@ what that line means **and** the engineering lessons baked into the script.
 
 ## Example
 
-Actively working, current turn already billing:
+Actively working, current turn already billing (the ellipsis is **animated**:
+it grows `․` → `‥` → `…` once per second while the turn is billing):
 
 ```
 Opus 4.8/xhigh 50K/1M | 98%↗ left • 4:47h | $0.48… current • $25 💸
@@ -103,7 +104,7 @@ The spend segment shows **cost only** (no token counts). Two parts: the
 
 | Piece | Meaning |
 |-------|---------|
-| `$0.48…` | cost of the **current turn**, with a `…` while it's still adding up |
+| `$0.48…` | cost of the **current turn**, with an **animated** ellipsis (`․` → `‥` → `…`, one frame per second) while it's still adding up |
 | `current` | label shown only while working *and* the turn has already billed |
 | *(or)* `$0.11 3m ago` | when idle: the **last** turn's cost + a ticking "N ago" clock, **no** label |
 | `$25 💸` | session total, **integer-truncated** (`int($)`), authoritative |
@@ -131,8 +132,12 @@ The spend segment shows **cost only** (no token counts). Two parts: the
 The label is driven by whether the **current turn has actually billed yet**
 (`turn_cost > 0`), *not* merely by "am I working":
 
-- **working AND turn has cost** → live figure with a `…` ellipsis + `current`
-  (e.g. `$0.48… current`) — it's still adding up.
+- **working AND turn has cost** → live figure with an animated ellipsis +
+  `current` (e.g. `$0.48… current`) — it's still adding up. The ellipsis cycles
+  through the single-cell dot-leader glyphs `․` `‥` `…` (U+2024/2025/2026),
+  keyed off `now % 3`, so it grows one dot per second without shifting the
+  line's width; `refreshInterval: 1` is what advances the frame, so the
+  animation adds zero extra work per render.
 - **otherwise** (idle, *or* you just hit Enter and no cost has come back yet) →
   the **previous** turn's figure with a ticking `N ago` and **no** label. The
   "ago" already says it's the last turn. So hitting Enter does **not** flip to
@@ -213,6 +218,12 @@ priority order:
   re-send of your next message expensive enough to be worth flagging.
 
 ### Cheap shell/rendering touches
+- **Free animation off the refresh clock:** the "billing" ellipsis animates
+  (`․` → `‥` → `…`) by deriving its frame from `now % 3` — a wall-clock value
+  the script already fetches — and letting `refreshInterval: 1` advance it.
+  No timers, no background process, zero extra work per render. The three
+  dot-leader glyphs (U+2024/2025/2026) are each a **single cell**, so the line
+  never shifts width mid-animation.
 - ANSI colors are built once from `printf '\033'`; thresholds recolor each field
   (context %, quota left, burn arrow, idle age) inline.
 - The `/effort` suffix is spliced **around** the model's `(context)` label using
@@ -572,7 +583,16 @@ if [ -n "$spend_ready" ]; then
   #     "ago" already says it's the last turn. So hitting Enter does NOT flip to
   #     "current"; it stays on "$X.XX <age> ago" until real cost data arrives.
   if [ "$idle" != "1" ] && [ "$(echo "$turn_cost > 0" | bc -l)" = "1" ]; then
-    turn_money=$(printf '$%.2f…' "$turn_cost")
+    # Animated ellipsis: cycle the one-/two-/three-dot leader glyphs (․ ‥ …),
+    # each a single cell so the segment never changes width. The frame comes
+    # from the wall clock ($now, already fetched), and refreshInterval=1 is
+    # what advances it — so the animation is free, no extra work per render.
+    case $((now % 3)) in
+      0) dots="․" ;;
+      1) dots="‥" ;;
+      *) dots="…" ;;
+    esac
+    turn_money=$(printf '$%.2f%s' "$turn_cost" "$dots")
     turn_suffix=" current"
   else
     # idle after a finished turn -> that turn's cost is in turn_cost; just after
