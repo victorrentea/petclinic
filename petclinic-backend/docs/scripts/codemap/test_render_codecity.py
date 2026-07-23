@@ -95,8 +95,13 @@ class RenderCodecityTest(unittest.TestCase):
             self.assertIn("function addPackageLabel", html)
             self.assertIn("function placeFloorLabelMesh", html)   # global no-overlap floor-label guard
             self.assertIn("instability", html)           # Ce/(Ce+Ca) metric
-            self.assertLess(html.index('id="colorMetric"'), html.index('id="heightMetric"'))
-            self.assertLess(html.index('id="heightMetric"'), html.index('id="areaMetric"'))
+            # Controls are two paired rows joined by separator glyphs:
+            #   row 1  AREA / HEIGHT      row 2  COLOR @ SCALE
+            self.assertIn('class="sep" aria-hidden="true">/</span>', html)
+            self.assertIn('class="sep" aria-hidden="true">@</span>', html)
+            self.assertLess(html.index('id="areaMetric"'), html.index('id="heightMetric"'))
+            self.assertLess(html.index('id="heightMetric"'), html.index('id="colorMetric"'))
+            self.assertLess(html.index('id="colorMetric"'), html.index('id="colorScale"'))
             self.assertIn("PetClinicMcp.java", html)
             self.assertIn('"district": "victor.training.petclinic.mcp"', html)
             self.assertIn("new THREE.BoxGeometry", html)
@@ -176,11 +181,19 @@ class RenderCodecityTest(unittest.TestCase):
             # buildings, which only crowded the city.
             self.assertNotIn("addChangeOutline", html)
             self.assertNotIn("THREE.BackSide", html)
-            # "highlight changed" is the default view…
-            self.assertIn('<option value="highlight" selected>', html)
-            # …but an empty change set must fall back, or the whole city greys out
-            # with nothing lit.
+            # The change set now defaults to "show everything" (was "highlight changed"):
+            # the city opens fully coloured, and the filter is opt-in.
+            self.assertIn('<option value="off" selected>show everything</option>', html)
+            self.assertNotIn('value="highlight" selected', html)
+            # An empty change set still disables the changed-only modes and stays on "off".
             self.assertIn('changeSelect.value = "off"', html)
+            # Cursor: hand over a building, arrow over empty space, 4-way move while dragging.
+            self.assertIn('hoverCursor = hit ? "pointer" : "default"', html)
+            self.assertIn("function applyCursor", html)
+            self.assertIn("let isDragging", html)
+            # Flat floor package labels are spun to face the camera each frame (no upside-down text).
+            self.assertIn("function updateFloorLabelFacing", html)
+            self.assertIn("floorLabelMeshes", html)
             # Unchanged buildings are not label candidates in highlight mode.
             self.assertIn("entry.file.changed)", html)
             self.assertIn("const labelPool", html)

@@ -319,13 +319,26 @@ html = """<!doctype html>
     font-size: 12px;
     line-height: 1.35;
   }
-  /* Two columns: the colour pair (metric + its scale) stacks on the left, the
-     geometry pair (height, area) on the right — so the scale sits directly under
-     the metric it scales, instead of reading as a fourth independent knob. */
+  /* Two rows of paired knobs, each pair joined by a separator glyph:
+       row 1   AREA  /  HEIGHT   (footprint & extrusion — the geometry)
+       row 2   COLOR @  SCALE    (the hue metric & the ramp it is drawn on)
+     so each row reads as one idea instead of four independent dropdowns. */
   .controls {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 6px 8px;
+    align-items: end;
+  }
+  .controls .sep {
+    align-self: end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;              /* ~ select height, so the glyph centres on the selects */
+    color: #7b8794;
+    font-size: 15px;
+    font-weight: 700;
+    user-select: none;
   }
   /* View switch (Classes / Packages / Modules) sits inline in the title row. */
   h1 .titleView {
@@ -745,17 +758,17 @@ html = """<!doctype html>
     </select></h1>
   <div class="controls">
     <label>
-      Color
-      <select id="colorMetric">
-        <option value="complexity_per_kloc">cognitive complexity / KLOC</option>
-        <option value="bugs_per_kloc">bugfix commits / KLOC</option>
-        <option value="commits_per_kloc" selected>total commits / KLOC</option>
+      Area
+      <select id="areaMetric">
+        <option value="bytes" selected>file size</option>
+        <option value="lines">lines of code (LOC)</option>
+        <option value="cognitive_complexity">cognitive complexity</option>
+        <option value="commits">total commits</option>
         <option value="committers">committers</option>
-        <option value="instability">instability Ce/(Ce+Ca)</option>
-        <option value="fan_in">incoming coupling (fan in)</option>
         <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
+    <span class="sep" aria-hidden="true">/</span>
     <label>
       Height
       <select id="heightMetric">
@@ -770,22 +783,24 @@ html = """<!doctype html>
       </select>
     </label>
     <label>
+      Color
+      <select id="colorMetric">
+        <option value="complexity_per_kloc">cognitive complexity / KLOC</option>
+        <option value="bugs_per_kloc">bugfix commits / KLOC</option>
+        <option value="commits_per_kloc" selected>total commits / KLOC</option>
+        <option value="committers">committers</option>
+        <option value="instability">instability Ce/(Ce+Ca)</option>
+        <option value="fan_in">incoming coupling (fan in)</option>
+        <option value="fan_out">outgoing coupling (fan out)</option>
+      </select>
+    </label>
+    <span class="sep" aria-hidden="true">@</span>
+    <label>
       Color scale
       <select id="colorScale" aria-label="colour scale">
         <option value="auto" selected>auto (log for /KLOC)</option>
         <option value="linear">linear</option>
         <option value="log">log</option>
-      </select>
-    </label>
-    <label>
-      Area
-      <select id="areaMetric">
-        <option value="bytes" selected>file size</option>
-        <option value="lines">lines of code (LOC)</option>
-        <option value="cognitive_complexity">cognitive complexity</option>
-        <option value="commits">total commits</option>
-        <option value="committers">committers</option>
-        <option value="fan_out">outgoing coupling (fan out)</option>
       </select>
     </label>
   </div>
@@ -806,8 +821,8 @@ html = """<!doctype html>
   <div class="viewOf pkgRow">
     <span>Change set:</span>
     <select id="changeMode" aria-label="change-set filter">
-      <option value="off">show everything</option>
-      <option value="highlight" selected>highlight changed</option>
+      <option value="off" selected>show everything</option>
+      <option value="highlight">highlight changed</option>
       <option value="hide">only changed</option>
     </select>
     <span id="changeCount" class="filterCount"></span>
@@ -917,9 +932,9 @@ const filterClearBtn = document.getElementById("pkgFilterClear");
 const filterCountEl = document.getElementById("pkgFilterCount");
 if (packageOpt && !PACKAGES.length) packageOpt.disabled = true;   // no package data → option greyed
 if (moduleOpt && MODULES.length < 2) moduleOpt.disabled = true;   // <2 modules → nothing to compare
-// Nothing in the change set → the highlight/hide modes have nothing to act on.
-// "highlight changed" is the default, so fall back to "off" as well: leaving the
-// disabled value selected would drain the whole city to grey with nothing lit.
+// "show everything" is the default; the highlight/hide modes only make sense when
+// there IS a change set. With none, disable them (leaving "off" selected and the
+// view unaffected) so the user can't pick a mode that would blank the whole city.
 if (changeSelect && !HAS_CHANGES) {
   for (const opt of changeSelect.options) if (opt.value !== "off") opt.disabled = true;
   changeSelect.value = "off";
@@ -975,6 +990,7 @@ let buildings = [];
 let districts = [];
 let cityLabels = [];
 let districtLabels = [];   // floating package tags (CSS2DObjects), when pkgLabelMode = "floating"
+const floorLabelMeshes = [];   // flat on-the-floor package names; re-oriented each frame to face the camera
 
 // ── Cross-view link with the 2D codemap (when embedded side by side) ──────────
 // The parent "combined" page bridges hover selection between this city and the
@@ -1053,7 +1069,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 mount.appendChild(renderer.domElement);
-renderer.domElement.style.cursor = "move";
+renderer.domElement.style.cursor = "default";   // arrow over empty space; hand over a building; move while dragging
 
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -1085,15 +1101,29 @@ function setRotationPivotToViewportCenter() {
   }
 }
 
+// Cursor state: hand (pointer) over a building, arrow (default) over empty space,
+// 4-way "move" while dragging, and the orbit glyph while Cmd/Ctrl is held.
+let pointerIsDown = false;    // a mouse button is currently pressed on the canvas
+let isDragging = false;       // …and the pointer has travelled far enough to be a drag
+let hoverCursor = "default";  // cursor implied by what is under the pointer (set in onPointerMove)
+
 function onPointerDown(event) {
   pointerDownAt = { x: event.clientX, y: event.clientY };
+  pointerIsDown = true;
+  isDragging = false;
   if (event.metaKey || event.ctrlKey) {
     setRotationPivotToViewportCenter();
   }
+  applyCursor(event);
 }
 
-// Move cursor by default (you can pan); a circular-arrow cursor while Cmd/Ctrl is
-// held to hint that dragging now orbits the camera.
+function onPointerUp(event) {
+  pointerIsDown = false;
+  isDragging = false;
+  applyCursor(event);
+}
+
+// A circular-arrow cursor while Cmd/Ctrl is held to hint that dragging now orbits.
 const ROTATE_CURSOR_SVG =
   "<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'>" +
   "<g fill='none' stroke-linecap='round' stroke-linejoin='round'>" +
@@ -1104,8 +1134,14 @@ const ROTATE_CURSOR_SVG =
   "</g></svg>";
 const ROTATE_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(ROTATE_CURSOR_SVG)}") 14 14, grab`;
 
-function updateCursor(event) {
-  renderer.domElement.style.cursor = (event.metaKey || event.ctrlKey) ? ROTATE_CURSOR : "move";
+// Precedence: Cmd/Ctrl → orbit glyph; an active drag → 4-way "move"; otherwise the
+// hover cursor (hand over a building, arrow over empty ground).
+function applyCursor(event) {
+  let cursor;
+  if (event.metaKey || event.ctrlKey) cursor = ROTATE_CURSOR;
+  else if (isDragging) cursor = "move";
+  else cursor = hoverCursor;
+  renderer.domElement.style.cursor = cursor;
 }
 
 function updatePointer(event) {
@@ -1313,6 +1349,7 @@ function rebuildCity() {
   // (rest, mapper, ...). A thin outline delimits every package from its siblings.
   _floorLabelBudget = 240;   // cap flat floor-text planes per rebuild (perf on big cities)
   _floorLabelBoxes = [];     // fresh overlap map for this rebuild's floor labels
+  floorLabelMeshes.length = 0;   // the previous rebuild's planes are gone; start the facing list over
   for (const node of root.descendants()) {
     if (node === root || !node.children) {
       continue;
@@ -1592,7 +1629,29 @@ function placeFloorLabelMesh(tex, worldW, worldH, x, z, yaw, topY) {
   mesh.userData.kind = "package";                    // disposed by clearCity's package sweep
   scene.add(mesh);
   _floorLabelBoxes.push(box);
+  floorLabelMeshes.push({ mesh, baseYaw: yaw });     // spun to face the viewer each frame
   return true;
+}
+
+// A flat floor label reads upside down from the far side of an orbit. Each frame,
+// spin it 180° about the vertical axis whenever its text would face away, so the
+// letters always point toward the camera (top edge pointing away from the viewer).
+// A 180° spin is about the plane's own (vertical) normal, so it stays flat, keeps
+// its footprint (no overlap regressions) and rotates the text in-place, never mirrors it.
+const _qFloorFlat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+const _qFloorYaw = new THREE.Quaternion();
+const _floorUpAxis = new THREE.Vector3(0, 1, 0);
+function updateFloorLabelFacing() {
+  for (const { mesh, baseYaw } of floorLabelMeshes) {
+    const dx = mesh.position.x - camera.position.x;
+    const dz = mesh.position.z - camera.position.z;
+    // Text "up" for orientation φ is (−sinφ, 0, −cosφ); flip when it would point
+    // toward the camera (negative dot with the camera→label ground vector).
+    let phi = baseYaw;
+    if (-Math.sin(phi) * dx - Math.cos(phi) * dz < 0) phi += Math.PI;
+    _qFloorYaw.setFromAxisAngle(_floorUpAxis, phi);
+    mesh.quaternion.copy(_qFloorYaw).multiply(_qFloorFlat);
+  }
 }
 
 function addPackageLabel(node, cx, cz, topY, width, depth) {
@@ -1737,9 +1796,15 @@ function formatDistrictHover(district) {
 }
 
 function onPointerMove(event) {
-  updateCursor(event);
+  // Promote a press into a drag once the pointer travels beyond a small threshold,
+  // so a plain click (which does nothing here) never flashes the 4-way move cursor.
+  if (pointerIsDown && pointerDownAt &&
+      Math.hypot(event.clientX - pointerDownAt.x, event.clientY - pointerDownAt.y) > 3) {
+    isDragging = true;
+  }
   if (introEl) {                      // keep the intro uncluttered: no hover tooltips while it is up
     hover.classList.remove("visible");
+    applyCursor(event);
     return;
   }
   const navKey = event[NAV_KEY] && !event.metaKey && !event.ctrlKey && !event.altKey;
@@ -1752,20 +1817,21 @@ function onPointerMove(event) {
   let tooltipObj = null;
   let tooltipIsDistrict = false;
   let glowFloor = null;       // platform to light as the would-be drill target
-  let cursor = "move";
+  // Hand (pointer) over a building — a clickable "block"; arrow over empty ground.
+  hoverCursor = hit ? "pointer" : "default";
 
   if (hit) {
     hit.object.material.emissive.setHex(0x5a0f1e);
     tooltipObj = hit.object;
-    if (navKey) { glowFloor = districtByName.get(hit.object.userData.file.district) || null; cursor = "zoom-in"; }
+    if (navKey) { glowFloor = districtByName.get(hit.object.userData.file.district) || null; hoverCursor = "zoom-in"; }
   } else {
     const districtHit = raycaster.intersectObjects(districts, false)[0];
     if (districtHit) {
       tooltipObj = districtHit.object;
       tooltipIsDistrict = true;
-      if (navKey) { glowFloor = districtHit.object; cursor = "zoom-in"; }
+      if (navKey) { glowFloor = districtHit.object; hoverCursor = "zoom-in"; }
     } else if (navKey && scopePath !== "" && raycaster.intersectObject(ground, false).length) {
-      cursor = "zoom-out";    // hovering the surrounding floor while zoomed in: a click steps out
+      hoverCursor = "zoom-out";    // hovering the surrounding floor while zoomed in: a click steps out
     }
   }
 
@@ -1780,9 +1846,7 @@ function onPointerMove(event) {
     hover.classList.remove("visible");
   }
   setFloorGlow(glowFloor);
-  if (!event.metaKey && !event.ctrlKey) {        // leave the orbit cursor alone while Cmd/Ctrl is held
-    renderer.domElement.style.cursor = cursor;
-  }
+  applyCursor(event);         // drag > Cmd/Ctrl orbit > hover cursor, resolved in one place
 }
 
 // Light a single package platform blue to preview the drill target; clears the previous one.
@@ -2127,9 +2191,11 @@ window.addEventListener("resize", onResize);
 window.addEventListener("resize", dismissIntro);
 window.addEventListener("pointermove", onPointerMove);
 window.addEventListener("pointerdown", onPointerDown, true);
-window.addEventListener("keydown", updateCursor);
-window.addEventListener("keyup", updateCursor);
-window.addEventListener("blur", () => { renderer.domElement.style.cursor = "move"; });
+window.addEventListener("pointerup", onPointerUp);
+window.addEventListener("pointercancel", onPointerUp);
+window.addEventListener("keydown", applyCursor);
+window.addEventListener("keyup", applyCursor);
+window.addEventListener("blur", () => { pointerIsDown = false; isDragging = false; renderer.domElement.style.cursor = "default"; });
 window.addEventListener("dblclick", onDoubleClick);
 window.addEventListener("click", onSceneClick);
 window.addEventListener("keydown", (e) => {
@@ -2154,6 +2220,7 @@ rebuildCity();
 
 function animate() {
   controls.update();
+  updateFloorLabelFacing();       // keep flat package names turned toward the viewer (never upside down)
   renderer.render(scene, camera);
   updateLabelVisibility();        // resolve which class labels are non-overlapping from this angle
   labelRenderer.render(scene, camera);
