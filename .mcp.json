@@ -42,6 +42,11 @@
         "X-API-Key": "pc-mcp-7f3a9c2e1b8d4056",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs"
       }
+    },
+
+    "atlassian": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp/authv2"
     }
   }
 }
