@@ -43,8 +43,7 @@ public class PetTypeRestController {
 
     @GetMapping("/{petTypeId}")
     public PetTypeDto getPetType(@PathVariable int petTypeId) {
-        PetType petType = petTypeRepository.findById(petTypeId).orElseThrow();
-        return petTypeMapper.toPetTypeDto(petType);
+        return petTypeMapper.toPetTypeDto(petTypeRepository.findById(petTypeId).orElseThrow());
     }
 
     @PreAuthorize("hasRole(@roles.VET_ADMIN)")

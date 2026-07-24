@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>victor.training.agentic</groupId>
+    <artifactId>petclinic-refactor-recipes</artifactId>
+    <version>1.0</version>
+
+    <name>PetClinic Refactor Recipes</name>
+    <description>
+        OpenRewrite recipes that reproduce, programmatically, refactorings we do by hand in this repo.
+        Two flavours:
+          - InlineSingleUseLocalVariable : a full imperative recipe (needs data-flow, so it MUST be imperative)
+          - ListGetFirst                 : a Refaster template recipe (a simple before/after expression swap)
+    </description>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <rewrite-recipe-bom.version>3.35.0</rewrite-recipe-bom.version>
+        <rewrite-templating.version>1.42.0</rewrite-templating.version>
+        <error-prone.version>2.36.0</error-prone.version>
+        <junit.version>5.11.4</junit.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Aligns the versions of every org.openrewrite.* artifact we use. -->
+            <dependency>
+                <groupId>org.openrewrite.recipe</groupId>
+                <artifactId>rewrite-recipe-bom</artifactId>
+                <version>${rewrite-recipe-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Forces a single JUnit 5 platform/jupiter version across the whole test classpath
+                 (rewrite-test and junit-jupiter otherwise drag in mismatched platform jars). -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The Java LST model + visitor API we write the recipe against. -->
+        <dependency>
+            <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-java</artifactId>
+        </dependency>
+
+        <!-- ===== Refaster template support (the "refactor recipe" flavour) ===== -->
+        <!-- The annotation processor that turns @BeforeTemplate/@AfterTemplate classes into recipes. -->
+        <dependency>
+            <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-templating</artifactId>
+        </dependency>
+        <!-- Supplies the @BeforeTemplate / @AfterTemplate annotations only (compile-time). -->
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_core</artifactId>
+            <version>${error-prone.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.auto.service</groupId>
+                    <artifactId>auto-service-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Provides jakarta.annotation.Generated (javax.annotation.Generated was removed in Java 9+). -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <!-- RewriteTest harness: before/after fixtures with full type attribution. -->
+        <dependency>
+            <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Java 21 parser backend used by the test harness to build typed LSTs. -->
+        <dependency>
+            <groupId>org.openrewrite</groupId>
+            <artifactId>rewrite-java-21</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.15.0</version>
+                <configuration>
+                    <!-- keep parameter names so Refaster templates read naturally -->
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                        <!-- generated recipe classes use jakarta.annotation.Generated on Java 9+ -->
+                        <arg>-Arewrite.generatedAnnotation=jakarta.annotation.Generated</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <!-- generates <TemplateClass>Recipe from @BeforeTemplate/@AfterTemplate -->
+                        <path>
+                            <groupId>org.openrewrite</groupId>
+                            <artifactId>rewrite-templating</artifactId>
+                            <version>${rewrite-templating.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
