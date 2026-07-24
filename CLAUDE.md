@@ -44,6 +44,15 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
+- **The backend seeds the DB via Flyway on startup** (`ddl-auto=none`; schema in `V1`,
+  sample data in `V3__sample_data.sql`, under `db/migration/`). A freshly (re)started
+  Postgres therefore looks **empty until the backend boots** — that is normal, *not* a broken
+  DB. Do not be surprised by an empty DB after a restart; start the backend and it re-seeds
+  itself.
+- ⚠️ `./start-database.sh` runs `rm -rf data` first — it **wipes the on-disk data dir** (and any
+  rows added at runtime). Flyway recreates the seed on the next backend boot regardless, but to
+  preserve runtime data start Postgres from the jar directly; use the script only for a
+  deliberate reset.
 
 ### Security
 - Disabled by default
