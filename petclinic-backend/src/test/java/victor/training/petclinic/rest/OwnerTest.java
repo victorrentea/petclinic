@@ -28,6 +28,7 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.PageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -128,7 +129,9 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        // filtered on purpose: the endpoint is paged now, so an unfiltered call only proves the
+        // owner exists if it happens to land on page 0 -- a fixture-ordering accident, not a test
+        List<OwnerDto> owners = search("/api/owners?lastName=Franklin");
 
         assertThat(owners)
             .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -156,8 +159,8 @@ public class OwnerTest {
             .getResponse()
             .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, new TypeReference<PageDto<OwnerDto>>() {
+        }).content();
     }
 
     @Test

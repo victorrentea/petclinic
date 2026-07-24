@@ -2,56 +2,93 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
+    <!-- label, input and button on one line: the button acts on the field beside it, so stacking it
+         underneath read as a second, unrelated control -->
     <form method="get"
-          class="form-horizontal" id="search-owner-form">
+          class="form-horizontal" id="search-owner-form" (ngSubmit)="searchByLastName(lastName)">
       <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-                   maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
+        <div class="control-group owners-search-row" id="lastNameGroup">
+          <label class="control-label owner-search-label" for="lastName">Last name</label>
+          <input class="form-control owner-search-input" size="30"
+                 maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/>
+          <!-- the form's (ngSubmit) does the search, so clicking the button and pressing Enter
+               in the input take the same path and navigate exactly once -->
+          <button type="submit" class="btn btn-default">Find Owner</button>
         </div>
       </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <!-- a load failure must not masquerade as an empty result -->
+    <div id="ownersError" class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- genuinely no matches: distinct from a page past the end, which keeps totalElements > 0 -->
+    <div id="noOwners" *ngIf="isOwnersDataReceived && !errorMessage && !hasResults">No owners with LastName starting with "{{lastName}}"</div>
+
+    <div class="table-responsive" id="ownersTable" *ngIf="owners.length > 0">
+
+      <table class="table table-striped owners-table">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
+          <!-- every sortable header carries an affordance at all times: the active column shows its
+               real direction in white, an idle one shows the SAME triangle greyed out. Without the
+               idle hint the column reads as plain text and nobody discovers it can be sorted.
+               The idle triangle points up because clicking an idle column sorts it ascending -- it
+               previews the click rather than claiming the column is already sorted. -->
+          <th class="owners-col-name sortable" id="sortByName" (click)="sortBy('lastName')">Name<span
+            class="sort-indicator" *ngIf="isSortedBy('lastName')">{{ query.direction === 'asc' ? '▲' : '▼' }}</span><span
+            class="sort-hint" *ngIf="!isSortedBy('lastName')" aria-hidden="true">▲</span></th>
+          <th class="owners-col-address">Address</th>
+          <th class="owners-col-city sortable" id="sortByCity" (click)="sortBy('city')">City<span
+            class="sort-indicator" *ngIf="isSortedBy('city')">{{ query.direction === 'asc' ? '▲' : '▼' }}</span><span
+            class="sort-hint" *ngIf="!isSortedBy('city')" aria-hidden="true">▲</span></th>
+          <th class="owners-col-telephone">Telephone</th>
+          <th class="owners-col-pets">Pets</th>
         </tr>
         </thead>
 
         <tbody>
         <tr *ngFor="let owner of owners">
+          <!-- "lastName, firstName" is presentation only: the DTO keeps the two fields apart and
+               the server sorts on the lastName, firstName, id chain -->
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-                                       (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+                                       (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets">{{ pet.name }}</div>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+    </div>
+
+    <!-- One control bar under the table: Add Owner on the left, paging on the right. It sits below
+         the grid because these controls act on what you have just read, not on what you are about
+         to read. Add Owner is outside the row-count guard on purpose -- a search that matches
+         nothing is exactly when you want to add someone. -->
+    <div class="owners-controls" *ngIf="isOwnersDataReceived">
+      <button type="button" id="addOwner" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+
+      <!-- keyed on the whole result set, not this page's rows: a page past the end has no rows but
+           still needs its Previous button, or a deep-linked ?page=99 strands the user with no way
+           back except editing the URL -->
+      <div class="owners-controls-paging" *ngIf="hasResults">
+        <div class="owners-page-size">
+          <label class="owners-page-size-label" for="pageSize">Rows per page</label>
+          <select id="pageSize" class="form-control" #pageSizeSelect
+                  (change)="changePageSize(pageSizeSelect.value)">
+            <option *ngFor="let size of pageSizeOptions" [value]="size"
+                    [selected]="size === query.size">{{ size }}</option>
+          </select>
+        </div>
+        <div class="owners-pagination">
+          <button type="button" id="previousPage" class="btn btn-default"
+                  [disabled]="!hasPreviousPage" (click)="goToPage(query.page - 1)">Previous</button>
+          <span id="pagePosition" class="owners-page-position">Page {{ query.page + 1 }} of {{ totalPages }}</span>
+          <button type="button" id="nextPage" class="btn btn-default"
+                  [disabled]="!hasNextPage" (click)="goToPage(query.page + 1)">Next</button>
+        </div>
       </div>
     </div>
   </div>

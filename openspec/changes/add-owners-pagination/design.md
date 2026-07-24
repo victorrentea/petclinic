@@ -122,6 +122,14 @@ The controller expands `lastName` → `lastName, firstName` and appends `id` unc
 stability is a correctness property; it must not depend on every client remembering to send three
 sort params (finding 4).
 
+**Refinement (code review):** the appended `id` follows the sort's *direction*, it is not a
+hard-coded `ASC`. The expanded chains are single-direction, so an all-`DESC` order with `id ASC`
+is neither a forward nor a backward walk of the all-`ASC` composite index — the database has to add
+a sort step. Matching `id` to the direction keeps the whole `ORDER BY` single-direction, so one
+index serves every page by a plain forward or backward scan. Verified by `EXPLAIN` at 10k rows:
+`ORDER BY … DESC, id ASC` produced an `Incremental Sort` on top of the scan; `… DESC, id DESC` is a
+pure `Index Scan Backward`. Either direction is equally stable, so this is a free win.
+
 ### D10 — Batch fetching for pets/visits, never `JOIN FETCH` with `Pageable`
 `spring.jpa.properties.hibernate.default_batch_fetch_size=50` turns ~46 queries per page into ~3 in
 one line with zero contract change, and is served by the existing `pets_owner_id_idx` /
@@ -242,6 +250,24 @@ At 28 rows PostgreSQL seq-scans regardless and this is completely invisible.
 → **Mitigation: `EXPLAIN` against a 10,000-row dataset before considering #25 done.** This is the
 single largest unresolved item; without it, the fix for one problem quietly creates another.
 
+**RESOLVED** — verified against a generated 10,000-row dataset with the V9 collation and all three
+indexes in place. No plan sequentially scans, and both `last_name` indexes earn their place:
+
+| Query | Plan | Time |
+|---|---|---|
+| Default name sort, page 0 | `Index Scan using owners_sort_idx`, no sort node | 0.03 ms |
+| `sort=city,asc`, page 0 | `Index Scan using owners_city_sort_idx` | 0.05 ms |
+| `sort=city,asc`, last page (offset 9990) | `Index Scan using owners_city_sort_idx` | 3.8 ms |
+| `lastName=Po` (1538 matches) — count | `Bitmap Index Scan on owners_search_idx`, `Index Cond` | 1.4 ms |
+| `lastName=Po` — page | `owners_sort_idx` ordered walk + `Filter` | 1.8 ms |
+| `lastName=Tudor000` (selective) — page | `Index Scan using owners_search_idx`, `Index Cond` + small sort | 0.4 ms |
+| Unfiltered count | `Seq Scan` (inherent to `count(*)` over a non-selective predicate) | 1.1 ms |
+
+The planner switches between the two indexes by selectivity, which is the desired behaviour: a
+selective prefix is served by `owners_search_idx`; a broad prefix is cheaper to satisfy by walking
+`owners_sort_idx` in order and filtering, because `LIMIT 10` stops it early. The feared outcome — a
+recollated column forcing a seq scan on every search — does not occur. **No change to V9 required.**
+
 **[The embedded test PostgreSQL may lack `und-x-icu`]** — verified present on the dev server
 (finding 3); it is the same 16.2 jar, so it should be present in tests too, but a migration that
 fails only in CI is a bad surprise.
@@ -287,8 +313,8 @@ places by design. If they diverge, the UI offers something the server rejects.
 
 ## Open Questions
 
-1. **The `EXPLAIN`-at-10k verification** (first risk above) — the one item that must be resolved
-   during implementation, not deferred.
+1. ~~**The `EXPLAIN`-at-10k verification**~~ — **RESOLVED during implementation**; see the table
+   under the first risk above. All three plans are index-served, nothing seq-scans, V9 unchanged.
 2. Sign-off on D4's deviation from the issue's "any column".
 3. **Product-owner sign-off on D6's accepted divergence** — one neutral order, exactly right for
    the Netherlands, mildly wrong for Hungary and Romania. If this is refused, per-locale ordering

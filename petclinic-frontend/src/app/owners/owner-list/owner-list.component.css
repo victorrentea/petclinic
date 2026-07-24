@@ -3,6 +3,56 @@
 display:none;
 }
 
+/* ---------------------------------------------------------------------------
+   The grid is the same hand-rolled Bootstrap `table table-striped` as the five
+   sibling list screens, so the theme in assets/css/petclinic.css already gives
+   it the header (#3c3834 bg / #f1f1f1 text / 2px #34302d bottom border), the
+   #f9f9f9 odd-row stripe and the .btn-default colours (#34302d bg / #6db33f
+   border / #f1f1f1 text). Only the sorting affordance and the fixed layout are
+   added here — do not restyle what the theme already provides.
+   --------------------------------------------------------------------------- */
+.owners-table {
+	/* fixed layout + one explicit width per column: without them every sort click
+	   re-measures the cell content and the column boundaries jump sideways */
+	table-layout: fixed;
+}
+
+.owners-table .owners-col-name { width: 22%; }
+.owners-table .owners-col-address { width: 28%; }
+.owners-table .owners-col-city { width: 18%; }
+.owners-table .owners-col-telephone { width: 17%; }
+.owners-table .owners-col-pets { width: 15%; }
+
+/* only Name and City carry a sort affordance; the other three headers stay
+   deliberately inert — no hover, no pointer, so they do not read as broken */
+.owners-table th.sortable {
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+}
+
+.owners-table th.sortable:hover {
+	color: #ffffff;
+}
+
+.owners-table th .sort-indicator {
+	margin-left: 6px;
+	font-size: 11px;
+}
+
+/* the idle affordance: the same triangle as the active indicator, greyed against the header's
+   #f1f1f1 text so it reads as "you may press this" without competing with the column that is
+   actually sorted. Hovering brings it up to full strength. */
+.owners-table th .sort-hint {
+	margin-left: 6px;
+	font-size: 11px;
+	color: rgba(241, 241, 241, 0.45);
+}
+
+.owners-table th.sortable:hover .sort-hint {
+	color: #f1f1f1;
+}
+
 #nameGroup {
 	display: flex;
 	align-items: center;
@@ -21,6 +71,24 @@ display:none;
 	padding-left: 0;
 }
 
+/* Bootstrap's .form-group carries margin-left/right: -15px, which pulled the "Last name" label
+   15px left of the table, the heading and Add Owner. Neutralise it so the whole screen shares one
+   left edge. */
+#search-owner-form .form-group {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+/* label + input + Find Owner on one line */
+.owners-search-row {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-left: 0;
+	margin-right: 0;
+	padding-left: 0;
+}
+
 .owner-search-label {
 	margin: 0;
 	text-align: left;
@@ -28,15 +96,29 @@ display:none;
 }
 
 .owner-search-input {
-	flex: 1;
+	/* grows with the row but stops before the button is pushed to the far edge */
+	flex: 1 1 auto;
+	max-width: 480px;
 }
 
+.owners-search-row .btn {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
+/* the control bar under the table: Add Owner left, paging right */
 .owners-controls {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	margin-bottom: 16px;
+	margin-top: 16px;
+}
+
+.owners-controls-paging {
+	display: flex;
+	align-items: center;
+	gap: 24px;
 }
 
 .owners-pagination {
@@ -53,6 +135,15 @@ display:none;
 
 .owners-page-size .form-control {
 	width: auto;
+}
+
+/* buttons and labels must never wrap onto a second line */
+.owners-controls .btn,
+.owners-page-size-label,
+.owners-page-position {
+	flex: 0 0 auto;
+	white-space: nowrap;
+	margin: 0;
 }
 
 @media (max-width: 576px) {

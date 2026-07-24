@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -61,6 +62,19 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error", "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    /**
+     * An unsortable {@code ?sort=} property is the client asking for something that does not exist —
+     * a 400, not the 500 plus stack trace that the catch-all below would produce.
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handlePropertyReference(PropertyReferenceException ex, HttpServletRequest request) {
+        log.warn("Rejected sort by unsupported property '{}'", ex.getPropertyName());
+        ProblemDetail pd = buildProblemDetail("Invalid Sort Property",
+            "Cannot sort by '" + ex.getPropertyName() + "'.", HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(pd);
     }
 

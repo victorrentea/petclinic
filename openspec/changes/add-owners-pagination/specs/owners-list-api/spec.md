@@ -60,7 +60,15 @@ nullable, format-free string — sorting either produces output that reads as a 
 The server SHALL expand every requested sort into a total order and SHALL always append the owner
 `id` as the final tiebreaker, regardless of what the client sent. Sorting by name SHALL expand to
 `last_name, first_name, id`. Page stability is a server-side correctness property and SHALL NOT
-depend on the client supplying the tiebreaker.
+depend on the client supplying the tiebreaker. The appended `id` SHALL take the same direction as
+the sort, so the whole ordering stays single-direction and one composite index can serve it by a
+forward or backward scan rather than forcing an extra sort step.
+
+#### Scenario: Descending sort is stable and index-servable
+- **WHEN** a client walks every page of `GET /api/owners?sort=city,desc` over data where `city` has
+  duplicates
+- **THEN** the union of all pages contains every owner exactly once, and the executed ordering is
+  `city DESC, last_name DESC, id DESC` — a single backward index walk, not a re-sort
 
 #### Scenario: Name sort expands to the full chain
 - **WHEN** a client calls `GET /api/owners?sort=lastName,asc`
@@ -99,8 +107,13 @@ is chosen because it is byte-identical to `nl-x-icu`, and the Netherlands is the
 #### Scenario: Mixed-case and accented surnames
 - **WHEN** owners `Bakker`, `de Vries`, `Gogh`, `Szabó`, `Ștefănescu`, `Tudor`, `van Gogh` exist and
   the list is sorted by name ascending
-- **THEN** they are returned in exactly that order, and **not** in the `C`-collation order, which
-  places every lowercase-initial name after all uppercase-initial ones and every accented name last
+- **THEN** they are returned in the order `Bakker`, `de Vries`, `Gogh`, `Ștefănescu`, `Szabó`,
+  `Tudor`, `van Gogh` — lowercase-initial and accented surnames interleaved with the plain ones,
+  and **not** in the `C`-collation order, which places every lowercase-initial name after all
+  uppercase-initial ones and every accented name last.
+  Note `Ștefănescu` precedes `Szabó`: ICU root folds `Ș` to `S`, so it compares `Ște…` against
+  `Sza…`. Romanian would order them the other way round — that is precisely the accepted divergence
+  of finding 3c, asserted below.
 
 #### Scenario: Ordering matches Dutch expectations exactly
 - **WHEN** any set of owner names is sorted under the configured collation

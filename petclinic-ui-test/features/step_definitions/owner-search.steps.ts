@@ -1,26 +1,27 @@
 import {Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import axios from 'axios';
 import {PlaywrightWorld} from '../support/world';
+import {ApiClient, DEFAULT_PAGE_SIZE, DEFAULT_SORT} from '../../tests/support/api-client';
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
-
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const lastNameOf = (name: string) => name.trim().split(/\s+/).pop() ?? '';
+const api = new ApiClient();
 
 Given('at least one owner exists', async function (this: PlaywrightWorld) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const withLastName = owners.find((o: any) => typeof o.lastName === 'string' && o.lastName.length >= 2);
+  const firstPage = await api.fetchOwnerPage({page: 0, size: DEFAULT_PAGE_SIZE, sort: DEFAULT_SORT});
+  const withLastName = firstPage.content.find((o) => typeof o.lastName === 'string' && o.lastName.length >= 2);
   if (!withLastName) {
     throw new Error('No owner with a usable last name found; cannot run owner-search scenario');
   }
   // "One name part": the first two letters of a real owner's last name.
   this.searchPrefix = withLastName.lastName.slice(0, 2);
-  const {data: matches} = await axios.get(`${API_BASE}/owners`, {
-    params: {lastName: this.searchPrefix},
-    timeout: 10_000,
+
+  // The filtered list is paged as well, so the grid can only show the first page of matches.
+  const matches = await api.fetchOwnerPage({
+    lastName: this.searchPrefix,
+    page: 0,
+    size: DEFAULT_PAGE_SIZE,
+    sort: DEFAULT_SORT,
   });
-  const expected: string[] = matches.map(fullName).sort();
+  const expected = ApiClient.getFullNames(matches.content).sort();
   if (expected.length === 0) {
     throw new Error(`API returned no owners for prefix "${this.searchPrefix}"; cannot assert data comes back`);
   }
@@ -51,7 +52,8 @@ Then('only owners whose last name starts with that part are listed', async funct
 
   expect(shown.length).toBeGreaterThan(0);
   for (const name of shown) {
-    expect(lastNameOf(name).toLowerCase()).toMatch(new RegExp(`^${prefix}`));
+    // Name cells read "Last, First", so the last name is everything before the comma.
+    expect(ApiClient.extractLastName(name).toLowerCase()).toMatch(new RegExp(`^${prefix}`));
   }
   expect(shown.sort()).toEqual(this.expectedFullNames);
 });

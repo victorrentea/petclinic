@@ -37,6 +37,11 @@ export class ActivatedRouteStub {
   private subject = new BehaviorSubject(this.testParams);
   params = this.subject.asObservable();
 
+  // ActivatedRoute.queryParams is Observable — list screens keep their state in the query string,
+  // so a test drives the component by pushing new query params through here.
+  private queryParamsSubject = new BehaviorSubject<{}>({});
+  queryParams = this.queryParamsSubject.asObservable();
+
   // Test parameters
   // tslint:disable-next-line:variable-name
   private _testParams: {};
@@ -47,6 +52,17 @@ export class ActivatedRouteStub {
   set testParams(params: {}) {
     this._testParams = params;
     this.subject.next(params);
+  }
+
+  // tslint:disable-next-line:variable-name
+  private _testQueryParams: {} = {};
+  get testQueryParams() {
+    return this._testQueryParams;
+  }
+
+  set testQueryParams(params: {}) {
+    this._testQueryParams = params;
+    this.queryParamsSubject.next(params);
   }
 
   // ActivatedRoute.snapshot.params

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage, OwnerQuery } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -19,10 +20,23 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
-    return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+  /**
+   * One server-side page of owners. Paging, sorting and the lastName filter compose into a single
+   * request, so this one call covers both the plain list and the search — the browser never holds
+   * more than one page (~10,000 owners are planned).
+   */
+  getOwners(query: OwnerQuery): Observable<OwnerPage> {
+    let params = new HttpParams()
+      .set('page', query.page)
+      .set('size', query.size)
+      .set('sort', `${query.sort},${query.direction}`);
+    if (query.lastName) {
+      params = params.set('lastName', query.lastName);
+    }
+    // Errors are deliberately NOT swallowed into an empty page here: an empty page is
+    // indistinguishable from a genuine "no owners match" result, so a 500 would render as the
+    // benign no-owners message. The component catches the error and shows it as a failure instead.
+    return this.http.get<OwnerPage>(this.entityUrl, {params});
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +62,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

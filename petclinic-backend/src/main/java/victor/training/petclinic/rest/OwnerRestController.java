@@ -2,7 +2,15 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mapping.PropertyReferenceException;
+import org.springframework.data.util.TypeInformation;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +24,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.PageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -34,10 +43,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,15 +64,64 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
-        content = @Content(mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-            examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    /**
+     * The properties a client may sort by, mapped to the rest of their sort chain.
+     * <p>
+     * Address and telephone are deliberately absent: address is free text starting with a house
+     * number, so sorting it reads {@code 14…, 221B…, 26…, 30…, 4…} — correct for text and a defect
+     * to every human who sees it; telephone has no consistent format. A sort that produces nonsense
+     * is read as a broken feature rather than as a limitation.
+     */
+    private static final Map<String, List<String>> SORT_CHAINS = Map.of(
+        "lastName", List.of("lastName", "firstName"),
+        "city", List.of("city", "lastName"));
+
+    private static final Sort DEFAULT_SORT = Sort.by("lastName");
+
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time")
+    // The response schema is deliberately left to springdoc to infer from the return type: naming a
+    // schema explicitly erases the generic, publishing content as an untyped array and generating
+    // `unknown[]` in the frontend's api-types.ts. A typed contract beats a hand-written example.
+    @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PageDto<OwnerDto> listOwners(
+        @RequestParam(name = "lastName", defaultValue = "") String lastName,
+        @ParameterObject Pageable pageable) {
+        Pageable totallyOrdered = PageRequest.of(
+            pageable.getPageNumber(), pageable.getPageSize(), toTotalOrder(pageable.getSort()));
+        Page<Owner> page = ownerRepository.findByLastNameStartingWith(lastName, totallyOrdered);
+        return PageDto.of(page, ownerMapper.toOwnerDtoCollection(page.getContent()));
+    }
+
+    /**
+     * Turns whatever the client asked for into a <i>total</i> order: expands each sortable property
+     * into its full chain and always appends {@code id}.
+     * <p>
+     * Page stability is a correctness property of the server, not something every client must
+     * remember to ask for. No sortable column is unique — {@code city} is London ×7 in the seed
+     * alone — and over a non-unique {@code ORDER BY} the database may legally break ties differently
+     * per request, which shows one owner on two consecutive pages while skipping another.
+     * <p>
+     * The {@code id} tiebreaker follows the sort's direction rather than a hard-coded {@code ASC}.
+     * Our expanded chains are single-direction, so an all-{@code DESC} order plus {@code id ASC}
+     * would be neither a forward nor a backward walk of the all-{@code ASC} composite index —
+     * forcing an extra sort step. Matching {@code id} to the direction lets one index serve every
+     * page by a plain forward or backward scan (verified by {@code EXPLAIN} at 10k rows: an
+     * Incremental Sort becomes a pure Index Scan Backward). Either direction is equally stable.
+     */
+    private Sort toTotalOrder(Sort requested) {
+        Sort expanded = Sort.unsorted();
+        Sort.Direction tiebreakDirection = Sort.Direction.ASC;
+        for (Sort.Order order : requested.isSorted() ? requested : DEFAULT_SORT) {
+            List<String> chain = SORT_CHAINS.get(order.getProperty());
+            if (chain == null) {
+                throw new PropertyReferenceException(order.getProperty(),
+                    TypeInformation.of(Owner.class), List.of());
+            }
+            expanded = expanded.and(Sort.by(order.getDirection(), chain.toArray(String[]::new)));
+            tiebreakDirection = order.getDirection();
+        }
+        return expanded.and(Sort.by(tiebreakDirection, "id"));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

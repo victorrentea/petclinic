@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List owners, one page at a time */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,35 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of results. */
+    PageDtoOwnerDto: {
+      /** @description The results on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description The zero-based index of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description The effective page size.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many results match in total, across all pages.
+       * @example 28
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description How many pages the results span.
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,18 +582,24 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List owners, one page at a time */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index (0..N) */
+        page?: number;
+        /** @description The size of the page to be returned */
+        size?: number;
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["PageDtoOwnerDto"];
         };
       };
       /** @description Bad Request */

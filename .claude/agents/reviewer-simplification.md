@@ -4,7 +4,7 @@ description: >
   Single-focused code reviewer for SIMPLIFICATION only. Internal — spawned by
   the /multi-review skill only, not for direct human use. Flags unnecessary complexity the diff adds.
 tools: Bash, Read, Grep
-model: sonnet
+model: opus
 ---
 
 # Simplification reviewer

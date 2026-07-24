@@ -31,6 +31,11 @@ export class PlaywrightWorld extends World {
   // and the owner full names the API returns for it (the expected result set).
   searchPrefix?: string;
   expectedFullNames?: string[];
+  // Set by the owners-pagination scenarios: the server's totals for the unfiltered
+  // list and the owner ids collected while walking every page of the grid.
+  totalOwners?: number;
+  totalOwnerPages?: number;
+  ownerIdsSeenWhilePaging?: number[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;

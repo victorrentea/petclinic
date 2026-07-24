@@ -195,40 +195,37 @@ paths:
         schema:
           type: string
           default: ""
+      - description: Zero-based page index (0..N)
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - description: The size of the page to be returned
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+      - description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
       responses:
         "200":
           content:
             application/json:
-              examples:
-                sample:
-                  description: sample
-                  value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
-                    - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/PageDtoOwnerDto"
           description: OK
         "400":
           content:
@@ -248,7 +245,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: "List owners, one page at a time"
       tags:
       - owner-rest-controller
     post:
@@ -1684,6 +1681,41 @@ components:
       - firstName
       - lastName
       - telephone
+    PageDtoOwnerDto:
+      type: object
+      description: One page of results.
+      properties:
+        content:
+          type: array
+          description: The results on this page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: The zero-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: The effective page size.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "How many results match in total, across all pages."
+          example: 28
+        totalPages:
+          type: integer
+          format: int32
+          description: How many pages the results span.
+          example: 3
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
     PetDto:
       type: object
       properties:

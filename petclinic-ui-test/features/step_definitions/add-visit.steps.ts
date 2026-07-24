@@ -1,18 +1,19 @@
 import {Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import axios from 'axios';
 import {PlaywrightWorld} from '../support/world';
+import {ApiClient} from '../../tests/support/api-client';
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
+const api = new ApiClient();
 
 Given('an owner with at least one pet exists', async function (this: PlaywrightWorld) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
+  // /api/owners is paged now, so "find any owner with a pet" means walking the pages.
+  const owners = await api.fetchAllOwners();
+  const ownerWithPet = owners.find((o) => Array.isArray(o.pets) && o.pets.length > 0);
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
   this.ownerId = ownerWithPet.id;
-  this.petId = ownerWithPet.pets[0].id;
+  this.petId = ownerWithPet.pets![0].id;
 });
 
 When("I open that owner's detail page", async function (this: PlaywrightWorld) {
