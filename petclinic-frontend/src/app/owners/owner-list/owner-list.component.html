@@ -34,11 +34,20 @@
                idle hint the column reads as plain text and nobody discovers it can be sorted.
                The idle triangle points up because clicking an idle column sorts it ascending -- it
                previews the click rather than claiming the column is already sorted. -->
-          <th class="owners-col-name sortable" id="sortByName" (click)="sortBy('lastName')">Name<span
+          <!-- sortable via mouse AND keyboard: tabindex makes the header focusable, Enter/Space
+               activate the sort (Space also preventDefault'd so it does not scroll the page), and
+               aria-sort announces the current order to screen readers -->
+          <th class="owners-col-name sortable" id="sortByName" scope="col" role="columnheader"
+              tabindex="0" [attr.aria-sort]="ariaSort('lastName')"
+              (click)="sortBy('lastName')"
+              (keydown)="sortByKeyboard($event, 'lastName')">Name<span
             class="sort-indicator" *ngIf="isSortedBy('lastName')">{{ query.direction === 'asc' ? '▲' : '▼' }}</span><span
             class="sort-hint" *ngIf="!isSortedBy('lastName')" aria-hidden="true">▲</span></th>
           <th class="owners-col-address">Address</th>
-          <th class="owners-col-city sortable" id="sortByCity" (click)="sortBy('city')">City<span
+          <th class="owners-col-city sortable" id="sortByCity" scope="col" role="columnheader"
+              tabindex="0" [attr.aria-sort]="ariaSort('city')"
+              (click)="sortBy('city')"
+              (keydown)="sortByKeyboard($event, 'city')">City<span
             class="sort-indicator" *ngIf="isSortedBy('city')">{{ query.direction === 'asc' ? '▲' : '▼' }}</span><span
             class="sort-hint" *ngIf="!isSortedBy('city')" aria-hidden="true">▲</span></th>
           <th class="owners-col-telephone">Telephone</th>

@@ -35,6 +35,12 @@ display:none;
 	color: #ffffff;
 }
 
+/* keyboard focus must be visible, since the header is now tab-reachable */
+.owners-table th.sortable:focus-visible {
+	outline: 2px solid #6db33f;
+	outline-offset: -2px;
+}
+
 .owners-table th .sort-indicator {
 	margin-left: 6px;
 	font-size: 11px;

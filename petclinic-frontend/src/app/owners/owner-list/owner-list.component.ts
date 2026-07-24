@@ -87,10 +87,26 @@ export class OwnerListComponent implements OnInit {
     return this.query.sort === column;
   }
 
+  /** For screen readers: the WAI-ARIA sort state of a column header. */
+  ariaSort(column: OwnerSortColumn): 'ascending' | 'descending' | 'none' {
+    if (!this.isSortedBy(column)) {
+      return 'none';
+    }
+    return this.query.direction === 'asc' ? 'ascending' : 'descending';
+  }
+
   /** Clicking the active column reverses it; clicking another column starts it ascending. */
   sortBy(column: OwnerSortColumn) {
     const direction = this.isSortedBy(column) && this.query.direction === 'asc' ? 'desc' : 'asc';
     this.navigateWith({sort: column, direction});
+  }
+
+  /** Keyboard equivalent of clicking a sortable header: Enter or Space toggles the sort. */
+  sortByKeyboard(event: KeyboardEvent, column: OwnerSortColumn) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault(); // Space would otherwise scroll the page
+      this.sortBy(column);
+    }
   }
 
   changePageSize(size: string) {

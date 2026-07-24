@@ -316,6 +316,22 @@ describe('OwnerListComponent', () => {
     expect(navigatedQueryParams()).toEqual({sort: 'city', direction: 'asc', page: 0});
   });
 
+  // a11y (Sonar Web:MouseEventWithoutKeyboardEquivalentCheck): a mouse-only sort excludes
+  // keyboard users — the header must be focusable, Enter-activatable and announce its sort state
+  it('sorts via the keyboard and exposes the sort state to assistive tech', () => {
+    renderWith({sort: 'city', direction: 'asc'}, pageOf([harry]));
+
+    const nameHeader = fixture.debugElement.query(By.css('#sortByName')).nativeElement;
+    expect(nameHeader.getAttribute('tabindex')).toBe('0');
+    expect(nameHeader.getAttribute('aria-sort')).toBe('none');
+    expect(fixture.debugElement.query(By.css('#sortByCity')).nativeElement.getAttribute('aria-sort'))
+      .toBe('ascending');
+
+    nameHeader.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+
+    expect(navigatedQueryParams()).toEqual({sort: 'lastName', direction: 'asc', page: 0});
+  });
+
   // ---------------------------------------------------------------- 8.5
 
   it('disables the previous control on the first page', () => {
