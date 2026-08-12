@@ -2,7 +2,11 @@
 # Watch the GitHub Actions run for a commit; the process exit status is the CI
 # verdict (0 = passed, non-zero = failed). Meant to be launched by the agent as
 # a BACKGROUND Bash task after a push — the post-push hook hands over the SHA so
-# the agent only has to run this one short line.
+# the agent only has to run this one short line. The SHA defaults to HEAD, so it
+# is also usable by hand: scripts/watch-ci.sh
+#
+# The protocol built on top of this exit status — what green/red/indeterminate
+# oblige the agent to do — lives in ../SKILL.md, not here.
 #
 # IMPORTANT: a non-zero exit here is consumed as "CI RED → automatically repair
 # the build". So a FALSE red (treating a transient gh hiccup as a failure) is far
@@ -15,7 +19,8 @@
 # via `gh run view --json status,conclusion`.
 set -uo pipefail
 
-SHA="${1:?usage: watch-ci.sh <sha>}"
+SHA="${1:-$(git rev-parse HEAD 2>/dev/null)}"
+[ -n "$SHA" ] || { echo "usage: watch-ci.sh [sha]   (no sha given and not in a git repo)" >&2; exit 2; }
 short="${SHA:0:7}"
 
 # The gate we care about. Every lookup below is scoped to it ON PURPOSE: a push

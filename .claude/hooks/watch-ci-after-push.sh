@@ -53,8 +53,12 @@ stamp="$(git rev-parse --git-dir)/pushwatch-last-sha"
 printf '%s' "$SHA" >"$stamp"
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD)
-CMD="bash $REPO_ROOT/.claude/hooks/pushwatch/watch-ci.sh $SHA"
+CMD="bash $REPO_ROOT/.claude/skills/ci-watch/scripts/watch-ci.sh $SHA"
 
+# The repair protocol lives in .claude/skills/ci-watch/SKILL.md, NOT inline here.
+# Green is the overwhelmingly common outcome and needs none of it, so paying for
+# that prose on every single push — in a JSON string that has to be \n-escaped by
+# hand — buys nothing. Point at the skill instead, and let it be loaded on red.
 cat <<EOF
-{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"Push landed: ${SHA:0:7} on $BRANCH. Launch the CI watch in the BACKGROUND (run_in_background:true), then keep working — do not block:\n\n$CMD\n\nExit 0 = CI green, non-zero = red. On green, just report it. On RED you MUST repair the build automatically — do NOT ask for permission: pull the failing job logs (gh run view <id> --log-failed), diagnose the root cause, apply the fix, commit, and push. Repair it even if someone else broke the build — any red build you catch is yours to fix. Report what you changed when done."}}
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"Push landed: ${SHA:0:7} on $BRANCH. Launch the CI watch in the BACKGROUND (run_in_background:true), then keep working — do not block:\n\n$CMD\n\nExit 0 = CI green: just report it. Non-zero = RED: invoke the 'ci-watch' skill and follow its repair protocol — repair the build automatically, without asking permission, even if someone else broke it. Output starting with ⚠️ is NOT a verdict: do not repair and do not claim green — read the ci-watch skill for what it means."}}
 EOF
