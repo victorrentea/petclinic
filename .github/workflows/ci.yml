@@ -37,11 +37,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          url=$(curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+          # --retry: the release CDN answers 503 often enough to redden a green build
+          url=$(curl -sSfL --retry 3 --retry-delay 2 --retry-all-errors \
+                -H "Authorization: Bearer $GH_TOKEN" \
                 https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
               | grep -o 'https://[^"]*linux_x64.tar.gz' | head -1)
           echo "Downloading $url"
-          curl -sSfL "$url" | sudo tar -xz -C /usr/local/bin gitleaks
+          curl -sSfL --retry 3 --retry-delay 2 --retry-all-errors "$url" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
           gitleaks version
 
       # Scan only the commits this push/PR introduces — mirroring the pre-commit
