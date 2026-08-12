@@ -128,15 +128,8 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 
 ## Development Notes
 
-### Java Code Preferences (moved from former .github/copilot-instructions.md)
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary
-- MapStruct is used for DTO mapping
-- Global exception handling in `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
-- Keep line length ≤ 120 chars
-- Builder chains: one property per line, unless only two properties are set
+### Java Code Preferences
+See `.github/instructions/java.instructions.md` (applies automatically to `**/*.java`).
 
 ## Task Modifiers
 - Write non-trivial code using TDD

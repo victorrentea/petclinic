@@ -8,17 +8,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import victor.training.petclinic.mapper.SpecialtyMapper;
-import victor.training.petclinic.mapper.VetMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.domain.Vet;
+import victor.training.petclinic.mapper.SpecialtyMapper;
+import victor.training.petclinic.mapper.VetMapper;
 import victor.training.petclinic.repository.SpecialtyRepository;
 import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.rest.dto.VetDto;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -40,7 +40,27 @@ public class VetRestController {
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = VetDto.class)),
-                    examples = @ExampleObject(name = "sample", value = ApiExamples.VETS)))
+                    examples = @ExampleObject(value = """
+                            [
+                                {
+                                    "id": 1,
+                                    "firstName": "James",
+                                    "lastName": "Carter",
+                                    "specialties": []
+                                },
+                                {
+                                    "id": 2,
+                                    "firstName": "Helen",
+                                    "lastName": "Leary",
+                                    "specialties": [
+                                        {
+                                            "id": 1,
+                                            "name": "radiology"
+                                        }
+                                    ]
+                                }
+                            ]
+                            """)))
     public List<VetDto> listVets() {
         List<Vet> allVets = vetRepository.findAll();
         return vetMapper.toVetDtos(allVets);

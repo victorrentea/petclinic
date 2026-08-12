@@ -33,6 +33,9 @@ Browser -> Backend: GET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
+Backend -> DB: petclinic
+activate DB
+deactivate DB
 Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
 activate Backend
 Backend -> DB: SELECT petclinic.owners
@@ -56,6 +59,9 @@ Browser -> Backend: GET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById
 activate Backend
+Backend -> DB: petclinic
+activate DB
+deactivate DB
 Backend -> Backend: Session.find victor.training.petclinic.domain.Pet
 activate Backend
 Backend -> DB: SELECT petclinic
