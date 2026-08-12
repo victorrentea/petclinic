@@ -94,7 +94,7 @@ rag-vector-store.json
 # playwright-cli scratch (browser skill) — normally redirected to $TMPDIR, see .claude/settings.json
 .playwright-cli/
 
-# Clone of the Code City generators (generate-codecity.sh) — a tool, not our source
+# Clone of the Code City generators (petclinic-backend/generate-codecity.sh) — a tool, not our source
 /petclinic-backend/.codecity-tool/
 
 # jira-cli skill: project-local PAT override, never commit it

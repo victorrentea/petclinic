@@ -20,9 +20,9 @@ each carries a `footer` with its own repo path, so the render is self-identifyin
 ![C4 System Context](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C1-Context.puml)
 
 #### Code City (3D)
-[Open the Code City in your browser →](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codemap/codecity.html)
+[Open the Code City in your browser →](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codecity/codecity.html)
 
-> Regenerate with `./generate-codecity.sh`. It clones the generators —
+> Regenerate with `petclinic-backend/generate-codecity.sh`. It clones the generators —
 > [victorrentea/code-city](https://github.com/victorrentea/code-city), a standalone tool
 > that works on any Java repo — into `petclinic-backend/.codecity-tool/` and runs them on this one.
 

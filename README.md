@@ -19,12 +19,12 @@ engineering techniques you can lift into your own projects.
   source (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **C4 model** as versioned Structurizr DSL: stable, human C1/C2 + a
   *code-coupled* C3 that is unit-tested against the real packages.
-- **[Code City](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codemap/codecity.html)** —
+- **[Code City](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codecity/codecity.html)** —
   a 3D view of the codebase (size = LOC, height = complexity, colour = churn)
   across Classes / Packages / Modules lenses, with commits/committers mined from
   git history. The generators are a tool of their own —
   [victorrentea/code-city](https://github.com/victorrentea/code-city), point it at any
-  Java repo; `./generate-codecity.sh` runs it on this one.
+  Java repo; `petclinic-backend/generate-codecity.sh` runs it on this one.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
   run are replayed into a PlantUML sequence diagram.
 - **MCP server** hosted by the backend at `/mcp` (Spring AI) — tools/resources

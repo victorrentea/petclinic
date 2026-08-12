@@ -5,23 +5,29 @@ description: Measure backend test coverage from the terminal — JaCoCo line cov
 
 # Java coverage
 
-Two scripts in `scripts/`, both runnable from anywhere in the repo. Both print only
-the **gaps**, as clickable `File.java:12-15,20` refs.
+Two scripts in this skill's own `scripts/` — spell the path from the repo root, since the
+repo has an unrelated `scripts/` of its own. Both run from anywhere in the repo and print
+only the **gaps**, as clickable `File.java:12-15,20` refs.
 
 ## Line coverage — what never ran
 
 ```sh
-scripts/coverage.sh                       # full run, uncovered lines per class
-scripts/coverage.sh -n                    # reuse the last run, don't re-run tests
-scripts/coverage.sh -c OwnerMapper -b     # one class, incl. half-covered branches
+.claude/skills/java-coverage/scripts/coverage.sh        # full run, uncovered lines per class
+.claude/skills/java-coverage/scripts/coverage.sh -n     # reuse the last run, don't re-run tests
+.claude/skills/java-coverage/scripts/coverage.sh -c OwnerMapper -b  # one class, incl. half-covered branches
 ```
+
+JaCoCo is already wired in `petclinic-backend/pom.xml` (agent + report bound to the `test`
+phase), so a plain `mvn test` writes the very report IntelliJ's "Run with Coverage" shows:
+`target/site/jacoco/index.html`. `coverage.sh` drives that same `mvn test` and reduces the
+`jacoco.xml` beside it — it adds the gap extraction, not the instrumentation.
 
 ## Mutation coverage — what ran but nothing asserted on
 
 ```sh
-scripts/mutation.sh rest.error            # a package (seconds)
-scripts/mutation.sh ValidationErrorExtractor   # a class, found by simple name
-scripts/mutation.sh                       # everything — minutes, avoid
+.claude/skills/java-coverage/scripts/mutation.sh rest.error   # a package (seconds)
+.claude/skills/java-coverage/scripts/mutation.sh ValidationErrorExtractor  # a class, by simple name
+.claude/skills/java-coverage/scripts/mutation.sh              # everything — minutes, avoid
 ```
 
 `mutation.sh` is self-contained: PIT is **not** in `pom.xml`. The script resolves the PIT
@@ -43,8 +49,9 @@ hole, fix it with a test before worrying about the mutant.
 - **Never `mvn test` while the IDE is building or running tests.** Both write
   `target/classes`; the collision fakes `NoClassDefFoundError` and
   "Unable to find @SpringBootConfiguration" failures that look like real bugs.
-- **`coverage.sh -t/--test` gives partial coverage.** Everything the subset never loads
-  reads as 0%. The script labels such a run `PARTIAL` — repeat that label when reporting.
+- **A subset run gives partial coverage** — `coverage.sh -t/--test`, or a bare
+  `mvn test -Dtest=...`. Everything the subset never loads reads as 0%, so the numbers look
+  falsely low. `coverage.sh` labels such a run `PARTIAL` — repeat that label when reporting.
 - Report the numbers and the gaps. Do not propose a test for every gap: generated code
   (MapStruct `*MapperImpl`), `equals`/`hashCode`/`toString` and Lombok accessors are
   noise, and `coverage.sh` already filters them (`--keep-generated` to see them).
