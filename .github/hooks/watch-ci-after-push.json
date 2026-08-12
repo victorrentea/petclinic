@@ -1,0 +1,16 @@
+{
+  "//": "Copilot CLI counterpart of the PostToolUse tripwire in .claude/settings.json:",
+  "//2": "after a `git push` lands, make the agent watch ci.yml and repair a red build.",
+  "//3": "Copilot discovers repo hooks in .github/hooks/*.json; the script itself is shared",
+  "//4": "with Claude Code and only switches its output envelope on --copilot.",
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/watch-ci-after-push.sh\" --copilot",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

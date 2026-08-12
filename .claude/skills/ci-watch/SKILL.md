@@ -14,9 +14,39 @@ verdict, then **encodes that verdict as its exit status**. The SHA defaults to `
 .claude/skills/ci-watch/scripts/watch-ci.sh 3c7c5cf9     # a specific commit
 ```
 
-**Always launch it as a background Bash task** (`run_in_background: true`) and keep
-working. It polls for minutes; blocking on it wastes the whole wait. The harness
-re-invokes you when it exits.
+**Never `&` it and never discard its exit status** — the exit status *is* the verdict.
+Beyond that, how you run it depends on which agent you are, because only one of the
+two can be woken up again:
+
+- **Claude Code** — launch it as a **background Bash task** (`run_in_background: true`)
+  and keep working. It polls for minutes; blocking on it wastes the whole wait, and the
+  harness re-invokes you when it exits.
+- **Copilot CLI** — run it in the **foreground and wait**. There is no
+  background-completion callback, so a backgrounded watch would simply lose its exit
+  status. The shell tool caps a command at **~3 min** and then hands control back with
+  the process *still running* — that is not a verdict. Keep reading the command's
+  output until it actually exits, and do not substitute a one-shot `gh run view` poll
+  for it. A `ci.yml` run takes ~5 min, so expect at least one such continuation.
+
+### Why a background Bash task and not a Monitor (Claude Code)
+
+Monitor is for *streams* — one notification per occurrence. This script produces
+exactly **one** verdict and exits, which is the case Monitor's own guidance sends to
+`run_in_background`. Three reasons it stays that way:
+
+- **The verdict is the exit status, not a stdout line.** Monitor treats stdout as the
+  event stream and only reports the exit code in passing; the whole `0 = green /
+  non-zero = repair` contract needs that status handed back.
+- **A Monitor filter can go silent on failure** — grep for the success marker and a
+  crash looks identical to "still running." This script always prints a terminal line
+  and always exits.
+- **Monitor times out at 5 min by default (1 h max).** A `ci.yml` run with the Sonar
+  gate can outlast that.
+
+Streaming per-job results as they land *would* be a legitimate Monitor use, and would
+surface a failure earlier — but it would also invite acting on a partial signal (a job
+that fails then passes on retry, a supersede-cancel), which is exactly what the
+false-red guarding below exists to prevent. One authoritative verdict is the point.
 
 ## The three verdicts
 
@@ -78,11 +108,25 @@ locally" is not evidence the build is repaired.
 
 ## How this gets triggered
 
-`.claude/hooks/watch-ci-after-push.sh` is a `PostToolUse` tripwire on Bash. It does
-**not** parse your command to decide whether you pushed; it reads the reflog on the
-upstream remote-tracking ref, which is authoritative — a push from the *other*
-petclinic checkout never touches this repo's reflog — and it de-dupes per delivered
-SHA, so several Bash calls after one push start exactly one watch.
+`.claude/hooks/watch-ci-after-push.sh` is a post-tool-use tripwire on shell commands.
+**One script serves both agents**, registered twice:
+
+| Agent | Registered in | Invoked as |
+|---|---|---|
+| Claude Code | `.claude/settings.json` → `PostToolUse` / `Bash` | `watch-ci-after-push.sh` |
+| Copilot CLI | `.github/hooks/watch-ci-after-push.json` → `postToolUse` | `watch-ci-after-push.sh --copilot` |
+
+All the detection is shared; `--copilot` only swaps the JSON envelope (Copilot takes
+`additionalContext` at the top level, Claude nests it under `hookSpecificOutput`) and
+the one sentence about foreground-vs-background above. Copilot finds this skill through
+`.github/skills` → `../.claude/skills`, so there is a single copy of everything.
+
+The tripwire does **not** parse your command to decide whether you pushed; it reads the
+reflog on the upstream remote-tracking ref, which is authoritative — a push from the
+*other* petclinic checkout never touches this repo's reflog — and it de-dupes per
+delivered SHA, so several tool calls after one push start exactly one watch. The de-dupe
+stamp is per-agent (`.git/pushwatch-last-sha.<agent>`), so a Claude session and a Copilot
+session in the same checkout don't mute each other.
 
 The tripwire hands over the SHA and the one-line command; it deliberately does **not**
 inline this repair protocol, because the green path is the common one and does not
