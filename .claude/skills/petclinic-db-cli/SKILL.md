@@ -1,7 +1,7 @@
 ---
 name: petclinic-db-cli
 description: Query the petclinic Postgres database (owners, pets, vets, visits, types, specialties) by calling the project's Postgres MCP server as a shell command. Use whenever a task needs to read or inspect petclinic data or schema AND no database MCP tools are available (no mcp__postgres-db__* tools). Also use when explicitly asked to "use the petclinic-db-cli skill".
-allowed-tools: Bash(.claude/skills/petclinic-db-cli/db-via-mcp.sh:*), Bash(mcptools:*), Bash(jq:*)
+allowed-tools: Bash(.claude/skills/petclinic-db-cli/db-cli.sh:*), Bash(mcptools:*), Bash(jq:*)
 ---
 
 # Database access when MCP servers are disabled
@@ -17,7 +17,7 @@ Run everything below from the repo root.
 ## 1. Discover what the server offers
 
 ```bash
-.claude/skills/petclinic-db-cli/db-via-mcp.sh tools
+.claude/skills/petclinic-db-cli/db-cli.sh tools
 ```
 
 Prints every tool with its parameter signature and description — the same
@@ -27,18 +27,18 @@ are unsure what is available.
 ## 2. Call a tool
 
 ```bash
-.claude/skills/petclinic-db-cli/db-via-mcp.sh call <tool_name> --params '<json>'
+.claude/skills/petclinic-db-cli/db-cli.sh call <tool_name> --params '<json>'
 ```
 
 The two tools this server exposes:
 
 ```bash
 # run SQL
-.claude/skills/petclinic-db-cli/db-via-mcp.sh call execute_sql \
+.claude/skills/petclinic-db-cli/db-cli.sh call execute_sql \
   --params '{"sql":"select count(*) from owners"}'
 
 # explore the schema without guessing table names
-.claude/skills/petclinic-db-cli/db-via-mcp.sh call search_objects \
+.claude/skills/petclinic-db-cli/db-cli.sh call search_objects \
   --params '{"object_type":"table"}'
 ```
 
@@ -47,7 +47,7 @@ The two tools this server exposes:
 The JSON envelope is verbose. Take only the rows:
 
 ```bash
-.claude/skills/petclinic-db-cli/db-via-mcp.sh call execute_sql \
+.claude/skills/petclinic-db-cli/db-cli.sh call execute_sql \
   --params '{"sql":"select name from types"}' | jq -c '.data.statements[0].rows'
 ```
 

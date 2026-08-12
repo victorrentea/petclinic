@@ -16,7 +16,7 @@
     },
 
     "postgres-db": {
-      "//": "In case MCPs are disabled, tell agent to use .claude/skills/petclinic-db-cli/db-via-mcp.sh (same server, over the CLI)",
+      "//": "In case MCPs are disabled, tell agent to use .claude/skills/petclinic-db-cli/db-cli.sh (same server, over the CLI)",
       "command": "npx",
       "args": [
         "-y",

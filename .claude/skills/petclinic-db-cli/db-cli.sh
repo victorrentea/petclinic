@@ -7,8 +7,8 @@
 # params, same JSON, only the transport differs. For agent harnesses where MCP
 # servers are disabled by org policy but the shell is available.
 #
-#   .claude/skills/petclinic-db-cli/db-via-mcp.sh tools
-#   .claude/skills/petclinic-db-cli/db-via-mcp.sh call execute_sql --params '{"sql":"select count(*) from owners"}'
+#   .claude/skills/petclinic-db-cli/db-cli.sh tools
+#   .claude/skills/petclinic-db-cli/db-cli.sh call execute_sql --params '{"sql":"select count(*) from owners"}'
 #
 # Setup once:  go install github.com/f/mcptools/cmd/mcptools@latest
 # Connection:  $DATABASE_URL, defaulting to the local petclinic database.
