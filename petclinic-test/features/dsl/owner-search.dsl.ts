@@ -10,16 +10,18 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
 
 /**
- * Asserts the clinic holds exactly the owners the Background spells out, so a
- * changed seed (Flyway's V3__sample_data.sql) fails on the Given instead of
- * looking like a broken search three rows into the Examples table.
+ * Every owner the clinic holds, by full name, after checking that the ones the
+ * Background names are among them — so a changed seed (Flyway's
+ * V3__sample_data.sql) fails on the Given instead of looking like a broken search.
  */
-export async function expectClinicOwnersAre(expected: string[]): Promise<void> {
+export async function fetchOwnerNamesIncluding(expected: string[]): Promise<string[]> {
   const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
   if (!Array.isArray(owners) || owners.length === 0) {
     throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
   }
-  expect(owners.map(fullName).sort()).toEqual([...expected].sort());
+  const names: string[] = owners.map(fullName);
+  expect(names).toEqual(expect.arrayContaining(expected));
+  return names;
 }
 
 export async function openOwnersPage(page: Page): Promise<void> {

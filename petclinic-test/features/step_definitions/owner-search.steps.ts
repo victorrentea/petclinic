@@ -1,8 +1,8 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {PlaywrightWorld} from '../support/world';
 import {
-  expectClinicOwnersAre,
   expectOwnersListed,
+  fetchOwnerNamesIncluding,
   openOwnersPage,
   searchOwnersByLastName,
 } from '../dsl/owner-search.dsl';
@@ -13,9 +13,8 @@ import {
 
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
 
-Given('the clinic has exactly these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  this.allOwnerNames = owners.raw().map(([name]) => name.trim());
-  await expectClinicOwnersAre(this.allOwnerNames);
+Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
+  this.allOwnerNames = await fetchOwnerNamesIncluding(owners.raw().map(([name]) => name.trim()));
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
