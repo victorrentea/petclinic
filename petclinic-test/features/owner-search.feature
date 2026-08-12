@@ -22,18 +22,15 @@ Feature: Search owners by last name
       | search | owners                       |
       | Potter | Harry Potter, Beatrix Potter |
 
-    Examples: any prefix of the last name narrows the list
+    Examples: any prefix of the last name narrows the list — and nothing else does
       | search  | owners                                                        |
       | Darling | George Darling, Wendy Darling                                 |
       | Sl      | Salazar Slytherin                                             |
       | D       | John Dolittle, George Darling, Wendy Darling, Charles Dickens |
-
-    Examples: and nothing else matches — prefix only, last name only, case-sensitive
-      | search | owners |
-      | otter  |        |
-      | Harry  |        |
-      | potter |        |
-      | Zzzz   |        |
+      | otter   |                                                               |
+      | Harry   |                                                               |
+      | potter  |                                                               |
+      | Zzzz    |                                                               |
 
   # The one row a table cannot hold: an empty field takes a different branch in
   # the UI — it re-lists everyone instead of calling the search endpoint.

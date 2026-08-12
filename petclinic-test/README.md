@@ -41,8 +41,8 @@ Given/When/Then sentences survive without a parser (`dsl/gherkin.ts` wraps
 `test.step`), and the steps stay ctrl-clickable, renameable and type-checked.
 
 `owner-search.feature` has **no** TypeScript twin on purpose: its whole contract is a table of
-what-you-type / who-shows-up, so it is a `Scenario Outline` with three `Examples:` blocks — the
-one thing Gherkin says better than code. Where the scenarios are only prose, as with add-visit,
+what-you-type / who-shows-up, so it is a `Scenario Outline` with `Examples:` blocks — the one
+thing Gherkin says better than code. Where the scenarios are only prose, as with add-visit,
 the choice between the two styles is taste.
 
 `@generate_sequence` means the same thing on both sides (`src/trace-diagram/sequence-tag.ts`
