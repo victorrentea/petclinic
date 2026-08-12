@@ -1,20 +1,21 @@
-import {Given, When, Then} from '@cucumber/cucumber';
+import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {PlaywrightWorld} from '../support/world';
 import {
+  expectClinicOwnersAre,
   expectOwnersListed,
-  fetchAllOwnerNames,
   openOwnersPage,
   searchOwnersByLastName,
 } from '../dsl/owner-search.dsl';
 
-// One-line adapters over the glue functions in ../dsl. The Examples table feeds
-// them the search term and the expected result set, so no step here decides
-// what to type — the .feature does.
+// One-line adapters over the glue functions in ../dsl. The Background states the
+// data and the Examples table states the search term and the expected result
+// set, so no step here decides anything — the .feature does.
 
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
 
-Given("the clinic's sample owners are loaded", async function (this: PlaywrightWorld) {
-  this.allOwnerNames = await fetchAllOwnerNames();
+Given('the clinic has exactly these owners', async function (this: PlaywrightWorld, owners: DataTable) {
+  this.allOwnerNames = owners.raw().map(([name]) => name.trim());
+  await expectClinicOwnersAre(this.allOwnerNames);
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {

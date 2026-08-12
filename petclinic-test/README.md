@@ -47,10 +47,10 @@ the choice between the two styles is taste.
 
 `@generate_sequence` means the same thing on both sides (`src/trace-diagram/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
-Tempo window and get a `.puml` in `features/generated_sequences/`. It can also sit on a single
-`Examples:` block, so one row of a table opts in and the rest just run — that is how
-owner-search produces exactly one diagram. The add-visit scenarios carry the tag **only** in
-`.spec.ts`, so their diagrams come from the TypeScript side.
+Tempo window and get a `.puml` in `features/generated_sequences/`. In owner-search it sits on
+the one plain `Scenario` — the Examples rows only vary the same round-trip, so diagramming
+them all would say nothing extra. The add-visit scenarios carry the tag **only** in `.spec.ts`,
+so their diagrams come from the TypeScript side.
 
 ## Sequence diagrams from real traces
 
