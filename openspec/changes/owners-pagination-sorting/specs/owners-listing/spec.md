@@ -19,6 +19,10 @@ The `GET /api/owners` endpoint SHALL return a paginated result set instead of th
 - **WHEN** a client requests a page number beyond the last available page
 - **THEN** the system returns an empty content list with the correct total element and page counts, not an error
 
+#### Scenario: Negative page number rejected
+- **WHEN** a client calls `GET /api/owners?page=-1`
+- **THEN** the system responds with `400 Bad Request` and does not return owner data
+
 ### Requirement: Restricted page size
 The system SHALL only accept page sizes from the fixed set `{5, 10, 20}`, to prevent clients from requesting unbounded or excessively large pages.
 
@@ -89,9 +93,24 @@ The Owners grid SHALL let the user sort by clicking the **Name** or **City** col
 - **WHEN** the user clicks the **City** column header
 - **THEN** the grid requests owners sorted by city and re-renders the table in that order
 
+#### Scenario: Toggling sort direction on the active column
+- **WHEN** the user clicks a column header that the grid is already sorted by
+- **THEN** the grid reverses the sort direction for that column (ascending becomes descending, descending becomes ascending) and re-renders the table in the new order
+
+#### Scenario: Switching to a different sort column
+- **WHEN** the grid is sorted by one column and the user clicks the other sortable column header
+- **THEN** the grid sorts by the newly clicked column in ascending order
+
+### Requirement: Owners grid search resets pagination
+When the user runs a new last-name search, the Owners grid SHALL return to the first page of results so the user is not left on a page number that no longer applies to the narrowed result set.
+
+#### Scenario: New search returns to first page
+- **WHEN** the user is on a page other than the first and submits a new last-name search
+- **THEN** the grid requests and displays the first page of results matching the new search, keeping the currently selected page size and sort order
+
 ### Requirement: Owners grid Name column display order
-The Owners grid SHALL display the Name column as "LastName FirstName" to match the sort key used for the Name column.
+The Owners grid SHALL display the Name column as the owner's last name followed by a space and the owner's first name (for example "Smith John"), to match the sort key used for the Name column.
 
 #### Scenario: Name column rendering
-- **WHEN** the Owners grid renders a row for an owner
-- **THEN** the Name cell displays the owner's last name followed by the owner's first name
+- **WHEN** the Owners grid renders a row for an owner with first name "John" and last name "Smith"
+- **THEN** the Name cell displays "Smith John"
