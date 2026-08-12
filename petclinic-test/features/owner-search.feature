@@ -8,12 +8,11 @@ Feature: Search owners by last name
       | Harry Potter   |
       | Beatrix Potter |
 
-  Scenario Outline: Filter owners by a last name part
+  Scenario Outline: Filter owners by a case-sensitive prefix of the last name
     When I open the owners page
     And I search owners for "<search>"
     Then exactly these owners are listed: "<owners>"
 
-    # matches a prefix of the last name, case-sensitively
     Examples:
       | search | owners                       |
       | Potter | Harry Potter, Beatrix Potter |
