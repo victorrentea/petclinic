@@ -1207,31 +1207,17 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                sample:
-                  description: sample
-                  value:
-                  - id: 1
-                    firstName: James
-                    lastName: Carter
-                    specialties: []
-                  - id: 2
-                    firstName: Helen
-                    lastName: Leary
-                    specialties:
-                    - id: 1
-                      name: radiology
-                      description: x-rays and imaging
-                  - id: 3
-                    firstName: Linda
-                    lastName: Douglas
-                    specialties:
-                    - id: 2
-                      name: surgery
-                      description: operations
-                    - id: 3
-                      name: dentistry
-                      description: teeth
+              example:
+              - id: 1
+                firstName: James
+                lastName: Carter
+                specialties: []
+              - id: 2
+                firstName: Helen
+                lastName: Leary
+                specialties:
+                - id: 1
+                  name: radiology
               schema:
                 type: array
                 items:
