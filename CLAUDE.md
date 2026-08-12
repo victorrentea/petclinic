@@ -114,6 +114,9 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Owners Area — Scale Assumption
+The owner count is expected to grow to approximately **10,000 within a year**. The `GET /api/owners` endpoint is paginated (server-side, Spring `Page<OwnerDto>`), sorted, and last-name filtered. Any future work on the Owners area (indexing, search, reporting) should be designed with this scale in mind. Do **not** add `JOIN FETCH` on the `Owner → pets` paginated query — `Owner.pets` is `@BatchSize(25)` + `LAZY` by design; a join fetch with `LIMIT/OFFSET` causes silent in-memory pagination (`HHH000104`).
+
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 - Owners: `/api/owners`, `/api/owners/{id}`

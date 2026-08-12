@@ -2,54 +2,66 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
+    <form method="get" class="form-horizontal" id="search-owner-form">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
           <label class="col-sm-2 control-label">Last name </label>
           <div class="col-sm-10">
-            <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
+            <input class="form-control" size="30" maxlength="80"
+              id="lastName" name="lastName" [(ngModel)]="lastName" value=""/>
           </div>
         </div>
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
+          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find Owner</button>
         </div>
       </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="isOwnersDataReceived && owners.length === 0">No owners with LastName starting with "{{lastName}}"</div>
+
+    <div class="table-responsive" id="ownersTable" *ngIf="owners.length > 0 || !isOwnersDataReceived">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th style="cursor:pointer" (click)="sortBy('name')">
+            Name
+            <span *ngIf="sortKey === 'name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th style="cursor:pointer" (click)="sortBy('city')">
+            City
+            <span *ngIf="sortKey === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
-
         <tbody>
         <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+          <td class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+              (click)="onSelect(owner)">{{ owner.lastName }} {{ owner.firstName }}</a>
+          </td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <span *ngFor="let pet of owner.pets">{{ pet.name }} </span>
+          </td>
         </tr>
         </tbody>
       </table>
+
+      <mat-paginator
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 20]"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

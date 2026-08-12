@@ -34,6 +34,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -128,7 +129,7 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        List<OwnerDto> owners = searchContent("/api/owners");
 
         assertThat(owners)
                 .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -141,28 +142,29 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerDto> owners = searchContent("/api/owners?lastName=Java");
 
         assertThat(owners)
                 .extracting(OwnerDto::getId, OwnerDto::getLastName)
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    /** Returns the {@code content} list from a paged GET response. */
+    private List<OwnerDto> searchContent(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        JsonNode root = mapper.readTree(responseJson);
+        return mapper.convertValue(root.get("content"), new TypeReference<List<OwnerDto>>() {
         });
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerDto> results = searchContent("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
     }

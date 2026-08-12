@@ -39,6 +39,19 @@ public final class ApiExamples {
                 "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
             ]""";
 
+    public static final String OWNERS_PAGE = """
+            {
+              "content": [
+                { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
+                  "city": "Madison", "telephone": "6085551023",
+                  "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
+                              "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+                { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
+                  "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
+              ],
+              "page": { "size": 10, "number": 0, "totalElements": 2, "totalPages": 1 }
+            }""";
+
     public static final String PETS = """
             [
               { "id": 1, "name": "Leo", "birthDate": "2010-09-07", "type": { "id": 1, "name": "cat" },

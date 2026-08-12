@@ -87,4 +87,13 @@ public class ExceptionControllerAdvice {
         return "Not found!";
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex,
+            HttpServletRequest request) {
+        log.warn("Bad request: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Bad Request", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
 }

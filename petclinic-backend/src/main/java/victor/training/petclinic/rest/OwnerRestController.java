@@ -1,8 +1,10 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -34,7 +36,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -62,12 +63,28 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+                    schema = @Schema(implementation = OwnerPageResponse.class),
+                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS_PAGE)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "name") String sortKey,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction) {
+        OwnerPaginationValidator.validatePageParams(page, size);
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+        Sort sort = OwnerPaginationValidator.toSort(sortKey, sortDirection);
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, PageRequest.of(page, size, sort));
+        return owners.map(ownerMapper::toOwnerDto);
+    }
+
+    /** Marker class for Swagger schema of the paged owners response. */
+    @Schema(name = "PageOwnerDto")
+    static class OwnerPageResponse extends org.springframework.data.web.PagedModel<OwnerDto> {
+        OwnerPageResponse(Page<OwnerDto> page) {
+            super(page);
+        }
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

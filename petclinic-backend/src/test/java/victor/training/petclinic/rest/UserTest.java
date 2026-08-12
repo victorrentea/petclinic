@@ -60,8 +60,8 @@ public class UserTest {
     }
 
     @Test
-    void create_noRoles_triggers_server_error() throws Exception {
-        // Send roles as null so the service sees user.getRoles() == null and throws
+    void create_noRoles_triggers_bad_request() throws Exception {
+        // Send roles as null so the service sees user.getRoles() == null and throws IllegalArgumentException
         UserDto newUser = new UserDto();
         newUser.setUsername("norolesuser");
         newUser.setPassword("password123");
@@ -71,6 +71,6 @@ public class UserTest {
         mockMvc.perform(post("/api/users")
                 .content(mapper.writeValueAsString(newUser))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

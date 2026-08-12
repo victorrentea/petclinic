@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
+import {OwnerPage} from '../owner-page';
 import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {PageEvent} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-owner-list',
@@ -11,23 +12,43 @@ import { finalize } from 'rxjs/operators';
 })
 export class OwnerListComponent implements OnInit {
   errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
+  lastName: string = '';
+
+  owners: Owner[] = [];
+  totalElements = 0;
+  totalPages = 0;
+
+  currentPage = 0;
+  pageSize = 10;
+  sortKey = 'name';
+  sortDirection = 'asc';
+
   isOwnersDataReceived: boolean = false;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
-  }
+  constructor(private router: Router, private ownerService: OwnerService) {}
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
+    this.loadOwners();
+  }
+
+  private loadOwners() {
+    this.isOwnersDataReceived = false;
+    const obs = this.lastName
+      ? this.ownerService.searchOwners(this.lastName, this.currentPage, this.pageSize, this.sortKey, this.sortDirection)
+      : this.ownerService.getOwners(this.currentPage, this.pageSize, this.sortKey, this.sortDirection);
+
+    obs.subscribe({
+      next: (page: OwnerPage) => {
+        this.owners = page.content ?? [];
+        this.totalElements = page.page?.totalElements ?? 0;
+        this.totalPages = page.page?.totalPages ?? 0;
         this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+      },
+      error: (err) => {
+        this.errorMessage = err as any;
+        this.isOwnersDataReceived = true;
+      }
+    });
   }
 
   onSelect(owner: Owner) {
@@ -38,35 +59,25 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-        this.ownerService.getOwners()
-          .subscribe(
-            (owners) => {
-              this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-        this.ownerService.searchOwners(lastName)
-          .subscribe(
-            (owners) => {
-
-              this.owners = owners;
-              console.log('this.owners ' + this.owners);
-
-            },
-            (error) =>
-            {
-              this.owners = null;
-            }
-          );
-
-      }
+  searchByLastName(lastName: string) {
+    this.lastName = lastName;
+    this.currentPage = 0; // reset to first page on new search
+    this.loadOwners();
   }
 
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadOwners();
+  }
 
+  sortBy(column: 'name' | 'city') {
+    if (this.sortKey === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKey = column;
+      this.sortDirection = 'asc';
+    }
+    this.loadOwners();
+  }
 }
