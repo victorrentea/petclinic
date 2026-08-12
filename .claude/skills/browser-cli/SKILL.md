@@ -30,7 +30,9 @@ Every command prints the page URL, title, and a fresh **snapshot** — an access
 tree where each element carries a `[ref=...]`. **Refs are how you target elements.**
 Take a `snapshot` first; never guess a ref.
 
-Snapshots are written to `.playwright-cli/page-<timestamp>.yml` (gitignored). Long
+Snapshots are written to `$PLAYWRIGHT_MCP_OUTPUT_DIR/page-<timestamp>.yml` — this repo
+pins that to `/tmp/playwright-cli` in `.claude/settings.json` so the scratch files never
+land in the working tree. Long
 pages print only the file path — `cat` it, or better, search it:
 
 ```bash
@@ -95,8 +97,8 @@ playwright-cli kill-all      # force-kill stale/zombie processes
 - **Angular/React inputs**: `fill` dispatches real input events, so frameworks pick it
   up — but the value must be in the format the widget parses (e.g. `2024-07-20`, not
   `2024/07/20`, for a Material datepicker), otherwise the control silently goes invalid.
-- Run from the repo root so `.playwright-cli/` (snapshots, console logs) lands in the
-  gitignored spot.
+- Scratch output (snapshots, console logs, screenshots) goes to
+  `$PLAYWRIGHT_MCP_OUTPUT_DIR` (`/tmp/playwright-cli` here) — never into the repo.
 
 ## Deeper reference
 

@@ -125,6 +125,8 @@ From the https://github.com/victorrentea/petclinic repo…
 - run the Code City 3D visualization on the sources of my project XYZ, using
   https://github.com/victorrentea/code-city (`git clone` it, then
   `./generate.sh <my-repo>` and open the `codecity.html` it writes).
+- show me where my GitHub Copilot AI credits went — per day, per model and per session — using
+  https://github.com/victorrentea/copilot-usage.
 - copy the idea to keep the backend Java in sync with `openapi.yaml`, and the frontend `api-types.ts` - prove that a change in a backend Dto fails the FE build, ran automatically prepush and on CI.
 - get the way agent is kept in a loop to fix CI its push broke.
 - get how to run critical tests before every push and again remotely in CI.

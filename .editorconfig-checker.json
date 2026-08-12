@@ -1,6 +1,6 @@
 {
   "//": "editorconfig-checker — enforces .editorconfig, which nothing else in this repo reads.",
-  "//1": "Indentation checks are ON. The excludes below fall into three groups.",
+  "//1": "Indentation checks are ON. The excludes below fall into two groups.",
   "//2": "Generated artifacts: regenerating them would just reintroduce the violation.",
   "//3": "Embedded-content files: every remaining violation in these sits inside a string",
   "//4": "literal — Java text blocks holding JSON fixtures and LLM prompts, and Python triple-",
@@ -8,9 +8,6 @@
   "//6": "and the checker cannot tell the difference. Re-indenting them to fit the grid would",
   "//7": "change the literal string: ApiExamples feeds openapi.yaml (a committed, drift-checked",
   "//8": "artifact), two are prompts sent to a model, and the Python ones are generated web pages.",
-  "//9": "Vendored tools: scripts/copilot-usage/ is a copy of an upstream tool. Its Python aligns",
-  "//10": "continuations under the opening paren and template.html is a web page, not repo source;",
-  "//11": "re-indenting either would fork the copy from its upstream for no gain.",
   "Exclude": [
     "docs/generated/",
     "src/app/generated/",
@@ -19,7 +16,6 @@
     "rest/ApiExamples\\.java$",
     "chatbot/assistant/Assistant\\.java$",
     "chatbot/assistant/JudgeGuard\\.java$",
-    "scripts/build_pr_gallery\\.py$",
-    "scripts/copilot-usage/"
+    "scripts/build_pr_gallery\\.py$"
   ]
 }

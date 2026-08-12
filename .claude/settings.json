@@ -2,6 +2,10 @@
   "enabledMcpjsonServers": [
     "petclinic-mcp"
   ],
+  "env": {
+    "//": "keep playwright-cli snapshots/console logs out of the working tree",
+    "PLAYWRIGHT_MCP_OUTPUT_DIR": "/tmp/playwright-cli"
+  },
   "permissions": {
     "deny": [
       "Bash(git commit --no-verify*)",

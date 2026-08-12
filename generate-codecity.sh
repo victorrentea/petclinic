@@ -3,7 +3,8 @@
 #
 # The generators are NOT in this repo — they are a tool of their own, reusable on any
 # Java checkout: https://github.com/victorrentea/code-city . This script keeps a clone
-# of them under .codecity-tool/ (gitignored) and runs it against PetClinic, with the
+# of them under petclinic-backend/.codecity-tool/ (gitignored, kept beside the docs it
+# generates rather than at the repo root) and runs it against PetClinic, with the
 # same title and output folder the committed pages already use, so re-running produces
 # a clean diff of what actually changed in the code, not of how it was generated.
 #
@@ -13,7 +14,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOL_URL="${CODECITY_TOOL_URL:-https://github.com/victorrentea/code-city.git}"
-TOOL_DIR="${CODECITY_TOOL_DIR:-$REPO/.codecity-tool}"
+TOOL_DIR="${CODECITY_TOOL_DIR:-$REPO/petclinic-backend/.codecity-tool}"
 OUT="$REPO/petclinic-backend/docs/generated/codemap"
 
 if [ ! -d "$TOOL_DIR/.git" ]; then

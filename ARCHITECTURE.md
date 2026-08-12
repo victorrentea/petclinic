@@ -24,7 +24,7 @@ each carries a `footer` with its own repo path, so the render is self-identifyin
 
 > Regenerate with `./generate-codecity.sh`. It clones the generators —
 > [victorrentea/code-city](https://github.com/victorrentea/code-city), a standalone tool
-> that works on any Java repo — into `.codecity-tool/` and runs them on this one.
+> that works on any Java repo — into `petclinic-backend/.codecity-tool/` and runs them on this one.
 
 > More C4 views (containers, per-component focus) live in
 > [`petclinic-backend/docs/README.md`](petclinic-backend/docs/README.md).
