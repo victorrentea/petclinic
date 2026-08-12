@@ -1,0 +1,48 @@
+## 1. Backend: repository & validation
+
+- [ ] 1.1 Extend `OwnerRepository` to `PagingAndSortingRepository<Owner, Integer>` (or `JpaRepository`) and add a paginated finder, e.g. `Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable)`; remove the old non-paginated `findByLastNameStartingWith(String)` once its only caller is migrated
+- [ ] 1.2 Implement a sort-property whitelist mapper: `name` → `Sort.by(direction, "lastName", "firstName")`, `city` → `Sort.by(direction, "city")`; throw/return `400 Bad Request` for any other sort key
+- [ ] 1.3 Implement a page-size whitelist check (`{5, 10, 20}`), returning `400 Bad Request` for other values
+- [ ] 1.4 Unit test the sort-whitelist mapper and page-size check in isolation (valid keys/sizes pass through, invalid ones are rejected)
+
+## 2. Backend: controller
+
+- [ ] 2.1 Update `OwnerRestController#listOwners` to accept `page`, `size`, `sort` request params (defaults: `page=0`, `size=10`, `sort=name,asc`) alongside the existing `lastName` param
+- [ ] 2.2 Wire the whitelist checks from Section 1 into `listOwners` before querying, returning `400 Bad Request` on violation
+- [ ] 2.3 Return `Page<OwnerDto>` (map `Page<Owner>` content via `ownerMapper`, preserving pagination metadata) instead of `List<OwnerDto>`
+- [ ] 2.4 Update `@Operation`/`@ApiResponse` Swagger annotations and `ApiExamples.OWNERS` sample to reflect the new `Page<OwnerDto>` response shape
+- [ ] 2.5 Regenerate `openapi.yaml` via `OpenApiExtractorTest`
+
+## 3. Backend: tests
+
+- [ ] 3.1 Controller/integration test: default call (`GET /api/owners`) returns page 0, size 10, sorted by lastName then firstName ascending
+- [ ] 3.2 Controller/integration test: `page`/`size` params return the correct slice and metadata (`totalElements`, `totalPages`)
+- [ ] 3.3 Controller/integration test: requesting a page beyond the last returns empty content with correct totals (not an error)
+- [ ] 3.4 Controller/integration test: `sort=name,asc` / `sort=name,desc` / `sort=city,asc` return correctly ordered results
+- [ ] 3.5 Controller/integration test: disallowed `sort` value returns `400 Bad Request`
+- [ ] 3.6 Controller/integration test: disallowed `size` value returns `400 Bad Request`
+- [ ] 3.7 Controller/integration test: `lastName` filter combined with pagination/sorting returns the correctly filtered, sorted, paginated subset and correct totals
+- [ ] 3.8 Run `mvn test` for the backend module and confirm all owner-related tests pass
+
+## 4. Frontend: service & model
+
+- [ ] 4.1 Add a typed paged-response interface (e.g. `PageResponse<T>` or similar) covering `content`, `totalElements`, `number`, `size`
+- [ ] 4.2 Update `OwnerService.getOwners()` and `OwnerService.searchOwners()` to accept `page`, `size`, `sort` parameters and return `Observable<PageResponse<Owner>>`, building the query string accordingly
+
+## 5. Frontend: owner-list component & template
+
+- [ ] 5.1 Update `OwnerListComponent` state to track current page, page size, sort column/direction, and the paged result (`content` + totals)
+- [ ] 5.2 Add pagination controls (e.g. Angular Material `MatPaginator`) to `owner-list.component.html`, wired to request the corresponding page/size on interaction
+- [ ] 5.3 Make the **Name** and **City** column headers clickable to toggle/set sort direction and re-fetch; leave Address/Telephone headers non-interactive
+- [ ] 5.4 Swap the Name cell template from `{{ owner.firstName }} {{ owner.lastName }}` to `{{ owner.lastName }} {{ owner.firstName }}`
+- [ ] 5.5 Ensure the existing `lastName` search box continues to work together with pagination/sorting (resets to page 0 on new search)
+
+## 6. Frontend: tests
+
+- [ ] 6.1 Update/add `OwnerService` spec tests to assert `page`/`size`/`sort` query params are sent and the paged response is parsed correctly
+- [ ] 6.2 Update `owner-list.component.spec.ts` to cover: default load requests page 0/size 10/sort=name,asc; clicking Name/City headers requests the right sort; paginator interaction requests the right page/size; Name column renders "LastName FirstName"
+- [ ] 6.3 Run `npm test` (or `npm run test-headless`) for the frontend and confirm all owner-list/owner-service tests pass
+
+## 7. Docs
+
+- [ ] 7.1 Add a note to `AGENTS.md` capturing the ~10,000-owners-within-a-year scale expectation as a durable assumption for future work on the Owners area
