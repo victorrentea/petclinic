@@ -1,27 +1,34 @@
 import {Given, When, Then} from '@cucumber/cucumber';
 import {PlaywrightWorld} from '../support/world';
 import {
-  expectOnlyOwnersWhoseLastNameStartsWithThatPart,
+  expectOwnersListed,
+  fetchAllOwnerNames,
   openOwnersPage,
-  pickLastNamePartOfAnExistingOwner,
-  searchOwnersByLastNamePart,
+  searchOwnersByLastName,
 } from '../dsl/owner-search.dsl';
 
-// One-line adapters over the glue functions in ../dsl, shared verbatim with
-// ../owner-search.spec.ts.
+// One-line adapters over the glue functions in ../dsl. The Examples table feeds
+// them the search term and the expected result set, so no step here decides
+// what to type — the .feature does.
 
-Given('at least one owner exists', async function (this: PlaywrightWorld) {
-  this.ownerSearch = await pickLastNamePartOfAnExistingOwner();
+const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+
+Given("the clinic's sample owners are loaded", async function (this: PlaywrightWorld) {
+  this.allOwnerNames = await fetchAllOwnerNames();
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
   await openOwnersPage(this.page);
 });
 
-When('I search for owners by a last name part', async function (this: PlaywrightWorld) {
-  await searchOwnersByLastNamePart(this.page, this.requireOwnerSearch());
+When('I search owners for {string}', async function (this: PlaywrightWorld, search: string) {
+  await searchOwnersByLastName(this.page, search);
 });
 
-Then('only owners whose last name starts with that part are listed', async function (this: PlaywrightWorld) {
-  await expectOnlyOwnersWhoseLastNameStartsWithThatPart(this.page, this.requireOwnerSearch());
+Then('exactly these owners are listed: {string}', async function (this: PlaywrightWorld, owners: string) {
+  await expectOwnersListed(this.page, namesIn(owners));
+});
+
+Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
+  await expectOwnersListed(this.page, this.requireAllOwnerNames());
 });

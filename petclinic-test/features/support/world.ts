@@ -9,7 +9,6 @@ import {appendWindow} from '../../tests/support/trace-window-store';
 import {flushBrowserSpans} from '../../tests/support/otel-flush';
 import {shouldGenerateSequence} from '../../src/trace-diagram/sequence-tag';
 import {runGenerate} from '../../src/trace-diagram/generate';
-import {OwnerSearch} from '../dsl/owner-search.dsl';
 
 setDefaultTimeout(60_000);
 
@@ -29,9 +28,8 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
-  // Set by the owner-search scenario: the last-name part typed into the filter
-  // plus the owner full names the API returns for it (the expected result set).
-  ownerSearch?: OwnerSearch;
+  // Set by the owner-search scenarios: every owner the API knows, by full name.
+  allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -41,11 +39,11 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireOwnerSearch(): OwnerSearch {
-    if (!this.ownerSearch) {
-      throw new Error('Expected a search prefix to have been chosen earlier in the scenario');
+  requireAllOwnerNames(): string[] {
+    if (!this.allOwnerNames) {
+      throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
-    return this.ownerSearch;
+    return this.allOwnerNames;
   }
 }
 
@@ -56,8 +54,8 @@ setWorldConstructor(PlaywrightWorld);
 //
 // Deliberately NOT wiping every .puml in DIAGRAMS_DIR: the plain-TypeScript
 // twins (../*.spec.ts, run by Playwright) write their diagrams into the same
-// folder, and a blanket wipe here would delete theirs — including
-// owner-search's, whose @generate_sequence tag now lives only on that side.
+// folder, and a blanket wipe here would delete theirs — including add-visit's,
+// whose @generate_sequence tags now live only on that side.
 // run-tests-with-tracing.sh clears the folder once, before running either suite.
 BeforeAll(function () {
   fs.mkdirSync(DIAGRAMS_DIR, {recursive: true});

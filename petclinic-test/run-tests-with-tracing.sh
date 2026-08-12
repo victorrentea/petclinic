@@ -62,9 +62,10 @@ fi
 log "✅ Backend has the OpenTelemetry agent attached."
 
 # --- run both suites -------------------------------------------------------
-# The same scenarios exist twice: as .feature files (Cucumber) and as their
-# plain-TypeScript twins (Playwright). Each carries its own @generate_sequence
-# tags, so both are needed to produce the full diagram set.
+# Two suites produce diagrams: the .feature files (Cucumber) and the
+# plain-TypeScript specs (Playwright). @generate_sequence is spread across both
+# — owner-search tags an Examples row, add-visit tags its .spec.ts tests — so
+# both runs are needed to produce the full diagram set.
 cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 
 # Clean slate once, for both suites: each regenerates only its own diagrams, so

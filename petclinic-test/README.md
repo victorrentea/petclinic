@@ -26,7 +26,7 @@ npm run test:docker   # fully isolated in Docker
 
 ## Gherkin, and the same tests without it
 
-`features/` holds each scenario twice, side by side, to compare the two styles:
+`features/` holds the add-visit scenarios twice, side by side, to compare the two styles:
 
 | | Gherkin | plain TypeScript |
 |---|---|---|
@@ -40,10 +40,17 @@ Both drive the **same glue functions** in `features/dsl/` — the readable
 Given/When/Then sentences survive without a parser (`dsl/gherkin.ts` wraps
 `test.step`), and the steps stay ctrl-clickable, renameable and type-checked.
 
+`owner-search.feature` has **no** TypeScript twin on purpose: its whole contract is a table of
+what-you-type / who-shows-up, so it is a `Scenario Outline` with three `Examples:` blocks — the
+one thing Gherkin says better than code. Where the scenarios are only prose, as with add-visit,
+the choice between the two styles is taste.
+
 `@generate_sequence` means the same thing on both sides (`src/trace-diagram/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
-Tempo window and get a `.puml` in `features/generated_sequences/`. The owner-search scenario
-carries the tag **only** in `.spec.ts`, so its diagram comes from the TypeScript side.
+Tempo window and get a `.puml` in `features/generated_sequences/`. It can also sit on a single
+`Examples:` block, so one row of a table opts in and the rest just run — that is how
+owner-search produces exactly one diagram. The add-visit scenarios carry the tag **only** in
+`.spec.ts`, so their diagrams come from the TypeScript side.
 
 ## Sequence diagrams from real traces
 
