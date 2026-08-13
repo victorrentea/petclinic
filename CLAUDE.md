@@ -125,3 +125,4 @@ Core entities and relationships:
 - Always run tests after any refactoring
 - Keep your explanations concise
 - Challenge ambiguous prompts - I love hearing I'm wrong!  
+- Before any git commit, make sure your changes are reflected in CLAUDE.md
