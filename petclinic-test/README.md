@@ -26,7 +26,8 @@ npm run test:docker   # fully isolated in Docker
 
 ## Gherkin, and the same tests without it
 
-`features/` holds the add-visit scenarios twice, side by side, to compare the two styles:
+`features/` holds add-visit twice, side by side, to compare the two styles — the `.feature`
+spells out three scenarios, the `.spec.ts` keeps only the one that is diagrammed:
 
 | | Gherkin | plain TypeScript |
 |---|---|---|
@@ -49,8 +50,8 @@ the choice between the two styles is taste.
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
 Tempo window and get a `.puml` in `features/generated_sequences/`. In owner-search it sits on
 the one plain `Scenario` — the Examples rows only vary the same round-trip, so diagramming
-them all would say nothing extra. The add-visit scenarios carry the tag **only** in `.spec.ts`,
-so their diagrams come from the TypeScript side.
+them all would say nothing extra. Add-visit carries the tag **only** in `.spec.ts`, so its
+diagram comes from the TypeScript side. Two tagged tests, two `.puml` — one per style.
 
 ## Sequence diagrams from real traces
 

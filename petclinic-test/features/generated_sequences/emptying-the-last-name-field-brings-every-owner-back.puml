@@ -1,0 +1,265 @@
+@startuml
+hide footbox
+title Emptying the last name field brings every owner back
+footer @generate_sequence Scenario in a .feature test
+participant Browser
+participant Backend
+participant DB
+== Emptying the last name field brings every owner back #1 ==
+Browser -> Backend: GET /api/owners
+activate Backend
+Backend -> Backend: OwnerRepository.findByLastNameStartingWith
+activate Backend
+Backend -> Backend: SELECT victor.training.petclinic.domain.Owner
+activate Backend
+Backend -> DB: SELECT petclinic.owners
+activate DB
+deactivate DB
+deactivate Backend
+deactivate Backend
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend --> Browser: 200
+deactivate Backend
+== Emptying the last name field brings every owner back #2 ==
+Browser -> Backend: GET /api/owners
+activate Backend
+Backend -> Backend: OwnerRepository.findByLastNameStartingWith
+activate Backend
+Backend -> Backend: SELECT victor.training.petclinic.domain.Owner
+activate Backend
+Backend -> DB: SELECT petclinic.owners
+activate DB
+deactivate DB
+deactivate Backend
+deactivate Backend
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend -> DB: SELECT petclinic.visits
+activate DB
+deactivate DB
+Backend --> Browser: 200
+deactivate Backend
+== Emptying the last name field brings every owner back #3 ==
+Browser -> Browser: documentFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
+activate Browser
+deactivate Browser
+@enduml
