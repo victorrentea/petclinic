@@ -7,7 +7,7 @@ Copilot: use this file over your proprietary .github/copilot-instructions.md
 
 ## Project Overview
 
-Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
+Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
