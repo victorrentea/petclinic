@@ -10,9 +10,7 @@ Diagrams are rendered live via the public [PlantUML proxy](https://plantuml.com/
 
 Source: [`packages.puml`](packages.puml). Validated by `PackagesArchTest`: every package in code must appear here, and ArchUnit asserts cross-package deps match the diagram.
 
-Three reading conventions, all of them project-agnostic — the recipe is written out at the top of `packages.puml` so it can be copied into any codebase that guards its packages with ArchUnit:
-- **Gravity.** A package is drawn below everything that depends on it, so every arrow points downwards. Its depth is the longest chain of dependencies starting at it, which is a computation rather than a naming exercise — the diagram carries no invented layer names.
-- **Invisible anchors.** Depths are held apart by a blank `label` per boundary, pinned by `-[hidden]->` arrows from the packages above and to the packages below. Nothing is drawn — the anchor just claims a row of its own, which is what forces the depths onto separate rows. Pinning with hidden arrows *between packages* would be wrong: ArchUnit reads those as real dependencies.
+One reading convention, project-agnostic — the recipe is written out at the top of `packages.puml` so it can be copied into any codebase that guards its packages with ArchUnit:
 - **Red double-headed line = cycle.** A bidirectional dependency is drawn as a single red line with an arrowhead at each end. ArchUnit's PlantUML parser can't read `<-->` arrows, so each red line is backed by two `-[hidden]->` arrows, which it *does* parse as the two directed dependencies. No such cycle exists today.
 
 ![Packages](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/packages.puml)

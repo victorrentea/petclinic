@@ -4,27 +4,14 @@ title Logical Architecture
 caption All lines are ArchUnit-tested vs code by PackagesArchTest
 footer petclinic-backend/docs/packages.puml
 
-' ── The recipe (portable — copy this whole layout trick to any project) ───────
-' 1. GRAVITY. A package is drawn below everything that depends on it, so every
-'    arrow points downwards. Depth of a package = length of the longest chain of
-'    dependencies starting at it; depth 0 (packages that depend on nothing) goes
-'    at the bottom. That is a computation, not an opinion — no layer names here.
-'
-' 2. INVISIBLE ANCHORS. Depths are held apart by a blank `label` per boundary,
-'    pinned by `-[hidden]->` arrows from every package above it and to every
-'    package below it. Nothing is drawn — the anchor only claims a row of its
-'    own, which is what forces the packages onto separate rows. Do NOT pin with
-'    hidden arrows between packages: ArchUnit reads those as real dependencies
-'    and the diagram would start permitting deps the code does not have. It
-'    drops the ones pointing at `sepN`, because `sepN` is not a component.
-'
-' 3. CYCLES ARE RED. A bidirectional dependency is ONE red double-headed line.
-'    ArchUnit cannot parse `<-->` arrows, so back each red line with two
-'    `-[hidden]->` arrows, which it *does* parse as the two directed edges:
-'        [A] <-[#red,thickness=2]-> [B]
-'        [A] -[hidden]-> [B]
-'        [B] -[hidden]-> [A]
-'    No cycle exists here today; the convention is in place so one shows up red.
+' ── The recipe (portable — copy this trick to any project) ───────────────────
+' CYCLES ARE RED. A bidirectional dependency is ONE red double-headed line.
+' ArchUnit cannot parse `<-->` arrows, so back each red line with two
+' `-[hidden]->` arrows, which it *does* parse as the two directed edges:
+'     [A] <-[#red,thickness=2]-> [B]
+'     [A] -[hidden]-> [B]
+'     [B] -[hidden]-> [A]
+' No cycle exists here today; the convention is in place so one shows up red.
 ' ─────────────────────────────────────────────────────────────────────────────
 
 skinparam shadowing false
@@ -42,22 +29,14 @@ arrow {
 }
 </style>
 
-' depth 2
 [REST] <<..rest>>
 [MCP] <<..mcp>>
 [REST Error] <<..rest.error>>
 [Security] <<..security>>
-
-' depth 1
 [Mapper] <<..mapper>>
 [Repository] <<..repository>>
-
-' depth 0
 [DTO] <<..rest.dto>>
 [Domain] <<..domain>>
-
-label " " as sep1
-label " " as sep2
 
 [Repository] --> [Domain]
 [Mapper] --> [Domain]
@@ -68,19 +47,5 @@ label " " as sep2
 [REST] --> [DTO]
 [MCP] --> [Domain]
 [MCP] --> [Repository]
-
-' depth 2 sits above depth 1
-[REST] -[hidden]-> sep1
-[MCP] -[hidden]-> sep1
-[REST Error] -[hidden]-> sep1
-[Security] -[hidden]-> sep1
-sep1 -[hidden]-> [Mapper]
-sep1 -[hidden]-> [Repository]
-
-' depth 1 sits above depth 0
-[Mapper] -[hidden]-> sep2
-[Repository] -[hidden]-> sep2
-sep2 -[hidden]-> [DTO]
-sep2 -[hidden]-> [Domain]
 
 @enduml
