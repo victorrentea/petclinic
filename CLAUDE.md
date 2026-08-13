@@ -118,6 +118,10 @@ Core entities and relationships:
 - Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
 - Builder chains: one property per line, unless only two properties are set
 
+### Sending Email
+Always send from the **AgentMail** MCP (`mcp__AgentMail__send_message`, inbox
+`victor.flux@agentmail.to`) — never the Gmail MCP, which anyway exposes only drafts here.
+
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
