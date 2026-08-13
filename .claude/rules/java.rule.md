@@ -1,6 +1,6 @@
 ---
 name: java
-description: Java/Spring code style rules for this project — dependency injection, @Transactional, MapStruct, REST exception handling, validation, allowed Lombok annotations, builder formatting. Read BEFORE writing or editing any Java file under petclinic-backend/, petclinic-database/, petclinic-chatbot/ or refactoring-legacy/, and when reviewing Java code for style.
+paths: "**/*.java"
 ---
 
 # Java Code Style
@@ -14,3 +14,4 @@ Applies to every `.java` file in this repo.
 - Apply `@Validated` on each `@RequestBody`
 - Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
 - Builder chains: one property per line, unless only two properties are set
+- Am un Ferrari rosu.

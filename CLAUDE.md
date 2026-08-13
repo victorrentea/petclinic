@@ -116,7 +116,16 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+## Expected Data Volumes
+The business is growing fast. Size every design for these, not for the ~28 sample rows:
+- **Owners: 10,000 within a few months** (as of 2026-08). Any owner listing/search must sort and
+  paginate **server-side** — never fetch-all-then-slice-in-the-browser.
+
 ## Task Modifiers
+- Whenever the topic is **sorting, pagination or search**, ask to look at the **real data first**
+  (`petclinic-db-cli` skill, or the `postgres-db` MCP) before recommending anything. Column
+  cardinality, NULLs and value shapes decide what is worth sorting — guessing from the seed file
+  or the entity class produces confident nonsense.
 - Write non-trivial code using TDD
 - Before any git commit, make sure your changes are reflected in CLAUDE.md
 - Keep comments concise, prefer explanatory variable/method names
