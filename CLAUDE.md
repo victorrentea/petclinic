@@ -9,9 +9,23 @@ Copilot: use this file over your proprietary .github/copilot-instructions.md
 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
-**Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
-- `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+**Structure:** (8 modules, not just back+front)
+
+| Module | What | Build |
+|---|---|---|
+| `petclinic-backend/` | Spring Boot 3.5 REST API (Java 21); also hosts the Spring AI **MCP server** at `/mcp` | Maven |
+| `petclinic-frontend/` | Angular 16 SPA (Angular Material + Bootstrap 3) | npm |
+| `petclinic-database/` | `PostgresLauncher` (embedded Postgres) + `NetworkLatencyProxy`; what `./start-database.sh` runs | Maven |
+| `petclinic-chatbot/` | Spring AI triage assistant on **:8082** — RAG over specialties, books visits via the backend's MCP. Needs `OPENAI_API_KEY` + pgvector on **:5433** (`docker compose up -d` in that folder) | Maven |
+| `petclinic-test/` | Playwright + Cucumber E2E in TypeScript; `features/` holds add-visit twice (Gherkin vs plain TS) on purpose. **Has its own CLAUDE.md — read it before touching tests** | npm |
+| `petclinic-observability/` | `docker compose` for `grafana/otel-lgtm` (Grafana :3300, OTLP :4317/:4318) + `otelcol-config.yaml` | docker |
+| `refactoring-legacy/` | Self-contained OpenRewrite recipes (imperative + Refaster). Deliberately **not** wired into the backend build | Maven |
+| `user-manual/` | `manual.md` + screenshots |  |
+| `scripts/` | `architecture-diff.sh`, `gh-pages-publish.sh`, `build_pr_gallery.py`, … |  |
+
+**Root files worth knowing:** [ARCHITECTURE.md](ARCHITECTURE.md) (diagrams generated from code),
+[GUARDRAILS.md](GUARDRAILS.md), `openapi.yaml` (generated), `sgconfig.yml` + `.ast-grep/` (lint rules),
+`.githooks/`, `secrets.env` (gitignored, holds `OPENAI_API_KEY`).
 
 ## Common Commands
 
@@ -22,19 +36,14 @@ Each script is foreground; run them in separate terminals.
 ./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
+./start-chatbot.sh         # Spring AI chatbot on localhost:8082 (needs backend up + OPENAI_API_KEY)
+./start-tests.sh           # Playwright E2E in petclinic-test/ (needs backend + frontend up)
+./install-all.sh           # one-time: git hooks + mvn/npm install across all modules
 petclinic-backend/docs/scripts/start-structurizr.sh  # optional: C4model Structurizr view on localhost:8081
 petclinic-backend/generate-codecity.sh  # rebuilds docs/generated/codecity/codecity.html, the 3D code view.
-     # Renderer = github.com/victorrentea/code-city, cloned into petclinic-backend/.codecity-tool/
-     # (gitignored); change the rendering there, here only its output is committed.
 ```
-
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
+⚠️ There is **no** `./start-all.sh` / `./run-all.sh`, despite what `start-tests.sh` prints on failure.
+Start each script above in its own terminal.
 
 ### Frontend (petclinic-frontend/)
 ```sh
@@ -43,30 +52,33 @@ npm run build                       # Production build
 npm test                            # Karma tests
 npm run test-headless               # Headless Chrome tests
 npm run e2e                         # Protractor e2e tests
+npm run generate:api                # regenerate src/app/generated/api-types.ts from ../openapi.yaml
+npm run lint:openapi                # Spectral lint of ../openapi.yaml
 ```
+
+### E2E (petclinic-test/)
+```sh
+npm test                            # headless Playwright (needs backend + frontend up)
+npm run test:cucumber               # the same scenarios via Gherkin step definitions
+npm run test:ui                     # interactive runner
+npm run show-report                 # HTML report
+npm run test:docker                 # fully isolated in Docker
+```
+See `petclinic-test/CLAUDE.md` for the Gherkin-vs-plain-TS split and tracing setup.
 
 ## Architecture
 
-### Backend Architecture
+### Frontend Architecture
 
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
+- One **feature module per aggregate** under `src/app/<feature>/` (`owners`, `pets`, `vets`, `visits`,
+  `pettypes`, `specialties`, `invoice`), each with its own `*-routing.module.ts`, `*.service.ts`,
+  model class, and `-list` / `-add` / `-edit` / `-detail` components.
+- `parts/` - shared bits (welcome, page-not-found); `testing/` - test doubles (`testing.module.ts`,
+  `router-stubs.ts`).
+- Cross-cutting: `app-routing.module.ts`, `error.service.ts`, `http-error.interceptor.ts`.
+- ⚠️ `src/app/generated/api-types.ts` is **generated** from the root `openapi.yaml`
+  (`npm run generate:api`, also run by `prebuild`) - never hand-edit it.
+- In services, `.pipe()` goes on its **own line**, never chained onto `http.get(...)`.
 
 ### Living Architecture & Guardrails
 
@@ -78,7 +90,7 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - **Flyway seeds the DB when the backend boots** (`ddl-auto=none`; `db/migration/`: schema in
   `V1`, sample data in `V3__sample_data.sql`). An empty DB before that is normal, not broken.
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
-  for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
+  for a deliberate reset; to keep runtime data, start Postgres from the jar directly
 
 ### Security
 - Disabled by default
@@ -86,18 +98,16 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
 - Default test user: `admin`/`admin`
 
+### Observability
+- `./start-grafana.sh` brings up `grafana/otel-lgtm` (Grafana **:3300**, admin/admin; OTLP **:4317/:4318**).
+- `./start-backend.sh` attaches the OTel Java agent **only if :4318 is already listening** — start
+  Grafana *first*, otherwise the backend runs with telemetry silently disabled.
+- Browser spans need a flush window: a scenario that finishes in <~5s closes the page before the
+  frontend exporter ships anything, so no frontend traces reach Tempo.
+
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+Backend exposes REST API with swagger kept in sync at `openapi.yaml`
 
 ## Domain Model
 Core entities and relationships:
@@ -106,22 +116,11 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Development Notes
-
-### Java Code Style
-- Keep line length ≤ 120 chars
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- MapStruct is used for DTO mapping
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
-- Builder chains: one property per line, unless only two properties are set
-
 ## Task Modifiers
 - Write non-trivial code using TDD
+- Before any git commit, make sure your changes are reflected in CLAUDE.md
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind comments when deleting or moving stuff, to prevent later 'heresy resurrection'
 - Always run tests after any refactoring
-- Keep your explanations concise
+- Keep your explanations concise, we are experienced Spring dev
 - Challenge ambiguous prompts - I love hearing I'm wrong!  
