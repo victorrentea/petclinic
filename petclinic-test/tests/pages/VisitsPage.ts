@@ -23,6 +23,9 @@ export class VisitsPage {
   async open(): Promise<void> {
     await this.page.goto('/visits');
     await this.pageTitle.waitFor({state: 'visible', timeout: 10000});
+    // The heading renders before the visits request resolves; without this the
+    // table can still be empty when a test starts reading rows.
+    await this.rows.first().waitFor({state: 'visible', timeout: 10000});
   }
 
   async waitForVisitsCount(expectedCount: number): Promise<void> {

@@ -20,6 +20,10 @@ export class OwnersPage {
   async open() {
     await this.page.goto('/owners');
     await this.pageTitle.waitFor({ state: 'visible', timeout: 10000 });
+    // The heading renders before the owners request resolves. Searching while that
+    // request is still in flight lets its response land last and repaint the full
+    // list over the filtered one.
+    await this.ownerNameCells.first().waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async getOwnerFullNames(): Promise<string[]> {

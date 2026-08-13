@@ -45,7 +45,6 @@ arrow {
 ' depth 2
 [REST] <<..rest>>
 [MCP] <<..mcp>>
-[REST Error] <<..rest.error>>
 [Security] <<..security>>
 
 ' depth 1
@@ -55,6 +54,7 @@ arrow {
 ' depth 0
 [DTO] <<..rest.dto>>
 [Domain] <<..domain>>
+[REST Error] <<..rest.error>>
 
 label " " as sep1
 label " " as sep2
@@ -66,13 +66,13 @@ label " " as sep2
 [REST] --> [Repository]
 [REST] --> [Mapper]
 [REST] --> [DTO]
+[REST] --> [REST Error]
 [MCP] --> [Domain]
 [MCP] --> [Repository]
 
 ' depth 2 sits above depth 1
 [REST] -[hidden]-> sep1
 [MCP] -[hidden]-> sep1
-[REST Error] -[hidden]-> sep1
 [Security] -[hidden]-> sep1
 sep1 -[hidden]-> [Mapper]
 sep1 -[hidden]-> [Repository]
@@ -82,5 +82,6 @@ sep1 -[hidden]-> [Repository]
 [Repository] -[hidden]-> sep2
 sep2 -[hidden]-> [DTO]
 sep2 -[hidden]-> [Domain]
+sep2 -[hidden]-> [REST Error]
 
 @enduml

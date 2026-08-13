@@ -116,6 +116,13 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Business rules worth knowing:**
+- A **Visit date** must fall within `[pet birth date .. today + 1 year]`, enforced twice:
+  `VisitRestController.checkDateInRange` (POST + PUT → 400) and `[min]`/`[max]` on the
+  datepicker in `visit-add`/`visit-edit`. The lower bound depends on the pet, so it cannot
+  be a bean-validation annotation on the DTO. Validation runs on write only — rows seeded or
+  created before it existed keep their out-of-range dates.
+
 ## Expected Data Volumes
 The business is growing fast. Size every design for these, not for the ~28 sample rows:
 - **Owners: 10,000 within a few months** (as of 2026-08). Any owner listing/search must sort and

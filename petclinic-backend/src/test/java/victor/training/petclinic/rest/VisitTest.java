@@ -214,6 +214,65 @@ public class VisitTest {
     }
 
     @Test
+    void create_rejectsDateBeforePetBirthDate() throws Exception {
+        LocalDate birthDate = petRepository.findById(petId).orElseThrow().getBirthDate();
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(birthDate.minusDays(1));
+        newVisit.setDescription("visit before the pet existed");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_rejectsDateMoreThanOneYearAhead() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        newVisit.setDescription("visit too far into the future");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_acceptsDateOnTheRangeBoundaries() throws Exception {
+        LocalDate birthDate = petRepository.findById(petId).orElseThrow().getBirthDate();
+
+        for (LocalDate boundary : Arrays.asList(birthDate, LocalDate.now().plusYears(1))) {
+            VisitDto newVisit = new VisitDto();
+            newVisit.setPetId(petId);
+            newVisit.setDate(boundary);
+            newVisit.setDescription("boundary visit on " + boundary);
+
+            mockMvc.perform(post("/api/visits")
+                    .content(mapper.writeValueAsString(newVisit))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(status().isCreated());
+        }
+    }
+
+    @Test
+    void update_rejectsDateOutsideTheAllowedRange() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.of(9, 7, 20));
+        update.setDescription("moved before the pet was born");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findById(visitId).orElseThrow().getDescription())
+                .isEqualTo("rabies shot");
+    }
+
+    @Test
     void findVisitsByPetId() {
         // Add a second visit for the same pet
         Visit visit2 = new Visit();

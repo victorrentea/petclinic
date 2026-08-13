@@ -34,6 +34,16 @@ export class VisitEditComponent implements OnInit {
     this.currentPetType = {} as PetType;
   }
 
+  /** A visit cannot predate the pet it belongs to. */
+  get minVisitDate(): Date | null {
+    return this.currentPet.birthDate ? new Date(this.currentPet.birthDate) : null;
+  }
+
+  /** Booking further ahead than a year is a typo, not a plan. */
+  get maxVisitDate(): Date {
+    return moment().add(1, 'year').toDate();
+  }
+
   ngOnInit() {
     const visitId = this.route.snapshot.params.id;
     this.visitService.getVisitById(visitId).subscribe(
