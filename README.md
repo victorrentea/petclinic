@@ -113,6 +113,7 @@ Patiently guide the agent through this setup, then tell it: Turn the lessons you
 - [CodexBar](https://codexbar.app) to see the remaining Claude/Codex/Copilot quota.
 - [ScreenBrush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before screenshot to agent. 
 - Custom statusline: [victorrentea/victor-statusline](https://github.com/victorrentea/victor-statusline) — rich status bars for Claude Code and Copilot CLI (per-turn cost, quota burn-rate, prompt-cache health). Tell your CLI agent: *configure yourself a status bar following that repo's README*.
+- Coming from IntelliJ? [victorrentea/intellij-look-vscode](https://github.com/victorrentea/intellij-look-vscode) — makes VS Code look and behave like IntelliJ's New UI (real JetBrains icons, matching colours and line spacing, branch on top, breadcrumb at the bottom). Install the `.vsix` from its Releases, then run *IntelliJ Look: Apply IntelliJ Settings*.
 
 ### Adopt ideas from `petclinic` into your own project ❤️
 
