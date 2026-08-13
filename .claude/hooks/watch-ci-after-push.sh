@@ -79,7 +79,7 @@ else
   HOW="Launch the CI watch in the BACKGROUND (run_in_background:true), then keep working — do not block:"
 fi
 
-# The repair protocol lives in .claude/skills/ci-watch/SKILL.md, NOT inline here.
+# The repair protocol lives in .claude/skills/ci-watch/java.rule.md, NOT inline here.
 # Green is the overwhelmingly common outcome and needs none of it, so paying for
 # that prose on every single push — in a JSON string that has to be \n-escaped by
 # hand — buys nothing. Point at the skill instead, and let it be loaded on red.

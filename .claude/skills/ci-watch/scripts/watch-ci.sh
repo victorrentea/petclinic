@@ -6,7 +6,7 @@
 # is also usable by hand: scripts/watch-ci.sh
 #
 # The protocol built on top of this exit status — what green/red/indeterminate
-# oblige the agent to do — lives in ../SKILL.md, not here.
+# oblige the agent to do — lives in ../java.rule.md, not here.
 #
 # IMPORTANT: a non-zero exit here is consumed as "CI RED → automatically repair
 # the build". So a FALSE red (treating a transient gh hiccup as a failure) is far

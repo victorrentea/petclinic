@@ -1,5 +1,4 @@
 ---
-name: java
 paths: "**/*.java"
 ---
 

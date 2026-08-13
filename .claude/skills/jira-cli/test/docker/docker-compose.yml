@@ -3,7 +3,7 @@
 # ONLY USABLE IF YOU ALREADY HOLD A DATA CENTER LICENCE KEY.
 # The image is free to pull, but the product is not: since 30 March 2026 Atlassian
 # no longer lets you generate Data Center trial licences yourself, and Jira Server
-# has been end-of-life since 2024. See SKILL.md for the free alternatives (the
+# has been end-of-life since 2024. See java.rule.md for the free alternatives (the
 # hermetic fake, or Jira Cloud Free).
 #
 #   docker compose -f test/docker/docker-compose.yml up -d
