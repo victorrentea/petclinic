@@ -40,7 +40,6 @@ arrow {
 
 [Repository] --> [Domain]
 [Mapper] --> [Domain]
-[Mapper] --> [DTO]
 [REST] --> [Domain]
 [REST] --> [Repository]
 [REST] --> [Mapper]
