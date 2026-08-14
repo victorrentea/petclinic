@@ -29,9 +29,14 @@ test('caps a long payload', () => {
   expect(lines[lines.length - 1]).toBe('…');
 });
 
-test('caps a very wide line', () => {
-  const [line] = formatJsonLines(`"${'x'.repeat(500)}"`);
-  expect(line.length).toBe(91); // 90 chars + the ellipsis
+// Wrapped, not clipped: the browser truncates a big body mid-JSON, which makes it
+// unparseable, and clipping the resulting single line to 90 chars would show a
+// fraction of the payload exactly when the payload is what you wanted to see.
+test('wraps a very wide line instead of clipping it away', () => {
+  const lines = formatJsonLines(`"${'x'.repeat(500)}"`);
+  expect(lines.length).toBe(6);
+  expect(lines[0].length).toBe(90);
+  expect(lines.join('')).toContain('x'.repeat(500));
 });
 
 test('jsonNote wraps the payload in a PlantUML note over both participants', () => {

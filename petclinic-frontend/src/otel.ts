@@ -17,15 +17,35 @@ function clipBody(body: string): string {
   return body.length <= MAX_BODY_CHARS ? body : `${body.slice(0, MAX_BODY_CHARS)}…`;
 }
 
-// XHR hands the request body to send() and then forgets it — applyCustomAttributesOnSpan
-// receives only the xhr — so stash it on the object on the way through.
-const originalSend = XMLHttpRequest.prototype.send;
-XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null) {
-  if (typeof body === 'string' && body) {
-    (this as any)[REQUEST_BODY] = body;
-  }
-  return originalSend.call(this, body as any);
-};
+const PATCH_MARKER = '__otelBodyCapturePatched__';
+
+/**
+ * XHR hands the request body to send() and then forgets it — applyCustomAttributesOnSpan
+ * receives only the xhr — so stash it on the object on the way through.
+ *
+ * Called only once the collector has answered, never at module load: patching a
+ * global prototype is a side effect no user who isn't being traced should pay for,
+ * and this file ships in the production bundle (`main.ts` imports it unconditionally).
+ * The marker makes it idempotent — under HMR a second evaluation would otherwise
+ * capture the already-patched send and chain wrappers N deep.
+ */
+function patchXhrSendOnce(): void {
+  const xhrPrototype = XMLHttpRequest.prototype as any;
+  if (xhrPrototype[PATCH_MARKER]) return;
+  xhrPrototype[PATCH_MARKER] = true;
+
+  const originalSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body?: Document | XMLHttpRequestBodyInit | null) {
+    // Written on every send, cleared when it isn't a string: an XHR object reused for
+    // a second request would otherwise carry the first request's body onto its span.
+    if (typeof body === 'string' && body) {
+      (this as any)[REQUEST_BODY] = body;
+    } else {
+      delete (this as any)[REQUEST_BODY];
+    }
+    return originalSend.call(this, body as any);
+  };
+}
 
 function captureBodies(span: { setAttribute: (k: string, v: string) => unknown }, xhr: XMLHttpRequest): void {
   const requestBody = (xhr as any)[REQUEST_BODY];
@@ -61,6 +81,8 @@ isCollectorReachable().then((up) => {
     console.info('ℹ️  OTel collector not reachable — frontend telemetry disabled.');
     return;
   }
+
+  patchXhrSendOnce();
 
   const provider = new WebTracerProvider({
     resource: resourceFromAttributes({

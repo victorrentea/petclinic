@@ -27,10 +27,12 @@ public class PrettyTestNames extends DisplayNameGenerator.ReplaceUnderscores {
         return replaceCapitals(super.generateDisplayNameForMethod(enclosingInstanceTypes, testClass, testMethod));
     }
 
+    // No underscore rule here on purpose: ReplaceUnderscores has already turned every
+    // `_` into a space by the time this runs, so a rule for it could never fire.
     private String replaceCapitals(String name) {
         return name.replaceAll("([A-Z])", " $1")
-                .replaceAll("_", " > ")
                 .replaceAll("\\s+", " ")
+                .trim()
                 .toLowerCase();
     }
 }

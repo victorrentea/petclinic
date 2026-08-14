@@ -59,7 +59,7 @@ test('a statement with nothing to break stays a single line', () => {
 
 test('applyParameters fills the placeholders in order', () => {
   expect(applyParameters('select * from owners where last_name=? and city=?', ['Potter', 'Cluj']))
-    .toBe('select * from owners where last_name=Potter and city=Cluj');
+    .toBe("select * from owners where last_name='Potter' and city='Cluj'");
 });
 
 // Capture can be off, or the agent can capture fewer values than there are
@@ -68,4 +68,53 @@ test('applyParameters leaves what it cannot fill alone', () => {
   expect(applyParameters('select * from owners where id=?', [])).toBe('select * from owners where id=?');
   expect(applyParameters('select * from o where a=? and b=?', ['1']))
     .toBe('select * from o where a=1 and b=?');
+});
+
+// The statement sanitizer is deliberately off (it is what would rewrite bound
+// values to `?`), so real string literals reach this code — and a literal is
+// somebody's data, never grammar to fold on.
+test('a keyword inside a string literal is not a clause', () => {
+  expect(formatSqlLines("select v.id from visits v where v.description = 'sent from the vet'"))
+    .toEqual([
+      'SELECT v.id',
+      'FROM visits v',
+      "WHERE v.description = 'sent from the vet'",
+    ]);
+});
+
+test('a subquery keeps its clauses inside the line that contains it', () => {
+  const lines = formatSqlLines(
+    'select o.id,(select count(*) from pets p where p.owner_id=o.id),o.telephone from owners o',
+  );
+  // the outer o.telephone must not end up attached to the subquery's WHERE
+  expect(lines[lines.length - 1]).toBe('FROM owners o');
+  expect(lines.some((l) => l.includes('o.telephone') && l.includes('count(*)'))).toBe(true);
+  expect(lines).not.toContain('WHERE p.owner_id=o.id), o.telephone');
+});
+
+test('a `?` inside a literal is not a placeholder', () => {
+  expect(applyParameters("select * from o where o.notes = 'is this ok?' and o.id = ?", ['10']))
+    .toBe("select * from o where o.notes = 'is this ok?' and o.id = 10");
+});
+
+test('a bound value is quoted, and cannot invent a clause of its own', () => {
+  const lines = formatSqlLines(
+    'select o.id from owners o where o.city = ? and o.last_name = ?',
+    ['from Bucharest', 'Order by Smith'],
+  );
+  expect(lines).toEqual([
+    'SELECT o.id',
+    'FROM owners o',
+    "WHERE o.city = 'from Bucharest' and o.last_name = 'Order by …",
+  ]);
+});
+
+test('numbers stay bare, strings get quotes', () => {
+  expect(applyParameters('where a=? and b=? and c=?', ['7', 'Potter', 'null']))
+    .toBe("where a=7 and b='Potter' and c=null");
+});
+
+test('a backslash in the SQL cannot eat the line break after it', () => {
+  const label = formatSqlLabel("select o.id from owners o where o.last_name like ? escape '\\'");
+  expect(label).toContain("escape '\\\\'");
 });
