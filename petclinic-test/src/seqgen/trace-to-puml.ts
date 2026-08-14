@@ -1,4 +1,4 @@
-import {applyParameters, formatSqlLabel} from './sql-label';
+import {formatSqlLabel} from './sql-label';
 import {jsonNote} from './json-label';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions} from './options';
 
@@ -95,7 +95,9 @@ function arrowLabel(span: NormSpan, target: string, options: DiagramOptions): st
   if (target !== 'DB' || options.sql === 'off') return span.name;
   const sql = sqlOf(span);
   if (!sql) return span.name;
-  return formatSqlLabel(options.sql === 'values' ? applyParameters(sql, parametersOf(span)) : sql);
+  // The values go in *after* the statement is folded into clauses — a bound value
+  // reading "Follow up on the vaccination" would otherwise be folded at its own ON.
+  return formatSqlLabel(sql, options.sql === 'values' ? parametersOf(span) : []);
 }
 
 // The browser is where the payloads are captured, so they sit on the frontend
@@ -123,11 +125,25 @@ function emitTrace(
   spans: NormSpan[], lines: string[], present: Set<string>, options: DiagramOptions,
 ): void {
   const byId = new Map(spans.map((s) => [s.spanId, s]));
-  const childrenOf = (id: string) => spans
-    .filter((s) => s.parentSpanId === id)
-    .sort((a, b) => a.startNano - b.startNano);
+  // Indexed once: filtering the whole span array per span made an N+1-heavy trace
+  // (hundreds of spans, which is exactly what these diagrams are for) quadratic.
+  const childrenByParent = new Map<string, NormSpan[]>();
+  for (const span of spans) {
+    const siblings = childrenByParent.get(span.parentSpanId) ?? [];
+    siblings.push(span);
+    childrenByParent.set(span.parentSpanId, siblings);
+  }
+  for (const siblings of childrenByParent.values()) {
+    siblings.sort((a, b) => a.startNano - b.startNano);
+  }
+  const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
-  const walk = (span: NormSpan, out: string[]): void => {
+  const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
+    // Whatever the driver does inside a query is the database's business: drawing a
+    // child of a DB span would put an arrow *out* of the DB lifeline, as if the
+    // database were calling the backend back.
+    if (parentParticipant === 'DB') return;
+
     const p = participantOf(span);
     const parent = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
     const pp = parent ? participantOf(parent) : undefined;
@@ -138,7 +154,7 @@ function emitTrace(
     // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
     // query, a self-span with no children — gets a bare arrow instead.
     const inner: string[] = [];
-    for (const child of childrenOf(span.spanId)) walk(child, inner);
+    for (const child of childrenOf(span.spanId)) walk(child, inner, p);
 
     if (!crossing && !selfCustom) {
       out.push(...inner);

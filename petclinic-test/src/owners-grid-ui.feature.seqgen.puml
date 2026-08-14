@@ -1,6 +1,6 @@
 @startuml
 ' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-' Drawn from real Tempo traces of src/owner-search.feature, for the scenarios tagged
+' Drawn from real Tempo traces of src/owners-grid-ui.feature, for the scenarios tagged
 ' @generate_sequence. Change the test, not this file, then regenerate with
 ' petclinic-test/run-tests-with-tracing.sh
 '
@@ -13,19 +13,19 @@
 '     npm run diagram:full    # + bound parameter values + JSON payloads
 '     SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram
 hide footbox
-title src/owner-search.feature
+title src/owners-grid-ui.feature
 footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== The default view is the first ten owners, ordered by name ==
+== Sorting by city is answered by the server, one page at a time ==
 Browser -> Backend: GET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith
 activate Backend
 Backend -> Backend: Hibernate Query
 activate Backend
-Backend -> DB: SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, (select count(*) from pets …\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only
+Backend -> DB: SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, (select count(*) from pets …\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.city, o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only
 deactivate Backend
 Backend -> Backend: Hibernate Query
 activate Backend

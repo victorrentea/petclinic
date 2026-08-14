@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -124,7 +125,8 @@ class CreateVisitShould {
         @Test
         void theTimeHasAlreadyPassedToday() {
             givenThePetExists();
-            // today is an allowed date, but midnight has passed at every moment of the day
+            // today is an allowed date, but midnight is in the past for the whole of it
+            // (bar the first nanosecond, which no test run will ever land on)
             assertThatThrownBy(
                     () -> petClinicMcp.createVisit(PET_ID, LocalDate.now(), LocalTime.MIDNIGHT, "Vaccination"))
                     .hasMessageContaining("Visit time must be in the future");
@@ -158,12 +160,13 @@ class CreateVisitShould {
         void saveTheVisitAsDescribed() {
             petClinicMcp.createVisit(PET_ID, nextWeek, morning, "Vaccination");
 
-            verify(visitRepository).save(any(Visit.class));
-            assertThat(rex.getVisits()).singleElement().satisfies(visit -> {
-                assertThat(visit.getDate()).isEqualTo(nextWeek);
-                assertThat(visit.getTime()).isEqualTo(morning);
-                assertThat(visit.getDescription()).isEqualTo("Vaccination");
-            });
+            // Captured rather than read back off the pet: the name claims the visit
+            // *handed to save* is the one described, so that is what gets asserted.
+            ArgumentCaptor<Visit> saved = ArgumentCaptor.forClass(Visit.class);
+            verify(visitRepository).save(saved.capture());
+            assertThat(saved.getValue().getDate()).isEqualTo(nextWeek);
+            assertThat(saved.getValue().getTime()).isEqualTo(morning);
+            assertThat(saved.getValue().getDescription()).isEqualTo("Vaccination");
         }
 
         @Test

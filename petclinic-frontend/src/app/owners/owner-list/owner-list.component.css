@@ -1,24 +1,13 @@
-#ownersByLastName
-{
-display:none;
-}
-
-#nameGroup {
+/* Everything the list is operated with, on one bar flush with the container's
+  left edge: the search field (a third of the width — last names are short),
+  both actions, then the paging controls at the far right. Paging sits above the
+  table so "page 1 of many" is readable without scrolling past a full page. */
+.owners-search-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-}
-
-#addressGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .owner-search-label {
@@ -27,53 +16,104 @@ display:none;
   min-width: 60px;
 }
 
-.owner-search-input {
-  flex: 1;
+.owners-search-bar .owner-search-input {
+  flex: 0 1 33%;
+  min-width: 160px;
 }
 
-.owners-controls {
-  display: flex;
+.owners-search-bar mat-paginator {
+  margin-left: auto;
+  background: transparent;
+}
+
+/* the paginator ships with vertical padding meant for a footer strip */
+:host ::ng-deep .owners-search-bar .mat-mdc-paginator-container {
+  min-height: 40px;
+  padding-right: 0;
+}
+
+/* Fixed layout, explicit widths: without it the browser sizes each column to the
+  content of the page currently shown, so re-sorting City shifts every column
+  sideways — the row you were reading moves while you look at it. */
+#ownersTable table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable th:nth-child(1), #ownersTable td:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2), #ownersTable td:nth-child(2) { width: 28%; }
+#ownersTable th:nth-child(3), #ownersTable td:nth-child(3) { width: 18%; }
+#ownersTable th:nth-child(4), #ownersTable td:nth-child(4) { width: 16%; }
+#ownersTable th:nth-child(5), #ownersTable td:nth-child(5) { width: 16%; }
+
+/* fixed widths mean long values must wrap rather than push the column — headers
+  included: "Telephone" in a 16% column has nowhere to go on a narrow viewport */
+#ownersTable th,
+#ownersTable td {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* The count pill sat ~1.3px below the optical centre of the pet names beside it:
+  `vertical-align: middle` centres the pill's *box* on the line box, and a line
+  box carries descender space no digit uses. Flex centring puts the digit dead
+  centre of the pill, and the -1px lifts the pill onto the text's ink centre —
+  measured, not guessed: it takes glyph-centre disagreement to under 0.1px.
+  The fixed height and min-width keep the pill identical from 1 to 4 digits. */
+.ownerPets .badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 24px;
+  height: 20px;
+  /* asymmetric on purpose: centring the digit's *line box* leaves its ink 1.25px
+    high, because the box reserves descender space no digit uses */
+  padding: 2.5px 7px 0;
+  line-height: 1;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
 }
 
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.ownerPetNames {
+  vertical-align: middle;
+  margin-left: 4px;
 }
 
-.owners-page-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Material hides a sort arrow until you hover the header, so a sortable column is
+  indistinguishable from a fixed one until the mouse happens to pass over it.
+  Show every arrow permanently. The arrow parts are painted with currentColor,
+  so `color` is the whole story: grey = sortable but not sorted, bright white =
+  the column actually sorted. !important is what beats the inline opacity
+  Material's own animation writes on the element. */
+:host ::ng-deep .mat-sort-header-arrow {
+  opacity: 0.8 !important;
+  transform: translateY(0) !important;
+  color: #9aa0a6;
 }
 
-.owners-page-size .form-control {
-  width: auto;
+/* The sorted column, and the one under the cursor, get the bright arrow. The
+  header strip is dark (petclinic.css: .table > thead > tr > th is #3c3834), so
+  white reads as "this one" and the grey above as "you could click me". */
+:host ::ng-deep th[aria-sort='ascending'] .mat-sort-header-arrow,
+:host ::ng-deep th[aria-sort='descending'] .mat-sort-header-arrow,
+:host ::ng-deep .mat-sort-header:hover .mat-sort-header-arrow {
+  opacity: 1 !important;
+  color: #ffffff;
+}
+
+:host ::ng-deep th[aria-sort='ascending'] .mat-sort-header-content,
+:host ::ng-deep th[aria-sort='descending'] .mat-sort-header-content {
+  font-weight: 700;
 }
 
 @media (max-width: 576px) {
-  #nameGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .owners-search-bar .owner-search-input {
+    flex: 1 1 100%;
   }
 
-  #addressGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .owner-search-input {
-    width: 100%;
-  }
-
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
+  .owners-search-bar mat-paginator {
+    margin-left: 0;
   }
 }
