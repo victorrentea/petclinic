@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
@@ -50,6 +51,7 @@ public class Pet {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    @BatchSize(size = 20)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
     private Set<Visit> visits = new HashSet<>();
 

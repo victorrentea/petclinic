@@ -7,11 +7,13 @@
 
     "playwright": {
       "//": "In case MCPs are disabled, tell agent to use playwright cli",
+      "//image-responses": "omit: screenshots land in --output-dir, never in the agent's context (tokens)",
       "command": "npx",
       "args": [
         "@playwright/mcp@latest",
         "--output-dir", "petclinic-test/.playwright-mcp",
-        "--save-session"
+        "--save-session",
+        "--image-responses", "omit"
       ]
     },
 

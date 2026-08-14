@@ -15,6 +15,7 @@ public interface OwnerMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "pets", ignore = true)
+    @Mapping(target = "petCount", ignore = true) // derived by the database, never written
     Owner toOwner(OwnerFieldsDto ownerDto);
 
     List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection);

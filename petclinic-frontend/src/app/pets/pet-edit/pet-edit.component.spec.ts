@@ -18,7 +18,7 @@ import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import {PetType} from '../../pettypes/pettype';
 import Spy = jasmine.Spy;
 
-const testOwner2: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+const testOwner2: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', petCount: 0, pets: [] };
 
 class OwnerServiceStub {
   getOwnerById(): Observable<any> {
@@ -80,6 +80,7 @@ describe('PetEditComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
+        petCount: 0,
         pets: null
       },
       visits: null

@@ -1,5 +1,6 @@
 import {test, expect} from './support/trace-fixture';
 import axios from 'axios';
+import {API_BASE, anOwnerWhosePetsMatch} from './support/api-client';
 
 // Issue #40: the visit date must be restricted to [pet birth date .. 1 year from now],
 // on the frontend form *and* on the API.
@@ -8,8 +9,6 @@ import axios from 'axios';
 // list against the API, so a row appearing mid-run would break it. The happy paths
 // (in-range dates being accepted) are covered by VisitTest on the backend, where each
 // case runs in its own rolled-back transaction.
-
-const API_BASE = process.env.API_BASE_URL || 'http://127.0.0.1:8080/api';
 
 const ABSURD_DATE = '0009-07-20';
 
@@ -21,14 +20,8 @@ interface PetUnderTest {
 }
 
 async function anyPetWithAKnownBirthDate(): Promise<PetUnderTest> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  for (const owner of owners) {
-    const pet = (owner.pets ?? []).find((p: any) => p.birthDate);
-    if (pet) {
-      return {ownerId: owner.id, petId: pet.id, petName: pet.name, birthDate: pet.birthDate};
-    }
-  }
-  throw new Error('No pet with a birth date found; cannot exercise visit-date validation');
+  const {owner, pet} = await anOwnerWhosePetsMatch((p) => !!p.birthDate);
+  return {ownerId: owner.id, petId: pet.id, petName: pet.name, birthDate: pet.birthDate!};
 }
 
 function todayPlusDays(days: number): string {

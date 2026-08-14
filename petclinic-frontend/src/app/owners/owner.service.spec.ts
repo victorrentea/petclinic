@@ -1,12 +1,13 @@
 import {
   HttpClientTestingModule,
   HttpTestingController,
+  TestRequest,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { HttpResponse } from '@angular/common/http';
 
 import { HttpErrorHandler } from '../error.service';
-import { OwnerService } from './owner.service';
+import { OwnerPage, OwnerQuery, OwnerService } from './owner.service';
 import { Owner } from './owner';
 
 describe('OwnerService', () => {
@@ -21,6 +22,7 @@ describe('OwnerService', () => {
       address: '110 W. Liberty St.',
       city: 'Madison',
       telephone: '6085551023',
+      petCount: 0,
       pets: []
     },
     {
@@ -30,9 +32,30 @@ describe('OwnerService', () => {
       address: '638 Cardinal Ave.',
       city: 'Sun Prairie',
       telephone: '6085551749',
+      petCount: 0,
       pets: []
     }
   ];
+
+  const defaultQuery: OwnerQuery = {lastName: '', page: 0, size: 10, sort: 'name,asc'};
+
+  const expectedPage: OwnerPage = {
+    content: expectedOwners,
+    totalElements: 2,
+    number: 0,
+    size: 10
+  };
+
+  function expectListRequest(query: OwnerQuery): TestRequest {
+    const req = httpTestingController.expectOne(
+      request => request.url === ownerService.entityUrl);
+    expect(req.request.method).toEqual('GET');
+    expect(req.request.params.get('lastName')).toEqual(query.lastName);
+    expect(req.request.params.get('page')).toEqual(String(query.page));
+    expect(req.request.params.get('size')).toEqual(String(query.size));
+    expect(req.request.params.get('sort')).toEqual(query.sort);
+    return req;
+  }
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -48,14 +71,32 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  it('should return the requested page of owners', () => {
+    let received: OwnerPage;
+    ownerService.getOwners(defaultQuery).subscribe(page => received = page, fail);
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expectListRequest(defaultQuery).flush(expectedPage);
+
+    expect(received).toEqual(expectedPage);
+  });
+
+  it('sends the whole view state as query parameters', () => {
+    const query: OwnerQuery = {lastName: 'Fr', page: 2, size: 20, sort: 'city,desc'};
+    ownerService.getOwners(query).subscribe();
+
+    expectListRequest(query).flush(expectedPage);
+  });
+
+  it('propagates a failure instead of masking it as an empty page', () => {
+    let failure: unknown = null;
+    ownerService.getOwners(defaultQuery).subscribe(
+      () => fail('the list call must not swallow the error'),
+      error => failure = error);
+
+    httpTestingController.expectOne(request => request.url === ownerService.entityUrl)
+      .flush('boom', {status: 500, statusText: 'Server Error'});
+
+    expect(failure).toBeTruthy();
   });
 
   it('search the owner by id', () => {
@@ -76,6 +117,7 @@ describe('OwnerService', () => {
       address: '110 W. Church St.',
       city: 'Madison',
       telephone: '6085551023',
+      petCount: 0,
       pets: []
     };
 
@@ -103,6 +145,7 @@ describe('OwnerService', () => {
       address: '110 W. Church St.',
       city: 'Madison',
       telephone: '6085551023',
+      petCount: 0,
       pets: []
     };
 
@@ -129,17 +172,5 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('DELETE');
     expect(req.request.body).toEqual(null);
     req.flush(null);
-  });
-
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
   });
 });

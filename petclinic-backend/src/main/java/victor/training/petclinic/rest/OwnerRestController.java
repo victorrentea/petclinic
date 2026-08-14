@@ -2,7 +2,13 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,9 +22,11 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.UnsortableColumnException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +42,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,15 +66,70 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    /** Public sort names, deliberately decoupled from entity fields: "name" is two properties. */
+    private static final Map<String, String[]> SORTABLE_COLUMNS = Map.of(
+            "name", new String[]{"lastName", "firstName"},
+            "city", new String[]{"city"},
+            "petCount", new String[]{"petCount"});
+
+    /** Largest supported size wins for anything in between; nothing else bounds the payload. */
+    private static final List<Integer> SUPPORTED_PAGE_SIZES = List.of(5, 10, 20);
+
+    /** Appended to every ordering so it is total, and paging visits each owner exactly once. */
+    private static final Sort TIEBREAKER = Sort.by("lastName", "firstName", "id");
+
+    @Operation(operationId = "listOwners", summary = "List owners, paginated and sorted",
+            description = "Returns one page of owners whose last name starts with the given prefix. "
+                    + "Sortable columns: name (last then first), city, petCount - each asc or desc. "
+                    + "Page size is clamped into {5, 10, 20}; a page past the end is empty, "
+                    + "not an error; an unsortable column is rejected with 400.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @ApiResponse(responseCode = "400", description = "Sort column or direction not supported",
+            content = @Content(mediaType = "*/*", schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        PageRequest pageRequest = PageRequest.of(Math.max(page, 0), clampToSupportedSize(size), sortBy(sort));
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageRequest);
+        return new OwnerPageDto()
+                .setContent(ownerMapper.toOwnerDtoCollection(owners.getContent()))
+                .setTotalElements(owners.getTotalElements())
+                .setNumber(owners.getNumber())
+                .setSize(owners.getSize());
+    }
+
+    /**
+     * Translates a public "field,direction" instruction into an ordering, rejecting anything
+     * outside the allowlist before a property name can reach the query, and appending the
+     * tiebreaker - so the whole ordering rule is readable in one place.
+     */
+    private Sort sortBy(String sortInstruction) {
+        String[] fieldAndDirection = sortInstruction.split(",", 2);
+        String field = fieldAndDirection[0];
+        String[] properties = SORTABLE_COLUMNS.get(field);
+        if (properties == null) {
+            throw new UnsortableColumnException(field, SORTABLE_COLUMNS.keySet());
+        }
+        Direction direction = fieldAndDirection.length == 1
+                ? Direction.ASC
+                : Direction.fromOptionalString(fieldAndDirection[1])
+                        .orElseThrow(() -> new UnsortableColumnException(
+                                fieldAndDirection[1], SORTABLE_COLUMNS.keySet()));
+        return Sort.by(direction, properties).and(TIEBREAKER);
+    }
+
+    /** Largest supported size not exceeding the request; below the smallest, the smallest. */
+    private int clampToSupportedSize(int requestedSize) {
+        return SUPPORTED_PAGE_SIZES.stream()
+                .filter(supported -> supported <= requestedSize)
+                .max(Integer::compare)
+                .orElse(SUPPORTED_PAGE_SIZES.get(0));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

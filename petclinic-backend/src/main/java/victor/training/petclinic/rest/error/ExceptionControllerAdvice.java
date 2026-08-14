@@ -75,9 +75,10 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.badRequest().body(pd);
     }
 
-    @ExceptionHandler(VisitDateOutOfRangeException.class)
+    /** Rules stated by the domain rather than by bean validation; the message is already user-facing. */
+    @ExceptionHandler({VisitDateOutOfRangeException.class, UnsortableColumnException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ProblemDetail> handleVisitDateOutOfRange(VisitDateOutOfRangeException ex,
+    public ResponseEntity<ProblemDetail> handleRequestRuleViolation(RuntimeException ex,
             HttpServletRequest request) {
         log.warn(VALIDATION_FAILED_LOG, ex.getMessage());
         ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR_TITLE,

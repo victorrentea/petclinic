@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Formula;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -56,6 +58,20 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    /**
+     * Derived, never written: makes Sort.by("petCount") reach the database as a correlated
+     * subquery, so one repository method serves all sortable columns (D3), and supplies the
+     * count the grid displays without loading the pets.
+     */
+    @Formula("(select count(*) from pets p where p.owner_id = id)")
+    private int petCount;
+
+    /**
+     * Batched, never fetch-joined: a fetch join combined with a Pageable silently moves
+     * pagination into memory (HHH000104) - the exact failure this design prevents (D4).
+     * Sized to the largest supported page size, so a full page costs one extra query.
+     */
+    @BatchSize(size = 20)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
     private Set<Pet> pets = new HashSet<>();
 

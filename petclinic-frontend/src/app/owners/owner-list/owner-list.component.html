@@ -2,36 +2,58 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
+    <!-- One bar, flush with the left edge: search, both actions, and the paging
+        controls. Paging lives above the table so "page 1 of many" is readable
+        without scrolling past a full page of owners. -->
+    <form method="get" id="search-owner-form" class="owners-search-bar">
+      <label class="owner-search-label" for="lastName">Last name</label>
+      <input class="form-control owner-search-input"
+        maxlength="80" id="lastName" name="lastName" [(ngModel)]="searchTerm" value=""/>
 
+      <button type="submit" class="btn btn-default" (click)="searchByLastName(searchTerm)">Find Owner</button>
+      <button type="button" class="btn btn-default" id="addOwner" (click)="addOwner()">Add Owner</button>
+
+      <mat-paginator *ngIf="!loadFailed"
+        data-testid="owners-paginator"
+        [length]="totalElements"
+        [pageIndex]="view.page"
+        [pageSize]="view.size"
+        [pageSizeOptions]="pageSizeOptions"
+        (page)="onPageChange($event)">
+      </mat-paginator>
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="loadFailed" class="alert alert-danger" id="ownersError" data-testid="owners-error">
+      The owner list could not be loaded. Please retry in a moment.
+    </div>
+
+    <div *ngIf="noSearchMatches" class="alert alert-warning" data-testid="owners-no-matches">
+      No owners with a last name starting with "{{ view.lastName }}".
+    </div>
+
+    <div *ngIf="noOwnersAtAll" class="alert alert-info" data-testid="owners-empty">
+      There are no owners yet.
+    </div>
+
+    <div *ngIf="pageIsPastTheEnd" class="alert alert-warning" data-testid="owners-page-empty">
+      This page is empty - only {{ totalElements }} owner(s) match.
+      <a href="" data-testid="owners-first-page" (click)="goToFirstPage(); $event.preventDefault()">Back to page 1</a>
+    </div>
+
+    <div class="table-responsive" id="ownersTable" *ngIf="hasResults">
+      <table class="table table-striped"
+        matSort
+        matSortDisableClear
+        [matSortActive]="sortActive"
+        [matSortDirection]="sortDirection"
+        (matSortChange)="onSortChange($event)">
         <thead>
         <tr>
-          <th>Name</th>
+          <th mat-sort-header="name" data-testid="sort-name">Name</th>
           <th>Address</th>
-          <th>City</th>
+          <th mat-sort-header="city" data-testid="sort-city">City</th>
           <th>Telephone</th>
-          <th>Pets</th>
+          <th mat-sort-header="petCount" data-testid="sort-petCount">Pets</th>
         </tr>
         </thead>
 
@@ -42,17 +64,14 @@
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
-          <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+          <td class="ownerPets">
+            <span class="badge" data-testid="pet-count">{{ owner.petCount }}</span>
+            <span class="ownerPetNames" *ngIf="owner.petCount > 0"> {{ petNames(owner) }}</span>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
     </div>
+
   </div>
 </div>

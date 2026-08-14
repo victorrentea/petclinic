@@ -5,6 +5,18 @@ import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+import { components, operations } from '../generated/api-types';
+
+/**
+ * The view state of the owners grid, and exactly what the list endpoint accepts - taken from
+ * the generated contract, so a new query parameter cannot leave this type silently stale.
+ * `sort` is `<field>,<asc|desc>` with field in name | city | petCount.
+ */
+export type OwnerQuery = Required<NonNullable<operations['listOwners']['parameters']['query']>>;
+
+export type OwnerPage = Omit<components['schemas']['OwnerPageDto'], 'content'> & {
+  content: Owner[];
+};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +31,12 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
-    return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+  /**
+   * Deliberately without catchError: the grid must tell a failed request apart from an empty
+   * result, which is impossible once a failure is masked as an empty page.
+   */
+  getOwners(query: OwnerQuery): Observable<OwnerPage> {
+    return this.http.get<OwnerPage>(this.entityUrl, { params: { ...query } });
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +62,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

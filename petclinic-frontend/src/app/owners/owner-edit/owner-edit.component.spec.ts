@@ -79,7 +79,7 @@ describe('OwnerEditComponent', () => {
   }));
 
   it('should submit owner and navigate to owner detail', () => {
-    const owner: Owner = { id: 42, firstName: 'Updated', lastName: 'Name', address: '1 St', city: 'City', telephone: '1234567890', pets: [] };
+    const owner: Owner = { id: 42, firstName: 'Updated', lastName: 'Name', address: '1 St', city: 'City', telephone: '1234567890', petCount: 0, pets: [] };
     component.onSubmit(owner);
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 42]);
   });

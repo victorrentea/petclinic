@@ -17,7 +17,7 @@ import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
 
-const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', petCount: 0, pets: [] };
 
 class VisitServiceStub {
   getVisitById(visitId: string): Observable<Visit> {
@@ -80,6 +80,7 @@ describe('VisitEditComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
+        petCount: 0,
         pets: null
       },
       visits: null

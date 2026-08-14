@@ -58,6 +58,7 @@ describe('VisitListComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
+        petCount: 0,
         pets: null
       },
       visits: null

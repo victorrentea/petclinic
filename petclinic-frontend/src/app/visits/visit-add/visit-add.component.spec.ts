@@ -26,7 +26,7 @@ class PetServiceStub {
   }
 }
 
-const visitOwner: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+const visitOwner: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', petCount: 0, pets: [] };
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
@@ -80,6 +80,7 @@ describe('VisitAddComponent', () => {
         address: '110 W. Liberty St.',
         city: 'Madison',
         telephone: '6085551023',
+        petCount: 0,
         pets: null
       },
       visits: null

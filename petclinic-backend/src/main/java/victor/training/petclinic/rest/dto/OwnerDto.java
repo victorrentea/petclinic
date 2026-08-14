@@ -45,6 +45,12 @@ public class OwnerDto {
     @Schema(example = "\"6085551023\"", description = "The telephone number of the pet owner.")
     private String telephone;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2",
+            description = "How many pets this owner has. Derived server-side, so a listing can "
+                    + "sort and display the count without loading the pets.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private int petCount;
+
     @Valid
     @Schema(accessMode = Schema.AccessMode.READ_ONLY,
             description = "The pets owned by this individual including any booked vet visits.",

@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners, paginated and sorted
+     * @description Returns one page of owners whose last name starts with the given prefix. Sortable columns: name (last then first), city, petCount - each asc or desc. Page size is clamped into {5, 10, 20}; a page past the end is empty, not an error; an unsortable column is rejected with 400.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -135,6 +138,12 @@ export interface components {
        * @example Franklin
        */
       lastName: string;
+      /**
+       * Format: int32
+       * @description How many pets this owner has. Derived server-side, so a listing can sort and display the count without loading the pets.
+       * @example 2
+       */
+      petCount: number;
       /** @description The pets owned by this individual including any booked vet visits. */
       pets: readonly components["schemas"]["PetDto"][];
       /**
@@ -169,6 +178,29 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, together with the total number of matching owners. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based index of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description Number of owners per page.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description Total number of owners matching the filter, across all pages.
+       * @example 10000
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,21 +585,27 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners, paginated and sorted
+   * @description Returns one page of owners whose last name starts with the given prefix. Sortable columns: name (last then first), city, petCount - each asc or desc. Page size is clamped into {5, 10, 20}; a page past the end is empty, not an error; an unsortable column is rejected with 400.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Sort column or direction not supported */
       400: {
         content: {
           "*/*": components["schemas"]["ProblemDetail"];

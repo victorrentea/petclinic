@@ -187,6 +187,10 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "Returns one page of owners whose last name starts with the given\
+        \ prefix. Sortable columns: name (last then first), city, petCount - each\
+        \ asc or desc. Page size is clamped into {5, 10, 20}; a page past the end\
+        \ is empty, not an error; an unsortable column is rejected with 400."
       operationId: listOwners
       parameters:
       - in: query
@@ -195,6 +199,26 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "name,asc"
       responses:
         "200":
           content:
@@ -203,39 +227,43 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      petCount: 1
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      petCount: 0
+                      pets: []
+                    totalElements: 2
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-          description: Bad Request
+          description: Sort column or direction not supported
         "404":
           content:
             '*/*':
@@ -248,7 +276,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: "List owners, paginated and sorted"
       tags:
       - owner-rest-controller
     post:
@@ -1623,6 +1651,13 @@ components:
           example: Franklin
           maxLength: 30
           minLength: 1
+        petCount:
+          type: integer
+          format: int32
+          description: "How many pets this owner has. Derived server-side, so a listing\
+            \ can sort and display the count without loading the pets."
+          example: 2
+          readOnly: true
         pets:
           type: array
           description: The pets owned by this individual including any booked vet
@@ -1642,6 +1677,7 @@ components:
       - city
       - firstName
       - lastName
+      - petCount
       - pets
       - telephone
     OwnerFieldsDto:
@@ -1684,6 +1720,36 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      description: "One page of owners, together with the total number of matching\
+        \ owners."
+      properties:
+        content:
+          type: array
+          description: The owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: Zero-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Number of owners per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "Total number of owners matching the filter, across all pages."
+          example: 10000
+      required:
+      - content
+      - number
+      - size
+      - totalElements
     PetDto:
       type: object
       properties:

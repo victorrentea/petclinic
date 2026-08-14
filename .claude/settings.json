@@ -9,7 +9,8 @@
   "permissions": {
     "deny": [
       "Bash(git commit --no-verify*)",
-      "Bash(git push --no-verify*)"
+      "Bash(git push --no-verify*)",
+      "mcp__playwright__browser_take_screenshot"
     ],
     "ask": [
       "Edit(.claude/settings.json)"

@@ -11,7 +11,7 @@ describe('VisitService', () => {
   let visitService: VisitService;
   const baseUrl = 'http://localhost:8080/api/visits';
 
-  const owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
+  const owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', petCount: 0, pets: [] };
   const pet = { id: 1, name: 'Leo', birthDate: '2010-09-07', type: { id: 1, name: 'cat' }, ownerId: 1, visits: [], owner };
   const expectedVisits: Visit[] = [
     { id: 1, date: '2013-01-01', description: 'rabies shot', pet }

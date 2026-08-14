@@ -93,6 +93,23 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
   `V1`, sample data in `V3__sample_data.sql`). An empty DB before that is normal, not broken.
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly
+- **Sort order is pinned in the schema, not inherited from the server.** A migration sets
+  `COLLATE "ro-x-icu"` on `owners.last_name`, `first_name` and `city`. The database otherwise
+  collates as `C` (raw bytes), which exiles every `Ș`/`Ț` surname — and anything typed in
+  lowercase — **after Z**; name-ascending is the default sort, so that is the first screen every
+  user sees. The collation sits on the **columns**, deliberately: every `ORDER BY` inherits it with
+  zero Java changes, and dev/CI/production cannot disagree. Changing the *database* default was
+  rejected — it is not expressible as a Flyway migration against an existing database and does not
+  travel with the schema, producing a bug class that passes CI and fails in production.
+- **The owners grid's sorts are indexed, and the indexes must match the tiebreaker.** `V10` adds
+  `(last_name, first_name, id)` and `(city, last_name, first_name, id)` — each ending in the full
+  tiebreaker, because an index only removes the sort node if it covers the *whole* ORDER BY. They
+  inherit `ro-x-icu` from the columns, so they match what the app emits. Plus
+  `(last_name text_pattern_ops)`: the search is `LIKE 'prefix%'`, which an ICU-collated btree
+  cannot serve, and this is what keeps the COUNT off a sequential scan. Verified at 10,000 rows:
+  Seq Scan + top-N heapsort (97 buffers) → Index Scan (9 buffers). There is deliberately **no**
+  index for `sort=petCount` — it orders by a correlated subquery (`Owner.petCount` is an
+  `@Formula`), so no index on `owners` can support it; that sort still scans the table.
 
 ### Security
 - Disabled by default
@@ -135,6 +152,13 @@ Core entities and relationships:
 The business is growing fast. Size every design for these, not for the ~28 sample rows:
 - **Owners: 10,000 within a few months** (as of 2026-08). Any owner listing/search must sort and
   paginate **server-side** — never fetch-all-then-slice-in-the-browser.
+- **Paging is positional, and its drift under concurrent inserts is known and accepted — do not
+  "fix" it.** If someone registers an owner that sorts before the page you are on while you page
+  forward, you may see an owner twice or miss one. Removing that requires keyset/cursor paging,
+  which cannot jump to a page, cannot report a total count and has no addressable page links —
+  all three are requirements of the owners grid. Every sort does carry a hidden tiebreaker
+  (last name, first name, id) so that paging an *unchanged* result set visits every owner exactly
+  once; that is a different problem, and it is solved.
 
 ## Task Modifiers
 - Whenever the topic is **sorting, pagination or search**, ask to look at the **real data first**

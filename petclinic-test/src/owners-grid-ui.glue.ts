@@ -1,6 +1,7 @@
 import {DataTable, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import {PlaywrightWorld} from './support/world';
+import {OWNERS_HEADER, listedOwners} from './support/owners-grid';
 
 // The steps owner-search.glue.ts already defines (the Background, opening the page,
 // the ordered-rows assertion, the pager) are registered globally by Cucumber, so
@@ -26,24 +27,24 @@ let notedGeometry: ColumnGeometry | undefined;
  * lib is ES2022, no DOM) even though the code runs in the page, hence the casts.
  */
 async function columnGeometry(world: PlaywrightWorld): Promise<ColumnGeometry> {
-  return world.page.evaluate(() => {
-    const headers: any[] = [...(globalThis as any).document.querySelectorAll('#ownersTable th')];
+  return world.page.evaluate((selector: string) => {
+    const headers: any[] = [...(globalThis as any).document.querySelectorAll(selector)];
     return {
       lefts: headers.map((th) => Math.round(th.getBoundingClientRect().left)),
       widths: headers.map((th) => Math.round(th.getBoundingClientRect().width)),
     };
-  });
+  }, OWNERS_HEADER);
 }
 
 When('I sort the grid by {string}', async function (this: PlaywrightWorld, column: string) {
-  const rowsBefore = await this.page.locator('#ownersTable td.ownerFullName').allTextContents();
+  const rowsBefore = await listedOwners(this.page)();
 
   await this.page.locator(`[data-testid="sort-${column}"]`).click();
 
   // The click is answered by a round-trip, so the assertion that follows must not
   // read the page the old rows are still on.
   await expect
-      .poll(() => this.page.locator('#ownersTable td.ownerFullName').allTextContents(), {timeout: 10_000})
+      .poll(listedOwners(this.page), {timeout: 10_000})
       .not.toEqual(rowsBefore);
 });
 
@@ -69,8 +70,8 @@ Then('the arrow of the sorted column is the most prominent one', async function 
 
   // Material marks an unsorted-but-sortable header aria-sort="none" rather than
   // leaving the attribute off, so "resting" is that value, not its absence.
-  const sorted = await opacityOf('#ownersTable th[aria-sort]:not([aria-sort="none"]) .mat-sort-header-arrow');
-  const resting = await opacityOf('#ownersTable th[aria-sort="none"] .mat-sort-header-arrow >> nth=0');
+  const sorted = await opacityOf(`${OWNERS_HEADER}[aria-sort]:not([aria-sort="none"]) .mat-sort-header-arrow`);
+  const resting = await opacityOf(`${OWNERS_HEADER}[aria-sort="none"] .mat-sort-header-arrow >> nth=0`);
 
   expect(sorted).toBeGreaterThan(resting);
 });
