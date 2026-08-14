@@ -123,39 +123,55 @@ function emitTrace(spans: NormSpan[], lines: string[], present: Set<string>): vo
   for (const root of roots) walk(root);
 }
 
-export function renderPuml(title: string, traces: NormSpan[][]): string {
-  // A trace can carry spans yet draw nothing — a lone browser `click`, say.
-  // Render each trace in isolation first and keep only the ones with content,
-  // so no empty `== title #n ==` section survives to skew the numbering (or the
-  // participant list).
-  const present = new Set<string>();
-  const sections: string[][] = [];
-  for (const spans of traces) {
-    const lines: string[] = [];
-    const drawn = new Set<string>();
-    emitTrace(spans, lines, drawn);
-    if (lines.length === 0) continue;
-    drawn.forEach((p) => present.add(p));
-    sections.push(lines);
-  }
+/** One tagged test, with every trace its interactions produced. */
+export interface DiagramScenario {
+  title: string;
+  traces: NormSpan[][];
+}
 
-  const body: string[] = [];
-  sections.forEach((lines, i) => {
-    if (sections.length > 1) body.push(`== ${title} #${i + 1} ==`);
-    body.push(...lines);
-  });
+export function renderPuml(title: string, scenarios: DiagramScenario[]): string {
+  // A trace can carry spans yet draw nothing — a lone browser `click`, say. Render
+  // each in isolation and keep only what has content, so an empty trace cannot
+  // pad a section, and a scenario left with nothing cannot leave a bare header.
+  const present = new Set<string>();
+  const sections: DiagramSection[] = [];
+  for (const scenario of scenarios) {
+    const lines: string[] = [];
+    for (const spans of scenario.traces) {
+      const traceLines: string[] = [];
+      const drawn = new Set<string>();
+      emitTrace(spans, traceLines, drawn);
+      if (traceLines.length === 0) continue;
+      drawn.forEach((p) => present.add(p));
+      lines.push(...traceLines);
+    }
+    if (lines.length === 0) continue;
+    sections.push({title: scenario.title, lines});
+  }
 
   const header = [
     '@startuml',
+    // ' starts a PlantUML comment: this warning is for whoever opens the file,
+    // it never reaches the rendered diagram.
+    `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
+    `' Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
+    `' @generate_sequence. Change the test, not this file, then regenerate with`,
+    `' petclinic-test/run-tests-with-tracing.sh`,
     'hide footbox',
     `title ${title}`,
     // footer (bottom of every page) states the diagram's provenance
-    'footer @generate_sequence Scenario in a .feature test',
+    'footer @generate_sequence — generated from real traces, do not edit',
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
+  const body = sections.flatMap((s) => [`== ${s.title} ==`, ...s.lines]);
   return [...header, ...body, '@enduml', ''].join('\n');
 }
 
+interface DiagramSection {
+  title: string;
+  lines: string[];
+}
+
 export function spansToPuml(spans: NormSpan[], title: string): string {
-  return renderPuml(title, [spans]);
+  return renderPuml(title, [{title, traces: [spans]}]);
 }

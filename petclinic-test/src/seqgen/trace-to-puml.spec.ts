@@ -54,26 +54,44 @@ test('spansToPuml nests a self-span\'s DB call inside the self-span activation',
 test('spansToPuml footers the diagram with its provenance', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
   // a PlantUML footer renders at the very bottom — provenance, not diagram content
-  expect(puml).toContain('footer @generate_sequence Scenario in a .feature test');
+  expect(puml).toContain('footer @generate_sequence');
   // the title stays a clean single line, no subtitle, no note, no caption
   expect(puml).toContain('\ntitle add a visit\n');
   expect(puml).not.toContain('note across');
   expect(puml).not.toContain('caption');
 });
 
-// The browser emits standalone spans (a lone `click`, say) that draw no arrow
-// at all. Such a trace used to still get a `== title #n ==` header, leaving an
-// empty section — and inflating the numbering of the sections that do exist.
+const lonelyClick: NormSpan[] = [{
+  traceId: 't2', spanId: 'c1', parentSpanId: '', name: 'click',
+  kind: 'INTERNAL', serviceName: 'petclinic-frontend', startNano: 1, attributes: {},
+}];
+
+// One diagram per source file, one section per scenario in it — a scenario's
+// several traces (each browser interaction opens its own) run together inside
+// its section, because the reader thinks in scenarios, not in traces.
+test('renderPuml titles by source file and sections by scenario', () => {
+  const puml = renderPuml('add-visit.spec.ts', [
+    {title: 'Add a visit', traces: [parseTempoTrace(fixture)]},
+    {title: 'Cancel a visit', traces: [parseTempoTrace(fixture)]},
+  ]);
+
+  expect(puml).toContain('\ntitle add-visit.spec.ts\n');
+  expect(puml).toContain('== Add a visit ==');
+  expect(puml).toContain('== Cancel a visit ==');
+  // participants are declared once for the whole file, not per section
+  expect(puml.match(/^participant Browser$/gm)).toHaveLength(1);
+});
+
+// The browser emits standalone spans (a lone `click`, say) that draw no arrow at
+// all. Those traces must vanish inside their scenario, and a scenario left with
+// nothing to draw must not leave an empty section behind.
 test('renderPuml drops traces that would draw nothing', () => {
-  const drawable = parseTempoTrace(fixture);
-  const lonelyClick: NormSpan[] = [{
-    traceId: 't2', spanId: 'c1', parentSpanId: '', name: 'click',
-    kind: 'INTERNAL', serviceName: 'petclinic-frontend', startNano: 1, attributes: {},
-  }];
+  const puml = renderPuml('add-visit.spec.ts', [
+    {title: 'Add a visit', traces: [lonelyClick, parseTempoTrace(fixture)]},
+    {title: 'Clicked around', traces: [lonelyClick]},
+  ]);
 
-  const puml = renderPuml('add a visit', [lonelyClick, drawable]);
-
-  expect(puml).not.toContain('#2');
-  expect(puml).not.toContain('== add a visit');
+  expect(puml).toContain('== Add a visit ==');
+  expect(puml).not.toContain('== Clicked around ==');
   expect(puml).toContain('Browser -> Backend: POST /api/visits');
 });

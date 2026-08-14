@@ -1,11 +1,15 @@
 @startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+' Drawn from real Tempo traces of src/add-visit.spec.ts, for the scenarios tagged
+' @generate_sequence. Change the test, not this file, then regenerate with
+' petclinic-test/run-tests-with-tracing.sh
 hide footbox
-title Add a visit to an existing pet from the owner detail page
-footer @generate_sequence Scenario in a .feature test
+title src/add-visit.spec.ts
+footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== Add a visit to an existing pet from the owner detail page #1 ==
+== Add a visit to an existing pet from the owner detail page ==
 Browser -> Backend: GET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
@@ -31,7 +35,6 @@ activate DB
 deactivate DB
 Backend --> Browser: 200
 deactivate Backend
-== Add a visit to an existing pet from the owner detail page #2 ==
 Browser -> Backend: GET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
@@ -54,7 +57,6 @@ activate DB
 deactivate DB
 Backend --> Browser: 200
 deactivate Backend
-== Add a visit to an existing pet from the owner detail page #3 ==
 Browser -> Backend: GET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById
@@ -74,7 +76,6 @@ activate DB
 deactivate DB
 Backend --> Browser: 200
 deactivate Backend
-== Add a visit to an existing pet from the owner detail page #4 ==
 Browser -> Backend: POST /api/owners/{ownerId}/pets/{petId}/visits
 activate Backend
 Backend -> Backend: VisitRepository.save

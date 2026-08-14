@@ -1,7 +1,7 @@
 import {test, expect} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import {slugify, generateFromWindows, TestWindow, GenerateDeps} from './generate';
+import {slugify, diagramPathFor, generateFromWindows, TestWindow, GenerateDeps} from './generate';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -11,7 +11,16 @@ test('slugify makes filesystem-safe names', () => {
   expect(slugify('Add a visit!')).toBe('add-a-visit');
 });
 
-test('generateFromWindows writes one puml per test that has traces', async () => {
+test('the diagram is filed next to its test, named after it', () => {
+  expect(diagramPathFor('/root', 'src/owner-search.feature'))
+    .toBe('/root/src/owner-search.feature.seq.puml');
+  expect(diagramPathFor('/root', 'src/add-visit.spec.ts'))
+    .toBe('/root/src/add-visit.spec.ts.seq.puml');
+});
+
+// One file per source, however many tagged scenarios it holds — they become
+// sections of the same diagram rather than files scattered by scenario name.
+test('generateFromWindows writes one puml per source file, sectioned by scenario', async () => {
   const written: Record<string, string> = {};
   const deps: GenerateDeps = {
     searchTraceIds: async () => ['t1'],
@@ -19,10 +28,22 @@ test('generateFromWindows writes one puml per test that has traces', async () =>
     writeFile: (p, c) => { written[p] = c; },
     log: () => {},
   };
-  const windows: TestWindow[] = [{ title: 'Add a visit', startMs: 0, endMs: 10_000 }];
+  const windows: TestWindow[] = [
+    { title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000 },
+    { title: 'Cancel a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000 },
+    { title: 'Search owners', source: 'src/owner-search.feature', startMs: 0, endMs: 10_000 },
+  ];
   const paths = await generateFromWindows(windows, '/out', deps);
-  expect(paths).toEqual(['/out/add-a-visit.puml']);
-  expect(written['/out/add-a-visit.puml']).toContain('Browser -> Backend: POST /api/visits');
+
+  expect(paths).toEqual([
+    '/out/src/add-visit.spec.ts.seq.puml',
+    '/out/src/owner-search.feature.seq.puml',
+  ]);
+  const addVisit = written['/out/src/add-visit.spec.ts.seq.puml'];
+  expect(addVisit).toContain('== Add a visit ==');
+  expect(addVisit).toContain('== Cancel a visit ==');
+  expect(addVisit).toContain('Browser -> Backend: POST /api/visits');
+  expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
 });
 
 test('generateFromWindows skips (no throw) when a test has zero traces', async () => {
@@ -34,7 +55,7 @@ test('generateFromWindows skips (no throw) when a test has zero traces', async (
     log: (m) => logs.push(m),
   };
   const paths = await generateFromWindows(
-    [{ title: 'Empty', startMs: 0, endMs: 1 }], '/out', deps, { attempts: 1 },
+    [{ title: 'Empty', source: 'src/x.spec.ts', startMs: 0, endMs: 1 }], '/out', deps, { attempts: 1 },
   );
   expect(paths).toEqual([]);
   expect(logs.join('\n')).toContain('no traces');
@@ -53,12 +74,12 @@ test('generateFromWindows retries a window until Tempo has ingested it', async (
     sleep: async (ms) => { slept.push(ms); },
   };
   const paths = await generateFromWindows(
-    [{ title: 'Add a visit', startMs: 0, endMs: 1 }], '/out', deps,
+    [{ title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 1 }], '/out', deps,
     { attempts: 5, delayMs: 250 },
   );
   expect(searches).toBe(3);
   expect(slept).toEqual([250, 250]);
-  expect(paths).toEqual(['/out/add-a-visit.puml']);
+  expect(paths).toEqual(['/out/src/add-visit.spec.ts.seq.puml']);
 });
 
 test('generateFromWindows gives up after the configured number of attempts', async () => {
@@ -71,7 +92,7 @@ test('generateFromWindows gives up after the configured number of attempts', asy
     sleep: async () => {},
   };
   const paths = await generateFromWindows(
-    [{ title: 'Empty', startMs: 0, endMs: 1 }], '/out', deps, { attempts: 4, delayMs: 1 },
+    [{ title: 'Empty', source: 'src/x.spec.ts', startMs: 0, endMs: 1 }], '/out', deps, { attempts: 4, delayMs: 1 },
   );
   expect(searches).toBe(4);
   expect(paths).toEqual([]);

@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {mergeWindow} from '../../src/support/trace-window-store';
+import {mergeWindow} from '../support/trace-window-store';
 
 test('mergeWindow appends a new title', () => {
   const out = mergeWindow([], { title: 'a', startMs: 1, endMs: 2 });

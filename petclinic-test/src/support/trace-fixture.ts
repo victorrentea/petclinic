@@ -2,7 +2,7 @@ import {test as base} from '@playwright/test';
 import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../../scripts/trace-diagram/sequence-tag';
+import {shouldGenerateSequence} from '../seqgen/sequence-tag';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
@@ -33,7 +33,12 @@ export const test = base.extend({
     const startMs = Date.now() - PRE_PAD_MS;
     await use(page);
     await flushBrowserSpans(page);
-    appendWindow(WINDOWS_FILE, {title: testInfo.title, startMs, endMs: Date.now() + POST_PAD_MS});
+    appendWindow(WINDOWS_FILE, {
+      title: testInfo.title,
+      source: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
+      startMs,
+      endMs: Date.now() + POST_PAD_MS,
+    });
   },
 });
 

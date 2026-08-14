@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {TestWindow} from '../../scripts/trace-diagram/generate';
+import {TestWindow} from '../seqgen/generate';
 
+/** Same scenario re-run in the same file replaces its window; titles may repeat across files. */
 export function mergeWindow(existing: TestWindow[], entry: TestWindow): TestWindow[] {
-  const kept = existing.filter((w) => w.title !== entry.title);
+  const kept = existing.filter((w) => w.title !== entry.title || w.source !== entry.source);
   return [...kept, entry];
 }
 

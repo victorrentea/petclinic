@@ -2,6 +2,9 @@ import {defineConfig, devices} from '@playwright/test';
 
 export default defineConfig({
   testDir: './src',
+  // src/seqgen/*.spec.ts are pure unit tests for the diagram tooling — no browser,
+  // no running stack. They have their own runner: playwright.unit.config.ts.
+  testIgnore: '**/seqgen/**',
   // After the suite, pull each tagged test's trace from Tempo and render a
   // PlantUML sequence diagram (best-effort; never fails the run).
   globalSetup: './src/support/global-setup.ts',
