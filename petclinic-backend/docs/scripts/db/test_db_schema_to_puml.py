@@ -59,7 +59,7 @@ def test_render_is_plain_snapshot():
 
 def test_caption_states_how_the_diagram_stays_in_sync():
     puml = m.generate(_real_schema_sql())
-    assert "caption Diagram kept in sync with DB incremental scripts" in puml
+    assert "caption Diagram generated from DB incremental scripts" in puml
 
 
 def test_footer_credits_generator_and_makes_no_diff_claim():

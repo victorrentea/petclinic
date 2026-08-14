@@ -1,8 +1,8 @@
 @startuml
 
 title Domain Model
-caption Diagram generated from code using reflection
-footer Generated via reflection from domain/*.java by DomainModelExtractorTest
+caption Diagram generated from code using Java reflection
+footer DomainModelExtractorTest: domain/*.java -> petclinic-backend/docs/generated/DomainModel.puml
 
 hide empty members
 skinparam classAttributeIconSize 0
