@@ -1,4 +1,4 @@
-import { runGenerate } from '../../src/trace-diagram/generate';
+import {runGenerate} from '../../scripts/trace-diagram/generate';
 
 // Runs after the whole Playwright suite. runGenerate() never throws; any failure
 // is logged and swallowed so a telemetry hiccup can't fail the test run.

@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
+import {test, expect} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { NormSpan, parseTempoTrace, renderPuml, spansToPuml } from './trace-to-puml';
+import {NormSpan, parseTempoTrace, renderPuml, spansToPuml} from './trace-to-puml';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),

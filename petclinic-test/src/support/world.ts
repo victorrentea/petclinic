@@ -5,15 +5,15 @@ import {
 import {Browser, BrowserContext, chromium, Page} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import {appendWindow} from '../../tests/support/trace-window-store';
-import {flushBrowserSpans} from '../../tests/support/otel-flush';
-import {shouldGenerateSequence} from '../../src/trace-diagram/sequence-tag';
-import {runGenerate} from '../../src/trace-diagram/generate';
+import {appendWindow} from './trace-window-store';
+import {flushBrowserSpans} from './otel-flush';
+import {shouldGenerateSequence} from '../../scripts/trace-diagram/sequence-tag';
+import {runGenerate} from '../../scripts/trace-diagram/generate';
 
 setDefaultTimeout(60_000);
 
 const WINDOWS_FILE = path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json');
-const DIAGRAMS_DIR = path.join(__dirname, '..', 'generated_sequences');
+const DIAGRAMS_DIR = path.join(__dirname, '..', '..', 'generated_sequences');
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range — mirrors the Playwright
@@ -52,11 +52,10 @@ setWorldConstructor(PlaywrightWorld);
 // Drop this run's recorded windows so the diagrams regenerated below come only
 // from scenarios that just ran.
 //
-// Deliberately NOT wiping every .puml in DIAGRAMS_DIR: the plain-TypeScript
-// twins (../*.spec.ts, run by Playwright) write their diagrams into the same
-// folder, and a blanket wipe here would delete theirs — including add-visit's,
-// whose @generate_sequence tags now live only on that side.
-// run-tests-with-tracing.sh clears the folder once, before running either suite.
+// Deliberately NOT wiping every .puml in DIAGRAMS_DIR: the Playwright specs
+// write their diagrams into the same folder and a blanket wipe here would
+// delete add-visit's. run-tests-with-tracing.sh clears the folder once, before
+// running either suite.
 BeforeAll(function () {
   fs.mkdirSync(DIAGRAMS_DIR, {recursive: true});
   fs.rmSync(WINDOWS_FILE, {force: true});

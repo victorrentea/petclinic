@@ -10,6 +10,9 @@ Browser -> Backend: GET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
+Backend -> DB: petclinic
+activate DB
+deactivate DB
 Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
 activate Backend
 Backend -> DB: SELECT petclinic.owners
@@ -90,6 +93,9 @@ Backend --> Browser: 201
 deactivate Backend
 == Add a visit to an existing pet from the owner detail page #5 ==
 Browser -> Browser: documentFetch
+activate Browser
+deactivate Browser
+Browser -> Browser: resourceFetch
 activate Browser
 deactivate Browser
 Browser -> Browser: resourceFetch

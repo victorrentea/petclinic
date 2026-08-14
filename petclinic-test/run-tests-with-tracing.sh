@@ -3,8 +3,7 @@
 # run-tests-with-tracing.sh — run the e2e tests against an ALREADY-RUNNING stack
 # so each @generate_sequence scenario's browser↔backend↔DB trace is captured in
 # Tempo and turned into a PlantUML sequence diagram
-# (petclinic-test/features/generated_sequences/<scenario>.puml) by the
-# Cucumber AfterAll hook.
+# (petclinic-test/generated_sequences/<scenario>.puml).
 #
 # This script assumes the full telemetry stack is already up, started the
 # canonical way (so the backend has the OpenTelemetry Java agent attached):
@@ -15,8 +14,8 @@
 #     ./start-frontend.sh     # Angular dev server        :4200
 #
 # It does NOT start or stop anything — it only verifies the stack is reachable,
-# runs the Cucumber suite (which reuses the running apps), and reports the
-# diagrams produced.
+# runs both suites (which reuse the running apps), and reports the diagrams
+# produced.
 #
 # Usage:  ./run-tests-with-tracing.sh            (from petclinic-test/)
 #
@@ -62,18 +61,17 @@ fi
 log "✅ Backend has the OpenTelemetry agent attached."
 
 # --- run both suites -------------------------------------------------------
-# Two suites produce diagrams: the .feature files (Cucumber) and the
-# plain-TypeScript specs (Playwright). @generate_sequence is spread across both
-# — owner-search tags a Scenario in its .feature, add-visit tags its .spec.ts
-# test — so both runs are needed to produce the full diagram set.
+# One diagram per style, so both runners are needed: add-visit.spec.ts carries
+# @generate_sequence as a Playwright tag, owner-search.feature as a Cucumber
+# scenario tag.
 cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 
 # Clean slate once, for both suites: each regenerates only its own diagrams, so
 # neither may wipe the folder itself.
-rm -f "$UI_TEST_DIR"/features/generated_sequences/*.puml
+rm -f "$UI_TEST_DIR"/generated_sequences/*.puml
 
-log "Running the plain-TypeScript feature specs (Playwright)…"
-npm run test:features
+log "Running the tagged Playwright spec…"
+npm run test:sequence
 test_status=$?
 
 log "Running the .feature scenarios (Cucumber)…"
@@ -83,7 +81,7 @@ cucumber_status=$?
 
 # --- report the diagrams produced ------------------------------------------
 shopt -s nullglob
-diagrams=("$UI_TEST_DIR"/features/generated_sequences/*.puml)
+diagrams=("$UI_TEST_DIR"/generated_sequences/*.puml)
 if ((${#diagrams[@]})); then
   log "📊 Collected ${#diagrams[@]} sequence diagram(s):"
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done

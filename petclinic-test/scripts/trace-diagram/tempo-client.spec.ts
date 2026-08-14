@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import {test, expect} from '@playwright/test';
 import {
   tempoConfigFromEnv, authHeader, buildSearchUrl, buildTraceUrl, searchTraceIds,
 } from './tempo-client';

@@ -1,9 +1,9 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
 
-// The glue code for the "Add a visit" feature, extracted as plain functions.
-// Cucumber's step_definitions and the plain-TypeScript add-visit.spec.ts both
-// call these — nothing here knows which of the two is driving it.
+// The sentences of add-visit.spec.ts, as plain functions: named for what the
+// reader of a scenario wants to see, not for the widget being clicked. The
+// selectors live here so the spec never mentions one.
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
