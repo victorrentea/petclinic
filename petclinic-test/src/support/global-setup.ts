@@ -1,6 +1,6 @@
 import * as path from 'path';
 import {forgetWindowsOf} from './trace-window-store';
-import {PLAYWRIGHT_SOURCES} from '../seqgen/generate';
+import {PLAYWRIGHT_SOURCES} from '../genseq/generate';
 
 // Forget the windows of the tests this runner owns (*.spec.ts), so global-teardown
 // regenerates their diagrams from this run alone. The Cucumber suite's windows stay

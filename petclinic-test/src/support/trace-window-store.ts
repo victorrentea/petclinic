@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {TestWindow} from '../seqgen/generate';
+import {TestWindow} from '../genseq/generate';
 
 /** Same scenario re-run in the same file replaces its window; titles may repeat across files. */
 export function mergeWindow(existing: TestWindow[], entry: TestWindow): TestWindow[] {

@@ -1,4 +1,4 @@
-import {runGenerate, PLAYWRIGHT_SOURCES} from '../seqgen/generate';
+import {runGenerate, PLAYWRIGHT_SOURCES} from '../genseq/generate';
 
 // Runs after the whole Playwright suite. Regenerates only the diagrams of the specs
 // this runner owns: the windows file also holds the Cucumber suite's entries, so that

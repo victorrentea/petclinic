@@ -51,10 +51,10 @@ Neither is a translation of the other — pick each for what it is good at:
   regex step lookup, no shared mutable World, and every sentence stays ctrl-clickable,
   renameable and type-checked.
 
-`@generate_sequence` means the same thing on both sides (`src/seqgen/sequence-tag.ts`
+`@generate_sequence` means the same thing on both sides (`src/genseq/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
 Tempo window and get a diagram. Each one is **filed next to its test and named after it** —
-`src/owner-search.feature.seqgen.puml`, `src/add-visit.spec.ts.seqgen.puml` — with one `== section ==`
+`src/owner-search.feature.genseq.puml`, `src/add-visit.spec.ts.genseq.puml` — with one `== section ==`
 per tagged scenario inside, so a file with several tagged scenarios stays one picture. They are
 generated artifacts and say so on their first lines; edit the test, not the `.puml`.
 

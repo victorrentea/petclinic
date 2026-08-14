@@ -2,7 +2,7 @@ import {test as base} from '@playwright/test';
 import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../seqgen/sequence-tag';
+import {shouldGenerateSequence} from '../genseq/sequence-tag';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of

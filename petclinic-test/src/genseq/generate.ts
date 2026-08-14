@@ -51,9 +51,9 @@ async function searchWithRetry(
   return [];
 }
 
-/** The diagram sits next to its test, named after it: owner-search.feature.seqgen.puml */
+/** The diagram sits next to its test, named after it: owner-search.feature.genseq.puml */
 export function diagramPathFor(rootDir: string, source: string): string {
-  return `${rootDir}/${source}.seqgen.puml`;
+  return `${rootDir}/${source}.genseq.puml`;
 }
 
 /**
