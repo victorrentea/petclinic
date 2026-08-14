@@ -10,6 +10,13 @@
     Keep in sync with .editorconfig (indent_size=4) and CLAUDE.md (<= 120 chars).
     Do not round-trip this file through the Eclipse UI — it reshuffles the
     entries and makes diffs unreadable. Edit by hand, keep ids sorted.
+
+    What it does to your code (verified with `mvn spotless:apply`):
+        before:  "  public String demo(String a, ..., String z) {"    2-space indent, 127 columns
+        after:   "    public String demo(String a, ...,"              re-indented to 4, then
+        after:   "            String z) {"                            wrapped, hanging indent 8
+    indentation.size=4 fixes the indent; lineSplit=120 (Eclipse's own default is 80) forces the
+    wrap; continuation_indentation=2 x tabulation.size=4 gives the 8-space hanging indent.
 -->
 <profiles version="21">
     <profile kind="CodeFormatterProfile" name="petclinic" version="21">

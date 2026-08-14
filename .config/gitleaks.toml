@@ -1,3 +1,8 @@
+# What it blocks, concretely: useDefault pulls in gitleaks' built-in rules, so staging
+#     spring.ai.openai.api-key=sk-<20 chars>T3BlbkFJ<20 chars>   ->  rule "openai-api-key"
+# aborts the commit; demanded instead is a placeholder resolved at runtime, e.g.
+#     spring.ai.openai.api-key=${OPENAI_API_KEY}
+#
 # Extend gitleaks' default rules, but allowlist the single PUBLIC demo MCP JWT used across
 # the PetClinic workshop. It encodes {"sub":"1","name":"George Franklin",...}, authenticates
 # only against the localhost MCP server, and is already committed elsewhere in the repo
