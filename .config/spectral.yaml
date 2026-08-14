@@ -1,1 +1,10 @@
+# Spectral's stock OpenAPI ruleset, run over the generated openapi.yaml (npm run lint:openapi).
+#
+# What it flags, concretely (rule operation-description, on paths./api/vets.get):
+#     get:
+#       operationId: listVets
+#       tags: [vet-rest-controller]     <- no `description:` anywhere under the operation
+# demanded instead: a non-empty `description:` per operation, i.e. @Operation(description = "...")
+# on the controller method, since openapi.yaml is generated from the code.
+# All 87 current findings are warnings, so the lint exits 0 — nothing is blocked today.
 extends: ["spectral:oas"]

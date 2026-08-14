@@ -1,5 +1,8 @@
 {
   "//": "editorconfig-checker — enforces .editorconfig, which nothing else in this repo reads.",
+  "//e1": "What it flags: a Java line ending in a space (trim_trailing_whitespace) or a file with",
+  "//e2": "no closing newline (insert_final_newline) — and a body indented '  return x;' when",
+  "//e3": "[*.{java,xml}] pins indent_size=4, so it demands '    return x;' instead.",
   "//1": "Indentation checks are ON. The excludes below fall into two groups.",
   "//2": "Generated artifacts: regenerating them would just reintroduce the violation.",
   "//3": "Embedded-content files: every remaining violation in these sits inside a string",
