@@ -222,23 +222,28 @@ export function renderPuml(
 
   const header = [
     '@startuml',
-    // ' starts a PlantUML comment: this warning is for whoever opens the file,
-    // it never reaches the rendered diagram.
+    // ' starts a PlantUML comment: this one warns whoever opens the *file*.
+    // Everything a reader of the *image* needs is in the legend below instead —
+    // a comment never reaches the rendered diagram, and the picture is what
+    // ends up pasted in a review, a slide or a wiki page.
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
-    `' Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
-    `' @generate_sequence. Change the test, not this file, then regenerate with`,
-    `' petclinic-test/run-tests-with-tracing.sh`,
-    `'`,
-    `' Detail shown here: ${describeOptions(options)}`,
-    `' Want more or less? The traces already carry all of it — re-rendering replays`,
-    `' them from Tempo (~1s): no test run, no backend, no browser, only Grafana up:`,
-    `'     cd petclinic-test`,
-    `'     npm run diagram:lean    # call flow only`,
-    `'     npm run diagram         # + the SQL statements`,
-    `'     npm run diagram:full    # + bound parameter values + JSON payloads`,
-    `'     SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram`,
     'hide footbox',
     `title ${title}`,
+    'legend right',
+    `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
+    `  Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
+    `  @generate_sequence. Change the test, not this file, then regenerate with`,
+    `  petclinic-test/run-tests-with-tracing.sh`,
+    ` `,
+    `  Detail shown here: ${describeOptions(options)}`,
+    `  Want more or less? The traces already carry all of it — re-rendering replays`,
+    `  them from Tempo (~1s): no test run, no backend, no browser, only Grafana up:`,
+    `      cd petclinic-test`,
+    `      npm run diagram:lean    # call flow only`,
+    `      npm run diagram         # + the SQL statements`,
+    `      npm run diagram:full    # + bound parameter values + JSON payloads`,
+    `      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram`,
+    'end legend',
     // footer (bottom of every page) states the diagram's provenance
     'footer @generate_sequence — generated from real traces, do not edit',
     ...orderedParticipants(present).map((p) => `participant ${p}`),

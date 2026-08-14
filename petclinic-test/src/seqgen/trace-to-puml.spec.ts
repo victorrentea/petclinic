@@ -129,11 +129,13 @@ test('payloads stay off unless asked for', () => {
   expect(puml).not.toContain('note over');
 });
 
-test('the header states the detail level and how to change it', () => {
+test('the legend states the detail level and how to change it, visibly in the image', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'values', httpBodies: true});
-  expect(puml).toContain("' Detail shown here: SQL shown, with values · HTTP bodies shown");
+  expect(puml).toContain('  Detail shown here: SQL shown, with values · HTTP bodies shown');
   expect(puml).toContain('npm run diagram:lean');
   expect(puml).toContain('SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1');
+  expect(puml).toContain('legend right');
+  expect(puml).toContain('end legend');
 });
 
 const lonelyClick: NormSpan[] = [{
