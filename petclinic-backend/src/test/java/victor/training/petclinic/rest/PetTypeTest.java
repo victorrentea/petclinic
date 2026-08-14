@@ -189,10 +189,17 @@ public class PetTypeTest {
                 .setType(petTypeRepository.findById(petTypeId).orElseThrow());
         petRepository.save(pet);
 
-        mockMvc.perform(delete("/api/pettypes/" + petTypeId))
-                .andExpect(status().isInternalServerError())
-                .andExpect(result -> assertThat(result.getResponse().getContentAsString()
-                        .contains("PetType is in use by existing pets and cannot be deleted")).isTrue());
+        // NOT_SUPPORTED means these rows are committed: delete them, or the extra owner
+        // shows up in every later test that reads the owner list.
+        try {
+            mockMvc.perform(delete("/api/pettypes/" + petTypeId))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(result -> assertThat(result.getResponse().getContentAsString()
+                            .contains("PetType is in use by existing pets and cannot be deleted")).isTrue());
+        } finally {
+            petRepository.delete(pet);
+            ownerRepository.delete(owner);
+        }
     }
 
 }
