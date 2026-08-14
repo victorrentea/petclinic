@@ -143,7 +143,7 @@ def render_puml(cur: Schema) -> str:
     out = [
         "@startuml",
         "title Database Schema (ERD)",
-        "caption Diagram kept in sync with DB incremental scripts",
+        "caption Diagram generated from DB incremental scripts",
         "footer Generated from exported DB.sql by db_schema_to_puml.py",
         "hide circle",
         "hide empty members",     # drop the empty methods compartment + its separator line
