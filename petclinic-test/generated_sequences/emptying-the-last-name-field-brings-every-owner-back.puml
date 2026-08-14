@@ -228,38 +228,4 @@ activate DB
 deactivate DB
 Backend --> Browser: 200
 deactivate Backend
-== Emptying the last name field brings every owner back #3 ==
-Browser -> Browser: documentFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
 @enduml

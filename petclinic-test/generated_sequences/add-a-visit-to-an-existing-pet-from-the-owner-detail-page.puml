@@ -91,41 +91,4 @@ deactivate Backend
 deactivate Backend
 Backend --> Browser: 201
 deactivate Backend
-== Add a visit to an existing pet from the owner detail page #5 ==
-Browser -> Browser: documentFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
-Browser -> Browser: resourceFetch
-activate Browser
-deactivate Browser
 @enduml

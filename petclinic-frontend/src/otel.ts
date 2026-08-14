@@ -51,6 +51,13 @@ isCollectorReachable().then((up) => {
   registerInstrumentations({
     instrumentations: [
       getWebAutoInstrumentations({
+        // Page load emits documentFetch + one resourceFetch per bundle/asset, in a
+        // trace of its own with no server span. Useful nowhere except load
+        // profiling, and in a generated sequence diagram it is a whole section of
+        // Browser -> Browser noise next to the round-trips the scenario is about.
+        '@opentelemetry/instrumentation-document-load': {
+          enabled: false,
+        },
         '@opentelemetry/instrumentation-fetch': {
           propagateTraceHeaderCorsUrls: [/localhost:8080/],
         },
