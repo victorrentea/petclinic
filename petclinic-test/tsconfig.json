@@ -16,7 +16,7 @@
   },
   "include": [
     "src/**/*",
-    "scripts/**/*",
+    "start-apps.ts",
     "playwright.config.ts"
   ]
 }

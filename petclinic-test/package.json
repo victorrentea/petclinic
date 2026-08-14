@@ -6,14 +6,14 @@
   "scripts": {
     "test": "playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
-    "trace:diagram": "ts-node scripts/trace-diagram/generate.ts",
+    "trace:diagram": "ts-node src/seqgen/generate.ts",
     "test:cucumber": "SKIP_SERVER_START=1 cucumber-js",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:with-apps": "ts-node scripts/start-apps.ts",
+    "test:with-apps": "ts-node start-apps.ts",
     "test:docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit",
-    "start:apps": "ts-node scripts/start-apps.ts",
+    "start:apps": "ts-node start-apps.ts",
     "show-report": "playwright show-report test-results/playwright-report",
     "test:sequence": "SKIP_SERVER_START=1 playwright test --grep @generate_sequence"
   },

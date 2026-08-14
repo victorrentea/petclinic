@@ -7,13 +7,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../../scripts/trace-diagram/sequence-tag';
-import {runGenerate} from '../../scripts/trace-diagram/generate';
+import {shouldGenerateSequence} from '../seqgen/sequence-tag';
+import {runGenerate} from '../seqgen/generate';
 
 setDefaultTimeout(60_000);
 
 const WINDOWS_FILE = path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json');
-const DIAGRAMS_DIR = path.join(__dirname, '..', '..', 'generated_sequences');
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range — mirrors the Playwright
@@ -33,6 +32,7 @@ export class PlaywrightWorld extends World {
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
+  traceSource?: string;
   traceStartMs?: number;
 
   constructor(options: IWorldOptions) {
@@ -49,15 +49,12 @@ export class PlaywrightWorld extends World {
 
 setWorldConstructor(PlaywrightWorld);
 
-// Drop this run's recorded windows so the diagrams regenerated below come only
-// from scenarios that just ran.
+// Drop the previous run's recorded windows, so the diagrams regenerated below
+// come only from scenarios that just ran. Mirrors Playwright's global-setup.
 //
-// Deliberately NOT wiping every .puml in DIAGRAMS_DIR: the Playwright specs
-// write their diagrams into the same folder and a blanket wipe here would
-// delete add-visit's. run-tests-with-tracing.sh clears the folder once, before
-// running either suite.
+// Deliberately NOT deleting any .seq.puml: each suite rewrites only the diagrams
+// of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
-  fs.mkdirSync(DIAGRAMS_DIR, {recursive: true});
   fs.rmSync(WINDOWS_FILE, {force: true});
 });
 
@@ -68,6 +65,7 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
 
   if (shouldGenerateSequence(pickle.tags)) {
     this.traceTitle = pickle.name;
+    this.traceSource = path.relative(path.join(__dirname, '..', '..'), pickle.uri);
     // Stamp every browser span with the scenario name so Tempo can find this
     // run via `{ span.test.name = "..." }`.
     await this.page.addInitScript((name) => {
@@ -82,6 +80,7 @@ After(async function (this: PlaywrightWorld) {
     await flushBrowserSpans(this.page);
     appendWindow(WINDOWS_FILE, {
       title: this.traceTitle,
+      source: this.traceSource!,
       startMs: this.traceStartMs,
       endMs: Date.now() + POST_PAD_MS,
     });

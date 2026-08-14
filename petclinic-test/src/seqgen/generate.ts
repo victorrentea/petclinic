@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {parseTempoTrace, renderPuml, NormSpan} from './trace-to-puml';
+import {parseTempoTrace, renderPuml, DiagramScenario, NormSpan} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 
 export interface TestWindow {
   title: string;
+  /** The file the scenario is written in — 'add-visit.spec.ts', 'owner-search.feature'. */
+  source: string;
   startMs: number;
   endMs: number;
 }
@@ -48,26 +50,48 @@ async function searchWithRetry(
   return [];
 }
 
+/** The diagram sits next to its test, named after it: owner-search.feature.seq.puml */
+export function diagramPathFor(rootDir: string, source: string): string {
+  return `${rootDir}/${source}.seq.puml`;
+}
+
+function groupBySource(windows: TestWindow[]): Map<string, TestWindow[]> {
+  const bySource = new Map<string, TestWindow[]>();
+  for (const w of windows) {
+    const group = bySource.get(w.source) ?? [];
+    group.push(w);
+    bySource.set(w.source, group);
+  }
+  return bySource;
+}
+
 export async function generateFromWindows(
-  windows: TestWindow[], outDir: string, deps: GenerateDeps, retry: RetryOptions = {},
+  windows: TestWindow[], rootDir: string, deps: GenerateDeps, retry: RetryOptions = {},
 ): Promise<string[]> {
   const written: string[] = [];
-  for (const w of windows) {
-    const traceql = `{ span.test.name = "${w.title}" }`;
-    const ids = await searchWithRetry(traceql, w, deps, retry);
-    if (ids.length === 0) {
-      deps.log(`⏭️  "${w.title}": no traces in window — skipped`);
-      continue;
+  // One diagram per source file, one section per scenario in it — so the picture
+  // is filed where its test is, and reads in the order the file does.
+  for (const [source, group] of groupBySource(windows)) {
+    const scenarios: DiagramScenario[] = [];
+    for (const w of group) {
+      const traceql = `{ span.test.name = "${w.title}" }`;
+      const ids = await searchWithRetry(traceql, w, deps, retry);
+      if (ids.length === 0) {
+        deps.log(`⏭️  "${w.title}": no traces in window — skipped`);
+        continue;
+      }
+      const traces: NormSpan[][] = [];
+      for (const id of ids) {
+        traces.push(parseTempoTrace(await deps.getTrace(id)));
+      }
+      scenarios.push({title: w.title, traces});
+      deps.log(`✅ "${w.title}": ${ids.length} trace(s)`);
     }
-    const traces: NormSpan[][] = [];
-    for (const id of ids) {
-      traces.push(parseTempoTrace(await deps.getTrace(id)));
-    }
-    const slug = slugify(w.title);
-    const filePath = `${outDir}/${slug}.puml`;
-    const puml = renderPuml(w.title, traces);
-    deps.writeFile(filePath, puml);
-    deps.log(`✅ "${w.title}": ${ids.length} trace(s) → ${filePath}`);
+    if (scenarios.length === 0) continue;
+
+    const filePath = diagramPathFor(rootDir, source);
+    deps.writeFile(filePath, renderPuml(source, scenarios));
+    deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     written.push(filePath);
   }
   return written;
@@ -76,14 +100,12 @@ export async function generateFromWindows(
 export async function runGenerate(): Promise<void> {
   const root = path.join(__dirname, '..', '..');
   const windowsFile = path.join(root, 'test-results', 'trace-windows.json');
-  const outDir = path.join(root, 'generated_sequences');
 
   if (!fs.existsSync(windowsFile)) {
     console.warn(`ℹ️  ${windowsFile} not found — no diagrams generated.`);
     return;
   }
   const windows: TestWindow[] = JSON.parse(fs.readFileSync(windowsFile, 'utf-8'));
-  fs.mkdirSync(outDir, { recursive: true });
 
   const cfg = tempoConfigFromEnv();
   const deps: GenerateDeps = {
@@ -103,8 +125,8 @@ export async function runGenerate(): Promise<void> {
   }
 
   try {
-    const paths = await generateFromWindows(windows, outDir, deps);
-    console.log(`📊 Generated ${paths.length} diagram(s) in ${outDir}`);
+    const paths = await generateFromWindows(windows, root, deps);
+    console.log(`📊 Generated ${paths.length} diagram(s)`);
   } catch (err) {
     console.warn(`⚠️  Diagram generation failed (continuing): ${(err as Error).message}`);
   }

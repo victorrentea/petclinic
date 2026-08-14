@@ -1,10 +1,15 @@
 @startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+' Drawn from real Tempo traces of src/owner-search.feature, for the scenarios tagged
+' @generate_sequence. Change the test, not this file, then regenerate with
+' petclinic-test/run-tests-with-tracing.sh
 hide footbox
-title Searching with an empty last name lists every owner
-footer @generate_sequence Scenario in a .feature test
+title src/owner-search.feature
+footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
+== Searching with an empty last name lists every owner ==
 Browser -> Backend: GET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith

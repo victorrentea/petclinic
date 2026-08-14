@@ -62,8 +62,8 @@ petclinic-backend/.tools/
 petclinic-backend/docs/generated/**/*.svg
 petclinic-backend/docs/generated/**/*.png
 
-# e2e trace sequence diagrams: the .puml sources under
-# petclinic-test/generated_sequences/ are tracked (no PNG renders).
+# e2e trace sequence diagrams: petclinic-test/src/*.seq.puml are generated but
+# tracked, so a PR shows how a change moved the real browser->backend->DB flow.
 
 # Bug-heatmap generated outputs — only the generator scripts are tracked
 # (docs/scripts/bug-heatmap/); regenerate the map with that folder's generate.sh
