@@ -42,4 +42,14 @@ public class VisitDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Last name of the owner (server-populated).")
     private @Nullable String ownerLastName;
+
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet that attended the visit.")
+    private @Nullable Integer vetId;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "First name of the vet (server-populated).")
+    private @Nullable String vetFirstName;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Last name of the vet (server-populated).")
+    private @Nullable String vetLastName;
 }

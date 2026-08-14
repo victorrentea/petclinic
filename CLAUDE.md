@@ -102,7 +102,7 @@ OpenAPI docs: http://localhost:8080/swagger-ui.html
 ## Domain Model
 Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**
-- **Pet** 1→N **Visit**
+- **Pet** 1→N **Visit** N→1 **Vet** (the attending vet; optional — legacy and MCP-booked visits have none)
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 

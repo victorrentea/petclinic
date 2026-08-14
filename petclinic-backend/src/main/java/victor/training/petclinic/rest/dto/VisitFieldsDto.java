@@ -20,4 +20,8 @@ public class VisitFieldsDto {
     @Size(min = 1, max = 255)
     @Schema(example = "rabies shot", description = "The description for the visit.")
     private String description;
+
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet that attended the visit.")
+    private @Nullable Integer vetId;
 }

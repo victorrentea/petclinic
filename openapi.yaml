@@ -1934,6 +1934,20 @@ components:
           type: string
           description: Name of the pet (server-populated).
           readOnly: true
+        vetFirstName:
+          type: string
+          description: First name of the vet (server-populated).
+          readOnly: true
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the vet that attended the visit.
+          example: 1
+          minimum: 0
+        vetLastName:
+          type: string
+          description: Last name of the vet (server-populated).
+          readOnly: true
       required:
       - description
       - id
@@ -1952,5 +1966,11 @@ components:
           example: rabies shot
           maxLength: 255
           minLength: 1
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the vet that attended the visit.
+          example: 1
+          minimum: 0
       required:
       - description

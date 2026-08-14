@@ -31,4 +31,9 @@ public class Visit {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    /** Vet that attended the consultation; null when not (yet) assigned. */
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
+
 }

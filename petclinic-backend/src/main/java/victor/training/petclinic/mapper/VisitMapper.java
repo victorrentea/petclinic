@@ -14,10 +14,12 @@ public interface VisitMapper {
     @Mapping(source = "petId", target = "pet.id")
     @Mapping(target = "pet.name", ignore = true)
     @Mapping(target = "pet.owner", ignore = true)
+    @Mapping(target = "vet", ignore = true) // looked up by the controller, so an unknown vetId is rejected
     Visit toVisit(VisitDto visitDto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "pet", ignore = true)
+    @Mapping(target = "vet", ignore = true) // looked up by the controller, so an unknown vetId is rejected
     Visit toVisit(VisitFieldsDto visitFieldsDto);
 
     @Mapping(source = "pet.id", target = "petId")
@@ -25,6 +27,9 @@ public interface VisitMapper {
     @Mapping(source = "pet.owner.id", target = "ownerId")
     @Mapping(source = "pet.owner.firstName", target = "ownerFirstName")
     @Mapping(source = "pet.owner.lastName", target = "ownerLastName")
+    @Mapping(source = "vet.id", target = "vetId")
+    @Mapping(source = "vet.firstName", target = "vetFirstName")
+    @Mapping(source = "vet.lastName", target = "vetLastName")
     VisitDto toVisitDto(Visit visit);
 
     List<VisitDto> toVisitsDto(List<Visit> visits);

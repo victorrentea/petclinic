@@ -6,8 +6,10 @@ import {
   clickAddVisitForFirstPet,
   expectBackOnOwnerDetailPage,
   expectPetVisitListContains,
+  expectPetVisitListShowsVet,
   fillVisitDateAndUniqueDescription,
   openOwnerDetailPage,
+  selectFirstVetInVisitForm,
   submitVisitForm,
 } from './dsl/add-visit.dsl';
 
@@ -38,6 +40,20 @@ test.describe('Add a visit', () => {
     {name: 'Add a back-dated visit without capturing a sequence diagram', date: '2025-02-03', sequence: false},
     {name: 'Add a follow-up visit and capture its sequence diagram', date: '2026-08-20', sequence: true},
   ];
+
+  test('Add a visit attended by a vet', async ({page}) => {
+    const {ownerId} = await anOwnerWithAtLeastOnePetExists();
+    const visitDate = '2026-09-15';
+
+    await openOwnerDetailPage(page, ownerId);
+    await clickAddVisitForFirstPet(page, 'Add Visit');
+    const description = await fillVisitDateAndUniqueDescription(page, visitDate);
+    const vetName = await selectFirstVetInVisitForm(page);
+    await submitVisitForm(page);
+
+    await expectBackOnOwnerDetailPage(page, ownerId);
+    await expectPetVisitListShowsVet(page, visitDate, description, vetName);
+  });
 
   for (const scenario of scenarios) {
     const tag = scenario.sequence ? [GENERATE_SEQUENCE_TAG] : [];

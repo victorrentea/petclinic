@@ -39,6 +39,14 @@ export async function fillVisitDateAndUniqueDescription(page: Page, date: string
   return description;
 }
 
+/** Picks the first real vet in the dropdown and returns its displayed name. */
+export async function selectFirstVetInVisitForm(page: Page): Promise<string> {
+  const vetSelect = page.locator('select#vetId');
+  const vetName = (await vetSelect.locator('option').nth(1).textContent() || '').trim();
+  await vetSelect.selectOption({label: vetName});
+  return vetName;
+}
+
 export async function submitVisitForm(page: Page): Promise<void> {
   await page.locator('button[type="submit"]:has-text("Add Visit")').click();
 }
@@ -49,7 +57,15 @@ export async function expectBackOnOwnerDetailPage(page: Page, ownerId: number): 
 }
 
 export async function expectPetVisitListContains(page: Page, date: string, description: string): Promise<void> {
+  await expect(visitRow(page, date, description)).toBeVisible({timeout: 10_000});
+}
+
+export async function expectPetVisitListShowsVet(
+  page: Page, date: string, description: string, vetName: string): Promise<void> {
+  await expect(visitRow(page, date, description)).toContainText(vetName, {timeout: 10_000});
+}
+
+function visitRow(page: Page, date: string, description: string) {
   const petBlock = page.locator('app-pet-list').first();
-  const row = petBlock.locator('app-visit-list tr').filter({hasText: date}).filter({hasText: description});
-  await expect(row).toBeVisible({timeout: 10_000});
+  return petBlock.locator('app-visit-list tr').filter({hasText: date}).filter({hasText: description});
 }

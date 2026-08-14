@@ -5,8 +5,10 @@ import {
   clickAddVisitForFirstPet,
   expectBackOnOwnerDetailPage,
   expectPetVisitListContains,
+  expectPetVisitListShowsVet,
   fillVisitDateAndUniqueDescription,
   openOwnerDetailPage,
+  selectFirstVetInVisitForm,
   submitVisitForm,
 } from '../dsl/add-visit.dsl';
 
@@ -50,5 +52,19 @@ Then(
       throw new Error('Expected a unique description to have been generated earlier in the scenario');
     }
     await expectPetVisitListContains(this.page, date, this.visitDescription);
+  },
+);
+
+When('I pick the first vet in the list', async function (this: PlaywrightWorld) {
+  this.vetName = await selectFirstVetInVisitForm(this.page);
+});
+
+Then(
+  "the pet's visit list shows the new visit dated {string} attended by that vet",
+  async function (this: PlaywrightWorld, date: string) {
+    if (!this.visitDescription || !this.vetName) {
+      throw new Error('Expected a description and a vet to have been picked earlier in the scenario');
+    }
+    await expectPetVisitListShowsVet(this.page, date, this.visitDescription, this.vetName);
   },
 );

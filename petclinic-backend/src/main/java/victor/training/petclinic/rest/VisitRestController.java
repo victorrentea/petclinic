@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -27,6 +29,7 @@ import java.util.List;
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class VisitRestController {
     private final VisitRepository visitRepository;
+    private final VetRepository vetRepository;
     private final VisitMapper visitMapper;
 
     @GetMapping
@@ -61,6 +64,7 @@ public class VisitRestController {
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
         Visit visit = visitMapper.toVisit(visitDto);
+        visit.setVet(resolveVet(visitDto.getVetId()));
         visitRepository.save(visit);
         return visit.getId();
     }
@@ -70,7 +74,16 @@ public class VisitRestController {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
+        currentVisit.setVet(resolveVet(visitDto.getVetId()));
         visitRepository.save(currentVisit);
+    }
+
+    /** Null vetId means "no vet attended (yet)"; an unknown one is rejected. */
+    private Vet resolveVet(Integer vetId) {
+        if (vetId == null) {
+            return null;
+        }
+        return vetRepository.findById(vetId).orElseThrow();
     }
 
     @Transactional

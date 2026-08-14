@@ -29,3 +29,13 @@ Feature: Add a visit
     And I submit the visit form
     Then I am back on the owner's detail page
     And the pet's visit list contains the new visit dated "2026-08-20"
+
+  Scenario: Add a visit attended by a vet
+    Given an owner with at least one pet exists
+    When I open that owner's detail page
+    And I click "Add Visit" for the first pet
+    And I fill in the visit date "2026-09-15" and a unique description
+    And I pick the first vet in the list
+    And I submit the visit form
+    Then I am back on the owner's detail page
+    And the pet's visit list shows the new visit dated "2026-09-15" attended by that vet
