@@ -145,7 +145,7 @@
                         <trimTrailingWhitespace/>
                         <removeUnusedImports/>
                         <endWithNewline/>
-                        <eclipse><file>${project.basedir}/../eclipse-formatter.xml</file></eclipse>
+                        <eclipse><file>${project.basedir}/../.config/eclipse-formatter.xml</file></eclipse>
                     </java>
                 </configuration>
             </plugin>

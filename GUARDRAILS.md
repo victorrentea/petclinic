@@ -33,7 +33,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | **SonarCloud Quality Gate** | Code-quality / new-code regressions | CI runs `SonarSource/sonarqube-scan-action` + `sonarqube-quality-gate-action` (config in `sonar-project.properties`). Java is analyzed with the custom **`petclinic agentic (extend)`** quality profile — it **extends** the built-in "Sonar agentic AI" and **overrides `java:S107`** ("too many parameters") to **max 5** params. The gate fails the build on new-code violations. |
 | Build hygiene | Webpack & Javadoc warnings | `npm run build` fails on any webpack `Warning:` (`scripts/build-strict.sh`); CI runs `mvn javadoc:javadoc -Dmaven.javadoc.failOnError=true` |
 | Spotless formatting | Java code-style drift | pre-commit runs `spotless:apply` on staged Java + re-stages; **CI runs `spotless:check`** as a fail-gate (Spotless has no lifecycle binding, so `mvn test` alone wouldn't catch it) |
-| OpenAPI lint (Spectral) | API-spec style/quality | pre-push **and CI** run `npm run lint:openapi` against `.spectral.yaml` over the freshly extracted `openapi.yaml` |
+| OpenAPI lint (Spectral) | API-spec style/quality | pre-push **and CI** run `npm run lint:openapi` against `.config/spectral.yaml` over the freshly extracted `openapi.yaml` |
 
 ### Chatbot (Embabel agents + assistant)
 

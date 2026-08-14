@@ -61,10 +61,10 @@ jobs:
           fi
           if [ -z "$base" ] || [ "$base" = "$zero" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "No usable base ref — scanning the tip commit only."
-            gitleaks git --redact --no-banner --log-opts="-1 HEAD" .
+            gitleaks git --redact --no-banner -c .config/gitleaks.toml --log-opts="-1 HEAD" .
           else
             echo "Scanning pushed range ${base}..HEAD"
-            gitleaks git --redact --no-banner --log-opts="${base}..HEAD" .
+            gitleaks git --redact --no-banner -c .config/gitleaks.toml --log-opts="${base}..HEAD" .
           fi
 
       # ── Hook parity: pre-push blocks a DB.sql change whose DB.puml is stale.
