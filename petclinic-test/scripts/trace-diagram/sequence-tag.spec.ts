@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { shouldGenerateSequence, GENERATE_SEQUENCE_TAG } from './sequence-tag';
+import {test, expect} from '@playwright/test';
+import {shouldGenerateSequence, GENERATE_SEQUENCE_TAG} from './sequence-tag';
 
 test('opts in only when the @generate_sequence tag is present', () => {
   expect(shouldGenerateSequence([{ name: GENERATE_SEQUENCE_TAG }])).toBe(true);

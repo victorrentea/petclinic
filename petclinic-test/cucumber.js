@@ -1,8 +1,8 @@
 module.exports = {
   default: {
     requireModule: ['ts-node/register'],
-    require: ['features/support/**/*.ts', 'features/step_definitions/**/*.ts'],
-    paths: ['features/**/*.feature'],
+    require: ['src/support/world.ts', 'src/**/*.glue.ts'],
+    paths: ['src/**/*.feature'],
     format: ['progress'],
     publishQuiet: true,
   },

@@ -180,8 +180,8 @@ Changing the response from a bare array to a page object breaks:
 
 | File | Why |
 |---|---|
-| `petclinic-test/tests/owners.spec.ts` | `shows all owners on initial load` asserts **all 28** names are on screen — fails by design at page size 10. |
-| `petclinic-test/tests/support/api-client.ts` | `fetchOwners()` typed `OwnerDto[]`, returns `response.data` directly. |
+| `petclinic-test/src/owner-search.feature` | `every owner in the clinic is listed` asserts **all 28** names are on screen — fails by design at page size 10. |
+| `petclinic-test/src/owner-search.glue.ts` | `GET /api/owners` typed as a bare array, used directly as the owner list. |
 | `petclinic-backend/src/test/resources/features/functional/owners.feature` | Step *"the response JSON array has size 2"* asserts the body **is** an array. |
 | `.../functional/OwnerSteps.java` | Parses the list response. |
 | `.../perf/OwnerSearchThroughLatencyProxyTest.java` | Hits `get("/api/owners")`. Already flaky locally / green in CI. |

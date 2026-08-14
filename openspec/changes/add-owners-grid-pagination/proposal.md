@@ -76,8 +76,8 @@ payload becomes a follow-up issue.
 - `openapi.yaml` regenerated → `src/app/generated/api-types.ts` regenerated; Spectral lint
 
 **Tests that break and must be repaired** (all identified, none unknown)
-- `petclinic-test/tests/owners.spec.ts` — asserts all 28 owners on screen
-- `petclinic-test/tests/support/api-client.ts` — `fetchOwners()` typed `OwnerDto[]`
+- `petclinic-test/src/owner-search.feature` — asserts all 28 owners on screen
+- `petclinic-test/src/owner-search.glue.ts` — reads `GET /api/owners` as a bare array
 - `petclinic-backend/.../features/functional/owners.feature` — "the response JSON array has size 2"
 - `.../functional/OwnerSteps.java`
 - `.../perf/OwnerSearchThroughLatencyProxyTest.java` — throughput baseline shifts (10 rows, not 28)

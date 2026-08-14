@@ -108,7 +108,7 @@ deep-link to the exact line. This is the section a domain expert reads first.
 ## Step 5 — Acceptance tests
 
 Find the tests that pin this behavior: backend `*Test.java` /
-`petclinic-test/features/**` / frontend `*.spec.ts` touched by or covering the
+`petclinic-test/src/**` / frontend `*.spec.ts` touched by or covering the
 change. Under **## Acceptance tests**, list each as a deep-linked `file:line` with a
 one-line "asserts that …". Then state plainly whether the changed business logic **is
 covered** — and call out any behavior from Step 4 with **no** matching test.

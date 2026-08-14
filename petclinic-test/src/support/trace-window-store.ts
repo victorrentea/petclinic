@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { TestWindow } from '../../src/trace-diagram/generate';
+import {TestWindow} from '../../scripts/trace-diagram/generate';
 
 export function mergeWindow(existing: TestWindow[], entry: TestWindow): TestWindow[] {
   const kept = existing.filter((w) => w.title !== entry.title);

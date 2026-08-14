@@ -1,13 +1,13 @@
 import {test as base} from '@playwright/test';
 import * as path from 'path';
-import {appendWindow} from '../../tests/support/trace-window-store';
-import {flushBrowserSpans} from '../../tests/support/otel-flush';
-import {shouldGenerateSequence} from '../../src/trace-diagram/sequence-tag';
+import {appendWindow} from './trace-window-store';
+import {flushBrowserSpans} from './otel-flush';
+import {shouldGenerateSequence} from '../../scripts/trace-diagram/sequence-tag';
 
-// The plain-TypeScript counterpart of features/support/world.ts: it honours the
-// very same @generate_sequence opt-in, only read from Playwright's test tags
-// instead of Cucumber's scenario tags. Untagged tests run normally and record
-// no trace window, so no .puml is produced for them.
+// The Playwright counterpart of src/glue/world.ts: it honours the very same
+// @generate_sequence opt-in, only read from Playwright's test tags instead of
+// Cucumber's scenario tags. Untagged tests run normally and record no trace
+// window, so no .puml is produced for them.
 
 const WINDOWS_FILE = path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json');
 
@@ -25,6 +25,8 @@ export const test = base.extend({
     // Stamp every browser span with the test name so Tempo can find this run
     // via `{ span.test.name = "..." }`.
     await page.addInitScript((name) => {
+      // globalThis === window in the browser; using it keeps this typecheck-clean
+      // under the Node lib (no 'dom') and matches how otel.ts reads the global.
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, testInfo.title);
 

@@ -16,7 +16,7 @@ Constraints that shape the approach:
   them, including `ro-x-icu`.
 - **`openapi.yaml` is generated** from the backend and drives `src/app/generated/api-types.ts`.
   CI runs Spectral lint plus a SonarCloud Quality Gate that fails the build.
-- **`petclinic-test/tests/pages/OwnersPage.ts` selects on `#ownersTable` and `td.ownerFullName`**,
+- **`petclinic-test/src/owner-search.glue.ts` selects on `#ownersTable` and `td.ownerFullName`**,
   and carries a comment documenting a pre-existing out-of-order-response bug.
 
 ## Goals / Non-Goals

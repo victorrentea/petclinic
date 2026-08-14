@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-import { spawn, ChildProcess } from 'child_process';
+import {spawn, ChildProcess} from 'child_process';
 import axios from 'axios';
 import * as net from 'net';
 import * as path from 'path';

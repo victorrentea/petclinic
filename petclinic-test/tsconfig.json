@@ -15,8 +15,8 @@
     "types": ["node"]
   },
   "include": [
-    "tests/**/*",
-    "features/**/*",
+    "src/**/*",
+    "scripts/**/*",
     "playwright.config.ts"
   ]
 }

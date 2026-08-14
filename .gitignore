@@ -37,7 +37,6 @@ petclinic-database/dependency-reduced-pom.xml
 
 # petclinic-test (Playwright)
 petclinic-test/test-results/
-petclinic-test/playwright-report/
 petclinic-test/playwright/.cache/
 
 # petclinic-frontend (Angular)
@@ -64,7 +63,7 @@ petclinic-backend/docs/generated/**/*.svg
 petclinic-backend/docs/generated/**/*.png
 
 # e2e trace sequence diagrams: the .puml sources under
-# petclinic-test/features/generated_sequences/ are tracked (no PNG renders).
+# petclinic-test/generated_sequences/ are tracked (no PNG renders).
 
 # Bug-heatmap generated outputs — only the generator scripts are tracked
 # (docs/scripts/bug-heatmap/); regenerate the map with that folder's generate.sh

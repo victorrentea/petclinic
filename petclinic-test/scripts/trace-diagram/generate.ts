@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseTempoTrace, renderPuml, NormSpan } from './trace-to-puml';
-import { tempoConfigFromEnv, searchTraceIds, getTrace } from './tempo-client';
+import {parseTempoTrace, renderPuml, NormSpan} from './trace-to-puml';
+import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 
 export interface TestWindow {
   title: string;
@@ -76,7 +76,7 @@ export async function generateFromWindows(
 export async function runGenerate(): Promise<void> {
   const root = path.join(__dirname, '..', '..');
   const windowsFile = path.join(root, 'test-results', 'trace-windows.json');
-  const outDir = path.join(root, 'features', 'generated_sequences');
+  const outDir = path.join(root, 'generated_sequences');
 
   if (!fs.existsSync(windowsFile)) {
     console.warn(`ℹ️  ${windowsFile} not found — no diagrams generated.`);

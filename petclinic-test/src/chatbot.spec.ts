@@ -1,4 +1,4 @@
-import { test, expect } from './support/trace-fixture';
+import {test, expect} from './support/trace-fixture';
 
 // The chatbot is a separate static page + streaming API on its own port (default 8082).
 // It must be running (./start-backend.sh + the chatbot app, with OPENAI_API_KEY on the server).
@@ -9,8 +9,9 @@ test.describe('PetClinic Assistant (chatbot)', () => {
     await page.goto(CHATBOT_URL);
 
     // Identity is derived from the Bearer JWT and rendered read-only, right-aligned, no "Name" label.
-    await expect(page.locator('#assistantUser')).toHaveText('George Franklin');
-    await expect(page.locator('#assistantEmail')).toContainText('george.franklin@petclinic.example');
+    // The name/email below are the claims of the page's DEMO_JWT — change both together.
+    await expect(page.locator('#assistantUser')).toHaveText('Kevin McCallister');
+    await expect(page.locator('#assistantEmail')).toContainText('kevin.mccallister@petclinic.example');
     // It must NOT be an <input> anymore (was giving the impression it was editable).
     await expect(page.locator('input#assistantUser')).toHaveCount(0);
   });

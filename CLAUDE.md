@@ -17,7 +17,7 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 | `petclinic-frontend/` | Angular 16 SPA (Angular Material + Bootstrap 3) | npm |
 | `petclinic-database/` | `PostgresLauncher` (embedded Postgres) + `NetworkLatencyProxy`; what `./start-database.sh` runs | Maven |
 | `petclinic-chatbot/` | Spring AI triage assistant on **:8082** — RAG over specialties, books visits via the backend's MCP. Needs `OPENAI_API_KEY` + pgvector on **:5433** (`docker compose up -d` in that folder) | Maven |
-| `petclinic-test/` | Playwright + Cucumber E2E in TypeScript; `features/` holds add-visit twice (Gherkin vs plain TS) on purpose. **Has its own CLAUDE.md — read it before touching tests** | npm |
+| `petclinic-test/` | Playwright + Cucumber E2E in TypeScript; `src/` pairs `add-visit.spec.ts` (+`.dsl.ts`) with `owner-search.feature` (+`.glue.ts`) to contrast a DSL against Gherkin. **Has its own CLAUDE.md — read it before touching tests** | npm |
 | `petclinic-observability/` | `docker compose` for `grafana/otel-lgtm` (Grafana :3300, OTLP :4317/:4318) + `otelcol-config.yaml` | docker |
 | `refactoring-legacy/` | Self-contained OpenRewrite recipes (imperative + Refaster). Deliberately **not** wired into the backend build | Maven |
 | `user-manual/` | `manual.md` + screenshots |  |
@@ -59,9 +59,11 @@ npm run lint:openapi                # Spectral lint of ../openapi.yaml
 ### E2E (petclinic-test/)
 ```sh
 npm test                            # headless Playwright (needs backend + frontend up)
-npm run test:cucumber               # the same scenarios via Gherkin step definitions
+npm run test:cucumber               # the .feature scenarios, via src/*.glue.ts
+npm run test:sequence               # only the @generate_sequence-tagged specs
+npm run test:unit                   # trace-diagram tooling, no browser
 npm run test:ui                     # interactive runner
-npm run show-report                 # HTML report
+npm run show-report                 # HTML report (test-results/playwright-report)
 npm run test:docker                 # fully isolated in Docker
 ```
 See `petclinic-test/CLAUDE.md` for the Gherkin-vs-plain-TS split and tracing setup.

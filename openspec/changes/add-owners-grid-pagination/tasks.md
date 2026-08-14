@@ -55,7 +55,7 @@ at `specs/owner-listing/spec.md`; decision references (D1–D10) at `design.md`.
 
 ## 7. Repair the tests this change breaks
 
-- [ ] 7.1 `petclinic-test/tests/support/api-client.ts` — `fetchOwners()` / `fetchOwnersByPrefix()` for the page response
+- [ ] 7.1 `petclinic-test/src/owner-search.glue.ts` — read the page response instead of a bare owner array
 - [ ] 7.2 `petclinic-backend/src/test/resources/features/functional/owners.feature` — the step asserting the body is a JSON array of size 2
 - [ ] 7.3 `petclinic-backend/.../functional/OwnerSteps.java` — list-response parsing
 - [ ] 7.4 `petclinic-frontend/.../owner.service.spec.ts` and `owner-list.component.spec.ts` — stubs returning `Observable<Owner[]>`
