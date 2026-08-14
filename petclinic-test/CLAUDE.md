@@ -24,8 +24,9 @@
 - **Detail is a render-time switch, not a capture-time one.** The traces always carry
   everything (SQL + bound values from the agent, HTTP payloads from the browser); `SEQ_SQL`
   (`off`|`statement`|`values`) and `SEQ_HTTP_BODIES` (`0`|`1`) decide what is drawn —
-  `src/genseq/options.ts`. So re-rendering is **~1s and needs only Grafana up**, no test run,
-  no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
+  `src/genseq/options.ts`. So re-rendering is **~1s and needs nothing running** — not even
+  Grafana: the fetched spans are cached in `test-results/trace-spans.json` and replayed
+  (`GENSEQ_REFRESH=1` forces a fresh Tempo fetch). No test run, no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
   vars with `npm run trace:diagram`. Every generated file repeats this in its own header.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,

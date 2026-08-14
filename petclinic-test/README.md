@@ -73,7 +73,9 @@ scripts now say so out loud if the order was wrong, instead of silently producin
 Capture and rendering are deliberately separate: the traces always carry everything — the SQL
 statement, the **bound parameter values**, and the JSON request/response payloads — while these
 two switches decide what reaches the page. Changing your mind is therefore a **re-render of the
-traces already in Tempo (~1s)**, not another test run: no backend, no browser, only Grafana up.
+spans cached from the last run (~1s)**, not another test run: no backend, no browser, not even
+Grafana — the fetched spans live in `test-results/trace-spans.json`, and `GENSEQ_REFRESH=1`
+re-fetches them from Tempo when they go stale.
 
 ```sh
 npm run diagram:lean    # call flow only          SEQ_SQL=off       SEQ_HTTP_BODIES=0

@@ -1,7 +1,11 @@
 import {test, expect} from '@playwright/test';
+import {parseTempoTrace} from './trace-to-puml';
 import * as fs from 'fs';
 import * as path from 'path';
-import {slugify, diagramPathFor, generateFromWindows, TestWindow, GenerateDeps} from './generate';
+import {
+  slugify, diagramPathFor, generateFromWindows, renderScenarios, spanCachePathFor,
+  CachedSource, TestWindow, GenerateDeps,
+} from './generate';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -138,4 +142,39 @@ test('traces are ordered by the server clock, not by the browser root span', asy
 
   const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(puml.indexOf('GET /api/pets')).toBeLessThan(puml.indexOf('POST /api/visits'));
+});
+
+// The whole point of the cache: after one Tempo fetch, changing the detail level is
+// an offline, sub-second switch — no Grafana, no backend, no re-run of the suite.
+test('generateFromWindows caches the spans it fetched', async () => {
+  const written: Record<string, string> = {};
+  const deps: GenerateDeps = {
+    searchTraceIds: async () => ['t1'],
+    getTrace: async () => fixture,
+    writeFile: (p, c) => { written[p] = c; },
+    log: () => {},
+  };
+  await generateFromWindows(
+    [{title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000}], '/out', deps,
+  );
+
+  const cached: CachedSource[] = JSON.parse(written[spanCachePathFor('/out')]);
+  expect(cached.map((c) => c.source)).toEqual(['src/add-visit.spec.ts']);
+  expect(cached[0].scenarios[0].title).toBe('Add a visit');
+  expect(cached[0].scenarios[0].traces[0].length).toBeGreaterThan(0);
+});
+
+test('renderScenarios redraws from the cache at another detail level, touching no Tempo', () => {
+  const written: Record<string, string> = {};
+  const cached: CachedSource[] = JSON.parse(JSON.stringify([{
+    source: 'src/add-visit.spec.ts',
+    scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}],
+  }]));
+
+  renderScenarios(cached, '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
+    {sql: 'off', httpBodies: false});
+
+  const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
+  expect(puml).toContain('== Add a visit ==');
+  expect(puml).not.toContain('SELECT');
 });
