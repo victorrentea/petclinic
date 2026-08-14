@@ -4,6 +4,7 @@
 
 # OS / IDE (apply to any module)
 .DS_Store
+.pytest_cache/
 Thumbs.db
 .idea/
 *.iml
@@ -22,7 +23,6 @@ Thumbs.db
 
 # Maven / Java build output (any module)
 target/
-**/.jqwik-database
 
 # Node (any module)
 node_modules/
