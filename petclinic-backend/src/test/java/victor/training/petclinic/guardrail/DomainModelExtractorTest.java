@@ -57,8 +57,9 @@ class DomainModelExtractorTest {
         List<Association> associations = collectAssociations(entities);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("@startuml\n!pragma layout smetana\n\n");
+        sb.append("@startuml\n\n");
         sb.append("title Domain Model\n");
+        sb.append("caption Diagram generated from code using reflection\n");
         sb.append("footer Generated via reflection from domain/*.java by DomainModelExtractorTest\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n\n");

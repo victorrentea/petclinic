@@ -1,18 +1,8 @@
 @startuml
 
-title Logical Architecture
-caption All lines are ArchUnit-tested vs code by PackagesArchTest
+title Backend Logical Architecture (java packages)
+caption All packages and dependencies are ArchUnit-tested vs code by PackagesArchTest
 footer petclinic-backend/docs/packages.puml
-
-' ── The recipe (portable — copy this trick to any project) ───────────────────
-' CYCLES ARE RED. A bidirectional dependency is ONE red double-headed line.
-' ArchUnit cannot parse `<-->` arrows, so back each red line with two
-' `-[hidden]->` arrows, which it *does* parse as the two directed edges:
-'     [A] <-[#red,thickness=2]-> [B]
-'     [A] -[hidden]-> [B]
-'     [B] -[hidden]-> [A]
-' No cycle exists here today; the convention is in place so one shows up red.
-' ─────────────────────────────────────────────────────────────────────────────
 
 skinparam shadowing false
 skinparam componentStyle rectangle
@@ -23,6 +13,11 @@ component {
   BackGroundColor #ECEFF1
   LineColor #546E7A
   FontStyle bold
+  ' only the component name is bold; the package pattern above it stays plain
+  ' (never write a stereotype in a comment — PackagesArchTest greps the raw file)
+  stereotype {
+    FontStyle plain
+  }
 }
 arrow {
   LineColor #78909C

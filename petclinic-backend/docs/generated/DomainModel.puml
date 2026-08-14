@@ -1,7 +1,7 @@
 @startuml
-!pragma layout smetana
 
 title Domain Model
+caption Diagram generated from code using reflection
 footer Generated via reflection from domain/*.java by DomainModelExtractorTest
 
 hide empty members
