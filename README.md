@@ -24,7 +24,7 @@ engineering techniques you can lift into your own projects.
   across Classes / Packages / Modules lenses, with commits/committers mined from
   git history. The generators are a tool of their own —
   [victorrentea/code-city](https://github.com/victorrentea/code-city), point it at any
-  Java repo; `petclinic-backend/generate-codecity.sh` runs it on this one.
+  Java repo; `petclinic-backend/docs/generate-codecity.sh` runs it on this one.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
   run are replayed into a PlantUML sequence diagram.
 - **MCP server** hosted by the backend at `/mcp` (Spring AI) — tools/resources
