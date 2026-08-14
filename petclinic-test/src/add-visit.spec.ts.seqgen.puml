@@ -1,0 +1,75 @@
+@startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+' Drawn from real Tempo traces of src/add-visit.spec.ts, for the scenarios tagged
+' @generate_sequence. Change the test, not this file, then regenerate with
+' petclinic-test/run-tests-with-tracing.sh
+'
+' Detail shown here: SQL shown, values as ? · HTTP bodies not shown
+' Want more or less? The traces already carry all of it — re-rendering replays
+' them from Tempo (~1s): no test run, no backend, no browser, only Grafana up:
+'     cd petclinic-test
+'     npm run diagram:lean    # call flow only
+'     npm run diagram         # + the SQL statements
+'     npm run diagram:full    # + bound parameter values + JSON payloads
+'     SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram
+hide footbox
+title src/add-visit.spec.ts
+footer @generate_sequence — generated from real traces, do not edit
+participant Browser
+participant Backend
+participant DB
+== Add a visit to an existing pet from the owner detail page ==
+Browser -> Backend: GET /api/owners/{ownerId}
+activate Backend
+Backend -> Backend: OwnerRepository.findById
+activate Backend
+Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
+activate Backend
+Backend -> DB: SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?
+deactivate Backend
+Backend -> Backend: Transaction.commit
+deactivate Backend
+Backend -> DB: SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?
+Backend -> DB: SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?
+Backend --> Browser: 200
+deactivate Backend
+Browser -> Backend: GET /api/owners/{ownerId}
+activate Backend
+Backend -> Backend: OwnerRepository.findById
+activate Backend
+Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
+activate Backend
+Backend -> DB: SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?
+deactivate Backend
+Backend -> Backend: Transaction.commit
+deactivate Backend
+Backend -> DB: SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?
+Backend -> DB: SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?
+Backend --> Browser: 200
+deactivate Backend
+Browser -> Backend: GET /api/pets/{petId}
+activate Backend
+Backend -> Backend: PetRepository.findById
+activate Backend
+Backend -> Backend: Session.find victor.training.petclinic.domain.Pet
+activate Backend
+Backend -> DB: SELECT p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, …\nFROM pets p1_0\nLEFT JOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.id=?
+deactivate Backend
+Backend -> Backend: Transaction.commit
+deactivate Backend
+Backend -> DB: SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?
+Backend --> Browser: 200
+deactivate Backend
+Browser -> Backend: POST /api/owners/{ownerId}/pets/{petId}/visits
+activate Backend
+Backend -> Backend: VisitRepository.save
+activate Backend
+Backend -> Backend: Session.persist victor.training.petclinic.domain.Visit
+activate Backend
+Backend -> DB: INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)
+deactivate Backend
+Backend -> Backend: Transaction.commit
+deactivate Backend
+Backend --> Browser: 201
+deactivate Backend
+@enduml

@@ -29,7 +29,7 @@ OUT_DIR="$ROOT/pr-diff"
 SUMMARY="$OUT_DIR/SUMMARY.md"
 
 # The architecture diagrams worth diffing, as `path|title`. Deliberately explicit
-# rather than a glob over *.puml: the e2e *.seq.puml and the C4 views are noisy
+# rather than a glob over *.puml: the e2e *.seqgen.puml and the C4 views are noisy
 # per-run artifacts, not the structural picture a reviewer needs.
 DIAGRAMS=(
   "petclinic-backend/docs/generated/DomainModel.puml|Domain model"

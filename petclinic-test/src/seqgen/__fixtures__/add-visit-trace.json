@@ -8,7 +8,10 @@
         { "traceId": "t1", "spanId": "f1", "name": "click",
           "kind": "SPAN_KIND_INTERNAL", "startTimeUnixNano": "1000", "attributes": [] },
         { "traceId": "t1", "spanId": "f2", "parentSpanId": "f1", "name": "HTTP POST",
-          "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1100", "attributes": [] }
+          "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1100", "attributes": [
+            { "key": "http.request.body", "value": { "stringValue": "{\"description\":\"annual checkup\",\"date\":\"2026-08-20\"}" } },
+            { "key": "http.response.body", "value": { "stringValue": "{\"id\":42,\"description\":\"annual checkup\"}" } }
+          ] }
       ] } ]
     },
     {
@@ -23,7 +26,14 @@
           "kind": "SPAN_KIND_INTERNAL", "startTimeUnixNano": "1300", "attributes": [] },
         { "traceId": "t1", "spanId": "b3", "parentSpanId": "b2", "name": "INSERT petclinic.visits",
           "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1400",
-          "attributes": [ { "key": "db.system", "value": { "stringValue": "postgresql" } } ] }
+          "attributes": [
+            { "key": "db.system", "value": { "stringValue": "postgresql" } },
+            { "key": "db.statement", "value": { "stringValue": "insert into petclinic.visits (description,pet_id,visit_date,id) values (?,?,?,?)" } },
+            { "key": "db.query.parameter.0", "value": { "stringValue": "annual checkup" } },
+            { "key": "db.query.parameter.1", "value": { "stringValue": "7" } },
+            { "key": "db.query.parameter.2", "value": { "stringValue": "2026-08-20" } },
+            { "key": "db.query.parameter.3", "value": { "stringValue": "42" } }
+          ] }
       ] } ]
     }
   ]

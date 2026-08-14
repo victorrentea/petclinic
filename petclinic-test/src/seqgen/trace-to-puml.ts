@@ -1,3 +1,7 @@
+import {applyParameters, formatSqlLabel} from './sql-label';
+import {jsonNote} from './json-label';
+import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions} from './options';
+
 export interface NormSpan {
   traceId: string;
   spanId: string;
@@ -60,11 +64,44 @@ const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 
 function participantOf(span: NormSpan): string {
   if (span.serviceName === 'petclinic-frontend') return 'Browser';
-  const isDb = 'db.system' in span.attributes || 'db.statement' in span.attributes
-    || DB_NAME_RE.test(span.name);
+  // both the old and the stable database semconv, since the agent can emit either
+  const isDb = ['db.system', 'db.system.name', 'db.statement', 'db.query.text']
+    .some((key) => key in span.attributes) || DB_NAME_RE.test(span.name);
   if (span.kind === 'CLIENT' && isDb) return 'DB';
   if (span.serviceName === 'petclinic-backend') return 'Backend';
   return span.serviceName || 'unknown';
+}
+
+// `db.statement` is the OTel agent's SQL; `db.query.text` is the same thing
+// under the stable database semconv, emitted once the agent opts in.
+function sqlOf(span: NormSpan): string | undefined {
+  const sql = span.attributes['db.statement'] ?? span.attributes['db.query.text'];
+  return sql?.trim() || undefined;
+}
+
+const PARAMETER_KEY_RE = /^db\.query\.parameter\.(\d+)$/;
+
+/** The bound values, in placeholder order — captured only when the agent is asked to. */
+function parametersOf(span: NormSpan): string[] {
+  return Object.entries(span.attributes)
+    .map(([key, value]) => ({index: PARAMETER_KEY_RE.exec(key)?.[1], value}))
+    .filter((p): p is {index: string; value: string} => p.index !== undefined)
+    .sort((a, b) => Number(a.index) - Number(b.index))
+    .map((p) => p.value);
+}
+
+/** What the arrow into this span says: the SQL for a DB hop, the span name otherwise. */
+function arrowLabel(span: NormSpan, target: string, options: DiagramOptions): string {
+  if (target !== 'DB' || options.sql === 'off') return span.name;
+  const sql = sqlOf(span);
+  if (!sql) return span.name;
+  return formatSqlLabel(options.sql === 'values' ? applyParameters(sql, parametersOf(span)) : sql);
+}
+
+// The browser is where the payloads are captured, so they sit on the frontend
+// CLIENT span — one level up from the backend SERVER span the arrow is drawn from.
+function bodyOf(span: NormSpan, parent: NormSpan | undefined, key: string): string | undefined {
+  return span.attributes[key] ?? parent?.attributes[key];
 }
 
 // Only a meaningful label (e.g. an HTTP status) is worth a return arrow;
@@ -82,45 +119,59 @@ function orderedParticipants(present: Set<string>): string[] {
   return [...ranked, ...rest];
 }
 
-function emitTrace(spans: NormSpan[], lines: string[], present: Set<string>): void {
+function emitTrace(
+  spans: NormSpan[], lines: string[], present: Set<string>, options: DiagramOptions,
+): void {
   const byId = new Map(spans.map((s) => [s.spanId, s]));
   const childrenOf = (id: string) => spans
     .filter((s) => s.parentSpanId === id)
     .sort((a, b) => a.startNano - b.startNano);
 
-  const walk = (span: NormSpan): void => {
+  const walk = (span: NormSpan, out: string[]): void => {
     const p = participantOf(span);
-    present.add(p);
     const parent = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
     const selfCustom = pp === p && span.kind === 'INTERNAL';
 
-    if (crossing) {
-      lines.push(`${pp} -> ${p}: ${span.name}`);
-      lines.push(`activate ${p}`);
-    } else if (selfCustom) {
-      // a self-span (e.g. @WithSpan) opens a nested activation so its own
-      // children — DB calls, downstream requests — render inside its lifetime
-      lines.push(`${p} -> ${p}: ${span.name}`);
-      lines.push(`activate ${p}`);
+    // Draw the subtree first: an activation bar is only worth its vertical space
+    // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
+    // query, a self-span with no children — gets a bare arrow instead.
+    const inner: string[] = [];
+    for (const child of childrenOf(span.spanId)) walk(child, inner);
+
+    if (!crossing && !selfCustom) {
+      out.push(...inner);
+      return;
     }
 
-    for (const child of childrenOf(span.spanId)) walk(child);
+    const bodies = options.httpBodies && crossing ? `${pp}, ${p}` : undefined;
 
     if (crossing) {
-      const label = returnLabel(span);
-      if (label) lines.push(`${p} --> ${pp}: ${label}`);
-      lines.push(`deactivate ${p}`);
-    } else if (selfCustom) {
-      lines.push(`deactivate ${p}`);
+      present.add(pp!);
+      present.add(p);
+      out.push(`${pp} -> ${p}: ${arrowLabel(span, p, options)}`);
+      if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
+    } else {
+      // a self-span (e.g. @WithSpan) whose children — DB calls, downstream
+      // requests — render inside its own lifetime
+      present.add(p);
+      out.push(`${p} -> ${p}: ${span.name}`);
     }
+
+    if (inner.length > 0) out.push(`activate ${p}`);
+    out.push(...inner);
+    // Only a meaningful return (an HTTP status) earns an arrow back.
+    const label = crossing ? returnLabel(span) : undefined;
+    if (label) out.push(`${p} --> ${pp}: ${label}`);
+    if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.response.body')));
+    if (inner.length > 0) out.push(`deactivate ${p}`);
   };
 
   const roots = spans
     .filter((s) => !s.parentSpanId || !byId.has(s.parentSpanId))
     .sort((a, b) => a.startNano - b.startNano);
-  for (const root of roots) walk(root);
+  for (const root of roots) walk(root, lines);
 }
 
 /** One tagged test, with every trace its interactions produced. */
@@ -129,7 +180,11 @@ export interface DiagramScenario {
   traces: NormSpan[][];
 }
 
-export function renderPuml(title: string, scenarios: DiagramScenario[]): string {
+export function renderPuml(
+  title: string,
+  scenarios: DiagramScenario[],
+  options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
+): string {
   // A trace can carry spans yet draw nothing — a lone browser `click`, say. Render
   // each in isolation and keep only what has content, so an empty trace cannot
   // pad a section, and a scenario left with nothing cannot leave a bare header.
@@ -140,7 +195,7 @@ export function renderPuml(title: string, scenarios: DiagramScenario[]): string 
     for (const spans of scenario.traces) {
       const traceLines: string[] = [];
       const drawn = new Set<string>();
-      emitTrace(spans, traceLines, drawn);
+      emitTrace(spans, traceLines, drawn, options);
       if (traceLines.length === 0) continue;
       drawn.forEach((p) => present.add(p));
       lines.push(...traceLines);
@@ -157,6 +212,15 @@ export function renderPuml(title: string, scenarios: DiagramScenario[]): string 
     `' Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
     `' @generate_sequence. Change the test, not this file, then regenerate with`,
     `' petclinic-test/run-tests-with-tracing.sh`,
+    `'`,
+    `' Detail shown here: ${describeOptions(options)}`,
+    `' Want more or less? The traces already carry all of it — re-rendering replays`,
+    `' them from Tempo (~1s): no test run, no backend, no browser, only Grafana up:`,
+    `'     cd petclinic-test`,
+    `'     npm run diagram:lean    # call flow only`,
+    `'     npm run diagram         # + the SQL statements`,
+    `'     npm run diagram:full    # + bound parameter values + JSON payloads`,
+    `'     SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram`,
     'hide footbox',
     `title ${title}`,
     // footer (bottom of every page) states the diagram's provenance
@@ -172,6 +236,8 @@ interface DiagramSection {
   lines: string[];
 }
 
-export function spansToPuml(spans: NormSpan[], title: string): string {
-  return renderPuml(title, [{title, traces: [spans]}]);
+export function spansToPuml(
+  spans: NormSpan[], title: string, options?: DiagramOptions,
+): string {
+  return renderPuml(title, [{title, traces: [spans]}], options);
 }

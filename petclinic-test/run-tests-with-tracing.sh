@@ -3,7 +3,7 @@
 # run-tests-with-tracing.sh — run the e2e tests against an ALREADY-RUNNING stack
 # so each @generate_sequence scenario's browser↔backend↔DB trace is captured in
 # Tempo and turned into a PlantUML sequence diagram
-# (petclinic-test/src/<test file>.seq.puml, next to the test itself).
+# (petclinic-test/src/<test file>.seqgen.puml, next to the test itself).
 #
 # This script assumes the full telemetry stack is already up, started the
 # canonical way (so the backend has the OpenTelemetry Java agent attached):
@@ -55,7 +55,7 @@ log "✅ Stack reachable (Grafana, Tempo/OTLP, Postgres, backend+agent, frontend
 # The backend only attaches the OTel agent when :4318 was already up at boot, so
 # a backend started before Grafana passes every check above yet emits no traces.
 backend_pid="$(lsof -nP -iTCP:$BACKEND_PORT -sTCP:LISTEN -t 2>/dev/null | head -1 || true)"
-if [[ -n "$backend_pid" ]] && ! ps -o command= -p "$backend_pid" 2>/dev/null | grep -q 'opentelemetry-javaagent.jar'; then
+if [[ -n "$backend_pid" ]] && ! ps -o command= -p "$backend_pid" 2>/dev/null | grep -q 'opentelemetry-javaagent'; then
   die "Backend on :$BACKEND_PORT is running WITHOUT the OpenTelemetry agent — restart it (./start-backend.sh) first."
 fi
 log "✅ Backend has the OpenTelemetry agent attached."
@@ -68,7 +68,7 @@ cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 
 # Clean slate once, for both suites: each regenerates only the diagrams of its
 # own source files, so neither may do this sweep itself.
-rm -f "$UI_TEST_DIR"/src/*.seq.puml
+rm -f "$UI_TEST_DIR"/src/*.seqgen.puml
 
 log "Running the tagged Playwright spec…"
 npm run test:sequence
@@ -81,7 +81,7 @@ cucumber_status=$?
 
 # --- report the diagrams produced ------------------------------------------
 shopt -s nullglob
-diagrams=("$UI_TEST_DIR"/src/*.seq.puml)
+diagrams=("$UI_TEST_DIR"/src/*.seqgen.puml)
 if ((${#diagrams[@]})); then
   log "📊 Collected ${#diagrams[@]} sequence diagram(s):"
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done
