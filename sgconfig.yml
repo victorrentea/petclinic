@@ -1,7 +1,0 @@
-# ast-grep — structural lint rules that enforce conventions written in CLAUDE.md.
-# Run manually:  sg scan
-# Test rules:    sg test
-ruleDirs:
-  - .ast-grep/rules
-testConfigs:
-  - testDir: .ast-grep/rule-tests

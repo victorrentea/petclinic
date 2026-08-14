@@ -6,8 +6,8 @@ import {Browser, BrowserContext, chromium, Page} from '@playwright/test';
 import * as path from 'path';
 import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../seqgen/sequence-tag';
-import {runGenerate, CUCUMBER_SOURCES} from '../seqgen/generate';
+import {shouldGenerateSequence} from '../genseq/sequence-tag';
+import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 
 setDefaultTimeout(60_000);
 
@@ -53,7 +53,7 @@ setWorldConstructor(PlaywrightWorld);
 // Playwright suite's windows are left alone — they are what a later
 // `npm run diagram` replays. Mirrors Playwright's global-setup.
 //
-// Deliberately NOT deleting any .seqgen.puml: each suite rewrites only the diagrams
+// Deliberately NOT deleting any .genseq.puml: each suite rewrites only the diagrams
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
   forgetWindowsOf(WINDOWS_FILE, CUCUMBER_SOURCES);

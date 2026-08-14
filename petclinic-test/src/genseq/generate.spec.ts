@@ -1,7 +1,11 @@
 import {test, expect} from '@playwright/test';
+import {parseTempoTrace} from './trace-to-puml';
 import * as fs from 'fs';
 import * as path from 'path';
-import {slugify, diagramPathFor, generateFromWindows, TestWindow, GenerateDeps} from './generate';
+import {
+  slugify, diagramPathFor, generateFromWindows, renderScenarios, spanCachePathFor,
+  CachedSource, TestWindow, GenerateDeps,
+} from './generate';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -13,9 +17,9 @@ test('slugify makes filesystem-safe names', () => {
 
 test('the diagram is filed next to its test, named after it', () => {
   expect(diagramPathFor('/root', 'src/owner-search.feature'))
-    .toBe('/root/src/owner-search.feature.seqgen.puml');
+    .toBe('/root/src/owner-search.feature.genseq.puml');
   expect(diagramPathFor('/root', 'src/add-visit.spec.ts'))
-    .toBe('/root/src/add-visit.spec.ts.seqgen.puml');
+    .toBe('/root/src/add-visit.spec.ts.genseq.puml');
 });
 
 // One file per source, however many tagged scenarios it holds — they become
@@ -36,10 +40,10 @@ test('generateFromWindows writes one puml per source file, sectioned by scenario
   const paths = await generateFromWindows(windows, '/out', deps);
 
   expect(paths).toEqual([
-    '/out/src/add-visit.spec.ts.seqgen.puml',
-    '/out/src/owner-search.feature.seqgen.puml',
+    '/out/src/add-visit.spec.ts.genseq.puml',
+    '/out/src/owner-search.feature.genseq.puml',
   ]);
-  const addVisit = written['/out/src/add-visit.spec.ts.seqgen.puml'];
+  const addVisit = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(addVisit).toContain('== Add a visit ==');
   expect(addVisit).toContain('== Cancel a visit ==');
   expect(addVisit).toContain('Browser -> Backend: POST /api/visits');
@@ -79,7 +83,7 @@ test('generateFromWindows retries a window until Tempo has ingested it', async (
   );
   expect(searches).toBe(3);
   expect(slept).toEqual([250, 250]);
-  expect(paths).toEqual(['/out/src/add-visit.spec.ts.seqgen.puml']);
+  expect(paths).toEqual(['/out/src/add-visit.spec.ts.genseq.puml']);
 });
 
 test('generateFromWindows gives up after the configured number of attempts', async () => {
@@ -136,6 +140,41 @@ test('traces are ordered by the server clock, not by the browser root span', asy
     },
   );
 
-  const puml = written['/out/src/add-visit.spec.ts.seqgen.puml'];
+  const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(puml.indexOf('GET /api/pets')).toBeLessThan(puml.indexOf('POST /api/visits'));
+});
+
+// The whole point of the cache: after one Tempo fetch, changing the detail level is
+// an offline, sub-second switch — no Grafana, no backend, no re-run of the suite.
+test('generateFromWindows caches the spans it fetched', async () => {
+  const written: Record<string, string> = {};
+  const deps: GenerateDeps = {
+    searchTraceIds: async () => ['t1'],
+    getTrace: async () => fixture,
+    writeFile: (p, c) => { written[p] = c; },
+    log: () => {},
+  };
+  await generateFromWindows(
+    [{title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000}], '/out', deps,
+  );
+
+  const cached: CachedSource[] = JSON.parse(written[spanCachePathFor('/out')]);
+  expect(cached.map((c) => c.source)).toEqual(['src/add-visit.spec.ts']);
+  expect(cached[0].scenarios[0].title).toBe('Add a visit');
+  expect(cached[0].scenarios[0].traces[0].length).toBeGreaterThan(0);
+});
+
+test('renderScenarios redraws from the cache at another detail level, touching no Tempo', () => {
+  const written: Record<string, string> = {};
+  const cached: CachedSource[] = JSON.parse(JSON.stringify([{
+    source: 'src/add-visit.spec.ts',
+    scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}],
+  }]));
+
+  renderScenarios(cached, '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
+    {sql: 'off', httpBodies: false});
+
+  const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
+  expect(puml).toContain('== Add a visit ==');
+  expect(puml).not.toContain('SELECT');
 });

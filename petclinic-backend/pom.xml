@@ -158,12 +158,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.jqwik</groupId>
-            <artifactId>jqwik</artifactId>
-            <version>1.9.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>7.22.0</version>
@@ -267,7 +261,7 @@
                         <trimTrailingWhitespace/>
                         <removeUnusedImports/>
                         <endWithNewline/>
-                        <eclipse><file>${project.basedir}/../eclipse-formatter.xml</file></eclipse>
+                        <eclipse><file>${project.basedir}/../.config/eclipse-formatter.xml</file></eclipse>
                     </java>
                 </configuration>
             </plugin>

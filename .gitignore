@@ -4,6 +4,7 @@
 
 # OS / IDE (apply to any module)
 .DS_Store
+.pytest_cache/
 Thumbs.db
 .idea/
 *.iml
@@ -22,7 +23,6 @@ Thumbs.db
 
 # Maven / Java build output (any module)
 target/
-**/.jqwik-database
 
 # Node (any module)
 node_modules/
@@ -56,13 +56,14 @@ petclinic-frontend/typings
 
 # petclinic-backend
 petclinic-backend/src/test/postman/reports/
+# otel agent jar + the Code City generators clone: tools, not our source
 petclinic-backend/.tools/
 
 # Generated diagram renders — sources (.puml/.dsl) are tracked; renders viewed via PlantUML proxy URLs (see docs/generated/INDEX.md)
 petclinic-backend/docs/generated/**/*.svg
 petclinic-backend/docs/generated/**/*.png
 
-# e2e trace sequence diagrams: petclinic-test/src/*.seqgen.puml are generated but
+# e2e trace sequence diagrams: petclinic-test/src/*.genseq.puml are generated but
 # tracked, so a PR shows how a change moved the real browser->backend->DB flow.
 
 # Bug-heatmap generated outputs — only the generator scripts are tracked
@@ -93,8 +94,6 @@ rag-vector-store.json
 # playwright-cli scratch (browser skill) — normally redirected to $TMPDIR, see .claude/settings.json
 .playwright-cli/
 
-# Clone of the Code City generators (petclinic-backend/generate-codecity.sh) — a tool, not our source
-/petclinic-backend/.codecity-tool/
 
 # jira-cli skill: project-local PAT override, never commit it
 .jira.env

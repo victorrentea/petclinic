@@ -1,5 +1,5 @@
 import {test} from './support/trace-fixture';
-import {GENERATE_SEQUENCE_TAG} from './seqgen/sequence-tag';
+import {GENERATE_SEQUENCE_TAG} from './genseq/sequence-tag';
 import {
   anOwnerWithAtLeastOnePetExists,
   clickAddVisitForFirstPet,
@@ -15,7 +15,7 @@ import {
 // mutable World — and every sentence stays ctrl-clickable, renameable and
 // type-checked. owner-search.feature is the Gherkin half of the comparison.
 //
-// @generate_sequence turns this run into add-visit.spec.ts.seqgen.puml, right here
+// @generate_sequence turns this run into add-visit.spec.ts.genseq.puml, right here
 // in this folder — one section per tagged test in the file.
 
 const VISIT_DATE = '2026-05-12';

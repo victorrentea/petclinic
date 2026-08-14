@@ -51,10 +51,10 @@ Neither is a translation of the other — pick each for what it is good at:
   regex step lookup, no shared mutable World, and every sentence stays ctrl-clickable,
   renameable and type-checked.
 
-`@generate_sequence` means the same thing on both sides (`src/seqgen/sequence-tag.ts`
+`@generate_sequence` means the same thing on both sides (`src/genseq/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
 Tempo window and get a diagram. Each one is **filed next to its test and named after it** —
-`src/owner-search.feature.seqgen.puml`, `src/add-visit.spec.ts.seqgen.puml` — with one `== section ==`
+`src/owner-search.feature.genseq.puml`, `src/add-visit.spec.ts.genseq.puml` — with one `== section ==`
 per tagged scenario inside, so a file with several tagged scenarios stays one picture. They are
 generated artifacts and say so on their first lines; edit the test, not the `.puml`.
 
@@ -73,7 +73,9 @@ scripts now say so out loud if the order was wrong, instead of silently producin
 Capture and rendering are deliberately separate: the traces always carry everything — the SQL
 statement, the **bound parameter values**, and the JSON request/response payloads — while these
 two switches decide what reaches the page. Changing your mind is therefore a **re-render of the
-traces already in Tempo (~1s)**, not another test run: no backend, no browser, only Grafana up.
+spans cached from the last run (~1s)**, not another test run: no backend, no browser, not even
+Grafana — the fetched spans live in `test-results/trace-spans.json`, and `GENSEQ_REFRESH=1`
+re-fetches them from Tempo when they go stale.
 
 ```sh
 npm run diagram:lean    # call flow only          SEQ_SQL=off       SEQ_HTTP_BODIES=0

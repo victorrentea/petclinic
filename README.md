@@ -24,7 +24,7 @@ engineering techniques you can lift into your own projects.
   across Classes / Packages / Modules lenses, with commits/committers mined from
   git history. The generators are a tool of their own —
   [victorrentea/code-city](https://github.com/victorrentea/code-city), point it at any
-  Java repo; `petclinic-backend/generate-codecity.sh` runs it on this one.
+  Java repo; `petclinic-backend/docs/generate-codecity.sh` runs it on this one.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
   run are replayed into a PlantUML sequence diagram.
 - **MCP server** hosted by the backend at `/mcp` (Spring AI) — tools/resources
@@ -133,6 +133,6 @@ From the https://github.com/victorrentea/petclinic repo…
 - get how to run critical tests before every push and again remotely in CI.
 - copy the CODEOWNERS idea to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
 - write 3 .feature tests for the most critical flows of my app XYZ
-- adopt the technique to generate sequence diagrams from key e2e tests, as in `petclinic-test/src/*.seqgen.puml`.
+- adopt the technique to generate sequence diagrams from key e2e tests, as in `petclinic-test/src/*.genseq.puml`.
 - get the code review skill using local sonar scanner and multi-agent review
 - set up an End/Stop hook that plays a sound when the agent finishes its turn.

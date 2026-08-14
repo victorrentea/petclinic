@@ -23,8 +23,8 @@ Each script is foreground; run them in separate terminals.
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 petclinic-backend/docs/scripts/start-structurizr.sh  # optional: C4model Structurizr view on localhost:8081
-petclinic-backend/generate-codecity.sh  # rebuilds docs/generated/codecity/codecity.html, the 3D code view.
-     # Renderer = github.com/victorrentea/code-city, cloned into petclinic-backend/.codecity-tool/
+petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/codecity.html, the 3D code view.
+     # Renderer = github.com/victorrentea/code-city, cloned into petclinic-backend/.tools/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 

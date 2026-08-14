@@ -12,12 +12,22 @@ export interface TestWindow {
   endMs: number;
 }
 
-export interface GenerateDeps {
-  searchTraceIds: (traceql: string, startMs: number, endMs: number) => Promise<string[]>;
-  getTrace: (traceId: string) => Promise<unknown>;
+/** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
+export interface RenderDeps {
   writeFile: (filePath: string, content: string) => void;
   log: (msg: string) => void;
+}
+
+export interface GenerateDeps extends RenderDeps {
+  searchTraceIds: (traceql: string, startMs: number, endMs: number) => Promise<string[]>;
+  getTrace: (traceId: string) => Promise<unknown>;
   sleep?: (ms: number) => Promise<void>;
+}
+
+/** One source file's scenarios, as fetched from Tempo — the input a re-render replays. */
+export interface CachedSource {
+  source: string;
+  scenarios: DiagramScenario[];
 }
 
 // Tempo ingests asynchronously, so a search fired the instant the suite ends
@@ -51,9 +61,18 @@ async function searchWithRetry(
   return [];
 }
 
-/** The diagram sits next to its test, named after it: owner-search.feature.seqgen.puml */
+/**
+ * The spans behind the last fetch, kept so a re-render needs nothing running.
+ * Tempo is queried once, when the tests run; every later `npm run diagram*` replays
+ * this file — which is what makes switching detail level a sub-second, offline switch.
+ */
+export function spanCachePathFor(rootDir: string): string {
+  return `${rootDir}/test-results/trace-spans.json`;
+}
+
+/** The diagram sits next to its test, named after it: owner-search.feature.genseq.puml */
 export function diagramPathFor(rootDir: string, source: string): string {
-  return `${rootDir}/${source}.seqgen.puml`;
+  return `${rootDir}/${source}.genseq.puml`;
 }
 
 /**
@@ -92,7 +111,7 @@ export async function generateFromWindows(
   windows: TestWindow[], rootDir: string, deps: GenerateDeps, retry: RetryOptions = {},
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
 ): Promise<string[]> {
-  const written: string[] = [];
+  const fetched: CachedSource[] = [];
   // One diagram per source file, one section per scenario in it — so the picture
   // is filed where its test is, and reads in the order the file does.
   for (const [source, group] of groupBySource(windows)) {
@@ -120,7 +139,22 @@ export async function generateFromWindows(
       }
     }
     if (scenarios.length === 0) continue;
+    fetched.push({source, scenarios});
+  }
 
+  if (fetched.length > 0) {
+    deps.writeFile(spanCachePathFor(rootDir), JSON.stringify(fetched));
+  }
+  return renderScenarios(fetched, rootDir, deps, options);
+}
+
+/** Draw the diagrams from spans already in hand — the offline half of the pipeline. */
+export function renderScenarios(
+  sources: CachedSource[], rootDir: string, deps: RenderDeps,
+  options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
+): string[] {
+  const written: string[] = [];
+  for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
     deps.writeFile(filePath, renderPuml(source, scenarios, options));
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
@@ -141,6 +175,23 @@ export const CUCUMBER_SOURCES = /\.feature$/;
 export async function runGenerate(ownedSources?: RegExp): Promise<void> {
   const root = path.join(__dirname, '..', '..');
   const windowsFile = path.join(root, 'test-results', 'trace-windows.json');
+  const options = optionsFromEnv();
+  console.log(`🎚️  Detail: ${describeOptions(options)}`);
+
+  // A standalone re-render (npm run diagram*) replays the cached spans: no Grafana,
+  // no backend, no test run — just the detail level you asked for. A test run always
+  // goes to Tempo instead (it owns fresh traces), and GENSEQ_REFRESH=1 forces that
+  // path by hand when the cache is stale.
+  const cacheFile = spanCachePathFor(root);
+  if (!ownedSources && !process.env.GENSEQ_REFRESH && fs.existsSync(cacheFile)) {
+    const cached: CachedSource[] = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+    const paths = renderScenarios(cached, root, {
+      writeFile: (p, c) => fs.writeFileSync(p, c),
+      log: (m) => console.log(m),
+    }, options);
+    console.log(`📊 Re-rendered ${paths.length} diagram(s) from ${cacheFile} — Grafana not needed`);
+    return;
+  }
 
   if (!fs.existsSync(windowsFile)) {
     console.warn(`ℹ️  ${windowsFile} not found — no diagrams generated.`);
@@ -174,9 +225,6 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
       console.log(`⏳ Waiting ${(settleMs / 1000).toFixed(1)}s for the last trace window to close…`);
       await sleep(settleMs);
     }
-
-    const options = optionsFromEnv();
-    console.log(`🎚️  Detail: ${describeOptions(options)}`);
 
     const paths = await generateFromWindows(windows, root, deps, {}, options);
     console.log(`📊 Generated ${paths.length} diagram(s)`);

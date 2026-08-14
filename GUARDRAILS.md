@@ -33,7 +33,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | **SonarCloud Quality Gate** | Code-quality / new-code regressions | CI runs `SonarSource/sonarqube-scan-action` + `sonarqube-quality-gate-action` (config in `sonar-project.properties`). Java is analyzed with the custom **`petclinic agentic (extend)`** quality profile — it **extends** the built-in "Sonar agentic AI" and **overrides `java:S107`** ("too many parameters") to **max 5** params. The gate fails the build on new-code violations. |
 | Build hygiene | Webpack & Javadoc warnings | `npm run build` fails on any webpack `Warning:` (`scripts/build-strict.sh`); CI runs `mvn javadoc:javadoc -Dmaven.javadoc.failOnError=true` |
 | Spotless formatting | Java code-style drift | pre-commit runs `spotless:apply` on staged Java + re-stages; **CI runs `spotless:check`** as a fail-gate (Spotless has no lifecycle binding, so `mvn test` alone wouldn't catch it) |
-| OpenAPI lint (Spectral) | API-spec style/quality | pre-push **and CI** run `npm run lint:openapi` against `.spectral.yaml` over the freshly extracted `openapi.yaml` |
+| OpenAPI lint (Spectral) | API-spec style/quality | pre-push **and CI** run `npm run lint:openapi` against `.config/spectral.yaml` over the freshly extracted `openapi.yaml` |
 
 ### Chatbot (Embabel agents + assistant)
 
@@ -52,7 +52,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `gitleaks` | Secrets in commits | pre-commit blocks commits with detected secrets; **CI re-scans the pushed commits with gitleaks** (range-scoped, like the hook's staged-diff scan) so `--no-verify` can't slip a secret past review |
 | CODEOWNERS Elders review | Sensitive files | `@victorrentea/elders` review required for `.github/CODEOWNERS`, `.claude/settings.json`, `openapi.yaml`, `petclinic-backend/DB.sql`, `db/migration/`, `docs/packages.puml`, `docs/c4model.dsl`, `docs/c4model.c3.dsl`, `docs/generated/DomainModel.puml`, `**/pom.xml`, `petclinic-frontend/package.json`, `petclinic-backend/pom-libs.txt`, `.github/workflows/ci.yml` |
 | `.claude/settings.json` ask | Local AI edits to sensitive files | Prompts Claude before Edit/Write of the CODEOWNERS-protected paths |
-| Pre-commit / pre-push hooks | Local drift detection | pre-commit: `gitleaks`, Spotless apply, TS/DB.puml/unversioned-deps regen + stage. pre-push: guardrail tests, Spectral lint, `ng build`, and all drift/`--check` gates |
+| Pre-commit / pre-push hooks (enable once: `git config core.hooksPath .githooks`) | Local drift detection | pre-commit: `gitleaks`, Spotless apply, TS/DB.puml/unversioned-deps regen + stage. pre-push: guardrail tests, Spectral lint, `ng build`, and all drift/`--check` gates |
 | CI workflow (`ci.yml`) | Push/PR drift detection (the hook backstop) | Mirrors every hook action so `--no-verify` can't bypass them: `gitleaks detect`, `spotless:check`, the DB.sql↔DB.puml guard, `mvn test` + Javadoc, Spectral lint, strict frontend build, the unversioned-deps regen, and SonarCloud scan/gate. Auto-commits regenerated artifacts with `[skip ci]`; fork PRs fail with an actionable error |
 
 ## Considered, not scheduled

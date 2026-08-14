@@ -3,19 +3,19 @@
 #
 # The generators are NOT in this repo — they are a tool of their own, reusable on any
 # Java checkout: https://github.com/victorrentea/code-city . This script keeps a clone
-# of them under petclinic-backend/.codecity-tool/ (gitignored, kept beside the docs it
-# generates) and runs it against PetClinic, with the same title and output folder the
+# of them under petclinic-backend/.tools/codecity/ (gitignored, out of the way of the
+# sources) and runs it against PetClinic, with the same title and output folder the
 # committed page already uses, so re-running produces a clean diff of what actually
 # changed in the code, not of how it was generated.
 #
-#   petclinic-backend/generate-codecity.sh            # refresh the tool, then rebuild the page
-#   CODECITY_NO_PULL=1 petclinic-backend/generate-codecity.sh   # keep the tool as-is (offline / pinned)
+#   petclinic-backend/docs/generate-codecity.sh            # refresh the tool, then rebuild the page
+#   CODECITY_NO_PULL=1 petclinic-backend/docs/generate-codecity.sh   # keep the tool as-is (offline / pinned)
 set -euo pipefail
 
-BACKEND="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO="$(cd "$BACKEND/.." && pwd)"
 TOOL_URL="${CODECITY_TOOL_URL:-https://github.com/victorrentea/code-city.git}"
-TOOL_DIR="${CODECITY_TOOL_DIR:-$BACKEND/.codecity-tool}"
+TOOL_DIR="${CODECITY_TOOL_DIR:-$BACKEND/.tools/codecity}"
 OUT="$BACKEND/docs/generated/codecity"
 
 if [ ! -d "$TOOL_DIR/.git" ]; then
