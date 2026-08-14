@@ -110,7 +110,7 @@ test('SEQ_SQL=off falls back to the generic span name', () => {
 
 test('SEQ_SQL=values puts the bound parameters back into the statement', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'values', httpBodies: false});
-  expect(puml).toContain('VALUES (annual checkup, 7, 2026-08-20, 42)');
+  expect(puml).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
   expect(puml).not.toContain('VALUES (?, ?, ?, ?)');
 });
 

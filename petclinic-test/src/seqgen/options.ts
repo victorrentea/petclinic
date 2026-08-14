@@ -17,11 +17,13 @@ export const DEFAULT_DIAGRAM_OPTIONS: DiagramOptions = {
   httpBodies: false,
 };
 
-const SQL_ALIASES: Record<string, SqlDetail> = {
-  off: 'off', none: 'off', no: 'off', '0': 'off', false: 'off',
-  statement: 'statement', on: 'statement', '1': 'statement', true: 'statement', yes: 'statement',
-  values: 'values', value: 'values', params: 'values', parameters: 'values', full: 'values',
-};
+// Object.create(null): a plain literal answers to `constructor` and `__proto__`,
+// which would sail past the fallback below and put `SQL undefined` in the header.
+const SQL_ALIASES: Record<string, SqlDetail> = Object.assign(Object.create(null), {
+  off: 'off', '0': 'off', false: 'off',
+  statement: 'statement', '1': 'statement', true: 'statement',
+  values: 'values', params: 'values',
+});
 
 const TRUTHY = /^(1|true|yes|on)$/i;
 const FALSY = /^(0|false|no|off)$/i;

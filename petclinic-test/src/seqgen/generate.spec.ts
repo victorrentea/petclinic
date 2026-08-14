@@ -97,3 +97,45 @@ test('generateFromWindows gives up after the configured number of attempts', asy
   expect(searches).toBe(4);
   expect(paths).toEqual([]);
 });
+
+// A scenario is several traces and the diagram's whole claim is that it shows the
+// order they happened in — Tempo hands them back newest-first.
+const tempoTrace = (spans: {name: string; service: string; startNano: number; kind: string}[]) => ({
+  batches: spans.map((s, i) => ({
+    resource: {attributes: [{key: 'service.name', value: {stringValue: s.service}}]},
+    scopeSpans: [{spans: [{
+      traceId: 't', spanId: `s${i}`, parentSpanId: i === 0 ? '' : 's0',
+      name: s.name, kind: s.kind, startTimeUnixNano: String(s.startNano), attributes: [],
+    }]}],
+  })),
+});
+
+test('traces are ordered by the server clock, not by the browser root span', async () => {
+  // The browser root of the POST opens *before* the request — it is the click that
+  // navigated — so ordering by "earliest span of any kind" would put the POST first.
+  const post = tempoTrace([
+    {name: 'click', service: 'petclinic-frontend', kind: 'SPAN_KIND_INTERNAL', startNano: 1_000},
+    {name: 'POST /api/visits', service: 'petclinic-backend', kind: 'SPAN_KIND_SERVER', startNano: 3_000},
+  ]);
+  const get = tempoTrace([
+    {name: 'click', service: 'petclinic-frontend', kind: 'SPAN_KIND_INTERNAL', startNano: 1_500},
+    {name: 'GET /api/pets', service: 'petclinic-backend', kind: 'SPAN_KIND_SERVER', startNano: 2_000},
+  ]);
+
+  const written: Record<string, string> = {};
+  await generateFromWindows(
+    [{title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 1, endMs: 2}],
+    '/out',
+    {
+      searchTraceIds: async () => ['post', 'get'],
+      getTrace: async (id) => (id === 'post' ? post : get),
+      writeFile: (p, c) => {
+        written[p] = c;
+      },
+      log: () => {},
+    },
+  );
+
+  const puml = written['/out/src/add-visit.spec.ts.seqgen.puml'];
+  expect(puml.indexOf('GET /api/pets')).toBeLessThan(puml.indexOf('POST /api/visits'));
+});

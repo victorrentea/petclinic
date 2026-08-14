@@ -7,7 +7,7 @@ import * as path from 'path';
 import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../seqgen/sequence-tag';
-import {runGenerate} from '../seqgen/generate';
+import {runGenerate, CUCUMBER_SOURCES} from '../seqgen/generate';
 
 setDefaultTimeout(60_000);
 
@@ -56,7 +56,7 @@ setWorldConstructor(PlaywrightWorld);
 // Deliberately NOT deleting any .seqgen.puml: each suite rewrites only the diagrams
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
-  forgetWindowsOf(WINDOWS_FILE, /\.feature$/);
+  forgetWindowsOf(WINDOWS_FILE, CUCUMBER_SOURCES);
 });
 
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {
@@ -91,7 +91,9 @@ After(async function (this: PlaywrightWorld) {
 });
 
 // Render a PlantUML sequence diagram for each recorded window. Best-effort:
+// Only this suite's diagrams: the Playwright windows in the same file are there so a
+// standalone `npm run diagram` can re-render every diagram, not for this run to rewrite.
 // runGenerate() never throws, so a telemetry hiccup can't fail the suite.
 AfterAll(async function () {
-  await runGenerate();
+  await runGenerate(CUCUMBER_SOURCES);
 });
