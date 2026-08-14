@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {parseTempoTrace, renderPuml, DiagramScenario, NormSpan} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
+import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 
 export interface TestWindow {
   title: string;
@@ -50,9 +51,9 @@ async function searchWithRetry(
   return [];
 }
 
-/** The diagram sits next to its test, named after it: owner-search.feature.seq.puml */
+/** The diagram sits next to its test, named after it: owner-search.feature.seqgen.puml */
 export function diagramPathFor(rootDir: string, source: string): string {
-  return `${rootDir}/${source}.seq.puml`;
+  return `${rootDir}/${source}.seqgen.puml`;
 }
 
 function groupBySource(windows: TestWindow[]): Map<string, TestWindow[]> {
@@ -67,6 +68,7 @@ function groupBySource(windows: TestWindow[]): Map<string, TestWindow[]> {
 
 export async function generateFromWindows(
   windows: TestWindow[], rootDir: string, deps: GenerateDeps, retry: RetryOptions = {},
+  options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
 ): Promise<string[]> {
   const written: string[] = [];
   // One diagram per source file, one section per scenario in it — so the picture
@@ -90,7 +92,7 @@ export async function generateFromWindows(
     if (scenarios.length === 0) continue;
 
     const filePath = diagramPathFor(rootDir, source);
-    deps.writeFile(filePath, renderPuml(source, scenarios));
+    deps.writeFile(filePath, renderPuml(source, scenarios, options));
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     written.push(filePath);
   }
@@ -124,8 +126,11 @@ export async function runGenerate(): Promise<void> {
     await sleep(settleMs);
   }
 
+  const options = optionsFromEnv();
+  console.log(`🎚️  Detail: ${describeOptions(options)}`);
+
   try {
-    const paths = await generateFromWindows(windows, root, deps);
+    const paths = await generateFromWindows(windows, root, deps, {}, options);
     console.log(`📊 Generated ${paths.length} diagram(s)`);
   } catch (err) {
     console.warn(`⚠️  Diagram generation failed (continuing): ${(err as Error).message}`);

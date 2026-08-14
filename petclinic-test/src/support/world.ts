@@ -3,9 +3,8 @@ import {
   setDefaultTimeout, setWorldConstructor, World, IWorldOptions,
 } from '@cucumber/cucumber';
 import {Browser, BrowserContext, chromium, Page} from '@playwright/test';
-import * as fs from 'fs';
 import * as path from 'path';
-import {appendWindow} from './trace-window-store';
+import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../seqgen/sequence-tag';
 import {runGenerate} from '../seqgen/generate';
@@ -49,13 +48,15 @@ export class PlaywrightWorld extends World {
 
 setWorldConstructor(PlaywrightWorld);
 
-// Drop the previous run's recorded windows, so the diagrams regenerated below
-// come only from scenarios that just ran. Mirrors Playwright's global-setup.
+// Drop the previous run's windows for the scenarios this runner owns (*.feature),
+// so the diagrams regenerated below come only from scenarios that just ran. The
+// Playwright suite's windows are left alone — they are what a later
+// `npm run diagram` replays. Mirrors Playwright's global-setup.
 //
-// Deliberately NOT deleting any .seq.puml: each suite rewrites only the diagrams
+// Deliberately NOT deleting any .seqgen.puml: each suite rewrites only the diagrams
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
-  fs.rmSync(WINDOWS_FILE, {force: true});
+  forgetWindowsOf(WINDOWS_FILE, /\.feature$/);
 });
 
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {

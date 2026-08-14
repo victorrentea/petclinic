@@ -133,6 +133,6 @@ From the https://github.com/victorrentea/petclinic repo…
 - get how to run critical tests before every push and again remotely in CI.
 - copy the CODEOWNERS idea to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
 - write 3 .feature tests for the most critical flows of my app XYZ
-- adopt the technique to generate sequence diagrams from key e2e tests, as in `petclinic-test/src/*.seq.puml`.
+- adopt the technique to generate sequence diagrams from key e2e tests, as in `petclinic-test/src/*.seqgen.puml`.
 - get the code review skill using local sonar scanner and multi-agent review
 - set up an End/Stop hook that plays a sound when the agent finishes its turn.

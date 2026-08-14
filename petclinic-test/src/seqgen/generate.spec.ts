@@ -13,9 +13,9 @@ test('slugify makes filesystem-safe names', () => {
 
 test('the diagram is filed next to its test, named after it', () => {
   expect(diagramPathFor('/root', 'src/owner-search.feature'))
-    .toBe('/root/src/owner-search.feature.seq.puml');
+    .toBe('/root/src/owner-search.feature.seqgen.puml');
   expect(diagramPathFor('/root', 'src/add-visit.spec.ts'))
-    .toBe('/root/src/add-visit.spec.ts.seq.puml');
+    .toBe('/root/src/add-visit.spec.ts.seqgen.puml');
 });
 
 // One file per source, however many tagged scenarios it holds — they become
@@ -36,10 +36,10 @@ test('generateFromWindows writes one puml per source file, sectioned by scenario
   const paths = await generateFromWindows(windows, '/out', deps);
 
   expect(paths).toEqual([
-    '/out/src/add-visit.spec.ts.seq.puml',
-    '/out/src/owner-search.feature.seq.puml',
+    '/out/src/add-visit.spec.ts.seqgen.puml',
+    '/out/src/owner-search.feature.seqgen.puml',
   ]);
-  const addVisit = written['/out/src/add-visit.spec.ts.seq.puml'];
+  const addVisit = written['/out/src/add-visit.spec.ts.seqgen.puml'];
   expect(addVisit).toContain('== Add a visit ==');
   expect(addVisit).toContain('== Cancel a visit ==');
   expect(addVisit).toContain('Browser -> Backend: POST /api/visits');
@@ -79,7 +79,7 @@ test('generateFromWindows retries a window until Tempo has ingested it', async (
   );
   expect(searches).toBe(3);
   expect(slept).toEqual([250, 250]);
-  expect(paths).toEqual(['/out/src/add-visit.spec.ts.seq.puml']);
+  expect(paths).toEqual(['/out/src/add-visit.spec.ts.seqgen.puml']);
 });
 
 test('generateFromWindows gives up after the configured number of attempts', async () => {

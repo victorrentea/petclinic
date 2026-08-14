@@ -1,10 +1,13 @@
-import * as fs from 'fs';
 import * as path from 'path';
+import {forgetWindowsOf} from './trace-window-store';
 
-// Drop the previous run's recorded windows, so global-teardown regenerates
-// diagrams only for tests that just ran — otherwise a window left behind by the
-// Cucumber suite is searched again here, and a diagram nobody asked for is
-// either rewritten or reported as skipped. Mirrors world.ts's BeforeAll.
+// Forget the windows of the tests this runner owns (*.spec.ts), so global-teardown
+// regenerates their diagrams from this run alone. The Cucumber suite's windows stay
+// on file: they are what a later `npm run diagram` replays to re-render every
+// diagram at another detail level. Mirrors world.ts's BeforeAll.
 export default async function globalSetup(): Promise<void> {
-  fs.rmSync(path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json'), {force: true});
+  forgetWindowsOf(
+    path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json'),
+    /\.spec\.ts$/,
+  );
 }
