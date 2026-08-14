@@ -144,7 +144,7 @@ def render_puml(cur: Schema) -> str:
         "@startuml",
         "title Database Schema (ERD)",
         "caption Diagram generated from DB incremental scripts",
-        "footer Generated from exported DB.sql by db_schema_to_puml.py",
+        "footer db/migration/** -> petclinic-backend/DB.sql -> petclinic-backend/docs/generated/DB.puml",
         "hide circle",
         "hide empty members",     # drop the empty methods compartment + its separator line
         "skinparam linetype ortho",

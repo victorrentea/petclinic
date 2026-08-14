@@ -60,7 +60,7 @@ class DomainModelExtractorTest {
         sb.append("@startuml\n\n");
         sb.append("title Domain Model\n");
         sb.append("caption Diagram generated from code using Java reflection\n");
-        sb.append("footer DomainModelExtractorTest: domain/*.java -> "
+        sb.append("footer domain/*.java -> "
                 + "petclinic-backend/docs/generated/DomainModel.puml\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n\n");
