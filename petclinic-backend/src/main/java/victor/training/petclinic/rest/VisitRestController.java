@@ -10,7 +10,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
-import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
@@ -64,7 +63,7 @@ public class VisitRestController {
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
         Visit visit = visitMapper.toVisit(visitDto);
-        visit.setVet(resolveVet(visitDto.getVetId()));
+        visit.setVet(vetRepository.getByIdOrNull(visitDto.getVetId()));
         visitRepository.save(visit);
         return visit.getId();
     }
@@ -74,16 +73,8 @@ public class VisitRestController {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
-        currentVisit.setVet(resolveVet(visitDto.getVetId()));
+        currentVisit.setVet(vetRepository.getByIdOrNull(visitDto.getVetId()));
         visitRepository.save(currentVisit);
-    }
-
-    /** Null vetId means "no vet attended (yet)"; an unknown one is rejected. */
-    private Vet resolveVet(Integer vetId) {
-        if (vetId == null) {
-            return null;
-        }
-        return vetRepository.findById(vetId).orElseThrow();
     }
 
     @Transactional

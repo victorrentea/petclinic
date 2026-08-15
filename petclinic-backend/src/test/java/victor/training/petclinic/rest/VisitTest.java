@@ -3,6 +3,7 @@ package victor.training.petclinic.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,9 @@ public class VisitTest {
 
     @Autowired
     VetRepository vetRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     int visitId;
     int petId;
@@ -242,6 +246,7 @@ public class VisitTest {
     void getById_exposesTheAttendingVet() throws Exception {
         Vet vet = vetRepository.findById(anExistingVetId()).orElseThrow();
         visitRepository.findById(visitId).orElseThrow().setVet(vet);
+        flushAndClear();
 
         VisitDto responseDto = callGet(visitId);
 
@@ -263,6 +268,7 @@ public class VisitTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
+        flushAndClear();
         assertThat(visitRepository.findById(visitId).orElseThrow().getVet().getId()).isEqualTo(vetId);
     }
 
@@ -270,6 +276,7 @@ public class VisitTest {
     void update_clearsTheAttendingVet() throws Exception {
         visitRepository.findById(visitId).orElseThrow()
                 .setVet(vetRepository.findById(anExistingVetId()).orElseThrow());
+        flushAndClear();
         VisitFieldsDto update = new VisitFieldsDto();
         update.setDate(LocalDate.now().plusDays(1));
         update.setDescription("vet no longer known");
@@ -279,7 +286,16 @@ public class VisitTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
+        flushAndClear();
         assertThat(visitRepository.findById(visitId).orElseThrow().getVet()).isNull();
+    }
+
+    // The test and the controller share one persistence context, so a read-back without
+    // this would assert against the very instance the controller just mutated in memory —
+    // green even if the save() were deleted. Flushing and clearing forces a real round-trip.
+    private void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private int anExistingVetId() {

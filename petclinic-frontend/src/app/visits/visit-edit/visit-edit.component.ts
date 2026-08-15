@@ -32,7 +32,7 @@ export class VisitEditComponent implements OnInit {
               private ownerService: OwnerService,
               private route: ActivatedRoute,
               private router: Router) {
-    this.visit = {} as Visit;
+    this.visit = {vetId: null} as unknown as Visit;
     this.currentPet = {} as Pet;
     this.currentOwner = {} as Owner;
     this.currentPetType = {} as PetType;

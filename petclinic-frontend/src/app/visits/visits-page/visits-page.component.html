@@ -27,7 +27,7 @@
               {{ visit.ownerFirstName }} {{ visit.ownerLastName }}
             </a>
           </td>
-          <td class="visit-vet">{{ visit.vetFirstName ? visit.vetFirstName + ' ' + visit.vetLastName : '—' }}</td>
+          <td class="visit-vet">{{ visit | vetName }}</td>
         </tr>
         </tbody>
       </table>
