@@ -78,9 +78,11 @@ Grafana — the fetched spans live in `test-results/trace-spans.json`, and `GENS
 re-fetches them from Tempo when they go stale.
 
 ```sh
-npm run diagram:lean    # call flow only          SEQ_SQL=off       SEQ_HTTP_BODIES=0
-npm run diagram         # + the SQL statements    SEQ_SQL=statement SEQ_HTTP_BODIES=0  (default)
-npm run diagram:full    # + values + payloads     SEQ_SQL=values    SEQ_HTTP_BODIES=1
+npm run diagram         # simplified, click to reveal      SEQ_INTERACTIVE=1  (default)
+npm run diagram:reveal  # the same, payloads included too  SEQ_HTTP_BODIES=1
+npm run diagram:lean    # baked in: call flow only         SEQ_SQL=off       SEQ_HTTP_BODIES=0
+npm run diagram:static  # baked in: + the SQL statements   SEQ_SQL=statement SEQ_HTTP_BODIES=0
+npm run diagram:full    # baked in: + values + payloads    SEQ_SQL=values    SEQ_HTTP_BODIES=1
 ```
 
 | switch | values | what it does |
@@ -88,7 +90,44 @@ npm run diagram:full    # + values + payloads     SEQ_SQL=values    SEQ_HTTP_BOD
 | `SEQ_SQL` | `off` | the DB arrow keeps the generic span name (`SELECT petclinic.owners`) |
 | | `statement` | the statement itself, folded one clause per line, `?` for each bound value |
 | | `values` | the same, with the bound values put back: `WHERE o1_0.id=2` |
-| `SEQ_HTTP_BODIES` | `0` / `1` | the JSON payload of each REST round-trip, as a note on the arrow |
+| `SEQ_HTTP_BODIES` | `0` / `1` | the JSON payload of each REST round-trip |
+| `SEQ_INTERACTIVE` | `1` | *(default)* draw none of it; hang it off each arrow to be clicked open |
+| | `0` | bake it into the picture, at the level `SEQ_SQL` / `SEQ_HTTP_BODIES` ask for |
+
+### Progressive disclosure
+
+`SEQ_SQL` and `SEQ_HTTP_BODIES` say **what** a diagram carries; `SEQ_INTERACTIVE` says
+whether it is *drawn* or *clicked open*. Baked in, every arrow shows the same amount of
+detail whether or not you care about it, and a diagram with the SQL on it is unreadable
+as a picture of the call flow — which is the thing the reader wanted first.
+
+So the default diagram is the simplified one, and each arrow that has more to say carries
+a `⊕` marker: a PlantUML link (`[[genseq://<id>{…} ⊕]]`) that renders as an `<a href>` in
+the SVG. Clicking that arrow in `review/review.html` opens a panel beside it —
+
+| arrow | click 1 | click 2 | click 3 |
+|---|---|---|---|
+| `Backend -> DB` | the statement, `?` for each bound value | the same, values put back | closed |
+| `GET /api/…`, `201` | that call's JSON body | closed | |
+
+State is per arrow, not a switch on the page: one arrow open says nothing about the next.
+
+Two files come out of a run, and both belong to the diagram:
+
+| | |
+|---|---|
+| `src/<test>.genseq.puml` | the picture, with a stable id on each revealable arrow |
+| `src/<test>.genseq.json` | what those ids reveal — statements, bound values, payloads |
+
+The id is a **hash of the detail**, never a counter: `.claude/skills/human-review/scripts/puml-diff.sh` renders the
+diagram as a *textual* diff against `origin/main`, so a positional id would shift with
+every inserted query and repaint the whole diagram below it as changed. Two arrows running
+the identical statement on identical values therefore share one id, which is also why the
+N+1 loops in these diagrams cost one entry rather than forty.
+
+`.claude/skills/human-review/scripts/build-review-html.py` inlines the sidecar next to the SVG it belongs to, so the
+whole thing keeps working from `file://` with no network — the guide still survives being
+mailed as a single file.
 
 Every generated file states its own level and repeats these commands in its header, so nobody
 has to come back here to find out. Two things make the values possible: the OTel Java agent is

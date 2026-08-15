@@ -1,7 +1,13 @@
 import {test, expect} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import {NormSpan, parseTempoTrace, renderPuml, spansToPuml} from './trace-to-puml';
+import {NormSpan, parseTempoTrace, renderDiagram, renderPuml, spansToPuml} from './trace-to-puml';
+import {DiagramOptions} from './options';
+
+// The diagrams are interactive by default now, so every assertion about a *baked in*
+// label has to say so — which is also the regression test that the static path, the
+// one CI and the committed snapshots depend on, still renders exactly what it did.
+const STATIC: DiagramOptions = {sql: 'statement', httpBodies: false, interactive: false};
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -24,7 +30,7 @@ test('parseTempoTrace normalizes spans with service name and kind', () => {
 });
 
 test('spansToPuml renders browser→backend→DB with the custom span', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   expect(puml).toContain('@startuml');
   expect(puml).toContain('@enduml');
   expect(puml).toContain('participant Browser');
@@ -41,7 +47,7 @@ test('spansToPuml renders browser→backend→DB with the custom span', () => {
 });
 
 test('spansToPuml nests a self-span\'s DB call inside the self-span activation', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   // book-visit (@WithSpan) opens its own activation; the INSERT it triggers
   // must be drawn inside that activation, then the activation closes.
   expect(puml).toContain(
@@ -57,7 +63,7 @@ test('spansToPuml nests a self-span\'s DB call inside the self-span activation',
 // Every activation bar costs vertical space, and a bar around a call that
 // reaches nobody encloses nothing — the diagram grows for no information.
 test('a call that reaches nothing draws a bare arrow, no activation bar', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   // the INSERT is a leaf: arrow in, nothing inside, no box on the DB lifeline
   expect(puml).not.toContain('activate DB');
   expect(puml).not.toContain('deactivate DB');
@@ -66,7 +72,7 @@ test('a call that reaches nothing draws a bare arrow, no activation bar', () => 
 });
 
 test('spansToPuml footers the diagram with its provenance', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   // a PlantUML footer renders at the very bottom — provenance, not diagram content
   expect(puml).toContain('footer @generate_sequence');
   // the title stays a clean single line, no subtitle, no note, no caption
@@ -78,7 +84,7 @@ test('spansToPuml footers the diagram with its provenance', () => {
 // "SELECT petclinic.owners" is true of every query the repository fires; the
 // statement is what tells the reader which one this arrow is.
 test('a DB arrow carries the statement, not the generic span name', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   expect(puml).not.toContain('Backend -> DB: INSERT petclinic.visits');
   expect(puml).toContain('VALUES (?, ?, ?, ?)');
 });
@@ -96,20 +102,20 @@ const dbSpanWithoutStatement: NormSpan[] = [
 ];
 
 test('a DB span with no statement attribute keeps its span name', () => {
-  const puml = spansToPuml(dbSpanWithoutStatement, 'no statement');
+  const puml = spansToPuml(dbSpanWithoutStatement, 'no statement', STATIC);
   expect(puml).toContain('Backend -> DB: SELECT petclinic.owners');
 });
 
 // The traces carry SQL, bound values and payloads all at once; these switches
 // decide what reaches the page, so a different level of detail is a re-render.
 test('SEQ_SQL=off falls back to the generic span name', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'off', httpBodies: false});
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'off'});
   expect(puml).toContain('Backend -> DB: INSERT petclinic.visits');
   expect(puml).not.toContain('VALUES');
 });
 
 test('SEQ_SQL=values puts the bound parameters back into the statement', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'values', httpBodies: false});
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'values'});
   expect(puml).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
   expect(puml).not.toContain('VALUES (?, ?, ?, ?)');
 });
@@ -117,7 +123,7 @@ test('SEQ_SQL=values puts the bound parameters back into the statement', () => {
 // The payloads are captured in the browser, so they sit on the frontend CLIENT
 // span — one level above the backend SERVER span the arrow is drawn from.
 test('SEQ_HTTP_BODIES draws the request and response payloads as notes', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'statement', httpBodies: true});
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, httpBodies: true});
   expect(puml).toContain('note over Browser, Backend');
   expect(puml).toContain('"description": "annual checkup"');
   expect(puml).toContain('"id": 42');
@@ -125,12 +131,12 @@ test('SEQ_HTTP_BODIES draws the request and response payloads as notes', () => {
 });
 
 test('payloads stay off unless asked for', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit');
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   expect(puml).not.toContain('note over');
 });
 
 test('the legend states the detail level and how to change it, visibly in the image', () => {
-  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {sql: 'values', httpBodies: true});
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'values', httpBodies: true});
   expect(puml).toContain('  Detail shown here: SQL shown, with values · HTTP bodies shown');
   expect(puml).toContain('npm run diagram:lean');
   expect(puml).toContain('SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1');
@@ -171,4 +177,92 @@ test('renderPuml drops traces that would draw nothing', () => {
   expect(puml).toContain('== Add a visit ==');
   expect(puml).not.toContain('== Clicked around ==');
   expect(puml).toContain('Browser -> Backend: POST /api/visits');
+});
+
+// ── progressive disclosure ────────────────────────────────────────────────────
+// The default picture is the simplified one, and every arrow that has more to say
+// carries a link marker whose id addresses that arrow's detail in the sidecar.
+
+const MARKER = /\[\[genseq:\/\/([a-z0-9-]+)\{[^}]*\} ⊕\]\]/;
+
+const detailOn = (line: string, details: Record<string, {title: string; steps: {label: string; text: string}[]}>) =>
+  details[MARKER.exec(line)![1]];
+
+const lineWith = (puml: string, needle: string) =>
+  puml.split('\n').find((l) => l.includes(needle))!;
+
+test('an interactive diagram keeps the DB arrow simplified and hangs the SQL off a marker', () => {
+  const {puml, details} = renderDiagram('add-visit.spec.ts',
+    [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]);
+
+  const arrow = lineWith(puml, 'Backend -> DB:');
+  expect(arrow).toContain('Backend -> DB: INSERT petclinic.visits');
+  expect(arrow).not.toContain('VALUES');
+  expect(arrow).toMatch(MARKER);
+
+  const entry = detailOn(arrow, details.details);
+  expect(entry.steps.map((s) => s.label)).toEqual([
+    'statement as sent — ? for each bound value',
+    'with the bound values put back',
+  ]);
+  expect(entry.steps[0].text).toContain('VALUES (?, ?, ?, ?)');
+  expect(entry.steps[1].text).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
+});
+
+// A DB span the agent captured no parameters for has nothing to put back, so its
+// cycle is one step long rather than a second click onto the same text.
+test('a statement with no bound parameters offers only the statement', () => {
+  const spans = parseTempoTrace(fixture).map((s) => ({
+    ...s,
+    attributes: Object.fromEntries(
+      Object.entries(s.attributes).filter(([k]) => !k.startsWith('db.query.parameter.'))),
+  }));
+  const {puml, details} = renderDiagram('x', [{title: 'x', traces: [spans]}]);
+  expect(detailOn(lineWith(puml, 'Backend -> DB:'), details.details).steps).toHaveLength(1);
+});
+
+test('the payloads become markers on the request and the response, not notes', () => {
+  const {puml, details} = renderDiagram('add-visit.spec.ts',
+    [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}],
+    {sql: 'statement', httpBodies: true, interactive: true});
+
+  expect(puml).not.toContain('note over');
+
+  const request = detailOn(lineWith(puml, 'Browser -> Backend:'), details.details);
+  expect(request.steps[0].label).toBe('request body');
+  expect(request.steps[0].text).toContain('"description": "annual checkup"');
+
+  const response = detailOn(lineWith(puml, 'Backend --> Browser:'), details.details);
+  expect(response.steps[0].label).toBe('response body');
+  expect(response.steps[0].text).toContain('"id": 42');
+});
+
+test('payloads stay unrevealable unless asked for, SQL off leaves no marker at all', () => {
+  const plain = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}]);
+  expect(lineWith(plain.puml, 'Browser -> Backend:')).not.toMatch(MARKER);
+
+  const none = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
+    {sql: 'off', httpBodies: false, interactive: true});
+  expect(none.puml).not.toMatch(MARKER);
+  expect(none.details.details).toEqual({});
+});
+
+// The review page renders a *textual* diff of the .puml, so an id that moved with
+// its arrow's position would repaint every arrow below an inserted one as changed.
+test('a marker id follows the arrow content, not its position in the file', () => {
+  const one = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}]);
+  const two = renderDiagram('x', [
+    {title: 'earlier', traces: [parseTempoTrace(fixture)]},
+    {title: 'x', traces: [parseTempoTrace(fixture)]},
+  ]);
+  expect(MARKER.exec(lineWith(two.puml, 'Backend -> DB:'))![1])
+    .toBe(MARKER.exec(lineWith(one.puml, 'Backend -> DB:'))![1]);
+});
+
+test('an interactive diagram tones its link markup down and says how to use it', () => {
+  const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
+    {sql: 'values', httpBodies: true, interactive: true});
+  expect(puml).toContain('skinparam hyperlinkUnderline false');
+  expect(puml).toContain("click an\n  arrow (or its ⊕) to reveal that one call's SQL / JSON payloads");
+  expect(puml).toContain('  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads');
 });
