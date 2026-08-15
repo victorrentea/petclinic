@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Collect every mechanical review artifact for a change set into review/assets/,
-# so /human-review-guide spends its turns on judgement rather than on plumbing.
+# so /human-review spends its turns on judgement rather than on plumbing.
 #
 # Deliberately a thin orchestrator over the repo's canonical generators — it
 # copies none of their logic. Duplicating puml_diff.py or architecture-diff.sh
