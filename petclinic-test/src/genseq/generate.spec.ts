@@ -3,7 +3,7 @@ import {parseTempoTrace} from './trace-to-puml';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-  slugify, diagramPathFor, generateFromWindows, renderScenarios, spanCachePathFor,
+  slugify, detailsPathFor, diagramPathFor, generateFromWindows, renderScenarios, spanCachePathFor,
   CachedSource, TestWindow, GenerateDeps,
 } from './generate';
 
@@ -24,6 +24,41 @@ test('the diagram is filed next to its test, named after it', () => {
 
 // One file per source, however many tagged scenarios it holds — they become
 // sections of the same diagram rather than files scattered by scenario name.
+test('what the markers reveal is filed beside the diagram, and is not itself a diagram', async () => {
+  const written: Record<string, string> = {};
+  renderScenarios(
+    [{source: 'src/add-visit.spec.ts',
+      scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
+    '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
+    {sql: 'statement', httpBodies: true, interactive: true},
+  );
+
+  expect(detailsPathFor('/out', 'src/add-visit.spec.ts'))
+    .toBe('/out/src/add-visit.spec.ts.genseq.json');
+  const index = JSON.parse(written['/out/src/add-visit.spec.ts.genseq.json']);
+  expect(index.version).toBe(1);
+  // every id in the index is addressed by a marker in the picture beside it
+  for (const id of Object.keys(index.details)) {
+    expect(written['/out/src/add-visit.spec.ts.genseq.puml']).toContain(`[[genseq://${id}{`);
+  }
+});
+
+// A static diagram has nothing left to reveal, so it must not leave a sidecar behind
+// claiming otherwise.
+test('the static path writes the picture alone, and drops a sidecar left by an earlier level', () => {
+  const written: Record<string, string> = {};
+  const removed: string[] = [];
+  renderScenarios(
+    [{source: 'src/add-visit.spec.ts',
+      scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
+    '/out',
+    {writeFile: (p, c) => { written[p] = c; }, removeFile: (p) => removed.push(p), log: () => {}},
+    {sql: 'values', httpBodies: true, interactive: false},
+  );
+  expect(Object.keys(written)).toEqual(['/out/src/add-visit.spec.ts.genseq.puml']);
+  expect(removed).toEqual(['/out/src/add-visit.spec.ts.genseq.json']);
+});
+
 test('generateFromWindows writes one puml per source file, sectioned by scenario', async () => {
   const written: Record<string, string> = {};
   const deps: GenerateDeps = {
@@ -172,7 +207,7 @@ test('renderScenarios redraws from the cache at another detail level, touching n
   }]));
 
   renderScenarios(cached, '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
-    {sql: 'off', httpBodies: false});
+    {sql: 'off', httpBodies: false, interactive: false});
 
   const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(puml).toContain('== Add a visit ==');

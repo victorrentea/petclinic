@@ -30,7 +30,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Failures are the only videos worth keeping in a normal run. `PW_VIDEO=on` exists for
-    // review-time recording (scripts/record-feature-video.sh), where the point is to film a
+    // review-time recording (.claude/skills/human-review/scripts/record-feature-video.sh), where the point is to film a
     // scenario that PASSES — the acceptance test itself becomes the demo of the feature.
     video: (process.env.PW_VIDEO as 'on' | 'off' | 'retain-on-failure') || 'retain-on-failure',
   },

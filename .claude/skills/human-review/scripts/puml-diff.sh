@@ -12,14 +12,14 @@
 #   structural (class / ER / package)  -> puml_diff.py      set semantics
 #   sequence   (participants + arrows) -> seq_puml_diff.py  ordered-script semantics
 #
-# Output (default review/assets/diagrams/):
+# Output (default .human-review/assets/diagrams/):
 #   <name>.diff.puml   the merged delta
 #   <name>.diff.svg    rendered, when plantuml is on PATH
 #   MANIFEST.tsv       name / source path / kind / status / diff.puml / svg
 #
 # Usage:
 #   scripts/puml-diff.sh [base-ref] [out-dir]
-#   scripts/puml-diff.sh origin/main review/assets/diagrams
+#   scripts/puml-diff.sh origin/main .human-review/assets/diagrams
 #
 # Exit codes: 0 = done (zero changed diagrams is a normal, quiet 0), 2 = bad usage.
 set -euo pipefail
@@ -29,7 +29,7 @@ ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 cd "$ROOT"
 
 BASE_REF="${1:-origin/main}"
-OUT_DIR="${2:-review/assets/diagrams}"
+OUT_DIR="${2:-.human-review/assets/diagrams}"
 
 STRUCT_DIFF="$ROOT/petclinic-backend/docs/scripts/puml-diff/puml_diff.py"
 SEQ_DIFF="$ROOT/petclinic-backend/docs/scripts/puml-diff/seq_puml_diff.py"

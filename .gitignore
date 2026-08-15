@@ -98,5 +98,5 @@ rag-vector-store.json
 # jira-cli skill: project-local PAT override, never commit it
 .jira.env
 
-# Review guide (scripts/build-review-html.py) — regenerate, never commit
-/review/
+# Review guide, built by the human-review skill — regenerate, never commit
+/.human-review/

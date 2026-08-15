@@ -13,7 +13,7 @@ No snippet text ever lives in the JSON: only a `path:from-to` reference, so a
 guide can never drift from the code it quotes.
 
 Usage:
-    build-review-html.py content.json --out review/review.html
+    build-review-html.py content.json --out .human-review/review.html
 """
 from __future__ import annotations
 
@@ -82,9 +82,36 @@ pre.code code { white-space:pre; }
 .diagram { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:1rem; margin:1.1rem 0; }
 .diagram .head { display:flex; justify-content:space-between; align-items:baseline; gap:1rem; flex-wrap:wrap; }
 .diagram .head b { font-size:1rem; }
+.prov { margin:.5rem 0 0; display:flex; gap:.9rem; flex-wrap:wrap; }
+.prov .srcref { margin-bottom:0; }
 .diagram .head span { color:var(--muted); font-size:.82rem; font-family:ui-monospace,Menlo,monospace; }
 .diagram .svgbox { overflow-x:auto; margin-top:.7rem; background:#fff; border-radius:6px; padding:.6rem; }
 .diagram .svgbox svg { max-width:100%; height:auto; display:block; margin:0 auto; }
+/* Progressive disclosure: the diagram arrives simplified, and an arrow that has more
+    to say is clickable. The hit area is a transparent rect the script lays under each
+    such arrow, so the whole band — label, line, marker — answers to one click. */
+.genseq-hot { cursor:pointer; }
+.genseq-hit { fill:transparent; }
+.genseq-hot:hover .genseq-hit { fill:#1a4fa0; fill-opacity:.07; }
+.genseq-hot.genseq-open .genseq-hit { fill:#1a4fa0; fill-opacity:.12; }
+.genseq-hot.genseq-open a[href^="genseq:"] text { font-weight:700; }
+.genseq-hint { margin:.45rem 0 0; color:var(--muted); font-size:.82rem; }
+#genseq-panel { position:absolute; z-index:40; max-width:min(38rem,92vw); min-width:16rem;
+                background:var(--card); color:var(--fg); border:1px solid var(--line);
+                border-left:3px solid var(--link); border-radius:8px;
+                box-shadow:0 8px 28px rgba(0,0,0,.22); padding:.55rem .7rem .7rem; }
+#genseq-panel[hidden] { display:none; }
+#genseq-panel .genseq-head { display:flex; align-items:baseline; gap:.5rem; }
+#genseq-panel .genseq-title { font:600 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+                              flex:1; word-break:break-all; }
+#genseq-panel .genseq-step { color:var(--muted); font-size:.76rem; white-space:nowrap; }
+#genseq-panel button { border:0; background:none; color:var(--muted); cursor:pointer;
+                        font-size:1.1rem; line-height:1; padding:0 .1rem; }
+#genseq-panel button:hover { color:var(--fg); }
+#genseq-panel .genseq-label { color:var(--link); font-size:.8rem; margin:.15rem 0 .4rem; }
+#genseq-panel pre { margin:0; max-height:24rem; overflow:auto; background:var(--code-bg);
+                    border-radius:6px; padding:.5rem .6rem; white-space:pre;
+                    font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
 .badge { border-radius:4px; padding:.1rem .45rem; font-size:.74rem; font-weight:600; text-transform:uppercase;
           letter-spacing:.04em; background:var(--accent-soft); color:var(--accent); }
 .city { display:block; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin:1rem 0; }
@@ -132,13 +159,18 @@ table.stat td.n { text-align:right; color:var(--muted); font-family:ui-monospace
   .v-mid {color:#e6b566;background:linear-gradient(90deg,#453515 0%,#282010 42%,transparent 88%)}
   .v-good{color:#8fd39c;background:linear-gradient(90deg,#1e3d24 0%,#172318 42%,transparent 88%)}
 }
-.vidwrap { max-width:900px; margin:1rem 0; }
+.vidwrap { display:grid; grid-template-columns:minmax(0,1fr) 19rem; gap:.9rem;
+            align-items:start; margin:1rem 0; }
 .vidwrap video { width:100%; display:block; border:1px solid var(--line);
-                  border-radius:8px 8px 0 0; background:#000; }
-.vidcap { border:1px solid var(--line); border-top:0; border-radius:0 0 8px 8px;
-          background:var(--card); padding:.7rem .95rem; min-height:3.2rem;
-          font-size:.95rem; color:var(--fg); }
-.vidcap:empty::before { content:"Press play — each step is narrated here."; color:var(--muted); }
+                  border-radius:8px; background:#000; }
+.transcript { margin:0; padding:.3rem; list-style:none; border:1px solid var(--line);
+              border-radius:8px; background:var(--card); max-height:26rem; overflow-y:auto; }
+.transcript li { display:grid; grid-template-columns:2.9rem 1fr; gap:.5rem; align-items:baseline;
+                  padding:.4rem .5rem; border-radius:5px; cursor:pointer; font-size:.88rem; }
+.transcript li:hover { background:var(--accent-soft); }
+.transcript li.on { background:var(--accent-soft); font-weight:600; }
+.transcript .ts { font:600 11.5px/1.5 ui-monospace,Menlo,monospace; color:var(--link); }
+@media (max-width:820px) { .vidwrap { grid-template-columns:1fr; } }
 video.vid { width:100%; max-width:900px; border:1px solid var(--line); border-radius:8px; display:block; margin:1rem 0; background:#000; }
 footer { margin-top:3.5rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.85rem; }
 """
@@ -147,17 +179,154 @@ footer { margin-top:3.5rem; padding-top:1rem; border-top:1px solid var(--line); 
 CAPTION_JS = """<script>
 document.querySelectorAll('.vidwrap').forEach(function (wrap) {
   var video = wrap.querySelector('video');
-  var cap = wrap.querySelector('.vidcap');
-  var cues = JSON.parse(video.dataset.cues || '[]');
-  if (!cues.length) return;
+  var items = Array.prototype.slice.call(wrap.querySelectorAll('.transcript li'));
+  if (!items.length) return;
+  items.forEach(function (li) {
+    li.addEventListener('click', function () {
+      video.currentTime = parseFloat(li.dataset.t);
+      video.play();
+    });
+  });
   video.addEventListener('timeupdate', function () {
-    var text = '';
-    for (var i = 0; i < cues.length; i++) {
-      if (cues[i].t <= video.currentTime) text = cues[i].text; else break;
-    }
-    if (cap.textContent !== text) cap.textContent = text;
+    var active = null;
+    items.forEach(function (li) {
+      if (parseFloat(li.dataset.t) <= video.currentTime) active = li;
+    });
+    items.forEach(function (li) { li.classList.toggle('on', li === active); });
+    if (!active) return;
+    // Measured against the panel's own box: offsetTop is relative to the nearest
+    // positioned ancestor, which is not necessarily the scroller.
+    var panel = active.parentNode;
+    var a = active.getBoundingClientRect();
+    var p = panel.getBoundingClientRect();
+    if (a.top < p.top) panel.scrollTop += a.top - p.top - 8;
+    else if (a.bottom > p.bottom) panel.scrollTop += a.bottom - p.bottom + 8;
   });
 });
+</script>"""
+
+
+GENSEQ_JS = """<script>
+// Progressive disclosure over the inlined sequence-diagram SVGs. The generator left a
+// PlantUML link on every arrow that has more to say, which PlantUML rendered as
+// <a href="genseq://<id>"> — a stable, generation-time handle, so nothing here has to
+// match rendered label text. The detail itself rides in the sidecar next to each
+// diagram. One click reveals; on a DB arrow a second click swaps `?` for the values
+// that were bound; one more closes it again.
+(function () {
+  var PREFIX = 'genseq://';
+  var panel = null, els = null, current = null;
+
+  function build() {
+    if (panel) return;
+    panel = document.createElement('div');
+    panel.id = 'genseq-panel';
+    panel.hidden = true;
+    panel.innerHTML =
+      '<div class="genseq-head"><span class="genseq-title"></span>' +
+      '<span class="genseq-step"></span>' +
+      '<button type="button" title="close (Esc)" aria-label="close">&times;</button></div>' +
+      '<div class="genseq-label"></div><pre></pre>';
+    document.body.appendChild(panel);
+    els = {
+      title: panel.querySelector('.genseq-title'),
+      step: panel.querySelector('.genseq-step'),
+      label: panel.querySelector('.genseq-label'),
+      body: panel.querySelector('pre'),
+    };
+    panel.querySelector('button').addEventListener('click', close);
+    panel.addEventListener('click', function (ev) { ev.stopPropagation(); });
+  }
+
+  function close() {
+    if (current) current.reset();
+    current = null;
+    if (panel) panel.hidden = true;
+  }
+
+  // Page coordinates, and anchored to the arrow rather than to the pointer: the panel
+  // must stay put while the page scrolls, and still be readable next to what it explains.
+  function place(target) {
+    var box = target.getBoundingClientRect();
+    panel.hidden = false;
+    var width = panel.offsetWidth;
+    var left = Math.min(box.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - width - 12);
+    panel.style.left = Math.max(window.scrollX + 8, left) + 'px';
+    panel.style.top = (box.bottom + window.scrollY + 8) + 'px';
+  }
+
+  function show(entry, index, target) {
+    build();
+    var step = entry.steps[index];
+    els.title.textContent = entry.title;
+    els.step.textContent = entry.steps.length > 1 ? (index + 1) + ' / ' + entry.steps.length : '';
+    els.label.textContent = step.label;
+    els.body.textContent = step.text;
+    place(target);
+  }
+
+  // A transparent rect under the arrow, so the click lands anywhere across the band
+  // instead of only on the glyph PlantUML made into a link.
+  function addHitArea(group) {
+    var box;
+    try { box = group.getBBox(); } catch (e) { return; }
+    if (!box || !box.width) return;
+    var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'genseq-hit');
+    rect.setAttribute('x', box.x - 4);
+    rect.setAttribute('y', box.y - 1);
+    rect.setAttribute('width', box.width + 8);
+    rect.setAttribute('height', Math.max(box.height - 2, 6));
+    rect.setAttribute('rx', '3');
+    group.insertBefore(rect, group.firstChild);
+  }
+
+  document.querySelectorAll('.diagram').forEach(function (diagram) {
+    var carrier = diagram.querySelector('script.genseq-details');
+    if (!carrier) return;
+    var details = (JSON.parse(carrier.textContent) || {}).details || {};
+    var revealable = 0;
+
+    diagram.querySelectorAll('svg a[href^="' + PREFIX + '"]').forEach(function (link) {
+      var entry = details[(link.getAttribute('href') || '').slice(PREFIX.length)];
+      var group = link.closest('g.message') || link.parentNode;
+      // An arrow this change *removed* is re-inserted from the base diagram, and its
+      // detail was never recorded here. Drop the handle rather than offer a dead one.
+      if (!entry || !entry.steps.length) { link.remove(); return; }
+      revealable++;
+
+      var index = -1;
+      var state = {reset: function () { index = -1; group.classList.remove('genseq-open'); }};
+      group.classList.add('genseq-hot');
+      addHitArea(group);
+      group.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (current && current !== state) current.reset();
+        index++;
+        if (index >= entry.steps.length) { close(); return; }
+        current = state;
+        group.classList.add('genseq-open');
+        show(entry, index, link);
+      });
+    });
+
+    if (!revealable) return;
+    var hint = document.createElement('p');
+    hint.className = 'genseq-hint';
+    hint.textContent = 'Simplified on purpose — click any highlighted arrow to reveal its SQL '
+      + '(again for the bound values) or its JSON payload.';
+    diagram.querySelector('.svgbox').insertAdjacentElement('beforebegin', hint);
+  });
+
+  // The panel is placed in page coordinates, so a diagram scrolled sideways under it
+  // would leave it pointing at the wrong arrow.
+  document.querySelectorAll('.diagram .svgbox').forEach(function (box) {
+    box.addEventListener('scroll', close);
+  });
+  document.addEventListener('click', close);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') close(); });
+})();
 </script>"""
 
 
@@ -189,6 +358,23 @@ def inline_svg(path: Path) -> str:
     return svg
 
 
+def genseq_details(rel: str, root: Path) -> str:
+    """The sidecar the generator filed beside the diagram, carried into the page.
+
+    Inlined rather than fetched: review.html is opened from file://, where fetch() of a
+    neighbouring file is blocked, and the guide has to survive being mailed as one file."""
+    if not rel.endswith(".genseq.puml"):
+        return ""
+    sidecar = root / (rel[: -len(".puml")] + ".json")
+    if not sidecar.is_file():
+        return ""
+    # `<` is the only character that can end a <script> block early, and a JSON string
+    # may legally spell it \\u003c — so the payload stays valid JSON and inert to the
+    # HTML parser without any un-escaping step on the other side.
+    payload = sidecar.read_text(encoding="utf-8").replace("<", "\\u003c")
+    return f'<script type="application/json" class="genseq-details">{payload}</script>'
+
+
 def read_manifest(path: Path):
     rows = []
     if not path.is_file():
@@ -199,6 +385,24 @@ def read_manifest(path: Path):
         if line.strip():
             rows.append(dict(zip(header, line.split("\t"))))
     return rows
+
+
+def _provenance(rel: str, root: Path) -> str:
+    """Links back to what produced a diagram: the test that generated it, and the .puml.
+
+    A sequence diagram is evidence only if the reviewer can reach the scenario behind it.
+    The generator files each diagram as `<test-file>.genseq.puml` next to its test, so the
+    source is derivable rather than something the guide has to be told."""
+    links = []
+    if rel.endswith('.genseq.puml'):
+        test = rel[: -len('.genseq.puml')]
+        if (root / test).is_file():
+            links.append(f'<a class="srcref" href="vscode://file/{(root / test).resolve()}:1:1">'
+                          f'generated by {html.escape(Path(test).name)}</a>')
+    if (root / rel).is_file():
+        links.append(f'<a class="srcref" href="vscode://file/{(root / rel).resolve()}:1:1">'
+                      f'{html.escape(Path(rel).name)}</a>')
+    return ('<p class="prov">' + " ".join(links) + '</p>') if links else ''
 
 
 def render_diagrams(spec, root: Path, out_dir: Path) -> str:
@@ -228,6 +432,8 @@ def render_diagrams(spec, root: Path, out_dir: Path) -> str:
             f'{html.escape(r["status"])} · {html.escape(r["kind"])}</span>'
             f'<span>{html.escape(r["source"])}</span></div>'
             + (f"<p>{note}</p>" if note else "")
+            + _provenance(r["source"], root)
+            + genseq_details(r["source"], root)
             + f'<div class="svgbox">{body}</div></div>'
         )
     return "\n".join(parts)
@@ -333,10 +539,15 @@ def main(argv=None) -> int:
             # timeupdate — no track element, which file:// pages are not allowed to load.
             cues_path = out_dir / s["video"].replace(".webm", ".cues.json")
             cues = json.loads(cues_path.read_text(encoding="utf-8")) if cues_path.is_file() else []
+            items = "".join(
+                f'<li data-t="{c["t"]:.2f}"><span class="ts">{int(c["t"]) // 60}:'
+                f'{int(c["t"]) % 60:02d}</span><span>{html.escape(c["text"])}</span></li>'
+                for c in cues
+            )
             vid = (
                 f'<div class="vidwrap"><video controls preload="metadata" '
-                f'src="{html.escape(s["video"])}" data-cues="{html.escape(json.dumps(cues))}">'
-                f'</video><div class="vidcap"></div></div>'
+                f'src="{html.escape(s["video"])}"></video>'
+                f'<ol class="transcript">{items}</ol></div>'
             )
         sections.append(
             f'<h2 id="{html.escape(s["id"])}">{html.escape(s["title"])}</h2>\n'
@@ -422,6 +633,7 @@ def main(argv=None) -> int:
 <footer>{spec.get('footer', '')}</footer>
 </div>
 {CAPTION_JS}
+{GENSEQ_JS}
 </body></html>
 """
     doc = open_links_in_new_tabs(doc)

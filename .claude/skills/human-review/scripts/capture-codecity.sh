@@ -18,7 +18,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 
-OUT="${1:-$ROOT/review/assets/codecity.png}"
+OUT="${1:-$ROOT/.human-review/assets/codecity.png}"
 MODE="${2:-highlight}"
 
 CITY="$ROOT/petclinic-backend/docs/generated/codecity/codecity.html"

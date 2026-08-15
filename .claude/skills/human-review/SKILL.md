@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # /human-review — assemble a review.html for a human
 
-Produce **one page, `review/review.html`**, that lets a human review a change set fast:
+Produce **one page, `.human-review/review.html`**, that lets a human review a change set fast:
 what to look at first, diagram deltas, where it landed in the city, a video of the
 feature working, what it cost in endpoint complexity, and the tests that pin it —
 every code reference a clickable VS Code deep-link, every snippet cut from the working
@@ -15,6 +15,24 @@ tree at build time.
 You are the assembler *and* the janitor: you run the automated reviews and apply the
 fixes nobody would argue with, then hand the human only the calls that are genuinely
 theirs. Do **not** commit or push.
+
+## Where the tooling lives
+
+Everything this skill drives lives in `scripts/` **next to this file**, so the skill is one
+self-contained thing you can read, copy or lift into another repo without hunting through
+the project for its moving parts. This file holds judgement and sequence; `scripts/` holds
+the mechanics.
+
+Two pieces deliberately stay outside it, because they are the project's and not the skill's:
+
+- `petclinic-backend/docs/scripts/puml-diff/{puml_diff,seq_puml_diff}.py` — the diagram
+  differs, which live beside the generators they mirror. `puml-diff.sh` calls them; it does
+  not carry a copy.
+- `scripts/architecture-diff.sh` — CI runs it (`pages-pr-preview.yml`) to publish the PR
+  diagram gallery. It predates this skill and answers a narrower question.
+
+Never inline either one here. A private fork of the review pipeline drifts in silence,
+which is the exact failure the guardrail tests exist to catch.
 
 ## Step 0 — Resolve the change set (from `$ARGUMENTS`)
 
@@ -27,7 +45,7 @@ Default `BASE` to `origin/main`. Every script below diffs against the **merge-ba
 commits that landed on the base after this branch started never show up as this branch's.
 
 Print a one-line scope banner (mode, refs, `--stat`). Empty change set → "Nothing to
-review." and stop. Create `review/assets/`.
+review." and stop. Create `.human-review/assets/`.
 
 ## Step 1 — Run the automated reviews, fix what is not disputable
 
@@ -46,6 +64,17 @@ in two, and say out loud which pile each landed in:
 Never argue a finding away silently. If you skip one, it goes in the list with a
 one-line reason.
 
+### Commit the work you found; leave your own fixes uncommitted
+
+Before touching anything, **commit whatever is already in the working tree** — the change
+set under review, and any in-flight work — so the branch has a clean baseline and the
+reviewer can see the "before" as history. Then make your fixes and **leave them
+uncommitted**. Their whole value is that `git diff` shows, at a glance, exactly what an
+agent touched and nothing else. Committing them buries that in a log entry nobody diffs.
+
+If a file has to be committed for a later step to work (a merge refuses to run over an
+uncommitted change to a file it rewrites), commit it and say which one, and why.
+
 ### Do not comment your own decisions into the code
 
 The reasoning for what you changed belongs in the guide, not in the source. Never leave
@@ -59,7 +88,7 @@ When in doubt, leave the code bare.
 ## Step 2 — Diagram deltas (red = added, red + struck = removed)
 
 ```sh
-scripts/puml-diff.sh $BASE review/assets/diagrams
+.claude/skills/human-review/scripts/puml-diff.sh $BASE .human-review/assets/diagrams
 ```
 
 Diffs **every** `.puml` that differs from the merge-base — committed, modified or
@@ -102,14 +131,19 @@ serving the old behaviour — the diagram would then be a picture of code you ar
 reviewing. Check `ps` for the process's path, and `curl` one endpoint for a field the
 change introduces, before trusting the trace.
 
-Re-run `scripts/puml-diff.sh` afterwards so the regenerated diagrams land in the
-manifest: a brand-new diagram renders all-red, and an existing one that gained a call
-shows just the new arrows in red.
+Re-run `.claude/skills/human-review/scripts/puml-diff.sh` afterwards so the regenerated diagrams land in the manifest.
+A diagram that did not exist before is shown **plain**, not red — reddening every line of
+something new says "all of this changed" when what happened is "this is new".
+
+**Show what generated each diagram.** A sequence diagram is evidence only if the reviewer
+can get to the test that produced it: give every diagram in the guide a link to the
+scenario source (`file:from-to`, so VS Code opens it at the test) and a link to the `.puml`
+itself. A picture with no provenance is a picture they have to trust.
 
 ## Step 4 — Code City screenshot
 
 ```sh
-scripts/capture-codecity.sh review/assets/codecity.png highlight
+.claude/skills/human-review/scripts/capture-codecity.sh .human-review/assets/codecity.png highlight
 ```
 
 Regenerate the city first if the branch moved (`petclinic-backend/generate-codecity.sh`);
@@ -123,7 +157,7 @@ Embed the PNG **wrapped in a link to `codecity.html`** so a click opens the live
 Record the feature actually working, with Playwright, straight into the guide:
 
 ```sh
-scripts/record-feature-video.sh review/assets/<feature>.webm
+.claude/skills/human-review/scripts/record-feature-video.sh .human-review/assets/<feature>.webm
 ```
 
 It drives the flow through the same selectors the e2e suite uses, deliberately slowed, and
@@ -145,7 +179,7 @@ the *whole flow* behind each entry point, read from bytecode. An entry point is 
 `@JmsListener` family count too, each tagged with its `kind`.
 
 Get the baseline by running the same test at the merge-base (or by reading the committed JSON
-from that ref), then render with `scripts/endpoint-complexity-delta.py before.json after.json`,
+from that ref), then render with `.claude/skills/human-review/scripts/endpoint-complexity-delta.py before.json after.json`,
 which groups by kind (HTTP → MCP → listeners → jobs) and colours **green for an increase, red
 for a decrease** — colour reads as authorship (what the branch added/removed), not as judgement.
 Report `before → after (Δ)` **ranked inside the full list**, so the reviewer sees whether the
@@ -158,7 +192,7 @@ otherwise read as "added by this branch".
 Never retype code into the guide. Reference it:
 
 ```sh
-scripts/extract-snippet.py petclinic-backend/.../Visit.java:33-38 --caption "…"
+.claude/skills/human-review/scripts/extract-snippet.py petclinic-backend/.../Visit.java:33-38 --caption "…"
 ```
 
 It cuts the lines verbatim at build time, numbers them from the real line number, and
@@ -167,7 +201,7 @@ titles them `path:from-to` as a `vscode://file/<abs-path>:<line>:1` link.
 Author the judgement into a JSON content file and render:
 
 ```sh
-scripts/build-review-html.py review/content.json --out review/review.html
+.claude/skills/human-review/scripts/build-review-html.py .human-review/content.json --out .human-review/review.html
 ```
 
 The JSON holds only prose + `path:from-to` references + per-diagram notes; the renderer
@@ -186,12 +220,12 @@ owns the shell, the CSS, the inlined SVGs and the snippet extraction. Sections, 
 
 ## Step 8 — Hand the app back
 
-Open the finished guide (`open review/review.html`). Then make sure the app is actually
+Open the finished guide (`open .human-review/review.html`). Then make sure the app is actually
 running from **this** checkout and open the screen the change affects, so the human can
 exercise it. Seed extra rows if the sample data is too thin to show the feature off.
 Finally start `/relay` so they can dictate UX tweaks straight into the session.
 
 ## Wrap-up
 
-`review/` is a throwaway artifact — remind the human to delete it rather than commit it.
+`.human-review/` is a throwaway artifact — remind the human to delete it rather than commit it.
 Print the path, and list what you fixed vs what you left for them. Do not commit or push.

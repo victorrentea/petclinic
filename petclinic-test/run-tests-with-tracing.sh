@@ -68,7 +68,7 @@ cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 
 # Clean slate once, for both suites: each regenerates only the diagrams of its
 # own source files, so neither may do this sweep itself.
-rm -f "$UI_TEST_DIR"/src/*.genseq.puml
+rm -f "$UI_TEST_DIR"/src/*.genseq.puml "$UI_TEST_DIR"/src/*.genseq.json
 
 log "Running the tagged Playwright spec…"
 npm run test:sequence

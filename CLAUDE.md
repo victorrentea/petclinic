@@ -28,22 +28,6 @@ petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 
-### Review-guide tooling (`scripts/`, driven by the `/human-review` skill)
-```sh
-scripts/puml-diff.sh [base-ref] [out-dir]        # red delta for EVERY changed .puml; dispatches
-     # structural diagrams to puml_diff.py and sequence diagrams to seq_puml_diff.py, writes
-     # <name>.diff.{puml,svg} + MANIFEST.tsv. A diagram that is new is rendered plain, not red.
-scripts/capture-codecity.sh <out.png> [mode]     # headless shot of codecity.html with the branch lit
-scripts/record-feature-video.sh <out.webm>       # films the feature in a real browser, slowed, and
-     # writes <out>.cues.json — the narration, timestamped as it runs, for captions under the player
-scripts/extract-snippet.py path:12-14 [--css]    # verbatim lines as HTML, Pygments-highlighted,
-     # titled with a vscode://file link. --css prints the token stylesheet.
-scripts/endpoint-complexity-delta.py before.json after.json   # entry-point complexity delta,
-     # grouped by kind, green = the branch added, red = removed; each row links to its handler
-scripts/build-review-html.py review/content.json --out review/review.html
-```
-`review/` is a throwaway artifact (gitignored) — regenerate it, never commit it.
-
 ### Backend (petclinic-backend/)
 ```sh
 mvn spring-boot:run              # Run backend

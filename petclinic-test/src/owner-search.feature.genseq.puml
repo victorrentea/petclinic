@@ -1,39 +1,105 @@
 @startuml
 ' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-' Drawn from real Tempo traces of src/owner-search.feature, for the scenarios tagged
-' @generate_sequence. Change the test, not this file, then regenerate with
-' petclinic-test/run-tests-with-tracing.sh
-'
-' Detail shown here: SQL shown, values as ? · HTTP bodies not shown
-' Want more or less? The traces already carry all of it — re-rendering replays
-' them from Tempo (~1s): no test run, no backend, no browser, only Grafana up:
-'     cd petclinic-test
-'     npm run diagram:lean    # call flow only
-'     npm run diagram         # + the SQL statements
-'     npm run diagram:full    # + bound parameter values + JSON payloads
-'     SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 npm run trace:diagram
 hide footbox
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #1A4FA0
 title src/owner-search.feature
+legend right
+  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+  Drawn from real Tempo traces of src/owner-search.feature, for the scenarios tagged
+  @generate_sequence. Change the test, not this file, then regenerate with
+  petclinic-test/run-tests-with-tracing.sh
+ 
+  This picture is deliberately simplified. In review/review.html, click an
+  arrow (or its ⊕) to reveal that one call's SQL / JSON payloads —
+  a DB arrow twice, for the statement and then for the bound values.
+ 
+  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
+  Want more or less? The traces already carry all of it — re-rendering replays
+  the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
+  not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
+      cd petclinic-test
+      npm run diagram:reveal  # simplified, click to reveal SQL + payloads
+      npm run diagram:lean    # baked in: call flow only
+      npm run diagram:static  # baked in: + the SQL statements
+      npm run diagram:full    # baked in: + bound parameter values + JSON payloads
+      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 SEQ_INTERACTIVE=0|1 npm run trace:diagram
+end legend
 footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== The default view is the first ten owners, ordered by name ==
+== Searching with an empty last name lists every owner ==
 Browser -> Backend: GET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith
 activate Backend
 Backend -> Backend: Hibernate Query
 activate Backend
-Backend -> DB: SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, (select count(*) from pets …\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only
-deactivate Backend
-Backend -> Backend: Hibernate Query
-activate Backend
-Backend -> DB: SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'
+Backend -> DB: petclinic
+Backend -> DB: SELECT petclinic.owners [[genseq://1c73ay1{Click for the statement, again for the bound values} ⊕]]
 deactivate Backend
 deactivate Backend
-Backend -> DB: SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id = any (?)
-Backend -> DB: SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id = any (?)
-Backend --> Browser: 200
+Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0m8heo1{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1chpwpd{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0ozjlf4{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1l7ls1s{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1jnr7mb{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0gy5sbn{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0n17dwq{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1n2a4nx{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1k7mtru{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0qqrhzh{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1orgej0{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0sfxruk{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0q2e0xr{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0lgfvn3{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1ukozz3{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1tn2vvg{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://13fgqen{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1vas4s9{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://07pazpo{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0tsgjez{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1lmec46{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://02phmuh{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1yt95l2{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://17boxa3{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1xvon54{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0bfdi6w{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://070g6rp{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1w3i40y{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0diyz5h{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0hbi6cn{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://046yqvm{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1l8klok{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0nnvac7{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0n2jjmc{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1imhebb{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1sd5aic{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0fu4sb2{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://109ed38{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0otrg6p{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1vdfzqf{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0renyjk{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0t0zlry{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1mipl6r{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0vfsw81{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0qep09m{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://14o80cw{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0vaw5f0{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0spzn25{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://00um12r{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1x5z1hr{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0wx7sne{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://01v0hcd{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1632cj1{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1x6kf8q{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://18nwna4{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0us06z7{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://1g17csn{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: SELECT petclinic [[genseq://0deb5uf{Click for the statement, again for the bound values} ⊕]]
+Backend --> Browser: 200 [[genseq://0c10zdp{Click for this call’s JSON body} ⊕]]
 deactivate Backend
 @enduml

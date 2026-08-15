@@ -19,21 +19,81 @@ function wrap(line: string): string[] {
   return parts;
 }
 
-/** The payload as note lines: pretty-printed when it parses, clipped either way. */
-export function formatJsonLines(body: string): string[] {
-  const trimmed = body.trim();
-  if (!trimmed) return [];
+/**
+ * A body the browser cut at its own byte cap ends mid-token, so it parses as nothing —
+ * and the payloads big enough to be clipped are exactly the ones worth pretty-printing.
+ * Cut back to the last complete member instead, close the containers that were still
+ * open, and let it parse.
+ */
+function repairClipped(text: string): string | null {
+  const stack: string[] = [];
+  let lastComplete = -1;
+  let inString = false;
+  let escaped = false;
 
-  let text = trimmed;
-  try {
-    text = JSON.stringify(JSON.parse(trimmed), null, 2);
-  } catch {
-    // Not JSON — a plain-text body, or one the browser truncated at its own cap,
-    // which lands here as a single enormous line. Wrapping rather than clipping it
-    // to one line is what keeps a too-large payload showing its shape.
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === '\\') escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') inString = true;
+    else if (c === '{' || c === '[') stack.push(c === '{' ? '}' : ']');
+    else if (c === '}' || c === ']') stack.pop();
+    else if (c === ',' && stack.length > 0) lastComplete = i;
   }
 
-  return capLines(text.split('\n').flatMap(wrap), MAX_LINES);
+  if (lastComplete < 0 || stack.length === 0) return null;
+  const closers = stack.slice().reverse().join('');
+  return text.slice(0, lastComplete) + closers;
+}
+
+interface Pretty {
+  text: string;
+  /** The browser cut this body at its own cap and it had to be closed to parse. */
+  repaired: boolean;
+}
+
+function prettify(body: string): Pretty | null {
+  const trimmed = body.trim();
+  if (!trimmed) return null;
+
+  try {
+    return {text: JSON.stringify(JSON.parse(trimmed), null, 2), repaired: false};
+  } catch {
+    const patched = repairClipped(trimmed);
+    if (patched !== null) {
+      try {
+        return {text: JSON.stringify(JSON.parse(patched), null, 2), repaired: true};
+      } catch {
+        // Still not JSON — a plain-text body. Wrapping rather than clipping it to one
+        // line is what keeps a too-large payload showing its shape.
+      }
+    }
+    return {text: trimmed, repaired: false};
+  }
+}
+
+/** The payload as note lines: pretty-printed when it parses, clipped either way. */
+export function formatJsonLines(body: string): string[] {
+  const pretty = prettify(body);
+  if (!pretty) return [];
+
+  const lines = pretty.text.split('\n').flatMap(wrap);
+  if (pretty.repaired) lines.push(ELLIPSIS);
+  return capLines(lines, MAX_LINES);
+}
+
+/**
+ * The whole payload, pretty-printed and neither wrapped nor clipped — for the panel
+ * a reader clicks open, which scrolls in both directions. Empty when there is no body.
+ */
+export function formatJsonDetail(body: string | undefined): string {
+  const pretty = prettify(body ?? '');
+  if (!pretty) return '';
+  return pretty.repaired ? `${pretty.text}\n${ELLIPSIS} clipped by the browser at its 4 KB cap` : pretty.text;
 }
 
 /** A `note over A, B` block carrying the payload, or nothing when there is none. */

@@ -61,12 +61,22 @@ META_RE = re.compile(
 )
 
 
+# PlantUML applies inline markup per rendered line: a <color>/<s> opened before a `\n`
+# does not survive it, and its closing tag then prints as literal text on the last line.
+# A folded SQL statement is exactly that case, so every line is wrapped on its own.
+NEWLINE = "\\n"
+
+
+def _per_line(text: str, wrap) -> str:
+    return NEWLINE.join(wrap(part) for part in text.split(NEWLINE))
+
+
 def _red(text: str) -> str:
-    return f"<color:{RED}>{text}</color>"
+    return _per_line(text, lambda part: f"<color:{RED}>{part}</color>")
 
 
 def _struck(text: str) -> str:
-    return f"<color:{RED}><s>{text}</s></color>"
+    return _per_line(text, lambda part: f"<color:{RED}><s>{part}</s></color>")
 
 
 def _colorize_arrow(arrow: str) -> str:

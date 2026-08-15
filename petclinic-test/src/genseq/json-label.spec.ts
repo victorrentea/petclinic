@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {formatJsonLines, jsonNote} from './json-label';
+import {ELLIPSIS} from './clip';
 
 test('pretty-prints a payload that came over the wire minified', () => {
   expect(formatJsonLines('{"id":42,"name":"Leo"}')).toEqual([
@@ -47,4 +48,13 @@ test('jsonNote wraps the payload in a PlantUML note over both participants', () 
     '}',
     'end note',
   ]);
+});
+
+test('a body the browser clipped mid-token is repaired, then pretty-printed', () => {
+  const clipped = '{"a":1,"b":{"c":2},"d":"unter';
+  const lines = formatJsonLines(clipped);
+  expect(lines[0]).toBe('{');
+  expect(lines.join('\n')).toContain('"a": 1');
+  expect(lines.join('\n')).toContain('"c": 2');
+  expect(lines[lines.length - 1]).toBe(ELLIPSIS);
 });
