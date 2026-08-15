@@ -8,6 +8,7 @@ import {By} from '@angular/platform-browser';
 import {VisitsPageComponent} from './visits-page.component';
 import {VisitService} from '../visit.service';
 import {Visit} from '../visit';
+import {VetNamePipe} from '../vet-name.pipe';
 
 class VisitServiceStub {
   getVisits(): Observable<Visit[]> {
@@ -38,7 +39,7 @@ describe('VisitsPageComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VisitsPageComponent],
+      declarations: [VisitsPageComponent, VetNamePipe],
       schemas: [NO_ERRORS_SCHEMA],
       imports: [CommonModule, RouterTestingModule],
       providers: [{provide: VisitService, useClass: VisitServiceStub}],

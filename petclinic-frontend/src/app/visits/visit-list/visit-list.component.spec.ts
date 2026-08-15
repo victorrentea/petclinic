@@ -13,6 +13,7 @@ import {Pet} from '../../pets/pet';
 import {Observable, of} from 'rxjs';
 import {By} from '@angular/platform-browser';
 import Spy = jasmine.Spy;
+import {VetNamePipe} from '../vet-name.pipe';
 
 class VisitServiceStub {
   deleteVisit(visitId: string): Observable<number> {
@@ -31,7 +32,7 @@ describe('VisitListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VisitListComponent],
+      declarations: [VisitListComponent, VetNamePipe],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
