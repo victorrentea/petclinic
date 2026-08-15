@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {parseTempoTrace, renderPuml, DiagramScenario, NormSpan} from './trace-to-puml';
+import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 
@@ -15,6 +15,9 @@ export interface TestWindow {
 /** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
 export interface RenderDeps {
   writeFile: (filePath: string, content: string) => void;
+  /** Optional: without it, re-rendering at a level with nothing to reveal leaves the
+   *  previous level's sidecar behind, claiming a detail the picture no longer offers. */
+  removeFile?: (filePath: string) => void;
   log: (msg: string) => void;
 }
 
@@ -73,6 +76,15 @@ export function spanCachePathFor(rootDir: string): string {
 /** The diagram sits next to its test, named after it: owner-search.feature.genseq.puml */
 export function diagramPathFor(rootDir: string, source: string): string {
   return `${rootDir}/${source}.genseq.puml`;
+}
+
+/**
+ * What the diagram's markers reveal, beside the diagram: owner-search.feature.genseq.json.
+ * A sidecar rather than comments inside the .puml — a payload is arbitrary text, and
+ * smuggling it through PlantUML's comment syntax is an escaping problem nobody needs.
+ */
+export function detailsPathFor(rootDir: string, source: string): string {
+  return `${rootDir}/${source}.genseq.json`;
 }
 
 /**
@@ -156,9 +168,20 @@ export function renderScenarios(
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
-    deps.writeFile(filePath, renderPuml(source, scenarios, options));
+    const {puml, details} = renderDiagram(source, scenarios, options);
+    deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
+    // Only the .puml paths are returned: the sidecar is part of one diagram, not
+    // another one, and every caller counts what it gets back as "diagrams".
     written.push(filePath);
+    const revealed = Object.keys(details.details).length;
+    const detailsPath = detailsPathFor(rootDir, source);
+    if (revealed > 0) {
+      deps.writeFile(detailsPath, `${JSON.stringify(details, null, 2)}\n`);
+      deps.log(`   🔍 ${revealed} revealable arrow(s) → ${detailsPath}`);
+    } else {
+      deps.removeFile?.(detailsPath);
+    }
   }
   return written;
 }
@@ -187,6 +210,7 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
     const cached: CachedSource[] = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
     const paths = renderScenarios(cached, root, {
       writeFile: (p, c) => fs.writeFileSync(p, c),
+      removeFile: (p) => fs.rmSync(p, {force: true}),
       log: (m) => console.log(m),
     }, options);
     console.log(`📊 Re-rendered ${paths.length} diagram(s) from ${cacheFile} — Grafana not needed`);
@@ -214,6 +238,7 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
       searchTraceIds: (q, s, e) => searchTraceIds(cfg, q, s, e),
       getTrace: (id) => getTrace(cfg, id),
       writeFile: (p, c) => fs.writeFileSync(p, c),
+      removeFile: (p) => fs.rmSync(p, {force: true}),
       log: (m) => console.log(m),
     };
 

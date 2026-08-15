@@ -198,6 +198,14 @@
             <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Bytecode reader behind EndpointComplexityExtractorTest: cyclomatic complexity and
+        the call graph, including MapStruct/Lombok code that has no source in this repo. -->
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.7.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.structurizr</groupId>
             <artifactId>structurizr-core</artifactId>

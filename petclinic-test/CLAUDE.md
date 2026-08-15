@@ -8,9 +8,9 @@
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
   `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Everything a
   run writes goes under `test-results/`.
-- ⚠️ `src/*.genseq.puml` are **generated** — one per test file, named after it
-  (`owner-search.feature.genseq.puml`), sectioned by scenario. Never hand-edit: change the test
-  and re-run `./run-tests-with-tracing.sh`.
+- ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
+  test file, named after it (`owner-search.feature.genseq.puml`), sectioned by scenario. Never
+  hand-edit: change the test and re-run `./run-tests-with-tracing.sh`.
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.
@@ -28,6 +28,14 @@
   Grafana: the fetched spans are cached in `test-results/trace-spans.json` and replayed
   (`GENSEQ_REFRESH=1` forces a fresh Tempo fetch). No test run, no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
   vars with `npm run trace:diagram`. Every generated file repeats this in its own header.
+- **A diagram is interactive by default** (`SEQ_INTERACTIVE=1`): the picture stays simplified
+  and each revealable arrow carries `[[genseq://<id>{…} ⊕]]`, a PlantUML link that becomes an
+  `<a href>` in the SVG — the hook `.claude/skills/human-review/scripts/build-review-html.py` binds to, so nothing ever
+  matches rendered label text. Clicking cycles that arrow alone: a DB arrow goes hidden → `?`
+  → bound values; a request/response arrow shows its JSON body. `SEQ_INTERACTIVE=0` bakes the
+  detail back into the picture exactly as before, which is what `diagram:lean`/`:static`/`:full`
+  do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
+  `.puml` textually, so a positional id would repaint everything under an inserted query.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,
   `*.feature` for Cucumber) — wiping it whole would shrink re-renders to the last suite that ran.

@@ -106,16 +106,28 @@ function clipWords(line: string): string {
   return [...words.slice(0, MAX_WORDS_PER_LINE), ELLIPSIS].join(' ');
 }
 
-/** The statement folded into display lines: one clause each, clipped in both directions. */
-export function formatSqlLines(sql: string, parameters: string[] = []): string[] {
+function foldStatement(sql: string, parameters: string[]): string[] {
   // Hibernate emits comma-packed column lists; without a space they read as one
   // enormous "word" and the word clip below could never bite.
   const spaced = overCode(sql.replace(/\s+/g, ' ').trim(), (code) => code.replace(/\s*,\s*/g, ', '));
 
   // Values go in *after* the fold on purpose: a description reading "Follow up on
   // the vaccination" would otherwise be folded at its own ON.
-  const bound = bindParameters(foldClauses(spaced), parameters);
-  return capLines(bound.map(clipWords), MAX_LINES);
+  return bindParameters(foldClauses(spaced), parameters);
+}
+
+/** The statement folded into display lines: one clause each, clipped in both directions. */
+export function formatSqlLines(sql: string, parameters: string[] = []): string[] {
+  return capLines(foldStatement(sql, parameters).map(clipWords), MAX_LINES);
+}
+
+/**
+ * The same fold, uncapped — for the panel a reader clicks open, which scrolls.
+ * A clip is what a *label* needs, because a 40-column select would swallow the
+ * page; a panel opened on purpose should show the statement that actually ran.
+ */
+export function formatSqlDetail(sql: string, parameters: string[] = []): string {
+  return foldStatement(sql, parameters).join('\n');
 }
 
 /** The same, as a PlantUML message label — `\n` is PlantUML's own line break. */
