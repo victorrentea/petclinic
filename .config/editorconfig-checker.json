@@ -1,0 +1,24 @@
+{
+  "//": "editorconfig-checker — enforces .editorconfig, which nothing else in this repo reads.",
+  "//e1": "What it flags: a Java line ending in a space (trim_trailing_whitespace) or a file with",
+  "//e2": "no closing newline (insert_final_newline) — and a body indented '  return x;' when",
+  "//e3": "[*.{java,xml}] pins indent_size=4, so it demands '    return x;' instead.",
+  "//1": "Indentation checks are ON. The excludes below fall into two groups.",
+  "//2": "Generated artifacts: regenerating them would just reintroduce the violation.",
+  "//3": "Embedded-content files: every remaining violation in these sits inside a string",
+  "//4": "literal — Java text blocks holding JSON fixtures and LLM prompts, and Python triple-",
+  "//5": "quoted strings holding HTML/CSS templates. Those lines are DATA, not code indentation,",
+  "//6": "and the checker cannot tell the difference. Re-indenting them to fit the grid would",
+  "//7": "change the literal string: ApiExamples feeds openapi.yaml (a committed, drift-checked",
+  "//8": "artifact), two are prompts sent to a model, and the Python ones are generated web pages.",
+  "Exclude": [
+    "docs/generated/",
+    "src/app/generated/",
+    "openapi\\.yaml$",
+    "\\.puml$",
+    "rest/ApiExamples\\.java$",
+    "chatbot/assistant/Assistant\\.java$",
+    "chatbot/assistant/JudgeGuard\\.java$",
+    "scripts/build_pr_gallery\\.py$"
+  ]
+}

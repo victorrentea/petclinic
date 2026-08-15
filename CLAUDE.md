@@ -7,7 +7,7 @@ Copilot: use this file over your proprietary .github/copilot-instructions.md
 
 ## Project Overview
 
-Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties).
+Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
@@ -23,8 +23,8 @@ Each script is foreground; run them in separate terminals.
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 petclinic-backend/docs/scripts/start-structurizr.sh  # optional: C4model Structurizr view on localhost:8081
-petclinic-backend/generate-codecity.sh  # rebuilds docs/generated/codecity/codecity.html, the 3D code view.
-     # Renderer = github.com/victorrentea/code-city, cloned into petclinic-backend/.codecity-tool/
+petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/codecity.html, the 3D code view.
+     # Renderer = github.com/victorrentea/code-city, cloned into petclinic-backend/.tools/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 
@@ -104,6 +104,19 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - Enable via `petclinic.security.enable=true`
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
 - Default test user: `admin`/`admin`
+
+### Observability
+- `./start-grafana.sh` brings up `grafana/otel-lgtm` (Grafana **:3300**, admin/admin; OTLP **:4317/:4318**).
+- `./start-backend.sh` attaches the OTel Java agent **only if :4318 is already listening** — start
+  Grafana *first*, otherwise the backend runs with telemetry silently disabled.
+- Browser spans need a flush window: a scenario that finishes in <~5s closes the page before the
+  frontend exporter ships anything, so no frontend traces reach Tempo.
+- The agent is pinned at **2.20.1** and told to capture the maximum: SQL unsanitized, **bound
+  query parameters** (`db.query.parameter.<n>`, which need `OTEL_SEMCONV_STABILITY_OPT_IN=database/dup`
+  and only exist from agent ~2.20 — 2.10 has no such flag). What a sequence diagram *shows* is
+  decided at render time in `petclinic-test/` (`SEQ_SQL`, `SEQ_HTTP_BODIES`), never here.
+- The agent jar is versioned in its filename — otherwise an already-downloaded
+  `opentelemetry-javaagent.jar` makes a version bump a silent no-op.
 
 
 ## API Endpoints

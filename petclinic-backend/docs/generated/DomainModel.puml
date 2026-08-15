@@ -1,8 +1,8 @@
 @startuml
-!pragma layout smetana
 
 title Domain Model
-footer Generated via reflection from domain/*.java by DomainModelExtractorTest
+caption Diagram generated from code using Java reflection
+footer domain/*.java -> petclinic-backend/docs/generated/DomainModel.puml
 
 hide empty members
 skinparam classAttributeIconSize 0

@@ -23,6 +23,18 @@
         <lombok.version>1.18.36</lombok.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <spring-ai.version>1.1.2</spring-ai.version>
+
+        <!-- IDE-urile pe m2e (VS Code / Eclipse) nu ruleaza ele procesoarele de
+        adnotari, ci folosesc sursele generate de Maven in
+        target/generated-sources/annotations.
+        Motivul: in Eclipse, Lombok nu e un annotation processor, ci un agent
+        care modifica AST-ul dupa runda de procesare. MapStruct, rulat de JDT APT
+        in aceeasi runda, nu vede getterele generate de Lombok si cade cu
+        "No implementation was created for XMapper due to having a problem in
+        the erroneous element". lombok-mapstruct-binding rezolva asta doar
+        pentru javac, nu si pentru JDT.
+        Dupa ce schimbi un mapper, ruleaza `mvn compile` ca sa se regenereze. -->
+        <m2e.apt.activation>maven_execution</m2e.apt.activation>
     </properties>
 
     <dependencyManagement>
@@ -146,12 +158,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>net.jqwik</groupId>
-            <artifactId>jqwik</artifactId>
-            <version>1.9.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>7.22.0</version>
@@ -263,7 +269,7 @@
                         <trimTrailingWhitespace/>
                         <removeUnusedImports/>
                         <endWithNewline/>
-                        <eclipse><file>${project.basedir}/../eclipse-formatter.xml</file></eclipse>
+                        <eclipse><file>${project.basedir}/../.config/eclipse-formatter.xml</file></eclipse>
                     </java>
                 </configuration>
             </plugin>

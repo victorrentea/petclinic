@@ -142,9 +142,9 @@ def render_puml(cur: Schema) -> str:
 
     out = [
         "@startuml",
-        "!pragma layout smetana",
         "title Database Schema (ERD)",
-        "footer Generated from DB.sql by db_schema_to_puml.py",
+        "caption Diagram generated from DB incremental scripts",
+        "footer db/migration/** -> petclinic-backend/DB.sql -> petclinic-backend/docs/generated/DB.puml",
         "hide circle",
         "hide empty members",     # drop the empty methods compartment + its separator line
         "skinparam linetype ortho",

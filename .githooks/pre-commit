@@ -5,7 +5,7 @@ ROOT="$(git rev-parse --show-toplevel)"
 
 # ── Secrets scan (gitleaks) ────────────────────────────────────────────────
 if command -v gitleaks >/dev/null 2>&1; then
-  if ! GITLEAKS_OUT=$(gitleaks protect --staged --redact --no-banner 2>&1); then
+  if ! GITLEAKS_OUT=$(gitleaks protect --staged --redact --no-banner -c "$ROOT/.config/gitleaks.toml" 2>&1); then
     echo "$GITLEAKS_OUT"
     echo ""
     echo "[pre-commit] ❌ Secrets detected in staged changes — commit blocked."
@@ -66,7 +66,7 @@ if [ -n "$STAGED_JAVA" ]; then
   # Scoped to the staged files only, so pre-existing violations elsewhere
   # don't block unrelated commits. Blocks on `error`; `warning` only reports.
   if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
-    if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan 2>&1); then
+    if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan -c "$ROOT/.config/sgconfig.yml" 2>&1); then
       echo "$SG_OUT"
       echo "[pre-commit] ❌ ast-grep rule violated — commit blocked."
       echo "[pre-commit] Rules live in .ast-grep/rules/ — see CLAUDE.md for the why."
@@ -83,11 +83,11 @@ fi
 # Nothing else in this repo reads .editorconfig — no IDE is in the loop, and
 # neither Spotless nor eslint enforces it. Without this it is documentation.
 # Scoped to staged files; settings (and the disabled indent checks) in
-# .editorconfig-checker.json.
+# .config/editorconfig-checker.json.
 STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACMR || true)
 if [ -n "$STAGED_ALL" ]; then
   if command -v editorconfig-checker >/dev/null 2>&1; then
-    if ! EC_OUT=$(echo "$STAGED_ALL" | xargs editorconfig-checker -no-color 2>&1); then
+    if ! EC_OUT=$(echo "$STAGED_ALL" | xargs editorconfig-checker -no-color -config "$ROOT/.config/editorconfig-checker.json" 2>&1); then
       echo "$EC_OUT"
       echo "[pre-commit] ❌ .editorconfig violated — commit blocked."
       exit 1
