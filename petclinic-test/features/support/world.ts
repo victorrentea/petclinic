@@ -55,8 +55,8 @@ setWorldConstructor(PlaywrightWorld);
 //
 // Deliberately NOT wiping every .puml in DIAGRAMS_DIR: the plain-TypeScript
 // twins (../*.spec.ts, run by Playwright) write their diagrams into the same
-// folder, and a blanket wipe here would delete theirs — including add-visit's,
-// whose @generate_sequence tags now live only on that side.
+// folder, and a blanket wipe here would delete theirs — including the add-visit
+// round-trips, whose @generate_sequence tags live only on that side.
 // run-tests-with-tracing.sh clears the folder once, before running either suite.
 BeforeAll(function () {
   fs.mkdirSync(DIAGRAMS_DIR, {recursive: true});

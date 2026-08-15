@@ -30,6 +30,7 @@ Feature: Add a visit
     Then I am back on the owner's detail page
     And the pet's visit list contains the new visit dated "2026-08-20"
 
+  @generate_sequence
   Scenario: Add a visit attended by a vet
     Given an owner with at least one pet exists
     When I open that owner's detail page

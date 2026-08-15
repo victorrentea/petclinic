@@ -39,10 +39,16 @@ export async function fillVisitDateAndUniqueDescription(page: Page, date: string
   return description;
 }
 
-/** Picks the first real vet in the dropdown and returns its displayed name. */
+/**
+ * Picks the first real vet in the dropdown and returns its displayed name.
+ * "First real" is expressed as "the first option that carries a vet id", not as
+ * index 1 — the placeholder's position is an incidental fact about the template,
+ * and anchoring on it turns a reordered option into a baffling failure here.
+ */
 export async function selectFirstVetInVisitForm(page: Page): Promise<string> {
   const vetSelect = page.locator('select#vetId');
-  const vetName = (await vetSelect.locator('option').nth(1).textContent() || '').trim();
+  const firstVet = vetSelect.locator('option:not([value$="null"]):not([value=""])').first();
+  const vetName = (await firstVet.textContent() || '').trim();
   await vetSelect.selectOption({label: vetName});
   return vetName;
 }
