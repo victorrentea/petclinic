@@ -142,4 +142,16 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('GET');
     req.flush(expectedOwners);
   });
+
+  it('search owners by broad query', () => {
+    ownerService.searchOwnersByQuery('fran').subscribe((owners) => {
+      expect(owners).toEqual(expectedOwners);
+    });
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?q=fran'
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedOwners);
+  });
 });

@@ -59,4 +59,10 @@ export class OwnerService {
       .get<Owner[]>(url)
       .pipe(catchError(this.handlerError('searchOwners', [])));
   }
+
+  searchOwnersByQuery(query: string): Observable<Owner[]> {
+    return this.http
+      .get<Owner[]>(this.entityUrl + '?q=' + encodeURIComponent(query))
+      .pipe(catchError(this.handlerError('searchOwnersByQuery', [])));
+  }
 }

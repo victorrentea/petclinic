@@ -558,6 +558,7 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        q?: string;
       };
     };
     responses: {
