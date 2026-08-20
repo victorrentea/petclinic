@@ -6,6 +6,13 @@
 export interface DetailStep {
   label: string;
   text: string;
+  /**
+   * A second rendering of the same fact, offered as a toggle in the panel rather than
+   * as another step. A SQL statement has exactly this shape — as sent, with `?`, and
+   * with the bound values put back — and the two are one thing seen two ways, not two
+   * things to page through.
+   */
+  alternate?: DetailStep;
 }
 
 /** Everything one arrow can reveal, in the order the clicks reveal it. */
@@ -19,7 +26,7 @@ export interface DetailIndex {
   details: Record<string, DetailEntry>;
 }
 
-export const DETAIL_INDEX_VERSION = 1;
+export const DETAIL_INDEX_VERSION = 2;  // 2: a step can carry an `alternate` to toggle to
 
 // FNV-1a. The id has to depend on the arrow's *content* alone: a counter would
 // renumber every arrow below an inserted one, and the review page renders a

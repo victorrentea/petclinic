@@ -100,3 +100,12 @@ rag-vector-store.json
 
 # Review guide, built by the human-review skill — regenerate, never commit
 /.human-review/
+
+# Playwright HTML report (petclinic-test) — regenerated per run, never commit
+/petclinic-test/playwright-report/
+
+# jqwik sample database (petclinic-backend) — local test state, never commit
+/petclinic-backend/.jqwik-database
+
+# Code City renderer, downloaded on demand by generate-codecity.sh — a tool, not source
+/petclinic-backend/.codecity-tool/
