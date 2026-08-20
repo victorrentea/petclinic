@@ -1,7 +1,9 @@
 // A DB span's name is a generic "SELECT petclinic.owners" — true of every query
-// the repository fires. The statement itself is what tells the reader *which*
-// query ran, so the diagram carries the SQL, folded one clause per line and
-// clipped so a 40-column Hibernate select cannot swallow the page.
+// the repository fires. What tells the reader *which* query ran comes in two
+// grains: Hibernate's own account of what it was doing (the HQL, or the entity
+// role it was lazily loading), and the SQL that account compiled down to. The
+// first is short enough to label an arrow with; the second is folded one clause
+// per line and clipped so a 40-column Hibernate select cannot swallow the page.
 
 import {capLines, ELLIPSIS} from './clip';
 
@@ -106,10 +108,42 @@ function clipWords(line: string): string {
   return [...words.slice(0, MAX_WORDS_PER_LINE), ELLIPSIS].join(' ');
 }
 
+// `hibernate.use_sql_comments` (see the backend's application.properties) makes
+// Hibernate prefix every statement it generates with what produced it — the HQL for
+// a query, `load com.example.Owner.pets` for a lazy collection fetch. The OTel agent
+// has no HQL of its own, so this comment is the only place a trace says which
+// repository call a bare `select ... from owners` came from.
+const LEADING_COMMENT = /^\s*\/\*([\s\S]*?)\*\/\s*/;
+const MAX_ORIGIN_WORDS = 14;
+
+/**
+ * Hibernate's account of the statement, and the statement itself. The comment is
+ * not SQL and never belongs inside the folded clauses; it is what the arrow is
+ * labelled with, while the statement stays behind the click.
+ */
+export function splitOrigin(sql: string): {origin?: string; statement: string} {
+  let rest = sql;
+  const comments: string[] = [];
+  for (let m = LEADING_COMMENT.exec(rest); m; m = LEADING_COMMENT.exec(rest)) {
+    comments.push(m[1]);
+    rest = rest.slice(m[0].length);
+  }
+  const origin = comments.join(' ').replace(/\s+/g, ' ').trim();
+  return origin ? {origin, statement: rest} : {statement: rest};
+}
+
+/** Hibernate's account of a statement, on one line, short enough to label an arrow. */
+export function formatOriginLabel(origin: string): string {
+  const words = origin.split(' ');
+  if (words.length <= MAX_ORIGIN_WORDS) return origin;
+  return [...words.slice(0, MAX_ORIGIN_WORDS), ELLIPSIS].join(' ');
+}
+
 function foldStatement(sql: string, parameters: string[]): string[] {
   // Hibernate emits comma-packed column lists; without a space they read as one
   // enormous "word" and the word clip below could never bite.
-  const spaced = overCode(sql.replace(/\s+/g, ' ').trim(), (code) => code.replace(/\s*,\s*/g, ', '));
+  const {statement} = splitOrigin(sql);
+  const spaced = overCode(statement.replace(/\s+/g, ' ').trim(), (code) => code.replace(/\s*,\s*/g, ', '));
 
   // Values go in *after* the fold on purpose: a description reading "Follow up on
   // the vaccination" would otherwise be folded at its own ON.

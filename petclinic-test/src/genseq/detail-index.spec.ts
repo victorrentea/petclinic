@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {DetailCollector, DetailEntry} from './detail-index';
+import {DETAIL_INDEX_VERSION, DetailCollector, DetailEntry} from './detail-index';
 
 const entry = (text: string): DetailEntry => ({title: 't', steps: [{label: 'l', text}]});
 
@@ -21,7 +21,7 @@ test('the index round-trips what was collected', () => {
   const collector = new DetailCollector();
   const id = collector.add(entry('select 1'));
   const index = collector.toIndex();
-  expect(index.version).toBe(1);
+  expect(index.version).toBe(DETAIL_INDEX_VERSION);
   expect(index.details[id]).toEqual(entry('select 1'));
 });
 

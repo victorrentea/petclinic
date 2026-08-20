@@ -13,10 +13,15 @@ const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
 );
 
-// A DB arrow is labelled with the statement the span carries, folded one clause
-// per line — `\n` being PlantUML's line break inside a message.
-const INSERT_LABEL =
-  'INSERT INTO petclinic.visits (description, pet_id, visit_date, id)\\nVALUES (?, ?, ?, ?)';
+// A baked-in DB arrow carries both grains: Hibernate's account of the statement on the
+// first line, then the statement folded one clause per line — `\n` being PlantUML's
+// line break inside a message.
+const INSERT_ORIGIN = 'insert for victor.training.petclinic.domain.Visit';
+const INSERT_LABEL = `${INSERT_ORIGIN}\\nINSERT INTO petclinic.visits `
+  + '(description, pet_id, visit_date, id)\\nVALUES (?, ?, ?, ?)';
+
+// The API's own name for the route, from openapi.yaml, sits above it.
+const ADD_VISIT = 'addVisit\\nPOST /api/visits';
 
 test('parseTempoTrace normalizes spans with service name and kind', () => {
   const spans = parseTempoTrace(fixture);
@@ -36,7 +41,7 @@ test('spansToPuml renders browser→backend→DB with the custom span', () => {
   expect(puml).toContain('participant Browser');
   expect(puml).toContain('participant Backend');
   expect(puml).toContain('participant DB');
-  expect(puml).toContain('Browser -> Backend: POST /api/visits');
+  expect(puml).toContain(`Browser -> Backend: ${ADD_VISIT}`);
   expect(puml).toContain('Backend -> Backend: book-visit');
   expect(puml).toContain(`Backend -> DB: ${INSERT_LABEL}`);
   expect(puml).toContain('Backend --> Browser: 201');
@@ -81,12 +86,20 @@ test('spansToPuml footers the diagram with its provenance', () => {
   expect(puml).not.toContain('caption');
 });
 
-// "SELECT petclinic.owners" is true of every query the repository fires; the
-// statement is what tells the reader which one this arrow is.
+// "SELECT petclinic.owners" is true of every query the repository fires; Hibernate's
+// account and the statement are what tell the reader which one this arrow is.
 test('a DB arrow carries the statement, not the generic span name', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
   expect(puml).not.toContain('Backend -> DB: INSERT petclinic.visits');
   expect(puml).toContain('VALUES (?, ?, ?, ?)');
+});
+
+// The origin comment is Hibernate talking about the statement, not part of it: it
+// belongs on the label, never folded in among the clauses.
+test('the origin comment labels the arrow and stays out of the folded SQL', () => {
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', STATIC);
+  expect(puml).toContain(`Backend -> DB: ${INSERT_ORIGIN}\\nINSERT INTO`);
+  expect(puml).not.toContain('/*');
 });
 
 const dbSpanWithoutStatement: NormSpan[] = [
@@ -176,41 +189,46 @@ test('renderPuml drops traces that would draw nothing', () => {
 
   expect(puml).toContain('== Add a visit ==');
   expect(puml).not.toContain('== Clicked around ==');
-  expect(puml).toContain('Browser -> Backend: POST /api/visits');
+  expect(puml).toContain(`Browser -> Backend: ${ADD_VISIT}`);
 });
 
 // ── progressive disclosure ────────────────────────────────────────────────────
 // The default picture is the simplified one, and every arrow that has more to say
 // carries a link marker whose id addresses that arrow's detail in the sidecar.
 
-const MARKER = /\[\[genseq:\/\/([a-z0-9-]+)\{[^}]*\} ⊕\]\]/;
+const MARKER = /\[\[genseq:\/\/([a-z0-9-]+)\{[^}]*\} [^\]]*\]\]/;
 
-const detailOn = (line: string, details: Record<string, {title: string; steps: {label: string; text: string}[]}>) =>
+interface Step {label: string; text: string; alternate?: {label: string; text: string}}
+
+const detailOn = (line: string, details: Record<string, {title: string; steps: Step[]}>) =>
   details[MARKER.exec(line)![1]];
 
 const lineWith = (puml: string, needle: string) =>
   puml.split('\n').find((l) => l.includes(needle))!;
 
-test('an interactive diagram keeps the DB arrow simplified and hangs the SQL off a marker', () => {
+test('an interactive DB arrow is labelled with Hibernate\'s account, SQL behind the link', () => {
   const {puml, details} = renderDiagram('add-visit.spec.ts',
     [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]);
 
   const arrow = lineWith(puml, 'Backend -> DB:');
-  expect(arrow).toContain('Backend -> DB: INSERT petclinic.visits');
+  expect(arrow).toContain(INSERT_ORIGIN);
   expect(arrow).not.toContain('VALUES');
   expect(arrow).toMatch(MARKER);
+  // the whole label is the click target — nothing trails the link
+  expect(arrow.trimEnd().endsWith(']]')).toBe(true);
 
+  // One step, not a cycle: the bound values are the step's alternate, which the panel
+  // offers as a toggle.
   const entry = detailOn(arrow, details.details);
-  expect(entry.steps.map((s) => s.label)).toEqual([
-    'statement as sent — ? for each bound value',
-    'with the bound values put back',
-  ]);
+  expect(entry.steps).toHaveLength(1);
+  expect(entry.steps[0].label).toBe('statement as sent — ? for each bound value');
   expect(entry.steps[0].text).toContain('VALUES (?, ?, ?, ?)');
-  expect(entry.steps[1].text).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
+  expect(entry.steps[0].alternate!.label).toBe('with the bound values put back');
+  expect(entry.steps[0].alternate!.text).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
 });
 
-// A DB span the agent captured no parameters for has nothing to put back, so its
-// cycle is one step long rather than a second click onto the same text.
+// A DB span the agent captured no parameters for has nothing to put back, so the panel
+// must not offer a toggle onto the same text.
 test('a statement with no bound parameters offers only the statement', () => {
   const spans = parseTempoTrace(fixture).map((s) => ({
     ...s,
@@ -218,7 +236,9 @@ test('a statement with no bound parameters offers only the statement', () => {
       Object.entries(s.attributes).filter(([k]) => !k.startsWith('db.query.parameter.'))),
   }));
   const {puml, details} = renderDiagram('x', [{title: 'x', traces: [spans]}]);
-  expect(detailOn(lineWith(puml, 'Backend -> DB:'), details.details).steps).toHaveLength(1);
+  const steps = detailOn(lineWith(puml, 'Backend -> DB:'), details.details).steps;
+  expect(steps).toHaveLength(1);
+  expect(steps[0].alternate).toBeUndefined();
 });
 
 test('the payloads become markers on the request and the response, not notes', () => {
@@ -263,6 +283,60 @@ test('an interactive diagram tones its link markup down and says how to use it',
   const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
     {sql: 'values', httpBodies: true, interactive: true});
   expect(puml).toContain('skinparam hyperlinkUnderline false');
-  expect(puml).toContain("click an\n  arrow (or its ⊕) to reveal that one call's SQL / JSON payloads");
+  expect(puml).toContain("click a\n  highlighted arrow to reveal that one call's SQL / JSON payloads");
   expect(puml).toContain('  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads');
+});
+
+// ── the Hibernate session spans ───────────────────────────────────────────────
+// OTel draws a span for the session call behind every query. Under a Spring Data
+// repository it restates the repository method in Hibernate's vocabulary and buys the
+// diagram nothing but a lifeline hop; with no repository above it, it is the only
+// account of what the code asked for.
+
+const backendSpan = (
+  spanId: string, parentSpanId: string, name: string, kind: NormSpan['kind'],
+): NormSpan => ({
+  traceId: 'h1', spanId, parentSpanId, name, kind,
+  serviceName: 'petclinic-backend', startNano: Number(spanId.slice(1)), attributes: {},
+});
+
+const query = backendSpan('h4', 'h3', 'SELECT petclinic.owners', 'CLIENT');
+query.attributes = {'db.system': 'postgresql'};
+
+const viaRepository: NormSpan[] = [
+  backendSpan('h1', '', 'GET /api/owners', 'SERVER'),
+  backendSpan('h2', 'h1', 'OwnerRepository.findById', 'INTERNAL'),
+  backendSpan('h3', 'h2', 'Session.find victor.training.petclinic.domain.Owner', 'INTERNAL'),
+  query,
+];
+
+test('a session span under a repository is dropped, its query kept', () => {
+  const puml = spansToPuml(viaRepository, 'via repository', STATIC);
+  expect(puml).toContain('Backend -> Backend: OwnerRepository.findById');
+  expect(puml).not.toContain('Session.find');
+  expect(puml).toContain('Backend -> DB: SELECT petclinic.owners');
+});
+
+test('a session span with no repository above it is kept', () => {
+  const direct = viaRepository.filter((s) => s.spanId !== 'h2')
+    .map((s) => (s.spanId === 'h3' ? {...s, parentSpanId: 'h1'} : s));
+  const puml = spansToPuml(direct, 'direct entity manager', STATIC);
+  expect(puml).toContain('Backend -> Backend: Session.find victor.training.petclinic.domain.Owner');
+});
+
+// `Hibernate Query` is the same instrumentation saying the same redundant thing for a
+// query rather than a lookup.
+test('a Hibernate Query span under a repository is dropped too', () => {
+  const spans = viaRepository.map(
+    (s) => (s.spanId === 'h3' ? {...s, name: 'Hibernate Query'} : s));
+  const puml = spansToPuml(spans, 'via repository', STATIC);
+  expect(puml).not.toContain('Hibernate Query');
+  expect(puml).toContain('Backend -> DB: SELECT petclinic.owners');
+});
+
+// Dropping an arrow must not drop the activation bar that balanced it.
+test('collapsing a session span leaves activate/deactivate balanced', () => {
+  const puml = spansToPuml(viaRepository, 'via repository', STATIC);
+  expect((puml.match(/^activate /gm) ?? []).length)
+    .toBe((puml.match(/^deactivate /gm) ?? []).length);
 });

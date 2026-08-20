@@ -10,11 +10,11 @@ legend right
   @generate_sequence. Change the test, not this file, then regenerate with
   petclinic-test/run-tests-with-tracing.sh
  
-  This picture is deliberately simplified. In review/review.html, click an
-  arrow (or its ⊕) to reveal that one call's SQL / JSON payloads —
-  a DB arrow twice, for the statement and then for the bound values.
+  This picture is deliberately simplified. In review/review.html, click a
+  highlighted arrow to reveal that one call's SQL —
+  a DB arrow's panel toggles between ? and the values that were bound.
  
-  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
+  Detail shown here: simplified · click an arrow to reveal its SQL
   Want more or less? The traces already carry all of it — re-rendering replays
   the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
   not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
@@ -30,76 +30,73 @@ participant Browser
 participant Backend
 participant DB
 == Searching with an empty last name lists every owner ==
-Browser -> Backend: GET /api/owners
+Browser -> Backend: List owners\nGET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith
 activate Backend
-Backend -> Backend: Hibernate Query
-activate Backend
 Backend -> DB: petclinic
-Backend -> DB: SELECT petclinic.owners [[genseq://1c73ay1{Click for the statement, again for the bound values} ⊕]]
+Backend -> DB: [[genseq://143xe0l{Click for the statement behind this call} SELECT petclinic.owners]]
 deactivate Backend
-deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0m8heo1{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1chpwpd{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0ozjlf4{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1l7ls1s{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1jnr7mb{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0gy5sbn{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0n17dwq{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1n2a4nx{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1k7mtru{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0qqrhzh{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1orgej0{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0sfxruk{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0q2e0xr{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0lgfvn3{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1ukozz3{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1tn2vvg{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://13fgqen{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1vas4s9{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://07pazpo{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0tsgjez{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1lmec46{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://02phmuh{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1yt95l2{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://17boxa3{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1xvon54{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0bfdi6w{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://070g6rp{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1w3i40y{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0diyz5h{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0hbi6cn{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://046yqvm{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1l8klok{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0nnvac7{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0n2jjmc{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1imhebb{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1sd5aic{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0fu4sb2{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://109ed38{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0otrg6p{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1vdfzqf{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0renyjk{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0t0zlry{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1mipl6r{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0vfsw81{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0qep09m{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://14o80cw{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0vaw5f0{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0spzn25{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://00um12r{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1x5z1hr{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0wx7sne{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://01v0hcd{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1632cj1{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1x6kf8q{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://18nwna4{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0us06z7{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1g17csn{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://0deb5uf{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://0c10zdp{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://12cxbed{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1n22wol{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1lhvte6{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://075xcpa{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0ro48t7{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1cd9u3f{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://15zzto4{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1o7w4wp{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1qp5eyc{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://13iqjmh{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1hzjhsy{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0xadwiq{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://060v3d1{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0vcpepb{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0anjtf3{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0yvdxi8{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1a2kb0l{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://12hpq13{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://03vz36o{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://00upuw9{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1parp4q{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://07iavpj{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0ubcut6{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://14wf2jt{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://10175qc{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://051sbes{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1nou1nv{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://04e6q5a{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0spf7cb{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0o4hxq5{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://18fvxsu{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0bzx4uw{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1s675dp{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://13f0bxw{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://10xr1w9{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1g1mcig{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1iwwbny{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://08flhmc{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0p34r2z{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://05yc7kp{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://00fwixc{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0nxhhce{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0zrxto5{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1t4tyqj{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0qp2eju{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://14hlqkw{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1sjcrsc{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0u99zjr{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://04sizcl{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0so4c5t{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1uqrm7e{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1ufhslr{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1yaz77b{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0p1zmte{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0xjxxgs{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://07ldlu5{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://0wu9h9z{Click for the statement behind this call} SELECT petclinic]]
+Backend -> DB: [[genseq://1hjf2k7{Click for the statement behind this call} SELECT petclinic]]
+Backend --> Browser: 200
 deactivate Backend
 @enduml

@@ -1,805 +1,796 @@
 {
-  "version": 1,
+  "version": 2,
   "details": {
-    "1c73ay1": {
+    "143xe0l": {
       "title": "SELECT petclinic.owners",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          }
         }
       ]
     },
-    "0jhcrfi": {
+    "030w0nk": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=2"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=2"
+          }
         }
       ]
     },
-    "1gbemwe": {
+    "0nq1lxs": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=2"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=2"
+          }
         }
       ]
     },
-    "0m8heo1": {
+    "12cxbed": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=3"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=3"
+          }
         }
       ]
     },
-    "1chpwpd": {
+    "1n22wol": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=3"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=3"
+          }
         }
       ]
     },
-    "0ozjlf4": {
+    "1lhvte6": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=4"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=4"
+          }
         }
       ]
     },
-    "1l7ls1s": {
+    "075xcpa": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=4"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=4"
+          }
         }
       ]
     },
-    "1jnr7mb": {
+    "0ro48t7": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=5"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=5"
+          }
         }
       ]
     },
-    "0gy5sbn": {
+    "1cd9u3f": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=5"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=5"
+          }
         }
       ]
     },
-    "0n17dwq": {
+    "15zzto4": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=6"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=6"
+          }
         }
       ]
     },
-    "1n2a4nx": {
+    "1o7w4wp": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=7"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=7"
+          }
         }
       ]
     },
-    "1k7mtru": {
+    "1qp5eyc": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=6"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=6"
+          }
         }
       ]
     },
-    "0qqrhzh": {
+    "13iqjmh": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=7"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=7"
+          }
         }
       ]
     },
-    "1orgej0": {
+    "1hzjhsy": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=8"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=8"
+          }
         }
       ]
     },
-    "0sfxruk": {
+    "0xadwiq": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=8"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=8"
+          }
         }
       ]
     },
-    "0q2e0xr": {
+    "060v3d1": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=10"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=10"
+          }
         }
       ]
     },
-    "0lgfvn3": {
+    "0vcpepb": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=9"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=9"
+          }
         }
       ]
     },
-    "1ukozz3": {
+    "0anjtf3": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=9"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=9"
+          }
         }
       ]
     },
-    "1tn2vvg": {
+    "0yvdxi8": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=11"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=11"
+          }
         }
       ]
     },
-    "13fgqen": {
+    "1a2kb0l": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=10"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=10"
+          }
         }
       ]
     },
-    "1vas4s9": {
+    "12hpq13": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=12"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=12"
+          }
         }
       ]
     },
-    "07pazpo": {
+    "03vz36o": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=11"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=11"
+          }
         }
       ]
     },
-    "0tsgjez": {
+    "00upuw9": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=14"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=14"
+          }
         }
       ]
     },
-    "1lmec46": {
+    "1parp4q": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=13"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=13"
+          }
         }
       ]
     },
-    "02phmuh": {
+    "07iavpj": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=12"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=12"
+          }
         }
       ]
     },
-    "1yt95l2": {
+    "0ubcut6": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=13"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=13"
+          }
         }
       ]
     },
-    "17boxa3": {
+    "14wf2jt": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=14"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=14"
+          }
         }
       ]
     },
-    "1xvon54": {
+    "10175qc": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=15"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=15"
+          }
         }
       ]
     },
-    "0bfdi6w": {
+    "051sbes": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=15"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=15"
+          }
         }
       ]
     },
-    "070g6rp": {
+    "1nou1nv": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=16"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=16"
+          }
         }
       ]
     },
-    "1w3i40y": {
+    "04e6q5a": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=17"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=17"
+          }
         }
       ]
     },
-    "0diyz5h": {
+    "0spf7cb": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=16"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=16"
+          }
         }
       ]
     },
-    "0hbi6cn": {
+    "0o4hxq5": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=18"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=18"
+          }
         }
       ]
     },
-    "046yqvm": {
+    "18fvxsu": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=17"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=17"
+          }
         }
       ]
     },
-    "1l8klok": {
+    "0bzx4uw": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=19"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=19"
+          }
         }
       ]
     },
-    "0nnvac7": {
+    "1s675dp": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=18"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=18"
+          }
         }
       ]
     },
-    "0n2jjmc": {
+    "13f0bxw": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=20"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=20"
+          }
         }
       ]
     },
-    "1imhebb": {
+    "10xr1w9": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=21"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=21"
+          }
         }
       ]
     },
-    "1sd5aic": {
+    "1g1mcig": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=19"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=19"
+          }
         }
       ]
     },
-    "0fu4sb2": {
+    "1iwwbny": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=22"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=22"
+          }
         }
       ]
     },
-    "109ed38": {
+    "08flhmc": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=20"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=20"
+          }
         }
       ]
     },
-    "0otrg6p": {
+    "0p34r2z": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=23"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=23"
+          }
         }
       ]
     },
-    "1vdfzqf": {
+    "05yc7kp": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=21"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=21"
+          }
         }
       ]
     },
-    "0renyjk": {
+    "00fwixc": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=24"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=24"
+          }
         }
       ]
     },
-    "0t0zlry": {
+    "0nxhhce": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=22"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=22"
+          }
         }
       ]
     },
-    "1mipl6r": {
+    "0zrxto5": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=25"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=25"
+          }
         }
       ]
     },
-    "0vfsw81": {
+    "1t4tyqj": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=23"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=23"
+          }
         }
       ]
     },
-    "0qep09m": {
+    "0qp2eju": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=26"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=26"
+          }
         }
       ]
     },
-    "14o80cw": {
+    "14hlqkw": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=24"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=24"
+          }
         }
       ]
     },
-    "0vaw5f0": {
+    "1sjcrsc": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=28"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=28"
+          }
         }
       ]
     },
-    "0spzn25": {
+    "0u99zjr": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=27"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=27"
+          }
         }
       ]
     },
-    "00um12r": {
+    "04sizcl": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=25"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=25"
+          }
         }
       ]
     },
-    "1x5z1hr": {
+    "0so4c5t": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=29"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=29"
+          }
         }
       ]
     },
-    "0wx7sne": {
+    "1uqrm7e": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=26"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=26"
+          }
         }
       ]
     },
-    "01v0hcd": {
+    "1ufhslr": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=30"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=30"
+          }
         }
       ]
     },
-    "1632cj1": {
+    "1yaz77b": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
+          }
         }
       ]
     },
-    "1x6kf8q": {
+    "0p1zmte": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=31"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=31"
+          }
         }
       ]
     },
-    "18nwna4": {
+    "0xjxxgs": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=28"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=28"
+          }
         }
       ]
     },
-    "0us06z7": {
+    "07ldlu5": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=32"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=32"
+          }
         }
       ]
     },
-    "1g17csn": {
+    "0wu9h9z": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=1"
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=1"
+          }
         }
       ]
     },
-    "0deb5uf": {
+    "1hjf2k7": {
       "title": "SELECT petclinic",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?"
-        },
-        {
-          "label": "with the bound values put back",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=1"
-        }
-      ]
-    },
-    "0c10zdp": {
-      "title": "Backend → Browser: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "[\n  {\n    \"id\": 2,\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": [\n          {\n            \"date\": \"2027-06-05\",\n            \"description\": \"DADADA\",\n            \"id\": 76,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810164784\",\n            \"id\": 64,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812843888\",\n            \"id\": 79,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786768414147\",\n            \"id\": 35,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786810795623\",\n            \"id\": 69,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786768404295\",\n            \"id\": 29,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786809927315\",\n            \"id\": 55,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810150437\",\n            \"id\": 58,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812623986\",\n            \"id\": 78,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check\",\n            \"id\": 47,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786813712633\",\n            \"id\": 81,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810736902\",\n            \"id\": 68,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check\",\n            \"id\": 66,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786810838010\",\n            \"id\": 70,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812263894\",\n            \"id\": 73,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786811860040\",\n            \"id\": 72,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check\",\n            \"id\": 67,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check — filmed for the review guide\",\n            \"id\": 40,\n            \"petId\": 2\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "with the bound values put back",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=1"
+          }
         }
       ]
     }

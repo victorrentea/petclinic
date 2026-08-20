@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {parseTempoTrace} from './trace-to-puml';
+import {DETAIL_INDEX_VERSION} from './detail-index';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -36,7 +37,7 @@ test('what the markers reveal is filed beside the diagram, and is not itself a d
   expect(detailsPathFor('/out', 'src/add-visit.spec.ts'))
     .toBe('/out/src/add-visit.spec.ts.genseq.json');
   const index = JSON.parse(written['/out/src/add-visit.spec.ts.genseq.json']);
-  expect(index.version).toBe(1);
+  expect(index.version).toBe(DETAIL_INDEX_VERSION);
   // every id in the index is addressed by a marker in the picture beside it
   for (const id of Object.keys(index.details)) {
     expect(written['/out/src/add-visit.spec.ts.genseq.puml']).toContain(`[[genseq://${id}{`);
@@ -81,7 +82,7 @@ test('generateFromWindows writes one puml per source file, sectioned by scenario
   const addVisit = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(addVisit).toContain('== Add a visit ==');
   expect(addVisit).toContain('== Cancel a visit ==');
-  expect(addVisit).toContain('Browser -> Backend: POST /api/visits');
+  expect(addVisit).toContain('Browser -> Backend: addVisit\\nPOST /api/visits');
   expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
 });
 

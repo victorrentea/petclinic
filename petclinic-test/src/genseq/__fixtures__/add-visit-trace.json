@@ -28,7 +28,7 @@
           "kind": "SPAN_KIND_CLIENT", "startTimeUnixNano": "1400",
           "attributes": [
             { "key": "db.system", "value": { "stringValue": "postgresql" } },
-            { "key": "db.statement", "value": { "stringValue": "insert into petclinic.visits (description,pet_id,visit_date,id) values (?,?,?,?)" } },
+            { "key": "db.statement", "value": { "stringValue": "/* insert for victor.training.petclinic.domain.Visit */ insert into petclinic.visits (description,pet_id,visit_date,id) values (?,?,?,?)" } },
             { "key": "db.query.parameter.0", "value": { "stringValue": "annual checkup" } },
             { "key": "db.query.parameter.1", "value": { "stringValue": "7" } },
             { "key": "db.query.parameter.2", "value": { "stringValue": "2026-08-20" } },

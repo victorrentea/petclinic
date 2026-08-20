@@ -106,3 +106,6 @@ rag-vector-store.json
 
 # jqwik sample database (petclinic-backend) — local test state, never commit
 /petclinic-backend/.jqwik-database
+
+# Code City renderer, downloaded on demand by generate-codecity.sh — a tool, not source
+/petclinic-backend/.codecity-tool/
