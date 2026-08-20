@@ -87,6 +87,17 @@ pre.code code { white-space:pre; }
 .diagram .head span { color:var(--muted); font-size:.82rem; font-family:ui-monospace,Menlo,monospace; }
 .diagram .svgbox { overflow-x:auto; margin-top:.7rem; background:#fff; border-radius:6px; padding:.6rem; }
 .diagram .svgbox svg { max-width:100%; height:auto; display:block; margin:0 auto; }
+.diagram .svgbox[hidden] { display:none; }
+/* How much unchanged context to draw around what changed. DomainModel and DB are big
+    enough that the whole diagram is a wall to hunt for red in, and how much context
+    makes a given change legible is the reviewer's call, not the generator's. */
+.focus { display:flex; align-items:center; gap:.35rem; margin-top:.7rem; flex-wrap:wrap; }
+.focus .lbl { color:var(--muted); font-size:.78rem; margin-right:.15rem; }
+.focus button { border:1px solid var(--line); background:var(--card); color:var(--muted);
+                border-radius:999px; cursor:pointer; font:600 .74rem/1.7 inherit;
+                padding:0 .6rem; }
+.focus button:hover { border-color:var(--link); color:var(--fg); }
+.focus button[aria-pressed="true"] { background:var(--link); border-color:var(--link); color:#fff; }
 /* Progressive disclosure: the diagram arrives simplified, and an arrow that has more
     to say is clickable. The hit area is a transparent rect the script lays under each
     such arrow, so the whole band — label, line, marker — answers to one click. */
@@ -211,6 +222,27 @@ document.querySelectorAll('.vidwrap').forEach(function (wrap) {
 });
 </script>"""
 
+
+FOCUS_JS = """<script>
+// The focus chooser: every level is already in the page, so switching is a visibility
+// flip, not a fetch — the guide must keep working as a single emailed file.
+(function () {
+  document.querySelectorAll('.diagram .focus').forEach(function (bar) {
+    var diagram = bar.closest('.diagram');
+    bar.addEventListener('click', function (ev) {
+      var button = ev.target.closest('button[data-level]');
+      if (!button) return;
+      var level = button.getAttribute('data-level');
+      bar.querySelectorAll('button[data-level]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === button));
+      });
+      diagram.querySelectorAll('.svgbox[data-level]').forEach(function (box) {
+        box.hidden = box.getAttribute('data-level') !== level;
+      });
+    });
+  });
+})();
+</script>"""
 
 EDITOR_JS = """<script>
 // Every `vscode://file/...` link is emitted with target="_blank", which is the only
@@ -475,6 +507,46 @@ def _provenance(rel: str, root: Path) -> str:
     return ('<p class="prov">' + " ".join(links) + '</p>') if links else ''
 
 
+# Which radius a reviewer meets first. Zero is the change with nothing to hang it on;
+# the whole diagram is what the focus levels exist to escape. One hop — what changed,
+# plus what it is attached to — is the reading that needs no explaining.
+DEFAULT_FOCUS = "1"
+
+
+def _focus_views(row, assets: Path, full_svg: Path, root: Path) -> str:
+    """The delta at each focus level, one visible at a time, with the chooser above them.
+
+    All of them are inlined rather than fetched on demand: the guide has to survive being
+    emailed as a single file, and a chooser whose other options 404 is worse than none.
+    """
+    levels = []
+    for pair in (row.get("focus") or "").split(","):
+        level, sep, name = pair.partition(":")
+        svg = assets / name
+        if sep and svg.is_file():
+            levels.append((level, svg))
+    levels.append(("all", full_svg))
+
+    if len(levels) == 1:                       # sequence diagrams, and anything unpruned
+        return f'<div class="svgbox">{inline_svg(full_svg, root)}</div>'
+
+    default = DEFAULT_FOCUS if any(l == DEFAULT_FOCUS for l, _ in levels) else "all"
+    buttons = "".join(
+        f'<button type="button" data-level="{html.escape(level)}" '
+        f'aria-pressed="{"true" if level == default else "false"}">{html.escape(level)}</button>'
+        for level, _ in levels
+    )
+    boxes = "".join(
+        f'<div class="svgbox" data-level="{html.escape(level)}"'
+        f'{"" if level == default else " hidden"}>{inline_svg(svg, root)}</div>'
+        for level, svg in levels
+    )
+    return (
+        '<div class="focus"><span class="lbl">unchanged context, in hops:</span>'
+        + buttons + "</div>" + boxes
+    )
+
+
 def render_diagrams(spec, root: Path, out_dir: Path) -> str:
     manifest = out_dir / spec.get("manifest", "assets/diagrams/MANIFEST.tsv")
     rows = read_manifest(manifest)
@@ -491,7 +563,7 @@ def render_diagrams(spec, root: Path, out_dir: Path) -> str:
         note = notes.get(r["name"], "")
         svg_rel = manifest.parent / r["svg"] if r.get("svg") else None
         body = (
-            inline_svg(svg_rel, root)
+            _focus_views(r, manifest.parent, svg_rel, root)
             if svg_rel and svg_rel.is_file()
             else f'<p class="sub">not rendered — see <code>{html.escape(r["diff_puml"])}</code></p>'
         )
@@ -504,7 +576,7 @@ def render_diagrams(spec, root: Path, out_dir: Path) -> str:
             + (f"<p>{note}</p>" if note else "")
             + _provenance(r["source"], root)
             + genseq_details(r["source"], root)
-            + f'<div class="svgbox">{body}</div></div>'
+            + body + '</div>'
         )
     return "\n".join(parts)
 
@@ -709,6 +781,7 @@ def main(argv=None) -> int:
 </div>
 {CAPTION_JS}
 {GENSEQ_JS}
+{FOCUS_JS}
 {EDITOR_JS}
 </body></html>
 """

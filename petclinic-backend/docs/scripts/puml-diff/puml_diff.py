@@ -89,9 +89,32 @@ def _struck_header(header: str) -> str:
     return f'{keyword} "{_struck(name)}" as {name}'
 
 
+# `[[url{tooltip} label]]` — a PlantUML link. The domain-model generator hangs one on
+# every class and field so a reviewer can click through to the source, and the line it
+# points at moves whenever anything above it moves. That must not read as a change:
+# identity is what the diagram *says*, and a link is how you get somewhere else.
+_LINK = re.compile(r"\s*\[\[[^\]]*\]\]")
+
+
+def _identity(s: str) -> str:
+    """A line reduced to what it means — links dropped, spacing normalised."""
+    return " ".join(_LINK.sub(" ", s).split())
+
+
+def _endpoint(side: str) -> str:
+    """The element a relationship end names, without the cardinality glued to it.
+
+    `_split_relationship` hands back `User "1"` and `"0..*" Role`, because a cardinality
+    change *is* a change to the relationship. It is not a change to which elements the
+    relationship joins, which is what a focus level walks.
+    """
+    tokens = [t for t in _identity(side).split() if not t.startswith('"')]
+    return " ".join(tokens) if tokens else _identity(side)
+
+
 def _element_name(header: str) -> str:
     """Extract the identity of an element from its (clean) header line."""
-    h = header.strip()
+    h = _identity(header)
     bracket = _BRACKET_COMPONENT.match(h)
     if bracket:                           # [Domain] <<..domain>>
         return f"[{bracket.group(1)}]"    # keyed as written, so relationships resolve
@@ -202,7 +225,7 @@ def parse(puml: str) -> Diagram:
 
 def _rel_key(rel) -> str:
     left, right, label = rel[0], rel[2], rel[3]     # identity ignores connector styling
-    return f"{left} {right} :: {label or ''}"
+    return f"{_identity(left)} {_identity(right)} :: {_identity(label or '')}"
 
 
 def _render_relationship(rel, mark) -> str:
@@ -219,17 +242,90 @@ def _render_relationship(rel, mark) -> str:
     return line
 
 
-def diff(old: Diagram, new: Diagram) -> str:
+ALL = "all"
+
+
+def _impacted(old: Diagram, new: Diagram) -> set:
+    """The elements this change actually touched.
+
+    An element is impacted when it is new, gone, has a member added or removed, or sits
+    at either end of a relationship that appeared or disappeared. Everything else in the
+    diagram is context — true before the change and true after it.
+    """
+    touched = set()
+    for name, el in new.elements.items():
+        if name not in old.elements:
+            touched.add(name)
+            continue
+        before = {_identity(m) for m in old.elements[name].members}
+        after = {_identity(m) for m in el.members}
+        if before != after:
+            touched.add(name)
+    touched |= set(old.elements) - set(new.elements)
+
+    old_keys = {_rel_key(r) for r in old.relationships}
+    new_keys = {_rel_key(r) for r in new.relationships}
+    for r in new.relationships:
+        if _rel_key(r) not in old_keys:
+            touched |= {_endpoint(r[0]), _endpoint(r[2])}
+    for r in old.relationships:
+        if _rel_key(r) not in new_keys:
+            touched |= {_endpoint(r[0]), _endpoint(r[2])}
+    return touched
+
+
+def _within(old: Diagram, new: Diagram, hops: int) -> set:
+    """The impacted elements, grown outwards `hops` relationships at a time.
+
+    The DomainModel and DB diagrams are large enough that a two-line change arrives as a
+    wall the reviewer has to search for red in. Zero hops is the change alone; each hop
+    adds what it is directly attached to, which is what makes a change *readable* — a new
+    column means little without the table it hangs off, and a new relationship means
+    little without both things it relates.
+
+    Both sides' relationships are walked, so an element pulled in by an edge this change
+    deleted is reachable too.
+    """
+    frontier = _impacted(old, new)
+    keep = set(frontier)
+    edges = old.relationships + new.relationships
+    for _ in range(hops):
+        nxt = set()
+        for raw_left, _conn, raw_right, _label in edges:
+            left, right = _endpoint(raw_left), _endpoint(raw_right)
+            if left in keep and right not in keep:
+                nxt.add(right)
+            if right in keep and left not in keep:
+                nxt.add(left)
+        if not nxt:
+            break
+        keep |= nxt
+    return keep
+
+
+def diff(old: Diagram, new: Diagram, focus=ALL) -> str:
+    names = set(old.elements) | set(new.elements)
+    keep = names if focus == ALL else _within(old, new, int(focus))
+
     out = ["@startuml"]
     out += [ln for ln in new.preamble if not ln.strip().startswith("caption")]
-    out.append("caption <color:red>added</color> or <color:red><s>removed</s></color>")
+    caption = "caption <color:red>added</color> or <color:red><s>removed</s></color>"
+    if focus != ALL:
+        hops = int(focus)
+        scope = "the impacted elements only" if hops == 0 else (
+            f"impacted + {hops} neighbour" + ("s" if hops > 1 else ""))
+        caption += f" — {scope} ({len(keep)} of {len(names)} shown)"
+    out.append(caption)
     out.append("")
 
     # ── Elements present in NEW (red header if the whole element is new) ──────
     for name, el in new.elements.items():
+        if name not in keep:
+            continue
         is_new = name not in old.elements
         old_members = old.elements[name].members if not is_new else []
-        removed = [m for m in old_members if m not in set(el.members)]
+        current = {_identity(m) for m in el.members}
+        removed = [m for m in old_members if _identity(m) not in current]
 
         header = el.header + (" #line:red;text:red" if is_new else "")
         if not el.has_body and not removed:
@@ -237,16 +333,16 @@ def diff(old: Diagram, new: Diagram) -> str:
             continue
 
         out.append(header + " {")
-        old_set = set(old_members)
+        old_set = {_identity(m) for m in old_members}
         for m in el.members:
-            out.append("  " + (_red(m) if (not is_new and m not in old_set) else m))
+            out.append("  " + (_red(m) if (not is_new and _identity(m) not in old_set) else m))
         for m in removed:                            # gone in NEW → struck ghost
             out.append("  " + _struck(m))
         out.append("}")
 
     # ── Elements removed entirely (present only in OLD): struck-through ghost ─
     for name, el in old.elements.items():
-        if name in new.elements:
+        if name in new.elements or name not in keep:
             continue
         header = _struck_header(el.header) + " #line:red;text:red"
         if not el.members:
@@ -262,11 +358,22 @@ def diff(old: Diagram, new: Diagram) -> str:
     # ── Relationships ────────────────────────────────────────────────────────
     old_keys = {_rel_key(r) for r in old.relationships}
     new_keys = {_rel_key(r) for r in new.relationships}
+    # A relationship with one end pruned away would draw an arrow to nothing, so it goes
+    # with the end it lost.
+    def both_ends_kept(r):
+        return _endpoint(r[0]) in keep and _endpoint(r[2]) in keep
+
     for r in new.relationships:
-        out.append(_render_relationship(r, "added" if _rel_key(r) not in old_keys else None))
+        if both_ends_kept(r):
+            out.append(_render_relationship(r, "added" if _rel_key(r) not in old_keys else None))
     for r in old.relationships:
-        if _rel_key(r) not in new_keys:              # gone in NEW → red ghost
+        if _rel_key(r) not in new_keys and both_ends_kept(r):   # gone in NEW → red ghost
             out.append(_render_relationship(r, "removed"))
+
+    # PlantUML renders an error page for a diagram with no content, and an empty focus
+    # level is a real answer — say it in the picture rather than break it.
+    if not keep:
+        out.append('note as EMPTY\n  nothing changed at this focus level\nend note')
 
     out.append("")
     out.append("@enduml")
@@ -281,14 +388,25 @@ def main(argv=None) -> int:
     ap.add_argument("old", help="Previous snapshot (.puml)")
     ap.add_argument("new", help="Current snapshot (.puml)")
     ap.add_argument("--out", help="Write merged diagram here (default: stdout)")
+    ap.add_argument(
+        "--focus", default=ALL, metavar="0|1|2|3|all",
+        help=(
+            "How much context to keep around what changed: 0 = the impacted elements "
+            "alone, N = grow N relationships outwards from them, all = the whole "
+            "diagram (default). For the large diagrams, where a two-line change "
+            "otherwise arrives as a wall to search for red in."
+        ),
+    )
     args = ap.parse_args(argv)
+    if args.focus != ALL and not args.focus.isdigit():
+        ap.error("--focus takes a non-negative integer or 'all'")
 
     with open(args.old, encoding="utf-8") as f:
         old = parse(f.read())
     with open(args.new, encoding="utf-8") as f:
         new = parse(f.read())
 
-    merged = diff(old, new)
+    merged = diff(old, new, args.focus)
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
             f.write(merged)

@@ -10,11 +10,11 @@ legend right
   @generate_sequence. Change the test, not this file, then regenerate with
   petclinic-test/run-tests-with-tracing.sh
  
-  This picture is deliberately simplified. In review/review.html, click an
-  arrow (or its ⊕) to reveal that one call's SQL / JSON payloads —
-  a DB arrow twice, for the statement and then for the bound values.
+  This picture is deliberately simplified. In review/review.html, click a
+  highlighted arrow to reveal that one call's SQL —
+  a DB arrow's panel toggles between ? and the values that were bound.
  
-  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
+  Detail shown here: simplified · click an arrow to reveal its SQL
   Want more or less? The traces already carry all of it — re-rendering replays
   the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
   not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
@@ -30,137 +30,106 @@ participant Browser
 participant Backend
 participant DB
 == Add a visit to an existing pet from the owner detail page ==
-Browser -> Backend: GET /api/vets
+Browser -> Backend: listVets\nGET /api/vets
 activate Backend
 Backend -> Backend: VetRepository.findAll
 activate Backend
-Backend -> Backend: Hibernate Query
-activate Backend
-Backend -> DB: SELECT petclinic [[genseq://0nf2y5o{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0nf2y5o{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend --> Browser: 200 [[genseq://1nmg2oo{Click for this call’s JSON body} ⊕]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: GET /api/pets/{petId}
+Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById
 activate Backend
-Backend -> DB: petclinic
-Backend -> Backend: Session.find victor.training.petclinic.domain.Pet
-activate Backend
-Backend -> DB: SELECT petclinic [[genseq://0ehnpdy{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://1dvza26{Click for the statement behind this call} PetRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://0id2znx{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: GET /api/owners/{ownerId}
+Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
-activate Backend
-Backend -> DB: SELECT petclinic.owners [[genseq://0v1zfua{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://09kc8m8{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: POST /api/owners/{ownerId}/pets/{petId}/visits [[genseq://174znjn{Click for this call’s JSON body} ⊕]]
+Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
 activate Backend
 Backend -> Backend: VisitRepository.save
 activate Backend
-Backend -> Backend: Session.persist victor.training.petclinic.domain.Visit
-activate Backend
-Backend -> DB: INSERT petclinic.visits [[genseq://1plk4wr{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://1a1p3uq{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
 Backend --> Browser: 201
 deactivate Backend
-Browser -> Backend: GET /api/owners/{ownerId}
+Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
-activate Backend
-Backend -> DB: SELECT petclinic.owners [[genseq://0v1zfua{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://0b5q3un{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
 == Add a visit attended by a vet ==
-Browser -> Backend: GET /api/vets
+Browser -> Backend: listVets\nGET /api/vets
 activate Backend
 Backend -> Backend: VetRepository.findAll
 activate Backend
-Backend -> Backend: Hibernate Query
-activate Backend
-Backend -> DB: SELECT petclinic [[genseq://0nf2y5o{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0nf2y5o{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend --> Browser: 200 [[genseq://1nmg2oo{Click for this call’s JSON body} ⊕]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: GET /api/pets/{petId}
+Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById
 activate Backend
 Backend -> DB: petclinic
-Backend -> Backend: Session.find victor.training.petclinic.domain.Pet
-activate Backend
-Backend -> DB: SELECT petclinic [[genseq://0ehnpdy{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://1dvza26{Click for the statement behind this call} PetRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://1ksmytc{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: GET /api/owners/{ownerId}
+Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
-activate Backend
-Backend -> DB: SELECT petclinic.owners [[genseq://0v1zfua{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://1n70u23{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
-Browser -> Backend: POST /api/owners/{ownerId}/pets/{petId}/visits [[genseq://1d9u5x3{Click for this call’s JSON body} ⊕]]
+Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
 activate Backend
 Backend -> Backend: VisitRepository.save
 activate Backend
-Backend -> Backend: Session.persist victor.training.petclinic.domain.Visit
-activate Backend
-Backend -> DB: INSERT petclinic.visits [[genseq://1gnv641{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://16txpyv{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
 Backend --> Browser: 201
 deactivate Backend
-Browser -> Backend: GET /api/owners/{ownerId}
+Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> Backend: Session.find victor.training.petclinic.domain.Owner
-activate Backend
-Backend -> DB: SELECT petclinic.owners [[genseq://0v1zfua{Click for the statement, again for the bound values} ⊕]]
-deactivate Backend
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: SELECT petclinic [[genseq://0jhcrfi{Click for the statement, again for the bound values} ⊕]]
-Backend -> DB: SELECT petclinic [[genseq://1gbemwe{Click for the statement, again for the bound values} ⊕]]
-Backend --> Browser: 200 [[genseq://0x0g655{Click for this call’s JSON body} ⊕]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
+Backend -> DB: [[genseq://0nq1lxs{Click for the statement behind this call} select visits]]
+Backend --> Browser: 200
 deactivate Backend
 @enduml
