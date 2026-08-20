@@ -14,10 +14,23 @@
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.
-- A `Backend -> DB` arrow is labelled with the **statement itself** (the span's `db.statement`,
-  or `db.query.text` under the stable semconv), not the generic span name — `src/genseq/sql-label.ts`
-  folds it one clause per line (`SELECT` / `FROM` / `JOIN` / `WHERE` / …), clipped to 10 words a
-  line and 8 lines an arrow. A DB span without a statement keeps its span name.
+- A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
+  `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
+  `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement
+  (`hibernate.use_sql_comments` in the backend — real HQL, but only for an `@Query` method;
+  a derived method is built through the Criteria API and comments itself `<criteria>`), the
+  Spring Data repository method above it, the Hibernate session call above it, and finally
+  `select pets` / `insert into visits` read off the SQL — which is all a lazy load leaves
+  behind, since it carries no comment and sits under no repository span.
+  The statement itself lives behind the click; `src/genseq/sql-label.ts` folds it one clause
+  per line (`SELECT` / `FROM` / `JOIN` / `WHERE` / …), clipped to 10 words a line and 8 lines
+  an arrow, with the origin comment split off — it is Hibernate talking *about* the statement.
+- A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
+  repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
+  one, else the `operationId`). The route says where a call went; the name says what it was for.
+- The **`Session.*` / `Hibernate Query` spans are dropped** when a Spring Data repository span
+  above them already said the same thing. They are kept with no repository above them — code
+  using the EntityManager directly, where the session call is the only account of the request.
 - Activation bars are drawn **only around a call that encloses something**. A leaf hop (a DB
   query, a childless `@WithSpan`) gets a bare arrow — the box would enclose nothing and each
   `activate`/`deactivate` pair costs vertical space the N+1-heavy diagrams cannot spare.
@@ -29,12 +42,15 @@
   (`GENSEQ_REFRESH=1` forces a fresh Tempo fetch). No test run, no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
   vars with `npm run trace:diagram`. Every generated file repeats this in its own header.
 - **A diagram is interactive by default** (`SEQ_INTERACTIVE=1`): the picture stays simplified
-  and each revealable arrow carries `[[genseq://<id>{…} ⊕]]`, a PlantUML link that becomes an
-  `<a href>` in the SVG — the hook `.claude/skills/human-review/scripts/build-review-html.py` binds to, so nothing ever
-  matches rendered label text. Clicking cycles that arrow alone: a DB arrow goes hidden → `?`
-  → bound values; a request/response arrow shows its JSON body. `SEQ_INTERACTIVE=0` bakes the
-  detail back into the picture exactly as before, which is what `diagram:lean`/`:static`/`:full`
-  do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
+  and each revealable arrow's **whole label** is wrapped in `[[genseq://<id>{…} <label>]]`, a
+  PlantUML link that becomes an `<a href>` in the SVG — the hook
+  `.claude/skills/human-review/scripts/build-review-html.py` binds to, so nothing ever matches
+  rendered label text. (It used to be a trailing `⊕`: a second, smaller thing to aim at when
+  the reviewer already wants to click the arrow.) One click reveals, another closes; a DB
+  panel **toggles** between `?` and the bound values, carried as the step's `alternate`.
+  That was a second click before, which swapped the text under the reader and counted itself
+  `1 / 2` — advertising neither that it existed nor what it would do. `SEQ_INTERACTIVE=0`
+  bakes the detail back into the picture, which is what `diagram:lean`/`:static`/`:full` do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
   `.puml` textually, so a positional id would repaint everything under an inserted query.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,

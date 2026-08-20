@@ -139,6 +139,28 @@ export function formatOriginLabel(origin: string): string {
   return [...words.slice(0, MAX_ORIGIN_WORDS), ELLIPSIS].join(' ');
 }
 
+// The last thing a DB arrow can be called. `SELECT petclinic` — the OTel span name — is
+// the operation plus the *database*, so every query in the trace shares it; the verb plus
+// the table it actually reads is the smallest description that tells two apart, which is
+// the whole job when twenty of them are an N+1.
+const STATEMENT_SHAPES: Array<[RegExp, string]> = [
+  [/^\s*select\b[\s\S]*?\bfrom\s+([\w."]+)/i, 'select'],
+  [/^\s*insert\s+into\s+([\w."]+)/i, 'insert into'],
+  [/^\s*update\s+([\w."]+)/i, 'update'],
+  [/^\s*delete\s+from\s+([\w."]+)/i, 'delete from'],
+];
+
+/** `select pets` for a statement that reads pets — or nothing, for SQL of no known shape. */
+export function summarizeStatement(sql: string): string | undefined {
+  const {statement} = splitOrigin(sql);
+  for (const [shape, verb] of STATEMENT_SHAPES) {
+    const m = shape.exec(statement);
+    // the schema prefix is the same for every table here, so it separates nothing
+    if (m) return `${verb} ${m[1].replace(/"/g, '').split('.').pop()}`;
+  }
+  return undefined;
+}
+
 function foldStatement(sql: string, parameters: string[]): string[] {
   // Hibernate emits comma-packed column lists; without a space they read as one
   // enormous "word" and the word clip below could never bite.

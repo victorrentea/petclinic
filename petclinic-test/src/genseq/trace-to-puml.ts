@@ -1,4 +1,4 @@
-import {formatOriginLabel, formatSqlDetail, formatSqlLabel, splitOrigin} from './sql-label';
+import {formatOriginLabel, formatSqlDetail, formatSqlLabel, splitOrigin, summarizeStatement} from './sql-label';
 import {formatJsonDetail, jsonNote} from './json-label';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, revealable} from './options';
 import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
@@ -92,18 +92,40 @@ function parametersOf(span: NormSpan): string[] {
     .map((p) => p.value);
 }
 
+// Hibernate writes a placeholder instead of query text when there was no query text to
+// write: a Spring Data *derived* method is assembled through the Criteria API, so its
+// comment reads `/* <criteria> */`. That names the mechanism, never the call.
+const ORIGIN_PLACEHOLDER = /^<[a-z]+>$/i;
+
+// `Session.find victor.training.petclinic.domain.Owner` — the package is the same for
+// every domain class in the trace, so it is nine words of nothing on an arrow.
+const QUALIFIED_NAME = /\b(?:[a-z][\w$]*\.)+([A-Z][\w$]*)/g;
+
+function unqualify(name: string): string {
+  return name.replace(QUALIFIED_NAME, '$1');
+}
+
 /**
- * What the arrow into this span says. For a DB hop that is Hibernate's own account of
- * the statement — the HQL, or the entity role it was lazily loading — because that is
- * the grain a reviewer reads a sequence diagram at: *which* call went to the database,
- * not which columns came back. The SQL stays one click away.
+ * What the arrow into this span says. For a DB hop that is the *call* the query came
+ * from, not the query — which is the grain a reviewer reads a sequence diagram at, and
+ * the one thing `SELECT petclinic`, repeated twenty times down an N+1, cannot tell them.
+ * The SQL stays one click away.
  *
- * The span name is the fallback, and it is a poor one: `SELECT petclinic` is what every
- * query in an N+1 is called. It only appears when the origin comment is missing, i.e.
- * the trace was recorded without `hibernate.use_sql_comments`.
+ * Three sources, best first, because no single one covers every query:
+ *
+ *   1. Hibernate's own comment on the statement (`hibernate.use_sql_comments`) — the
+ *      real HQL, but only for a query written as HQL: an `@Query` method.
+ *   2. the Spring Data repository method above it — what a derived method has instead of
+ *      HQL, since Hibernate only says `<criteria>` for those;
+ *   3. the Hibernate session call above it — `Session.find Owner`, which is what a lazy
+ *      load or a `findById` has instead of either.
+ *
+ * The span name is the last resort and a poor one; it appears when a trace was recorded
+ * without any of the above, e.g. against a backend older than `use_sql_comments`.
  */
 function arrowLabel(
   span: NormSpan, target: string, options: DiagramOptions, operations: OperationNames,
+  caller?: string,
 ): string {
   if (target !== 'DB') {
     // A REST hop's span name is its route; the contract's name for that operation is
@@ -115,13 +137,15 @@ function arrowLabel(
   const sql = sqlOf(span);
   if (!sql) return span.name;
   const {origin} = splitOrigin(sql);
-  if (options.interactive) return origin ? formatOriginLabel(origin) : span.name;
+  const spoken = origin && !ORIGIN_PLACEHOLDER.test(origin) ? formatOriginLabel(origin) : undefined;
+  const account = spoken ?? caller ?? summarizeStatement(sql);
+  if (options.interactive) return account ?? span.name;
   // A baked-in diagram is asked for precisely to have the statement on the page, so it
   // gets both grains: Hibernate's account, then the SQL it compiled to.
   // The values go in *after* the statement is folded into clauses — a bound value
   // reading "Follow up on the vaccination" would otherwise be folded at its own ON.
   const statement = formatSqlLabel(sql, options.sql === 'values' ? parametersOf(span) : []);
-  return origin ? `${formatOriginLabel(origin)}\\n${statement}` : statement;
+  return account ? `${account}\\n${statement}` : statement;
 }
 
 // The handle a reader clicks. PlantUML turns `[[scheme://id{tooltip} text]]` into an
@@ -225,12 +249,21 @@ function emitTrace(
   }
   const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
-  const underRepository = (span: NormSpan): boolean => {
+  const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
       up; up = up.parentSpanId ? byId.get(up.parentSpanId) : undefined) {
-      if (REPOSITORY_SPAN_RE.test(up.name)) return true;
+      if (matches.test(up.name)) return up;
     }
-    return false;
+    return undefined;
+  };
+
+  // Who asked for this query — the repository method if there is one, else the session
+  // call. Both are already in the trace; the diagram drops them as arrows precisely
+  // because they belong *on* the query.
+  const callerOf = (span: NormSpan): string | undefined => {
+    const source = nearestAncestor(span, REPOSITORY_SPAN_RE)
+      ?? nearestAncestor(span, HIBERNATE_SPAN_RE);
+    return source ? unqualify(source.name) : undefined;
   };
 
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
@@ -244,7 +277,8 @@ function emitTrace(
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
     const selfCustom = pp === p && span.kind === 'INTERNAL'
-      && !(HIBERNATE_SPAN_RE.test(span.name) && underRepository(span));
+      && !(HIBERNATE_SPAN_RE.test(span.name)
+        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined);
 
     // Draw the subtree first: an activation bar is only worth its vertical space
     // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
@@ -269,7 +303,9 @@ function emitTrace(
         : bodySteps(bodyOf(span, parent, 'http.request.body'), 'request body', options);
       const title = p === 'DB' ? span.name : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
-      const label = linkLabel(arrowLabel(span, p, options, operations), collector, title, steps, tooltip);
+      const label = linkLabel(
+        arrowLabel(span, p, options, operations, p === 'DB' ? callerOf(span) : undefined),
+        collector, title, steps, tooltip);
       out.push(`${pp} -> ${p}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {

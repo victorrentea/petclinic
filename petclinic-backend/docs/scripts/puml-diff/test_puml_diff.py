@@ -142,3 +142,87 @@ def test_removed_bracket_component_struck_but_keeps_alias():
     # Aliased so relationships still pointing at [Repository] resolve to the
     # struck box instead of spawning a second, unstyled one.
     assert 'component "<color:red><s>Repository</s></color>" as Repository' in _pkg_diff()
+
+
+# ── Focus levels ─────────────────────────────────────────────────────────────
+# DomainModel and DB are large enough that a two-line change arrives as a wall the
+# reviewer has to search for red in. `--focus` keeps what changed plus N relationships
+# outwards, so the same delta can be read at whatever radius makes it legible.
+
+def _focused(level):
+    return m.diff(_parse(BEFORE), _parse(AFTER), level)
+
+
+def _elements(out):
+    """The elements a rendered diff draws, by name — a removed one wears its strikeout."""
+    return {m._element_name(m._strip_markup(ln).rstrip("{").strip())
+            for ln in out.splitlines() if ln.startswith(("class ", "enum "))}
+
+
+def test_focus_zero_keeps_only_what_changed():
+    kept = _elements(_focused("0"))
+    # Owner gained a field and an Invoice; Vet's id changed type; Visit lost `time`;
+    # Invoice is new; Role was deleted — and User with it, since the relationship
+    # between them disappeared and a relationship has two ends.
+    assert kept == {"Owner", "Vet", "Visit", "Invoice", "Role", "User"}
+    assert "Specialty" not in kept        # untouched, and one hop from Vet
+    assert "PetType" not in kept
+
+
+def test_each_hop_pulls_in_the_next_ring():
+    assert "Pet" not in _elements(_focused("0"))
+    assert "Pet" in _elements(_focused("1"))        # Owner -- Pet
+    assert "PetType" not in _elements(_focused("1"))
+    assert "PetType" in _elements(_focused("2"))    # PetType -- Pet -- Owner
+
+
+def test_focus_all_is_the_whole_diagram_and_the_default():
+    assert _focused(m.ALL) == _diff()
+    assert _elements(_focused(m.ALL)) >= _elements(_focused("3"))
+
+
+# A relationship whose far end was pruned would draw an arrow into nothing.
+def test_a_pruned_end_takes_its_relationship_with_it():
+    out = _focused("0")
+    assert "Invoice" in out
+    assert "PetType" not in out
+    for line in out.splitlines():
+        if " -- " in line or "-[#red]-" in line:
+            left, right = line.split()[0], line.split()[-1].split(":")[0]
+            assert "PetType" not in (left, right)
+
+
+def test_the_caption_says_what_is_being_shown():
+    assert "the impacted elements only (6 of 9 shown)" in _focused("0")
+    assert "impacted + 1 neighbour" in _focused("1")
+    assert "impacted + 2 neighbours" in _focused("2")
+    assert "shown)" not in _diff()          # the whole diagram needs no qualifier
+
+
+# An identical pair has nothing impacted, and an empty diagram is a PlantUML error page.
+def test_nothing_changed_at_focus_zero_still_renders():
+    same = _parse(BEFORE)
+    out = m.diff(same, _parse(BEFORE), "0")
+    assert "nothing changed at this focus level" in out
+    assert out.strip().endswith("@enduml")
+
+
+# The domain-model generator hangs a `[[src://…]]` link on every class and field, and
+# the line it points at moves whenever anything above it moves. Identity is what the
+# diagram says; a link is how you get somewhere else.
+def test_a_source_link_is_not_a_change():
+    plain = m.parse("""@startuml
+class Owner {
+  id : Integer
+}
+@enduml""")
+    linked = m.parse("""@startuml
+class Owner [[src://a/Owner.java:12{open Owner}]] {
+  id : Integer [[src://a/Owner.java:15{open id}]]
+}
+@enduml""")
+    out = m.diff(plain, linked)
+    assert "<color:red>" not in out.replace(
+        "caption <color:red>added</color> or <color:red><s>removed</s></color>", "")
+    assert m._impacted(plain, linked) == set()
+    assert "[[src://a/Owner.java:15{open id}]]" in out   # …and the link still renders

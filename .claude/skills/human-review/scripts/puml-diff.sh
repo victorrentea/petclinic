@@ -15,7 +15,8 @@
 # Output (default .human-review/assets/diagrams/):
 #   <name>.diff.puml   the merged delta
 #   <name>.diff.svg    rendered, when plantuml is on PATH
-#   MANIFEST.tsv       name / source path / kind / status / diff.puml / svg
+#   <name>.diff.focus<N>.svg   the same delta, pruned to N hops around what changed
+#   MANIFEST.tsv       name / source / kind / status / diff.puml / svg / focus levels
 #
 # Usage:
 #   scripts/puml-diff.sh [base-ref] [out-dir]
@@ -27,6 +28,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 cd "$ROOT"
+
+# How much context to keep around a change, in relationships. The review page turns
+# these into a chooser; "all" is the unpruned diagram the .diff.svg already holds.
+FOCUS_LEVELS="0 1 2 3"
 
 BASE_REF="${1:-origin/main}"
 OUT_DIR="${2:-.human-review/assets/diagrams}"
@@ -67,7 +72,7 @@ done < <(
 )
 
 MANIFEST="$OUT_DIR/MANIFEST.tsv"
-printf 'name\tsource\tkind\tstatus\tdiff_puml\tsvg\n' > "$MANIFEST"
+printf 'name\tsource\tkind\tstatus\tdiff_puml\tsvg\tfocus\n' > "$MANIFEST"
 
 # A sequence diagram is the one that declares lifelines and sends messages along
 # them; everything else in this repo is a structural snapshot.
@@ -126,8 +131,24 @@ for rel in "${CHANGED[@]}"; do
     [ -f "${diff_puml%.puml}.svg" ] && svg="$(basename "${diff_puml%.puml}.svg")"
   fi
 
-  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$name" "$rel" "$kind" "$status" "$(basename "$diff_puml")" "$svg" >> "$MANIFEST"
+  # A structural diagram is drawn again at each focus level, so the reviewer picks the
+  # radius that makes the change legible instead of hunting for red across the whole
+  # skyline. Rendering all of them up front costs a few seconds once; deciding at read
+  # time costs nothing, and the guide has to survive being emailed as one file.
+  focus=""
+  if [ "$kind" = structural ] && [ "$status" != added ] && [ -n "$svg" ]; then
+    for level in $FOCUS_LEVELS; do
+      level_puml="$OUT_DIR/$name.diff.focus$level.puml"
+      python3 "$STRUCT_DIFF" "$old" "$new" --focus "$level" --out "$level_puml"
+      plantuml -tsvg "$level_puml" >/dev/null 2>&1 || true
+      if [ -f "${level_puml%.puml}.svg" ]; then
+        focus="$focus${focus:+,}$level:$(basename "${level_puml%.puml}.svg")"
+      fi
+    done
+  fi
+
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$name" "$rel" "$kind" "$status" "$(basename "$diff_puml")" "$svg" "$focus" >> "$MANIFEST"
   echo "[puml-diff] $rel ($kind, $status) -> $diff_puml" >&2
   count=$((count + 1))
 done
