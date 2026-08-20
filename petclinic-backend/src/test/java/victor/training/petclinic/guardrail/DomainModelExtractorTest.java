@@ -13,6 +13,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -39,6 +40,7 @@ class DomainModelExtractorTest {
     private static final String BASE_PKG = "victor.training.petclinic";
     private static final String DOMAIN_MODEL_PKG = BASE_PKG + ".domain";
     private static final Path GENERATED_DIR = Paths.get("docs/generated");
+    private static final Path SOURCE_ROOT = Paths.get("src/main/java");
 
     private static final String ONE = "1";
     private static final String MANY = "0..*";
@@ -66,7 +68,8 @@ class DomainModelExtractorTest {
         sb.append("skinparam classAttributeIconSize 0\n\n");
 
         for (Class<?> cls : entities) {
-            sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName());
+            sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName())
+                    .append(sourceLink(cls, cls.getSimpleName()));
 
             List<String> members = renderMembers(cls, entities);
             if (members.isEmpty()) {
@@ -193,7 +196,8 @@ class DomainModelExtractorTest {
         List<String> lines = new ArrayList<>();
         if (cls.isEnum()) {
             for (Object value : cls.getEnumConstants()) {
-                lines.add(((Enum<?>) value).name());
+                String name = ((Enum<?>) value).name();
+                lines.add(name + sourceLink(cls, name));
             }
             return lines;
         }
@@ -202,9 +206,67 @@ class DomainModelExtractorTest {
                 continue;
             if (referencedDomainClass(f, domain) != null)
                 continue; // association, not attribute
-            lines.add(f.getName() + " : " + typeName(f.getGenericType()));
+            lines.add(f.getName() + " : " + typeName(f.getGenericType())
+                    + sourceLink(cls, f.getName()));
         }
         return lines;
+    }
+
+    // ── Source links: click a class or a field, land on the declaration ───────
+
+    /**
+     * The link the reviewer clicks, as a repo-relative `src://path:line` handle.
+     *
+     * Deliberately NOT an absolute `vscode://file/...` URL: this .puml is a committed
+     * artifact, and baking `/Users/someone/...` into it makes every machine that
+     * regenerates it produce a diff. The review page resolves the handle against its
+     * own checkout when it inlines the SVG.
+     *
+     * Reflection knows the members but not where they were written, so the line is
+     * found by reading the source file back — no line, no link, and the diagram is
+     * exactly what it was before.
+     */
+    private String sourceLink(Class<?> cls, String member) {
+        Path source = sourceFileOf(cls);
+        if (source == null)
+            return "";
+        int line = lineOfDeclaration(source, member);
+        // The test runs with the module as its working directory, so the paths it has
+        // are module-relative; the review page resolves against the repo root.
+        String module = Paths.get("").toAbsolutePath().getFileName().toString();
+        String rel = module + "/" + source.toString().replace('\\', '/');
+        return " [[src://" + rel + (line > 0 ? ":" + line : "")
+                + "{open " + member + " in the editor}]]";
+    }
+
+    private Path sourceFileOf(Class<?> cls) {
+        Path file = SOURCE_ROOT.resolve(cls.getName().replace('.', '/') + ".java");
+        return Files.isRegularFile(file) ? file : null;
+    }
+
+    /**
+     * The line `member` is declared on: a field or an enum constant, matched as a whole
+     * word before the `;`, `=`, `,` or `(` that can follow it. Comments and Javadoc
+     * mentioning the name are skipped, since a `*`-continued line is never a
+     * declaration.
+     */
+    private int lineOfDeclaration(Path source, String member) {
+        Pattern declaration = Pattern.compile(
+                "(^|[^\\w.])" + Pattern.quote(member) + "\\s*([;=,(){]|$)");
+        try {
+            List<String> lines = Files.readAllLines(source);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                String trimmed = line.trim();
+                if (trimmed.startsWith("*") || trimmed.startsWith("//"))
+                    continue;
+                if (declaration.matcher(line).find())
+                    return i + 1;
+            }
+        } catch (IOException e) {
+            return 0; // unreadable source is a missing line number, not a failed build
+        }
+        return 0;
     }
 
     // ── Reflection helpers ─────────────────────────────────────────────────────

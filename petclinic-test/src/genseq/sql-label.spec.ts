@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {formatSqlLines, formatSqlLabel, applyParameters} from './sql-label';
+import {applyParameters, formatOriginLabel, formatSqlLabel, formatSqlLines, splitOrigin, summarizeStatement} from './sql-label';
 
 test('breaks a statement into one line per clause, keywords uppercased', () => {
   const lines = formatSqlLines(
@@ -117,4 +117,59 @@ test('numbers stay bare, strings get quotes', () => {
 test('a backslash in the SQL cannot eat the line break after it', () => {
   const label = formatSqlLabel("select o.id from owners o where o.last_name like ? escape '\\'");
   expect(label).toContain("escape '\\\\'");
+});
+
+// ── Hibernate's origin comment ────────────────────────────────────────────────
+// `hibernate.use_sql_comments` prefixes each statement with what produced it. It is
+// Hibernate talking *about* the statement, so it labels the arrow and never reaches
+// the folded clauses.
+
+test('splits the leading comment off the statement', () => {
+  const {origin, statement} = splitOrigin(
+    '/* select o from Owner o where o.lastName like ?1 */ select o1_0.id from owners o1_0');
+  expect(origin).toBe('select o from Owner o where o.lastName like ?1');
+  expect(statement).toBe('select o1_0.id from owners o1_0');
+});
+
+test('a multi-line comment collapses to one line', () => {
+  expect(splitOrigin('/* load\n   com.example.Owner.pets */ select 1').origin)
+    .toBe('load com.example.Owner.pets');
+});
+
+// A trace recorded without use_sql_comments, or an inline comment further along, is
+// not an origin — only a comment the statement *opens* with is.
+test('a statement with no leading comment keeps all of itself', () => {
+  const {origin, statement} = splitOrigin('select 1 /* not an origin */');
+  expect(origin).toBeUndefined();
+  expect(statement).toBe('select 1 /* not an origin */');
+});
+
+test('the comment never reaches the folded statement', () => {
+  const lines = formatSqlLines('/* insert for com.example.Visit */ insert into visits (id) values (?)');
+  expect(lines.join(' ')).not.toContain('/*');
+  expect(lines[0]).toBe('INSERT INTO visits (id)');
+});
+
+test('an arrow-length origin is left alone, a runaway one is clipped', () => {
+  const short = 'load com.example.Owner.pets';
+  expect(formatOriginLabel(short)).toBe(short);
+  expect(formatOriginLabel(Array(40).fill('w').join(' '))).toMatch(/…$/);
+});
+
+// The fallback name for a query the trace says nothing else about — a lazy load, which
+// carries no Hibernate comment and sits under no repository span.
+test('names a statement by its verb and the table it touches', () => {
+  expect(summarizeStatement('select p1_0.id from pets p1_0 where p1_0.owner_id=?')).toBe('select pets');
+  expect(summarizeStatement('select v1_0.id from petclinic.visits v1_0')).toBe('select visits');
+  expect(summarizeStatement('insert into petclinic.visits (id) values (?)')).toBe('insert into visits');
+  expect(summarizeStatement('update owners set city=? where id=?')).toBe('update owners');
+  expect(summarizeStatement('delete from visits where id=?')).toBe('delete from visits');
+});
+
+test('the origin comment does not hide the shape of the statement', () => {
+  expect(summarizeStatement('/* <criteria> */ select o1_0.id from owners o1_0')).toBe('select owners');
+});
+
+test('SQL of no recognised shape gets no summary rather than a wrong one', () => {
+  expect(summarizeStatement('call some_procedure(?)')).toBeUndefined();
 });

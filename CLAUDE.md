@@ -98,6 +98,14 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
   decided at render time in `petclinic-test/` (`SEQ_SQL`, `SEQ_HTTP_BODIES`), never here.
 - The agent jar is versioned in its filename — otherwise an already-downloaded
   `opentelemetry-javaagent.jar` makes a version bump a silent no-op.
+- `spring.jpa.properties.hibernate.use_sql_comments=true` makes Hibernate prefix each
+  statement with the HQL that produced it, so a trace can say which call a bare
+  `select … from owners` came from — the agent captures no HQL of its own. It only fires
+  for queries *written* as HQL (`@Query`); a Spring Data derived method is assembled
+  through the Criteria API and comments itself `/* <criteria> */`, and an entity or lazy
+  load carries no comment at all. The sequence diagrams fall back accordingly — see
+  `petclinic-test/CLAUDE.md`. **A backend started before this property was added labels
+  every DB arrow `SELECT petclinic`; restart it and re-record.**
 
 
 ## API Endpoints

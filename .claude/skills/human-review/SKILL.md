@@ -135,6 +135,32 @@ Re-run `.claude/skills/human-review/scripts/puml-diff.sh` afterwards so the rege
 A diagram that did not exist before is shown **plain**, not red — reddening every line of
 something new says "all of this changed" when what happened is "this is new".
 
+**The base diagram must come from the same renderer as the new one.** A sequence diagram
+is a rendering choice as much as a recording: change what an arrow is labelled with, and
+every arrow in the committed base diagram reads as a deletion with its replacement added
+underneath — a wall of red that says nothing about the change under review. Whenever the
+generator in `petclinic-test/src/genseq/` has moved since the base ref, regenerate the
+base side too:
+
+```sh
+git stash push --include-untracked          # your fixes are uncommitted; keep them
+git checkout $BASE -- petclinic-test/src/genseq petclinic-backend/src/main/resources/application.properties
+cd petclinic-test && GENSEQ_REFRESH=1 ./run-tests-with-tracing.sh   # base traces, base renderer
+```
+
+…then restore the branch's generator and re-render, so both sides differ only in what
+the *code* does. `npm run trace:diagram` re-renders from the cached spans in about a
+second, so the expensive part is the one traced run per side, not the rendering.
+
+If you skip it, say so in the guide next to the diagram: a red arrow the reviewer cannot
+distinguish from a real change is worse than no diagram.
+
+⚠️ The DB arrows are labelled from Hibernate's own comment on each statement
+(`hibernate.use_sql_comments`, in the backend's `application.properties`). A backend
+started before that property existed emits statements without it, and every DB arrow
+falls back to its span name — `SELECT petclinic`, over and over. If that is what you see,
+the running backend predates the property: restart it and re-record.
+
 **Show what generated each diagram.** A sequence diagram is evidence only if the reviewer
 can get to the test that produced it: give every diagram in the guide a link to the
 scenario source (`file:from-to`, so VS Code opens it at the test) and a link to the `.puml`

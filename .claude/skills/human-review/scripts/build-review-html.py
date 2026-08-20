@@ -87,6 +87,17 @@ pre.code code { white-space:pre; }
 .diagram .head span { color:var(--muted); font-size:.82rem; font-family:ui-monospace,Menlo,monospace; }
 .diagram .svgbox { overflow-x:auto; margin-top:.7rem; background:#fff; border-radius:6px; padding:.6rem; }
 .diagram .svgbox svg { max-width:100%; height:auto; display:block; margin:0 auto; }
+.diagram .svgbox[hidden] { display:none; }
+/* How much unchanged context to draw around what changed. DomainModel and DB are big
+    enough that the whole diagram is a wall to hunt for red in, and how much context
+    makes a given change legible is the reviewer's call, not the generator's. */
+.focus { display:flex; align-items:center; gap:.35rem; margin-top:.7rem; flex-wrap:wrap; }
+.focus .lbl { color:var(--muted); font-size:.78rem; margin-right:.15rem; }
+.focus button { border:1px solid var(--line); background:var(--card); color:var(--muted);
+                border-radius:999px; cursor:pointer; font:600 .74rem/1.7 inherit;
+                padding:0 .6rem; }
+.focus button:hover { border-color:var(--link); color:var(--fg); }
+.focus button[aria-pressed="true"] { background:var(--link); border-color:var(--link); color:#fff; }
 /* Progressive disclosure: the diagram arrives simplified, and an arrow that has more
     to say is clickable. The hit area is a transparent rect the script lays under each
     such arrow, so the whole band — label, line, marker — answers to one click. */
@@ -105,10 +116,16 @@ pre.code code { white-space:pre; }
 #genseq-panel .genseq-title { font:600 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
                               flex:1; word-break:break-all; }
 #genseq-panel .genseq-step { color:var(--muted); font-size:.76rem; white-space:nowrap; }
-#genseq-panel button { border:0; background:none; color:var(--muted); cursor:pointer;
+#genseq-panel .genseq-close { border:0; background:none; color:var(--muted); cursor:pointer;
                         font-size:1.1rem; line-height:1; padding:0 .1rem; }
-#genseq-panel button:hover { color:var(--fg); }
-#genseq-panel .genseq-label { color:var(--link); font-size:.8rem; margin:.15rem 0 .4rem; }
+#genseq-panel .genseq-close:hover { color:var(--fg); }
+#genseq-panel .genseq-label { color:var(--link); font-size:.8rem; margin:.15rem 0 .4rem;
+                              display:flex; align-items:baseline; gap:.5rem; }
+#genseq-panel .genseq-toggle { border:1px solid var(--line); background:var(--code-bg);
+                        color:var(--muted); cursor:pointer; border-radius:999px;
+                        font:600 .7rem/1.6 inherit; padding:0 .55rem; white-space:nowrap; }
+#genseq-panel .genseq-toggle:hover { color:var(--fg); border-color:var(--link); }
+#genseq-panel .genseq-toggle[hidden] { display:none; }
 #genseq-panel pre { margin:0; max-height:24rem; overflow:auto; background:var(--code-bg);
                     border-radius:6px; padding:.5rem .6rem; white-space:pre;
                     font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
@@ -206,16 +223,62 @@ document.querySelectorAll('.vidwrap').forEach(function (wrap) {
 </script>"""
 
 
+FOCUS_JS = """<script>
+// The focus chooser: every level is already in the page, so switching is a visibility
+// flip, not a fetch — the guide must keep working as a single emailed file.
+(function () {
+  document.querySelectorAll('.diagram .focus').forEach(function (bar) {
+    var diagram = bar.closest('.diagram');
+    bar.addEventListener('click', function (ev) {
+      var button = ev.target.closest('button[data-level]');
+      if (!button) return;
+      var level = button.getAttribute('data-level');
+      bar.querySelectorAll('button[data-level]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === button));
+      });
+      diagram.querySelectorAll('.svgbox[data-level]').forEach(function (box) {
+        box.hidden = box.getAttribute('data-level') !== level;
+      });
+    });
+  });
+})();
+</script>"""
+
+EDITOR_JS = """<script>
+// Every `vscode://file/...` link is emitted with target="_blank", which is the only
+// thing that works inside VS Code's Simple Browser: the guide runs in an iframe there,
+// and an iframe drops a navigation to a custom scheme without so much as an error — the
+// click simply does nothing.
+//
+// A real browser tab does not need it and is worse for it: the handoff to the editor
+// leaves an about:blank tab behind on every jump. So at top level the link navigates in
+// place instead, which hands off to the editor without moving the page.
+(function () {
+  if (window.self !== window.top) return;
+  document.addEventListener('click', function (ev) {
+    var link = ev.target.closest && ev.target.closest('a[href^="vscode:"]');
+    if (!link || ev.defaultPrevented || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
+    ev.preventDefault();
+    window.location.href = link.getAttribute('href');
+  });
+})();
+</script>"""
+
 GENSEQ_JS = """<script>
-// Progressive disclosure over the inlined sequence-diagram SVGs. The generator left a
-// PlantUML link on every arrow that has more to say, which PlantUML rendered as
-// <a href="genseq://<id>"> — a stable, generation-time handle, so nothing here has to
-// match rendered label text. The detail itself rides in the sidecar next to each
-// diagram. One click reveals; on a DB arrow a second click swaps `?` for the values
-// that were bound; one more closes it again.
+// Progressive disclosure over the inlined sequence-diagram SVGs. The generator wrapped
+// the label of every arrow that has more to say in a PlantUML link, which PlantUML
+// rendered as <a href="genseq://<id>"> — a stable, generation-time handle, so nothing
+// here has to match rendered label text. The detail itself rides in the sidecar next to
+// each diagram. One click reveals, another closes.
+//
+// Where a step has a second rendering of the same fact — a statement as sent vs. the
+// same statement with its bound values put back — the panel offers it as a toggle. It
+// used to be a second click on the arrow, which swapped the text under the reader and
+// counted itself "1 / 2": both the affordance and the fact that there *was* one were
+// invisible until you had already found them by accident.
 (function () {
   var PREFIX = 'genseq://';
-  var panel = null, els = null, current = null;
+  var panel = null, els = null, current = null, step = null, alternate = false;
 
   function build() {
     if (panel) return;
@@ -225,16 +288,19 @@ GENSEQ_JS = """<script>
     panel.innerHTML =
       '<div class="genseq-head"><span class="genseq-title"></span>' +
       '<span class="genseq-step"></span>' +
-      '<button type="button" title="close (Esc)" aria-label="close">&times;</button></div>' +
-      '<div class="genseq-label"></div><pre></pre>';
+      '<button type="button" class="genseq-close" title="close (Esc)" aria-label="close">&times;</button></div>' +
+      '<div class="genseq-label"><span class="genseq-what"></span>' +
+      '<button type="button" class="genseq-toggle" hidden></button></div><pre></pre>';
     document.body.appendChild(panel);
     els = {
       title: panel.querySelector('.genseq-title'),
       step: panel.querySelector('.genseq-step'),
-      label: panel.querySelector('.genseq-label'),
+      label: panel.querySelector('.genseq-what'),
+      toggle: panel.querySelector('.genseq-toggle'),
       body: panel.querySelector('pre'),
     };
-    panel.querySelector('button').addEventListener('click', close);
+    panel.querySelector('.genseq-close').addEventListener('click', close);
+    els.toggle.addEventListener('click', function () { render(!alternate); });
     panel.addEventListener('click', function (ev) { ev.stopPropagation(); });
   }
 
@@ -255,13 +321,26 @@ GENSEQ_JS = """<script>
     panel.style.top = (box.bottom + window.scrollY + 8) + 'px';
   }
 
+  // `on` picks which of the step's two renderings is in the pre; the button always
+  // names the *other* one, so it reads as what a click will get you.
+  function render(on) {
+    alternate = on && !!step.alternate;
+    var view = alternate ? step.alternate : step;
+    els.label.textContent = view.label;
+    els.body.textContent = view.text;
+    els.toggle.hidden = !step.alternate;
+    if (step.alternate) {
+      els.toggle.textContent = alternate ? 'show ?' : 'show values';
+      els.toggle.setAttribute('aria-pressed', alternate ? 'true' : 'false');
+    }
+  }
+
   function show(entry, index, target) {
     build();
-    var step = entry.steps[index];
+    step = entry.steps[index];
     els.title.textContent = entry.title;
     els.step.textContent = entry.steps.length > 1 ? (index + 1) + ' / ' + entry.steps.length : '';
-    els.label.textContent = step.label;
-    els.body.textContent = step.text;
+    render(false);
     place(target);
   }
 
@@ -291,8 +370,14 @@ GENSEQ_JS = """<script>
       var entry = details[(link.getAttribute('href') || '').slice(PREFIX.length)];
       var group = link.closest('g.message') || link.parentNode;
       // An arrow this change *removed* is re-inserted from the base diagram, and its
-      // detail was never recorded here. Drop the handle rather than offer a dead one.
-      if (!entry || !entry.steps.length) { link.remove(); return; }
+      // detail was never recorded here. Drop the handle rather than offer a dead one —
+      // by unwrapping it, since the link is now around the label itself and removing
+      // the element would take the arrow's text with it.
+      if (!entry || !entry.steps.length) {
+        while (link.firstChild) link.parentNode.insertBefore(link.firstChild, link);
+        link.remove();
+        return;
+      }
       revealable++;
 
       var index = -1;
@@ -315,7 +400,7 @@ GENSEQ_JS = """<script>
     var hint = document.createElement('p');
     hint.className = 'genseq-hint';
     hint.textContent = 'Simplified on purpose — click any highlighted arrow to reveal its SQL '
-      + '(again for the bound values) or its JSON payload.';
+      + 'or its JSON payload; a statement\u2019s panel toggles between ? and the bound values.';
     diagram.querySelector('.svgbox').insertAdjacentElement('beforebegin', hint);
   });
 
@@ -350,12 +435,29 @@ def snippet_html(ref: str, caption: str | None, root: Path) -> str:
     return out.stdout
 
 
-def inline_svg(path: Path) -> str:
+# `src://<repo-relative path>[:line]` — the handle the diagram generators leave on a
+# class, a field, an endpoint. They cannot emit `vscode://file/<abs>` themselves: their
+# .puml is committed, and an absolute path in it is a diff on every machine that
+# regenerates the diagram. Resolving it here, against this checkout, is the last moment
+# where the absolute path is a fact rather than a guess.
+SRC_HANDLE = re.compile(r'href="src://(?P<path>[^"#:]+)(?::(?P<line>\d+))?"')
+
+
+def resolve_source_links(svg: str, root: Path) -> str:
+    def fix(m):
+        target = (root / m.group("path")).resolve()
+        line = m.group("line") or "1"
+        return f'href="vscode://file/{target}:{line}:1"'
+
+    return SRC_HANDLE.sub(fix, svg)
+
+
+def inline_svg(path: Path, root: Path) -> str:
     """Inline rather than <img src>: the guide must survive being emailed as one file."""
     svg = path.read_text(encoding="utf-8")
     svg = re.sub(r"^<\?xml[^>]*\?>\s*", "", svg)
     svg = re.sub(r"<!DOCTYPE[^>]*>\s*", "", svg)
-    return svg
+    return resolve_source_links(svg, root)
 
 
 def genseq_details(rel: str, root: Path) -> str:
@@ -405,6 +507,46 @@ def _provenance(rel: str, root: Path) -> str:
     return ('<p class="prov">' + " ".join(links) + '</p>') if links else ''
 
 
+# Which radius a reviewer meets first. Zero is the change with nothing to hang it on;
+# the whole diagram is what the focus levels exist to escape. One hop — what changed,
+# plus what it is attached to — is the reading that needs no explaining.
+DEFAULT_FOCUS = "1"
+
+
+def _focus_views(row, assets: Path, full_svg: Path, root: Path) -> str:
+    """The delta at each focus level, one visible at a time, with the chooser above them.
+
+    All of them are inlined rather than fetched on demand: the guide has to survive being
+    emailed as a single file, and a chooser whose other options 404 is worse than none.
+    """
+    levels = []
+    for pair in (row.get("focus") or "").split(","):
+        level, sep, name = pair.partition(":")
+        svg = assets / name
+        if sep and svg.is_file():
+            levels.append((level, svg))
+    levels.append(("all", full_svg))
+
+    if len(levels) == 1:                       # sequence diagrams, and anything unpruned
+        return f'<div class="svgbox">{inline_svg(full_svg, root)}</div>'
+
+    default = DEFAULT_FOCUS if any(l == DEFAULT_FOCUS for l, _ in levels) else "all"
+    buttons = "".join(
+        f'<button type="button" data-level="{html.escape(level)}" '
+        f'aria-pressed="{"true" if level == default else "false"}">{html.escape(level)}</button>'
+        for level, _ in levels
+    )
+    boxes = "".join(
+        f'<div class="svgbox" data-level="{html.escape(level)}"'
+        f'{"" if level == default else " hidden"}>{inline_svg(svg, root)}</div>'
+        for level, svg in levels
+    )
+    return (
+        '<div class="focus"><span class="lbl">unchanged context, in hops:</span>'
+        + buttons + "</div>" + boxes
+    )
+
+
 def render_diagrams(spec, root: Path, out_dir: Path) -> str:
     manifest = out_dir / spec.get("manifest", "assets/diagrams/MANIFEST.tsv")
     rows = read_manifest(manifest)
@@ -421,7 +563,7 @@ def render_diagrams(spec, root: Path, out_dir: Path) -> str:
         note = notes.get(r["name"], "")
         svg_rel = manifest.parent / r["svg"] if r.get("svg") else None
         body = (
-            inline_svg(svg_rel)
+            _focus_views(r, manifest.parent, svg_rel, root)
             if svg_rel and svg_rel.is_file()
             else f'<p class="sub">not rendered — see <code>{html.escape(r["diff_puml"])}</code></p>'
         )
@@ -434,7 +576,7 @@ def render_diagrams(spec, root: Path, out_dir: Path) -> str:
             + (f"<p>{note}</p>" if note else "")
             + _provenance(r["source"], root)
             + genseq_details(r["source"], root)
-            + f'<div class="svgbox">{body}</div></div>'
+            + body + '</div>'
         )
     return "\n".join(parts)
 
@@ -485,13 +627,18 @@ ANCHOR = re.compile(r'<a\s+([^>]*?)href="(?P<href>[^"]*)"([^>]*)>', re.I)
 def open_links_in_new_tabs(doc: str) -> str:
     """Every outbound link leaves the guide in a new tab — a reviewer reading this page
     should never lose their place in it. In-page anchors keep the current tab (a new tab
-    for a jump to a section is nonsense), and `vscode://` hands off to the editor without
-    navigating at all."""
+    for a jump to a section is nonsense).
+
+    `vscode://` gets the new tab too, for the guide read inside VS Code's Simple Browser:
+    that is an iframe, and an iframe drops a navigation to a custom scheme on the floor,
+    so the click did nothing at all. A top-level tab does not need it — see EDITOR_JS,
+    which takes the target back off there rather than strand an about:blank tab behind
+    every jump to a file."""
 
     def fix(m):
         whole = m.group(0)
         href = m.group("href")
-        if href.startswith("#") or href.startswith("vscode:") or "target=" in whole.lower():
+        if href.startswith("#") or "target=" in whole.lower():
             return whole
         return whole[:-1] + ' target="_blank" rel="noopener">'
 
@@ -634,6 +781,8 @@ def main(argv=None) -> int:
 </div>
 {CAPTION_JS}
 {GENSEQ_JS}
+{FOCUS_JS}
+{EDITOR_JS}
 </body></html>
 """
     doc = open_links_in_new_tabs(doc)
