@@ -226,3 +226,41 @@ class Owner [[src://a/Owner.java:12{open Owner}]] {
         "caption <color:red>added</color> or <color:red><s>removed</s></color>", "")
     assert m._impacted(plain, linked) == set()
     assert "[[src://a/Owner.java:15{open id}]]" in out   # …and the link still renders
+
+
+# ── Sequence diagrams: a changed statement is one red arrow, not a pair ──────
+# An arrow carries `[[genseq://<id>{…} label]]`, and the id is a fingerprint of what the
+# arrow reveals. When only that moves, the call is unchanged and the statement behind it
+# is not — telling the reviewer that twice, once struck and once red, is twice the red
+# for one fact.
+import seq_puml_diff as sq
+
+
+def _seq(old_arrow, new_arrow):
+    frame = "@startuml\nparticipant Backend\nparticipant DB\n%s\n@enduml\n"
+    return sq.diff(frame % old_arrow, frame % new_arrow)
+
+
+ARROW = 'Backend -> DB: [[genseq://%s{Click for the statement} select visits]]'
+
+
+def test_a_changed_statement_reddens_the_arrow_it_hides_behind():
+    out = _seq(ARROW % "aaa1111", ARROW % "bbb2222")
+    assert "<s>" not in out                       # not a removal
+    assert out.count("select visits") == 1        # not a pair
+    assert f"<color:{sq.RED}>" in out             # but marked
+
+
+def test_an_untouched_arrow_stays_plain():
+    out = _seq(ARROW % "aaa1111", ARROW % "aaa1111")
+    assert f"<color:{sq.RED}>" not in out
+    assert "-[#" not in out
+
+
+# The label itself changing is a different call, not the same one restated: that is a
+# genuine removal plus a genuine addition.
+def test_a_changed_label_is_still_a_removal_and_an_addition():
+    other = 'Backend -> DB: [[genseq://bbb2222{Click for the statement} select pets]]'
+    out = _seq(ARROW % "aaa1111", other)
+    assert "<s>" in out
+    assert "select pets" in out and "select visits" in out

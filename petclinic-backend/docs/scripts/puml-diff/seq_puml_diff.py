@@ -140,6 +140,19 @@ def _mark_participant(line: str, removed: bool) -> str:
     return f'{m["kind"]} "{shown}" as {alias} #FFEBEB'
 
 
+# `[[genseq://<id>{…} label]]` — the id is a fingerprint of what the arrow reveals, so
+# two arrows that read identically but carry different ids are the *same call* against a
+# *changed statement*. Matching on the visible label alone catches that as one modified
+# arrow; matching on the raw line reports it as a deletion with its replacement added
+# underneath, which is the same fact told twice and twice as much red.
+DETAIL_ID = re.compile(r"(genseq://)[A-Za-z0-9-]+")
+
+
+def _as_read(line: str) -> str:
+    """The arrow as the reader sees it, with the fingerprint of its detail dropped."""
+    return DETAIL_ID.sub(r"\1", line.strip())
+
+
 def _split(puml: str):
     """-> (meta, participant_lines, body_lines)"""
     meta, participants, body = [], [], []
@@ -184,11 +197,16 @@ def diff(old: str, new: str) -> str:
 
     # ── body: an ordered script, so an ordered diff ──────────────────────────
     matcher = difflib.SequenceMatcher(
-        a=[l.strip() for l in old_body], b=[l.strip() for l in new_body], autojunk=False
+        a=[_as_read(l) for l in old_body], b=[_as_read(l) for l in new_body], autojunk=False
     )
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag in ("equal",):
-            out.extend(new_body[j1:j2])
+            # Equal as *read* — but an arrow whose detail id moved is the same call over a
+            # statement this change rewrote. That earns a red label, not a strikeout: what
+            # the reviewer is being shown is still there, and only what it hides differs.
+            for old_line, new_line in zip(old_body[i1:i2], new_body[j1:j2]):
+                changed = old_line.strip() != new_line.strip()
+                out.append(_mark_line(new_line, removed=False) or new_line if changed else new_line)
             continue
         if tag in ("replace", "delete"):
             for line in old_body[i1:i2]:
