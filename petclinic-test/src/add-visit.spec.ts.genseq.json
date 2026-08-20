@@ -1,15 +1,6 @@
 {
   "version": 2,
   "details": {
-    "0nf2y5o": {
-      "title": "SELECT petclinic",
-      "steps": [
-        {
-          "label": "statement as sent — ? for each bound value",
-          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
-        }
-      ]
-    },
     "1dvza26": {
       "title": "SELECT petclinic",
       "steps": [
@@ -23,15 +14,15 @@
         }
       ]
     },
-    "0nq1lxs": {
-      "title": "SELECT petclinic",
+    "10rnkt2": {
+      "title": "SELECT petclinic.visits",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "with the bound values put back",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=2"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=2"
           }
         }
       ]
@@ -62,28 +53,15 @@
         }
       ]
     },
-    "1a1p3uq": {
+    "0xk196o": {
       "title": "INSERT petclinic.visits",
       "steps": [
         {
           "label": "statement as sent — ? for each bound value",
-          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
+          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)",
           "alternate": {
             "label": "with the bound values put back",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1787208626197', 2, ?, ?)"
-          }
-        }
-      ]
-    },
-    "16txpyv": {
-      "title": "INSERT petclinic.visits",
-      "steps": [
-        {
-          "label": "statement as sent — ? for each bound value",
-          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
-          "alternate": {
-            "label": "with the bound values put back",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-09-15', 'Annual check-up 1787208626199', 2, ?, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1787256692928', 2, ?)"
           }
         }
       ]
