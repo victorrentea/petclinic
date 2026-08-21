@@ -89,16 +89,19 @@ def _struck_header(header: str) -> str:
     return f'{keyword} "{_struck(name)}" as {name}'
 
 
-# `[[url{tooltip} label]]` — a PlantUML link. The domain-model generator hangs one on
-# every class and field so a reviewer can click through to the source, and the line it
-# points at moves whenever anything above it moves. That must not read as a change:
-# identity is what the diagram *says*, and a link is how you get somewhere else.
-_LINK = re.compile(r"\s*\[\[[^\]]*\]\]")
+# `[[url{tooltip} label]]`, or the older `text [[url{tooltip}]]`. The domain-model
+# generator hangs one on every class and field so a reviewer can click through to the
+# source, and the line it points at moves whenever anything above it moves. That must not
+# read as a change: identity is what the diagram *says*, and a link is how you get
+# somewhere else. The tooltip holds spaces, so the url and the label are matched apart.
+_LINK = re.compile(
+    r"\[\[(?P<url>[^\s\[\]{]+)(?P<tip>\{[^}]*\})?(?:\s+(?P<label>[^\]]*))?\]\]"
+)
 
 
 def _identity(s: str) -> str:
-    """A line reduced to what it means — links dropped, spacing normalised."""
-    return " ".join(_LINK.sub(" ", s).split())
+    """A line reduced to what it means: every link replaced by the text it shows."""
+    return " ".join(_LINK.sub(lambda m: m.group("label") or "", s).split())
 
 
 def _endpoint(side: str) -> str:
@@ -110,6 +113,26 @@ def _endpoint(side: str) -> str:
     """
     tokens = [t for t in _identity(side).split() if not t.startswith('"')]
     return " ".join(tokens) if tokens else _identity(side)
+
+
+def _member(text: str, paint=None) -> str:
+    """One member line, with its link *wrapping* the text rather than trailing it.
+
+    PlantUML prints the URL itself when a `[[...]]` carries no label, so a member written
+    as `id : Integer [[src://…]]` renders as its own name followed by sixty characters of
+    absolute path. The generator emits the wrapped form now — but the base side of a diff
+    was written before it did, and a delta has to stay readable against a base that
+    predates every change in it. So both forms are normalised here, on the way out.
+
+    The diff colouring goes on the label, inside the link, so a struck member is still a
+    struck member and still clickable.
+    """
+    m = _LINK.search(text)
+    if not m:
+        return paint(text) if paint else text
+    visible = (m.group("label") or _LINK.sub("", text)).strip()
+    target = m.group("url") + (m.group("tip") or "")
+    return f"[[{target} {paint(visible) if paint else visible}]]"
 
 
 def _element_name(header: str) -> str:
@@ -335,9 +358,10 @@ def diff(old: Diagram, new: Diagram, focus=ALL) -> str:
         out.append(header + " {")
         old_set = {_identity(m) for m in old_members}
         for m in el.members:
-            out.append("  " + (_red(m) if (not is_new and _identity(m) not in old_set) else m))
+            fresh = not is_new and _identity(m) not in old_set
+            out.append("  " + _member(m, _red if fresh else None))
         for m in removed:                            # gone in NEW → struck ghost
-            out.append("  " + _struck(m))
+            out.append("  " + _member(m, _struck))
         out.append("}")
 
     # ── Elements removed entirely (present only in OLD): struck-through ghost ─
@@ -350,7 +374,7 @@ def diff(old: Diagram, new: Diagram, focus=ALL) -> str:
             continue
         out.append(header + " {")
         for m in el.members:
-            out.append("  " + _struck(m))
+            out.append("  " + _member(m, _struck))
         out.append("}")
 
     out.append("")

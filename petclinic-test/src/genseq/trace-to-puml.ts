@@ -232,6 +232,12 @@ function returnLabel(span: NormSpan): string | undefined {
 const HIBERNATE_SPAN_RE = /^(Session\.\w+|Hibernate Query)\b/;
 const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 
+// The commit the transaction interceptor issues on the way out. It is emitted as the last
+// child of whatever span opened the transaction, which is what lets the diagram draw the
+// *scope* rather than just the moment: a bare `Transaction.commit` arrow says a
+// transaction ended somewhere above, and leaves the reader to guess how far up.
+const TRANSACTION_COMMIT = 'Transaction.commit';
+
 const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
@@ -258,6 +264,16 @@ function emitTrace(
   }
   const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
+  /**
+   * A span that opened a transaction: the interceptor committed inside it.
+   *
+   * In this codebase that is every Spring Data repository method, because nothing above
+   * them is `@Transactional` — so each call gets its own transaction and its own session,
+   * which is a fact about the design worth being able to see.
+   */
+  const opensTransaction = (span: NormSpan): boolean =>
+    childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT);
+
   const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
       up; up = up.parentSpanId ? byId.get(up.parentSpanId) : undefined) {
@@ -272,7 +288,10 @@ function emitTrace(
   const callerOf = (span: NormSpan): string | undefined => {
     const source = nearestAncestor(span, REPOSITORY_SPAN_RE)
       ?? nearestAncestor(span, HIBERNATE_SPAN_RE);
-    return source ? unqualify(source.name) : undefined;
+    // A caller drawn as the frame around this query has already named it; repeating the
+    // name on the arrow inside its own box says the same thing twice.
+    if (!source || opensTransaction(source)) return undefined;
+    return unqualify(source.name);
   };
 
   // DB spans that actually carry a statement. The agent also emits statement-less DB
@@ -315,8 +334,13 @@ function emitTrace(
     // database were calling the backend back.
     if (parentParticipant === 'DB') return;
 
+    // The commit is the closing edge of the frame drawn below — an arrow for it as well
+    // would draw the same event twice, once as a boundary and once as a message.
+    const parentSpan = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
+    if (span.name === TRANSACTION_COMMIT && parentSpan && opensTransaction(parentSpan)) return;
+
     const p = participantOf(span);
-    const parent = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
+    const parent = parentSpan;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
     const selfCustom = pp === p && span.kind === 'INTERNAL'
@@ -329,6 +353,19 @@ function emitTrace(
     // query, a self-span with no children — gets a bare arrow instead.
     const inner: string[] = [];
     for (const child of childrenOf(span.spanId)) walk(child, inner, p);
+
+    // A transaction's scope is a region of the conversation, not a message in it, so it is
+    // drawn as a frame around everything that ran inside it. The reader can then see which
+    // queries shared a transaction and a Hibernate session — and, just as usefully, which
+    // ones ran outside every frame, as the lazy loads of an N+1 do.
+    if (!crossing && opensTransaction(span)) {
+      if (inner.length === 0) return;   // an empty frame states nothing
+      present.add(p);
+      out.push(`group ${unqualify(span.name)}`);
+      out.push(...inner);
+      out.push('end');
+      return;
+    }
 
     if (!crossing && !selfCustom) {
       out.push(...inner);

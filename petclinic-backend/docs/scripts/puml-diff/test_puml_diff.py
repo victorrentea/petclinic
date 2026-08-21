@@ -225,7 +225,8 @@ class Owner [[src://a/Owner.java:12{open Owner}]] {
     assert "<color:red>" not in out.replace(
         "caption <color:red>added</color> or <color:red><s>removed</s></color>", "")
     assert m._impacted(plain, linked) == set()
-    assert "[[src://a/Owner.java:15{open id}]]" in out   # …and the link still renders
+    # …and the link still renders, rewrapped around the member it points at
+    assert "[[src://a/Owner.java:15{open id} id : Integer]]" in out
 
 
 # ── Sequence diagrams: a changed statement is one red arrow, not a pair ──────
@@ -264,3 +265,47 @@ def test_a_changed_label_is_still_a_removal_and_an_addition():
     out = _seq(ARROW % "aaa1111", other)
     assert "<s>" in out
     assert "select pets" in out and "select visits" in out
+
+
+# ── Member links: wrapping, whichever form the input used ────────────────────
+# PlantUML prints the URL when a `[[...]]` has no label. The generator wraps the member
+# text now, but the base side of a diff predates that — and a delta has to stay readable
+# against a base that predates every change in it.
+
+def _members(out, cls):
+    body = out.split(f"class {cls}", 1)[1].split("\n}", 1)[0]
+    return [ln.strip() for ln in body.splitlines() if ln.strip().startswith("[[")]
+
+
+OLD_FORM = """@startuml
+class Owner {
+  id : Integer [[src://a/Owner.java:5{open id}]]
+  gone : String [[src://a/Owner.java:9{open gone}]]
+}
+@enduml"""
+
+NEW_FORM = """@startuml
+class Owner {
+  [[src://a/Owner.java:5{open id} id : Integer]]
+  [[src://a/Owner.java:12{open added} added : String]]
+}
+@enduml"""
+
+
+def test_a_trailing_link_is_rewrapped_around_its_member():
+    out = m.diff(m.parse(OLD_FORM), m.parse(NEW_FORM))
+    for line in _members(out, "Owner"):
+        # nothing may sit outside the link, or PlantUML renders the raw URL
+        assert line.startswith("[[") and line.endswith("]]")
+    assert "{open id} id : Integer]]" in out          # unchanged, still plain
+
+
+def test_the_diff_colour_goes_inside_the_link():
+    out = m.diff(m.parse(OLD_FORM), m.parse(NEW_FORM))
+    assert "{open added} <color:red>added : String</color>]]" in out
+    assert "{open gone} <color:red><s>gone : String</s></color>]]" in out
+
+
+def test_a_member_with_no_link_is_untouched():
+    plain = "@startuml\nclass X {\n  a : int\n}\n@enduml"
+    assert "  a : int" in m.diff(m.parse(plain), m.parse(plain))
