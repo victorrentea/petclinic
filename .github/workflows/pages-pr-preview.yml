@@ -46,11 +46,17 @@ jobs:
       - name: Install PlantUML
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends plantuml
 
+      # The review tooling lives in github.com/victorrentea/human-review; this resolves
+      # it from the symlinked skill locally, or clones it here. One source of truth.
+      - name: Resolve the /human-review skill
+        id: skill
+        run: echo "dir=$(./scripts/ensure-human-review.sh)" >> "$GITHUB_OUTPUT"
+
       - name: Compute the architecture delta
         id: delta
         run: |
           set -euo pipefail
-          ./scripts/architecture-diff.sh "origin/${{ github.base_ref }}"
+          "${{ steps.skill.outputs.dir }}/ci/architecture-diff.sh" "origin/${{ github.base_ref }}"
           count=$(find pr-diff -name '*.diff.puml' | wc -l | tr -d ' ')
           echo "count=$count" >> "$GITHUB_OUTPUT"
 
@@ -60,7 +66,7 @@ jobs:
 
       - name: Build the gallery page
         if: steps.delta.outputs.count != '0'
-        run: python3 scripts/build_pr_gallery.py pr-diff
+        run: python3 "${{ steps.skill.outputs.dir }}/ci/build_pr_gallery.py" pr-diff
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}

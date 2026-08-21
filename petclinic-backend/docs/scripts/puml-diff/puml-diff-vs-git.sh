@@ -34,7 +34,7 @@ fi
 # The differ ships with the /human-review skill now — resolved from the symlinked
 # skill locally, fetched on a runner. Keeping a copy here would be a second,
 # silently drifting fork of the review pipeline.
-python3 "$("$ROOT/scripts/ensure-puml-diff.sh")/puml_diff.py" "$OLD" "$ABS" --out "$MERGED"
+python3 "$("$ROOT/scripts/ensure-human-review.sh")/puml-diff/puml_diff.py" "$OLD" "$ABS" --out "$MERGED"
 echo "[puml-diff] wrote $MERGED" >&2
 
 if command -v plantuml >/dev/null 2>&1; then
