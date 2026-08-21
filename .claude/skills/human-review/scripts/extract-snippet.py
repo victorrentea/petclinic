@@ -101,6 +101,47 @@ def parse_ref(ref: str):
     return m["path"], start, end
 
 
+# A hand-written line range is a guess at where a construct begins and ends, and it is
+# wrong in the same two ways every time: it opens on the tail of the comment above the
+# code, and it stops a line or two before the closing brace. Both are fixed here rather
+# than in each reference, because the reference is written by someone reading the file in
+# an editor, where the range is obvious and the off-by-two is not.
+
+COMMENT_LINE = re.compile(r"^\s*(//|#|/\*|\*/|\*(?!\S))")
+OPENERS, CLOSERS = "([{", ")]}"
+MAX_SNAP = 40
+
+
+def _first_code_line(lines: list[str], start: int, end: int) -> int:
+    """Skip leading comment and blank lines — the snippet is here for the code."""
+    i = start
+    while i < end and (not lines[i - 1].strip() or COMMENT_LINE.match(lines[i - 1])):
+        i += 1
+    return i if i <= end else start
+
+
+def _depth(line: str) -> int:
+    """Bracket balance of one line, ignoring anything after a `//`."""
+    code = line.split("//")[0]
+    return sum(c in OPENERS for c in code) - sum(c in CLOSERS for c in code)
+
+
+def _closing_line(lines: list[str], start: int, end: int) -> int:
+    """Extend `end` until whatever the range opened is closed.
+
+    A snippet that stops at `return vetName;` and never shows the `}` reads as a method
+    the reviewer cannot see the end of — and they cannot tell whether that is the range
+    or the code. Bounded, so an unbalanced file (or a brace inside a string this does not
+    parse) costs a slightly long snippet rather than the whole rest of the file.
+    """
+    depth = sum(_depth(l) for l in lines[start - 1 : end])
+    limit = min(len(lines), end + MAX_SNAP)
+    while depth > 0 and end < limit:
+        end += 1
+        depth += _depth(lines[end - 1])
+    return end
+
+
 def render(ref: str, caption: str | None, root: Path) -> str:
     rel, start, end = parse_ref(ref)
     path = (root / rel).resolve()
@@ -111,6 +152,8 @@ def render(ref: str, caption: str | None, root: Path) -> str:
     if start > len(lines):
         raise SystemExit(f"[extract-snippet] {rel} has {len(lines)} lines, asked for {start}")
     end = min(end, len(lines))
+    start = _first_code_line(lines, start, end)
+    end = _closing_line(lines, start, end)
     body = lines[start - 1 : end]
 
     # Strip the common indent so a deeply nested method does not read as a column

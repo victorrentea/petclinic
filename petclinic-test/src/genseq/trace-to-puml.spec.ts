@@ -220,12 +220,15 @@ test('an interactive DB arrow is labelled with Hibernate\'s account, SQL behind 
   expect(arrow).toContain(`{Click for the statement behind this call} ${INSERT_ORIGIN} ⊕]]`);
 
   // One step, not a cycle: the bound values are the step's alternate, which the panel
-  // offers as a toggle.
+  // offers as a toggle. Neither is labelled — the panel's title says which call this is,
+  // and a line reading "statement as sent, ? for each bound value" only described the
+  // toggle's own state, above SQL whose `?`s were already in plain sight.
   const entry = detailOn(arrow, details.details);
+  expect(entry.title).toBe(INSERT_ORIGIN);
   expect(entry.steps).toHaveLength(1);
-  expect(entry.steps[0].label).toBe('statement as sent — ? for each bound value');
+  expect(entry.steps[0].label).toBe('');
   expect(entry.steps[0].text).toContain('VALUES (?, ?, ?, ?)');
-  expect(entry.steps[0].alternate!.label).toBe('with the bound values put back');
+  expect(entry.steps[0].alternate!.label).toBe('');
   expect(entry.steps[0].alternate!.text).toContain("VALUES ('annual checkup', 7, '2026-08-20', 42)");
 });
 
