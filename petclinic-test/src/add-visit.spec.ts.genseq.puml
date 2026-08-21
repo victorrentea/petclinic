@@ -11,10 +11,10 @@ legend right
   petclinic-test/run-tests-with-tracing.sh
  
   This picture is deliberately simplified. In review/review.html, click any
-  arrow marked ⊕ to reveal that one call's SQL —
+  arrow marked ⊕ to reveal that one call's SQL / JSON payloads —
   a DB arrow's panel toggles between ? and the values that were bound.
  
-  Detail shown here: simplified · click an arrow to reveal its SQL
+  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
   Want more or less? The traces already carry all of it — re-rendering replays
   the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
   not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
@@ -36,7 +36,7 @@ group transaction · PetRepository.findById
 Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
 end
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: 200
+Backend --> Browser: [[genseq://10ac15z{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
@@ -45,12 +45,12 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: 200
+Backend --> Browser: [[genseq://0vqfp9o{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
-Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
+Browser -> Backend: [[genseq://0pcfnee{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://088i0vt{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://0e0gzdb{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Browser: 201
 deactivate Backend
@@ -61,6 +61,6 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: 200
+Backend --> Browser: [[genseq://05tiqyp{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml

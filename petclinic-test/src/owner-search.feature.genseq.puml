@@ -11,10 +11,10 @@ legend right
   petclinic-test/run-tests-with-tracing.sh
  
   This picture is deliberately simplified. In review/review.html, click any
-  arrow marked ⊕ to reveal that one call's SQL —
+  arrow marked ⊕ to reveal that one call's SQL / JSON payloads —
   a DB arrow's panel toggles between ? and the values that were bound.
  
-  Detail shown here: simplified · click an arrow to reveal its SQL
+  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
   Want more or less? The traces already carry all of it — re-rendering replays
   the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
   not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
@@ -32,7 +32,6 @@ participant DB
 == Searching with an empty last name lists every owner ==
 Browser -> Backend: List owners\nGET /api/owners
 activate Backend
-Backend -> DB: petclinic
 Backend -> DB: [[genseq://1aoufu2{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
@@ -94,6 +93,6 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://0chbrim{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: 200
+Backend --> Browser: [[genseq://17t70qq{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml
