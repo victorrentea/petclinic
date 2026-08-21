@@ -9,7 +9,7 @@ import {shouldGenerateSequence} from '../genseq/sequence-tag';
 // Cucumber's scenario tags. Untagged tests run normally and record no trace
 // window, so no .puml is produced for them.
 
-const WINDOWS_FILE = path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json');
+const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-windows');
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range.
@@ -33,7 +33,7 @@ export const test = base.extend({
     const startMs = Date.now() - PRE_PAD_MS;
     await use(page);
     await flushBrowserSpans(page);
-    appendWindow(WINDOWS_FILE, {
+    appendWindow(WINDOWS_DIR, {
       title: testInfo.title,
       source: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
       startMs,

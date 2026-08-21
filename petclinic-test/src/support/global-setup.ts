@@ -8,7 +8,7 @@ import {PLAYWRIGHT_SOURCES} from '../genseq/generate';
 // diagram at another detail level. Mirrors world.ts's BeforeAll.
 export default async function globalSetup(): Promise<void> {
   forgetWindowsOf(
-    path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json'),
+    path.join(__dirname, '..', '..', 'test-results', 'trace-windows'),
     PLAYWRIGHT_SOURCES,
   );
 }
