@@ -345,3 +345,53 @@ test('collapsing a session span leaves activate/deactivate balanced', () => {
   expect((puml.match(/^activate /gm) ?? []).length)
     .toBe((puml.match(/^deactivate /gm) ?? []).length);
 });
+
+// ── Transaction scope ─────────────────────────────────────────────────────────
+// The interceptor's commit is emitted as the last child of whatever opened the
+// transaction, so the diagram can draw the region rather than the moment. A bare
+// `Transaction.commit` arrow said a transaction ended somewhere above and left the
+// reader to guess how far up — and said nothing at all about which queries were *not*
+// in one, which is the whole story of an N+1 behind open-session-in-view.
+
+const selectOwners = {
+  ...query,
+  attributes: {'db.system': 'postgresql', 'db.statement': 'select o1_0.id from owners o1_0'},
+};
+
+const inTransaction: NormSpan[] = [
+  backendSpan('t1', '', 'GET /api/owners', 'SERVER'),
+  backendSpan('t2', 't1', 'OwnerRepository.findById', 'INTERNAL'),
+  {...selectOwners, spanId: 't3', parentSpanId: 't2'},
+  backendSpan('t4', 't2', 'Transaction.commit', 'INTERNAL'),
+  {...selectOwners, spanId: 't5', parentSpanId: 't1'},   // a lazy load, after the commit
+];
+
+test('a transaction is drawn as a frame around what ran inside it', () => {
+  const body = spansToPuml(inTransaction, 'tx', STATIC).split('\n').map((l) => l.trim());
+  const open = body.indexOf('group OwnerRepository.findById');
+  const close = body.indexOf('end', open);
+  expect(open).toBeGreaterThan(-1);
+  expect(close).toBeGreaterThan(open);
+  // the query inside is inside; the lazy load after the commit is outside
+  expect(body.slice(open, close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(1);
+  expect(body.slice(close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(1);
+});
+
+test('the commit is the frame, not another arrow inside it', () => {
+  expect(spansToPuml(inTransaction, 'tx', STATIC)).not.toContain('Transaction.commit');
+});
+
+// The frame already names the call; repeating it on the arrow it encloses says the same
+// thing twice, so a query inside falls back to describing itself.
+test('a query inside a frame does not repeat the frame\'s label', () => {
+  // split on the whole line: "Backend" contains "end"
+  const inside = spansToPuml(inTransaction, 'tx', STATIC)
+    .split('group OwnerRepository.findById\n')[1].split('\nend\n')[0];
+  expect(inside).not.toContain('OwnerRepository.findById');
+  expect(inside).toContain('select owners');
+});
+
+test('a span that opened no transaction is not framed', () => {
+  const noTx = inTransaction.filter((s) => s.name !== 'Transaction.commit');
+  expect(spansToPuml(noTx, 'tx', STATIC)).not.toContain('group ');
+});
