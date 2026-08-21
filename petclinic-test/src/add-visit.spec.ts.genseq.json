@@ -1,67 +1,67 @@
 {
   "version": 2,
   "details": {
-    "1dvza26": {
-      "title": "SELECT petclinic",
+    "0jw0huv": {
+      "title": "select pets",
       "steps": [
         {
-          "label": "statement as sent — ? for each bound value",
+          "label": "",
           "text": "SELECT p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.id=?",
           "alternate": {
-            "label": "with the bound values put back",
+            "label": "",
             "text": "SELECT p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.id=2"
           }
         }
       ]
     },
-    "10rnkt2": {
-      "title": "SELECT petclinic.visits",
+    "1cdku0l": {
+      "title": "select visits",
       "steps": [
         {
-          "label": "statement as sent — ? for each bound value",
+          "label": "",
           "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
-            "label": "with the bound values put back",
+            "label": "",
             "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=2"
           }
         }
       ]
     },
-    "0stbfh4": {
-      "title": "SELECT petclinic.owners",
+    "0totfe9": {
+      "title": "select owners",
       "steps": [
         {
-          "label": "statement as sent — ? for each bound value",
+          "label": "",
           "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
           "alternate": {
-            "label": "with the bound values put back",
+            "label": "",
             "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=2"
           }
         }
       ]
     },
-    "030w0nk": {
-      "title": "SELECT petclinic",
+    "1hjadar": {
+      "title": "select pets",
       "steps": [
         {
-          "label": "statement as sent — ? for each bound value",
+          "label": "",
           "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
           "alternate": {
-            "label": "with the bound values put back",
+            "label": "",
             "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=2"
           }
         }
       ]
     },
-    "0xk196o": {
-      "title": "INSERT petclinic.visits",
+    "088i0vt": {
+      "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
-          "label": "statement as sent — ? for each bound value",
+          "label": "",
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)",
           "alternate": {
-            "label": "with the bound values put back",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1787256692928', 2, ?)"
+            "label": "",
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1787346941503', 2, ?)"
           }
         }
       ]

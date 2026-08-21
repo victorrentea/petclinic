@@ -32,43 +32,35 @@ participant DB
 == Add a visit to an existing pet from the owner detail page ==
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
-Backend -> Backend: PetRepository.findById
-activate Backend
-Backend -> DB: [[genseq://1dvza26{Click for the statement behind this call} PetRepository.findById ⊕]]
-Backend -> Backend: Transaction.commit
-deactivate Backend
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
+group transaction · PetRepository.findById
+Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
+end
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
-Backend -> Backend: OwnerRepository.findById
-activate Backend
-Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById ⊕]]
-Backend -> Backend: Transaction.commit
-deactivate Backend
-Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
+group transaction · OwnerRepository.findById
+Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+end
+Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
 activate Backend
-Backend -> Backend: VisitRepository.save
-activate Backend
-Backend -> DB: [[genseq://0xk196o{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
-Backend -> Backend: Transaction.commit
-deactivate Backend
+group transaction · VisitRepository.save
+Backend -> DB: [[genseq://088i0vt{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+end
 Backend --> Browser: 201
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
-Backend -> Backend: OwnerRepository.findById
-activate Backend
-Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById ⊕]]
-Backend -> Backend: Transaction.commit
-deactivate Backend
-Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
+group transaction · OwnerRepository.findById
+Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+end
+Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 @enduml
