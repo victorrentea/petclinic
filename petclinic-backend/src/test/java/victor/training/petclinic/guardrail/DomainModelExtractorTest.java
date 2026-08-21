@@ -65,7 +65,17 @@ class DomainModelExtractorTest {
         sb.append("footer domain/*.java -> "
                 + "petclinic-backend/docs/generated/DomainModel.puml\n\n");
         sb.append("hide empty members\n");
-        sb.append("skinparam classAttributeIconSize 0\n\n");
+        sb.append("skinparam classAttributeIconSize 0\n");
+        // Every class and every field is a link to its declaration. Underlining them all
+        // would put a blue rule under most of the diagram, and the affordance is not worth
+        // that: the legend says once what would otherwise be said on every row.
+        sb.append("skinparam hyperlinkUnderline false\n");
+        sb.append("skinparam hyperlinkColor #000000\n");
+        // Emitted before the classes so it survives the review diff, which copies the
+        // preamble from the new side and starts its own output at the first element.
+        sb.append("legend bottom\n");
+        sb.append("  Click any class or field to jump to the source code.\n");
+        sb.append("end legend\n\n");
 
         for (Class<?> cls : entities) {
             sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName())

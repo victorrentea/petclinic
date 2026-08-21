@@ -6,6 +6,11 @@ footer domain/*.java -> petclinic-backend/docs/generated/DomainModel.puml
 
 hide empty members
 skinparam classAttributeIconSize 0
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #000000
+legend bottom
+  Click any class or field to jump to the source code.
+end legend
 
 class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:32{open Owner in the editor}]] {
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:35{open id in the editor} id : Integer]]
