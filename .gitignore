@@ -109,3 +109,6 @@ rag-vector-store.json
 
 # Code City renderer, downloaded on demand by generate-codecity.sh — a tool, not source
 /petclinic-backend/.codecity-tool/
+
+# /human-review skill, fetched on demand by scripts/ensure-puml-diff.sh — a tool, not source
+/petclinic-backend/.tools/human-review/

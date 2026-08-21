@@ -23,7 +23,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
 BASE_REF="${1:-origin/main}"
 
-PUML_DIFF="$ROOT/petclinic-backend/docs/scripts/puml-diff/puml_diff.py"
+# The differ ships with the /human-review skill now; this resolves it from the
+# symlinked skill locally, or fetches it on a runner. One source of truth, not two.
+PUML_DIFF="$("$ROOT/scripts/ensure-puml-diff.sh")/puml_diff.py"
 PLANTUML_URL="$SCRIPT_DIR/plantuml_url.py"
 OUT_DIR="$ROOT/pr-diff"
 SUMMARY="$OUT_DIR/SUMMARY.md"
