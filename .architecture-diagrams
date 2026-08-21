@@ -1,0 +1,8 @@
+# The diagrams worth diffing per pull request, as `path|title`.
+# Read by the /human-review skill's ci/architecture-diff.sh.
+#
+# Deliberately a list rather than a glob over *.puml: the e2e *.genseq.puml and the C4
+# views are noisy per-run artifacts, not the structural picture a reviewer needs.
+petclinic-backend/docs/generated/DomainModel.puml|Domain model
+petclinic-backend/docs/generated/DB.puml|Database schema (ERD)
+petclinic-backend/docs/packages.puml|Logical architecture (packages)

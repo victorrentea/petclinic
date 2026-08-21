@@ -75,11 +75,16 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 there, not here — an edit through the symlink is an edit to that repo, and needs committing
 there too.
 
-The PlantUML differs moved with it. Anything in this repo that needs them —
-`scripts/architecture-diff.sh`, `docs/scripts/puml-diff/puml-diff-vs-git.sh` — resolves them
-through `scripts/ensure-puml-diff.sh`, which uses the symlinked skill locally and clones the
-repo into a gitignored `petclinic-backend/.tools/` on a runner. Never vendor a second copy:
-a private fork of the review pipeline drifts in silence.
+The review tooling moved with it: the PlantUML differs, the per-PR architecture delta
+(`ci/architecture-diff.sh`), the gallery builder and the plantuml.com URL encoder. Anything
+here that needs them — `pages-pr-preview.yml`, `docs/scripts/puml-diff/puml-diff-vs-git.sh` —
+resolves the skill through `scripts/ensure-human-review.sh`, which uses the symlink locally
+and clones the repo into a gitignored `petclinic-backend/.tools/` on a runner. Never vendor
+a second copy: a private fork of the review pipeline drifts in silence.
+
+What stays here is what is *ours*: `.architecture-diagrams` (which diagrams a PR delta
+covers) and `scripts/gh-pages-publish.sh` (our Pages branch, token and URL scheme — it would
+publish any directory and is not review tooling).
 
 ### Living Architecture & Guardrails
 
