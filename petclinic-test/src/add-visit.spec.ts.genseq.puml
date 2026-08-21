@@ -30,13 +30,6 @@ participant Browser
 participant Backend
 participant DB
 == Add a visit to an existing pet from the owner detail page ==
-Browser -> Backend: listVets\nGET /api/vets
-activate Backend
-group transaction · VetRepository.findAll
-Backend -> DB: [[genseq://0p6yxbc{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties ⊕]]
-end
-Backend --> Browser: 200
-deactivate Backend
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 group transaction · PetRepository.findById
@@ -44,6 +37,13 @@ Backend -> DB: petclinic
 Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
 end
 Backend -> DB: [[genseq://1bcshtp{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: 200
+deactivate Backend
+Browser -> Backend: listVets\nGET /api/vets
+activate Backend
+group transaction · VetRepository.findAll
+Backend -> DB: [[genseq://0p6yxbc{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties ⊕]]
+end
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
@@ -59,7 +59,7 @@ Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/p
 activate Backend
 Backend -> Backend: VetRepository.getByIdOrNull
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://1oudb53{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://1c1k1r4{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Browser: 201
 deactivate Backend
@@ -73,6 +73,13 @@ Backend -> DB: [[genseq://1bcshtp{Click for the statement behind this call} sele
 Backend --> Browser: 200
 deactivate Backend
 == Add a visit attended by a vet ==
+Browser -> Backend: listVets\nGET /api/vets
+activate Backend
+group transaction · VetRepository.findAll
+Backend -> DB: [[genseq://0p6yxbc{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties ⊕]]
+end
+Backend --> Browser: 200
+deactivate Backend
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 group transaction · PetRepository.findById
@@ -80,13 +87,6 @@ Backend -> DB: petclinic
 Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
 end
 Backend -> DB: [[genseq://1bcshtp{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: 200
-deactivate Backend
-Browser -> Backend: listVets\nGET /api/vets
-activate Backend
-group transaction · VetRepository.findAll
-Backend -> DB: [[genseq://0p6yxbc{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties ⊕]]
-end
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
@@ -107,7 +107,7 @@ Backend -> DB: [[genseq://0zykq1t{Click for the statement behind this call} SELE
 end
 deactivate Backend
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://0gm87qs{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://0rsu536{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Browser: 201
 deactivate Backend

@@ -1,15 +1,6 @@
 {
   "version": 2,
   "details": {
-    "0p6yxbc": {
-      "title": "SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
-        }
-      ]
-    },
     "0jw0huv": {
       "title": "select pets",
       "steps": [
@@ -33,6 +24,15 @@
             "label": "",
             "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=2"
           }
+        }
+      ]
+    },
+    "0p6yxbc": {
+      "title": "SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
         }
       ]
     },
@@ -62,7 +62,7 @@
         }
       ]
     },
-    "1oudb53": {
+    "1c1k1r4": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -70,7 +70,7 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1787340147014-45da2ad9', 2, ?, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1787347087745-ebcd69a0', 2, ?, ?)"
           }
         }
       ]
@@ -88,7 +88,7 @@
         }
       ]
     },
-    "0gm87qs": {
+    "0rsu536": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -96,7 +96,7 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1787340147014-956077e7', 2, 4, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1787347087747-c31cd379', 2, 4, ?)"
           }
         }
       ]

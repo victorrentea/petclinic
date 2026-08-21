@@ -309,3 +309,43 @@ def test_the_diff_colour_goes_inside_the_link():
 def test_a_member_with_no_link_is_untouched():
     plain = "@startuml\nclass X {\n  a : int\n}\n@enduml"
     assert "  a : int" in m.diff(m.parse(plain), m.parse(plain))
+
+
+# ── Directives survive the diff ──────────────────────────────────────────────
+# `footer domain/*.java -> DomainModel.puml` parses as a relationship on the strength of
+# its arrow. Everything after it was then treated as content, so the skinparams and the
+# legend never reached the delta — and the rendered diff disagreed with the diagram it
+# was a diff of: underlined links, no legend, different icon sizes.
+
+DIRECTIVES = """@startuml
+title Domain Model
+footer domain/*.java -> petclinic-backend/docs/generated/DomainModel.puml
+hide empty members
+skinparam hyperlinkUnderline false
+legend bottom
+  Click any class or field to jump to the source code.
+end legend
+class Owner {
+  id : Integer
+}
+@enduml"""
+
+
+def test_a_footer_with_an_arrow_is_not_a_relationship():
+    d = m.parse(DIRECTIVES)
+    assert d.relationships == []
+    assert list(d.elements) == ["Owner"]
+
+
+def test_every_directive_reaches_the_delta():
+    out = m.diff(m.parse(DIRECTIVES), m.parse(DIRECTIVES))
+    for directive in ("footer domain/*.java", "hide empty members",
+                      "skinparam hyperlinkUnderline false"):
+        assert directive in out
+
+
+def test_a_legend_survives_body_and_all():
+    out = m.diff(m.parse(DIRECTIVES), m.parse(DIRECTIVES))
+    assert "legend bottom" in out
+    assert "Click any class or field to jump to the source code." in out
+    assert "end legend" in out

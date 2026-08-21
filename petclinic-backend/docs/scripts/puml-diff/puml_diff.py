@@ -204,14 +204,39 @@ class Diagram:
     relationships: list = field(default_factory=list)  # list[(left, conn, right, label)]
 
 
+# Lines that describe the diagram rather than its content. Matched *before* anything
+# else, because some of them look like content: `footer domain/*.java -> DomainModel.puml`
+# parses as a relationship on the strength of its arrow, and every directive after it —
+# `hide empty members`, the skinparams, the legend — was then dropped from the delta as
+# "past the preamble". The rendered diff quietly disagreed with the diagram it was a diff of.
+DIRECTIVE_RE = re.compile(
+    r"^(?:!|title|caption|footer|header|legend|endlegend|end\s+legend|hide|show|skinparam|"
+    r"scale|autonumber|left\s+to\s+right\s+direction|top\s+to\s+bottom\s+direction)\b",
+    re.I,
+)
+LEGEND_OPEN_RE = re.compile(r"^legend\b", re.I)
+LEGEND_CLOSE_RE = re.compile(r"^end\s*legend\b", re.I)
+
+
 def parse(puml: str) -> Diagram:
     d = Diagram()
     current = None            # name of the element whose body we're inside
     seen_content = False      # have we passed the preamble yet?
+    in_legend = False         # a legend's body is prose, and prose looks like anything
 
     for raw in puml.splitlines():
         clean = _strip_markup(raw.strip())
         if not clean or clean.startswith("@start") or clean == "@enduml":
+            continue
+
+        if in_legend:
+            d.preamble.append(raw.rstrip())
+            in_legend = not LEGEND_CLOSE_RE.match(clean)
+            continue
+
+        if DIRECTIVE_RE.match(clean):
+            d.preamble.append(raw.rstrip())
+            in_legend = bool(LEGEND_OPEN_RE.match(clean)) and not LEGEND_CLOSE_RE.match(clean)
             continue
 
         if current is not None:
