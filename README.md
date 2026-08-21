@@ -11,8 +11,8 @@ engineering techniques you can lift into your own projects.
   code and diagram drift apart. See [GUARDRAILS.md](GUARDRAILS.md).
 - **Snapshot now, diff at review.** Committed diagrams stay a clean picture of
   *current* reality; the red add/remove delta is computed on demand from two git
-  snapshots (`puml-diff`), and a whole PR's architecture change is reviewable as
-  a gallery of delta images ([`/human-review`](https://github.com/victorrentea/human-review)'s `ci/architecture-diff.sh`).
+  snapshots (`puml-diff`), when a human asks for it — see
+  [`/human-review`](https://github.com/victorrentea/human-review).
 - **Diagrams generated from code, rendered from source.** `.puml` files are
   committed and rendered live via the PlantUML proxy straight off GitHub raw —
   no build step to view them; each render carries a `footer` naming its own

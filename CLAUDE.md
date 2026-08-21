@@ -78,16 +78,16 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 there, not here — an edit through the symlink is an edit to that repo, and needs committing
 there too.
 
-The review tooling moved with it: the PlantUML differs, the per-PR architecture delta
-(`ci/architecture-diff.sh`), the gallery builder and the plantuml.com URL encoder. Anything
-here that needs them — `pages-pr-preview.yml`, `docs/scripts/puml-diff/puml-diff-vs-git.sh` —
-resolves the skill through `scripts/ensure-human-review.sh`, which uses the symlink locally
-and clones the repo into a gitignored `petclinic-backend/.tools/` on a runner. Never vendor
-a second copy: a private fork of the review pipeline drifts in silence.
+The PlantUML differs moved with it. `docs/scripts/puml-diff/puml-diff-vs-git.sh` reaches
+them through `scripts/ensure-human-review.sh`, which uses the symlink locally and clones the
+repo into a gitignored `petclinic-backend/.tools/` otherwise. Never vendor a second copy: a
+private fork of the review pipeline drifts in silence.
 
-What stays here is what is *ours*: `.architecture-diagrams` (which diagrams a PR delta
-covers) and `scripts/gh-pages-publish.sh` (our Pages branch, token and URL scheme — it would
-publish any directory and is not review tooling).
+**The review guide is built by hand, not by CI.** It deep-links into a working tree and
+drives a whole local stack — a browser, a database, Tempo, PlantUML, a Maven build — so
+there is no online version and no PR automation for it. Run `/human-review` when you want
+one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
+which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
 ### Living Architecture & Guardrails
 
