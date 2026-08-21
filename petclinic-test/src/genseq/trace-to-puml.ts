@@ -177,6 +177,11 @@ const BODY_TOOLTIP = 'Click for this call’s JSON body';
  * step's alternate, which the panel offers as a toggle rather than as a second click —
  * a click that swaps the text under you reads as a bug until you have seen it twice,
  * and a `1 / 2` counter is not a discoverable way to say "there is more".
+ *
+ * Neither carries a label. "statement as sent — ? for each bound value" described the
+ * toggle's own state, which the toggle already shows, above a block of SQL whose `?`s
+ * are right there to see; the panel's title says which call this is, and that is the
+ * only thing a reader does not already have in front of them.
  */
 function sqlSteps(span: NormSpan, options: DiagramOptions): DetailStep[] {
   if (!options.interactive || options.sql === 'off') return [];
@@ -184,10 +189,10 @@ function sqlSteps(span: NormSpan, options: DiagramOptions): DetailStep[] {
   if (!sql) return [];
   const parameters = parametersOf(span);
   return [{
-    label: 'statement as sent — ? for each bound value',
+    label: '',
     text: formatSqlDetail(sql),
     ...(parameters.length > 0 ? {
-      alternate: {label: 'with the bound values put back', text: formatSqlDetail(sql, parameters)},
+      alternate: {label: '', text: formatSqlDetail(sql, parameters)},
     } : {}),
   }];
 }
@@ -270,6 +275,40 @@ function emitTrace(
     return source ? unqualify(source.name) : undefined;
   };
 
+  // DB spans that actually carry a statement. The agent also emits statement-less DB
+  // spans — a connection acquisition, named after the database — and those are not
+  // queries: counting them would keep a repository arrow alive because something that
+  // never was a query failed to be named after it.
+  const queriesUnder = (span: NormSpan): NormSpan[] => {
+    const found: NormSpan[] = [];
+    const descend = (s: NormSpan): void => {
+      for (const child of childrenOf(s.spanId)) {
+        if (participantOf(child) !== 'DB') descend(child);
+        else if (sqlOf(child)) found.push(child);
+      }
+    };
+    descend(span);
+    return found;
+  };
+
+  /**
+   * A repository self-arrow whose queries all ended up wearing its own name.
+   *
+   * That is the common case — a `findById` has no HQL for the arrow to show instead —
+   * and it draws `OwnerRepository.findById` twice, once as a hop to itself and once on
+   * the query below it. The one on the query is the useful one: it is attached to the
+   * statement it explains. So the hop goes.
+   *
+   * A repository whose query *does* have something else to say keeps its arrow: there
+   * `VetRepository.findAll` and `SELECT DISTINCT v FROM Vet …` are two different facts.
+   */
+  const restatedByItsQueries = (span: NormSpan): boolean => {
+    if (!REPOSITORY_SPAN_RE.test(span.name)) return false;
+    const queries = queriesUnder(span);
+    return queries.length > 0 && queries.every(
+      (q) => arrowLabel(q, 'DB', options, operations, callerOf(q)) === unqualify(span.name));
+  };
+
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
     // Whatever the driver does inside a query is the database's business: drawing a
     // child of a DB span would put an arrow *out* of the DB lifeline, as if the
@@ -282,7 +321,8 @@ function emitTrace(
     const crossing = pp !== undefined && pp !== p;
     const selfCustom = pp === p && span.kind === 'INTERNAL'
       && !(HIBERNATE_SPAN_RE.test(span.name)
-        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined);
+        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined)
+      && !restatedByItsQueries(span);
 
     // Draw the subtree first: an activation bar is only worth its vertical space
     // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
@@ -305,11 +345,13 @@ function emitTrace(
       const steps = p === 'DB'
         ? sqlSteps(span, options)
         : bodySteps(bodyOf(span, parent, 'http.request.body'), 'request body', options);
-      const title = p === 'DB' ? span.name : `${pp} → ${p}: ${span.name}`;
+      const text = arrowLabel(span, p, options, operations, p === 'DB' ? callerOf(span) : undefined);
+      // The panel is titled with what the arrow says, not with the span's generic name:
+      // a reader who clicked `OwnerRepository.findById` should not be told the thing they
+      // opened is called `SELECT petclinic.owners`.
+      const title = p === 'DB' ? text : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
-      const label = linkLabel(
-        arrowLabel(span, p, options, operations, p === 'DB' ? callerOf(span) : undefined),
-        collector, title, steps, tooltip);
+      const label = linkLabel(text, collector, title, steps, tooltip);
       out.push(`${pp} -> ${p}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {

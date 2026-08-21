@@ -197,7 +197,7 @@ class DomainModelExtractorTest {
         if (cls.isEnum()) {
             for (Object value : cls.getEnumConstants()) {
                 String name = ((Enum<?>) value).name();
-                lines.add(name + sourceLink(cls, name));
+                lines.add(linked(cls, name, name));
             }
             return lines;
         }
@@ -206,8 +206,8 @@ class DomainModelExtractorTest {
                 continue;
             if (referencedDomainClass(f, domain) != null)
                 continue; // association, not attribute
-            lines.add(f.getName() + " : " + typeName(f.getGenericType())
-                    + sourceLink(cls, f.getName()));
+            lines.add(linked(cls, f.getName(),
+                    f.getName() + " : " + typeName(f.getGenericType())));
         }
         return lines;
     }
@@ -226,17 +226,37 @@ class DomainModelExtractorTest {
      * found by reading the source file back — no line, no link, and the diagram is
      * exactly what it was before.
      */
+    /**
+     * `text`, as the clickable face of `member`'s declaration.
+     *
+     * The link has to *wrap* the text: PlantUML prints the URL itself when a `[[...]]`
+     * carries no label, so a member with a link appended rendered as its own name
+     * followed by sixty characters of absolute path.
+     */
+    private String linked(Class<?> cls, String member, String text) {
+        if (sourceFileOf(cls) == null)
+            return text;
+        return "[[" + handle(cls, member) + "{open " + member + " in the editor} " + text + "]]";
+    }
+
+    /**
+     * A class *header* link needs no label: PlantUML hangs it off the class box rather
+     * than printing it, so the box itself stays the thing you click.
+     */
     private String sourceLink(Class<?> cls, String member) {
-        Path source = sourceFileOf(cls);
-        if (source == null)
+        if (sourceFileOf(cls) == null)
             return "";
+        return " [[" + handle(cls, member) + "{open " + member + " in the editor}]]";
+    }
+
+    private String handle(Class<?> cls, String member) {
+        Path source = sourceFileOf(cls);
         int line = lineOfDeclaration(source, member);
         // The test runs with the module as its working directory, so the paths it has
         // are module-relative; the review page resolves against the repo root.
         String module = Paths.get("").toAbsolutePath().getFileName().toString();
         String rel = module + "/" + source.toString().replace('\\', '/');
-        return " [[src://" + rel + (line > 0 ? ":" + line : "")
-                + "{open " + member + " in the editor}]]";
+        return "src://" + rel + (line > 0 ? ":" + line : "");
     }
 
     private Path sourceFileOf(Class<?> cls) {

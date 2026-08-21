@@ -115,12 +115,13 @@ pre.code code { white-space:pre; }
 #genseq-panel .genseq-head { display:flex; align-items:baseline; gap:.5rem; }
 #genseq-panel .genseq-title { font:600 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
                               flex:1; word-break:break-all; }
+#genseq-panel .genseq-head { gap:.6rem; }
 #genseq-panel .genseq-step { color:var(--muted); font-size:.76rem; white-space:nowrap; }
 #genseq-panel .genseq-close { border:0; background:none; color:var(--muted); cursor:pointer;
                         font-size:1.1rem; line-height:1; padding:0 .1rem; }
 #genseq-panel .genseq-close:hover { color:var(--fg); }
-#genseq-panel .genseq-label { color:var(--link); font-size:.8rem; margin:.15rem 0 .4rem;
-                              display:flex; align-items:baseline; gap:.5rem; }
+#genseq-panel .genseq-label { color:var(--link); font-size:.8rem; margin:.15rem 0 .4rem; }
+#genseq-panel .genseq-label[hidden] { display:none; }
 #genseq-panel .genseq-toggle { border:1px solid var(--line); background:var(--code-bg);
                         color:var(--muted); cursor:pointer; border-radius:999px;
                         font:600 .7rem/1.6 inherit; padding:0 .55rem; white-space:nowrap; }
@@ -278,7 +279,10 @@ GENSEQ_JS = """<script>
 // invisible until you had already found them by accident.
 (function () {
   var PREFIX = 'genseq://';
-  var panel = null, els = null, current = null, step = null, alternate = false;
+  // `?` or the bound values is a way of reading, not a property of one arrow: a reviewer
+  // who asked for values once is reading the whole page in values. So the choice is the
+  // page's, and every panel opened after it honours it.
+  var panel = null, els = null, current = null, step = null, showValues = false;
 
   function build() {
     if (panel) return;
@@ -287,20 +291,20 @@ GENSEQ_JS = """<script>
     panel.hidden = true;
     panel.innerHTML =
       '<div class="genseq-head"><span class="genseq-title"></span>' +
+      '<button type="button" class="genseq-toggle" hidden></button>' +
       '<span class="genseq-step"></span>' +
       '<button type="button" class="genseq-close" title="close (Esc)" aria-label="close">&times;</button></div>' +
-      '<div class="genseq-label"><span class="genseq-what"></span>' +
-      '<button type="button" class="genseq-toggle" hidden></button></div><pre></pre>';
+      '<div class="genseq-label"></div><pre></pre>';
     document.body.appendChild(panel);
     els = {
       title: panel.querySelector('.genseq-title'),
       step: panel.querySelector('.genseq-step'),
-      label: panel.querySelector('.genseq-what'),
+      label: panel.querySelector('.genseq-label'),
       toggle: panel.querySelector('.genseq-toggle'),
       body: panel.querySelector('pre'),
     };
     panel.querySelector('.genseq-close').addEventListener('click', close);
-    els.toggle.addEventListener('click', function () { render(!alternate); });
+    els.toggle.addEventListener('click', function () { showValues = !showValues; render(); });
     panel.addEventListener('click', function (ev) { ev.stopPropagation(); });
   }
 
@@ -321,17 +325,18 @@ GENSEQ_JS = """<script>
     panel.style.top = (box.bottom + window.scrollY + 8) + 'px';
   }
 
-  // `on` picks which of the step's two renderings is in the pre; the button always
-  // names the *other* one, so it reads as what a click will get you.
-  function render(on) {
-    alternate = on && !!step.alternate;
-    var view = alternate ? step.alternate : step;
-    els.label.textContent = view.label;
+  // The button always names the *other* rendering, so it reads as what a click will get
+  // you. A step with no alternate — a JSON payload — simply has no button.
+  function render() {
+    var on = showValues && !!step.alternate;
+    var view = on ? step.alternate : step;
+    els.label.textContent = view.label || '';
+    els.label.hidden = !view.label;
     els.body.textContent = view.text;
     els.toggle.hidden = !step.alternate;
     if (step.alternate) {
-      els.toggle.textContent = alternate ? 'show ?' : 'show values';
-      els.toggle.setAttribute('aria-pressed', alternate ? 'true' : 'false');
+      els.toggle.textContent = on ? 'show ?' : 'show values';
+      els.toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
   }
 
@@ -340,7 +345,7 @@ GENSEQ_JS = """<script>
     step = entry.steps[index];
     els.title.textContent = entry.title;
     els.step.textContent = entry.steps.length > 1 ? (index + 1) + ' / ' + entry.steps.length : '';
-    render(false);
+    render();
     place(target);
   }
 
@@ -399,8 +404,8 @@ GENSEQ_JS = """<script>
     if (!revealable) return;
     var hint = document.createElement('p');
     hint.className = 'genseq-hint';
-    hint.textContent = 'Simplified on purpose — click any highlighted arrow to reveal its SQL '
-      + 'or its JSON payload; a statement\u2019s panel toggles between ? and the bound values.';
+    hint.textContent = 'Simplified on purpose — click any arrow marked \u2295 to reveal its SQL '
+      + 'or its JSON payload. Switching a statement to its bound values switches them all.';
     diagram.querySelector('.svgbox').insertAdjacentElement('beforebegin', hint);
   });
 
@@ -415,7 +420,14 @@ GENSEQ_JS = """<script>
 </script>"""
 
 
-SNIPPET_TOKEN = re.compile(r"\{\{snippet:(?P<ref>[^|}]+)(?:\|(?P<caption>[^}]*))?\}\}")
+# The caption is prose, and prose about this project says things like `{{ visit | vetName }}`.
+# Stopping it at the first `}` cut the directive in half there and spilled the rest onto the
+# page as literal text, so the caption now runs to the last `}}` on the line — stopping
+# only at a following `{{snippet:`, so two directives in one paragraph stay two
+# directives while a caption may still quote a template expression.
+SNIPPET_TOKEN = re.compile(
+    r"\{\{snippet:(?P<ref>[^|}]+)(?:\|(?P<caption>(?:(?!\{\{snippet:).)*))?\}\}"
+)
 
 
 def expand_snippets(text: str, root: Path) -> str:
@@ -611,6 +623,11 @@ def render_findings(findings) -> str:
     return '<ol class="findings">' + "\n".join(items) + "</ol>"
 
 
+# The guide is one of a dozen tabs the reviewer has open, all of them named after the
+# branch. The prefix is what makes it findable at a glance in the tab strip.
+TITLE_PREFIX = "\U0001F471\U0001F3FB\u200D\u2642\uFE0F "
+
+
 def resolve_refs(items, root: Path):
     """Turn `path:from-to` strings into {label, abs} so the renderer can link them.
 
@@ -775,7 +792,7 @@ def main(argv=None) -> int:
     doc = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{html.escape(spec.get('title', 'Review guide'))}</title>
+<title>{TITLE_PREFIX}{html.escape(spec.get('title', 'Review guide'))}</title>
 <style>{CSS}{extra_css}</style></head>
 <body><div class="wrap">
 <h1>{html.escape(spec.get('title', 'Review guide'))}</h1>
