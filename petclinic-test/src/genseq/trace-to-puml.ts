@@ -274,6 +274,14 @@ function emitTrace(
   const opensTransaction = (span: NormSpan): boolean =>
     childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT);
 
+  /**
+   * What the frame is called. It says `transaction` out loud, because a bare box round
+   * some arrows is not self-explanatory, and names the method that opened it — unless
+   * that method is the request itself, whose arrow is right above the frame anyway.
+   */
+  const transactionLabel = (span: NormSpan): string =>
+    (span.kind === 'SERVER' ? 'transaction' : `transaction · ${unqualify(span.name)}`);
+
   const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
       up; up = up.parentSpanId ? byId.get(up.parentSpanId) : undefined) {
@@ -358,17 +366,21 @@ function emitTrace(
     // drawn as a frame around everything that ran inside it. The reader can then see which
     // queries shared a transaction and a Hibernate session — and, just as usefully, which
     // ones ran outside every frame, as the lazy loads of an N+1 do.
-    if (!crossing && opensTransaction(span)) {
-      if (inner.length === 0) return;   // an empty frame states nothing
-      present.add(p);
-      out.push(`group ${unqualify(span.name)}`);
-      out.push(...inner);
-      out.push('end');
-      return;
-    }
+    //
+    // The frame wraps the *inside* of the span, never the span's own arrow: when the
+    // transaction is opened by the request handler itself — `@Transactional` on a
+    // controller method — framing the span would swallow the request and the response
+    // with it, and the picture would lose the call it is about.
+    const body = opensTransaction(span) && inner.length > 0
+      ? [`group ${transactionLabel(span)}`, ...inner, 'end']
+      : inner;
 
-    if (!crossing && !selfCustom) {
-      out.push(...inner);
+    // A span drawn as a frame is not also drawn as an arrow: the frame carries its name
+    // and its extent, and a self-hop above it would be the same call stated twice — which
+    // is what the bare `Transaction.commit` arrow was doing in the first place.
+    if (!crossing && (!selfCustom || opensTransaction(span))) {
+      present.add(p);
+      out.push(...body);
       return;
     }
 
@@ -399,7 +411,7 @@ function emitTrace(
     }
 
     if (inner.length > 0) out.push(`activate ${p}`);
-    out.push(...inner);
+    out.push(...body);
     // Only a meaningful return (an HTTP status) earns an arrow back.
     const label = crossing ? returnLabel(span) : undefined;
     if (label) {
