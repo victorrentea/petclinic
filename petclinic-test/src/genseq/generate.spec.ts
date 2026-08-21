@@ -3,10 +3,7 @@ import {parseTempoTrace} from './trace-to-puml';
 import {DETAIL_INDEX_VERSION} from './detail-index';
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  slugify, detailsPathFor, diagramPathFor, generateFromWindows, renderScenarios, spanCachePathFor,
-  CachedSource, TestWindow, GenerateDeps,
-} from './generate';
+import {CachedSource, GenerateDeps, TestWindow, detailsPathFor, diagramPathFor, generateFromWindows, mergeCachedSources, renderScenarios, slugify, spanCachePathFor} from './generate';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -213,4 +210,26 @@ test('renderScenarios redraws from the cache at another detail level, touching n
   const puml = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(puml).toContain('== Add a visit ==');
   expect(puml).not.toContain('SELECT');
+});
+
+// Each runner fetches only the sources it owns. Writing that over the cache left it
+// holding whichever suite ran last, so a later `npm run diagram` re-rendered that
+// suite's diagrams and quietly none of the others.
+test('a run replaces its own sources in the span cache and keeps the rest', () => {
+  const cached = [
+    {source: 'src/add-visit.spec.ts', scenarios: [{title: 'old', traces: []}]},
+    {source: 'src/owner-search.feature', scenarios: [{title: 'search', traces: []}]},
+  ];
+  const fresh = [{source: 'src/add-visit.spec.ts', scenarios: [{title: 'new', traces: []}]}];
+
+  const merged = mergeCachedSources(cached as any, fresh as any);
+  expect(merged.map((c) => c.source))
+    .toEqual(['src/add-visit.spec.ts', 'src/owner-search.feature']);
+  expect(merged[0].scenarios[0].title).toBe('new');   // this run's, not the stale one
+  expect(merged[1].scenarios[0].title).toBe('search'); // the other suite survives
+});
+
+test('an empty cache merges to just what was fetched', () => {
+  const fresh = [{source: 'a.feature', scenarios: []}];
+  expect(mergeCachedSources([], fresh as any)).toEqual(fresh);
 });
