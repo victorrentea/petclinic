@@ -214,8 +214,10 @@ test('an interactive DB arrow is labelled with Hibernate\'s account, SQL behind 
   expect(arrow).toContain(INSERT_ORIGIN);
   expect(arrow).not.toContain('VALUES');
   expect(arrow).toMatch(MARKER);
-  // the whole label is the click target — nothing trails the link
-  expect(arrow.trimEnd().endsWith(']]')).toBe(true);
+  // the whole label is the click target, and the ⊕ rides inside the link rather than
+  // after it — the arrow is what you aim at, the glyph is what says you can
+  expect(arrow.trimEnd().endsWith('⊕]]')).toBe(true);
+  expect(arrow).toContain(`{Click for the statement behind this call} ${INSERT_ORIGIN} ⊕]]`);
 
   // One step, not a cycle: the bound values are the step's alternate, which the panel
   // offers as a toggle.
@@ -283,7 +285,7 @@ test('an interactive diagram tones its link markup down and says how to use it',
   const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
     {sql: 'values', httpBodies: true, interactive: true});
   expect(puml).toContain('skinparam hyperlinkUnderline false');
-  expect(puml).toContain("click a\n  highlighted arrow to reveal that one call's SQL / JSON payloads");
+  expect(puml).toContain("click any\n  arrow marked ⊕ to reveal that one call's SQL / JSON payloads");
   expect(puml).toContain('  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads');
 });
 

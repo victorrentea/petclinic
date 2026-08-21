@@ -612,12 +612,30 @@ def render_findings(findings) -> str:
 
 
 def resolve_refs(items, root: Path):
-    """Turn `path:from-to` strings into {label, abs} so the renderer can link them."""
+    """Turn `path:from-to` strings into {label, abs} so the renderer can link them.
+
+    A reference to a file that is not there is a build failure, not a link. A snippet
+    already fails loudly — `extract-snippet.py` cannot cut lines out of nothing — but a
+    bare ref used to render whatever it was given, so a path that went stale (a file
+    renamed on the base branch, say) reached the reviewer as a deep link that silently
+    did nothing when clicked. Failing here costs one build; failing there costs the
+    reviewer's trust in every other link on the page.
+    """
     out = []
+    missing = []
     for ref in items:
         rel, _, pos = ref.rpartition(":")
         start = pos.split("-")[0]
-        out.append({"label": ref, "abs": f"{(root / rel).resolve()}:{start}:1"})
+        target = (root / rel).resolve()
+        if not target.is_file():
+            missing.append(ref)
+        out.append({"label": ref, "abs": f"{target}:{start}:1"})
+    if missing:
+        raise SystemExit(
+            "[review] these references point at files that do not exist:\n  "
+            + "\n  ".join(missing)
+            + "\nFix the path in the content file (a base-branch rename is the usual cause)."
+        )
     return out
 
 

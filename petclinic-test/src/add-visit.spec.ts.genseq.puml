@@ -10,8 +10,8 @@ legend right
   @generate_sequence. Change the test, not this file, then regenerate with
   petclinic-test/run-tests-with-tracing.sh
  
-  This picture is deliberately simplified. In review/review.html, click a
-  highlighted arrow to reveal that one call's SQL —
+  This picture is deliberately simplified. In review/review.html, click any
+  arrow marked ⊕ to reveal that one call's SQL —
   a DB arrow's panel toggles between ? and the values that were bound.
  
   Detail shown here: simplified · click an arrow to reveal its SQL
@@ -34,28 +34,28 @@ Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById
 activate Backend
-Backend -> DB: [[genseq://1dvza26{Click for the statement behind this call} PetRepository.findById]]
+Backend -> DB: [[genseq://1dvza26{Click for the statement behind this call} PetRepository.findById ⊕]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits]]
+Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById ⊕]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 Browser -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
 activate Backend
 Backend -> Backend: VisitRepository.save
 activate Backend
-Backend -> DB: [[genseq://0xk196o{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit]]
+Backend -> DB: [[genseq://0xk196o{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
 Backend --> Browser: 201
@@ -64,11 +64,11 @@ Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: OwnerRepository.findById
 activate Backend
-Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById]]
+Backend -> DB: [[genseq://0stbfh4{Click for the statement behind this call} OwnerRepository.findById ⊕]]
 Backend -> Backend: Transaction.commit
 deactivate Backend
-Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets]]
-Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits]]
+Backend -> DB: [[genseq://030w0nk{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://10rnkt2{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: 200
 deactivate Backend
 @enduml
