@@ -152,17 +152,21 @@ function arrowLabel(
 // <a href> around its own <text> run in the SVG, which is a stable, generation-time
 // anchor for the id — nothing downstream has to match rendered label text.
 //
-// The link wraps the whole label rather than trailing a ⊕ after it: a glyph is a
-// second, smaller thing to aim at, and a reviewer who has understood that arrows are
-// clickable wants to click the arrow. The label text is the affordance.
+// The link wraps the whole label *and* keeps the ⊕ inside it. Those answer two different
+// questions: the wrapped label makes the arrow the click target, so a reviewer who wants
+// to click it can aim at the words rather than at a glyph; the ⊕ is what says there is
+// anything to click at all. Drop it and a diagram read outside review.html — a raw .puml,
+// an SVG in a PR — offers no hint that an arrow hides a statement.
 const MARKER_SCHEME = 'genseq://';
+const MARKER_GLYPH = '⊕';
 
 /** `label`, wrapped in the link that reveals `steps` — or bare, when there is nothing to reveal. */
 function linkLabel(
   label: string, collector: DetailCollector, title: string, steps: DetailStep[], tooltip: string,
 ): string {
   if (steps.length === 0) return label;
-  return `[[${MARKER_SCHEME}${collector.add({title, steps})}{${tooltip}} ${label}]]`;
+  const id = collector.add({title, steps});
+  return `[[${MARKER_SCHEME}${id}{${tooltip}} ${label} ${MARKER_GLYPH}]]`;
 }
 
 const SQL_TOOLTIP = 'Click for the statement behind this call';
@@ -381,8 +385,8 @@ export function renderDiagram(
   ] : [];
   const interactiveLegend = options.interactive && kinds.length > 0 ? [
     ` `,
-    `  This picture is deliberately simplified. In review/review.html, click a`,
-    `  highlighted arrow to reveal that one call's ${kinds.join(' / ')} —`,
+    `  This picture is deliberately simplified. In review/review.html, click any`,
+    `  arrow marked ${MARKER_GLYPH} to reveal that one call's ${kinds.join(' / ')} —`,
     `  a DB arrow's panel toggles between ? and the values that were bound.`,
   ] : [];
 
