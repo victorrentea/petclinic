@@ -11,7 +11,7 @@ import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 
 setDefaultTimeout(60_000);
 
-const WINDOWS_FILE = path.join(__dirname, '..', '..', 'test-results', 'trace-windows.json');
+const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-windows');
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range — mirrors the Playwright
@@ -56,7 +56,7 @@ setWorldConstructor(PlaywrightWorld);
 // Deliberately NOT deleting any .genseq.puml: each suite rewrites only the diagrams
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
-  forgetWindowsOf(WINDOWS_FILE, CUCUMBER_SOURCES);
+  forgetWindowsOf(WINDOWS_DIR, CUCUMBER_SOURCES);
 });
 
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {
@@ -79,7 +79,7 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
 After(async function (this: PlaywrightWorld) {
   if (this.traceTitle && this.traceStartMs !== undefined) {
     await flushBrowserSpans(this.page);
-    appendWindow(WINDOWS_FILE, {
+    appendWindow(WINDOWS_DIR, {
       title: this.traceTitle,
       source: this.traceSource!,
       startMs: this.traceStartMs,

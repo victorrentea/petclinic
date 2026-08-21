@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
@@ -15,6 +16,8 @@ export interface TestWindow {
 /** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
 export interface RenderDeps {
   writeFile: (filePath: string, content: string) => void;
+  /** Optional: lets a run merge into the span cache instead of replacing it. */
+  readFile?: (filePath: string) => string | undefined;
   /** Optional: without it, re-rendering at a level with nothing to reveal leaves the
    *  previous level's sidecar behind, claiming a detail the picture no longer offers. */
   removeFile?: (filePath: string) => void;
@@ -109,6 +112,25 @@ function chronological(traces: NormSpan[][]): NormSpan[][] {
   return [...traces].sort((a, b) => startOf(a) - startOf(b));
 }
 
+/** What the cache already holds, or nothing when it is absent, unreadable or not wired. */
+function readSpanCache(file: string, deps: GenerateDeps): CachedSource[] {
+  try {
+    const raw = deps.readFile?.(file);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** `fresh` wins for the sources it covers; every other source keeps what it had. */
+export function mergeCachedSources(
+  cached: CachedSource[], fresh: CachedSource[],
+): CachedSource[] {
+  const replaced = new Set(fresh.map((c) => c.source));
+  return [...cached.filter((c) => !replaced.has(c.source)), ...fresh]
+    .sort((a, b) => a.source.localeCompare(b.source));
+}
+
 function groupBySource(windows: TestWindow[]): Map<string, TestWindow[]> {
   const bySource = new Map<string, TestWindow[]>();
   for (const w of windows) {
@@ -155,7 +177,12 @@ export async function generateFromWindows(
   }
 
   if (fetched.length > 0) {
-    deps.writeFile(spanCachePathFor(rootDir), JSON.stringify(fetched));
+    // Merge, never replace. Each runner fetches only the sources it owns, so writing
+    // `fetched` over the cache left it holding whichever suite ran last — and a later
+    // `npm run diagram` then re-rendered *that* suite's diagrams and quietly none of the
+    // others. The same trap the windows store is built to avoid, in its sibling cache.
+    deps.writeFile(spanCachePathFor(rootDir),
+      JSON.stringify(mergeCachedSources(readSpanCache(spanCachePathFor(rootDir), deps), fetched)));
   }
   return renderScenarios(fetched, rootDir, deps, options);
 }
@@ -197,7 +224,7 @@ export const CUCUMBER_SOURCES = /\.feature$/;
 
 export async function runGenerate(ownedSources?: RegExp): Promise<void> {
   const root = path.join(__dirname, '..', '..');
-  const windowsFile = path.join(root, 'test-results', 'trace-windows.json');
+  const windowsDir = path.join(root, 'test-results', 'trace-windows');
   const options = optionsFromEnv();
   console.log(`🎚️  Detail: ${describeOptions(options)}`);
 
@@ -210,6 +237,7 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
     const cached: CachedSource[] = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
     const paths = renderScenarios(cached, root, {
       writeFile: (p, c) => fs.writeFileSync(p, c),
+      readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
       log: (m) => console.log(m),
     }, options);
@@ -217,17 +245,16 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
     return;
   }
 
-  if (!fs.existsSync(windowsFile)) {
-    console.warn(`ℹ️  ${windowsFile} not found — no diagrams generated.`);
+  if (!fs.existsSync(windowsDir)) {
+    console.warn(`ℹ️  ${windowsDir} not found — no diagrams generated.`);
     return;
   }
 
   // Everything below is inside the guard: both hooks that call this document that it
-  // never throws, and a run killed mid-write leaves a windows file that JSON.parse
-  // rejects — which would fail a whole suite for a telemetry-only reason.
+  // never throws, and a telemetry-only problem must never fail a whole suite.
   try {
-    const all: TestWindow[] = JSON.parse(fs.readFileSync(windowsFile, 'utf-8'));
-    const windows = ownedSources ? all.filter((w) => ownedSources.test(w.source)) : all;
+    const all: TestWindow[] = readWindows(windowsDir);
+    const windows = ownedSources ? all.filter((w) => ownedSources.test(w.source ?? '')) : all;
     if (windows.length === 0) {
       console.log('ℹ️  No trace windows for this runner — no diagrams generated.');
       return;
@@ -238,6 +265,7 @@ export async function runGenerate(ownedSources?: RegExp): Promise<void> {
       searchTraceIds: (q, s, e) => searchTraceIds(cfg, q, s, e),
       getTrace: (id) => getTrace(cfg, id),
       writeFile: (p, c) => fs.writeFileSync(p, c),
+      readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
       log: (m) => console.log(m),
     };

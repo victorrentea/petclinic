@@ -28,6 +28,22 @@
 - A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
   repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
   one, else the `operationId`). The route says where a call went; the name says what it was for.
+- **A transaction is drawn as a `group` frame, not an arrow.** The interceptor's
+  `Transaction.commit` is emitted as the last child of whatever opened the transaction, so
+  the renderer frames that span's whole subtree and drops the commit arrow — the frame's
+  closing edge *is* the commit. A bare `Transaction.commit` arrow said a transaction ended
+  somewhere above and left the reader to guess how far up. The frame also shows what is
+  **outside** every transaction, which is the whole story of an N+1 behind
+  open-session-in-view: in this codebase nothing above the repositories is `@Transactional`,
+  so each repository call is its own transaction and its own Hibernate session, and the lazy
+  loads that follow run in none of them. A query inside a frame does not repeat the frame's
+  label — it falls back to describing itself (`select pets`).
+  Where the interceptor opens it decides what the frame wraps, and all three placements are
+  covered: on a **repository** or a **service**, the frame *replaces* that span's self-hop
+  (it already carries the name and the extent, so drawing both states the call twice); on
+  the **handler** (`@Transactional` on a controller method) the commit lands on the SERVER
+  span, so the frame wraps the handler's *body* — framing the span itself would swallow the
+  request and the response arrows with it, and the picture would lose the call it is about.
 - The **`Session.*` / `Hibernate Query` spans are dropped** when a Spring Data repository span
   above them already said the same thing. They are kept with no repository above them — code
   using the EntityManager directly, where the session call is the only account of the request.

@@ -177,6 +177,11 @@ const BODY_TOOLTIP = 'Click for this call’s JSON body';
  * step's alternate, which the panel offers as a toggle rather than as a second click —
  * a click that swaps the text under you reads as a bug until you have seen it twice,
  * and a `1 / 2` counter is not a discoverable way to say "there is more".
+ *
+ * Neither carries a label. "statement as sent — ? for each bound value" described the
+ * toggle's own state, which the toggle already shows, above a block of SQL whose `?`s
+ * are right there to see; the panel's title says which call this is, and that is the
+ * only thing a reader does not already have in front of them.
  */
 function sqlSteps(span: NormSpan, options: DiagramOptions): DetailStep[] {
   if (!options.interactive || options.sql === 'off') return [];
@@ -184,10 +189,10 @@ function sqlSteps(span: NormSpan, options: DiagramOptions): DetailStep[] {
   if (!sql) return [];
   const parameters = parametersOf(span);
   return [{
-    label: 'statement as sent — ? for each bound value',
+    label: '',
     text: formatSqlDetail(sql),
     ...(parameters.length > 0 ? {
-      alternate: {label: 'with the bound values put back', text: formatSqlDetail(sql, parameters)},
+      alternate: {label: '', text: formatSqlDetail(sql, parameters)},
     } : {}),
   }];
 }
@@ -227,6 +232,12 @@ function returnLabel(span: NormSpan): string | undefined {
 const HIBERNATE_SPAN_RE = /^(Session\.\w+|Hibernate Query)\b/;
 const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 
+// The commit the transaction interceptor issues on the way out. It is emitted as the last
+// child of whatever span opened the transaction, which is what lets the diagram draw the
+// *scope* rather than just the moment: a bare `Transaction.commit` arrow says a
+// transaction ended somewhere above, and leaves the reader to guess how far up.
+const TRANSACTION_COMMIT = 'Transaction.commit';
+
 const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
@@ -253,6 +264,24 @@ function emitTrace(
   }
   const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
+  /**
+   * A span that opened a transaction: the interceptor committed inside it.
+   *
+   * In this codebase that is every Spring Data repository method, because nothing above
+   * them is `@Transactional` — so each call gets its own transaction and its own session,
+   * which is a fact about the design worth being able to see.
+   */
+  const opensTransaction = (span: NormSpan): boolean =>
+    childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT);
+
+  /**
+   * What the frame is called. It says `transaction` out loud, because a bare box round
+   * some arrows is not self-explanatory, and names the method that opened it — unless
+   * that method is the request itself, whose arrow is right above the frame anyway.
+   */
+  const transactionLabel = (span: NormSpan): string =>
+    (span.kind === 'SERVER' ? 'transaction' : `transaction · ${unqualify(span.name)}`);
+
   const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
       up; up = up.parentSpanId ? byId.get(up.parentSpanId) : undefined) {
@@ -267,7 +296,44 @@ function emitTrace(
   const callerOf = (span: NormSpan): string | undefined => {
     const source = nearestAncestor(span, REPOSITORY_SPAN_RE)
       ?? nearestAncestor(span, HIBERNATE_SPAN_RE);
-    return source ? unqualify(source.name) : undefined;
+    // A caller drawn as the frame around this query has already named it; repeating the
+    // name on the arrow inside its own box says the same thing twice.
+    if (!source || opensTransaction(source)) return undefined;
+    return unqualify(source.name);
+  };
+
+  // DB spans that actually carry a statement. The agent also emits statement-less DB
+  // spans — a connection acquisition, named after the database — and those are not
+  // queries: counting them would keep a repository arrow alive because something that
+  // never was a query failed to be named after it.
+  const queriesUnder = (span: NormSpan): NormSpan[] => {
+    const found: NormSpan[] = [];
+    const descend = (s: NormSpan): void => {
+      for (const child of childrenOf(s.spanId)) {
+        if (participantOf(child) !== 'DB') descend(child);
+        else if (sqlOf(child)) found.push(child);
+      }
+    };
+    descend(span);
+    return found;
+  };
+
+  /**
+   * A repository self-arrow whose queries all ended up wearing its own name.
+   *
+   * That is the common case — a `findById` has no HQL for the arrow to show instead —
+   * and it draws `OwnerRepository.findById` twice, once as a hop to itself and once on
+   * the query below it. The one on the query is the useful one: it is attached to the
+   * statement it explains. So the hop goes.
+   *
+   * A repository whose query *does* have something else to say keeps its arrow: there
+   * `VetRepository.findAll` and `SELECT DISTINCT v FROM Vet …` are two different facts.
+   */
+  const restatedByItsQueries = (span: NormSpan): boolean => {
+    if (!REPOSITORY_SPAN_RE.test(span.name)) return false;
+    const queries = queriesUnder(span);
+    return queries.length > 0 && queries.every(
+      (q) => arrowLabel(q, 'DB', options, operations, callerOf(q)) === unqualify(span.name));
   };
 
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
@@ -276,13 +342,19 @@ function emitTrace(
     // database were calling the backend back.
     if (parentParticipant === 'DB') return;
 
+    // The commit is the closing edge of the frame drawn below — an arrow for it as well
+    // would draw the same event twice, once as a boundary and once as a message.
+    const parentSpan = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
+    if (span.name === TRANSACTION_COMMIT && parentSpan && opensTransaction(parentSpan)) return;
+
     const p = participantOf(span);
-    const parent = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
+    const parent = parentSpan;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
     const selfCustom = pp === p && span.kind === 'INTERNAL'
       && !(HIBERNATE_SPAN_RE.test(span.name)
-        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined);
+        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined)
+      && !restatedByItsQueries(span);
 
     // Draw the subtree first: an activation bar is only worth its vertical space
     // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
@@ -290,8 +362,25 @@ function emitTrace(
     const inner: string[] = [];
     for (const child of childrenOf(span.spanId)) walk(child, inner, p);
 
-    if (!crossing && !selfCustom) {
-      out.push(...inner);
+    // A transaction's scope is a region of the conversation, not a message in it, so it is
+    // drawn as a frame around everything that ran inside it. The reader can then see which
+    // queries shared a transaction and a Hibernate session — and, just as usefully, which
+    // ones ran outside every frame, as the lazy loads of an N+1 do.
+    //
+    // The frame wraps the *inside* of the span, never the span's own arrow: when the
+    // transaction is opened by the request handler itself — `@Transactional` on a
+    // controller method — framing the span would swallow the request and the response
+    // with it, and the picture would lose the call it is about.
+    const body = opensTransaction(span) && inner.length > 0
+      ? [`group ${transactionLabel(span)}`, ...inner, 'end']
+      : inner;
+
+    // A span drawn as a frame is not also drawn as an arrow: the frame carries its name
+    // and its extent, and a self-hop above it would be the same call stated twice — which
+    // is what the bare `Transaction.commit` arrow was doing in the first place.
+    if (!crossing && (!selfCustom || opensTransaction(span))) {
+      present.add(p);
+      out.push(...body);
       return;
     }
 
@@ -305,11 +394,13 @@ function emitTrace(
       const steps = p === 'DB'
         ? sqlSteps(span, options)
         : bodySteps(bodyOf(span, parent, 'http.request.body'), 'request body', options);
-      const title = p === 'DB' ? span.name : `${pp} → ${p}: ${span.name}`;
+      const text = arrowLabel(span, p, options, operations, p === 'DB' ? callerOf(span) : undefined);
+      // The panel is titled with what the arrow says, not with the span's generic name:
+      // a reader who clicked `OwnerRepository.findById` should not be told the thing they
+      // opened is called `SELECT petclinic.owners`.
+      const title = p === 'DB' ? text : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
-      const label = linkLabel(
-        arrowLabel(span, p, options, operations, p === 'DB' ? callerOf(span) : undefined),
-        collector, title, steps, tooltip);
+      const label = linkLabel(text, collector, title, steps, tooltip);
       out.push(`${pp} -> ${p}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {
@@ -320,7 +411,7 @@ function emitTrace(
     }
 
     if (inner.length > 0) out.push(`activate ${p}`);
-    out.push(...inner);
+    out.push(...body);
     // Only a meaningful return (an HTTP status) earns an arrow back.
     const label = crossing ? returnLabel(span) : undefined;
     if (label) {
