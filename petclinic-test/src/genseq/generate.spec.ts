@@ -79,7 +79,8 @@ test('generateFromWindows writes one puml per source file, sectioned by scenario
   const addVisit = written['/out/src/add-visit.spec.ts.genseq.puml'];
   expect(addVisit).toContain('== Add a visit ==');
   expect(addVisit).toContain('== Cancel a visit ==');
-  expect(addVisit).toContain('Browser -> Backend: addVisit\\nPOST /api/visits');
+  // the arrow is wrapped in its reveal link now, so match the label inside it
+  expect(addVisit).toContain('addVisit\\nPOST /api/visits');
   expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
 });
 

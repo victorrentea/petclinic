@@ -189,7 +189,7 @@ test('renderPuml drops traces that would draw nothing', () => {
 
   expect(puml).toContain('== Add a visit ==');
   expect(puml).not.toContain('== Clicked around ==');
-  expect(puml).toContain(`Browser -> Backend: ${ADD_VISIT}`);
+  expect(puml).toContain(ADD_VISIT);
 });
 
 // ── progressive disclosure ────────────────────────────────────────────────────
@@ -262,9 +262,17 @@ test('the payloads become markers on the request and the response, not notes', (
   expect(response.steps[0].text).toContain('"id": 42');
 });
 
-test('payloads stay unrevealable unless asked for, SQL off leaves no marker at all', () => {
+// Behind a click a payload costs the picture nothing, so an interactive diagram carries
+// it by default; baked in it is a wall of JSON, so a static one still has to ask.
+// Withholding it by default only meant a reviewer clicked a request arrow and found
+// that it had nothing to say.
+test('payloads are revealable by default, and nothing is when there is nothing to reveal', () => {
   const plain = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}]);
-  expect(lineWith(plain.puml, 'Browser -> Backend:')).not.toMatch(MARKER);
+  expect(lineWith(plain.puml, 'Browser -> Backend:')).toMatch(MARKER);
+
+  const withheld = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
+    {sql: 'statement', httpBodies: false, interactive: true});
+  expect(lineWith(withheld.puml, 'Browser -> Backend:')).not.toMatch(MARKER);
 
   const none = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
     {sql: 'off', httpBodies: false, interactive: true});
