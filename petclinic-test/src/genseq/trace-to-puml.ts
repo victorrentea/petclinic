@@ -274,13 +274,9 @@ function emitTrace(
   const opensTransaction = (span: NormSpan): boolean =>
     childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT);
 
-  /**
-   * What the frame is called. It says `transaction` out loud, because a bare box round
-   * some arrows is not self-explanatory, and names the method that opened it — unless
-   * that method is the request itself, whose arrow is right above the frame anyway.
-   */
-  const transactionLabel = (span: NormSpan): string =>
-    (span.kind === 'SERVER' ? 'transaction' : `transaction · ${unqualify(span.name)}`);
+  // Just `tx`. The frame's job is to show an *extent*, and whatever opened it is named
+  // by the call the frame sits inside — a longer label only repeats that.
+  const TRANSACTION_LABEL = 'tx';
 
   const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
@@ -302,39 +298,6 @@ function emitTrace(
     return unqualify(source.name);
   };
 
-  // DB spans that actually carry a statement. The agent also emits statement-less DB
-  // spans — a connection acquisition, named after the database — and those are not
-  // queries: counting them would keep a repository arrow alive because something that
-  // never was a query failed to be named after it.
-  const queriesUnder = (span: NormSpan): NormSpan[] => {
-    const found: NormSpan[] = [];
-    const descend = (s: NormSpan): void => {
-      for (const child of childrenOf(s.spanId)) {
-        if (participantOf(child) !== 'DB') descend(child);
-        else if (sqlOf(child)) found.push(child);
-      }
-    };
-    descend(span);
-    return found;
-  };
-
-  /**
-   * A repository self-arrow whose queries all ended up wearing its own name.
-   *
-   * That is the common case — a `findById` has no HQL for the arrow to show instead —
-   * and it draws `OwnerRepository.findById` twice, once as a hop to itself and once on
-   * the query below it. The one on the query is the useful one: it is attached to the
-   * statement it explains. So the hop goes.
-   *
-   * A repository whose query *does* have something else to say keeps its arrow: there
-   * `VetRepository.findAll` and `SELECT DISTINCT v FROM Vet …` are two different facts.
-   */
-  const restatedByItsQueries = (span: NormSpan): boolean => {
-    if (!REPOSITORY_SPAN_RE.test(span.name)) return false;
-    const queries = queriesUnder(span);
-    return queries.length > 0 && queries.every(
-      (q) => arrowLabel(q, 'DB', options, operations, callerOf(q)) === unqualify(span.name));
-  };
 
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
     // Whatever the driver does inside a query is the database's business: drawing a
@@ -351,10 +314,12 @@ function emitTrace(
     const parent = parentSpan;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
+    // A repository call is drawn as a call: a self-hop, an activation, and its statements
+    // fired from inside it. That is the shape a reader expects of a method that queries,
+    // and it gives the transaction frame somewhere to sit.
     const selfCustom = pp === p && span.kind === 'INTERNAL'
       && !(HIBERNATE_SPAN_RE.test(span.name)
-        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined)
-      && !restatedByItsQueries(span);
+        && nearestAncestor(span, REPOSITORY_SPAN_RE) !== undefined);
 
     // Draw the subtree first: an activation bar is only worth its vertical space
     // when something is drawn *inside* it. A call that reaches nobody — a leaf DB
@@ -372,13 +337,10 @@ function emitTrace(
     // controller method — framing the span would swallow the request and the response
     // with it, and the picture would lose the call it is about.
     const body = opensTransaction(span) && inner.length > 0
-      ? [`group ${transactionLabel(span)}`, ...inner, 'end']
+      ? [`group ${TRANSACTION_LABEL}`, ...inner, 'end']
       : inner;
 
-    // A span drawn as a frame is not also drawn as an arrow: the frame carries its name
-    // and its extent, and a self-hop above it would be the same call stated twice — which
-    // is what the bare `Transaction.commit` arrow was doing in the first place.
-    if (!crossing && (!selfCustom || opensTransaction(span))) {
+    if (!crossing && !selfCustom) {
       present.add(p);
       out.push(...body);
       return;

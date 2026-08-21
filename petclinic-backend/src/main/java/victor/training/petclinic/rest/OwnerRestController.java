@@ -143,6 +143,10 @@ public class OwnerRestController {
 
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
+    // Booking is one unit of work: resolve the vet, then save the visit. Without this each
+    // repository call opened and committed its own transaction, so a failure to save left
+    // the request half-done and the sequence diagram showed two transactions for one POST.
+    @Transactional
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
             @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);

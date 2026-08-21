@@ -376,7 +376,7 @@ const inTransaction: NormSpan[] = [
 
 test('a transaction is drawn as a frame around what ran inside it', () => {
   const body = spansToPuml(inTransaction, 'tx', STATIC).split('\n').map((l) => l.trim());
-  const open = body.indexOf('group transaction · OwnerRepository.findById');
+  const open = body.indexOf('group tx');
   const close = body.indexOf('end', open);
   expect(open).toBeGreaterThan(-1);
   expect(close).toBeGreaterThan(open);
@@ -394,7 +394,7 @@ test('the commit is the frame, not another arrow inside it', () => {
 test('a query inside a frame does not repeat the frame\'s label', () => {
   // split on the whole line: "Backend" contains "end"
   const inside = spansToPuml(inTransaction, 'tx', STATIC)
-    .split('group transaction · OwnerRepository.findById\n')[1].split('\nend\n')[0];
+    .split('group tx\n')[1].split('\nend\n')[0];
   expect(inside).not.toContain('OwnerRepository.findById');
   expect(inside).toContain('select owners');
 });
@@ -431,7 +431,7 @@ test('a handler-level transaction frames its body, not the request', () => {
     (l) => l.startsWith('Browser -> Backend:') && l.includes('POST /api/visits'));
   expect(request).toBeGreaterThan(-1);
   expect(body).toContain('Backend --> Browser: 201');
-  const open = body.indexOf('group transaction');
+  const open = body.indexOf('group tx');
   const close = body.indexOf('end', open);
   expect(open).toBeGreaterThan(request);
   expect(body.slice(open, close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(2);
@@ -450,19 +450,24 @@ const onService: NormSpan[] = [
 // The frame replaces the self-hop rather than nesting inside it: it already carries the
 // method's name and its extent, so drawing both states the same call twice — which is
 // what the bare `Transaction.commit` arrow did.
-test('a service-level transaction is the frame, not a call plus a frame', () => {
+// The call is drawn as a call and the frame sits inside it. A method that queries should
+// look like a method that queries — a hop, an activation, and its statements fired from
+// within — and the frame then has somewhere to sit rather than standing in for the call.
+test('a service-level transaction is a frame inside the call that opened it', () => {
   const body = spansToPuml(onService, 'tx', STATIC).split('\n').map((l) => l.trim());
-  expect(body).not.toContain('Backend -> Backend: VisitService.book');
-  const open = body.indexOf('group transaction · VisitService.book');
-  expect(open).toBeGreaterThan(-1);
+  const call = body.indexOf('Backend -> Backend: VisitService.book');
+  expect(call).toBeGreaterThan(-1);
+  expect(body[call + 1]).toBe('activate Backend');
+  const open = body.indexOf('group tx', call);
+  expect(open).toBeGreaterThan(call);
   const close = body.indexOf('end', open);
   expect(body.slice(open, close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(2);
-  // still inside the request's activation, not floating beside it
-  expect(body.indexOf('activate Backend')).toBeLessThan(open);
 });
 
-// The label has to say what the box is; a bare frame round some arrows explains nothing.
-test('the frame names the transaction, and the method when that is not the request', () => {
-  expect(spansToPuml(onController, 'tx', STATIC)).toContain('group transaction\n');
-  expect(spansToPuml(onService, 'tx', STATIC)).toContain('group transaction · VisitService.book');
+// The frame's job is to show an extent. Whatever opened it is named by the call the frame
+// sits inside, so a longer label would only repeat the line above it.
+test('the frame is called tx, wherever it was opened', () => {
+  expect(spansToPuml(onController, 'tx', STATIC)).toContain('group tx\n');
+  expect(spansToPuml(onService, 'tx', STATIC)).toContain('group tx\n');
+  expect(spansToPuml(onService, 'tx', STATIC)).not.toContain('transaction ·');
 });
