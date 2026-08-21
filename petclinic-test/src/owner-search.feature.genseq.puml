@@ -94,6 +94,6 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://1eusyai{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://06o99d9{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml
