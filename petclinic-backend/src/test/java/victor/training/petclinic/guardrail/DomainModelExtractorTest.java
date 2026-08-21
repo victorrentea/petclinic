@@ -42,6 +42,10 @@ class DomainModelExtractorTest {
     private static final Path GENERATED_DIR = Paths.get("docs/generated");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java");
 
+    // One wording for every link. Naming the member in its own tooltip only repeated the
+    // text the pointer was already on, and the legend says what clicking does anyway.
+    private static final String TOOLTIP = "{Click to open in editor}";
+
     private static final String ONE = "1";
     private static final String MANY = "0..*";
 
@@ -246,7 +250,7 @@ class DomainModelExtractorTest {
     private String linked(Class<?> cls, String member, String text) {
         if (sourceFileOf(cls) == null)
             return text;
-        return "[[" + handle(cls, member) + "{open " + member + " in the editor} " + text + "]]";
+        return "[[" + handle(cls, member) + TOOLTIP + " " + text + "]]";
     }
 
     /**
@@ -256,7 +260,7 @@ class DomainModelExtractorTest {
     private String sourceLink(Class<?> cls, String member) {
         if (sourceFileOf(cls) == null)
             return "";
-        return " [[" + handle(cls, member) + "{open " + member + " in the editor}]]";
+        return " [[" + handle(cls, member) + TOOLTIP + "]]";
     }
 
     private String handle(Class<?> cls, String member) {
