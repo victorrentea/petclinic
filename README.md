@@ -11,8 +11,8 @@ engineering techniques you can lift into your own projects.
   code and diagram drift apart. See [GUARDRAILS.md](GUARDRAILS.md).
 - **Snapshot now, diff at review.** Committed diagrams stay a clean picture of
   *current* reality; the red add/remove delta is computed on demand from two git
-  snapshots (`puml-diff`), and a whole PR's architecture change is reviewable as
-  a gallery of delta images (`architecture-diff.sh`).
+  snapshots (`puml-diff`), when a human asks for it — see
+  [`/human-review`](https://github.com/victorrentea/human-review).
 - **Diagrams generated from code, rendered from source.** `.puml` files are
   committed and rendered live via the PlantUML proxy straight off GitHub raw —
   no build step to view them; each render carries a `footer` naming its own
@@ -135,4 +135,8 @@ From the https://github.com/victorrentea/petclinic repo…
 - write 3 .feature tests for the most critical flows of my app XYZ
 - adopt the technique to generate sequence diagrams from key e2e tests, as in `petclinic-test/src/*.genseq.puml`.
 - get the code review skill using local sonar scanner and multi-agent review
+- assemble a reviewer's guide for a change set — diagram deltas, Code City, a video of the
+  feature, complexity delta and snippets deep-linked into the editor — with
+  https://github.com/victorrentea/human-review (`/plugin marketplace add victorrentea/human-review`),
+  which is the `/human-review` skill this repo symlinks into `.claude/skills/`.
 - set up an End/Stop hook that plays a sound when the agent finishes its turn.

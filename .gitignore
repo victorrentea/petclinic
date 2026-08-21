@@ -88,8 +88,6 @@ rag-vector-store.json
 *.xlsx
 
 
-# Review-time architecture delta (scripts/architecture-diff.sh) — regenerate, never commit
-/pr-diff/
 
 # playwright-cli scratch (browser skill) — normally redirected to $TMPDIR, see .claude/settings.json
 .playwright-cli/
@@ -109,3 +107,6 @@ rag-vector-store.json
 
 # Code City renderer, downloaded on demand by generate-codecity.sh — a tool, not source
 /petclinic-backend/.codecity-tool/
+
+# /human-review skill, fetched on demand by scripts/ensure-puml-diff.sh — a tool, not source
+/petclinic-backend/.tools/human-review/

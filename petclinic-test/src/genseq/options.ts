@@ -18,9 +18,10 @@ export interface DiagramOptions {
   interactive: boolean;
 }
 
+/** The default diagram: simplified, with everything the traces carry a click away. */
 export const DEFAULT_DIAGRAM_OPTIONS: DiagramOptions = {
   sql: 'statement',
-  httpBodies: false,
+  httpBodies: true,
   interactive: true,
 };
 
@@ -45,10 +46,15 @@ function boolFrom(raw: string | undefined, fallback: boolean): boolean {
 export function optionsFromEnv(
   env: Record<string, string | undefined> = process.env,
 ): DiagramOptions {
+  const interactive = boolFrom(env.SEQ_INTERACTIVE, DEFAULT_DIAGRAM_OPTIONS.interactive);
   return {
     sql: SQL_ALIASES[env.SEQ_SQL?.trim().toLowerCase() ?? ''] ?? DEFAULT_DIAGRAM_OPTIONS.sql,
-    httpBodies: boolFrom(env.SEQ_HTTP_BODIES, DEFAULT_DIAGRAM_OPTIONS.httpBodies),
-    interactive: boolFrom(env.SEQ_INTERACTIVE, DEFAULT_DIAGRAM_OPTIONS.interactive),
+    // Payloads default to *whether they cost anything to carry*. Baked into the picture
+    // they are a wall of JSON, so a static diagram still has to ask for them; behind a
+    // click they cost nothing at all, and withholding them only meant a reviewer clicked
+    // a request arrow and found it had nothing to say.
+    httpBodies: boolFrom(env.SEQ_HTTP_BODIES, interactive),
+    interactive,
   };
 }
 
