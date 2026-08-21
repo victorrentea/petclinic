@@ -4,14 +4,12 @@ name: Pages mirror
 # switched from `main` to `gh-pages` without stranding a single URL that is
 # served today (the Code City link in README.md, every committed .puml, …).
 #
-# Why the indirection at all: PR preview galleries must never land on main, but
-# Pages serves only one branch. Pointing Pages at a *derived* branch lets main
-# stay the clean source of truth while `pr/<n>/` previews live alongside the
-# mirror — see pages-pr-preview.yml.
-#
-# The `pr/` directory is deliberately preserved on every mirror: it is owned by
-# the preview workflow, not by main, and a naive force-push would wipe every
-# open PR's gallery.
+# NOTE: the indirection existed for the per-PR architecture galleries, which have been
+# removed — the review guide is built by hand and read locally now. This workflow stays
+# only because GitHub Pages is still *served from* `gh-pages`: deleting it would freeze
+# that branch and quietly stale every URL it serves (the Code City link in README.md,
+# every committed .puml). To retire it, first switch the Pages source back to `main` in
+# the repository settings, then delete this file — in that order.
 
 on:
   push:

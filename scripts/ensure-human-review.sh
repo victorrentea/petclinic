@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Print the /human-review skill directory, fetching it if it is not already here.
 #
-# The review tooling used to live in this repo: the PlantUML differs, the architecture
-# delta, the PR gallery. It now ships with the skill (github.com/victorrentea/human-review),
+# The PlantUML differs used to live in this repo. They now ship with the /human-review
+# skill (github.com/victorrentea/human-review),
 # which is where it is developed — a second copy here would be a private fork of the
 # review pipeline, drifting in silence.
 #
-# Callers reach into it: `$(ensure-human-review.sh)/puml-diff/puml_diff.py`,
-# `$(ensure-human-review.sh)/ci/architecture-diff.sh`.
+# Callers reach into it, e.g. `$(ensure-human-review.sh)/puml-diff/puml_diff.py`.
 #
 # Locally the skill is symlinked into .claude/skills/, so the differs are already on disk.
 # On a CI runner nothing is symlinked, so they are cloned into a gitignored .tools/ —
