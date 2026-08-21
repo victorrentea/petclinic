@@ -1119,6 +1119,36 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</span>
+<span class="bar"><i class="seg" style="width:4.55%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i><i class="seg" style="width:4.55%;background:var(--series-3)" data-tip="repository: 1 decision points"></i></span>
+<span class="value">3</span>
+</summary>
+<div class="detail"><p class="meta">OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto) — 16 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VetRepository.getByIdOrNull(Integer)</td><td>repository</td><td class="num">2</td></tr>
+<tr><td>VisitMapperImpl.toVisit(VisitFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setVet(Vet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getVetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners</span>
 <span class="bar"><i class="seg" style="width:4.55%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
@@ -1142,32 +1172,6 @@ td {
 <tr><td>OwnerFieldsDto.getTelephone()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>OwnerRepository.save(Owner) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>OwnerRestController.addOwner(OwnerFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</span>
-<span class="bar"><i class="seg" style="width:4.55%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
-<span class="value">2</span>
-</summary>
-<div class="detail"><p class="meta">OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto) — 12 methods, call depth 2</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapperImpl.toVisit(VisitFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -1734,9 +1738,9 @@ td {
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">4</td><td class="num">21</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> list_visits</td><td>PetClinicMcp.listVisits()</td><td class="num">4</td><td class="num">17</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">3</td><td class="num">23</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</td><td>OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)</td><td class="num">3</td><td class="num">16</td><td class="num">2</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> cancel_visit</td><td>PetClinicMcp.cancelVisit(LocalDate)</td><td class="num">3</td><td class="num">13</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners</td><td>OwnerRestController.addOwner(OwnerFieldsDto)</td><td class="num">2</td><td class="num">15</td><td class="num">2</td></tr>
-<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</td><td>OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)</td><td class="num">2</td><td class="num">12</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/pets/{petId}</td><td>PetRestController.updatePet(int, PetDto)</td><td class="num">2</td><td class="num">14</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/pettypes</td><td>PetTypeRestController.addPetType(PetTypeFieldsDto)</td><td class="num">2</td><td class="num">7</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pettypes/{petTypeId}</td><td>PetTypeRestController.getPetType(int)</td><td class="num">2</td><td class="num">8</td><td class="num">2</td></tr>

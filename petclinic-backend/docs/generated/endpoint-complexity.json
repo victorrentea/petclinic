@@ -848,6 +848,34 @@
     ]
   },
   {
+    "kind": "http",
+    "httpMethod": "POST",
+    "path": "/api/owners/{ownerId}/pets/{petId}/visits",
+    "handler": "OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)",
+    "flowCc": 3,
+    "methods": 16,
+    "depth": 2,
+    "decisionsByLayer": {"mapper": 1, "repository": 1},
+    "flow": [
+      {"method": "victor.training.petclinic.rest.OwnerRestController#addVisitToOwner", "cc": 1, "layer": "controller"},
+      {"method": "victor.training.petclinic.mapper.VisitMapperImpl#toVisit", "cc": 2, "layer": "mapper"},
+      {"method": "victor.training.petclinic.domain.Pet#<init>", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.domain.Pet#setId", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.domain.Visit#setPet", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.rest.dto.VisitFieldsDto#getVetId", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.repository.VetRepository#getByIdOrNull", "cc": 2, "layer": "repository"},
+      {"method": "victor.training.petclinic.domain.Visit#setVet", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.repository.VisitRepository#save", "cc": 1, "layer": "repository"},
+      {"method": "victor.training.petclinic.domain.Visit#getId", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.domain.Visit#<init>", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.rest.dto.VisitFieldsDto#getDate", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.domain.Visit#setDate", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.rest.dto.VisitFieldsDto#getDescription", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.domain.Visit#setDescription", "cc": 1, "layer": "model"},
+      {"method": "victor.training.petclinic.repository.VetRepository#findById", "cc": 1, "layer": "repository"}
+    ]
+  },
+  {
     "kind": "mcp",
     "httpMethod": "MCP",
     "path": "cancel_visit",
@@ -897,30 +925,6 @@
       {"method": "victor.training.petclinic.domain.Owner#setCity", "cc": 1, "layer": "model"},
       {"method": "victor.training.petclinic.rest.dto.OwnerFieldsDto#getTelephone", "cc": 1, "layer": "model"},
       {"method": "victor.training.petclinic.domain.Owner#setTelephone", "cc": 1, "layer": "model"}
-    ]
-  },
-  {
-    "kind": "http",
-    "httpMethod": "POST",
-    "path": "/api/owners/{ownerId}/pets/{petId}/visits",
-    "handler": "OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)",
-    "flowCc": 2,
-    "methods": 12,
-    "depth": 2,
-    "decisionsByLayer": {"mapper": 1},
-    "flow": [
-      {"method": "victor.training.petclinic.rest.OwnerRestController#addVisitToOwner", "cc": 1, "layer": "controller"},
-      {"method": "victor.training.petclinic.mapper.VisitMapperImpl#toVisit", "cc": 2, "layer": "mapper"},
-      {"method": "victor.training.petclinic.domain.Pet#<init>", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.domain.Pet#setId", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.domain.Visit#setPet", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.repository.VisitRepository#save", "cc": 1, "layer": "repository"},
-      {"method": "victor.training.petclinic.domain.Visit#getId", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.domain.Visit#<init>", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.rest.dto.VisitFieldsDto#getDate", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.domain.Visit#setDate", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.rest.dto.VisitFieldsDto#getDescription", "cc": 1, "layer": "model"},
-      {"method": "victor.training.petclinic.domain.Visit#setDescription", "cc": 1, "layer": "model"}
     ]
   },
   {
