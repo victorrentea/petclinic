@@ -1,3 +1,4 @@
+import {randomUUID} from 'crypto';
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
 
@@ -32,8 +33,17 @@ export async function clickAddVisitForFirstPet(page: Page, buttonLabel: string):
 }
 
 /** Returns the generated description, so the caller can later assert on that exact row. */
+/**
+ * The description is what a later assertion finds the row by, so it has to be unique
+ * across the whole suite — not merely across one file.
+ *
+ * `Date.now()` alone is not: the specs run in parallel workers against one shared
+ * database, and two of them filling the form in the same millisecond produced the same
+ * "unique" description. The assertions then matched both rows and failed on strict mode,
+ * blaming whichever test came second. A random suffix is what actually makes it unique.
+ */
 export async function fillVisitDateAndUniqueDescription(page: Page, date: string): Promise<string> {
-  const description = `Annual check-up ${Date.now()}`;
+  const description = `Annual check-up ${Date.now()}-${randomUUID().slice(0, 8)}`;
   await page.locator('input[name="date"]').fill(date);
   await page.locator('input#description').fill(description);
   return description;
@@ -64,6 +74,19 @@ export async function expectBackOnOwnerDetailPage(page: Page, ownerId: number): 
 
 export async function expectPetVisitListContains(page: Page, date: string, description: string): Promise<void> {
   await expect(visitRow(page, date, description)).toBeVisible({timeout: 10_000});
+}
+
+/**
+ * The vet column reads "not attended" — an em dash, per VetNamePipe.NOT_ATTENDED.
+ *
+ * Booking without choosing a vet is a supported path, not an oversight: the vet is
+ * optional, and legacy and MCP-booked visits have none. Asserting the dash is what makes
+ * the no-vet case a statement rather than the absence of one.
+ */
+export async function expectPetVisitListShowsNoVet(
+  page: Page, date: string, description: string): Promise<void> {
+  await expect(visitRow(page, date, description).locator('.visit-vet'))
+    .toHaveText('—', {timeout: 10_000});
 }
 
 export async function expectPetVisitListShowsVet(

@@ -5,6 +5,7 @@ import {
   clickAddVisitForFirstPet,
   expectBackOnOwnerDetailPage,
   expectPetVisitListContains,
+  expectPetVisitListShowsNoVet,
   expectPetVisitListShowsVet,
   fillVisitDateAndUniqueDescription,
   openOwnerDetailPage,
@@ -34,6 +35,7 @@ test('Add a visit to an existing pet from the owner detail page',
 
     await expectBackOnOwnerDetailPage(page, ownerId);
     await expectPetVisitListContains(page, VISIT_DATE, description);
+    await expectPetVisitListShowsNoVet(page, VISIT_DATE, description);
   });
 
 // The vet link crosses browser -> API -> DB, so this one is tagged too: its trace is the
@@ -42,14 +44,13 @@ test('Add a visit attended by a vet',
   {tag: [GENERATE_SEQUENCE_TAG]},
   async ({page}) => {
     const {ownerId} = await anOwnerWithAtLeastOnePetExists();
-    const visitDate = '2026-09-15';
 
     await openOwnerDetailPage(page, ownerId);
     await clickAddVisitForFirstPet(page, 'Add Visit');
-    const description = await fillVisitDateAndUniqueDescription(page, visitDate);
+    const description = await fillVisitDateAndUniqueDescription(page, VISIT_DATE);
     const vetName = await selectFirstVetInVisitForm(page);
     await submitVisitForm(page);
 
     await expectBackOnOwnerDetailPage(page, ownerId);
-    await expectPetVisitListShowsVet(page, visitDate, description, vetName);
+    await expectPetVisitListShowsVet(page, VISIT_DATE, description, vetName);
   });
