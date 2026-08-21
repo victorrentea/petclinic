@@ -1,8 +1,8 @@
 import {test, expect} from '@playwright/test';
 import {DEFAULT_DIAGRAM_OPTIONS, describeOptions, optionsFromEnv} from './options';
 
-test('an empty environment renders the middle ground: SQL, no payloads', () => {
-  expect(optionsFromEnv({})).toEqual({sql: 'statement', httpBodies: false, interactive: true});
+test('an empty environment reveals everything the traces carry, a click at a time', () => {
+  expect(optionsFromEnv({})).toEqual({sql: 'statement', httpBodies: true, interactive: true});
   expect(optionsFromEnv({})).toEqual(DEFAULT_DIAGRAM_OPTIONS);
 });
 
@@ -49,4 +49,13 @@ test('describeOptions names what is revealable rather than what is drawn', () =>
     .toBe('simplified · click an arrow to reveal its SQL');
   expect(describeOptions({sql: 'off', httpBodies: false, interactive: true}))
     .toBe('simplified · nothing recorded to reveal');
+});
+
+// Payloads are free behind a click and expensive baked in, so the default follows the
+// mode rather than being one answer for both.
+test('payloads follow the mode unless asked for by name', () => {
+  expect(optionsFromEnv({}).httpBodies).toBe(true);                       // interactive
+  expect(optionsFromEnv({SEQ_INTERACTIVE: '0'}).httpBodies).toBe(false);  // baked in
+  expect(optionsFromEnv({SEQ_INTERACTIVE: '0', SEQ_HTTP_BODIES: '1'}).httpBodies).toBe(true);
+  expect(optionsFromEnv({SEQ_HTTP_BODIES: '0'}).httpBodies).toBe(false);
 });
