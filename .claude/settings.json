@@ -9,7 +9,8 @@
   "permissions": {
     "deny": [
       "Bash(git commit --no-verify*)",
-      "Bash(git push --no-verify*)"
+      "Bash(git push --no-verify*)",
+      "Edit(./openapi.yaml)"
     ],
     "ask": [
       "Edit(.claude/settings.json)"

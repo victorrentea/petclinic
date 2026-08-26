@@ -65,7 +65,8 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 
 **Key Patterns:**
 - DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
+- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
+  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
 ### The /human-review skill lives in its own repo
