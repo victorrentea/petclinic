@@ -10,12 +10,7 @@
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
-      "Edit(./openapi.yaml)",
-      "Bash(*>*openapi.yaml*)",
-      "Bash(sed -i*openapi.yaml*)",
-      "Bash(*tee*openapi.yaml*)",
-      "Bash(cp *openapi.yaml)",
-      "Bash(mv *openapi.yaml)"
+      "Edit(./openapi.yaml)"
     ],
     "ask": [
       "Edit(.claude/settings.json)"
