@@ -110,3 +110,8 @@ rag-vector-store.json
 
 # /human-review skill, fetched on demand by scripts/ensure-puml-diff.sh — a tool, not source
 /petclinic-backend/.tools/human-review/
+
+# /human-review skill, symlinked to a local checkout of victorrentea/human-review.
+# An absolute symlink pointing outside the repo: dangling in every other clone, and
+# it used to break the GitHub Pages build outright. Keep it local, never commit it.
+/.claude/skills/human-review
