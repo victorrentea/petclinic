@@ -115,11 +115,6 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Development Notes
-
-### Java Code Style
-See the `java` skill (`.claude/skills/java/`).
-
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
