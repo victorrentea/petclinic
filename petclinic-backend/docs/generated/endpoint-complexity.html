@@ -814,6 +814,41 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
+<span class="bar"><i class="seg" style="width:21.05%;background:var(--series-1)" data-tip="controller: 4 decision points"></i><i class="seg" style="width:10.53%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="value">7</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 21 methods, call depth 4</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitRestController.requireDateInAllowedRange(LocalDate, Pet)</td><td>controller</td><td class="num">5</td></tr>
+<tr><td>VisitMapperImpl.toVisit(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapperImpl.visitDtoToPet(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/vets</span>
 <span class="bar"><i class="seg" style="width:5.26%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:21.05%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">6</span>
@@ -929,6 +964,31 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
+<span class="bar"><i class="seg" style="width:21.05%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
+<span class="value">5</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 11 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitRestController.requireDateInAllowedRange(LocalDate, Pet)</td><td>controller</td><td class="num">5</td></tr>
+<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes</span>
 <span class="bar"><i class="seg" style="width:15.79%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
@@ -1008,37 +1068,6 @@ td {
 <tr><td>PetTypeDto.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
-<span class="value">3</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 17 methods, call depth 4</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapperImpl.toVisit(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitDtoToPet(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -1454,27 +1483,6 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg empty" data-tip="No branching anywhere in this flow"></i></span>
-<span class="value">1</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 7 methods, call depth 1</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/visits/{visitId}</span>
 <span class="bar"><i class="seg empty" data-tip="No branching anywhere in this flow"></i></span>
 <span class="value">1</span>
@@ -1643,14 +1651,15 @@ td {
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits/{visitId}</td><td>VisitRestController.getVisit(int)</td><td class="num">10</td><td class="num">27</td><td class="num">3</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> create_visit</td><td>PetClinicMcp.createVisit(int, LocalDate, LocalTime, String)</td><td class="num">8</td><td class="num">20</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets</td><td>VetRestController.listVets()</td><td class="num">7</td><td class="num">22</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">7</td><td class="num">21</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> call_vet_ambulance</td><td>PetClinicMcp.callVetAmbulance(McpSyncRequestContext)</td><td class="num">7</td><td class="num">3</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/vets</td><td>VetRestController.addVet(VetDto)</td><td class="num">6</td><td class="num">27</td><td class="num">4</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</td><td>VetRestController.updateVet(int, VetDto)</td><td class="num">6</td><td class="num">25</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets/{vetId}</td><td>VetRestController.getVet(int)</td><td class="num">5</td><td class="num">21</td><td class="num">4</td></tr>
+<tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</td><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td class="num">5</td><td class="num">11</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pettypes</td><td>PetTypeRestController.listPetTypes()</td><td class="num">4</td><td class="num">9</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties</td><td>SpecialtyRestController.listSpecialties()</td><td class="num">4</td><td class="num">11</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">3</td><td class="num">23</td><td class="num">3</td></tr>
-<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">3</td><td class="num">17</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> cancel_visit</td><td>PetClinicMcp.cancelVisit(LocalDate)</td><td class="num">3</td><td class="num">13</td><td class="num">2</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> list_visits</td><td>PetClinicMcp.listVisits()</td><td class="num">3</td><td class="num">13</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners</td><td>OwnerRestController.addOwner(OwnerFieldsDto)</td><td class="num">2</td><td class="num">15</td><td class="num">2</td></tr>
@@ -1673,7 +1682,6 @@ td {
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/specialties/{specialtyId}</td><td>SpecialtyRestController.updateSpecialty(int, SpecialtyDto)</td><td class="num">1</td><td class="num">8</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/specialties/{specialtyId}</td><td>SpecialtyRestController.deleteSpecialty(int)</td><td class="num">1</td><td class="num">4</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/vets/{vetId}</td><td>VetRestController.deleteVet(int)</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
-<tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</td><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td class="num">1</td><td class="num">7</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/visits/{visitId}</td><td>VisitRestController.deleteVisit(int)</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
 </tbody>
 </table>
