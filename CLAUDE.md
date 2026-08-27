@@ -56,6 +56,7 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
+
 ### Living Architecture & Guardrails
 
 See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living architecture diagrams, and CI drift checks.
@@ -114,6 +115,12 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+
+### Expected data volume (from business, Aug 2026)
+**Owners will reach 10,000 — possibly 100,000 — within a year.** The seeded ~28 rows are
+demo data only: never size a design off them. Anything that lists owners must page and
+sort **in the database**, never in the browser or in memory, and must not fan out
+per-owner queries (pets/visits).
 
 ## Task Modifiers
 - Write non-trivial code using TDD
