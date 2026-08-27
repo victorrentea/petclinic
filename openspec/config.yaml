@@ -30,3 +30,14 @@ schema: spec-driven
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+
+# Per-artifact rules
+rules:
+  proposal:
+    - "proposal.md is read by a non-technical Product Owner. Assume they do not know JSON, SQL, HTTP or this codebase's file layout."
+    - "Keep out of the proposal: class/type/file/table/column names, code identifiers and paths, JSON or SQL snippets, HTTP verbs, status codes and query parameters, library/framework/annotation names, index and migration details, generated-artifact and test class names."
+    - "Say instead what a user or the business notices: what the workflow does before and after, what gets faster, what is deliberately not delivered and why, who is affected, what must ship together, what a revert costs."
+    - "Move every technical detail you cut into design.md (a 'Technical Impact' section if it has no natural home) - never delete it, and never let it back into the proposal. When design.md is skipped, it goes into tasks.md."
+    - "Word the Capabilities section in plain language; name a breaking change in business terms and leave the enumeration to design.md."
+  design:
+    - "design.md is the home for everything technical that the proposal must not carry: contract shapes, identifiers, file and caller lists, SQL, indexes, generated artifacts."

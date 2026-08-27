@@ -309,3 +309,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
+
+**Audience rule: `proposal.md` is written for a Product Owner, not for a developer**
+- If you rewrite, extend or summarize `proposal.md`, keep it readable end to end by a non-technical PO: no class/file/table names, no JSON or SQL, no HTTP verbs, status codes or query parameters, no library or annotation names.
+- Technical detail belongs in `design.md` (or `tasks.md` when no design exists) — move it there, never delete it, and never move it back into the proposal.

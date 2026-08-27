@@ -248,6 +248,10 @@ Updated main specs:
 Main specs are now updated. The change remains active - archive when implementation is complete.
 ```
 
+**Audience rule: `proposal.md` is written for a Product Owner, not for a developer**
+- If you rewrite, extend or summarize `proposal.md`, keep it readable end to end by a non-technical PO: no class/file/table names, no JSON or SQL, no HTTP verbs, status codes or query parameters, no library or annotation names.
+- Technical detail belongs in `design.md` (or `tasks.md` when no design exists) — move it there, never delete it, and never move it back into the proposal.
+
 **Guardrails**
 - Read both delta and main specs before making changes
 - Preserve existing content not mentioned in delta
