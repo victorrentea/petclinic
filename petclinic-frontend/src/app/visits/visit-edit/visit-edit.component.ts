@@ -20,11 +20,6 @@ export class VisitEditComponent implements OnInit {
   currentPet: Pet;
   currentOwner: Owner;
   currentPetType: PetType;
-  // GitHub #40: a visit can neither predate its pet nor be booked more than a year ahead.
-  // Moment objects, because MatMomentDateModule is what this module installs as the adapter.
-  minVisitDate?: moment.Moment;
-  readonly maxVisitDate = moment().add(1, 'year');
-  readonly maxVisitDateLabel = moment().add(1, 'year').format('YYYY/MM/DD');
   updateSuccess = false;
   errorMessage: string;
 
@@ -48,7 +43,6 @@ export class VisitEditComponent implements OnInit {
           pet => {
             this.currentPet = pet;
             this.currentPetType = pet.type;
-            this.minVisitDate = pet.birthDate ? moment(pet.birthDate) : undefined;
             this.ownerService.getOwnerById(pet.ownerId).subscribe(
               owner => {
                 this.currentOwner = owner;

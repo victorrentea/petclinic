@@ -31,6 +31,8 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -231,5 +233,69 @@ public class VisitTest {
             assertThat(visit.getPet().getId()).isEqualTo(petId);
             assertThat(visit.getDate()).isNotNull();
         });
+    }
+
+    // GitHub #40: the visit date must sit between the pet's birth date and one year from today.
+    // The rule is checked here rather than through the e2e suite because only a JVM test feeds
+    // JaCoCo, and only JaCoCo feeds the Sonar new-code coverage gate.
+
+    private VisitDto aVisitOn(LocalDate date) {
+        VisitDto visit = new VisitDto();
+        visit.setPetId(petId);
+        visit.setDate(date);
+        visit.setDescription("annual checkup");
+        return visit;
+    }
+
+    @Test
+    void create_rejectsDateBeforeThePetWasBorn() throws Exception {
+        VisitDto tooEarly = aVisitOn(PetTest.BIRTH_DATE.minusDays(1));
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(tooEarly))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("precedes the birth date")));
+
+        assertThat(visitRepository.findByPetId(petId)).hasSize(1); // only the one from before()
+    }
+
+    @Test
+    void create_rejectsDateMoreThanAYearAhead() throws Exception {
+        VisitDto tooLate = aVisitOn(LocalDate.now().plusYears(1).plusDays(1));
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(tooLate))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("more than a year ahead")));
+    }
+
+    @Test
+    void create_acceptsTheEdgesOfTheAllowedRange() throws Exception {
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(aVisitOn(PetTest.BIRTH_DATE)))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(aVisitOn(LocalDate.now().plusYears(1))))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void update_cannotMoveAVisitOutsideTheAllowedRange() throws Exception {
+        VisitFieldsDto moved = new VisitFieldsDto();
+        moved.setDescription("rabies shot");
+        moved.setDate(PetTest.BIRTH_DATE.minusYears(1));
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(moved))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findById(visitId).orElseThrow().getDate())
+                .isEqualTo(LocalDate.now());
     }
 }
