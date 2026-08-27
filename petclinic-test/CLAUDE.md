@@ -6,8 +6,14 @@
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
-  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Everything a
-  run writes goes under `test-results/`.
+  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling, `scripts/` the
+  narrated screen recorders. Everything a run writes goes under `test-results/`.
+- `scripts/record-bug40.sh before|after` films one take of GitHub issue #40 through the same
+  selectors the e2e suite uses, deliberately slowed, and burns the narration into the frame with
+  the review pipeline's `annotate-feature-video.py`; `scripts/combine-bug40.sh` joins the two takes
+  into one `.mp4` behind title cards, with a merged `.srt`. A take asserts what it narrates and
+  exits 3 on a mismatch, so a film can never claim a fix that is not there. The **before** take only
+  reproduces while the bug does — re-shooting it means checking out a pre-fix commit.
 - ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
   test file, named after it (`owner-search.feature.genseq.puml`), sectioned by scenario. Never
   hand-edit: change the test and re-run `./run-tests-with-tracing.sh`.
