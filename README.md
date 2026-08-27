@@ -80,20 +80,19 @@ Tell an agent running in this repo:
 
 The tasks below have the pattern: **<description>** – <prompt to paste to agent>
 
-- **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
-- **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
-- **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
-- **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
-- **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
-- **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
-- **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is most time lost?
-- **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
-- **Query tuning** — optimize the "search owners by last name" query.
-- **Speedup tests** — speedup the backend tests.
-- **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
+1. **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
+1. **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
+1. **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
+1. **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
+1. **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
+1. **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
+1. **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces 1. where is most time lost?
+1. **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
+1. **Query tuning** — optimize the "search owners by last name" query.
+1. **Speedup tests** — speedup the backend tests.
+1. **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
   
 Some tasks above require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
-
 
 ### Tools
 Start YOUR agent in YOUR🫵 work project and tell it:
