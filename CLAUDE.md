@@ -12,6 +12,13 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `petclinic-chatbot/` - Spring AI triage assistant (RAG over specialties, talks to the backend MCP)
+- `petclinic-database/` - `PostgresLauncher` for the embedded Postgres, plus a network-latency proxy
+- `petclinic-observability/` - `grafana/otel-lgtm` compose file + OTel collector config
+- `petclinic-test/` - Playwright/Cucumber e2e suite (TypeScript, npm), also renders sequence diagrams from traces
+- `refactoring-legacy/` - self-contained OpenRewrite module; never wired into the backend build
+- `user-manual/` - `manual.md` and its screenshots
+- `scripts/` - shared shell/python helpers (`ensure-human-review.sh`, `list-unversioned-deps.py`)
 
 ## Common Commands
 
@@ -28,46 +35,8 @@ petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
 ### The /human-review skill lives in its own repo
 
@@ -149,14 +118,7 @@ Core entities and relationships:
 ## Development Notes
 
 ### Java Code Style
-- Keep line length ≤ 120 chars
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- MapStruct is used for DTO mapping
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
-- Builder chains: one property per line, unless only two properties are set
+See the `java` skill (`.claude/skills/java/`).
 
 ## Task Modifiers
 - Write non-trivial code using TDD
