@@ -285,6 +285,16 @@ public class VisitTest {
     }
 
     @Test
+    void create_withoutADate_isNotTheRangeRulesBusiness() throws Exception {
+        // The DTO declares the date nullable; whether that should stay so is @NotNull's call,
+        // not the range check's — this pins that the range check waves a null through.
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(aVisitOn(null)))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
     void update_cannotMoveAVisitOutsideTheAllowedRange() throws Exception {
         VisitFieldsDto moved = new VisitFieldsDto();
         moved.setDescription("rabies shot");

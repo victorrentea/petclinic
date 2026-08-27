@@ -33,6 +33,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Slf4j
 @RestControllerAdvice(basePackages = "victor.training.petclinic.rest")
 public class ExceptionControllerAdvice {
+    /** ProblemDetail property carrying the human-readable reasons, whatever rejected the request. */
+    private static final String ERRORS = "errors";
 
     private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
             HttpServletRequest request) {
@@ -52,7 +54,7 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", errors);
+        pd.setProperty(ERRORS, errors);
         return ResponseEntity.badRequest().body(pd);
     }
 
@@ -66,7 +68,7 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", errors);
+        pd.setProperty(ERRORS, errors);
         return ResponseEntity.badRequest().body(pd);
     }
 
@@ -82,7 +84,7 @@ public class ExceptionControllerAdvice {
         log.warn("Request rejected with {}: {}", status, reason);
         ProblemDetail pd = buildProblemDetail(status.getReasonPhrase(), reason, status, request);
         if (reason != null) {
-            pd.setProperty("errors", List.of(reason));
+            pd.setProperty(ERRORS, List.of(reason));
         }
         return ResponseEntity.status(status).body(pd);
     }
