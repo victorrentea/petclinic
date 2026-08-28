@@ -29,7 +29,7 @@ footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== Searching with an empty last name lists every owner ==
+== [[src://petclinic-test/src/owner-search.feature:26{Click to open the test} Searching with an empty last name lists every owner]] ==
 Browser -> Backend: List owners\nGET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith

@@ -3,6 +3,7 @@ import {formatJsonDetail, jsonNote} from './json-label';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, revealable} from './options';
 import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
 import {OperationNames, defaultOperations, operationNameOf} from './openapi-operations';
+import {linkedSectionTitle} from './test-location';
 
 export interface NormSpan {
   traceId: string;
@@ -395,6 +396,8 @@ function emitTrace(
 export interface DiagramScenario {
   title: string;
   traces: NormSpan[][];
+  /** `src://path:line` of the test this section came from, when it could be located. */
+  link?: string;
 }
 
 /** The picture and, when it is interactive, what each of its markers reveals. */
@@ -426,7 +429,7 @@ export function renderDiagram(
       lines.push(...traceLines);
     }
     if (lines.length === 0) continue;
-    sections.push({title: scenario.title, lines});
+    sections.push({title: scenario.title, link: scenario.link, lines});
   }
 
   const kinds = revealable(options);
@@ -475,7 +478,11 @@ export function renderDiagram(
     'footer @generate_sequence — generated from real traces, do not edit',
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
-  const body = sections.flatMap((s) => [`== ${s.title} ==`, ...s.lines]);
+  // The header is the one place the picture can say which test produced it, so it is
+  // also the place to put the link there: PlantUML renders a creole link inside a
+  // divider, and the review page resolves the handle against its own checkout.
+  const body = sections.flatMap(
+    (s) => [`== ${linkedSectionTitle(s.title, s.link)} ==`, ...s.lines]);
   return {
     puml: [...header, ...body, '@enduml', ''].join('\n'),
     details: collector.toIndex(),
@@ -493,6 +500,7 @@ export function renderPuml(
 
 interface DiagramSection {
   title: string;
+  link?: string;
   lines: string[];
 }
 

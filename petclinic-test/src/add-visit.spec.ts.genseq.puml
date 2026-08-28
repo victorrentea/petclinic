@@ -29,7 +29,7 @@ footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== Add a visit to an existing pet from the owner detail page ==
+== [[src://petclinic-test/src/add-visit.spec.ts:26{Click to open the test} Add a visit to an existing pet from the owner detail page]] ==
 Browser -> Backend: listVets\nGET /api/vets
 activate Backend
 Backend -> Backend: VetRepository.findAll
@@ -87,7 +87,7 @@ Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1bcshtp{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: [[genseq://19nguco{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
-== Add a visit attended by a vet ==
+== [[src://petclinic-test/src/add-visit.spec.ts:43{Click to open the test} Add a visit attended by a vet]] ==
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 Backend -> Backend: PetRepository.findById

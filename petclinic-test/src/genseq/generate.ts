@@ -4,6 +4,7 @@ import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
+import {lineOfTest, testHandle} from './test-location';
 
 export interface TestWindow {
   title: string;
@@ -187,6 +188,25 @@ export async function generateFromWindows(
   return renderScenarios(fetched, rootDir, deps, options);
 }
 
+/**
+ * Point every section header at the test that produced it.
+ *
+ * The lookup needs the source file, so a caller without `readFile` (the unit tests) gets
+ * plain headers rather than links into a file nobody could confirm exists — a link that
+ * lands nowhere costs the reviewer more than no link at all.
+ *
+ * `source` is relative to this module ('src/add-visit.spec.ts'); the handle has to be
+ * relative to the repo, which is what the review page resolves against.
+ */
+function linkScenarios(
+  scenarios: DiagramScenario[], rootDir: string, source: string, deps: RenderDeps,
+): DiagramScenario[] {
+  const text = deps.readFile?.(`${rootDir}/${source}`);
+  if (text === undefined) return scenarios;
+  const repoRelative = `${path.basename(rootDir)}/${source}`;
+  return scenarios.map((s) => ({...s, link: testHandle(repoRelative, lineOfTest(text, s.title))}));
+}
+
 /** Draw the diagrams from spans already in hand — the offline half of the pipeline. */
 export function renderScenarios(
   sources: CachedSource[], rootDir: string, deps: RenderDeps,
@@ -195,7 +215,8 @@ export function renderScenarios(
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
-    const {puml, details} = renderDiagram(source, scenarios, options);
+    const {puml, details} =
+      renderDiagram(source, linkScenarios(scenarios, rootDir, source, deps), options);
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not

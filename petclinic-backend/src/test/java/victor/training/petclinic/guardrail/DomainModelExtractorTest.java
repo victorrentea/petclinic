@@ -70,15 +70,15 @@ class DomainModelExtractorTest {
                 + "petclinic-backend/docs/generated/DomainModel.puml\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n");
-        // Every class and every field is a link to its declaration. Underlining them all
-        // would put a blue rule under most of the diagram, and the affordance is not worth
-        // that: the legend says once what would otherwise be said on every row.
+        // Every class box is a link to its declaration. Underlining them would put a blue
+        // rule across the diagram, and the affordance is not worth that: the legend says
+        // once what would otherwise be said on every box.
         sb.append("skinparam hyperlinkUnderline false\n");
         sb.append("skinparam hyperlinkColor #000000\n");
         // Emitted before the classes so it survives the review diff, which copies the
         // preamble from the new side and starts its own output at the first element.
         sb.append("legend bottom\n");
-        sb.append("  Click any class or field to jump to the source code.\n");
+        sb.append("  Click any class to jump to the source code.\n");
         sb.append("end legend\n\n");
 
         for (Class<?> cls : entities) {
@@ -210,8 +210,7 @@ class DomainModelExtractorTest {
         List<String> lines = new ArrayList<>();
         if (cls.isEnum()) {
             for (Object value : cls.getEnumConstants()) {
-                String name = ((Enum<?>) value).name();
-                lines.add(linked(cls, name, name));
+                lines.add(((Enum<?>) value).name());
             }
             return lines;
         }
@@ -220,13 +219,12 @@ class DomainModelExtractorTest {
                 continue;
             if (referencedDomainClass(f, domain) != null)
                 continue; // association, not attribute
-            lines.add(linked(cls, f.getName(),
-                    f.getName() + " : " + typeName(f.getGenericType())));
+            lines.add(f.getName() + " : " + typeName(f.getGenericType()));
         }
         return lines;
     }
 
-    // ── Source links: click a class or a field, land on the declaration ───────
+    // ── Source links: click a class, land on its declaration ──────────────────
 
     /**
      * The link the reviewer clicks, as a repo-relative `src://path:line` handle.
@@ -236,26 +234,15 @@ class DomainModelExtractorTest {
      * regenerates it produce a diff. The review page resolves the handle against its
      * own checkout when it inlines the SVG.
      *
-     * Reflection knows the members but not where they were written, so the line is
-     * found by reading the source file back — no line, no link, and the diagram is
-     * exactly what it was before.
-     */
-    /**
-     * `text`, as the clickable face of `member`'s declaration.
+     * Reflection knows the classes but not where they were written, so the line is
+     * found by reading the source file back — no line, and the link still opens the
+     * file at the top.
      *
-     * The link has to *wrap* the text: PlantUML prints the URL itself when a `[[...]]`
-     * carries no label, so a member with a link appended rendered as its own name
-     * followed by sixty characters of absolute path.
-     */
-    private String linked(Class<?> cls, String member, String text) {
-        if (sourceFileOf(cls) == null)
-            return text;
-        return "[[" + handle(cls, member) + TOOLTIP + " " + text + "]]";
-    }
-
-    /**
-     * A class *header* link needs no label: PlantUML hangs it off the class box rather
-     * than printing it, so the box itself stays the thing you click.
+     * Only the class box carries one. Every field used to be a link of its own, which
+     * made the whole diagram clickable and none of it legible as a diagram: a model is
+     * read class by class, and landing on the class is one keystroke from the field.
+     * A class *header* link needs no label either — PlantUML hangs it off the box
+     * rather than printing it, so the box itself stays the thing you click.
      */
     private String sourceLink(Class<?> cls, String member) {
         if (sourceFileOf(cls) == null)
@@ -279,10 +266,9 @@ class DomainModelExtractorTest {
     }
 
     /**
-     * The line `member` is declared on: a field or an enum constant, matched as a whole
-     * word before the `;`, `=`, `,` or `(` that can follow it. Comments and Javadoc
-     * mentioning the name are skipped, since a `*`-continued line is never a
-     * declaration.
+     * The line `member` is declared on, matched as a whole word before the `;`, `=`, `,`
+     * or `(` that can follow it. Comments and Javadoc mentioning the name are skipped,
+     * since a `*`-continued line is never a declaration.
      */
     private int lineOfDeclaration(Path source, String member) {
         Pattern declaration = Pattern.compile(
