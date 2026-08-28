@@ -573,32 +573,6 @@
         }
       ]
     },
-    "06hjrnf": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=22"
-          }
-        }
-      ]
-    },
-    "1chbokm": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=25"
-          }
-        }
-      ]
-    },
     "10nowmm": {
       "title": "select pets",
       "steps": [
@@ -794,12 +768,51 @@
         }
       ]
     },
-    "17t70qq": {
+    "06hjrnf": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=22"
+          }
+        }
+      ]
+    },
+    "1chbokm": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=25"
+          }
+        }
+      ]
+    },
+    "1aa5cr0": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=29"
+          }
+        }
+      ]
+    },
+    "0jyfzws": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "[\n  {\n    \"id\": 2,\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": [\n          {\n            \"date\": \"2027-06-05\",\n            \"description\": \"DADADA\",\n            \"id\": 76,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812623986\",\n            \"id\": 78,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810164784\",\n            \"id\": 64,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812843888\",\n            \"id\": 79,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810736902\",\n            \"id\": 68,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1787208626199\",\n            \"id\": 89,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1787257611929\",\n            \"id\": 92,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786810838010\",\n            \"id\": 70,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786811860040\",\n            \"id\": 72,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786768518106\",\n            \"id\": 36,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786809927315\",\n            \"id\": 55,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786810150437\",\n            \"id\": 58,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check\",\n            \"id\": 47,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786809912779\",\n            \"id\": 51,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786813712633\",\n            \"id\": 81,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786823368970\",\n            \"id\": 85,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check — filmed for the review guide\",\n            \"id\": 40,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786810795623\",\n            \"id\": 69,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1787208474657\",\n            \"id\": 86,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786768414147\",\n            \"id\": 35,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check\",\n            \"id\": 67,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Post-op check 1786823190914\",\n            \"id\": 84,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2,\n            \"ownerFirstName\": \"Harry\",\n            \"ownerLastName\": \"Potter\"\n          },\n          {\n            \"date\": \"2026-09-15\",\n            \"description\": \"Annual check-up 1786812263894\",\n            \"id\": 73,\n            \"petId\": 2,\n            \"petName\": \"Hedwig\",\n            \"ownerId\": 2\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+          "text": "[{\"id\":2,\"firstName\":\"Harry\",\"lastName\":\"Potter\",\"address\":\"4 Privet Drive\",\"city\":\"Little Whinging\",\"telephone\":\"0119084455\",\"pets\":[{\"name\":\"Hedwig\",\"birthDate\":\"2018-08-06\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":2,\"ownerId\":2,\"visits\":[{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1787828987166\",\"id\":39,\"petId\":2,\"petName\":\"Hedwig\",\"ownerId\":2,\"ownerFirstName\":\"Harry\",\"ownerLastName\":\"Potter\"},{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1787831297960\",\"id\":40,\"petId\":2,\"petName\":\"Hedwig\",\"ownerId\":2,\"ownerFirstName\":\"Harry\",\"ownerLastName\":\"Potter\"},{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1787937590123\",\"id\":50,\"petId\":2,\"petName\":\"Hedwig\",\"ownerId\":2,\"ownerFirstName\":\"Harry\",\"ownerLastName\":\"Potter\"}]}]},{\"id\":3,\"firstName\":\"Erwin\",\"lastName\":\"Schroedinger\",\"address\":\"Boltzmanngasse 5\",\"city\":\"Vienna\",\"telephone\":\"0131914920\",\"pets\":[{\"name\":\"Milton\",\"birthDate\":\"2020-09-07\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":3,\"ownerId\":3,\"visits\":[{\"date\":\"2025-08-21\",\"description\":\"wave function collapsed during auscultation; patient definitively purring\",\"id\":27,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"2025-06-12\",\"description\":\"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\"id\":26,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"0026-05-03\",\"description\":\"annual general checkup\",\"id\":25,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"}]}]},{\"id\":4,\"firstName\":\"Tom\",\"lastName\":\"Riddle\",\"address\":\"Malfoy Manor\",\"city\":\"Wiltshire\",\"telephone\":\"0119844321\",\"pets\":[{\"name\":\"Nagini\",\"birthDate\":\"2017-01-20\",\"type\":{\"name\":\"snake\",\"id\":4},\"id\":4,\"ownerId\":4,\"visits\":[]}]},{\"id\":5,\"firstName\":\"Ronald\",\"lastName\":\"Weasley\",\"address\":\"The Burrow\",\"city\":\"Ottery St Catchpole\",\"telephone\":\"0119544321\",\"pets\":[{\"name\":\"Scabbers\",\"birthDate\":\"2019-08-06\",\"type\":{\"name\":\"hamster\",\"id\":6},\"id\":5,\"ownerId\":5,\"visits\":[]}]},{\"id\":6,\"firstName\":\"Roger\",\"lastName\":\"Radcliff\",\"address\":\"27 Outer Circle\",\"city\":\"London\",\"telephone\":\"0442074860707\",\"pets\":[{\"name\":\"Perdita\",\"birthDate\":\"2018-03-07\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":7,\"ownerId\":6,\"visits\":[]},{\"name\":\"Pongo\",\"birthDate\":\"2018-04-17\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":6,\"ownerId\":6,\"visits\":[]}]},{\"id\":7,\"firstName\":\"Newt\",\"lastName\":\"Scamander\",\"address\":\"Diagon Alley\",\"city\":\"London\",\"telephone\":\"0442079460001\",\"pets\":[{\"name\":\"Pickett\",\"birthDate\":\"2020-11-30\",\"type\":{\"name\":\"lizard\",\"id\":3},\"id\":8,\"ownerId\":7,\"visits\":[]}]},{\"id\":8,\"firstName\":\"Alice\",\"lastName\":\"Liddell\",\"address\":\"Christ Church\",\"city\":\"Oxford\",\"telephone\":\"0441865276150\",\"pets\":[{\"name\":\"Cheshire\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":10,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":2,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2023-06-04\",\"description\":\"neutered\",\"id\":3,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]},{\"name\":\"Dinah\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":9,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":1,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2022-09-04\",\"description\":\"spayed\",\"id\":4,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]}]},{\"id\":9,\"firstName\":\"Henry\",\"lastName\":\"Baskerville\",\"address\":\"Baskerville Hall\",\"city\":\"Dartmoor\",\"telephone\":\"0441626832093\",\"pets\":[{\"name\":\"Baskerville\",\"birthDate\":\"2017-02-24\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":11,\"ownerId\":9,\"visits\":[{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1787841004783\",\"id\":41,\"petId\":11,\"petName\":\"Baskerville\",\"ownerId\":9,\"ownerFirstName\":\"Henry\",\"ownerLastName\":\"Baskerville\"},{…"
         }
       ]
     }
