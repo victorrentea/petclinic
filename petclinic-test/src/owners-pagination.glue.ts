@@ -93,6 +93,9 @@ Then('paging to the last page lists every owner in the clinic', async function (
 Then('the owners are still sorted by {string} {word}', async function (this: PlaywrightWorld, column: string, direction: string) {
   const arrow = this.page.locator(`#ownersTable th.sortable[data-sort-key="${sortKeyFor(column)}"] span.sort-arrow`);
   await expect(arrow).toHaveText(sortArrowFor(direction), {timeout: 10_000});
+  // The dimmed arrow on an unsorted column is the same glyph as the ascending one, so the
+  // text alone would let an unsorted column pass as "sorted ascending".
+  await expect(arrow).not.toHaveClass(/sort-arrow-idle/, {timeout: 10_000});
 });
 
 Then('these columns offer a sort control', async function (this: PlaywrightWorld, columns: DataTable) {

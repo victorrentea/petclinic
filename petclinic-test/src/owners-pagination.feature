@@ -12,6 +12,8 @@ Feature: Browse owners page by page
       | Bond, James        |
       | Poirot, Hercule    |
       | McCallister, Kevin |
+      | Bărbulescu, Ștefan |
+      | Șerban, Andrei     |
 
   Scenario: The list opens on the first page, ten owners at a time
     When I open the owners page
@@ -34,11 +36,33 @@ Feature: Browse owners page by page
     When I open the owners page
     And I sort owners by "Name" ascending
     Then the owners are listed in this order
+      | Bărbulescu, Ștefan |
       | Baskerville, Henry |
       | Bond, James        |
       | Carraclough, Sam   |
       | Darling, George    |
       | Darling, Wendy     |
+
+  # Sorting happens in the database, so this asserts the database's collation, not the UI's.
+  # The clinic is seeded en_US.UTF-8, which orders dictionary-style: a Romanian diacritic sorts
+  # as the letter it decorates. Both ends of the alphabet are pinned, because each catches a
+  # different half of the mistake:
+  #
+  #   ascending  -- 'Bărbulescu' opens the list, because Bar... < Bas...
+  #   descending -- 'Șerban' stays down among the S names instead of leading the whole list
+  #
+  # Switch the database to the C collation and both flip: byte-wise, the multi-byte 'ă' and 'Ș'
+  # outrank every ASCII letter, so 'Bărbulescu' falls behind 'Bond' and 'Șerban' jumps above
+  # 'Wensleydale'. That is the regression these two scenarios exist to catch.
+  Scenario: A diacritic sorts as its base letter, not after Z
+    When I open the owners page
+    And I sort owners by "Name" descending
+    Then the owners are listed in this order
+      | Wensleydale, Wallace |
+      | Weasley, Ronald      |
+      | Tremaine, Lady       |
+      | Silver, Long         |
+      | Șerban, Andrei       |
 
   # The scenario that catches the LIMIT/OFFSET bug. Six owners live in London,
   # so with no tiebreaker the database is free to return the tied rows in a
@@ -51,7 +75,7 @@ Feature: Browse owners page by page
     And I walk from the first page to the last page
     Then every owner in the clinic was listed exactly once
 
-  # Searched for, because with 28 seeded owners the Potters are not on the first page.
+  # Searched for, because with 29 seeded owners the Potters are not on the first page.
   Scenario: A name is shown the way it is sorted and searched
     When I open the owners page
     And I search owners for "Potter"

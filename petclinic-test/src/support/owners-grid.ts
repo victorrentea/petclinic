@@ -55,7 +55,11 @@ export async function sortBy(page: Page, column: string, direction: string): Pro
   const header = page.locator(`#ownersTable th.sortable[data-sort-key="${sortKeyFor(column)}"]`);
   const arrow = header.locator('span.sort-arrow');
   const wanted = sortArrowFor(direction);
-  const shown = async () => ((await arrow.textContent()) ?? '').trim();
+  // An unsorted sortable column now shows the *same* arrow as an ascending one, only dimmed
+  // (class `sort-arrow-idle`), so the glyph alone no longer says whether the column is sorted.
+  // Reading the idle column as "no arrow" keeps the old, meaningful three states.
+  const shown = async () => arrow.evaluate((el) =>
+    el.classList.contains('sort-arrow-idle') ? '' : (el.textContent ?? '').trim());
   for (let click = 0; click < 3; click++) {
     const before = await shown();
     if (before === wanted) {
