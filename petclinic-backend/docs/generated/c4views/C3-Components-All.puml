@@ -22,7 +22,7 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
     Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="[rest.**] HTTP endpoints, DTOs, error handlers", $tags="", $link="")
     Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="[domain] JPA entities", $tags="", $link="")
     Component(PetClinic.Backend.RepositoryLayer, "Repository Layer", $techn="Spring Data", $descr="[repository] Spring Data JPA repositories", $tags="", $link="")
-    Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="MapStruct", $descr="[mapper] MapStruct mappers", $tags="", $link="")
+    Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="Spring", $descr="[mapper] hand-written mappers", $tags="", $link="")
   }
 
 }

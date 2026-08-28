@@ -316,26 +316,20 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 19 decision points"></i></span>
-<span class="value">20</span>
+<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
+<span class="value">15</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.listOwners(String) — 61 methods, call depth 8</p>
+<div class="detail"><p class="meta">OwnerRestController.listOwners(String) — 55 methods, call depth 7</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>OwnerMapperImpl.toOwnerDtoCollection(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapperImpl.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>OwnerMapperImpl.toOwnerDto(Owner)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.petOwnerId(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>OwnerMapper.toOwnerDtoCollection(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>OwnerMapper.toOwnerDto(Owner)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.getAddress()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getCity()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
@@ -390,26 +384,68 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}</span>
-<span class="bar"><i class="seg" style="width:89.47%;background:var(--series-2)" data-tip="mapper: 17 decision points"></i></span>
-<span class="value">18</span>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/users</span>
+<span class="bar"><i class="seg" style="width:35.71%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:57.14%;background:var(--series-2)" data-tip="mapper: 8 decision points"></i></span>
+<span class="value">14</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 60 methods, call depth 7</p>
+<div class="detail"><p class="meta">UserRestController.addUser(UserDto) — 34 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetMapperImpl.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>OwnerMapperImpl.toOwnerDto(Owner)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.petOwnerId(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>UserRestController.addUser(UserDto)</td><td>controller</td><td class="num">6</td></tr>
+<tr><td>UserMapper.toRoleDtos(Set)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>UserMapper.toRoles(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>UserMapper.toRole(RoleDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>UserMapper.toRoleDto(Role)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>UserMapper.toUser(UserDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>UserMapper.toUserDto(User)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Role.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Role.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Role.getUser()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Role.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Role.setUser(User)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>RoleDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>RoleDto.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>RoleDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.getEnabled()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.getPassword()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.getRoles()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.getUsername()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.setEnabled(Boolean)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.setPassword(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.setRoles(Set)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>User.setUsername(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.getEnabled()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.getPassword()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.getRoles()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.getUsername()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.setEnabled(Boolean)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.setPassword(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.setRoles(List)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserDto.setUsername(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>UserRepository.save(User) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}</span>
+<span class="bar"><i class="seg" style="width:85.71%;background:var(--series-2)" data-tip="mapper: 12 decision points"></i></span>
+<span class="value">13</span>
+</summary>
+<div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 54 methods, call depth 6</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>OwnerMapper.toOwnerDto(Owner)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.getAddress()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getCity()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
@@ -465,24 +501,18 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets</span>
-<span class="bar"><i class="seg" style="width:84.21%;background:var(--series-2)" data-tip="mapper: 16 decision points"></i></span>
-<span class="value">17</span>
+<span class="bar"><i class="seg" style="width:78.57%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
+<span class="value">12</span>
 </summary>
-<div class="detail"><p class="meta">PetRestController.listPets() — 47 methods, call depth 6</p>
+<div class="detail"><p class="meta">PetRestController.listPets() — 41 methods, call depth 5</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetMapperImpl.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapperImpl.petOwnerId(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
@@ -526,23 +556,17 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:73.68%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
-<span class="value">15</span>
+<span class="bar"><i class="seg" style="width:64.29%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="value">10</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 48 methods, call depth 5</p>
+<div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 42 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapperImpl.petOwnerId(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
@@ -588,23 +612,17 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:73.68%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
-<span class="value">15</span>
+<span class="bar"><i class="seg" style="width:64.29%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="value">10</span>
 </summary>
-<div class="detail"><p class="meta">PetRestController.getPet(int) — 46 methods, call depth 5</p>
+<div class="detail"><p class="meta">PetRestController.getPet(int) — 40 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapperImpl.petOwnerId(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
@@ -647,48 +665,36 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/users</span>
-<span class="bar"><i class="seg" style="width:26.32%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:42.11%;background:var(--series-2)" data-tip="mapper: 8 decision points"></i></span>
-<span class="value">14</span>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/vets</span>
+<span class="bar"><i class="seg" style="width:42.86%;background:var(--series-2)" data-tip="mapper: 6 decision points"></i></span>
+<span class="value">7</span>
 </summary>
-<div class="detail"><p class="meta">UserRestController.addUser(UserDto) — 34 methods, call depth 4</p>
+<div class="detail"><p class="meta">VetRestController.listVets() — 22 methods, call depth 5</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>UserRestController.addUser(UserDto)</td><td>controller</td><td class="num">6</td></tr>
-<tr><td>UserMapperImpl.roleDtoListToRoleSet(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>UserMapperImpl.roleSetToRoleDtoList(Set)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>UserMapperImpl.roleDtoToRole(RoleDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>UserMapperImpl.roleToRoleDto(Role)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>UserMapperImpl.toUser(UserDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>UserMapperImpl.toUserDto(User)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Role.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Role.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Role.getUser()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Role.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Role.setUser(User)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>RoleDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>RoleDto.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>RoleDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.getEnabled()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.getPassword()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.getRoles()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.getUsername()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.setEnabled(Boolean)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.setPassword(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.setRoles(Set)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>User.setUsername(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.getEnabled()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.getPassword()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.getRoles()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.getUsername()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.setEnabled(Boolean)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.setPassword(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.setRoles(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserDto.setUsername(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>UserRepository.save(User) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>VetMapper.toVetDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VetMapper.toVetDto(Vet)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Specialty.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>SpecialtyDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>SpecialtyDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>SpecialtyDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>SpecialtyDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getSpecialties()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetDto.setFirstName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetDto.setLastName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetDto.setSpecialties(List)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetRepository.findAll() <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VetRestController.listVets()</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -696,20 +702,15 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:57.89%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
-<span class="value">12</span>
+<span class="bar"><i class="seg" style="width:42.86%;background:var(--series-2)" data-tip="mapper: 6 decision points"></i></span>
+<span class="value">7</span>
 </summary>
-<div class="detail"><p class="meta">VisitRestController.listVisits() — 28 methods, call depth 4</p>
+<div class="detail"><p class="meta">VisitRestController.listVisits() — 23 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapperImpl.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
@@ -737,94 +738,17 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:47.37%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
-<span class="value">10</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.getVisit(int) — 27 methods, call depth 3</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapperImpl.visitPetOwnerFirstName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerId(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.visitPetOwnerLastName(Visit)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapperImpl.toVisitDto(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetId(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitPetName(Visit)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.getVisit(int)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:31.58%;background:var(--series-2)" data-tip="mapper: 6 decision points"></i></span>
-<span class="value">7</span>
-</summary>
-<div class="detail"><p class="meta">VetRestController.listVets() — 22 methods, call depth 5</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VetMapperImpl.toVetDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VetMapperImpl.toVetDto(Vet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Specialty.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>SpecialtyDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>SpecialtyDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>SpecialtyDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>SpecialtyDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Vet.getSpecialties()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetDto.setFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetDto.setLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetDto.setSpecialties(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VetRepository.findAll() <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VetRestController.listVets()</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:21.05%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:28.57%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">6</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.addVet(VetDto) — 27 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialty(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>SpecialtyMapperImpl.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VetMapperImpl.toVet(VetDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialty(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>SpecialtyMapper.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VetMapper.toVet(VetDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>VetRestController.updateSpecialties(Vet)</td><td>controller</td><td class="num">2</td></tr>
 <tr><td>Specialty.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
@@ -856,15 +780,15 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:15.79%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:21.43%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">6</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.updateVet(int, VetDto) — 25 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialty(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>SpecialtyMapperImpl.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialty(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>SpecialtyMapper.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>VetRestController.updateSpecialties(Vet)</td><td>controller</td><td class="num">2</td></tr>
 <tr><td>VetRestController.updateVet(int, VetDto)</td><td>controller</td><td class="num">2</td></tr>
 <tr><td>Specialty.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
@@ -895,16 +819,16 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:21.05%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:28.57%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.getVet(int) — 21 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VetMapperImpl.toVetDto(Vet)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VetMapper.toVetDto(Vet)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Specialty.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
@@ -929,16 +853,52 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
+<span class="bar"><i class="seg" style="width:28.57%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="value">5</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.getVisit(int) — 22 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">5</td></tr>
+<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.getVisit(int)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:15.79%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:21.43%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.listPetTypes() — 9 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetTypeMapperImpl.toPetTypeDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetTypeMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetTypeMapper.toPetTypeDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetTypeMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
@@ -953,15 +913,15 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:15.79%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:21.43%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.listSpecialties() — 11 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDtos(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Specialty.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
@@ -978,15 +938,15 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addPetToOwner(int, PetFieldsDto) — 23 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetMapperImpl.toPet(PetFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapperImpl.toPetType(PetTypeDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPet(PetFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetType(PetTypeDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
@@ -1014,46 +974,15 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
-<span class="value">3</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 17 methods, call depth 4</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapperImpl.toVisit(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>VisitMapperImpl.visitDtoToPet(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addOwner(OwnerFieldsDto) — 15 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>OwnerMapperImpl.toOwner(OwnerFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>OwnerMapper.toOwner(OwnerFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Owner.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.setAddress(String)</td><td>model</td><td class="num">1</td></tr>
@@ -1075,14 +1004,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto) — 12 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapperImpl.toVisit(VisitFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>VisitMapper.toVisit(VisitFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
 <tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
@@ -1101,14 +1030,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.updatePet(int, PetDto) — 14 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetMapperImpl.toPetType(PetTypeDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetType(PetTypeDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Pet.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setType(PetType)</td><td>model</td><td class="num">1</td></tr>
@@ -1129,14 +1058,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.addPetType(PetTypeFieldsDto) — 7 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetTypeMapperImpl.toPetType(PetTypeFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetTypeMapper.toPetType(PetTypeFieldsDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>PetType.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.setName(String)</td><td>model</td><td class="num">1</td></tr>
@@ -1150,14 +1079,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.getPetType(int) — 8 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>PetTypeMapperImpl.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetTypeMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
@@ -1172,7 +1101,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.deletePetType(int) — 3 methods, call depth 1</p>
@@ -1189,14 +1118,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.addSpecialty(SpecialtyDto) — 12 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialty(SpecialtyDto)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Specialty.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
@@ -1215,7 +1144,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/feed</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyFeedController.feed(String) — 9 methods, call depth 3</p>
@@ -1238,14 +1167,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/{specialtyId}</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.getSpecialty(int) — 10 methods, call depth 2</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>SpecialtyMapperImpl.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>SpecialtyMapper.toSpecialtyDto(Specialty)</td><td>mapper</td><td class="num">2</td></tr>
 <tr><td>Specialty.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Specialty.getName()</td><td>model</td><td class="num">1</td></tr>
@@ -1255,6 +1184,37 @@ td {
 <tr><td>SpecialtyDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>SpecialtyRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>SpecialtyRestController.getSpecialty(int)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="value">2</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 17 methods, call depth 4</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisit(VisitDto)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitMapper.petOfId(Integer)</td><td>mapper</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -1496,7 +1456,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> create_visit</span>
-<span class="bar"><i class="seg" style="width:36.84%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:50.00%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.createVisit(int, LocalDate, LocalTime, String) — 20 methods, call depth 3</p>
@@ -1530,7 +1490,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> call_vet_ambulance</span>
-<span class="bar"><i class="seg" style="width:31.58%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:42.86%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.callVetAmbulance(McpSyncRequestContext) — 3 methods, call depth 1</p>
@@ -1547,7 +1507,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> cancel_visit</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.cancelVisit(LocalDate) — 13 methods, call depth 2</p>
@@ -1574,7 +1534,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> list_visits</span>
-<span class="bar"><i class="seg" style="width:10.53%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.listVisits() — 13 methods, call depth 1</p>
@@ -1601,7 +1561,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> get_owner_profile</span>
-<span class="bar"><i class="seg" style="width:5.26%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.getOwnerProfile() — 16 methods, call depth 2</p>
@@ -1633,24 +1593,23 @@ td {
 <table class="summary">
 <thead><tr><th>kind</th><th>entry point</th><th>handler</th><th class="num">flow CC</th><th class="num">methods</th><th class="num">depth</th></tr></thead>
 <tbody>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String)</td><td class="num">20</td><td class="num">61</td><td class="num">8</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">18</td><td class="num">60</td><td class="num">7</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">17</td><td class="num">47</td><td class="num">6</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</td><td>OwnerRestController.getOwnersPet(int, int)</td><td class="num">15</td><td class="num">48</td><td class="num">5</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets/{petId}</td><td>PetRestController.getPet(int)</td><td class="num">15</td><td class="num">46</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String)</td><td class="num">15</td><td class="num">55</td><td class="num">7</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/users</td><td>UserRestController.addUser(UserDto)</td><td class="num">14</td><td class="num">34</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits</td><td>VisitRestController.listVisits()</td><td class="num">12</td><td class="num">28</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits/{visitId}</td><td>VisitRestController.getVisit(int)</td><td class="num">10</td><td class="num">27</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">13</td><td class="num">54</td><td class="num">6</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">12</td><td class="num">41</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</td><td>OwnerRestController.getOwnersPet(int, int)</td><td class="num">10</td><td class="num">42</td><td class="num">4</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets/{petId}</td><td>PetRestController.getPet(int)</td><td class="num">10</td><td class="num">40</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> create_visit</td><td>PetClinicMcp.createVisit(int, LocalDate, LocalTime, String)</td><td class="num">8</td><td class="num">20</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets</td><td>VetRestController.listVets()</td><td class="num">7</td><td class="num">22</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits</td><td>VisitRestController.listVisits()</td><td class="num">7</td><td class="num">23</td><td class="num">3</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> call_vet_ambulance</td><td>PetClinicMcp.callVetAmbulance(McpSyncRequestContext)</td><td class="num">7</td><td class="num">3</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/vets</td><td>VetRestController.addVet(VetDto)</td><td class="num">6</td><td class="num">27</td><td class="num">4</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</td><td>VetRestController.updateVet(int, VetDto)</td><td class="num">6</td><td class="num">25</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets/{vetId}</td><td>VetRestController.getVet(int)</td><td class="num">5</td><td class="num">21</td><td class="num">4</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits/{visitId}</td><td>VisitRestController.getVisit(int)</td><td class="num">5</td><td class="num">22</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pettypes</td><td>PetTypeRestController.listPetTypes()</td><td class="num">4</td><td class="num">9</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties</td><td>SpecialtyRestController.listSpecialties()</td><td class="num">4</td><td class="num">11</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">3</td><td class="num">23</td><td class="num">3</td></tr>
-<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">3</td><td class="num">17</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> cancel_visit</td><td>PetClinicMcp.cancelVisit(LocalDate)</td><td class="num">3</td><td class="num">13</td><td class="num">2</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> list_visits</td><td>PetClinicMcp.listVisits()</td><td class="num">3</td><td class="num">13</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners</td><td>OwnerRestController.addOwner(OwnerFieldsDto)</td><td class="num">2</td><td class="num">15</td><td class="num">2</td></tr>
@@ -1662,6 +1621,7 @@ td {
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/specialties</td><td>SpecialtyRestController.addSpecialty(SpecialtyDto)</td><td class="num">2</td><td class="num">12</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties/feed</td><td>SpecialtyFeedController.feed(String)</td><td class="num">2</td><td class="num">9</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties/{specialtyId}</td><td>SpecialtyRestController.getSpecialty(int)</td><td class="num">2</td><td class="num">10</td><td class="num">2</td></tr>
+<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">2</td><td class="num">17</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> get_owner_profile</td><td>PetClinicMcp.getOwnerProfile()</td><td class="num">2</td><td class="num">16</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-ANY">ANY</b> /</td><td>RootRestController.redirectToSwagger(HttpServletResponse)</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/count</td><td>OwnerRestController.countOwners()</td><td class="num">1</td><td class="num">2</td><td class="num">1</td></tr>

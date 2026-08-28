@@ -53,5 +53,5 @@ hole, fix it with a test before worrying about the mutant.
   `mvn test -Dtest=...`. Everything the subset never loads reads as 0%, so the numbers look
   falsely low. `coverage.sh` labels such a run `PARTIAL` — repeat that label when reporting.
 - Report the numbers and the gaps. Do not propose a test for every gap: generated code
-  (MapStruct `*MapperImpl`), `equals`/`hashCode`/`toString` and Lombok accessors are
+  `equals`/`hashCode`/`toString` and accessors are
   noise, and `coverage.sh` already filters them (`--keep-generated` to see them).

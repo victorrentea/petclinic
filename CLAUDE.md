@@ -32,7 +32,7 @@ petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/
 ```sh
 mvn spring-boot:run              # Run backend
 mvn test                         # Run tests
-mvn clean install                # Build + regenerate MapStruct mappers
+mvn clean install                # Build
 mvn test -Dtest=ClassName#methodName # Run a single test
 ```
 
@@ -51,13 +51,9 @@ npm run e2e                         # Protractor e2e tests
 
 **Layered Structure:**
 1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
+2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
 4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
@@ -152,10 +148,10 @@ Core entities and relationships:
 - Keep line length ≤ 120 chars
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
-- MapStruct is used for DTO mapping
+- DTO mapping is hand-written in `mapper/` — no MapStruct, no annotation processor
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on each `@RequestBody`
-- Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
+- No Lombok: write accessors, constructors and `LoggerFactory.getLogger(...)` explicitly
 - Builder chains: one property per line, unless only two properties are set
 
 ## Task Modifiers

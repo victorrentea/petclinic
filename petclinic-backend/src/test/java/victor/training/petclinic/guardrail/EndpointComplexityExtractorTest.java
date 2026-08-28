@@ -39,9 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <ul>
  *   <li><b>CC per method</b> = 1 + conditional jumps + switch cases + catch handlers. Bytecode
  *       keeps one jump per {@code &&}/{@code ||}/ternary, so this matches the source-level
- *       McCabe number — while also covering code that has no source here (MapStruct
- *       {@code *MapperImpl}, Lombok accessors), which is exactly the complexity a source
- *       parser would miss.</li>
+ *       McCabe number — while also covering generated and synthetic code that has no source
+ *       here, which is exactly the complexity a source parser would miss.</li>
  *   <li><b>Call graph</b> = every {@code invoke*} whose owner is our own package, plus the
  *       lambda bodies referenced by {@code invokedynamic}. A call landing on an abstract or
  *       interface method is re-pointed at the implementations found in target/classes; when
@@ -56,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>The headline number, {@code flowCc}, aggregates the way McCabe composes: it is
  * {@code 1 + sum(CC - 1)} over the DISTINCT methods reachable from the handler (cycles counted
  * once) — the decision points of the entire flow, plus one. Summing raw CC instead would count
- * methods rather than paths, and the Lombok accessors of a wide DTO would then outweigh every
+ * methods rather than paths, and the accessors of a wide DTO would then outweigh every
  * real branch in the code. The number of reachable methods is reported separately, as size.
  *
  * <p>Known limits: only static targets are known, so a call through an interface with several
@@ -535,7 +534,7 @@ class EndpointComplexityExtractorTest {
 
         List<Node> nodes = depthOf.keySet().stream().map(this::toNode).toList();
         // McCabe composes over a call flow by DECISION POINTS: a straight-line method (CC 1)
-        // adds no path, so summing raw CC would just count methods — and the Lombok accessors
+        // adds no path, so summing raw CC would just count methods — and the accessors
         // of a wide DTO would then outweigh every branch in the code.
         Map<String, Integer> decisionsByLayer = new LinkedHashMap<>();
         for (String layer : LAYERS) {

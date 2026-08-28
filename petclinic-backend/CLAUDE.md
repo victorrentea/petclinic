@@ -2,17 +2,13 @@
 
 **Layered Structure:**
 1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - MapStruct entity↔DTO conversion
+2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
 4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
 
 Two packages sit outside that stack:
 - `security/` - Spring Security config, off unless `petclinic.security.enable=true`
 - `mcp/` - `PetClinicMcp` (`@Tool`s exposed at `/mcp`, consumed by `petclinic-chatbot`) + its Tomcat/security customizers
-
-**Generated Code:**
-- MapStruct mapper implementations → `target/generated-sources/annotations/`
-- Regenerate via `mvn clean install`
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
