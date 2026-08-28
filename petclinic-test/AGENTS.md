@@ -32,6 +32,17 @@
   across); `renderDiagram` folds them between the traces. A sentence that caused no traffic is
   **not** drawn, and a trace is placed by the browser's span **for that one request** — never by
   the trace root, which opens on a click and stays open across everything that click leads to.
+- ⚠️ **`petclinic-frontend/src/otel.ts` must start tracing synchronously under an e2e run.**
+  `main.ts` imports it before bootstrapping Angular, so anything deferred to a promise misses the
+  app's bootstrap request — which is the *first* request of every scenario. It used to gate on an
+  async collector probe, so the opening navigation produced no trace and the diagram lost its
+  first sentence. The probe is kept for everyone else and skipped when `__E2E_TEST_NAME__` is
+  already on the page.
+- A DB arrow is drawn only for a real query. The agent also emits a **connection acquisition** —
+  no statement, named after the database — which would render as a bare `Backend -> DB: petclinic`
+  with nothing behind its ⊕. Dropped by name matching `db.namespace`, not by the statement being
+  absent: an agent that never emits `db.statement` still records queries, and those are named
+  `SELECT petclinic.owners`.
 - A `@SpringBootTest` annotated `@GenerateSequence` feeds the *same* pipeline: the JVM writes a
   trace window into `test-results/trace-windows/` and `npm run diagram:java` (`GENSEQ_SUITE=java`)
   fetches and renders it. Its diagram is filed next to the `.java` file, so its window's `source`

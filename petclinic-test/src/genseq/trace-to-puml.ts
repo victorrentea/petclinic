@@ -90,6 +90,25 @@ function sqlOf(span: NormSpan): string | undefined {
   return sql?.trim() || undefined;
 }
 
+/**
+ * The span the agent draws for *acquiring a pooled connection*: no statement, and named
+ * after the database rather than after anything asked of it — `Backend -> DB: petclinic`,
+ * with nothing behind its ⊕ and nothing to say.
+ *
+ * Keyed on the name matching the database, not merely on the statement being absent: a
+ * trace recorded by an agent that never emits `db.statement` still has real queries in it,
+ * and those are named `SELECT petclinic.owners`. Dropping every statement-less DB span
+ * would empty such a diagram completely.
+ *
+ * Invisible until the browser's *first* request of a run started being captured — that is
+ * the one that finds the pool empty.
+ */
+function isConnectionAcquisition(span: NormSpan): boolean {
+  if (sqlOf(span)) return false;
+  const database = span.attributes['db.namespace'] ?? span.attributes['db.name'];
+  return database !== undefined && span.name.trim() === database.trim();
+}
+
 const PARAMETER_KEY_RE = /^db\.query\.parameter\.(\d+)$/;
 
 /** The bound values, in placeholder order — captured only when the agent is asked to. */
@@ -364,6 +383,13 @@ function emitTrace(
     if (span.name === TRANSACTION_COMMIT && parentSpan && opensTransaction(parentSpan)) return;
 
     const p = participantOf(span);
+
+    // `queriesUnder` already discounts a connection acquisition when deciding whether a
+    // repository arrow was restated by its queries; this is the same judgement applied to
+    // drawing it at all. Nothing is lost by returning here — a DB span's children are never
+    // drawn anyway (the guard at the top of this function).
+    if (p === 'DB' && isConnectionAcquisition(span)) return;
+
     const parent = parentSpan;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;

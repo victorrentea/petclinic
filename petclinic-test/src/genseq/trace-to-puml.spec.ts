@@ -657,3 +657,43 @@ test('a Java diagram names its own opt-in and its own runner', () => {
   expect(browser).toContain('@generate_sequence');
   expect(browser).toContain('petclinic-test/run-tests-with-tracing.sh');
 });
+
+// The agent draws a span for acquiring a pooled connection, named after the database and
+// carrying an empty statement. It says nothing an arrow could show, and it only ever
+// appeared on the first request of a run — the one that finds the pool empty.
+const connectionAcquisition: NormSpan[] = [
+  {
+    traceId: 'c', spanId: 'c1', parentSpanId: '', name: 'GET /api/owners',
+    kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1, attributes: {},
+  },
+  {
+    traceId: 'c', spanId: 'c2', parentSpanId: 'c1', name: 'petclinic',
+    kind: 'CLIENT', serviceName: 'petclinic-backend', startNano: 2,
+    attributes: {'db.system': 'postgresql', 'db.statement': '', 'db.name': 'petclinic',
+      'db.namespace': 'petclinic', 'db.query.text': ''},
+  },
+  {
+    traceId: 'c', spanId: 'c3', parentSpanId: 'c1', name: 'SELECT petclinic.owners',
+    kind: 'CLIENT', serviceName: 'petclinic-backend', startNano: 3,
+    attributes: {'db.system': 'postgresql', 'db.statement': 'select * from owners'},
+  },
+];
+
+test('acquiring a connection is not drawn as a query', () => {
+  const puml = spansToPuml(connectionAcquisition, 'first request of a run', STATIC);
+  expect(puml).not.toContain('Backend -> DB: petclinic');
+  expect(puml).toContain('Backend -> DB: select owners');
+  // the lifeline is still there — the real query put it there
+  expect(puml).toContain('participant DB');
+});
+
+// Keyed on the name matching the database, not on the statement being missing: an agent
+// that never emits db.statement still records real queries, and dropping every
+// statement-less DB span would empty such a diagram completely.
+test('a statement-less span named after an operation is still a query', () => {
+  const puml = spansToPuml(connectionAcquisition.map(
+    (s) => (s.spanId === 'c3' ? {...s, attributes: {'db.system': 'postgresql'}} : s)),
+  'no statement recorded', STATIC);
+  expect(puml).toContain('Backend -> DB: SELECT petclinic.owners');
+  expect(puml).not.toContain('Backend -> DB: petclinic\n');
+});

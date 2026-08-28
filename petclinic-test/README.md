@@ -82,6 +82,10 @@ Two things the narration deliberately does not do:
 - **it never invents an arrow.** A sentence that caused no traffic — a pure assertion — is not
   drawn. The picture is of what crossed the wire, and a self-call with nothing under it would
   claim otherwise.
+- **it is only as complete as the capture.** A sentence is drawn when its traffic was
+  recorded, so a gap in the instrumentation reads as a missing sentence. Both browser
+  scenarios used to start one step late for exactly that reason — see below.
+
 - **it does not trust the trace's root span.** The browser's user-interaction span opens on a
   click and stays open across everything that click leads to, so a form submitted three
   sentences later still hangs off it; anchoring there credited a `POST` to the click that had
@@ -89,6 +93,22 @@ Two things the narration deliberately does not do:
   against the same clock the sentences are stamped on, and neither early (the root) nor late
   (the backend span, which arrives after the test has moved on to the assertion that waits
   for it).
+
+#### Why the first request of a scenario used to have no span at all
+
+`src/main.ts` imports `src/otel.ts` before it bootstraps Angular, so whatever that module does
+*synchronously* is in place before the app's first HTTP call — and whatever it defers to a
+promise is not. It gated everything behind an asynchronous reachability probe of the collector,
+so Angular's bootstrap request went out while the probe was still in flight and was never
+instrumented. The scenario's opening navigation therefore produced no trace, and the diagram had
+nothing to put under `When I open the owners page`.
+
+The probe still runs for everyone else — it is what keeps a developer with no collector from
+paying for the exporter or the `XMLHttpRequest` prototype patch. It is skipped only when
+Playwright's `addInitScript` has already stamped `__E2E_TEST_NAME__` on the page, which is the
+one case where the answer is known in advance: the suite refuses to start unless the collector
+is up. `owner-search` went from 2 traces to 3 and `add-visit` from 7 to 8; both diagrams now
+open on the scenario's first sentence.
 
 ## Sequence diagrams from real traces
 
