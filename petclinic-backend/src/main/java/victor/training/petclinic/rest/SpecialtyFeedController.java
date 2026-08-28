@@ -1,6 +1,5 @@
 package victor.training.petclinic.rest;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +18,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api")
-@RequiredArgsConstructor
 public class SpecialtyFeedController {
     private final SpecialtyFeed specialtyFeed;
+
+    public SpecialtyFeedController(SpecialtyFeed specialtyFeed) {
+        this.specialtyFeed = specialtyFeed;
+    }
 
     @GetMapping("/specialties/feed")
     public ResponseEntity<List<SpecialtyFeed.Item>> feed(

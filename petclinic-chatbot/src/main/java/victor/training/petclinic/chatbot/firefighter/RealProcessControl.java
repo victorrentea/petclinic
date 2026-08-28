@@ -1,12 +1,13 @@
 package victor.training.petclinic.chatbot.firefighter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +26,9 @@ import org.springframework.stereotype.Component;
  * <p>The scripts live at the repo root, one level above this module; {@code firefighter.repo-root}
  * defaults to {@code ..} (resolved against the working dir) and can be overridden.
  */
-@Slf4j
 @Component
 public class RealProcessControl implements ProcessControl {
+    private static final Logger log = LoggerFactory.getLogger(RealProcessControl.class);
 
     private final Path repoRoot;
 

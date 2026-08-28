@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpTool.McpAnnotations;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -25,7 +24,6 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
-@RequiredArgsConstructor
 @Component
 public class PetClinicMcp {
 
@@ -39,6 +37,12 @@ public class PetClinicMcp {
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
+
+    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
+        this.ownerRepository = ownerRepository;
+        this.petRepository = petRepository;
+        this.visitRepository = visitRepository;
+    }
 
     @McpTool(
             name = "get_owner_profile",

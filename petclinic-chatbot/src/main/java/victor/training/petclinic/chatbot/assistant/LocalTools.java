@@ -1,8 +1,9 @@
 package victor.training.petclinic.chatbot.assistant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -18,9 +19,9 @@ import org.springframework.stereotype.Component;
  *       from the security principal), so the model can't email anyone else.</li>
  * </ul>
  */
-@Slf4j
 @Component
 class LocalTools {
+    private static final Logger log = LoggerFactory.getLogger(LocalTools.class);
 
     /** ToolContext key under which the controller publishes the authenticated owner's email. */
     static final String OWNER_EMAIL = "ownerEmail";

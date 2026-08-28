@@ -1,6 +1,5 @@
 package victor.training.petclinic.rest;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -16,9 +15,12 @@ import java.util.List;
  * the database — and out of the SQL log. The endpoint adds an ETag on top so unchanged polls get a 304.
  */
 @Component
-@RequiredArgsConstructor
 public class SpecialtyFeed {
     private final SpecialtyRepository specialtyRepository;
+
+    public SpecialtyFeed(SpecialtyRepository specialtyRepository) {
+        this.specialtyRepository = specialtyRepository;
+    }
 
     /** Lean projection — exactly what a RAG/sync client needs, decoupled from {@code SpecialtyDto}. */
     public record Item(Integer id, String name, String description) {

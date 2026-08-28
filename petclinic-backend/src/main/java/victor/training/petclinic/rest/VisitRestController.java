@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Visit;
@@ -23,11 +22,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/visits")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+
+    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+        this.visitRepository = visitRepository;
+        this.visitMapper = visitMapper;
+    }
 
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",
