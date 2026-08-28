@@ -4,13 +4,20 @@
 #
 #   ./run-loadtest.sh 10000     # seed + measure
 #
+# NO IMAGES ARE BUILT. The Docker VM on this machine has ~0 bytes free and pruning the
+# user's images or volumes is off limits, so the backend jar and the JMeter distribution
+# are produced on the host and bind-mounted into one stock `eclipse-temurin:21-jre`.
+# Compiling on the host is not the same as running a service on the host: no port is bound
+# and no server starts there — the backend under test runs in `loadtest-backend`, and the
+# load generator in `loadtest-jmeter`, exactly as required.
+# `run-loadtest.sh` produces both artifacts before it brings the stack up.
 name: loadtest-petclinic
 
 services:
   db:
     image: postgres:16
     container_name: loadtest-db
-    # The dev DB collates en_US.UTF-8, which is what makes a plain btree unusable for
+    # The dev DB collates en_US.UTF-8, which is what makes text_pattern_ops necessary for
     # LIKE 'x%'. Reproduce it here or the prefix-search numbers would be a lie.
     environment:
       POSTGRES_DB: petclinic
@@ -55,26 +62,22 @@ services:
       - loadtest
 
   backend:
-    build:
-      # Same context as the shipped Dockerfile; only the Dockerfile differs, because the
-      # shipped one forgets to COPY lombok.config — see the comment in Dockerfile.backend.
-      context: ../../petclinic-backend
-      dockerfile: ../petclinic-test/loadtest/Dockerfile.backend
-    image: loadtest-petclinic-backend
+    image: eclipse-temurin:21-jre
     container_name: loadtest-backend
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ../../petclinic-backend/target/petclinic-backend-1.0.jar:/app/app.jar:ro
+    command: ["java", "-jar", "/app/app.jar"]
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/petclinic
       SPRING_DATASOURCE_USERNAME: petclinic
       SPRING_DATASOURCE_PASSWORD: petclinic
-      # application.properties ships show-sql=true. Left on, every row of an N+1 is
-      # printed to stdout and the log writer, not the database, becomes the bottleneck.
+      # application.properties ships show-sql=true. Left on, every statement is printed to
+      # stdout and the log writer, not the database, becomes the bottleneck.
       SPRING_JPA_SHOW_SQL: "false"
       SPRING_JPA_PROPERTIES_HIBERNATE_USE_SQL_COMMENTS: "false"
-      # A grid load has to hold 10k owners + pets + visits as entities and again as DTOs
-      # and again as the serialised buffer. Pin the heap so an OOM is a finding, not noise.
       JAVA_TOOL_OPTIONS: "-Xmx3g -Xms3g -XX:+UseG1GC"
       SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "30"
       LOGGING_LEVEL_ROOT: WARN
@@ -83,21 +86,19 @@ services:
     networks:
       - loadtest
 
-  # Native arm64/amd64 JMeter. The published jmeter images are amd64-only, and a load
-  # generator running under QEMU emulation measures the emulator, not the server.
+  # JMeter runs from a host-extracted distribution on the same JRE image, so the load
+  # generator is still a container but costs no image build and no VM disk.
   jmeter:
-    build:
-      context: .
-      dockerfile: Dockerfile.jmeter
-    image: loadtest-jmeter
+    image: eclipse-temurin:21-jre
     container_name: loadtest-jmeter
     working_dir: /work
     volumes:
-      - ./jmx:/work/jmx
+      - ./.tools/apache-jmeter-5.6.3:/opt/jmeter:ro
+      - ./jmx:/work/jmx:ro
       - ./results:/work/results
     environment:
-      TARGET_HOST: backend
-      TARGET_PORT: "8080"
+      JVM_ARGS: "-Xms512m -Xmx1g"
+    entrypoint: ["/opt/jmeter/bin/jmeter"]
     networks:
       - loadtest
     profiles: ["tools"]

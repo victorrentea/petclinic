@@ -1,162 +1,279 @@
-=== [1] the grid query, empty prefix — this is what GET /api/owners runs ===
-                                                   QUERY PLAN                                                   
-----------------------------------------------------------------------------------------------------------------
- Seq Scan on owners o1_0  (cost=0.00..239.00 rows=10000 width=58) (actual time=0.010..1.244 rows=10000 loops=1)
-   Filter: (last_name ~~ '%'::text)
-   Buffers: shared hit=114
+=== [1] FIRST page, sort=name — order by last_name, first_name, id ===
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.29..0.74 rows=5 width=58) (actual time=0.018..0.038 rows=5 loops=1)
+   Buffers: shared hit=7
+   ->  Index Scan using owners_last_name_first_name_id_idx on owners o1_0  (cost=0.29..911.27 rows=10000 width=58) (actual time=0.018..0.037 rows=5 loops=1)
+         Filter: (last_name ~~ '%'::text)
+         Buffers: shared hit=7
  Planning:
-   Buffers: shared hit=101
- Planning Time: 0.358 ms
- Execution Time: 1.567 ms
-(7 rows)
+   Buffers: shared hit=183
+ Planning Time: 0.537 ms
+ Execution Time: 0.052 ms
+(9 rows)
 
-=== [2] broad prefix search (lastName=L) ===
-                                                 QUERY PLAN                                                 
-------------------------------------------------------------------------------------------------------------
- Seq Scan on owners o1_0  (cost=0.00..239.00 rows=707 width=58) (actual time=0.004..0.489 rows=715 loops=1)
-   Filter: (last_name ~~ 'L%'::text)
-   Rows Removed by Filter: 9285
+=== [2] DEEP page, sort=name — same query plus OFFSET (the paging question) ===
+                                                                           QUERY PLAN                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=330.40..330.85 rows=5 width=58) (actual time=4.470..4.472 rows=5 loops=1)
+   Buffers: shared hit=10066
+   InitPlan 1 (returns $0)
+     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=1.473..1.474 rows=1 loops=1)
+           Buffers: shared hit=114
+           ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.002..1.079 rows=10000 loops=1)
+                 Buffers: shared hit=114
+   ->  Index Scan using owners_last_name_first_name_id_idx on owners o1_0  (cost=0.29..911.27 rows=10000 width=58) (actual time=0.008..2.728 rows=10000 loops=1)
+         Filter: (last_name ~~ '%'::text)
+         Buffers: shared hit=9952
+ Planning:
+   Buffers: shared hit=9
+ Planning Time: 0.108 ms
+ Execution Time: 4.500 ms
+(14 rows)
+
+=== [3] FIRST page, sort=city,desc ===
+                                                                      QUERY PLAN                                                                      
+------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.29..0.71 rows=5 width=58) (actual time=0.004..0.006 rows=5 loops=1)
+   Buffers: shared hit=5
+   ->  Index Scan Backward using owners_city_id_idx on owners o1_0  (cost=0.29..847.22 rows=10000 width=58) (actual time=0.004..0.005 rows=5 loops=1)
+         Filter: (last_name ~~ '%'::text)
+         Buffers: shared hit=5
+ Planning:
+   Buffers: shared hit=9
+ Planning Time: 0.058 ms
+ Execution Time: 0.011 ms
+(9 rows)
+
+=== [4] DEEP page, sort=city,desc ===
+                                                                        QUERY PLAN                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=323.99..324.41 rows=5 width=58) (actual time=2.858..2.859 rows=5 loops=1)
+   Buffers: shared hit=4277
+   InitPlan 1 (returns $0)
+     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.917..0.917 rows=1 loops=1)
+           Buffers: shared hit=114
+           ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.003..0.549 rows=10000 loops=1)
+                 Buffers: shared hit=114
+   ->  Index Scan Backward using owners_city_id_idx on owners o1_0  (cost=0.29..847.22 rows=10000 width=58) (actual time=0.003..1.673 rows=10000 loops=1)
+         Filter: (last_name ~~ '%'::text)
+         Buffers: shared hit=4163
+ Planning Time: 0.067 ms
+ Execution Time: 2.868 ms
+(12 rows)
+
+=== [5] the count query — runs on EVERY request, for Page.totalElements ===
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=264.00..264.01 rows=1 width=8) (actual time=1.222..1.222 rows=1 loops=1)
    Buffers: shared hit=114
- Planning Time: 0.029 ms
- Execution Time: 0.514 ms
-(6 rows)
+   ->  Seq Scan on owners o1_0  (cost=0.00..239.00 rows=10000 width=4) (actual time=0.005..0.803 rows=10000 loops=1)
+         Filter: (last_name ~~ '%'::text)
+         Buffers: shared hit=114
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.084 ms
+ Execution Time: 1.237 ms
+(9 rows)
 
-=== [3] selective prefix search (lastName=Quarrierstein) ===
-                                               QUERY PLAN                                               
---------------------------------------------------------------------------------------------------------
- Seq Scan on owners o1_0  (cost=0.00..239.00 rows=1 width=58) (actual time=0.135..0.490 rows=2 loops=1)
-   Filter: (last_name ~~ 'Quarrierstein%'::text)
-   Rows Removed by Filter: 9998
-   Buffers: shared hit=114
- Planning Time: 0.023 ms
- Execution Time: 0.493 ms
-(6 rows)
+=== [6] SELECTIVE prefix, first page — does owners_last_name_pattern_idx serve LIKE? ===
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.043..0.044 rows=2 loops=1)
+   Buffers: shared hit=10
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.043..0.043 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=10
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.005..0.006 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+               Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=28
+ Planning Time: 0.128 ms
+ Execution Time: 0.049 ms
+(14 rows)
 
-=== [4] ONE lazy pets load — the backend runs this once PER OWNER ===
+=== [7] BROAD prefix, first page ===
+                                                                        QUERY PLAN                                                                         
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.29..6.73 rows=5 width=58) (actual time=0.814..0.815 rows=5 loops=1)
+   Buffers: shared hit=3945
+   ->  Index Scan using owners_last_name_first_name_id_idx on owners o1_0  (cost=0.29..911.27 rows=707 width=58) (actual time=0.813..0.814 rows=5 loops=1)
+         Filter: (last_name ~~ 'L%'::text)
+         Rows Removed by Filter: 3950
+         Buffers: shared hit=3945
+ Planning Time: 0.040 ms
+ Execution Time: 0.819 ms
+(8 rows)
+
+=== [8] count query under a selective prefix ===
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=8.31..8.32 rows=1 width=8) (actual time=0.007..0.008 rows=1 loops=1)
+   Buffers: shared hit=4
+   ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=4) (actual time=0.005..0.006 rows=2 loops=1)
+         Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+         Filter: (last_name ~~ 'Quarrierstein%'::text)
+         Buffers: shared hit=4
+ Planning Time: 0.056 ms
+ Execution Time: 0.027 ms
+(8 rows)
+
+=== [9] the SAME query as a PREPARED statement — generic vs custom plan ===
+PREPARE
+--- executions 1-5 (custom plans) ---
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.015..0.015 rows=2 loops=1)
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.014..0.014 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.007..0.008 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+ Planning Time: 0.104 ms
+ Execution Time: 0.024 ms
+(9 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.009..0.010 rows=2 loops=1)
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.009..0.009 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.004..0.005 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+ Planning Time: 0.067 ms
+ Execution Time: 0.015 ms
+(9 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.008 rows=2 loops=1)
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.007 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.004..0.004 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+ Planning Time: 0.056 ms
+ Execution Time: 0.013 ms
+(9 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.006..0.006 rows=2 loops=1)
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.006..0.006 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.003..0.004 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+ Planning Time: 0.051 ms
+ Execution Time: 0.011 ms
+(9 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.007 rows=2 loops=1)
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.007 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.004..0.005 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+ Planning Time: 0.052 ms
+ Execution Time: 0.012 ms
+(9 rows)
+
+--- execution 6+ (this is where a generic plan would appear) ---
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.007 rows=2 loops=1)
+   Buffers: shared hit=4
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.007..0.007 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=4
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.004..0.004 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+               Buffers: shared hit=4
+ Planning Time: 0.058 ms
+ Execution Time: 0.013 ms
+(12 rows)
+
+                                                                      QUERY PLAN                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=8.32..8.32 rows=1 width=58) (actual time=0.005..0.005 rows=2 loops=1)
+   Buffers: shared hit=4
+   ->  Sort  (cost=8.32..8.32 rows=1 width=58) (actual time=0.005..0.005 rows=2 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=4
+         ->  Index Scan using owners_last_name_pattern_idx on owners o1_0  (cost=0.29..8.31 rows=1 width=58) (actual time=0.003..0.003 rows=2 loops=1)
+               Index Cond: ((last_name ~>=~ 'Quarrierstein'::text) AND (last_name ~<~ 'Quarriersteio'::text))
+               Filter: (last_name ~~ 'Quarrierstein%'::text)
+               Buffers: shared hit=4
+ Planning Time: 0.043 ms
+ Execution Time: 0.009 ms
+(12 rows)
+
+DEALLOCATE
+=== [10] ONE lazy pets load — still runs once PER OWNER ON THE PAGE ===
                                                              QUERY PLAN                                                             
 ------------------------------------------------------------------------------------------------------------------------------------
- Nested Loop Left Join  (cost=0.44..24.67 rows=2 width=54) (actual time=0.025..0.027 rows=2 loops=1)
-   Buffers: shared hit=7
-   ->  Index Scan using pets_owner_id_idx on pets p1_0  (cost=0.29..8.32 rows=2 width=22) (actual time=0.014..0.014 rows=2 loops=1)
+ Nested Loop Left Join  (cost=0.44..24.67 rows=2 width=54) (actual time=0.029..0.031 rows=2 loops=1)
+   Buffers: shared hit=7 dirtied=1
+   ->  Index Scan using pets_owner_id_idx on pets p1_0  (cost=0.29..8.32 rows=2 width=22) (actual time=0.024..0.024 rows=2 loops=1)
          Index Cond: (owner_id = 4242)
-         Buffers: shared hit=3
-   ->  Index Scan using types_pkey on types t1_0  (cost=0.15..8.17 rows=1 width=36) (actual time=0.005..0.005 rows=1 loops=2)
+         Buffers: shared hit=3 dirtied=1
+   ->  Index Scan using types_pkey on types t1_0  (cost=0.15..8.17 rows=1 width=36) (actual time=0.002..0.002 rows=1 loops=2)
          Index Cond: (id = p1_0.type_id)
          Buffers: shared hit=4
  Planning:
-   Buffers: shared hit=213
- Planning Time: 0.315 ms
- Execution Time: 0.052 ms
+   Buffers: shared hit=118
+ Planning Time: 0.255 ms
+ Execution Time: 0.040 ms
 (12 rows)
 
-=== [5] ONE lazy visits load — the backend runs this once PER PET ===
+=== [11] ONE lazy visits load — once PER PET on the page ===
                                                            QUERY PLAN                                                           
 --------------------------------------------------------------------------------------------------------------------------------
- Index Scan using visits_pet_id_idx on visits v1_0  (cost=0.29..8.32 rows=2 width=39) (actual time=0.017..0.018 rows=2 loops=1)
+ Index Scan using visits_pet_id_idx on visits v1_0  (cost=0.29..8.32 rows=2 width=39) (actual time=0.012..0.013 rows=2 loops=1)
    Index Cond: (pet_id = 4242)
    Buffers: shared hit=3
  Planning:
-   Buffers: shared hit=45
- Planning Time: 0.126 ms
- Execution Time: 0.031 ms
+   Buffers: shared hit=43
+ Planning Time: 0.117 ms
+ Execution Time: 0.021 ms
 (7 rows)
 
-=== [6] WOULD-BE first page, sorted by name — not implemented; costed here ===
-                                                      QUERY PLAN                                                       
------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=380.10..380.11 rows=5 width=29) (actual time=2.297..2.298 rows=5 loops=1)
-   Buffers: shared hit=120
-   ->  Sort  (cost=380.10..405.10 rows=10000 width=29) (actual time=2.296..2.297 rows=5 loops=1)
-         Sort Key: last_name, first_name, id
-         Sort Method: top-N heapsort  Memory: 25kB
-         Buffers: shared hit=120
-         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.003..0.760 rows=10000 loops=1)
-               Buffers: shared hit=114
- Planning:
-   Buffers: shared hit=9
- Planning Time: 0.035 ms
- Execution Time: 2.307 ms
-(12 rows)
+=== indexes on owners ===
+             indexname              |                                                 indexdef                                                 
+------------------------------------+----------------------------------------------------------------------------------------------------------
+ owners_city_id_idx                 | CREATE INDEX owners_city_id_idx ON public.owners USING btree (city, id)
+ owners_last_name_first_name_id_idx | CREATE INDEX owners_last_name_first_name_id_idx ON public.owners USING btree (last_name, first_name, id)
+ owners_last_name_pattern_idx       | CREATE INDEX owners_last_name_pattern_idx ON public.owners USING btree (last_name text_pattern_ops)
+ owners_pkey                        | CREATE UNIQUE INDEX owners_pkey ON public.owners USING btree (id)
+(4 rows)
 
-=== [7] WOULD-BE deep page (last page at size 5), sorted by name ===
-                                                           QUERY PLAN                                                            
----------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=13.416..13.417 rows=5 loops=1)
-   Buffers: shared hit=228
-   InitPlan 1 (returns $0)
-     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.906..0.906 rows=1 loops=1)
-           Buffers: shared hit=114
-           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.001..0.541 rows=10000 loops=1)
-                 Buffers: shared hit=114
-   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=11.799..12.234 rows=10000 loops=1)
-         Sort Key: owners.last_name, owners.first_name, owners.id
-         Sort Method: quicksort  Memory: 1088kB
-         Buffers: shared hit=114
-         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.001..0.672 rows=10000 loops=1)
-               Buffers: shared hit=114
- Planning:
-   Buffers: shared hit=3
- Planning Time: 0.039 ms
- Execution Time: 13.479 ms
-(17 rows)
+=== how often each owners index was ACTUALLY used by the load run ===
+            indexrelname            | idx_scan | idx_tup_read | idx_tup_fetch 
+------------------------------------+----------+--------------+---------------
+ owners_city_id_idx                 |    31815 |    318150000 |     318150000
+ owners_last_name_first_name_id_idx |    88330 |    432243340 |     432243340
+ owners_last_name_pattern_idx       |    61199 |       122398 |        122398
+ owners_pkey                        |        0 |            0 |             0
+(4 rows)
 
-=== [8] WOULD-BE deep page, sorted by city ===
-                                                           QUERY PLAN                                                            
----------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=7.870..7.872 rows=5 loops=1)
-   Buffers: shared hit=228
-   InitPlan 1 (returns $0)
-     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.974..0.974 rows=1 loops=1)
-           Buffers: shared hit=114
-           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.003..0.590 rows=10000 loops=1)
-                 Buffers: shared hit=114
-   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=6.188..6.624 rows=10000 loops=1)
-         Sort Key: owners.city, owners.id
-         Sort Method: quicksort  Memory: 1088kB
-         Buffers: shared hit=114
-         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.002..0.684 rows=10000 loops=1)
-               Buffers: shared hit=114
- Planning Time: 0.040 ms
- Execution Time: 7.929 ms
-(15 rows)
-
-=== [9] WOULD-BE deep page, sorted by name DESC ===
-                                                           QUERY PLAN                                                            
----------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=13.420..13.421 rows=5 loops=1)
-   Buffers: shared hit=228
-   InitPlan 1 (returns $0)
-     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.952..0.952 rows=1 loops=1)
-           Buffers: shared hit=114
-           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.002..0.556 rows=10000 loops=1)
-                 Buffers: shared hit=114
-   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=11.731..12.193 rows=10000 loops=1)
-         Sort Key: owners.last_name DESC, owners.first_name DESC, owners.id DESC
-         Sort Method: quicksort  Memory: 1088kB
-         Buffers: shared hit=114
-         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.001..0.667 rows=10000 loops=1)
-               Buffers: shared hit=114
- Planning:
-   Buffers: shared hit=9
- Planning Time: 0.054 ms
- Execution Time: 13.508 ms
-(17 rows)
-
-=== [10] the total count a paged grid needs for its paginator ===
-                                                   QUERY PLAN                                                   
-----------------------------------------------------------------------------------------------------------------
- Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.950..0.950 rows=1 loops=1)
-   Buffers: shared hit=114
-   ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.004..0.590 rows=10000 loops=1)
-         Buffers: shared hit=114
- Planning Time: 0.035 ms
- Execution Time: 0.962 ms
-(6 rows)
-
-=== indexes that actually exist on owners ===
-  indexname  |                             indexdef                              
--------------+-------------------------------------------------------------------
- owners_pkey | CREATE UNIQUE INDEX owners_pkey ON public.owners USING btree (id)
+=== sequential scans of owners during the load run (0 would be ideal) ===
+ seq_scan | seq_tup_read | idx_scan 
+----------+--------------+----------
+   120145 |   1201450000 |   181344
 (1 row)
 
 === collation (decides whether a plain btree can serve LIKE prefix) ===

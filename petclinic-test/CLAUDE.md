@@ -105,12 +105,23 @@
   exactly that.
   - The 10k/100k rows are seeded with **psql, not Flyway** — `db/migration/` is the demo
     database and must not grow 10k owners. The schema under test is still the shipped one.
-  - ⚠️ It cannot use `petclinic-backend/Dockerfile`: that file copies `pom.xml` and `src/`
-    but **not `lombok.config`**, so `lombok.accessors.chain=true` is lost, Lombok emits void
-    setters, and the build dies on `new Owner().setId(...)` in `OwnerRestController`. The
-    same bug makes `docker-compose.test.yml`'s backend image unbuildable. `loadtest/`
-    carries a one-line-longer copy; the shipped Dockerfile is still broken.
-  - What it measured: `GET /api/owners` takes **only** `lastName` — no page, size or sort —
-    and returns the whole table with every pet and visit. 25,007 SQL statements and 6.5 MB
-    at 10k owners; ~250,000 statements and 66 MB at 100k. The N+1 is the cost, not the
-    queries: each one runs in tens of microseconds.
+    The fixture TRUNCATEs `owners`, so the V3 demo rows and the V10/V11 collation rows are
+    absent during a run.
+  - **It builds no images.** The Docker VM here has no free disk, so `run-loadtest.sh`
+    produces the backend jar (`mvn package`) and fetches JMeter **on the host**, then
+    bind-mounts both into a stock `eclipse-temurin:21-jre`. Compiling on the host is not
+    running a service there — the backend under test and the load generator are containers.
+  - ⚠️ It therefore cannot use `petclinic-backend/Dockerfile` anyway, which is **broken**:
+    it copies `pom.xml` and `src/` but **not `lombok.config`**, so `lombok.accessors.chain`
+    is lost, Lombok emits void setters, and the build dies on `new Owner().setId(...)` in
+    `OwnerRestController`. The same bug makes `docker-compose.test.yml`'s backend image
+    unbuildable.
+  - What it measured on `accesa26` (paged grid, V9 indexes): first page p50 **4 ms** at 10k
+    and **12 ms** at 100k; last page **7 ms** / **53 ms**. All three V9 indexes are used and
+    `owners_pkey` is not. Two costs still scale with the table — the per-request
+    `SELECT count(*)` for `totalElements`, which Seq Scans unless `lastName` is given
+    (12.3 ms at 100k, i.e. most of a first-page request), and `OFFSET`, which walks 100,000
+    index entries to return the last 5 rows.
+  - `results/*-prepaging.txt` are the same scenarios against the commit **before** paging
+    existed (6.5 MB / 25,007 statements per grid load at 10k; 66 MB / ~250,000 at 100k;
+    p50 3.0 s and 27.8 s). Kept as the "before" picture — do not read them as current.

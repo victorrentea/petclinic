@@ -1,12 +1,13 @@
 scenario                                          n  err      p50      p95      p99      max    req/s  MB/resp
 --------------------------------------------------------------------------------------------------------------
-S1 first page (default sort)                     80    0     3005     3881     3925     3925     1.27     6.52
-S2 deep page (page=1999 size=5)                  76    0     3253     4127     4295     4295     1.18     6.52
-S3 sort by name asc                              68    0     3406     5104     5348     5348     1.06     6.52
-S4 sort by name desc                             89    0     2687     3044     3937     3937     1.39     6.52
-S5 sort by city asc                              76    0     3143     4198     4288     4288     1.21     6.52
-S6 sort by city desc                             80    0     2906     3738     4932     4932     1.26     6.52
-S7 prefix search broad (L)                      574    0      199      251      310      375    18.90     0.47
-S8 prefix search selective (Quarrierstein)    59428    0        2        3        5       42  1978.23     0.00
+S0 defaults (page=0 size=10 sort=name)         9534    0        8       34       72      769   310.93     0.01
+S1 first page (size=5)                        22023    0        4       10       21     1447   700.34     0.00
+S2 deep page (last page, size=5)              13780    0        7       15       24       67   458.37     0.00
+S3 deep page sort=name,asc                    12669    0        7       19       40      193   419.67     0.00
+S4 deep page sort=name,desc                    7877    0        9       43      101      380   259.48     0.00
+S5 deep page sort=city,asc                    14601    0        6       17       41      298   482.34     0.00
+S6 deep page sort=city,desc                   17214    0        6       11       19       61   572.77     0.00
+S7 prefix search broad (L)                    22447    0        4       10       23      374   739.12     0.00
+S8 prefix search selective (Quarrierstein)    61199    0        1        4       11      360  2015.84     0.00
 
 latencies in ms; MB/resp is the mean response body size

@@ -1,0 +1,32 @@
+Does the size parameter bound the work, with 100,000 owners in the table?
+Captured against loadtest-backend; owners counted in the real response body.
+
+totalowners:100000
+
+request                       bytes    owners     time_s
+---------------------- ------------ --------- ----------
+page=0&size=5                  3479         5   0.016403
+page=0&size=10                 6981        10   0.019570
+page=0&size=50                33907        50   0.031688
+page=0&size=200              135845       200   0.075467
+page=0&size=1000             701104      1000   0.317302
+
+For comparison, before paging existed one request returned 69,345,170 bytes and
+100,000 owners regardless of any page/size parameter (see summary-100000-prepaging.txt).
+
+SQL statements per request, delimited by marker queries in the Postgres log
+(docker logs --since is unusable here: the VM clock and the host clock disagree,
+which widens the window and folds neighbouring requests into the count).
+
+  page=0 size=5              page: 1  count: 1  pets:   5  visits:   8  TOTAL:   15
+  page=0 size=20             page: 1  count: 1  pets:  20  visits:  39  TOTAL:   61
+  page=0 size=200            page: 1  count: 1  pets: 200  visits: 291  TOTAL:  493
+  deep page size=5           page: 1  count: 1  pets:   5  visits:   9  TOTAL:   16
+
+Statements scale with the PAGE, not with the table: a 5-row page costs 15 statements
+whether the table holds 10,000 rows or 100,000. Before paging, one grid load issued
+25,007 statements at 10k owners and ~250,000 at 100k.
+
+The per-owner N+1 itself is NOT gone -- one pets query per owner on the page, one
+visits query per pet -- it is merely capped by the size parameter. At size=200 it is 493
+statements for a single page view.

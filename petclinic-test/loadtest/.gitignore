@@ -1,0 +1,4 @@
+# JMeter distribution fetched by run-loadtest.sh. 149 MB of third-party binary that the
+# script re-downloads on demand — it lives on the host only because the Docker VM has no
+# room for another image.
+.tools/
