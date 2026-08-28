@@ -1,4 +1,4 @@
-# ast-grep — structural lint rules that enforce conventions written in CLAUDE.md.
+# ast-grep — structural lint rules that enforce conventions written in AGENTS.md.
 # Run manually:  sg scan -c .config/sgconfig.yml
 # Test rules:    sg test -c .config/sgconfig.yml
 #

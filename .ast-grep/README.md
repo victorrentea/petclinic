@@ -1,7 +1,7 @@
 # ast-grep rules
 
 Structural lint rules that enforce conventions already written in prose in
-[CLAUDE.md](../CLAUDE.md). A convention nobody checks is a suggestion.
+[AGENTS.md](../AGENTS.md). A convention nobody checks is a suggestion.
 
 ```sh
 sg scan                 # scan the repo
@@ -12,7 +12,7 @@ sg scan --update-all    # apply autofixes (none of the current rules define one)
 Wired into `.githooks/pre-commit`, scoped to staged Java files.
 `severity: error` blocks the commit; `severity: warning` only reports.
 
-| rule | CLAUDE.md line it enforces | severity |
+| rule | AGENTS.md line it enforces | severity |
 |---|---|---|
 | `no-lombok` | "No Lombok: write accessors, constructors and loggers explicitly" | error |
 | `requestbody-needs-valid` | "@Validated on @RequestBody" | error |

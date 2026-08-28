@@ -1,4 +1,4 @@
-# CLAUDE.md: "No Lombok: write accessors, constructors and LoggerFactory.getLogger(...)
+# AGENTS.md: "No Lombok: write accessors, constructors and LoggerFactory.getLogger(...)
 # explicitly". Lombok was removed from both poms; an import that sneaks back in would
 # not compile, and a re-added dependency would quietly resurrect the generated-code
 # layer this project deliberately dropped.

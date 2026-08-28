@@ -62,14 +62,14 @@ if [ -n "$STAGED_JAVA" ]; then
     echo "[pre-commit] ⚠️  mvn not on PATH — skipping Spotless formatting."
   fi
 
-  # ── ast-grep: structural rules that enforce CLAUDE.md conventions ────────
+  # ── ast-grep: structural rules that enforce AGENTS.md conventions ────────
   # Scoped to the staged files only, so pre-existing violations elsewhere
   # don't block unrelated commits. Blocks on `error`; `warning` only reports.
   if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
     if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan -c "$ROOT/.config/sgconfig.yml" 2>&1); then
       echo "$SG_OUT"
       echo "[pre-commit] ❌ ast-grep rule violated — commit blocked."
-      echo "[pre-commit] Rules live in .ast-grep/rules/ — see CLAUDE.md for the why."
+      echo "[pre-commit] Rules live in .ast-grep/rules/ — see AGENTS.md for the why."
       exit 1
     fi
     [ -n "$SG_OUT" ] && echo "$SG_OUT"
