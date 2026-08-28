@@ -1,31 +1,76 @@
 package victor.training.petclinic.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
+import victor.training.petclinic.domain.Owner;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = PetMapper.class)
-public interface VisitMapper {
+@Component
+public class VisitMapper {
 
-    @Mapping(source = "petId", target = "pet.id")
-    @Mapping(target = "pet.name", ignore = true)
-    @Mapping(target = "pet.owner", ignore = true)
-    Visit toVisit(VisitDto visitDto);
+    public Visit toVisit(VisitDto visitDto) {
+        if (visitDto == null) {
+            return null;
+        }
+        Visit visit = new Visit();
+        visit.setPet(petOfId(visitDto.getPetId()));
+        visit.setId(visitDto.getId());
+        visit.setDate(visitDto.getDate());
+        visit.setDescription(visitDto.getDescription());
+        return visit;
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "pet", ignore = true)
-    Visit toVisit(VisitFieldsDto visitFieldsDto);
+    public Visit toVisit(VisitFieldsDto visitFieldsDto) {
+        if (visitFieldsDto == null) {
+            return null;
+        }
+        Visit visit = new Visit();
+        visit.setDate(visitFieldsDto.getDate());
+        visit.setDescription(visitFieldsDto.getDescription());
+        return visit;
+    }
 
-    @Mapping(source = "pet.id", target = "petId")
-    @Mapping(source = "pet.name", target = "petName")
-    @Mapping(source = "pet.owner.id", target = "ownerId")
-    @Mapping(source = "pet.owner.firstName", target = "ownerFirstName")
-    @Mapping(source = "pet.owner.lastName", target = "ownerLastName")
-    VisitDto toVisitDto(Visit visit);
+    public VisitDto toVisitDto(Visit visit) {
+        if (visit == null) {
+            return null;
+        }
+        Pet pet = visit.getPet();
+        Owner owner = pet == null ? null : pet.getOwner();
+        VisitDto visitDto = new VisitDto();
+        if (pet != null) {
+            visitDto.setPetId(pet.getId());
+            visitDto.setPetName(pet.getName());
+        }
+        if (owner != null) {
+            visitDto.setOwnerId(owner.getId());
+            visitDto.setOwnerFirstName(owner.getFirstName());
+            visitDto.setOwnerLastName(owner.getLastName());
+        }
+        visitDto.setDate(visit.getDate());
+        visitDto.setDescription(visit.getDescription());
+        visitDto.setId(visit.getId());
+        return visitDto;
+    }
 
-    List<VisitDto> toVisitsDto(List<Visit> visits);
+    public List<VisitDto> toVisitsDto(List<Visit> visits) {
+        if (visits == null) {
+            return null;
+        }
+        List<VisitDto> dtos = new ArrayList<>(visits.size());
+        for (Visit visit : visits) {
+            dtos.add(toVisitDto(visit));
+        }
+        return dtos;
+    }
+
+    private Pet petOfId(Integer petId) {
+        Pet pet = new Pet();
+        pet.setId(petId);
+        return pet;
+    }
 }
