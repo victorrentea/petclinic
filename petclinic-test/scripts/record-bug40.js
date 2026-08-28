@@ -18,7 +18,11 @@ const VALID_DATE = plusDays(30);
 const DEMO_TAG = 'Bug 40 demo';   // every row this script creates carries it, so cleanup can find them
 
 (async () => {
-  const owners = await (await fetch(apiUrl + '/api/owners')).json();
+  // /api/owners is paged: it answers with {content, totalElements, ...} and defaults to
+  // 10 rows, so ask for one big page rather than trusting the default to hold a pet owner.
+  const ownersPage = await (await fetch(apiUrl + '/api/owners?page=0&size=200')).json();
+  const owners = ownersPage.content;
+  if (!Array.isArray(owners)) throw new Error('GET /api/owners did not return a page with a content array');
   const owner = owners.find(o => (o.pets || []).length > 0);
   if (!owner) throw new Error('no owner with a pet in the database');
   const pet = owner.pets[0];

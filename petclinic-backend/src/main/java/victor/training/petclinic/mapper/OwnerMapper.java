@@ -6,8 +6,6 @@ import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring", uses = PetMapper.class)
 public interface OwnerMapper {
 
@@ -16,7 +14,5 @@ public interface OwnerMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "pets", ignore = true)
     Owner toOwner(OwnerFieldsDto ownerDto);
-
-    List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection);
 
 }

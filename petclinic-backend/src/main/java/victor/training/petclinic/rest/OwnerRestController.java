@@ -1,8 +1,12 @@
 package victor.training.petclinic.rest;
 
-import java.net.URI;
-import java.util.List;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import java.net.URI;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -30,14 +34,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,15 +62,69 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
+    @Operation(operationId = "listOwners", summary = "List a page of owners")
+    @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true,
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "name") String sort) {
+        if (page < 0) {
+            throw new ResponseStatusException(BAD_REQUEST, "Page number cannot be negative, was " + page);
+        }
+        if (size < 1) {
+            throw new ResponseStatusException(BAD_REQUEST, "Page size must be at least 1, was " + size);
+        }
+        PageRequest pageRequest = PageRequest.of(page, size, parseSort(sort));
+        return ownerRepository.findByLastNameStartingWith(lastName, pageRequest)
+                .map(ownerMapper::toOwnerDto);
+    }
+
+    /**
+     * Turns the client's logical sort key into columns. A client-supplied Sort is never handed to
+     * Spring Data raw: that would let anyone sort by pets.visits.description and turn the paged
+     * query into a cartesian join.
+     */
+    private Sort parseSort(String sort) {
+        String[] parts = sort.split(",", 2);
+        OwnerSortKey key = OwnerSortKey.of(parts[0]);
+        if (parts.length == 1) {
+            return key.ascending;
+        }
+        return switch (parts[1].trim().toLowerCase()) {
+            case "asc" -> key.ascending;
+            case "desc" -> key.ascending.descending();
+            default -> throw new ResponseStatusException(BAD_REQUEST,
+                    "Unknown sort direction '" + parts[1] + "'. Use 'asc' or 'desc'.");
+        };
+    }
+
+    /**
+     * The only sorts a client may ask for. Every one of them ends in id: six owners live in London,
+     * so ORDER BY city alone leaves tied rows in an order the database may change between requests --
+     * under LIMIT/OFFSET that shows one owner on two pages and never shows another.
+     */
+    private enum OwnerSortKey {
+        NAME(Sort.by("lastName", "firstName", "id")), CITY(Sort.by("city", "id"));
+
+        private final Sort ascending;
+
+        OwnerSortKey(Sort ascending) {
+            this.ascending = ascending;
+        }
+
+        static OwnerSortKey of(String key) {
+            for (OwnerSortKey candidate : values()) {
+                if (candidate.name().equalsIgnoreCase(key.trim())) {
+                    return candidate;
+                }
+            }
+            throw new ResponseStatusException(BAD_REQUEST,
+                    "Owners cannot be sorted by '" + key + "'. Sort by 'name' or 'city'.");
+        }
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

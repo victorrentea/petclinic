@@ -1,5 +1,6 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {fetchAllOwners} from './support/owners-api';
 
 // The sentences of visit-date-range.spec.ts (GitHub issue #40), as plain functions —
 // same shape as add-visit.dsl.ts: named for what the reader of a scenario wants to see,
@@ -29,12 +30,12 @@ export const TOO_FAR_FUTURE_DATE = isoDaysFromToday(2 * 365);
 export const VALID_DATE = isoDaysFromToday(30);
 
 export async function aPetWithAKnownBirthDateExists(): Promise<PetUnderTest> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => (o.pets || []).some((p: any) => p.birthDate));
+  const owners = await fetchAllOwners();
+  const owner = owners.find((o) => (o.pets ?? []).some((p: any) => p.birthDate));
   if (!owner) {
     throw new Error('No owner with a pet that has a birth date; cannot check the visit-date range');
   }
-  const pet = owner.pets.find((p: any) => p.birthDate);
+  const pet = owner.pets!.find((p: any) => p.birthDate);
   return {ownerId: owner.id, petId: pet.id, petName: pet.name, birthDate: pet.birthDate};
 }
 

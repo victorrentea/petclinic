@@ -14,6 +14,22 @@
   into one `.mp4` behind title cards, with a merged `.srt`. A take asserts what it narrates and
   exits 3 on a mismatch, so a film can never claim a fix that is not there. The **before** take only
   reproduces while the bug does — re-shooting it means checking out a pre-fix commit.
+- ⚠️ **An owner list in Gherkin is a data table, one owner per row — never a comma-separated
+  cell.** The grid renders `Potter, Harry` (Lastname, Firstname), so a comma no longer separates
+  two owners. A Scenario Outline is still right where the expectation is a *single* value (a
+  search term, a page size, "no owners are listed"), never for a list.
+- The owners grid is covered by two features sharing one glue set: `owner-search.feature`
+  (the last-name filter) and `owners-pagination.feature` (paging, sorting, the pager strip).
+  `owner-search.glue.ts` owns the steps both use — the Background, opening the page, searching,
+  `exactly these owners are listed`; `owners-pagination.glue.ts` owns the rest. The grid's DOM
+  contract (`#ownersTable`, `td.ownerFullName`, `th.sortable[data-sort-key]` + `span.sort-arrow`,
+  `#ownersPager` with `#pageSizeSelect`/`#pagerPrev`/`#pagerNext`/`#pagerCurrentPage` **1-based**)
+  lives in one place, `src/support/owners-grid.ts` — steps never spell a selector themselves.
+- ⚠️ **`GET /api/owners` is paged** (`{content, totalElements, totalPages, number, size}`) and
+  defaults to 10 rows. Nothing may `Array.isArray` the response or assume one call sees the whole
+  clinic: `src/support/owners-api.ts` `fetchAllOwners()` walks every page, and `fullName()` there
+  is the single definition of `Lastname, Firstname`. `scripts/record-bug40.js` and the
+  `docker-compose.test.yml` backend healthcheck both ask for an explicit page.
 - ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
   test file, named after it (`owner-search.feature.genseq.puml`), sectioned by scenario. Never
   hand-edit: change the test and re-run `./run-tests-with-tracing.sh`.

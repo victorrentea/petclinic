@@ -51,6 +51,15 @@ display:none;
   gap: 8px;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-arrow {
+  margin-left: 4px;
+}
+
 .owners-page-size .form-control {
   width: auto;
 }
@@ -76,4 +85,81 @@ display:none;
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* Push Add Owner to the right edge; the pager keeps the left of the same line.
+  margin-left:auto rather than only space-between, so the button still sits
+  right when the pager is absent (no page loaded yet). */
+.owners-add-btn {
+  margin-left: auto;
+}
+
+/* Fixed layout: without it the browser re-measures every column from its
+  content, so sorting a column (different rows, different longest value)
+  silently reflows the whole table. */
+.owners-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.owners-table th:nth-child(1),
+.owners-table td:nth-child(1) { width: 22%; }
+.owners-table th:nth-child(2),
+.owners-table td:nth-child(2) { width: 26%; }
+.owners-table th:nth-child(3),
+.owners-table td:nth-child(3) { width: 14%; }
+.owners-table th:nth-child(4),
+.owners-table td:nth-child(4) { width: 18%; }
+.owners-table th:nth-child(5),
+.owners-table td:nth-child(5) { width: 20%; }
+
+.owners-table td {
+  overflow-wrap: break-word;
+}
+
+/* An unsorted sortable column still shows its ⇅, just faded, so the column
+  looks clickable before anyone clicks it; the active column's arrow is full
+  strength. */
+.sort-arrow-idle {
+  opacity: 0.35;
+}
+
+.sortable:hover .sort-arrow-idle {
+  opacity: 0.7;
+}
+
+/* Pets used to render one per line, so a two-pet owner made its row taller
+  than the rest. One line, comma-separated, truncated with an ellipsis — every
+  row is now the same height regardless of how many pets an owner has. */
+.owners-table td.owner-pets {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Arrow glyphs instead of "Previous"/"Next": direction is read at a glance,
+  with no word to parse. The buttons carry aria-label, since a lone arrow is
+  not an accessible name. */
+.pager-arrow {
+  /* px, not rem: this app sets a 10px root font-size, so 1.1rem silently
+    rendered these glyphs at 11px — smaller than the text they replaced. */
+  min-width: 38px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
+/* The search row: input flush against the left edge of the container (so it
+  lines up with the "Owners" heading and the table below), button inline to
+  its right. The old markup used bootstrap's horizontal-form columns, which
+  indented the input by a label column and pushed the button onto its own row.
+  The label is now ghost text in the field, with aria-label carrying the
+  accessible name a placeholder alone doesn't reliably provide. */
+.owner-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }

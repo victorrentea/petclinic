@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -34,6 +35,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -149,6 +151,96 @@ public class OwnerTest {
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
+        JsonNode page = getPage(uriTemplate);
+        return mapper.convertValue(page.get("content"), new TypeReference<List<OwnerDto>>() {
+        });
+    }
+
+    @Test
+    void listOwners_defaultsToTheFirstPageOfTen() throws Exception {
+        JsonNode page = getPage("/api/owners");
+
+        assertThat(page.get("content")).hasSize(10);
+        assertThat(page.get("size").asInt()).isEqualTo(10);
+        assertThat(page.get("number").asInt()).isZero();
+        assertThat(page.get("totalElements").asLong()).isEqualTo(ownerRepository.count());
+    }
+
+    @Test
+    void listOwners_defaultSortIsLastNameThenFirstName() throws Exception {
+        List<OwnerDto> owners = search("/api/owners?size=20");
+
+        assertThat(owners)
+                .extracting(o -> o.getLastName() + ", " + o.getFirstName())
+                .isSorted();
+    }
+
+    /**
+     * Six owners live in London, so ORDER BY city alone leaves their relative order up to the
+     * database. Under LIMIT/OFFSET that lets one owner surface on two pages while another is never
+     * returned. Only walking every page exposes it -- asserting a single page always passes.
+     */
+    @Test
+    void listOwners_walkingEveryPageOfATiedSortLosesNobody() throws Exception {
+        List<Integer> collected = new ArrayList<>();
+        long total = ownerRepository.count();
+
+        for (int pageNumber = 0; collected.size() < total; pageNumber++) {
+            List<OwnerDto> pageContent = search("/api/owners?sort=city&size=5&page=" + pageNumber);
+            assertThat(pageContent).as("page %d came back empty before every owner was seen", pageNumber)
+                    .isNotEmpty();
+            pageContent.forEach(owner -> collected.add(owner.getId()));
+        }
+
+        assertThat(collected).doesNotHaveDuplicates();
+        assertThat(collected).hasSize((int) total);
+    }
+
+    @Test
+    void listOwners_rejectsASortKeyOutsideTheWhitelist() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=pets.visits.description"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listOwners_rejectsAMeaninglessPageOrSize() throws Exception {
+        mockMvc.perform(get("/api/owners?size=0")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/owners?size=-1")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/owners?page=-1")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listOwners_filterCombinesWithPaging() throws Exception {
+        ownerRepository.save(namedOwner("Ada", "Pageable"));
+        ownerRepository.save(namedOwner("Grace", "Pageable"));
+        ownerRepository.save(namedOwner("Barbara", "Pageable"));
+
+        JsonNode firstPage = getPage("/api/owners?lastName=Pageable&size=2");
+
+        assertThat(firstPage.get("totalElements").asLong()).isEqualTo(3);
+        assertThat(firstPage.get("content")).hasSize(2);
+        assertThat(search("/api/owners?lastName=Pageable&size=2&page=1"))
+                .extracting(OwnerDto::getFirstName)
+                .containsExactly("Grace");
+    }
+
+    @Test
+    void listOwners_pagePastTheEndIsEmptyButStillReportsTheTotals() throws Exception {
+        JsonNode page = getPage("/api/owners?page=999");
+
+        assertThat(page.get("content")).isEmpty();
+        assertThat(page.get("totalElements").asLong()).isEqualTo(ownerRepository.count());
+        assertThat(page.get("totalPages").asInt()).isPositive();
+    }
+
+    private Owner namedOwner(String firstName, String lastName) {
+        Owner owner = TestData.anOwner();
+        owner.setFirstName(firstName);
+        owner.setLastName(lastName);
+        return owner;
+    }
+
+    private JsonNode getPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,8 +248,7 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readTree(responseJson);
     }
 
     @Test

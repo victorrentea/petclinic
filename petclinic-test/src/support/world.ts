@@ -28,6 +28,8 @@ export class PlaywrightWorld extends World {
   visitDescription?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
+  // Set by the paging scenarios: every owner seen while walking the grid page by page.
+  collectedOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -43,6 +45,13 @@ export class PlaywrightWorld extends World {
       throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
     return this.allOwnerNames;
+  }
+
+  requireCollectedOwnerNames(): string[] {
+    if (!this.collectedOwnerNames) {
+      throw new Error('Expected the grid to have been walked page by page earlier in the scenario');
+    }
+    return this.collectedOwnerNames;
   }
 }
 

@@ -100,7 +100,13 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners?lastName=&page=&size=&sort=`, `/api/owners/{id}`
+  - ⚠️ `GET /api/owners` returns a **paged** `Page<OwnerDto>` (`content` / `totalElements` /
+    `totalPages` / `number` / `size`), not a bare array. Defaults: page 0, size 10, `sort=name` asc.
+    `sort` takes only the logical keys `name` or `city` (+ optional `,asc` / `,desc`); anything else
+    is a 400. Every sort ends in `id` as tiebreaker — six owners share the city "London", and without
+    a total order `LIMIT/OFFSET` shows one owner on two pages and never shows another.
+  - `/api/owners/count` is unrelated to the grid and stays (used by the welcome page).
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

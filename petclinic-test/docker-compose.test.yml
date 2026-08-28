@@ -10,7 +10,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=postgres
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/owners"]
+      # /api/owners is paged now. `size=1` keeps the probe honest (it still exercises the
+      # controller, the repository and the DB) without re-running the pets/visits N+1 over
+      # ten owners every 10 seconds, and grep proves the page envelope came back — a 200
+      # with a bare array would mean the backend is serving the pre-paging contract.
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:8080/api/owners?page=0&size=1' | grep -q '\"totalElements\"'"]
       interval: 10s
       timeout: 5s
       retries: 10
