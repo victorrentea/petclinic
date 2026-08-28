@@ -1,0 +1,167 @@
+=== [1] the grid query, empty prefix — this is what GET /api/owners runs ===
+                                                   QUERY PLAN                                                   
+----------------------------------------------------------------------------------------------------------------
+ Seq Scan on owners o1_0  (cost=0.00..239.00 rows=10000 width=58) (actual time=0.010..1.244 rows=10000 loops=1)
+   Filter: (last_name ~~ '%'::text)
+   Buffers: shared hit=114
+ Planning:
+   Buffers: shared hit=101
+ Planning Time: 0.358 ms
+ Execution Time: 1.567 ms
+(7 rows)
+
+=== [2] broad prefix search (lastName=L) ===
+                                                 QUERY PLAN                                                 
+------------------------------------------------------------------------------------------------------------
+ Seq Scan on owners o1_0  (cost=0.00..239.00 rows=707 width=58) (actual time=0.004..0.489 rows=715 loops=1)
+   Filter: (last_name ~~ 'L%'::text)
+   Rows Removed by Filter: 9285
+   Buffers: shared hit=114
+ Planning Time: 0.029 ms
+ Execution Time: 0.514 ms
+(6 rows)
+
+=== [3] selective prefix search (lastName=Quarrierstein) ===
+                                               QUERY PLAN                                               
+--------------------------------------------------------------------------------------------------------
+ Seq Scan on owners o1_0  (cost=0.00..239.00 rows=1 width=58) (actual time=0.135..0.490 rows=2 loops=1)
+   Filter: (last_name ~~ 'Quarrierstein%'::text)
+   Rows Removed by Filter: 9998
+   Buffers: shared hit=114
+ Planning Time: 0.023 ms
+ Execution Time: 0.493 ms
+(6 rows)
+
+=== [4] ONE lazy pets load — the backend runs this once PER OWNER ===
+                                                             QUERY PLAN                                                             
+------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop Left Join  (cost=0.44..24.67 rows=2 width=54) (actual time=0.025..0.027 rows=2 loops=1)
+   Buffers: shared hit=7
+   ->  Index Scan using pets_owner_id_idx on pets p1_0  (cost=0.29..8.32 rows=2 width=22) (actual time=0.014..0.014 rows=2 loops=1)
+         Index Cond: (owner_id = 4242)
+         Buffers: shared hit=3
+   ->  Index Scan using types_pkey on types t1_0  (cost=0.15..8.17 rows=1 width=36) (actual time=0.005..0.005 rows=1 loops=2)
+         Index Cond: (id = p1_0.type_id)
+         Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=213
+ Planning Time: 0.315 ms
+ Execution Time: 0.052 ms
+(12 rows)
+
+=== [5] ONE lazy visits load — the backend runs this once PER PET ===
+                                                           QUERY PLAN                                                           
+--------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using visits_pet_id_idx on visits v1_0  (cost=0.29..8.32 rows=2 width=39) (actual time=0.017..0.018 rows=2 loops=1)
+   Index Cond: (pet_id = 4242)
+   Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=45
+ Planning Time: 0.126 ms
+ Execution Time: 0.031 ms
+(7 rows)
+
+=== [6] WOULD-BE first page, sorted by name — not implemented; costed here ===
+                                                      QUERY PLAN                                                       
+-----------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=380.10..380.11 rows=5 width=29) (actual time=2.297..2.298 rows=5 loops=1)
+   Buffers: shared hit=120
+   ->  Sort  (cost=380.10..405.10 rows=10000 width=29) (actual time=2.296..2.297 rows=5 loops=1)
+         Sort Key: last_name, first_name, id
+         Sort Method: top-N heapsort  Memory: 25kB
+         Buffers: shared hit=120
+         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.003..0.760 rows=10000 loops=1)
+               Buffers: shared hit=114
+ Planning:
+   Buffers: shared hit=9
+ Planning Time: 0.035 ms
+ Execution Time: 2.307 ms
+(12 rows)
+
+=== [7] WOULD-BE deep page (last page at size 5), sorted by name ===
+                                                           QUERY PLAN                                                            
+---------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=13.416..13.417 rows=5 loops=1)
+   Buffers: shared hit=228
+   InitPlan 1 (returns $0)
+     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.906..0.906 rows=1 loops=1)
+           Buffers: shared hit=114
+           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.001..0.541 rows=10000 loops=1)
+                 Buffers: shared hit=114
+   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=11.799..12.234 rows=10000 loops=1)
+         Sort Key: owners.last_name, owners.first_name, owners.id
+         Sort Method: quicksort  Memory: 1088kB
+         Buffers: shared hit=114
+         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.001..0.672 rows=10000 loops=1)
+               Buffers: shared hit=114
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.039 ms
+ Execution Time: 13.479 ms
+(17 rows)
+
+=== [8] WOULD-BE deep page, sorted by city ===
+                                                           QUERY PLAN                                                            
+---------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=7.870..7.872 rows=5 loops=1)
+   Buffers: shared hit=228
+   InitPlan 1 (returns $0)
+     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.974..0.974 rows=1 loops=1)
+           Buffers: shared hit=114
+           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.003..0.590 rows=10000 loops=1)
+                 Buffers: shared hit=114
+   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=6.188..6.624 rows=10000 loops=1)
+         Sort Key: owners.city, owners.id
+         Sort Method: quicksort  Memory: 1088kB
+         Buffers: shared hit=114
+         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.002..0.684 rows=10000 loops=1)
+               Buffers: shared hit=114
+ Planning Time: 0.040 ms
+ Execution Time: 7.929 ms
+(15 rows)
+
+=== [9] WOULD-BE deep page, sorted by name DESC ===
+                                                           QUERY PLAN                                                            
+---------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=1119.90..1119.91 rows=5 width=29) (actual time=13.420..13.421 rows=5 loops=1)
+   Buffers: shared hit=228
+   InitPlan 1 (returns $0)
+     ->  Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.952..0.952 rows=1 loops=1)
+           Buffers: shared hit=114
+           ->  Seq Scan on owners owners_1  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.002..0.556 rows=10000 loops=1)
+                 Buffers: shared hit=114
+   ->  Sort  (cost=878.39..903.39 rows=10000 width=29) (actual time=11.731..12.193 rows=10000 loops=1)
+         Sort Key: owners.last_name DESC, owners.first_name DESC, owners.id DESC
+         Sort Method: quicksort  Memory: 1088kB
+         Buffers: shared hit=114
+         ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=29) (actual time=0.001..0.667 rows=10000 loops=1)
+               Buffers: shared hit=114
+ Planning:
+   Buffers: shared hit=9
+ Planning Time: 0.054 ms
+ Execution Time: 13.508 ms
+(17 rows)
+
+=== [10] the total count a paged grid needs for its paginator ===
+                                                   QUERY PLAN                                                   
+----------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=239.00..239.01 rows=1 width=8) (actual time=0.950..0.950 rows=1 loops=1)
+   Buffers: shared hit=114
+   ->  Seq Scan on owners  (cost=0.00..214.00 rows=10000 width=0) (actual time=0.004..0.590 rows=10000 loops=1)
+         Buffers: shared hit=114
+ Planning Time: 0.035 ms
+ Execution Time: 0.962 ms
+(6 rows)
+
+=== indexes that actually exist on owners ===
+  indexname  |                             indexdef                              
+-------------+-------------------------------------------------------------------
+ owners_pkey | CREATE UNIQUE INDEX owners_pkey ON public.owners USING btree (id)
+(1 row)
+
+=== collation (decides whether a plain btree can serve LIKE prefix) ===
+ datcollate  
+-------------
+ en_US.UTF-8
+(1 row)
+

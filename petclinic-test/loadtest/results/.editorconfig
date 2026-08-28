@@ -1,0 +1,9 @@
+# The .txt files here are captured verbatim from psql and JMeter. Their column padding
+# and trailing spaces are part of the output, not style choices: re-indenting an
+# `EXPLAIN (ANALYZE, BUFFERS)` plan to satisfy a 2-space grid would alter the evidence
+# the file exists to record. The cosmetic rules are therefore off for this directory
+# only — everything else still inherits the repo root .editorconfig.
+[*.txt]
+trim_trailing_whitespace = false
+indent_style = unset
+indent_size = unset

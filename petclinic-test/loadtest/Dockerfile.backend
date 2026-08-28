@@ -1,0 +1,27 @@
+# Backend image for the load test.
+#
+# Identical to petclinic-backend/Dockerfile except for one added line: `COPY lombok.config`.
+# The shipped Dockerfile copies only pom.xml and src/, so lombok.config — which sets
+# `lombok.accessors.chain=true` — never reaches the build. Lombok then emits void setters
+# and compilation dies on the chained calls in OwnerRestController
+# (`new Owner().setId(ownerId)`, `new Pet().setId(petId)`) and PetRestController:
+#   [ERROR] OwnerRestController.java:[122,39] 'void' type not allowed here
+# i.e. `docker-compose.test.yml` cannot build its backend image as committed.
+# Fixing the shipped Dockerfile is out of scope for a load test, so the fix lives here.
+FROM maven:3.9-eclipse-temurin-21 AS build
+
+WORKDIR /app
+COPY pom.xml .
+COPY lombok.config .
+COPY src ./src
+
+RUN mvn -B clean package -DskipTests
+
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

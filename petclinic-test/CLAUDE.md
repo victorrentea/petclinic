@@ -97,3 +97,20 @@
   `http.response.body` on the XHR client span, 4 KB cap) — no OTel agent records payloads, and
   the browser is the only place both sides are in hand. The renderer therefore reads them off
   the span **or its parent**, since the arrow is drawn from the backend's SERVER span.
+- `loadtest/` is a **self-contained Docker load test** for the owners grid (its own
+  `README.md`). It shares nothing with the Playwright/Cucumber suite above: its own compose
+  file, its own Postgres on **25432** and backend on **28080** — never 5432/8080/4200, which
+  the dev stack owns, nor 15432, which the latency proxy in `petclinic-database` owns.
+  Everything it creates is named `loadtest-*`; `loadtest/run-loadtest.sh --down` removes
+  exactly that.
+  - The 10k/100k rows are seeded with **psql, not Flyway** — `db/migration/` is the demo
+    database and must not grow 10k owners. The schema under test is still the shipped one.
+  - ⚠️ It cannot use `petclinic-backend/Dockerfile`: that file copies `pom.xml` and `src/`
+    but **not `lombok.config`**, so `lombok.accessors.chain=true` is lost, Lombok emits void
+    setters, and the build dies on `new Owner().setId(...)` in `OwnerRestController`. The
+    same bug makes `docker-compose.test.yml`'s backend image unbuildable. `loadtest/`
+    carries a one-line-longer copy; the shipped Dockerfile is still broken.
+  - What it measured: `GET /api/owners` takes **only** `lastName` — no page, size or sort —
+    and returns the whole table with every pet and visit. 25,007 SQL statements and 6.5 MB
+    at 10k owners; ~250,000 statements and 66 MB at 100k. The N+1 is the cost, not the
+    queries: each one runs in tens of microseconds.
