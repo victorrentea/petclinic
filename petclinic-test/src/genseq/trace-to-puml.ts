@@ -3,6 +3,7 @@ import {formatJsonDetail, jsonNote} from './json-label';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, revealable} from './options';
 import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
 import {OperationNames, defaultOperations, operationNameOf} from './openapi-operations';
+import {StepMark, stepAt} from './steps';
 
 export interface NormSpan {
   traceId: string;
@@ -64,7 +65,15 @@ export function parseTempoTrace(tempoJson: any): NormSpan[] {
 
 const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 
+// A span may name its own lifeline. Nothing in a trace otherwise separates the test
+// from the code it drives when both run in one JVM: a @SpringBootTest's MockMvc call and
+// the controller it reaches carry the same `service.name`, so without this they collapse
+// onto one participant and the picture loses the only hop it was drawn to show.
+const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
+
 function participantOf(span: NormSpan): string {
+  const declared = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
+  if (declared) return declared;
   if (span.serviceName === 'petclinic-frontend') return 'Browser';
   // both the old and the stable database semconv, since the agent can emit either
   const isDb = ['db.system', 'db.system.name', 'db.statement', 'db.query.text']
@@ -238,7 +247,7 @@ const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 // transaction ended somewhere above, and leaves the reader to guess how far up.
 const TRANSACTION_COMMIT = 'Transaction.commit';
 
-const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
+const PARTICIPANT_ORDER = ['Test', 'Browser', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));
@@ -246,10 +255,17 @@ function orderedParticipants(present: Set<string>): string[] {
   return [...ranked, ...rest];
 }
 
+/**
+ * @returns whether this trace drew a *sentence* — a self-call from a span that named its own
+ * lifeline, which is how a @SpringBootTest's given/when/then arrive. The browser suites'
+ * sentences are folded in by the caller instead (they are timestamps, not spans), so between
+ * the two the legend can say whether the picture has narration in it at all.
+ */
 function emitTrace(
   spans: NormSpan[], lines: string[], present: Set<string>, options: DiagramOptions,
   collector: DetailCollector, operations: OperationNames,
-): void {
+): boolean {
+  let sentences = false;
   const byId = new Map(spans.map((s) => [s.spanId, s]));
   // Indexed once: filtering the whole span array per span made an N+1-heavy trace
   // (hundreds of spans, which is exactly what these diagrams are for) quadratic.
@@ -407,6 +423,7 @@ function emitTrace(
       // a self-span (e.g. @WithSpan) whose children — DB calls, downstream
       // requests — render inside its own lifetime
       present.add(p);
+      sentences ||= PARTICIPANT_ATTRIBUTE in span.attributes;
       out.push(`${p} -> ${p}: ${span.name}`);
     }
 
@@ -427,18 +444,72 @@ function emitTrace(
     .filter((s) => !s.parentSpanId || !byId.has(s.parentSpanId))
     .sort((a, b) => a.startNano - b.startNano);
   for (const root of roots) walk(root, lines);
+  return sentences;
 }
 
 /** One tagged test, with every trace its interactions produced. */
 export interface DiagramScenario {
   title: string;
   traces: NormSpan[][];
+  /**
+   * The sentences the test walked through, stamped as it went — the Gherkin steps of a
+   * .feature, the DSL calls of a .spec.ts. Absent for a scenario recorded before this
+   * existed, or for one whose sentences nobody narrated: the traces then render exactly
+   * as they did, which is what keeps the cached spans of an old run re-renderable.
+   */
+  steps?: StepMark[];
 }
 
 /** The picture and, when it is interactive, what each of its markers reveals. */
 export interface RenderedDiagram {
   puml: string;
   details: DetailIndex;
+}
+
+/**
+ * The lifeline a scenario's narration belongs on: whoever opened the trace.
+ *
+ * For a browser test that is the browser — the root span is the click or the navigation,
+ * and the request to the backend hangs off it. For a @SpringBootTest it is the test
+ * itself, which declares its own participant. Hard-coding `Browser` would have been the
+ * same answer for every trace this repo records today and the wrong one for the first
+ * trace that starts anywhere else.
+ */
+function driverOf(spans: NormSpan[]): string | undefined {
+  const known = new Set(spans.map((s) => s.spanId));
+  const roots = spans.filter((s) => !s.parentSpanId || !known.has(s.parentSpanId));
+  const first = (roots.length > 0 ? roots : spans)
+    .reduce<NormSpan | undefined>((a, b) => (a && a.startNano <= b.startNano ? a : b), undefined);
+  return first && participantOf(first);
+}
+
+/**
+ * When the browser issued this trace's request — the instant to line the step marks up
+ * against. Neither obvious answer works:
+ *
+ *   - the earliest span of any kind is the *root*, and the frontend's user-interaction
+ *     root opens on the click and stays open across everything that click leads to.
+ *     Measured here: the POST of a form submitted at 440.199 sits in a trace whose root
+ *     opened at 440.089, back when the button that opened the form was clicked — three
+ *     sentences earlier, and that is the sentence the narration would have quoted.
+ *   - the earliest backend span is 5–60ms late, which is enough to fall past the next
+ *     mark: the same POST reached the server at 440.256, by which time the test had
+ *     already moved on to the assertion that waits for it.
+ *
+ * What is neither early nor late is the browser's own span for that one request — the
+ * parent of the first backend span, since that is the call it was the server side of.
+ * It is stamped in the browser, on the same machine's clock as the marks, at the moment
+ * the request left. Every fallback below is for a trace that has no such pair.
+ */
+function traceStartMs(spans: NormSpan[]): number {
+  const byId = new Map(spans.map((s) => [s.spanId, s]));
+  const serverSide = spans.filter((s) => participantOf(s) !== 'Browser');
+  const firstDrawn = serverSide.length > 0
+    ? serverSide.reduce((a, b) => (a.startNano <= b.startNano ? a : b))
+    : undefined;
+  const issuedBy = firstDrawn && byId.get(firstDrawn.parentSpanId);
+  const anchor = issuedBy ?? firstDrawn;
+  return (anchor ? anchor.startNano : Math.min(...spans.map((s) => s.startNano))) / 1e6;
 }
 
 export function renderDiagram(
@@ -453,13 +524,37 @@ export function renderDiagram(
   const present = new Set<string>();
   const collector = new DetailCollector();
   const sections: DiagramSection[] = [];
+  // Whether the legend has to explain the self-calls: a diagram with no narration in it
+  // must not carry a paragraph about narration.
+  let anyNarration = false;
   for (const scenario of scenarios) {
     const lines: string[] = [];
+    // Narrated once per sentence, not once per trace: a step that fires three requests
+    // says its sentence above the first of them and then gets out of the way.
+    let narrated: string | undefined;
     for (const spans of scenario.traces) {
       const traceLines: string[] = [];
       const drawn = new Set<string>();
-      emitTrace(spans, traceLines, drawn, options, collector, operations);
+      anyNarration = emitTrace(spans, traceLines, drawn, options, collector, operations)
+        || anyNarration;
+      // Deliberately after the render, not before: a trace that draws nothing must not
+      // pull its sentence onto the page, or the diagram grows narration for calls the
+      // reader cannot see. A sentence that caused no traffic at all — a pure assertion —
+      // is likewise never narrated, and that silence is the honest answer: the picture
+      // is of what crossed the wire.
       if (traceLines.length === 0) continue;
+      const step = stepAt(scenario.steps ?? [], traceStartMs(spans));
+      const driver = driverOf(spans) ?? 'Browser';
+      if (step && step.label !== narrated) {
+        // A self-call rather than a note or a divider: it sits on the lifeline that is
+        // about to do the calling, so the sentence and the arrows it explains read as one
+        // block — and it survives being exported as a plain .puml, which a divider's
+        // full-width bar does not do gracefully inside a scenario section.
+        present.add(driver);
+        lines.push(`${driver} -> ${driver}: ${step.label}`);
+        narrated = step.label;
+        anyNarration = true;
+      }
       drawn.forEach((p) => present.add(p));
       lines.push(...traceLines);
     }
@@ -468,11 +563,29 @@ export function renderDiagram(
   }
 
   const kinds = revealable(options);
+  // The diagram tells its reader how to regenerate it, so it has to know which of the three
+  // runners drew it. The file it is named after is the only thing that says.
+  const fromJava = /\.java$/.test(title);
+  // A Java test's diagram is filed beside its .java file, which is one directory *out* of
+  // petclinic-test — so its source reads `../petclinic-backend/…`. That `..` is an artefact of
+  // where the generator runs, not of where the test lives, and on the page it only makes the
+  // legend box wider. Shown from the repository root instead.
+  const shown = title.replace(/^\.\.\//, '');
+  const optIn = fromJava ? '@GenerateSequence' : '@generate_sequence';
+  const runner = fromJava
+    ? 'petclinic-backend/run-tests-with-tracing.sh   (needs only ./start-grafana.sh)'
+    : 'petclinic-test/run-tests-with-tracing.sh';
   // The marker is a hyperlink, and a link that shouts blue-and-underlined would
   // read as the arrow's subject rather than as a handle beside it.
   const interactiveHeader = options.interactive ? [
     'skinparam hyperlinkUnderline false',
     'skinparam hyperlinkColor #1A4FA0',
+  ] : [];
+  const narrationLegend = anyNarration ? [
+    ` `,
+    `  The self-calls on the leftmost lifeline are the test's own sentences — a .feature's`,
+    `  steps, a .spec.ts's DSL calls, a @SpringBootTest's given/when/then — each above the`,
+    `  calls it caused. A sentence that caused no traffic is not drawn.`,
   ] : [];
   const interactiveLegend = options.interactive && kinds.length > 0 ? [
     ` `,
@@ -490,12 +603,13 @@ export function renderDiagram(
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
-    `title ${title}`,
+    `title ${shown}`,
     'legend right',
     `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
-    `  Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
-    `  @generate_sequence. Change the test, not this file, then regenerate with`,
-    `  petclinic-test/run-tests-with-tracing.sh`,
+    `  Drawn from real Tempo traces of ${shown}, for the tests marked`,
+    `  ${optIn}. Change the test, not this file, then regenerate with`,
+    `  ${runner}`,
+    ...narrationLegend,
     ...interactiveLegend,
     ` `,
     `  Detail shown here: ${describeOptions(options)}`,
@@ -510,7 +624,7 @@ export function renderDiagram(
     `      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 SEQ_INTERACTIVE=0|1 npm run trace:diagram`,
     'end legend',
     // footer (bottom of every page) states the diagram's provenance
-    'footer @generate_sequence — generated from real traces, do not edit',
+    `footer ${optIn} — generated from real traces, do not edit`,
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   const body = sections.flatMap((s) => [`== ${s.title} ==`, ...s.lines]);

@@ -6,9 +6,13 @@ skinparam hyperlinkColor #1A4FA0
 title src/add-visit.spec.ts
 legend right
   ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-  Drawn from real Tempo traces of src/add-visit.spec.ts, for the scenarios tagged
+  Drawn from real Tempo traces of src/add-visit.spec.ts, for the tests marked
   @generate_sequence. Change the test, not this file, then regenerate with
   petclinic-test/run-tests-with-tracing.sh
+ 
+  The self-calls on the leftmost lifeline are the test's own sentences — a .feature's
+  steps, a .spec.ts's DSL calls, a @SpringBootTest's given/when/then — each above the
+  calls it caused. A sentence that caused no traffic is not drawn.
  
   This picture is deliberately simplified. In review/review.html, click any
   arrow marked ⊕ to reveal that one call's SQL / JSON payloads —
@@ -30,13 +34,14 @@ participant Browser
 participant Backend
 participant DB
 == Add a visit to an existing pet from the owner detail page ==
+Browser -> Browser: click add visit for first pet
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 group transaction · PetRepository.findById
 Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
 end
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0fpklrs{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://18fe2y7{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
@@ -45,15 +50,17 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0m3k1ky{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://0cnx7tr{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
-Browser -> Backend: [[genseq://1epu8qa{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+Browser -> Browser: submit visit form
+Browser -> Backend: [[genseq://1wu0mup{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://0fx9ssv{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://1vi58md{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Browser: 201
 deactivate Backend
+Browser -> Browser: expect back on owner detail page
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 group transaction · OwnerRepository.findById
@@ -61,6 +68,6 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://137uefx{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://117bkf1{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml

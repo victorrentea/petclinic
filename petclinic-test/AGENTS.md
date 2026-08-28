@@ -25,6 +25,20 @@
   The statement itself lives behind the click; `src/genseq/sql-label.ts` folds it one clause
   per line (`SELECT` / `FROM` / `JOIN` / `WHERE` / …), clipped to 10 words a line and 8 lines
   an arrow, with the origin comment split off — it is Hibernate talking *about* the statement.
+- **A self-call on the leftmost lifeline is the test's own sentence**, not an instrumented
+  span: the Gherkin step of a `.feature`, the DSL function name of a `.spec.ts`, the
+  `given/when/then` of a `@SpringBootTest`. `src/genseq/steps.ts` records them (a timestamp per
+  sentence — the browser and the test run in two processes, so a span would have to be threaded
+  across); `renderDiagram` folds them between the traces. A sentence that caused no traffic is
+  **not** drawn, and a trace is placed by the browser's span **for that one request** — never by
+  the trace root, which opens on a click and stays open across everything that click leads to.
+- A `@SpringBootTest` annotated `@GenerateSequence` feeds the *same* pipeline: the JVM writes a
+  trace window into `test-results/trace-windows/` and `npm run diagram:java` (`GENSEQ_SUITE=java`)
+  fetches and renders it. Its diagram is filed next to the `.java` file, so its window's `source`
+  climbs out of here with `../petclinic-backend/…`. There the sentences are real spans — one JVM,
+  one OTel context — and `genseq.participant=Test` is what keeps the test off the app's lifeline.
+  Code: `petclinic-backend/src/test/java/victor/training/petclinic/genseq/`, run with
+  `petclinic-backend/run-tests-with-tracing.sh` (needs only Tempo up).
 - A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
   repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
   one, else the `operationId`). The route says where a call went; the name says what it was for.

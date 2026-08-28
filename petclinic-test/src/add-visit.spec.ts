@@ -1,6 +1,14 @@
 import {test} from './support/trace-fixture';
 import {GENERATE_SEQUENCE_TAG} from './genseq/sequence-tag';
-import {
+import {narrate} from './genseq/steps';
+import * as sentences from './add-visit.dsl';
+
+// narrate() hands back the very same functions, each stamping its own name on the way in,
+// so the generated diagram can say which sentence caused which request — the .feature's
+// `When I open the owners page` has a Gherkin keyword to be quoted from, a DSL has only
+// the name of the function, and that turns out to be enough. Nothing below changes shape
+// for it: still named imports, still ctrl-clickable, still type-checked against the DSL.
+const {
   anOwnerWithAtLeastOnePetExists,
   clickAddVisitForFirstPet,
   expectBackOnOwnerDetailPage,
@@ -8,7 +16,7 @@ import {
   fillVisitDateAndUniqueDescription,
   openOwnerDetailPage,
   submitVisitForm,
-} from './add-visit.dsl';
+} = narrate(sentences);
 
 // Scenario as a DSL: the body is a list of sentences from add-visit.dsl.ts, so
 // it reads like Gherkin without a parser, a regex step lookup or a shared

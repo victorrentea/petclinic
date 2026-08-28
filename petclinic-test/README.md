@@ -58,6 +58,38 @@ Tempo window and get a diagram. Each one is **filed next to its test and named a
 per tagged scenario inside, so a file with several tagged scenarios stays one picture. They are
 generated artifacts and say so on their first lines; edit the test, not the `.puml`.
 
+### The sentence that caused the call
+
+A diagram drawn from traces alone answers *what did the system do*. It cannot answer *which
+line of the test made it do that*: nothing in an HTTP route or a SQL statement knows the
+scenario was on `When I search owners for ""`. So each test stamps its own sentences as it
+walks through them, and the renderer folds them back in as **a self-call on the leftmost
+lifeline, above the arrows that sentence caused**.
+
+| | where the sentence comes from |
+|---|---|
+| `owner-search.feature` | the Gherkin step, keyword and all — read off the Gherkin document, so an `And` is quoted as `And` |
+| `add-visit.spec.ts` | the DSL function's own name: `openOwnerDetailPage` → `open owner detail page` |
+| `AddVisitSequenceTest.java` | `given("…") / when("…") / and("…") / then("…")` — see below |
+
+The spec did not have to change shape for this. `add-visit.spec.ts` imports its DSL through
+`narrate()` (`src/genseq/steps.ts`), which hands back the very same functions with a stamp on
+the way in — still named imports, still ctrl-clickable, still type-checked, and the sentence on
+the picture *is* the function's name, so it cannot drift from the code.
+
+Two things the narration deliberately does not do:
+
+- **it never invents an arrow.** A sentence that caused no traffic — a pure assertion — is not
+  drawn. The picture is of what crossed the wire, and a self-call with nothing under it would
+  claim otherwise.
+- **it does not trust the trace's root span.** The browser's user-interaction span opens on a
+  click and stays open across everything that click leads to, so a form submitted three
+  sentences later still hangs off it; anchoring there credited a `POST` to the click that had
+  merely opened the form. The anchor is the browser's span *for that one request* — measured
+  against the same clock the sentences are stamped on, and neither early (the root) nor late
+  (the backend span, which arrives after the test has moved on to the assertion that waits
+  for it).
+
 ## Sequence diagrams from real traces
 
 ```sh
@@ -67,6 +99,63 @@ generated artifacts and say so on their first lines; edit the test, not the `.pu
 **Start order matters:** `./start-grafana.sh` must run *before* `./start-backend.sh` — the
 backend only attaches the OpenTelemetry Java agent if `:4318` is already listening. Both
 scripts now say so out loud if the order was wrong, instead of silently producing no diagrams.
+
+### The same picture from a @SpringBootTest
+
+A browser test needs five processes up to be drawn. The same journey, one layer down, needs
+one — and produces the same kind of picture:
+
+```sh
+./start-grafana.sh                          # Tempo on :4318. That is the whole stack.
+cd petclinic-backend && ./run-tests-with-tracing.sh
+```
+
+No database (the tests boot an embedded Postgres), no backend (they *are* the backend), no
+frontend, no Chromium. Out comes
+`petclinic-backend/src/test/java/…/AddVisitSequenceTest.java.genseq.puml`, beside its test.
+
+What a test has to do to be drawn:
+
+```java
+@SpringBootTest
+@GenerateSequence                       // the Java twin of @generate_sequence
+class AddVisitSequenceTest {
+
+    @Test
+    void addsAVisitToAnExistingPet() throws Exception {
+        given("an owner with at least one pet exists");
+        JsonNode owner = anOwnerWithAPet();
+
+        when("the owner detail page is opened");
+        mockMvc.perform(get("/api/owners/{ownerId}", owner.path("id").asInt()));
+        …
+```
+
+`given/when/then/and` are **marks, not blocks**: each closes the span the previous one opened.
+A `given(String, Runnable)` would have scoped itself properly and forced every value the next
+sentence needs out of the test's own locals into a field — and a test that has to be
+restructured to be drawn is a test nobody will draw.
+
+Three things make this the *same* feature rather than a second one:
+
+- the JVM writes the very same **trace window** the browser suites write
+  (`petclinic-test/test-results/trace-windows/`), so the same generator draws the diagram —
+  `npm run diagram:java`, which `run-tests-with-tracing.sh` calls for you;
+- the sentences render as the same **self-calls on the leftmost lifeline**. Here they need no
+  side channel at all: the test and the code under test share one JVM and one OTel context, so
+  a sentence can be a real span with the calls it caused nested inside it;
+- one attribute, `genseq.participant=Test`, separates the test from the code it drives.
+  Nothing else in the trace can: both run under one `service.name`, and without it the whole
+  diagram collapses onto a single participant.
+
+The test is deliberately **not** `@Transactional`, unlike its neighbours in `rest/`: a test
+transaction wrapped round the MockMvc calls swallows the repository-level ones, and the frames
+that make the picture worth reading — one transaction and one Hibernate session per repository
+call, with the lazy loads of the N+1 falling outside every one of them — collapse into a single
+box.
+
+Under a plain `mvn test` the tracer is a no-op and `@GenerateSequence` costs nothing; the agent
+is attached only by `-Pgenseq`, which is what the script runs.
 
 ### How much detail a diagram shows
 

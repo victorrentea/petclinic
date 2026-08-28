@@ -25,3 +25,11 @@ lesson: run both and read the two trees side by side. Keep them in sync when the
 - DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec
 - Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
+
+**A @SpringBootTest as a sequence diagram:** annotate the class `@GenerateSequence`
+(`src/test/java/.../genseq/`), say its sentences with `Steps.given/when/and/then(String)`, and
+`./run-tests-with-tracing.sh` draws `<TheTest>.java.genseq.puml` beside the test — the same
+pipeline that draws the browser suites' diagrams, only Tempo has to be running
+(`./start-grafana.sh`; the tests boot their own embedded Postgres). The OTel agent is attached
+only under `-Pgenseq`, so a plain `mvn test` is unaffected and the annotation costs nothing.
+The tooling and the reasoning live in `petclinic-test/README.md` and `petclinic-test/AGENTS.md`.

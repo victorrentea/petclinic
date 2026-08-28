@@ -466,3 +466,194 @@ test('the frame names the transaction, and the method when that is not the reque
   expect(spansToPuml(onController, 'tx', STATIC)).toContain('group transaction\n');
   expect(spansToPuml(onService, 'tx', STATIC)).toContain('group transaction · VisitService.book');
 });
+
+// ---------------------------------------------------------------------------
+// The narration: the sentence the test was on, above the arrows it caused.
+// ---------------------------------------------------------------------------
+
+const NARRATION_SPANS = (traceId: string, atMs: number, route: string): NormSpan[] => [
+  {
+    traceId, spanId: `${traceId}-root`, parentSpanId: '', name: 'click',
+    kind: 'CLIENT', serviceName: 'petclinic-frontend', startNano: atMs * 1e6, attributes: {},
+  },
+  {
+    traceId, spanId: `${traceId}-server`, parentSpanId: `${traceId}-root`, name: route,
+    kind: 'SERVER', serviceName: 'petclinic-backend', startNano: (atMs + 5) * 1e6,
+    attributes: {'http.status_code': '200'},
+  },
+];
+
+const narratedScenario = () => ({
+  title: 'Filter owners',
+  steps: [
+    {label: 'When I open the owners page', atMs: 1_000},
+    {label: 'And I search owners for ""', atMs: 2_000},
+  ],
+  traces: [
+    NARRATION_SPANS('t1', 1_100, 'GET /api/owners'),
+    NARRATION_SPANS('t2', 2_100, 'GET /api/owners'),
+    NARRATION_SPANS('t3', 2_400, 'GET /api/pettypes'),
+  ],
+});
+
+test('each sentence is a self-call on the lifeline above the arrows it caused', () => {
+  const puml = renderPuml('owner-search.feature', [narratedScenario()], STATIC);
+  // `List owners` is what openapi.yaml calls the route; the narration sits above it.
+  expect(puml).toContain(
+    'Browser -> Browser: When I open the owners page\n'
+    + 'Browser -> Backend: List owners\\nGET /api/owners\n',
+  );
+  expect(puml).toContain(
+    'Browser -> Browser: And I search owners for ""\n'
+    + 'Browser -> Backend: List owners\\nGET /api/owners\n',
+  );
+});
+
+// Two requests from one sentence are one step, not two: repeating the narration between
+// them would claim the test said the sentence twice.
+test('a sentence that fires several requests is narrated once', () => {
+  const puml = renderPuml('owner-search.feature', [narratedScenario()], STATIC);
+  const said = puml.match(/^Browser -> Browser: And I search owners for ""$/gm) ?? [];
+  expect(said).toHaveLength(1);
+});
+
+// The frontend's user-interaction root span opens on the click and stays open across
+// everything that click leads to — so a request sent three sentences later still hangs
+// off it. Anchoring on the trace's earliest span would credit that request to the
+// sentence that did the clicking; the browser's span for the request itself is what says
+// when it actually left.
+test('a request is narrated by the sentence that sent it, not by the click that opened the page', () => {
+  const scenario = {
+    title: 'Add a visit',
+    steps: [
+      {label: 'click add visit for first pet', atMs: 1_000},
+      {label: 'submit visit form', atMs: 2_000},
+    ],
+    traces: [<NormSpan[]>[
+      // the interaction root, opened by the click in the first sentence…
+      {
+        traceId: 'late', spanId: 'late-root', parentSpanId: '', name: 'click',
+        kind: 'INTERNAL', serviceName: 'petclinic-frontend', startNano: 1_010 * 1e6, attributes: {},
+      },
+      // …and the request the *second* sentence sent, still inside it
+      {
+        traceId: 'late', spanId: 'late-client', parentSpanId: 'late-root', name: 'POST',
+        kind: 'CLIENT', serviceName: 'petclinic-frontend', startNano: 2_050 * 1e6, attributes: {},
+      },
+      {
+        traceId: 'late', spanId: 'late-server', parentSpanId: 'late-client', name: 'POST /api/visits',
+        kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 2_060 * 1e6,
+        attributes: {'http.status_code': '201'},
+      },
+    ]],
+  };
+  const puml = renderPuml('add-visit.spec.ts', [scenario], STATIC);
+  expect(puml).toContain('Browser -> Browser: submit visit form');
+  expect(puml).not.toContain('click add visit for first pet');
+});
+
+// A scenario recorded before the narration existed — or one whose sentences nobody
+// narrated — has to render exactly as it always did, or every cached run stops replaying.
+test('a scenario with no steps renders no narration', () => {
+  const {steps, ...unnarrated} = narratedScenario();
+  const puml = renderPuml('owner-search.feature', [unnarrated], STATIC);
+  expect(puml).not.toContain('Browser -> Browser:');
+  expect(puml).toContain('Browser -> Backend: List owners');
+});
+
+// The narration explains arrows. A sentence whose trace draws nothing has no arrows to
+// explain, and must not pull itself onto the page.
+test('a sentence whose trace draws nothing is not narrated', () => {
+  const scenario = {
+    title: 'Filter owners',
+    steps: [
+      {label: 'When I open the owners page', atMs: 1_000},
+      {label: 'Then every owner is listed', atMs: 2_000},
+    ],
+    traces: [
+      NARRATION_SPANS('t1', 1_100, 'GET /api/owners'),
+      // a lone browser span: nothing crosses a lifeline, so nothing is drawn
+      [NARRATION_SPANS('t2', 2_100, 'unused')[0]],
+    ],
+  };
+  const puml = renderPuml('owner-search.feature', [scenario], STATIC);
+  expect(puml).toContain('Browser -> Browser: When I open the owners page');
+  expect(puml).not.toContain('Then every owner is listed');
+});
+
+// A @SpringBootTest drives the very same renderer: its spans name their own lifeline,
+// because `service.name` cannot tell the test apart from the code it is calling.
+test('a span may declare its own participant, and Test sorts leftmost', () => {
+  const spans: NormSpan[] = [
+    {
+      traceId: 'j', spanId: 'j-step', parentSpanId: '', name: 'given an owner with a pet',
+      kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
+      attributes: {'genseq.participant': 'Test'},
+    },
+    {
+      traceId: 'j', spanId: 'j-server', parentSpanId: 'j-step', name: 'GET /api/owners/{ownerId}',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_150 * 1e6,
+      attributes: {'http.status_code': '200'},
+    },
+  ];
+  const puml = renderPuml('OwnerTest.java', [{
+    title: 'reads an owner back',
+    steps: [{label: 'when the owner is fetched', atMs: 1_000}],
+    traces: [spans],
+  }], STATIC);
+
+  expect(puml.indexOf('participant Test')).toBeLessThan(puml.indexOf('participant Backend'));
+  // the narration lands on the test's lifeline, not the browser's
+  expect(puml).toContain('Test -> Test: when the owner is fetched');
+  expect(puml).toContain('Test -> Backend: Get an owner by ID\\nGET /api/owners/{ownerId}');
+  expect(puml).not.toContain('participant Browser');
+});
+
+// The legend describes the picture in front of the reader, so it may only mention the
+// narration when there is narration to mention.
+test('the legend explains the sentences only when the diagram has them', () => {
+  const narratedLegend = renderPuml('owner-search.feature', [narratedScenario()], STATIC);
+  expect(narratedLegend).toContain("the test's own sentences");
+
+  const {steps, ...unnarrated} = narratedScenario();
+  expect(renderPuml('owner-search.feature', [unnarrated], STATIC))
+    .not.toContain("the test's own sentences");
+});
+
+// The diagram tells its reader how to regenerate it, and the three runners are not
+// interchangeable: a @SpringBootTest's picture pointing at petclinic-test's script would send
+// them to start a browser stack they do not need.
+test('a Java diagram names its own opt-in and its own runner', () => {
+  const java = renderPuml('../petclinic-backend/src/test/java/OwnerSequenceTest.java', [{
+    title: 'reads an owner back',
+    traces: [<NormSpan[]>[
+      // the extension's per-test root: it declares the lifeline but is never drawn, having
+      // no parent to cross from
+      {
+        traceId: 'j', spanId: 'j-root', parentSpanId: '', name: 'test: reads an owner back',
+        kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 0.9e9,
+        attributes: {'genseq.participant': 'Test', 'test.name': 'reads an owner back'},
+      },
+      {
+        traceId: 'j', spanId: 'j-step', parentSpanId: 'j-root', name: 'when the owner is fetched',
+        kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1e9,
+        attributes: {'genseq.participant': 'Test'},
+      },
+      {
+        traceId: 'j', spanId: 'j-server', parentSpanId: 'j-step', name: 'GET /api/owners/{ownerId}',
+        kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1.1e9,
+        attributes: {'http.status_code': '200'},
+      },
+    ]],
+  }], STATIC);
+
+  expect(java).toContain('@GenerateSequence');
+  expect(java).not.toContain('@generate_sequence');
+  expect(java).toContain('petclinic-backend/run-tests-with-tracing.sh');
+  // its sentences are spans, not step marks, and the legend still has to explain them
+  expect(java).toContain("the test's own sentences");
+
+  const browser = renderPuml('src/owner-search.feature', [narratedScenario()], STATIC);
+  expect(browser).toContain('@generate_sequence');
+  expect(browser).toContain('petclinic-test/run-tests-with-tracing.sh');
+});

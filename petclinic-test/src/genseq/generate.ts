@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
+import {StepMark} from './steps';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 
@@ -11,6 +12,12 @@ export interface TestWindow {
   source: string;
   startMs: number;
   endMs: number;
+  /**
+   * The sentences the scenario walked through, in order, each stamped when it started —
+   * what turns a wall of HTTP arrows back into the test that caused them. Optional: a
+   * window written before this existed still renders, just without the narration.
+   */
+  steps?: StepMark[];
 }
 
 /** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
@@ -164,7 +171,7 @@ export async function generateFromWindows(
         for (const id of ids) {
           traces.push(parseTempoTrace(await deps.getTrace(id)));
         }
-        scenarios.push({title: w.title, traces: chronological(traces)});
+        scenarios.push({title: w.title, traces: chronological(traces), steps: w.steps});
         deps.log(`✅ "${w.title}": ${ids.length} trace(s)`);
       } catch (err) {
         // One scenario's Tempo error must not cost every other diagram — the runner
@@ -221,8 +228,27 @@ export function renderScenarios(
  */
 export const PLAYWRIGHT_SOURCES = /\.spec\.ts$/;
 export const CUCUMBER_SOURCES = /\.feature$/;
+/** A @SpringBootTest carrying @GenerateSequence; its windows are written from the JVM. */
+export const JAVA_SOURCES = /\.java$/;
 
-export async function runGenerate(ownedSources?: RegExp): Promise<void> {
+// Maven cannot call runGenerate() with an argument the way the two Node runners do, so the
+// backend's run-tests-with-tracing.sh names its suite here instead. Without it a post-test
+// `npm run diagram` would take the no-owner path — replay the cache — and never go to
+// Tempo for the traces the Java run has just produced.
+const OWNED_SOURCES: Record<string, RegExp> = {
+  playwright: PLAYWRIGHT_SOURCES,
+  cucumber: CUCUMBER_SOURCES,
+  java: JAVA_SOURCES,
+};
+
+export function ownedSourcesFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): RegExp | undefined {
+  return OWNED_SOURCES[env.GENSEQ_SUITE?.trim().toLowerCase() ?? ''];
+}
+
+export async function runGenerate(owned?: RegExp): Promise<void> {
+  const ownedSources = owned ?? ownedSourcesFromEnv();
   const root = path.join(__dirname, '..', '..');
   const windowsDir = path.join(root, 'test-results', 'trace-windows');
   const options = optionsFromEnv();

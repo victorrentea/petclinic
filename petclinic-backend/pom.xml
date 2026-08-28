@@ -170,7 +170,7 @@
             <scope>test</scope>
         </dependency>
         <!-- Bytecode reader behind EndpointComplexityExtractorTest: cyclomatic complexity and
-        the call graph. -->
+            the call graph. -->
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
@@ -247,5 +247,55 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Trace the tests instead of merely running them: attaches the OpenTelemetry Java agent
+            to the surefire JVM, so every @GenerateSequence test is recorded in Tempo and drawn as
+            a sequence diagram beside its .java file. Driven by ./run-tests-with-tracing.sh, which
+            also downloads the agent and renders the diagrams afterwards.
+
+            A profile, not the default: the agent costs a second of startup and needs a collector
+            on :4318, and `mvn test` must stay a plain test run. -->
+        <profile>
+            <id>genseq</id>
+            <properties>
+                <!-- 2.20+ is what can capture bound query parameters (db.query.parameter.<n>);
+                    kept in step with start-backend.sh, which downloads the same jar. -->
+                <otel.agent.version>2.20.1</otel.agent.version>
+                <otel.agent.jar>${project.basedir}/.tools/opentelemetry-javaagent-${otel.agent.version}.jar</otel.agent.jar>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- @{argLine} keeps jacoco's agent, which prepare-agent put there. -->
+                            <argLine>@{argLine} -javaagent:${otel.agent.jar}</argLine>
+                            <!-- Environment, not systemPropertyVariables: surefire applies those
+                                inside the forked JVM *after* it has booted, which is after the
+                                agent's premain has already read its configuration. -->
+                            <environmentVariables>
+                                <OTEL_SERVICE_NAME>petclinic-backend</OTEL_SERVICE_NAME>
+                                <OTEL_EXPORTER_OTLP_ENDPOINT>http://localhost:4318</OTEL_EXPORTER_OTLP_ENDPOINT>
+                                <OTEL_EXPORTER_OTLP_PROTOCOL>http/protobuf</OTEL_EXPORTER_OTLP_PROTOCOL>
+                                <OTEL_TRACES_EXPORTER>otlp</OTEL_TRACES_EXPORTER>
+                                <OTEL_METRICS_EXPORTER>none</OTEL_METRICS_EXPORTER>
+                                <OTEL_LOGS_EXPORTER>none</OTEL_LOGS_EXPORTER>
+                                <OTEL_RESOURCE_ATTRIBUTES>deployment.environment=local</OTEL_RESOURCE_ATTRIBUTES>
+                                <!-- Same reasoning as start-backend.sh: capture the most the agent
+                                    can give, and decide what the picture shows at render time. -->
+                                <OTEL_INSTRUMENTATION_COMMON_DB_STATEMENT_SANITIZER_ENABLED>false</OTEL_INSTRUMENTATION_COMMON_DB_STATEMENT_SANITIZER_ENABLED>
+                                <OTEL_INSTRUMENTATION_JDBC_EXPERIMENTAL_CAPTURE_QUERY_PARAMETERS>true</OTEL_INSTRUMENTATION_JDBC_EXPERIMENTAL_CAPTURE_QUERY_PARAMETERS>
+                                <OTEL_SEMCONV_STABILITY_OPT_IN>database/dup</OTEL_SEMCONV_STABILITY_OPT_IN>
+                                <!-- A test run is over in seconds; the default 5s batch delay would
+                                    leave the last spans to the shutdown hook. -->
+                                <OTEL_BSP_SCHEDULE_DELAY>500</OTEL_BSP_SCHEDULE_DELAY>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
