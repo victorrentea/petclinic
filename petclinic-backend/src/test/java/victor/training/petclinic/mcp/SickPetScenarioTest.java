@@ -96,16 +96,16 @@ class SickPetScenarioTest {
                 .filter(t -> "cat".equalsIgnoreCase(t.getName()))
                 .findFirst()
                 .orElseGet(() -> petRepository.findPetTypes().get(0));
-        Pet cat = new Pet()
-                .setName(catName)
-                .setBirthDate(LocalDate.of(2021, 4, 15))
-                .setType(catType);
-        Owner owner = new Owner()
-                .setFirstName("Victor")
-                .setLastName("Owner_SPS")
-                .setAddress("1 Cat Lane")
-                .setCity("Bucharest")
-                .setTelephone("0700000000");
+        Pet cat = new Pet();
+        cat.setName(catName);
+        cat.setBirthDate(LocalDate.of(2021, 4, 15));
+        cat.setType(catType);
+        Owner owner = new Owner();
+        owner.setFirstName("Victor");
+        owner.setLastName("Owner_SPS");
+        owner.setAddress("1 Cat Lane");
+        owner.setCity("Bucharest");
+        owner.setTelephone("0700000000");
         owner.addPet(cat);
         return ownerRepository.save(owner);
     }

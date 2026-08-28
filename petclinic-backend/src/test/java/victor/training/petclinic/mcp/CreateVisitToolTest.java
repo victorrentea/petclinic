@@ -47,16 +47,16 @@ class CreateVisitToolTest {
 
     @BeforeEach
     void setUp() {
-        Pet pet = new Pet()
-                .setName("Rex")
-                .setBirthDate(LocalDate.of(2020, 1, 1))
-                .setType(petRepository.findPetTypes().get(0));
-        Owner owner = new Owner()
-                .setFirstName("Tdd")
-                .setLastName("Creator")
-                .setAddress("1 Test Way")
-                .setCity("Testville")
-                .setTelephone("0000000000");
+        Pet pet = new Pet();
+        pet.setName("Rex");
+        pet.setBirthDate(LocalDate.of(2020, 1, 1));
+        pet.setType(petRepository.findPetTypes().get(0));
+        Owner owner = new Owner();
+        owner.setFirstName("Tdd");
+        owner.setLastName("Creator");
+        owner.setAddress("1 Test Way");
+        owner.setCity("Testville");
+        owner.setTelephone("0000000000");
         owner.addPet(pet);
         ownerRepository.save(owner);
         ownerId = owner.getId();
@@ -89,16 +89,16 @@ class CreateVisitToolTest {
 
     @Test
     void pet_of_another_owner_is_rejected() {
-        Pet otherPet = new Pet()
-                .setName("Bella")
-                .setBirthDate(LocalDate.of(2021, 2, 2))
-                .setType(petRepository.findPetTypes().get(0));
-        Owner other = new Owner()
-                .setFirstName("Other")
-                .setLastName("Owner")
-                .setAddress("9 Elsewhere")
-                .setCity("Faraway")
-                .setTelephone("0000000000");
+        Pet otherPet = new Pet();
+        otherPet.setName("Bella");
+        otherPet.setBirthDate(LocalDate.of(2021, 2, 2));
+        otherPet.setType(petRepository.findPetTypes().get(0));
+        Owner other = new Owner();
+        other.setFirstName("Other");
+        other.setLastName("Owner");
+        other.setAddress("9 Elsewhere");
+        other.setCity("Faraway");
+        other.setTelephone("0000000000");
         other.addPet(otherPet);
         ownerRepository.save(other);
 

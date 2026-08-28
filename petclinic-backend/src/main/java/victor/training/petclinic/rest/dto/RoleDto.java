@@ -3,9 +3,7 @@ package victor.training.petclinic.rest.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
-@Data
 public class RoleDto {
 
     @NotNull
@@ -13,4 +11,11 @@ public class RoleDto {
     @Schema(example = "admin", description = "The role's name")
     private String name;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

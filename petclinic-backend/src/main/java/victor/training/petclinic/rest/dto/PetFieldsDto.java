@@ -5,9 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 
-@Data
 public class PetFieldsDto {
 
     @NotNull
@@ -26,4 +24,28 @@ public class PetFieldsDto {
     @Valid
     @Schema
     private PetTypeDto type;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public PetTypeDto getType() {
+        return type;
+    }
+
+    public void setType(PetTypeDto type) {
+        this.type = type;
+    }
 }

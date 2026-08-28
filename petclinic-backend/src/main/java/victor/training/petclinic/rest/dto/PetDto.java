@@ -7,14 +7,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 public class PetDto {
     @NotBlank
     @Size(max = 30)
@@ -45,4 +43,51 @@ public class PetDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     private List<VisitDto> visits = new ArrayList<>();
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public PetTypeDto getType() {
+        return type;
+    }
+
+    public void setType(PetTypeDto type) {
+        this.type = type;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Integer ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public List<VisitDto> getVisits() {
+        return visits;
+    }
+
+    public void setVisits(List<VisitDto> visits) {
+        this.visits = visits;
+    }
 }

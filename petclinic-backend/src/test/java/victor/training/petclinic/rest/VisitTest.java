@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
-import victor.training.petclinic.domain.PetType;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
@@ -64,9 +63,9 @@ public class VisitTest {
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
-        Pet pet = TestData.aPet()
-                .setOwner(owner)
-                .setType(petTypeRepository.save(new PetType().setName("dog")));
+        Pet pet = TestData.aPet();
+        pet.setOwner(owner);
+        pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
         petRepository.save(pet);
         petId = pet.getId();
 

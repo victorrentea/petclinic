@@ -9,9 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
-@Data
 public class VetDto {
 
     @NotNull
@@ -35,4 +33,36 @@ public class VetDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1", description = "The ID of the vet.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer id;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public List<SpecialtyDto> getSpecialties() {
+        return specialties;
+    }
+
+    public void setSpecialties(List<SpecialtyDto> specialties) {
+        this.specialties = specialties;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }
