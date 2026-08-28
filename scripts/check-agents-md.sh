@@ -20,15 +20,13 @@ cd "$ROOT"
 
 POINTER='@AGENTS.md'
 
-# Tracked symlinks that are a deliberate, reviewed exception. Anything not listed
-# here fails the check.
-ALLOWED_SYMLINKS=(
-  # Copilot CLI reads .github/skills, Claude Code reads .claude/skills, and neither
-  # can be pointed elsewhere by config. A symlink is the only way to serve one copy
-  # to both. Consequence on Windows: this arrives as a 17-byte text file and Copilot
-  # CLI finds no skills there. Claude Code is unaffected (it reads the real dir).
-  '.github/skills'
-)
+# Tracked symlinks that are a deliberate, reviewed exception. Deliberately empty:
+# the repo carries no symlink at all, so every path in it survives a Windows clone.
+# (.github/skills -> ../.claude/skills used to live here until we measured that
+# `copilot skill list` reads .claude/skills directly — see `copilot skill --help`:
+# "Project  .github/skills/, .agents/skills/, or .claude/skills/". The symlink was
+# redundant, so it went rather than got excused.)
+ALLOWED_SYMLINKS=()
 
 fail=0
 err() { echo "[agents-md] ❌ $*"; fail=1; }
@@ -37,7 +35,8 @@ err() { echo "[agents-md] ❌ $*"; fail=1; }
 while read -r mode _ _ path; do
   [ "$mode" = "120000" ] || continue
   allowed=0
-  for a in "${ALLOWED_SYMLINKS[@]}"; do
+  # ${arr[@]+…} keeps `set -u` quiet on an empty array under bash 3.2 (macOS).
+  for a in ${ALLOWED_SYMLINKS[@]+"${ALLOWED_SYMLINKS[@]}"}; do
     [ "$path" = "$a" ] && allowed=1 && break
   done
   if [ "$allowed" -eq 0 ]; then
