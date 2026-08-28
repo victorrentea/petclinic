@@ -17,9 +17,6 @@ public class VetMapper {
     }
 
     public Vet toVet(VetDto vetDto) {
-        if (vetDto == null) {
-            return null;
-        }
         Vet vet = new Vet();
         vet.setId(vetDto.getId());
         vet.setFirstName(vetDto.getFirstName());
@@ -29,9 +26,6 @@ public class VetMapper {
     }
 
     public Vet toVet(VetFieldsDto vetFieldsDto) {
-        if (vetFieldsDto == null) {
-            return null;
-        }
         Vet vet = new Vet();
         vet.setFirstName(vetFieldsDto.getFirstName());
         vet.setLastName(vetFieldsDto.getLastName());
@@ -40,9 +34,6 @@ public class VetMapper {
     }
 
     public VetDto toVetDto(Vet vet) {
-        if (vet == null) {
-            return null;
-        }
         VetDto vetDto = new VetDto();
         vetDto.setFirstName(vet.getFirstName());
         vetDto.setLastName(vet.getLastName());
@@ -53,7 +44,7 @@ public class VetMapper {
 
     public List<VetDto> toVetDtos(List<Vet> vets) {
         if (vets == null) {
-            return null;
+            return List.of();
         }
         List<VetDto> dtos = new ArrayList<>(vets.size());
         for (Vet vet : vets) {

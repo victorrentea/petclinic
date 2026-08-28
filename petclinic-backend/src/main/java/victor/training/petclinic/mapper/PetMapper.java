@@ -24,9 +24,6 @@ public class PetMapper {
     }
 
     public PetDto toPetDto(Pet pet) {
-        if (pet == null) {
-            return null;
-        }
         PetDto petDto = new PetDto();
         Owner owner = pet.getOwner();
         if (owner != null) {
@@ -42,7 +39,7 @@ public class PetMapper {
 
     public List<PetDto> toPetsDto(List<Pet> pets) {
         if (pets == null) {
-            return null;
+            return List.of();
         }
         List<PetDto> dtos = new ArrayList<>(pets.size());
         for (Pet pet : pets) {
@@ -53,7 +50,7 @@ public class PetMapper {
 
     public List<Pet> toPets(List<PetDto> pets) {
         if (pets == null) {
-            return null;
+            return new ArrayList<>();
         }
         List<Pet> entities = new ArrayList<>(pets.size());
         for (PetDto petDto : pets) {
@@ -63,9 +60,6 @@ public class PetMapper {
     }
 
     public Pet toPet(PetDto petDto) {
-        if (petDto == null) {
-            return null;
-        }
         Pet pet = new Pet();
         pet.setOwner(ownerOfId(petDto.getOwnerId()));
         pet.setId(petDto.getId());
@@ -77,9 +71,6 @@ public class PetMapper {
     }
 
     public Pet toPet(PetFieldsDto petFieldsDto) {
-        if (petFieldsDto == null) {
-            return null;
-        }
         Pet pet = new Pet();
         pet.setName(petFieldsDto.getName());
         pet.setBirthDate(petFieldsDto.getBirthDate());
@@ -109,7 +100,7 @@ public class PetMapper {
 
     public List<PetTypeDto> toPetTypeDtos(List<PetType> petTypes) {
         if (petTypes == null) {
-            return null;
+            return List.of();
         }
         List<PetTypeDto> dtos = new ArrayList<>(petTypes.size());
         for (PetType petType : petTypes) {
@@ -126,7 +117,7 @@ public class PetMapper {
 
     private Set<Visit> toVisits(List<VisitDto> visitDtos) {
         if (visitDtos == null) {
-            return null;
+            return new LinkedHashSet<>();
         }
         Set<Visit> visits = LinkedHashSet.newLinkedHashSet(visitDtos.size());
         for (VisitDto visitDto : visitDtos) {

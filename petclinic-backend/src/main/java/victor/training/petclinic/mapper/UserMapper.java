@@ -15,9 +15,6 @@ import java.util.Set;
 public class UserMapper {
 
     public User toUser(UserDto userDto) {
-        if (userDto == null) {
-            return null;
-        }
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setPassword(userDto.getPassword());
@@ -27,9 +24,6 @@ public class UserMapper {
     }
 
     public UserDto toUserDto(User user) {
-        if (user == null) {
-            return null;
-        }
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getUsername());
         userDto.setPassword(user.getPassword());
@@ -39,9 +33,6 @@ public class UserMapper {
     }
 
     private Role toRole(RoleDto roleDto) {
-        if (roleDto == null) {
-            return null;
-        }
         Role role = new Role();
         role.setName(roleDto.getName());
         return role;
@@ -49,7 +40,7 @@ public class UserMapper {
 
     private Set<Role> toRoles(List<RoleDto> roleDtos) {
         if (roleDtos == null) {
-            return null;
+            return new LinkedHashSet<>();
         }
         Set<Role> roles = LinkedHashSet.newLinkedHashSet(roleDtos.size());
         for (RoleDto roleDto : roleDtos) {
@@ -59,9 +50,6 @@ public class UserMapper {
     }
 
     private RoleDto toRoleDto(Role role) {
-        if (role == null) {
-            return null;
-        }
         RoleDto roleDto = new RoleDto();
         roleDto.setName(role.getName());
         return roleDto;
@@ -69,7 +57,7 @@ public class UserMapper {
 
     private List<RoleDto> toRoleDtos(Set<Role> roles) {
         if (roles == null) {
-            return null;
+            return List.of();
         }
         List<RoleDto> roleDtos = new ArrayList<>(roles.size());
         for (Role role : roles) {

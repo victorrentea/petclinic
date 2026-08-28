@@ -12,18 +12,12 @@ import java.util.List;
 public class PetTypeMapper {
 
     public PetType toPetType(PetTypeFieldsDto petTypeFieldsDto) {
-        if (petTypeFieldsDto == null) {
-            return null;
-        }
         PetType petType = new PetType();
         petType.setName(petTypeFieldsDto.getName());
         return petType;
     }
 
     public PetTypeDto toPetTypeDto(PetType petType) {
-        if (petType == null) {
-            return null;
-        }
         PetTypeDto petTypeDto = new PetTypeDto();
         petTypeDto.setName(petType.getName());
         petTypeDto.setId(petType.getId());
@@ -31,9 +25,6 @@ public class PetTypeMapper {
     }
 
     public PetTypeFieldsDto toPetTypeFieldsDto(PetType petType) {
-        if (petType == null) {
-            return null;
-        }
         PetTypeFieldsDto petTypeFieldsDto = new PetTypeFieldsDto();
         petTypeFieldsDto.setName(petType.getName());
         return petTypeFieldsDto;
@@ -41,7 +32,7 @@ public class PetTypeMapper {
 
     public List<PetTypeDto> toPetTypeDtos(List<PetType> petTypes) {
         if (petTypes == null) {
-            return null;
+            return List.of();
         }
         List<PetTypeDto> dtos = new ArrayList<>(petTypes.size());
         for (PetType petType : petTypes) {

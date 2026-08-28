@@ -14,9 +14,6 @@ import java.util.List;
 public class VisitMapper {
 
     public Visit toVisit(VisitDto visitDto) {
-        if (visitDto == null) {
-            return null;
-        }
         Visit visit = new Visit();
         visit.setPet(petOfId(visitDto.getPetId()));
         visit.setId(visitDto.getId());
@@ -26,9 +23,6 @@ public class VisitMapper {
     }
 
     public Visit toVisit(VisitFieldsDto visitFieldsDto) {
-        if (visitFieldsDto == null) {
-            return null;
-        }
         Visit visit = new Visit();
         visit.setDate(visitFieldsDto.getDate());
         visit.setDescription(visitFieldsDto.getDescription());
@@ -36,9 +30,6 @@ public class VisitMapper {
     }
 
     public VisitDto toVisitDto(Visit visit) {
-        if (visit == null) {
-            return null;
-        }
         Pet pet = visit.getPet();
         Owner owner = pet == null ? null : pet.getOwner();
         VisitDto visitDto = new VisitDto();
@@ -59,7 +50,7 @@ public class VisitMapper {
 
     public List<VisitDto> toVisitsDto(List<Visit> visits) {
         if (visits == null) {
-            return null;
+            return List.of();
         }
         List<VisitDto> dtos = new ArrayList<>(visits.size());
         for (Visit visit : visits) {

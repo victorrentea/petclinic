@@ -11,9 +11,6 @@ import java.util.List;
 public class SpecialtyMapper {
 
     public Specialty toSpecialty(SpecialtyDto specialtyDto) {
-        if (specialtyDto == null) {
-            return null;
-        }
         Specialty specialty = new Specialty();
         specialty.setId(specialtyDto.getId());
         specialty.setName(specialtyDto.getName());
@@ -22,9 +19,6 @@ public class SpecialtyMapper {
     }
 
     public SpecialtyDto toSpecialtyDto(Specialty specialty) {
-        if (specialty == null) {
-            return null;
-        }
         SpecialtyDto specialtyDto = new SpecialtyDto();
         specialtyDto.setId(specialty.getId());
         specialtyDto.setName(specialty.getName());
@@ -34,7 +28,7 @@ public class SpecialtyMapper {
 
     public List<SpecialtyDto> toSpecialtyDtos(List<Specialty> specialties) {
         if (specialties == null) {
-            return null;
+            return List.of();
         }
         List<SpecialtyDto> dtos = new ArrayList<>(specialties.size());
         for (Specialty specialty : specialties) {
@@ -45,7 +39,7 @@ public class SpecialtyMapper {
 
     public List<Specialty> toSpecialty(List<SpecialtyDto> specialties) {
         if (specialties == null) {
-            return null;
+            return new ArrayList<>();
         }
         List<Specialty> entities = new ArrayList<>(specialties.size());
         for (SpecialtyDto specialtyDto : specialties) {

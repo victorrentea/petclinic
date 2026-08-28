@@ -17,9 +17,6 @@ public class OwnerMapper {
     }
 
     public OwnerDto toOwnerDto(Owner owner) {
-        if (owner == null) {
-            return null;
-        }
         OwnerDto ownerDto = new OwnerDto();
         ownerDto.setId(owner.getId());
         ownerDto.setFirstName(owner.getFirstName());
@@ -32,9 +29,6 @@ public class OwnerMapper {
     }
 
     public Owner toOwner(OwnerFieldsDto ownerDto) {
-        if (ownerDto == null) {
-            return null;
-        }
         Owner owner = new Owner();
         owner.setFirstName(ownerDto.getFirstName());
         owner.setLastName(ownerDto.getLastName());
@@ -46,7 +40,7 @@ public class OwnerMapper {
 
     public List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection) {
         if (ownerCollection == null) {
-            return null;
+            return List.of();
         }
         List<OwnerDto> dtos = new ArrayList<>(ownerCollection.size());
         for (Owner owner : ownerCollection) {
