@@ -1,0 +1,14 @@
+# CLAUDE.md: "No Lombok: write accessors, constructors and LoggerFactory.getLogger(...)
+# explicitly". Lombok was removed from both poms; an import that sneaks back in would
+# not compile, and a re-added dependency would quietly resurrect the generated-code
+# layer this project deliberately dropped.
+id: no-lombok
+language: java
+severity: error
+message: "Lombok was removed from this project — write the accessor/constructor/logger explicitly"
+files:
+  - "petclinic-backend/src/main/**/*.java"
+  - "petclinic-chatbot/src/main/**/*.java"
+rule:
+  kind: import_declaration
+  regex: "^import\\s+lombok\\."

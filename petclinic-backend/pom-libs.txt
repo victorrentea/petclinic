@@ -26,7 +26,6 @@ petclinic-chatbot:
   com.embabel.agent:embabel-agent-openai-autoconfigure
   com.embabel.agent:embabel-agent-starter
   io.micrometer:micrometer-registry-prometheus
-  org.projectlombok:lombok
   org.springframework.ai:spring-ai-advisors-vector-store
   org.springframework.ai:spring-ai-starter-mcp-client
   org.springframework.ai:spring-ai-starter-model-ollama

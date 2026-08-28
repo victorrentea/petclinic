@@ -20,7 +20,6 @@ applying to it — the dependency drifts out of the tested, coherent set the BOM
 
    ```xml
    <properties>
-     <lombok.version>1.18.36</lombok.version>   <!-- overrides Boot's managed lombok -->
    </properties>
    ```
 
@@ -56,8 +55,6 @@ No output → it is unmanaged: add a property-backed version.
 
 | artifact | managed by parent? | correct form |
 | --- | --- | --- |
-| `org.projectlombok:lombok` | **yes** (1.18.36 via `${lombok.version}`) | `<version>` is redundant — drop it, keep the property |
-| `org.mapstruct:*` | no | needs `${mapstruct.version}` |
 | `org.springdoc:springdoc-openapi-starter-webmvc-ui` | no | needs an explicit version |
 | `io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations` | no | needs an explicit version |
 

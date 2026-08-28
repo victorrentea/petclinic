@@ -1,0 +1,16 @@
+id: no-lombok
+snapshots:
+  ? |
+    import lombok.Data;
+  : labels:
+    - source: import lombok.Data;
+      style: primary
+      start: 0
+      end: 19
+  ? |
+    import lombok.extern.slf4j.Slf4j;
+  : labels:
+    - source: import lombok.extern.slf4j.Slf4j;
+      style: primary
+      start: 0
+      end: 33

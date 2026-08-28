@@ -20,21 +20,8 @@
         <java.version>21</java.version>
 
         <!-- Third-party libraries -->
-        <lombok.version>1.18.36</lombok.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
         <spring-ai.version>1.1.2</spring-ai.version>
 
-        <!-- IDE-urile pe m2e (VS Code / Eclipse) nu ruleaza ele procesoarele de
-        adnotari, ci folosesc sursele generate de Maven in
-        target/generated-sources/annotations.
-        Motivul: in Eclipse, Lombok nu e un annotation processor, ci un agent
-        care modifica AST-ul dupa runda de procesare. MapStruct, rulat de JDT APT
-        in aceeasi runda, nu vede getterele generate de Lombok si cade cu
-        "No implementation was created for XMapper due to having a problem in
-        the erroneous element". lombok-mapstruct-binding rezolva asta doar
-        pentru javac, nu si pentru JDT.
-        Dupa ce schimbi un mapper, ruleaza `mvn compile` ca sa se regenereze. -->
-        <m2e.apt.activation>maven_execution</m2e.apt.activation>
     </properties>
 
     <dependencyManagement>
@@ -111,22 +98,6 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>compile</scope>
-        </dependency>
 
         <!-- Test libs -->
         <dependency>
@@ -199,7 +170,7 @@
             <scope>test</scope>
         </dependency>
         <!-- Bytecode reader behind EndpointComplexityExtractorTest: cyclomatic complexity and
-        the call graph, including MapStruct/Lombok code that has no source in this repo. -->
+        the call graph. -->
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
@@ -271,29 +242,6 @@
                         <endWithNewline/>
                         <eclipse><file>${project.basedir}/../.config/eclipse-formatter.xml</file></eclipse>
                     </java>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>1.6.3</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
