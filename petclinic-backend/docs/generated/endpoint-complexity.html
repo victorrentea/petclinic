@@ -316,14 +316,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:34.62%;background:var(--series-1)" data-tip="controller: 9 decision points"></i><i class="seg" style="width:65.38%;background:var(--series-2)" data-tip="mapper: 17 decision points"></i></span>
-<span class="value">27</span>
+<span class="bar"><i class="seg" style="width:39.29%;background:var(--series-1)" data-tip="controller: 11 decision points"></i><i class="seg" style="width:60.71%;background:var(--series-2)" data-tip="mapper: 17 decision points"></i></span>
+<span class="value">29</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.listOwners(String, int, int, String) — 64 methods, call depth 7</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>OwnerRestController.parseSort(String)</td><td>controller</td><td class="num">6</td></tr>
+<tr><td>OwnerRestController.parseSort(String)</td><td>controller</td><td class="num">8</td></tr>
 <tr><td>OwnerRestController.OwnerSortKey.of(String)</td><td>controller</td><td class="num">3</td></tr>
 <tr><td>OwnerRestController.listOwners(String, int, int, String)</td><td>controller</td><td class="num">3</td></tr>
 <tr><td>PetMapperImpl.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
@@ -394,7 +394,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}</span>
-<span class="bar"><i class="seg" style="width:65.38%;background:var(--series-2)" data-tip="mapper: 17 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:60.71%;background:var(--series-2)" data-tip="mapper: 17 decision points"></i></span>
 <span class="value">18</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 60 methods, call depth 7</p>
@@ -468,7 +468,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets</span>
-<span class="bar"><i class="seg" style="width:61.54%;background:var(--series-2)" data-tip="mapper: 16 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:57.14%;background:var(--series-2)" data-tip="mapper: 16 decision points"></i></span>
 <span class="value">17</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.listPets() — 47 methods, call depth 6</p>
@@ -529,7 +529,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:53.85%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:50.00%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
 <span class="value">15</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 48 methods, call depth 5</p>
@@ -591,7 +591,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:53.85%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:50.00%;background:var(--series-2)" data-tip="mapper: 14 decision points"></i></span>
 <span class="value">15</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.getPet(int) — 46 methods, call depth 5</p>
@@ -651,7 +651,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/users</span>
-<span class="bar"><i class="seg" style="width:19.23%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:30.77%;background:var(--series-2)" data-tip="mapper: 8 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:17.86%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:28.57%;background:var(--series-2)" data-tip="mapper: 8 decision points"></i></span>
 <span class="value">14</span>
 </summary>
 <div class="detail"><p class="meta">UserRestController.addUser(UserDto) — 34 methods, call depth 4</p>
@@ -699,7 +699,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:42.31%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:39.29%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
 <span class="value">12</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.listVisits() — 28 methods, call depth 4</p>
@@ -741,7 +741,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:34.62%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:32.14%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
 <span class="value">10</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.getVisit(int) — 27 methods, call depth 3</p>
@@ -782,7 +782,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:23.08%;background:var(--series-2)" data-tip="mapper: 6 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:21.43%;background:var(--series-2)" data-tip="mapper: 6 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.listVets() — 22 methods, call depth 5</p>
@@ -818,7 +818,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-1)" data-tip="controller: 4 decision points"></i><i class="seg" style="width:7.69%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-1)" data-tip="controller: 4 decision points"></i><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 21 methods, call depth 4</p>
@@ -853,7 +853,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:14.29%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">6</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.addVet(VetDto) — 27 methods, call depth 4</p>
@@ -894,7 +894,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:11.54%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:10.71%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">6</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.updateVet(int, VetDto) — 25 methods, call depth 3</p>
@@ -933,7 +933,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.getVet(int) — 21 methods, call depth 4</p>
@@ -968,7 +968,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:14.29%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 11 methods, call depth 2</p>
@@ -993,7 +993,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:11.54%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:10.71%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.listPetTypes() — 9 methods, call depth 3</p>
@@ -1016,7 +1016,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:11.54%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:10.71%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.listSpecialties() — 11 methods, call depth 3</p>
@@ -1041,7 +1041,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</span>
-<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addPetToOwner(int, PetFieldsDto) — 23 methods, call depth 3</p>
@@ -1078,7 +1078,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addOwner(OwnerFieldsDto) — 15 methods, call depth 2</p>
@@ -1107,7 +1107,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto) — 12 methods, call depth 2</p>
@@ -1133,7 +1133,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.updatePet(int, PetDto) — 14 methods, call depth 2</p>
@@ -1161,7 +1161,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.addPetType(PetTypeFieldsDto) — 7 methods, call depth 2</p>
@@ -1182,7 +1182,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.getPetType(int) — 8 methods, call depth 2</p>
@@ -1204,7 +1204,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.deletePetType(int) — 3 methods, call depth 1</p>
@@ -1221,7 +1221,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.addSpecialty(SpecialtyDto) — 12 methods, call depth 2</p>
@@ -1247,7 +1247,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/feed</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyFeedController.feed(String) — 9 methods, call depth 3</p>
@@ -1270,7 +1270,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/{specialtyId}</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.getSpecialty(int) — 10 methods, call depth 2</p>
@@ -1507,7 +1507,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> create_visit</span>
-<span class="bar"><i class="seg" style="width:26.92%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:25.00%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.createVisit(int, LocalDate, LocalTime, String) — 20 methods, call depth 3</p>
@@ -1541,7 +1541,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> call_vet_ambulance</span>
-<span class="bar"><i class="seg" style="width:23.08%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:21.43%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.callVetAmbulance(McpSyncRequestContext) — 3 methods, call depth 1</p>
@@ -1558,7 +1558,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> cancel_visit</span>
-<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.cancelVisit(LocalDate) — 13 methods, call depth 2</p>
@@ -1585,7 +1585,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> list_visits</span>
-<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.14%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.listVisits() — 13 methods, call depth 1</p>
@@ -1612,7 +1612,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> get_owner_profile</span>
-<span class="bar"><i class="seg" style="width:3.85%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:3.57%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.getOwnerProfile() — 16 methods, call depth 2</p>
@@ -1644,7 +1644,7 @@ td {
 <table class="summary">
 <thead><tr><th>kind</th><th>entry point</th><th>handler</th><th class="num">flow CC</th><th class="num">methods</th><th class="num">depth</th></tr></thead>
 <tbody>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String, int, int, String)</td><td class="num">27</td><td class="num">64</td><td class="num">7</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String, int, int, String)</td><td class="num">29</td><td class="num">64</td><td class="num">7</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">18</td><td class="num">60</td><td class="num">7</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">17</td><td class="num">47</td><td class="num">6</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</td><td>OwnerRestController.getOwnersPet(int, int)</td><td class="num">15</td><td class="num">48</td><td class="num">5</td></tr>
