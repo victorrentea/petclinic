@@ -5,6 +5,7 @@ description: >
   the /multi-review skill only, not for direct human use. Flags wasteful work the diff introduces.
 tools: Bash, Read, Grep
 model: opus
+memory: project
 ---
 
 # Efficiency reviewer
