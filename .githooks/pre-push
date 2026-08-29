@@ -94,6 +94,7 @@ TESTS=(
   DomainModelExtractorTest
   DbSchemaExtractorTest
   JpaMatchesDBSchemaTest
+  DeploymentDiagramTest
 )
 TESTS_CSV=$(IFS=,; echo "${TESTS[*]}")
 echo "[pre-push] Running guardrail tests (this may take ~20s)…"
