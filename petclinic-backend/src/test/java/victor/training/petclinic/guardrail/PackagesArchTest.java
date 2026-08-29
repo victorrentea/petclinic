@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         importOptions = DoNotIncludeTests.class)
 class PackagesArchTest {
 
-    private static final Path DIAGRAM = Paths.get("docs/packages.puml");
+    private static final Path DIAGRAM = Paths.get("docs/package2s.puml");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java/victor/training/petclinic");
 
     @ArchTest
