@@ -99,7 +99,7 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://0chbrim{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
-Backend --> Test: 200
+Backend --> Test: [[genseq://1r19c8i{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
 Test -> Test: when the owner detail page is opened
@@ -111,15 +111,15 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Test: 200
+Backend --> Test: [[genseq://1u21t6e{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
 Test -> Test: and a visit is added for the first pet
 activate Test
-Test -> Backend: Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits
+Test -> Backend: [[genseq://1k7xuy6{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://1rdygrb{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://1bwb9c2{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Test: 201
 deactivate Backend
@@ -133,7 +133,7 @@ Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} sele
 end
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Test: 200
+Backend --> Test: [[genseq://07xwj8b{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
 @enduml

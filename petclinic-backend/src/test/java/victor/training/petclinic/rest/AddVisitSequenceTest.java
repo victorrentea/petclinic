@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static victor.training.petclinic.genseq.Rest.call;
 import static victor.training.petclinic.genseq.Steps.and;
 import static victor.training.petclinic.genseq.Steps.given;
 import static victor.training.petclinic.genseq.Steps.then;
@@ -67,26 +68,30 @@ class AddVisitSequenceTest {
         int petId = owner.path("pets").get(0).path("id").asInt();
 
         when("the owner detail page is opened");
-        mockMvc.perform(get("/api/owners/{ownerId}", ownerId)).andExpect(status().isOk());
+        call(mockMvc, get("/api/owners/{ownerId}", ownerId)).andExpect(status().isOk());
 
         and("a visit is added for the first pet");
         String description = "Annual check-up " + System.currentTimeMillis();
-        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+        call(mockMvc, post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(Map.of("date", VISIT_DATE, "description", description))))
                 .andExpect(status().isCreated());
 
         then("the visit is listed under the pet");
-        JsonNode reloaded = json(mockMvc.perform(get("/api/owners/{ownerId}", ownerId))
+        JsonNode reloaded = json(call(mockMvc, get("/api/owners/{ownerId}", ownerId))
                 .andExpect(status().isOk()));
         assertThat(reloaded.path("pets").get(0).path("visits").toString())
                 .contains(description)
                 .contains(VISIT_DATE);
     }
 
-    /** The Java twin of the spec's `anOwnerWithAtLeastOnePetExists`, over MockMvc instead of axios. */
+    /**
+     * The Java twin of the spec's `anOwnerWithAtLeastOnePetExists`, over MockMvc instead of axios.
+     * {@link victor.training.petclinic.genseq.Rest#call} rather than a bare `mockMvc.perform`: it
+     * wraps the call in the span that carries the JSON payloads onto the diagram.
+     */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(mockMvc.perform(get("/api/owners")).andExpect(status().isOk()));
+        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
         return StreamSupport.stream(owners.spliterator(), false)
                 .filter(o -> !o.path("pets").isEmpty())
                 .findFirst()
