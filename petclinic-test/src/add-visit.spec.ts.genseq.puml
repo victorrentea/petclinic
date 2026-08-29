@@ -33,7 +33,7 @@ footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== Add a visit to an existing pet from the owner detail page ==
+== [[genseq-scenario://31{Open the test at this scenario} Add a visit to an existing pet from the owner detail page]] ==
 Browser -> Browser: open owner detail page
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend

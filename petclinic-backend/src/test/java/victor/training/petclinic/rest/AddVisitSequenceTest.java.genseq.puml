@@ -33,7 +33,7 @@ footer @GenerateSequence — generated from real traces, do not edit
 participant Test
 participant Backend
 participant DB
-== adds a visit to an existing pet ==
+== [[genseq-scenario://64{Open the test at this scenario} adds a visit to an existing pet]] ==
 Test -> Test: given an owner with at least one pet exists
 activate Test
 Test -> Backend: List owners\nGET /api/owners

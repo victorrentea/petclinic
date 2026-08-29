@@ -3,6 +3,7 @@ import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
 import {StepMark} from './steps';
+import {scenarioLine} from './scenario-line';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 
@@ -202,7 +203,7 @@ export function renderScenarios(
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
-    const {puml, details} = renderDiagram(source, scenarios, options);
+    const {puml, details} = renderDiagram(source, located(scenarios, source, rootDir, deps), options);
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not
@@ -218,6 +219,22 @@ export function renderScenarios(
     }
   }
   return written;
+}
+
+/**
+ * Each scenario with the line it is written on, so its section header can link back to it.
+ *
+ * Read here rather than carried in the span cache: re-rendering an older run's spans must
+ * point at where the scenario is *now*. A file that cannot be read — a diagram whose test was
+ * deleted, or one being rendered somewhere the sources are not checked out — simply yields no
+ * lines, and every section renders as the plain text it always did.
+ */
+function located(
+  scenarios: DiagramScenario[], source: string, rootDir: string, deps: RenderDeps,
+): DiagramScenario[] {
+  const text = deps.readFile?.(`${rootDir}/${source}`);
+  if (text === undefined) return scenarios;
+  return scenarios.map((s) => ({...s, line: scenarioLine(source, s.title, text)}));
 }
 
 /**

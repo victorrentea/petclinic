@@ -33,7 +33,7 @@ footer @generate_sequence — generated from real traces, do not edit
 participant Browser
 participant Backend
 participant DB
-== Searching with an empty last name lists every owner ==
+== [[genseq-scenario://26{Open the test at this scenario} Searching with an empty last name lists every owner]] ==
 Browser -> Browser: When I open the owners page
 Browser -> Backend: List owners\nGET /api/owners
 activate Backend

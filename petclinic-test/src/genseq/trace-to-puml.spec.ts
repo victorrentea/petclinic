@@ -697,3 +697,18 @@ test('a statement-less span named after an operation is still a query', () => {
   expect(puml).toContain('Backend -> DB: SELECT petclinic.owners');
   expect(puml).not.toContain('Backend -> DB: petclinic\n');
 });
+
+// The section header is the reader's handle on the scenario behind the picture. A line
+// number rather than a path: the .puml is committed and read on other machines.
+test('a section header links to its scenario when the line is known', () => {
+  const puml = renderPuml('src/owner-search.feature',
+    [{...narratedScenario(), line: 26}], STATIC);
+  expect(puml).toContain(
+    '== [[genseq-scenario://26{Open the test at this scenario} Filter owners]] ==');
+});
+
+test('a section whose line could not be found stays plain text', () => {
+  const puml = renderPuml('src/owner-search.feature', [narratedScenario()], STATIC);
+  expect(puml).toContain('== Filter owners ==');
+  expect(puml).not.toContain('genseq-scenario://');
+});
