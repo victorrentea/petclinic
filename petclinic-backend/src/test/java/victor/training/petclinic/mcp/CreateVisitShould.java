@@ -23,6 +23,7 @@ import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
+import victor.training.petclinic.repository.TimeSlotRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.tools.PrettyTestNames;
 
@@ -67,6 +68,8 @@ class CreateVisitShould {
     PetRepository petRepository;
     @Mock
     VisitRepository visitRepository;
+    @Mock
+    TimeSlotRepository timeSlotRepository;
 
     PetClinicMcp petClinicMcp;
 
@@ -77,7 +80,7 @@ class CreateVisitShould {
 
     @BeforeEach
     final void before() {
-        petClinicMcp = new PetClinicMcp(ownerRepository, petRepository, visitRepository);
+        petClinicMcp = new PetClinicMcp(ownerRepository, petRepository, visitRepository, timeSlotRepository);
         anOwnerWithId(OWNER_ID).addPet(rex);
         rex.setId(PET_ID);
         authenticateAs(OWNER_ID);

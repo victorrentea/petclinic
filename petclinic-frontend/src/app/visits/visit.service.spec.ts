@@ -42,12 +42,30 @@ describe('VisitService', () => {
     req.flush(expectedVisits[0]);
   });
 
-  it('should add visit via owner/pet URL', () => {
+  it('should add visit via the visits URL, carrying the pet id in the body', () => {
     const newVisit: Visit = { id: 0, date: '2023-05-01', description: 'checkup', pet };
     visitService.addVisit(newVisit).subscribe(v => expect(v).toEqual(newVisit), fail);
-    const req = httpTestingController.expectOne('http://localhost:8080/api/owners/1/pets/1/visits');
+    const req = httpTestingController.expectOne(baseUrl);
     expect(req.request.method).toEqual('POST');
+    expect(req.request.body.petId).toEqual(1);
     req.event(new HttpResponse({ status: 201, statusText: 'Created', body: newVisit }));
+  });
+
+  it('should book a visit into a slot', () => {
+    const booking: Visit = { id: 0, date: '2023-05-01', description: 'checkup', pet, vetId: 2, timeSlotId: 9 };
+    visitService.addVisit(booking).subscribe(v => expect(v).toEqual(booking), fail);
+    const req = httpTestingController.expectOne(baseUrl);
+    expect(req.request.body.timeSlotId).toEqual(9);
+    req.event(new HttpResponse({ status: 201, statusText: 'Created', body: booking }));
+  });
+
+  it('should return the free slots of a vet on a day', () => {
+    const slots = [{ id: 9, vetId: 2, date: '2026-09-01', startTime: '09:00:00', endTime: '09:30:00' }];
+    visitService.getFreeSlots(2, '2026-09-01').subscribe(s => expect(s).toEqual(slots), fail);
+    const req = httpTestingController.expectOne(
+      'http://localhost:8080/api/vets/2/slots?date=2026-09-01');
+    expect(req.request.method).toEqual('GET');
+    req.flush(slots);
   });
 
   it('should update visit', () => {

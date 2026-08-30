@@ -87,6 +87,10 @@ export interface paths {
     put: operations["updateVet"];
     delete: operations["deleteVet"];
   };
+  "/api/vets/{vetId}/slots": {
+    /** List the slots a vet still has free on a given day */
+    get: operations["listFreeSlots"];
+  };
   "/api/visits": {
     get: operations["listVisits"];
     post: operations["addVisit"];
@@ -269,6 +273,36 @@ export interface components {
        */
       name: string;
     };
+    TimeSlotDto: {
+      /**
+       * Format: date
+       * @description The day the slot is on.
+       * @example "2026-09-01T00:00:00.000Z"
+       */
+      date: string;
+      /**
+       * @description When the slot ends.
+       * @example 09:30:00
+       */
+      endTime: string;
+      /**
+       * Format: int32
+       * @description The ID of the slot.
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description When the slot starts.
+       * @example 09:00:00
+       */
+      startTime: string;
+      /**
+       * Format: int32
+       * @description The ID of the vet the slot belongs to.
+       * @example 1
+       */
+      vetId: number;
+    };
     UserDto: {
       /**
        * @description Indicates if the user is enabled
@@ -343,6 +377,25 @@ export interface components {
       petId: number;
       /** @description Name of the pet (server-populated). */
       petName?: string;
+      /**
+       * @description Start time of the booked slot (server-populated).
+       * @example 09:00:00
+       */
+      startTime?: string;
+      /**
+       * Format: int32
+       * @description The slot to book. When set, the visit takes the slot's vet, date and time.
+       * @example 1
+       */
+      timeSlotId?: number;
+      /**
+       * Format: int32
+       * @description The ID of the vet seeing the pet. Null on visits with no vet assigned.
+       * @example 1
+       */
+      vetId?: number;
+      /** @description Name of the vet (server-populated). */
+      vetName?: string;
     };
     VisitFieldsDto: {
       /**
@@ -356,6 +409,12 @@ export interface components {
        * @example rabies shot
        */
       description: string;
+      /**
+       * Format: int32
+       * @description The ID of the vet seeing the pet.
+       * @example 1
+       */
+      vetId?: number;
     };
   };
   responses: never;
@@ -389,6 +448,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -413,6 +478,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -441,6 +512,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -465,6 +542,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -493,6 +576,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -519,6 +608,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -543,6 +638,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -579,6 +680,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -611,6 +718,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -638,6 +751,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -672,6 +791,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -711,6 +836,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -741,6 +872,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -780,6 +917,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -813,6 +956,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -853,6 +1002,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -891,6 +1046,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -917,6 +1078,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -950,6 +1117,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -988,6 +1161,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1019,6 +1198,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1045,6 +1230,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1078,6 +1269,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1109,6 +1306,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1147,6 +1350,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1178,6 +1387,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1204,6 +1419,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1235,6 +1456,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1270,6 +1497,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1301,6 +1534,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1339,6 +1578,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1368,6 +1613,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1403,6 +1654,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1429,6 +1686,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1462,6 +1725,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1493,6 +1762,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1531,6 +1806,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1562,6 +1843,55 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
+    };
+  };
+  /** List the slots a vet still has free on a given day */
+  listFreeSlots: {
+    parameters: {
+      query: {
+        date: string;
+      };
+      path: {
+        vetId: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TimeSlotDto"][];
+        };
+      };
+      /** @description Bad Request */
+      400: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1588,6 +1918,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1621,6 +1957,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1652,6 +1994,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */
@@ -1690,6 +2038,12 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
+        };
+      };
       /** @description Internal Server Error */
       500: {
         content: {
@@ -1719,6 +2073,12 @@ export interface operations {
       404: {
         content: {
           "*/*": string;
+        };
+      };
+      /** @description Conflict */
+      409: {
+        content: {
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Internal Server Error */

@@ -38,6 +38,12 @@ class Specialty [[src://petclinic-backend/src/main/java/victor/training/petclini
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:6{Click to open in editor} name : String]]
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:16{Click to open in editor} description : String]]
 }
+class TimeSlot [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/TimeSlot.java:19{Click to open in editor}]] {
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/TimeSlot.java:23{Click to open in editor} id : Integer]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/TimeSlot.java:32{Click to open in editor} date : LocalDate]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/TimeSlot.java:36{Click to open in editor} startTime : LocalTime]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/TimeSlot.java:40{Click to open in editor} endTime : LocalTime]]
+}
 class User [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:11{Click to open in editor}]] {
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:14{Click to open in editor} username : String]]
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:16{Click to open in editor} password : String]]
@@ -47,6 +53,13 @@ class Vet [[src://petclinic-backend/src/main/java/victor/training/petclinic/doma
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:15{Click to open in editor} id : Integer]]
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:18{Click to open in editor} firstName : String]]
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:21{Click to open in editor} lastName : String]]
+}
+class VetSchedule [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:21{Click to open in editor}]] {
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:25{Click to open in editor} id : Integer]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:35{Click to open in editor} dayOfWeek : DayOfWeek]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:39{Click to open in editor} startTime : LocalTime]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:43{Click to open in editor} endTime : LocalTime]]
+  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VetSchedule.java:46{Click to open in editor} slotMinutes : int]]
 }
 class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:11{Click to open in editor}]] {
   [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:14{Click to open in editor} id : Integer]]
@@ -58,7 +71,11 @@ class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/do
 Owner "1" -- "0..*" Pet : owner
 Pet "1" -- "0..*" Visit : pet
 PetType "1" -- "0..*" Pet : type
+TimeSlot "1" -- "0..*" Visit : timeSlot
 User "1" -- "0..*" Role : user
 Vet "1" -- "0..*" Specialty : specialties
+Vet "1" -- "0..*" TimeSlot : vet
+Vet "1" -- "0..*" VetSchedule : vet
+Vet "1" -- "0..*" Visit : vet
 
 @enduml

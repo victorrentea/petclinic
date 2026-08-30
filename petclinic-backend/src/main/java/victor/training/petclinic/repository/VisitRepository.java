@@ -21,4 +21,6 @@ public interface VisitRepository extends Repository<Visit, Integer> {
     void delete(Visit visit);
 
     List<Visit> findByPetId(int petId);
+
+    boolean existsByTimeSlotId(int timeSlotId);
 }

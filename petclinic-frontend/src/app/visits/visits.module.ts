@@ -4,6 +4,7 @@ import {VisitListComponent} from './visit-list/visit-list.component';
 import {VisitEditComponent} from './visit-edit/visit-edit.component';
 import {NgModule} from '@angular/core';
 import {VisitService} from './visit.service';
+import {VetService} from '../vets/vet.service';
 import {VisitAddComponent} from './visit-add/visit-add.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {FormsModule} from '@angular/forms';
@@ -47,6 +48,7 @@ export const MY_DATE_FORMATS = {
   ],
   providers: [
     VisitService,
+    VetService,
     {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
     {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS}
   ]

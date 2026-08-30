@@ -35,6 +35,14 @@ entity "specialties" as specialties {
 {field} description : text
 }
 
+entity "time_slots" as time_slots {
+{field} id : int <<PK>>
+{field} vet_id : int <<FK>> not null
+{field} slot_date : date not null
+{field} start_time : time not null
+{field} end_time : time not null
+}
+
 entity "types" as types {
 {field} id : int <<PK>>
 {field} name : text
@@ -44,6 +52,15 @@ entity "users" as users {
 {field} username : varchar(20) <<PK>>
 {field} password : varchar(60) not null
 {field} enabled : boolean not null
+}
+
+entity "vet_schedules" as vet_schedules {
+{field} id : int <<PK>>
+{field} vet_id : int <<FK>> not null
+{field} day_of_week : varchar(10) not null
+{field} start_time : time not null
+{field} end_time : time not null
+{field} slot_minutes : int not null
 }
 
 entity "vet_specialties" as vet_specialties {
@@ -63,14 +80,20 @@ entity "visits" as visits {
 {field} visit_date : date
 {field} description : text
 {field} visit_time : time
+{field} vet_id : int <<FK>>
+{field} time_slot_id : int <<FK>>
 }
 
 
 owners ||--o{ pets : owner_id
 pets ||--o{ visits : pet_id
 specialties ||--o{ vet_specialties : specialty_id
+time_slots ||--o{ visits : time_slot_id
 types ||--o{ pets : type_id
 users ||--o{ roles : username
+vets ||--o{ time_slots : vet_id
+vets ||--o{ vet_schedules : vet_id
 vets ||--o{ vet_specialties : vet_id
+vets ||--o{ visits : vet_id
 
 @enduml

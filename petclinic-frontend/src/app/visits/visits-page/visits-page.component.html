@@ -11,16 +11,20 @@
         <thead>
         <tr>
           <th>Date</th>
+          <th>Time</th>
           <th>Description</th>
           <th>Pet</th>
+          <th>Vet</th>
           <th>Owner</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let visit of visits">
           <td class="visit-date">{{ visit.date }}</td>
+          <td class="visit-time">{{ visit.startTime ? visit.startTime.substring(0, 5) : '—' }}</td>
           <td class="visit-description">{{ visit.description }}</td>
           <td class="visit-pet">{{ visit.petName }}</td>
+          <td class="visit-vet">{{ visit.vetName || '—' }}</td>
           <td class="visit-owner">
             <a class="owner-link" [routerLink]="'/owners/' + visit.ownerId">
               {{ visit.ownerFirstName }} {{ visit.ownerLastName }}

@@ -70,6 +70,15 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.badRequest().body(pd);
     }
 
+    @ExceptionHandler(SlotAlreadyBookedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<ProblemDetail> handleSlotAlreadyBooked(SlotAlreadyBookedException ex,
+            HttpServletRequest request) {
+        log.warn("Slot conflict: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Slot Already Booked", ex.getMessage(), HttpStatus.CONFLICT, request);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(pd);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

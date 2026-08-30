@@ -32,6 +32,7 @@ arrow {
 [Repository] <<..repository>>
 [DTO] <<..rest.dto>>
 [Domain] <<..domain>>
+[Scheduling] <<..scheduling>>
 
 [Repository] --> [Domain]
 [Mapper] --> [Domain]
@@ -42,5 +43,8 @@ arrow {
 [REST] --> [DTO]
 [MCP] --> [Domain]
 [MCP] --> [Repository]
+[REST] --> [REST Error]
+[Scheduling] --> [Domain]
+[Scheduling] --> [Repository]
 
 @enduml

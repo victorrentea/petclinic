@@ -27,6 +27,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -52,6 +58,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -77,6 +89,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -102,6 +120,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -127,6 +151,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -152,6 +182,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -177,6 +213,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -242,6 +284,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -274,6 +322,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -306,6 +360,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -340,6 +400,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -377,6 +443,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -416,6 +488,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -456,6 +534,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -500,6 +584,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -545,6 +635,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -591,6 +687,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -648,6 +750,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -681,6 +789,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -717,6 +831,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -755,6 +875,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -797,6 +923,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -828,6 +960,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -861,6 +999,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -897,6 +1041,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -935,6 +1085,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -980,6 +1136,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1011,6 +1173,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1049,6 +1217,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1082,6 +1256,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1118,6 +1298,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1156,6 +1342,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1192,6 +1384,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1249,6 +1447,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1280,6 +1484,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1313,6 +1523,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1349,6 +1565,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1387,6 +1609,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1395,6 +1623,58 @@ paths:
           description: Internal Server Error
       tags:
       - vet-rest-controller
+  /api/vets/{vetId}/slots:
+    get:
+      operationId: listFreeSlots
+      parameters:
+      - in: path
+        name: vetId
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - in: query
+        name: date
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeSlotDto"
+          description: OK
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Bad Request
+        "404":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Internal Server Error
+      summary: List the slots a vet still has free on a given day
+      tags:
+      - vet-slot-rest-controller
   /api/visits:
     get:
       operationId: listVisits
@@ -1431,6 +1711,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1462,6 +1748,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1495,6 +1787,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1531,6 +1829,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1569,6 +1873,12 @@ paths:
               schema:
                 type: string
           description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+          description: Conflict
         "500":
           content:
             '*/*':
@@ -1830,6 +2140,41 @@ components:
       required:
       - id
       - name
+    TimeSlotDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: The day the slot is on.
+          example: 2026-09-01
+        endTime:
+          type: string
+          description: When the slot ends.
+          example: 09:30:00
+        id:
+          type: integer
+          format: int32
+          description: The ID of the slot.
+          example: 1
+          minimum: 0
+          readOnly: true
+        startTime:
+          type: string
+          description: When the slot starts.
+          example: 09:00:00
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the vet the slot belongs to.
+          example: 1
+          minimum: 0
+      required:
+      - date
+      - endTime
+      - id
+      - startTime
+      - vetId
     UserDto:
       type: object
       properties:
@@ -1934,6 +2279,29 @@ components:
           type: string
           description: Name of the pet (server-populated).
           readOnly: true
+        startTime:
+          type: string
+          description: Start time of the booked slot (server-populated).
+          example: 09:00:00
+          readOnly: true
+        timeSlotId:
+          type: integer
+          format: int32
+          description: "The slot to book. When set, the visit takes the slot's vet,\
+            \ date and time."
+          example: 1
+          minimum: 0
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the vet seeing the pet. Null on visits with no vet
+            assigned.
+          example: 1
+          minimum: 0
+        vetName:
+          type: string
+          description: Name of the vet (server-populated).
+          readOnly: true
       required:
       - description
       - id
@@ -1952,5 +2320,11 @@ components:
           example: rabies shot
           maxLength: 255
           minLength: 1
+        vetId:
+          type: integer
+          format: int32
+          description: The ID of the vet seeing the pet.
+          example: 1
+          minimum: 0
       required:
       - description

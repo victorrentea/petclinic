@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 import jakarta.validation.Valid;
@@ -31,6 +32,21 @@ public class VisitDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Name of the pet (server-populated).")
     private @Nullable String petName;
+
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet seeing the pet. Null on visits with no vet assigned.")
+    private @Nullable Integer vetId;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Name of the vet (server-populated).")
+    private @Nullable String vetName;
+
+    @Min(0)
+    @Schema(example = "1", description = "The slot to book. When set, the visit takes the slot's vet, date and time.")
+    private @Nullable Integer timeSlotId;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, type = "string", example = "09:00:00",
+            description = "Start time of the booked slot (server-populated).")
+    private @Nullable LocalTime startTime;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "ID of the owner of the pet (server-populated).")
     private @Nullable Integer ownerId;
@@ -79,6 +95,38 @@ public class VisitDto {
 
     public void setPetName(String petName) {
         this.petName = petName;
+    }
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
+    }
+
+    public String getVetName() {
+        return vetName;
+    }
+
+    public void setVetName(String vetName) {
+        this.vetName = vetName;
+    }
+
+    public Integer getTimeSlotId() {
+        return timeSlotId;
+    }
+
+    public void setTimeSlotId(Integer timeSlotId) {
+        this.timeSlotId = timeSlotId;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
     public Integer getOwnerId() {

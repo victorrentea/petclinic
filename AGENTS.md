@@ -60,7 +60,12 @@ npm run e2e                         # Protractor e2e tests
 1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
 2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
+4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role,
+   VetSchedule, TimeSlot)
+5. Scheduling (`scheduling/`) - `SlotGenerator`, the `@Scheduled` job that expands each vet's weekly
+   `VetSchedule` into bookable `TimeSlot`s over a rolling 14-day horizon, and `SlotPlan`, the pure
+   function that splits one day's opening hours into slots. Enabled by `@EnableScheduling`; the job
+   also runs a few seconds after boot, so a freshly started stack has slots to book.
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
@@ -136,7 +141,8 @@ REST Contract:
 - Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
+- Visits: `/api/visits` (POST accepts `timeSlotId` to claim a slot; the slot dictates vet, date and time)
+- Vet slots: `/api/vets/{vetId}/slots?date=yyyy-MM-dd` — the slots that vet still has free that day
 - PetTypes: `/api/pettypes`
 - Specialties: `/api/specialties`
 - Users: `/api/users`
@@ -147,6 +153,9 @@ Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
+- **Vet** 1→N **VetSchedule** (weekly availability) 1→N **TimeSlot** (one bookable window)
+- **Visit** N→1 **Vet**, **Visit** 1→1 **TimeSlot** — both nullable; visits booked before V9 have neither.
+  `visits.time_slot_id` is UNIQUE, so the database is what ultimately stops a double booking
 - **User** 1→N **Role**
 
 ## Development Notes

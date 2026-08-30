@@ -8,9 +8,13 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.time.Clock;
 
 @SpringBootApplication
 @EnableCaching // backs the cached @GetMapping("/api/specialties/feed") so polling clients don't hit the DB
+@EnableScheduling // runs SlotGenerator, which keeps bookable slots ahead of today
 public class PetClinicApplication {
 
     public static void main(String[] args) {
@@ -26,5 +30,10 @@ public class PetClinicApplication {
     @ConfigurationProperties(prefix = "openapi")
     OpenAPI customOpenAPI() {
         return new OpenAPI();
+    }
+
+    @Bean
+    Clock clock() {
+        return Clock.systemDefaultZone();
     }
 }

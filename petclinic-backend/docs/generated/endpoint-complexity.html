@@ -316,14 +316,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
-<span class="value">12</span>
+<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 13 decision points"></i></span>
+<span class="value">14</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.listOwners(String) — 55 methods, call depth 7</p>
+<div class="detail"><p class="meta">OwnerRestController.listOwners(String) — 66 methods, call depth 7</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
 <tr><td>OwnerMapper.toOwnerDtoCollection(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
@@ -365,10 +365,17 @@ td {
 <tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
@@ -378,6 +385,10 @@ td {
 <tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -385,14 +396,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}</span>
-<span class="bar"><i class="seg" style="width:81.82%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
-<span class="value">10</span>
+<span class="bar"><i class="seg" style="width:84.62%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
+<span class="value">12</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 54 methods, call depth 6</p>
+<div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 65 methods, call depth 6</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
 <tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
@@ -433,10 +444,17 @@ td {
 <tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
@@ -446,6 +464,10 @@ td {
 <tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -453,14 +475,14 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets</span>
-<span class="bar"><i class="seg" style="width:81.82%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
-<span class="value">10</span>
+<span class="bar"><i class="seg" style="width:84.62%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
+<span class="value">12</span>
 </summary>
-<div class="detail"><p class="meta">PetRestController.listPets() — 41 methods, call depth 5</p>
+<div class="detail"><p class="meta">PetRestController.listPets() — 52 methods, call depth 5</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
 <tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
@@ -488,10 +510,17 @@ td {
 <tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
@@ -501,6 +530,142 @@ td {
 <tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</span>
+<span class="bar"><i class="seg" style="width:69.23%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="value">10</span>
+</summary>
+<div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 53 methods, call depth 4</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getPetById(int)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.lambda$getPetById$0(int, Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>OwnerRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>OwnerRestController.getOwnersPet(int, int)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setType(PetTypeDto)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setVisits(List)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/pets/{petId}</span>
+<span class="bar"><i class="seg" style="width:69.23%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="value">10</span>
+</summary>
+<div class="detail"><p class="meta">PetRestController.getPet(int) — 51 methods, call depth 4</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
+<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
+<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setType(PetTypeDto)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetDto.setVisits(List)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>PetRestController.getPet(int)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -508,7 +673,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/users</span>
-<span class="bar"><i class="seg" style="width:45.45%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:36.36%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:38.46%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:30.77%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">10</span>
 </summary>
 <div class="detail"><p class="meta">UserRestController.addUser(UserDto) — 34 methods, call depth 4</p>
@@ -555,125 +720,15 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
-<span class="value">8</span>
-</summary>
-<div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 42 methods, call depth 4</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
-<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getPetById(int)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.lambda$getPetById$0(int, Pet)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>OwnerRestController.getOwnersPet(int, int)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setType(PetTypeDto)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setVisits(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
-<span class="value">8</span>
-</summary>
-<div class="detail"><p class="meta">PetRestController.getPet(int) — 40 methods, call depth 4</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
-<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setType(PetTypeDto)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setVisits(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>PetRestController.getPet(int)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:45.45%;background:var(--series-2)" data-tip="mapper: 5 decision points"></i></span>
-<span class="value">6</span>
+<span class="bar"><i class="seg" style="width:53.85%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
+<span class="value">8</span>
 </summary>
-<div class="detail"><p class="meta">VisitRestController.listVisits() — 23 methods, call depth 3</p>
+<div class="detail"><p class="meta">VisitRestController.listVisits() — 34 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
 <tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
 <tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
@@ -681,10 +736,17 @@ td {
 <tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
@@ -694,6 +756,10 @@ td {
 <tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitRepository.findAllWithPetAndOwner() <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>VisitRestController.listVisits()</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
@@ -702,8 +768,55 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
+<span class="bar"><i class="seg" style="width:38.46%;background:var(--series-2)" data-tip="mapper: 5 decision points"></i></span>
+<span class="value">6</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.getVisit(int) — 33 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">6</td></tr>
+<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getTimeSlot()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setTimeSlotId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.setVetName(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.getVisit(int)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:36.36%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:30.77%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.listVets() — 22 methods, call depth 5</p>
@@ -739,7 +852,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.updateVet(int, VetDto) — 25 methods, call depth 3</p>
@@ -778,7 +891,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.addVet(VetDto) — 27 methods, call depth 4</p>
@@ -818,36 +931,44 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:27.27%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
+<span class="bar"><i class="seg" style="width:23.08%;background:var(--series-1)" data-tip="controller: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
-<div class="detail"><p class="meta">VisitRestController.getVisit(int) — 22 methods, call depth 2</p>
+<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 30 methods, call depth 4</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
-<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">3</td></tr>
+<tr><td>VisitRestController.claimSlot(Visit, int)</td><td>controller</td><td class="num">2</td></tr>
+<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>SlotAlreadyBookedException.&lt;init&gt;(int)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getStartTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.getVisit(int)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setTimeSlot(TimeSlot)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setVet(Vet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getTimeSlotId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitDto.getVetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitMapper.petOfId(Integer)</td><td>mapper</td><td class="num">1</td></tr>
+<tr><td>VisitMapper.toVisit(VisitDto)</td><td>mapper</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.existsByTimeSlotId(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -855,7 +976,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.listPetTypes() — 9 methods, call depth 3</p>
@@ -878,7 +999,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.listSpecialties() — 11 methods, call depth 3</p>
@@ -903,7 +1024,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.getVet(int) — 21 methods, call depth 4</p>
@@ -938,7 +1059,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addPetToOwner(int, PetFieldsDto) — 23 methods, call depth 3</p>
@@ -975,7 +1096,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.updatePet(int, PetDto) — 14 methods, call depth 2</p>
@@ -1003,7 +1124,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.deletePetType(int) — 3 methods, call depth 1</p>
@@ -1020,7 +1141,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/feed</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyFeedController.feed(String) — 9 methods, call depth 3</p>
@@ -1036,6 +1157,61 @@ td {
 <tr><td>SpecialtyFeed.load()</td><td>controller</td><td class="num">1</td></tr>
 <tr><td>SpecialtyFeed.toItem(Specialty)</td><td>controller</td><td class="num">1</td></tr>
 <tr><td>SpecialtyRepository.findAll() <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/vets/{vetId}/slots</span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="value">2</span>
+</summary>
+<div class="detail"><p class="meta">VetSlotRestController.listFreeSlots(int, LocalDate) — 16 methods, call depth 3</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>TimeSlotMapper.toTimeSlotDtos(List)</td><td>mapper</td><td class="num">2</td></tr>
+<tr><td>TimeSlot.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getEndTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getStartTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.setEndTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.setStartTime(LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotDto.setVetId(Integer)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotMapper.toTimeSlotDto(TimeSlot)</td><td>mapper</td><td class="num">1</td></tr>
+<tr><td>TimeSlotRepository.findFreeSlots(int, LocalDate) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSlotRestController.listFreeSlots(int, LocalDate)</td><td>controller</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="value">2</span>
+</summary>
+<div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 11 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>VisitRestController.vetOfId(Integer)</td><td>controller</td><td class="num">2</td></tr>
+<tr><td>VetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Visit.setVet(Vet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitFieldsDto.getVetId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -1383,58 +1559,6 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
-<span class="bar"><i class="seg empty" data-tip="No branching anywhere in this flow"></i></span>
-<span class="value">1</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 17 methods, call depth 4</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setPet(Pet)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.getPetId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitMapper.petOfId(Integer)</td><td>mapper</td><td class="num">1</td></tr>
-<tr><td>VisitMapper.toVisit(VisitDto)</td><td>mapper</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.addVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.bookVisit(VisitDto)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
-<span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg empty" data-tip="No branching anywhere in this flow"></i></span>
-<span class="value">1</span>
-</summary>
-<div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 7 methods, call depth 1</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>Visit.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitFieldsDto.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRepository.save(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/visits/{visitId}</span>
 <span class="bar"><i class="seg empty" data-tip="No branching anywhere in this flow"></i></span>
 <span class="value">1</span>
@@ -1456,7 +1580,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> create_visit</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:53.85%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.createVisit(int, LocalDate, LocalTime, String) — 20 methods, call depth 3</p>
@@ -1490,7 +1614,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> call_vet_ambulance</span>
-<span class="bar"><i class="seg" style="width:54.55%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:46.15%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.callVetAmbulance(McpSyncRequestContext) — 3 methods, call depth 1</p>
@@ -1507,7 +1631,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> cancel_visit</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.cancelVisit(LocalDate) — 13 methods, call depth 2</p>
@@ -1533,8 +1657,34 @@ td {
 </details>
 <details class="row">
 <summary>
+<span class="endpoint"><b class="verb v-MCP">MCP</b> find_available_slots</span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="value">3</span>
+</summary>
+<div class="detail"><p class="meta">PetClinicMcp.findAvailableSlots(int, LocalDate) — 12 methods, call depth 1</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>PetClinicMcp.findAvailableSlots(int, LocalDate)</td><td>other</td><td class="num">2</td></tr>
+<tr><td>PetClinicMcp.requireFutureDate(LocalDate)</td><td>other</td><td class="num">2</td></tr>
+<tr><td>PetClinicMcp.SlotView.&lt;init&gt;(int, int, String, LocalDate, LocalTime, LocalTime)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getDate()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getEndTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getStartTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotRepository.findFreeSlots(int, LocalDate) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Vet.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Vet.getLastName()</td><td>model</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> list_visits</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:15.38%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.listVisits() — 13 methods, call depth 1</p>
@@ -1561,7 +1711,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> get_owner_profile</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:7.69%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.getOwnerProfile() — 16 methods, call depth 2</p>
@@ -1589,32 +1739,68 @@ td {
 </div>
 </details>
 </div>
+<h2 class="kind">Jobs</h2>
+<div class="chart">
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-JOB">JOB</b> SlotGenerator.generateSlotsForHorizon</span>
+<span class="bar"><i class="seg" style="width:69.23%;background:var(--series-5)" data-tip="other: 9 decision points"></i></span>
+<span class="value">10</span>
+</summary>
+<div class="detail"><p class="meta">SlotGenerator.generateSlotsForHorizon() — 14 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>SlotGenerator.generateMissingSlots(VetSchedule, LocalDate)</td><td>other</td><td class="num">4</td></tr>
+<tr><td>SlotGenerator.generateSlotsForHorizon()</td><td>other</td><td class="num">4</td></tr>
+<tr><td>SlotPlan.startTimes(LocalTime, LocalTime, int)</td><td>other</td><td class="num">4</td></tr>
+<tr><td>TimeSlot.&lt;init&gt;(Vet, LocalDate, LocalTime, LocalTime)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlot.getStartTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>TimeSlotRepository.findByVetIdAndDate(int, LocalDate) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>TimeSlotRepository.saveAll(Iterable) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>Vet.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSchedule.getDayOfWeek()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSchedule.getEndTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSchedule.getSlotMinutes()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSchedule.getStartTime()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetSchedule.getVet()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>VetScheduleRepository.findAllWithVet() <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+</div>
 <h2>Table view</h2>
 <table class="summary">
 <thead><tr><th>kind</th><th>entry point</th><th>handler</th><th class="num">flow CC</th><th class="num">methods</th><th class="num">depth</th></tr></thead>
 <tbody>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String)</td><td class="num">12</td><td class="num">55</td><td class="num">7</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">10</td><td class="num">54</td><td class="num">6</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">10</td><td class="num">41</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String)</td><td class="num">14</td><td class="num">66</td><td class="num">7</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">12</td><td class="num">65</td><td class="num">6</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">12</td><td class="num">52</td><td class="num">5</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</td><td>OwnerRestController.getOwnersPet(int, int)</td><td class="num">10</td><td class="num">53</td><td class="num">4</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets/{petId}</td><td>PetRestController.getPet(int)</td><td class="num">10</td><td class="num">51</td><td class="num">4</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/users</td><td>UserRestController.addUser(UserDto)</td><td class="num">10</td><td class="num">34</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</td><td>OwnerRestController.getOwnersPet(int, int)</td><td class="num">8</td><td class="num">42</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets/{petId}</td><td>PetRestController.getPet(int)</td><td class="num">8</td><td class="num">40</td><td class="num">4</td></tr>
+<tr><td>job</td><td><b class="verb v-JOB">JOB</b> SlotGenerator.generateSlotsForHorizon</td><td>SlotGenerator.generateSlotsForHorizon()</td><td class="num">10</td><td class="num">14</td><td class="num">2</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits</td><td>VisitRestController.listVisits()</td><td class="num">8</td><td class="num">34</td><td class="num">3</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> create_visit</td><td>PetClinicMcp.createVisit(int, LocalDate, LocalTime, String)</td><td class="num">8</td><td class="num">20</td><td class="num">3</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> call_vet_ambulance</td><td>PetClinicMcp.callVetAmbulance(McpSyncRequestContext)</td><td class="num">7</td><td class="num">3</td><td class="num">1</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits</td><td>VisitRestController.listVisits()</td><td class="num">6</td><td class="num">23</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits/{visitId}</td><td>VisitRestController.getVisit(int)</td><td class="num">6</td><td class="num">33</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets</td><td>VetRestController.listVets()</td><td class="num">5</td><td class="num">22</td><td class="num">5</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</td><td>VetRestController.updateVet(int, VetDto)</td><td class="num">5</td><td class="num">25</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/vets</td><td>VetRestController.addVet(VetDto)</td><td class="num">4</td><td class="num">27</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/visits/{visitId}</td><td>VisitRestController.getVisit(int)</td><td class="num">4</td><td class="num">22</td><td class="num">2</td></tr>
+<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">4</td><td class="num">30</td><td class="num">4</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pettypes</td><td>PetTypeRestController.listPetTypes()</td><td class="num">3</td><td class="num">9</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties</td><td>SpecialtyRestController.listSpecialties()</td><td class="num">3</td><td class="num">11</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets/{vetId}</td><td>VetRestController.getVet(int)</td><td class="num">3</td><td class="num">21</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> cancel_visit</td><td>PetClinicMcp.cancelVisit(LocalDate)</td><td class="num">3</td><td class="num">13</td><td class="num">2</td></tr>
+<tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> find_available_slots</td><td>PetClinicMcp.findAvailableSlots(int, LocalDate)</td><td class="num">3</td><td class="num">12</td><td class="num">1</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> list_visits</td><td>PetClinicMcp.listVisits()</td><td class="num">3</td><td class="num">13</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">2</td><td class="num">23</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/pets/{petId}</td><td>PetRestController.updatePet(int, PetDto)</td><td class="num">2</td><td class="num">14</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</td><td>PetTypeRestController.deletePetType(int)</td><td class="num">2</td><td class="num">3</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties/feed</td><td>SpecialtyFeedController.feed(String)</td><td class="num">2</td><td class="num">9</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets/{vetId}/slots</td><td>VetSlotRestController.listFreeSlots(int, LocalDate)</td><td class="num">2</td><td class="num">16</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</td><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td class="num">2</td><td class="num">11</td><td class="num">2</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> get_owner_profile</td><td>PetClinicMcp.getOwnerProfile()</td><td class="num">2</td><td class="num">16</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-ANY">ANY</b> /</td><td>RootRestController.redirectToSwagger(HttpServletResponse)</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners</td><td>OwnerRestController.addOwner(OwnerFieldsDto)</td><td class="num">1</td><td class="num">15</td><td class="num">2</td></tr>
@@ -1632,8 +1818,6 @@ td {
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/specialties/{specialtyId}</td><td>SpecialtyRestController.updateSpecialty(int, SpecialtyDto)</td><td class="num">1</td><td class="num">8</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/specialties/{specialtyId}</td><td>SpecialtyRestController.deleteSpecialty(int)</td><td class="num">1</td><td class="num">4</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/vets/{vetId}</td><td>VetRestController.deleteVet(int)</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
-<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/visits</td><td>VisitRestController.addVisit(VisitDto)</td><td class="num">1</td><td class="num">17</td><td class="num">4</td></tr>
-<tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</td><td>VisitRestController.updateVisit(int, VisitFieldsDto)</td><td class="num">1</td><td class="num">7</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/visits/{visitId}</td><td>VisitRestController.deleteVisit(int)</td><td class="num">1</td><td class="num">3</td><td class="num">1</td></tr>
 </tbody>
 </table>

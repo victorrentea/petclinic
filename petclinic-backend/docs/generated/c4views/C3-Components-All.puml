@@ -18,6 +18,7 @@ left to right direction
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container_Boundary("PetClinic.Backend_boundary", "Backend", $tags="") {
     Component(PetClinic.Backend.Security, "Security", $techn="Spring Security", $descr="[security] Spring Security configuration", $tags="", $link="")
+    Component(PetClinic.Backend.Scheduling, "Scheduling", $techn="Spring Scheduling", $descr="[scheduling] the job that keeps bookable vet slots ahead of today", $tags="", $link="")
     Component(PetClinic.Backend.MCP, "MCP", $techn="Spring AI", $descr="[mcp] Spring AI MCP server (SSE) — tools and resources for pet owners", $tags="", $link="")
     Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="[rest.**] HTTP endpoints, DTOs, error handlers", $tags="", $link="")
     Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="[domain] JPA entities", $tags="", $link="")
@@ -35,6 +36,8 @@ Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "uses", $techn
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.Scheduling, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.Scheduling, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

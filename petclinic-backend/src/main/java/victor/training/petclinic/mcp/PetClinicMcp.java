@@ -19,9 +19,11 @@ import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.TimeSlot;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
+import victor.training.petclinic.repository.TimeSlotRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
 @Component
@@ -37,11 +39,14 @@ public class PetClinicMcp {
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
-    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
+    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository,
+            TimeSlotRepository timeSlotRepository) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
+        this.timeSlotRepository = timeSlotRepository;
     }
 
     @McpTool(
@@ -84,6 +89,28 @@ public class PetClinicMcp {
     }
 
     public record AmbulanceAddressInput(String address) {
+    }
+
+    public record SlotView(int id, int vetId, String vetName, LocalDate date, LocalTime startTime, LocalTime endTime) {
+    }
+
+    @McpTool(
+            name = "find_available_slots",
+            description = "List the appointment slots a given vet still has free on a given day. Feed the "
+                    + "returned slot id to create_visit to book that exact window.",
+            annotations = @McpAnnotations(readOnlyHint = true, destructiveHint = false, openWorldHint = false))
+    @Transactional(readOnly = true)
+    public List<SlotView> findAvailableSlots(
+            @McpToolParam(description = "Vet ID whose calendar to look at", required = true) int vetId,
+            @McpToolParam(description = "Day to look at (yyyy-MM-dd)", required = true) LocalDate date) {
+        requireFutureDate(date);
+        List<SlotView> result = new ArrayList<>();
+        for (TimeSlot slot : timeSlotRepository.findFreeSlots(vetId, date)) {
+            result.add(new SlotView(slot.getId(), slot.getVet().getId(),
+                    slot.getVet().getFirstName() + " " + slot.getVet().getLastName(),
+                    slot.getDate(), slot.getStartTime(), slot.getEndTime()));
+        }
+        return result;
     }
 
     @McpTool(

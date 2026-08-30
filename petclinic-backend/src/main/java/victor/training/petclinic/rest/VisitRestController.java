@@ -9,10 +9,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.TimeSlot;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.TimeSlotRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.SlotAlreadyBookedException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,10 +31,15 @@ import java.util.List;
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final VetRepository vetRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper, VetRepository vetRepository,
+            TimeSlotRepository timeSlotRepository) {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
+        this.vetRepository = vetRepository;
+        this.timeSlotRepository = timeSlotRepository;
     }
 
     @GetMapping
@@ -64,8 +74,25 @@ public class VisitRestController {
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
         Visit visit = visitMapper.toVisit(visitDto);
+        if (visitDto.getTimeSlotId() != null) {
+            claimSlot(visit, visitDto.getTimeSlotId());
+        } else if (visitDto.getVetId() != null) {
+            visit.setVet(vetRepository.findById(visitDto.getVetId()).orElseThrow());
+        }
         visitRepository.save(visit);
         return visit.getId();
+    }
+
+    /** A booked slot dictates the vet, the day and the time of day — the client sends only its id. */
+    private void claimSlot(Visit visit, int timeSlotId) {
+        if (visitRepository.existsByTimeSlotId(timeSlotId)) {
+            throw new SlotAlreadyBookedException(timeSlotId);
+        }
+        TimeSlot slot = timeSlotRepository.findById(timeSlotId).orElseThrow();
+        visit.setTimeSlot(slot);
+        visit.setVet(slot.getVet());
+        visit.setDate(slot.getDate());
+        visit.setTime(slot.getStartTime());
     }
 
     @PutMapping("{visitId}")
@@ -73,7 +100,12 @@ public class VisitRestController {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
+        currentVisit.setVet(vetOfId(visitDto.getVetId()));
         visitRepository.save(currentVisit);
+    }
+
+    private Vet vetOfId(Integer vetId) {
+        return vetId == null ? null : vetRepository.findById(vetId).orElseThrow();
     }
 
     @Transactional

@@ -27,6 +27,16 @@ public class Visit {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    /** The vet who will see the pet; null on visits booked before slots existed. */
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
+
+    /** The slot this visit claims. Unique in the schema, so a slot holds at most one visit. */
+    @OneToOne
+    @JoinColumn(name = "time_slot_id")
+    private TimeSlot timeSlot;
+
     public Integer getId() {
         return id;
     }
@@ -65,5 +75,21 @@ public class Visit {
 
     public void setPet(Pet pet) {
         this.pet = pet;
+    }
+
+    public Vet getVet() {
+        return vet;
+    }
+
+    public void setVet(Vet vet) {
+        this.vet = vet;
+    }
+
+    public TimeSlot getTimeSlot() {
+        return timeSlot;
+    }
+
+    public void setTimeSlot(TimeSlot timeSlot) {
+        this.timeSlot = timeSlot;
     }
 }

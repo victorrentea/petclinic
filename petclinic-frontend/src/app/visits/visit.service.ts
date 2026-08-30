@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Visit} from './visit';
+import {TimeSlot} from './time-slot';
 import {environment} from '../../environments/environment';
 import {HandleError, HttpErrorHandler} from '../error.service';
 import {HttpClient} from '@angular/common/http';
@@ -31,11 +32,16 @@ export class VisitService {
       );
   }
 
+  getFreeSlots(vetId: number, date: string): Observable<TimeSlot[]> {
+    const slotsUrl = environment.REST_API_URL + `vets/${vetId}/slots`;
+    return this.http.get<TimeSlot[]>(slotsUrl, {params: {date}})
+      .pipe(
+        catchError(this.handlerError('getFreeSlots', []))
+      );
+  }
+
   addVisit(visit: Visit): Observable<Visit> {
-    const ownerId = visit.pet.ownerId;
-    const petId = visit.pet.id;
-    const visitsUrl = environment.REST_API_URL + `owners/${ownerId}/pets/${petId}/visits`;
-    return this.http.post<Visit>(visitsUrl, visit)
+    return this.http.post<Visit>(this.entityUrl, {...visit, petId: visit.pet.id})
       .pipe(
         catchError(this.handlerError('addVisit', visit))
       );
