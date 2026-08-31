@@ -3,6 +3,19 @@
 Interviu de design, 31 aug 2026. Partea I = ce ai decis deja. Partea II = ce a mai rămas,
 fiecare cu răspunsul pe care îl recomand — dacă le lași așa, le implementez așa.
 
+> **Fișierul ăsta e înghețat la interviu. Sursa vie e `openspec/changes/paginate-owners-grid/`**
+> (sesiunea `petclinic-bf`, commit `872afc9a`) — proposal, design tehnic, spec cu 26 de
+> scenarii, 30 de taskuri, scrise din QA.md. Două puncte au fost duse mai departe acolo și
+> **le înlocuiesc pe cele de mai jos**:
+>
+> - **Indecșii de ordonare sunt `(last_name, first_name, id)` și `(city, id)`** — nu fără
+>   `id`, cum scrie la #5. Cu `ORDER BY city, id`, un index doar pe `(city)` lasă un
+>   incremental sort pe fiecare pagină. #5 a fost scris înainte să fie fixat tie-breaker-ul.
+> - **Coloana Name se randează `Potter, Harry`**, nu `Harry Potter` — cerut de Victor după
+>   interviu, ca textul coloanei să se citească în ordinea în care e sortat. Asta sparge și
+>   `namesIn` din `owner-search.glue.ts`, care face `split(',')` pe o coloană Examples
+>   separată prin virgulă, iar acum fiecare nume conține o virgulă.
+
 ---
 
 ## Context care a schimbat totul
