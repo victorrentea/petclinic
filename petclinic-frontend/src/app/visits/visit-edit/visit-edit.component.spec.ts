@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
+import * as moment from 'moment';
 
 const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
@@ -118,5 +119,15 @@ describe('VisitEditComponent', () => {
     component.currentOwner = visitEditOwner as any;
     component.gotoOwnerDetail();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('should limit the date picker to the pet\'s lifetime (issue #40)', () => {
+    const petService = fixture.debugElement.injector.get(PetService);
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+
+    component.ngOnInit();
+
+    expect(component.minVisitDate.format('YYYY-MM-DD')).toBe('2010-09-07');
+    expect(component.maxVisitDate.isAfter(moment())).toBeTrue();
   });
 });

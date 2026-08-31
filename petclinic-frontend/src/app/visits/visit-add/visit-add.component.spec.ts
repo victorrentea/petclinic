@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import * as moment from 'moment';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -114,5 +115,14 @@ describe('VisitAddComponent', () => {
     component.currentOwner = visitOwner;
     component.gotoOwnerDetail();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('should limit the date picker to the pet\'s lifetime (issue #40)', () => {
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+
+    component.ngOnInit();
+
+    expect(component.minVisitDate.format('YYYY-MM-DD')).toBe('2010-09-07');
+    expect(component.maxVisitDate.isAfter(moment())).toBeTrue();
   });
 });

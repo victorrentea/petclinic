@@ -212,6 +212,85 @@ public class VisitTest {
         assertThat(updated.getDescription()).isEqualTo("updated description");
     }
 
+    // Issue #40: a visit belongs between the pet's birth date and a year from now. The form
+    // guards the same range; these are the half that also holds for a client skipping it.
+
+    @Test
+    void create_dateBeforeTheBirthDate_isRejected() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        newVisit.setDescription("a visit before the pet existed");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_dateMoreThanAYearAhead_isRejected() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        newVisit.setDescription("a visit too far ahead");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_dateOnTheEdgesOfTheRange_isAccepted() throws Exception {
+        VisitDto onTheBirthDate = new VisitDto();
+        onTheBirthDate.setPetId(petId);
+        onTheBirthDate.setDate(PetTest.BIRTH_DATE);
+        onTheBirthDate.setDescription("first day");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(onTheBirthDate))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        VisitDto aYearAhead = new VisitDto();
+        aYearAhead.setPetId(petId);
+        aYearAhead.setDate(LocalDate.now().plusYears(1));
+        aYearAhead.setDescription("exactly a year ahead");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(aYearAhead))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void update_dateBeforeTheBirthDate_isRejected() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        update.setDescription("moved before the pet existed");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findById(visitId).orElseThrow().getDate())
+                .isEqualTo(LocalDate.now());
+    }
+
+    @Test
+    void update_dateMoreThanAYearAhead_isRejected() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        update.setDescription("moved too far ahead");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     void findVisitsByPetId() {
         // Add a second visit for the same pet
