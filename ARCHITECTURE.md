@@ -4,7 +4,7 @@ Every diagram is **generated from the code** and rendered live via the
 [PlantUML proxy](https://plantuml.com/) off the GitHub-hosted `.puml` source —
 each carries a `footer` with its own repo path, so the render is self-identifying.
 
-#### Deployment (FE → BE → DB)
+#### Deployment (FE / chatbot → BE → DB)
 ![Deployment](petclinic-backend/docs/deployment.drawio.png)
 
 > The only hand-drawn diagram here, and the only one that needs to be: the backend cannot
