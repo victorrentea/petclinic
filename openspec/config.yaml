@@ -1,5 +1,19 @@
 schema: spec-driven
 
+rules:
+  proposal:
+    - "Audience: a non-technical, functional PO who does not know Spring, Angular, SQL or
+      this codebase. Write the whole proposal so that person can review and approve it
+      alone."
+    - "No class, method, file, table, column, endpoint, framework, library or annotation
+      names. No JSON or code snippets. No file paths, except where naming who must review
+      the pull request."
+    - "State effects in terms of what a user sees and what the business gets. When a
+      technical fact is the actual reason for a decision, translate it into its business
+      consequence and leave the mechanism to design.md."
+    - "Every technical detail removed for this reason must land in design.md — moved, not
+      dropped. design.md is where the developers review it."
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.

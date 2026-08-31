@@ -114,6 +114,15 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
   every DB arrow `SELECT petclinic`; restart it and re-record.**
 
 
+### Planning changes (OpenSpec)
+
+Change proposals live in `openspec/changes/<name>/` (spec-driven schema: `proposal.md`,
+`specs/`, `design.md`, `tasks.md`). **`proposal.md` is written for a non-technical, functional
+PO** — no class, file, endpoint, table or framework names, no code. Every technical fact
+belongs in `design.md`, which is what the developers review. The rule is enforced from
+`openspec/config.yaml` (`rules.proposal`), so `openspec instructions proposal` serves it
+automatically — don't restate it in a prompt.
+
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract `/openapi.yaml`
