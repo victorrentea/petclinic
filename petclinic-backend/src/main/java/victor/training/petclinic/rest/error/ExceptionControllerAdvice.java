@@ -70,6 +70,18 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.badRequest().body(pd);
     }
 
+    // The codebase signals a rejected request with IllegalArgumentException (see PetClinicMcp);
+    // without this it would fall into the catch-all below and surface as a 500.
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException ex,
+            HttpServletRequest request) {
+        log.warn("Rejected request: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", List.of(ex.getMessage()));
+        return ResponseEntity.badRequest().body(pd);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

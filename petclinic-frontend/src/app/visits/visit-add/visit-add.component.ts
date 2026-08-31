@@ -21,6 +21,9 @@ export class VisitAddComponent implements OnInit {
   currentPet: Pet;
   currentOwner: Owner;
   currentPetType: PetType;
+  // Issue #40: a visit belongs between the pet's birth date and a year from now.
+  minVisitDate: moment.Moment;
+  maxVisitDate = moment().add(1, 'year');
   addedSuccess = false;
   errorMessage: string;
 
@@ -44,6 +47,7 @@ export class VisitAddComponent implements OnInit {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
+        this.minVisitDate = moment(pet.birthDate);
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
           owner => {
             this.currentOwner = owner;
