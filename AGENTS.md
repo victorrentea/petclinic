@@ -118,12 +118,24 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract `/openapi.yaml`
 
+**Rejecting a request = `IllegalArgumentException`.** That is the idiom already used by
+`PetClinicMcp`, and `ExceptionControllerAdvice` maps it to a 400 ProblemDetail. Without that
+handler it falls into the advice's catch-all `@ExceptionHandler(Exception.class)` and surfaces
+as a 500 — so a new validation rule needs no new exception type, only the throw.
+
 ## Domain Model
 Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+
+### Volumetry (business target, stated by Victor 2026-08-31)
+
+**~100.000 owners** within one to five years. Today's seed has 26 — that number means
+nothing for design. Anything that lists owners (or any collection that grows with them)
+must be paginated **server-side**; fetching the whole table and paginating/sorting it in
+the browser is not an option and must not be proposed again.
 
 ## Task Modifiers
 - Write non-trivial code using TDD
