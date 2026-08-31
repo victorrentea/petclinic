@@ -41,6 +41,36 @@ test.describe('Owners grid layout', () => {
     expect(descending).toEqual(ascending);
   });
 
+  test('sortable columns say so without being hovered', async ({page}) => {
+    await page.goto('/owners?page=0&size=5&sort=lastName,asc');
+    await expect(page.locator('#ownersTable td.ownerFullName').first()).toBeVisible();
+
+    // Read with the pointer parked away from the table: Material fades its arrow in on
+    // hover, and a hint that only exists under the cursor is not a hint.
+    await page.mouse.move(0, 0);
+    const headers = await page.$$eval('#ownersTable th', (ths) =>
+      ths.map((th) => {
+        const arrow = th.querySelector('.mat-sort-header-arrow');
+        return {
+          label: th.textContent!.trim(),
+          arrowOpacity: arrow ? Number(getComputedStyle(arrow).opacity) : null,
+          cursor: getComputedStyle(th).cursor,
+        };
+      })
+    );
+
+    const sortable = headers.filter((h) => h.label === 'Name' || h.label === 'City');
+    expect(sortable).toHaveLength(2);
+    for (const header of sortable) {
+      expect(header.arrowOpacity).toBeGreaterThan(0);
+      expect(header.cursor).toBe('pointer');
+    }
+
+    for (const header of headers.filter((h) => !['Name', 'City'].includes(h.label))) {
+      expect(header.arrowOpacity).toBeNull();
+    }
+  });
+
   test('column positions survive paging', async ({page}) => {
     await page.goto('/owners?page=0&size=5&sort=lastName,asc');
     await expect(page.locator('#ownersTable td.ownerFullName').first()).toBeVisible();

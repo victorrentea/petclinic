@@ -122,3 +122,21 @@ display:none;
   width: 28px;
   height: 28px;
 }
+
+/* A sortable column has to look sortable before the pointer reaches it. Material fades
+    its arrow in only on hover, so the grid asked you to go hunting for which headers you
+    may click — and the plain Bootstrap th did not even get a pointer cursor. The arrow is
+    now always drawn, dimmed until that column is the one being sorted. */
+#ownersTable th.mat-sort-header {
+  cursor: pointer;
+}
+
+::ng-deep #ownersTable th.mat-sort-header .mat-sort-header-arrow {
+  opacity: 0.45 !important;
+  transform: none !important;
+}
+
+::ng-deep #ownersTable th.mat-sort-header[aria-sort='ascending'] .mat-sort-header-arrow,
+::ng-deep #ownersTable th.mat-sort-header[aria-sort='descending'] .mat-sort-header-arrow {
+  opacity: 1 !important;
+}
