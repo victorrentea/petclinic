@@ -28,8 +28,11 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
+  // Set by the owner-search Background: how many owners the clinic holds, counted by
+  // walking the pages of the listing (no request answers with the whole table).
+  ownerTotal?: number;
+  // Set by `I note the owners listed on this page`, to prove the next page repeats none of them.
+  notedOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -40,11 +43,18 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
-      throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
+  requireOwnerTotal(): number {
+    if (this.ownerTotal === undefined) {
+      throw new Error('Expected the clinic\'s owners to have been counted earlier in the scenario');
     }
-    return this.allOwnerNames;
+    return this.ownerTotal;
+  }
+
+  requireNotedOwnerNames(): string[] {
+    if (!this.notedOwnerNames) {
+      throw new Error('Expected an earlier step to have noted the owners listed on a page');
+    }
+    return this.notedOwnerNames;
   }
 }
 

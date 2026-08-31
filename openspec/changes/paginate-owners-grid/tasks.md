@@ -30,21 +30,21 @@
 
 ## 4. Fix the other consumers of the array shape
 
-- [ ] 4.1 Update `petclinic-test/src/owner-search.glue.ts` (`the clinic has these owners`) to read `data.content`; verify the existing search scenarios pass
-- [ ] 4.1b Move the glue's `fullName` helper to `lastName, firstName` and update the Background data table; verify the Background fails loudly on a mismatched seed rather than on the search step
-- [ ] 4.1c Replace the comma separator in the `Examples` expected-owners column (and `namesIn`'s `split(',')`) with one that survives commas inside a name; verify a two-owner expectation still parses as two names, not four
-- [ ] 4.2 Update `petclinic-test/src/visit-date-validation.dsl.ts` (`aPetWithAKnownBirthDateExists`) to iterate `data.content`; verify `visit-date-validation.spec.ts` passes
-- [ ] 4.3 Update the scratchpad film scripts `bug-before.js` / `bug-after.js`; verify each still runs end to end
+- [x] 4.1 Update `petclinic-test/src/owner-search.glue.ts` (`the clinic has these owners`) to read `data.content`; verify the existing search scenarios pass
+- [x] 4.1b Move the glue's `fullName` helper to `lastName, firstName` and update the Background data table; verify the Background fails loudly on a mismatched seed rather than on the search step
+- [x] 4.1c Replace the comma separator in the `Examples` expected-owners column (and `namesIn`'s `split(',')`) with one that survives commas inside a name; verify a two-owner expectation still parses as two names, not four
+- [x] 4.2 Update `petclinic-test/src/visit-date-validation.dsl.ts` (`aPetWithAKnownBirthDateExists`) to iterate `data.content`; verify `visit-date-validation.spec.ts` passes
+- [x] 4.3 Update the scratchpad film scripts `bug-before.js` / `bug-after.js`; verify each still runs end to end
 
 ## 5. E2E — the grid's own scenarios
 
-- [ ] 5.1 Rewrite the `@generate_sequence` scenario in `owner-search.feature` from "every owner in the clinic is listed" to "the first page of owners is listed" (first 10 of the default order + reported total); verify it passes and still produces a `Browser -> Backend` call
-- [ ] 5.2 Add scenarios for: default page, changing page size, navigating to page 2, sorting by Name, sorting by City, and search combined with paging; verify all pass and that none of them creates or deletes an owner (the `petclinic-test/AGENTS.md` rule)
-- [ ] 5.3 Extend `owner-search.glue.ts` with the paginator/sort steps, reusing `expectOwnersListed`; verify the whole Cucumber suite is green
+- [x] 5.1 Rewrite the `@generate_sequence` scenario in `owner-search.feature` from "every owner in the clinic is listed" to "the first page of owners is listed" (first 10 of the default order + reported total); verify it passes and still produces a `Browser -> Backend` call
+- [x] 5.2 Add scenarios for: default page, changing page size, navigating to page 2, sorting by Name, sorting by City, and search combined with paging; verify all pass and that none of them creates or deletes an owner (the `petclinic-test/AGENTS.md` rule)
+- [x] 5.3 Extend `owner-search.glue.ts` with the paginator/sort steps, reusing `expectOwnersListed`; verify the whole Cucumber suite is green
 
 ## 6. Regenerate guardrail artifacts and land it
 
-- [ ] 6.1 Regenerate `petclinic-backend/DB.sql` (`DbSchemaExtractorTest`) and `docs/generated/DB.puml`; verify the DB.sql↔DB.puml pre-push guard passes
-- [ ] 6.2 Re-run `./run-tests-with-tracing.sh` to regenerate `owner-search.feature.genseq.puml`/`.json`; verify `DeploymentDiagramTest` still finds the `Browser -> Backend` arc
-- [ ] 6.3 Run the full local gate — backend `mvn test`, strict `ng build`, Spectral lint on the new `openapi.yaml`, and the e2e suite — and verify everything is green before pushing
+- [x] 6.1 Regenerate `petclinic-backend/DB.sql` (`DbSchemaExtractorTest`) and `docs/generated/DB.puml`; verify the DB.sql↔DB.puml pre-push guard passes
+- [x] 6.2 Re-run `./run-tests-with-tracing.sh` to regenerate `owner-search.feature.genseq.puml`/`.json`; verify `DeploymentDiagramTest` still finds the `Browser -> Backend` arc
+- [x] 6.3 Run the full local gate — backend `mvn test`, strict `ng build`, Spectral lint on the new `openapi.yaml`, and the e2e suite — and verify everything is green before pushing
 - [ ] 6.4 Post the "sortable by Name and City only, not any column" deviation as a comment on issue #25, and open the PR flagging that `openapi.yaml` and `db/migration/` need `@victorrentea/elders` review; verify the CODEOWNERS reviewers are requested on the PR

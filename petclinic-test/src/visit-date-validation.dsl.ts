@@ -1,5 +1,6 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {findOwner, petsOf} from './support/owners-api';
 
 // The sentences of visit-date-validation.spec.ts (issue #40): a visit may not be dated
 // before the pet was born, nor more than a year ahead. Selectors live here, never in the spec.
@@ -14,14 +15,12 @@ export interface PetWithBirthDate {
 }
 
 export async function aPetWithAKnownBirthDateExists(): Promise<PetWithBirthDate> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  for (const owner of owners) {
-    const pet = (owner.pets || []).find((p: any) => p.birthDate);
-    if (pet) {
-      return {ownerId: owner.id, petId: pet.id, petName: pet.name, birthDate: pet.birthDate};
-    }
+  const owner = await findOwner((o) => petsOf(o).some((pet) => !!pet.birthDate));
+  if (!owner) {
+    throw new Error('No pet with a birth date found; cannot run the visit-date-range scenario');
   }
-  throw new Error('No pet with a birth date found; cannot run the visit-date-range scenario');
+  const pet = petsOf(owner).find((p) => p.birthDate)!;
+  return {ownerId: owner.id, petId: pet.id, petName: pet.name, birthDate: pet.birthDate!};
 }
 
 export function daysBefore(date: string, days: number): string {
