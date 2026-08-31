@@ -35,7 +35,7 @@ Two scenarios sit side by side in `src/`, each written the way its style is mean
 | | Gherkin | a DSL in TypeScript |
 |---|---|---|
 | scenario | `owner-search.feature` | `add-visit.spec.ts` |
-| sentences | `owner-search.glue.ts` (regex → step) | `add-visit.dsl.ts` (functions) |
+| sentences | `owner-search.feature.glue.ts` (regex → step) | `add-visit.dsl.ts` (functions) |
 | state | `support/world.ts` (mutable `this`) | local `const`s |
 | diagram opt-in | `@generate_sequence` scenario tag | `{tag: [GENERATE_SEQUENCE_TAG]}` |
 | run | `npm run test:cucumber` | `npm test` |
