@@ -12,6 +12,17 @@ path. `scripts/check-agents-md.sh` enforces all of this (pre-push and CI).
 
 Copilot: use this file over your proprietary .github/copilot-instructions.md
 
+## Additional Knowledge
+
+Load one of these when the task calls for it — they are the sole source of truth on their subject.
+
+When a guardrail test fails, or a living diagram no longer matches the code, the drift
+checks and what each of them asserts are in [GUARDRAILS.md](GUARDRAILS.md).
+When you need traces — starting the stack in the right order, or explaining a span, a SQL
+label or a missing frontend trace — the whole OTel setup is in [OBSERVABILITY.md](OBSERVABILITY.md).
+To see how the pieces fit together, every diagram generated from the code is rendered in
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Project Overview
 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -90,10 +101,6 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
-### Living Architecture & Guardrails
-
-See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living architecture diagrams, and CI drift checks.
-
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
@@ -107,28 +114,6 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 - Enable via `petclinic.security.enable=true`
 - Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
 - Default test user: `admin`/`admin`
-
-### Observability
-- `./start-grafana.sh` brings up `grafana/otel-lgtm` (Grafana **:3300**, admin/admin; OTLP **:4317/:4318**).
-- `./start-backend.sh` attaches the OTel Java agent **only if :4318 is already listening** — start
-  Grafana *first*, otherwise the backend runs with telemetry silently disabled.
-- Browser spans need a flush window: a scenario that finishes in <~5s closes the page before the
-  frontend exporter ships anything, so no frontend traces reach Tempo.
-- The agent is pinned at **2.20.1** and told to capture the maximum: SQL unsanitized, **bound
-  query parameters** (`db.query.parameter.<n>`, which need `OTEL_SEMCONV_STABILITY_OPT_IN=database/dup`
-  and only exist from agent ~2.20 — 2.10 has no such flag). What a sequence diagram *shows* is
-  decided at render time in `petclinic-test/` (`SEQ_SQL`, `SEQ_HTTP_BODIES`), never here.
-- The agent jar is versioned in its filename — otherwise an already-downloaded
-  `opentelemetry-javaagent.jar` makes a version bump a silent no-op.
-- `spring.jpa.properties.hibernate.use_sql_comments=true` makes Hibernate prefix each
-  statement with the HQL that produced it, so a trace can say which call a bare
-  `select … from owners` came from — the agent captures no HQL of its own. It only fires
-  for queries *written* as HQL (`@Query`); a Spring Data derived method is assembled
-  through the Criteria API and comments itself `/* <criteria> */`, and an entity or lazy
-  load carries no comment at all. The sequence diagrams fall back accordingly — see
-  `petclinic-test/AGENTS.md`. **A backend started before this property was added labels
-  every DB arrow `SELECT petclinic`; restart it and re-record.**
-
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
