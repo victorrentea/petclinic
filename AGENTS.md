@@ -125,16 +125,6 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Development Notes
-
-### Java Code Style
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- Builder chains: one property per line, unless only two properties are set
-
-
-
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
