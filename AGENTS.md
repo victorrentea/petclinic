@@ -16,9 +16,27 @@ Copilot: use this file over your proprietary .github/copilot-instructions.md
 
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
-**Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
+**Structure:** (no aggregator pom — each Maven module is built on its own)
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built. Also hosts the Spring AI
+  MCP server at `/mcp` and, under `docs/`, the living-architecture tooling (Structurizr, codecity).
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `petclinic-database/` - tiny Java module launching the **embedded Postgres** used by
+  `./start-database.sh` and by the tests (`PostgresLauncher`), plus a `NetworkLatencyProxy`
+  for demoing slow-DB scenarios
+- `petclinic-chatbot/` - separate Spring Boot app on **:8082** (`./start-chatbot.sh`): a Spring AI
+  triage assistant. RAG over the vet-specialty knowledge base picks a specialty, then it books the
+  visit through the backend's MCP server. OpenAI-only (chat + embeddings, key from `secrets.env`),
+  own pgvector on **:5433** (`docker compose up -d` in that folder). Also holds the
+  `firefighter/` agent demo.
+- `petclinic-test/` - Playwright + Cucumber e2e suite (TypeScript, `./start-tests.sh`) and the
+  `src/genseq/` Tempo→PlantUML sequence-diagram tooling. Has its own `AGENTS.md` — read it before
+  touching tests or diagrams.
+- `petclinic-observability/` - `docker-compose.yml` for `grafana/otel-lgtm` (Grafana :3300,
+  OTLP :4317/:4318), started by `./start-grafana.sh`
+- `refactoring-legacy/` - self-contained OpenRewrite recipe module, run from the CLI against the
+  backend; deliberately not wired into `petclinic-backend/pom.xml`
+- `user-manual/` - `manual.md` + screenshots, **generated** by `/regen-user-manual`; never edit by hand
+- `scripts/` - repo guardrails (`check-agents-md.sh`, `ensure-human-review.sh`, `list-unversioned-deps.py`)
 
 ## Common Commands
 
@@ -35,42 +53,8 @@ petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
 ### The /human-review skill lives in its own repo
 
@@ -132,15 +116,7 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+REST Contract `/openapi.yaml`
 
 ## Domain Model
 Core entities and relationships:
@@ -152,14 +128,12 @@ Core entities and relationships:
 ## Development Notes
 
 ### Java Code Style
-- Keep line length ≤ 120 chars
-- Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
-- DTO mapping is hand-written in `mapper/` — no MapStruct, no annotation processor
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on each `@RequestBody`
-- No Lombok: write accessors, constructors and `LoggerFactory.getLogger(...)` explicitly
 - Builder chains: one property per line, unless only two properties are set
+
+
 
 ## Task Modifiers
 - Write non-trivial code using TDD
