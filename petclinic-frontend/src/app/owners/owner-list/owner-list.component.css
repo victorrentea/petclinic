@@ -1,3 +1,24 @@
+/* The grid's column widths must not depend on the rows it happens to be showing.
+    With the default auto layout, a page whose cities read "Yorkshire, Winnetka,
+    Wiltshire" lays out wider than one reading "Bristol, Brussels, Dartmoor", so the
+    headers jump sideways on every sort click and page change — under the cursor that
+    just clicked them. Fixed widths pin them. */
+#ownersTable table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable th,
+#ownersTable td {
+  overflow-wrap: break-word;
+}
+
+#ownersTable th:nth-child(1), #ownersTable td:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2), #ownersTable td:nth-child(2) { width: 26%; }
+#ownersTable th:nth-child(3), #ownersTable td:nth-child(3) { width: 16%; }
+#ownersTable th:nth-child(4), #ownersTable td:nth-child(4) { width: 20%; }
+#ownersTable th:nth-child(5), #ownersTable td:nth-child(5) { width: 16%; }
+
 #ownersByLastName
 {
 display:none;
@@ -47,4 +68,57 @@ display:none;
   .owner-search-input {
     width: 100%;
   }
+}
+
+/* Pets on one line: an owner with two pets used to stack them and make that row taller
+    than its neighbours, so the grid's rows were all different heights. */
+#ownersTable td.ownerPets {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+}
+
+/* One white bar under the grid: Add Owner on the left, paging on the right. The button
+    used to sit alone below it, and the bar was 56px of mostly nothing. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  padding: 4px 8px;
+}
+
+::ng-deep .owners-footer .mat-mdc-paginator {
+  background: transparent;
+}
+
+::ng-deep .owners-footer .mat-mdc-paginator-container {
+  min-height: 28px;
+  padding: 0;
+}
+
+/* Zeroing the field's padding leaves the value sitting low; centre it explicitly. */
+::ng-deep .owners-footer .mat-mdc-form-field-infix,
+::ng-deep .owners-footer .mat-mdc-text-field-wrapper {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  height: 28px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+::ng-deep .owners-footer .mat-mdc-icon-button.mat-mdc-button-base {
+  width: 28px;
+  height: 28px;
+  padding: 2px;
+}
+
+/* Material's invisible 48px touch target is what pokes out of the bar and summons a
+    horizontal scrollbar once the button around it is only 28px wide. */
+::ng-deep .owners-footer .mat-mdc-button-touch-target {
+  width: 28px;
+  height: 28px;
 }

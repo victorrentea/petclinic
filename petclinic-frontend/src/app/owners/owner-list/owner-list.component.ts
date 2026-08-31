@@ -43,6 +43,12 @@ export class OwnerListComponent implements OnInit {
       error => this.errorMessage = error as any);
   }
 
+  // One line per owner keeps every row the same height. The full list is on hover,
+  // since a wide-enough cell for four pets would waste the width on the many with one.
+  petNames(owner: Owner): string {
+    return owner.pets.map(pet => pet.name).join(', ');
+  }
+
   onSelect(owner: Owner) {
     this.router.navigate(['/owners', owner.id]);
   }

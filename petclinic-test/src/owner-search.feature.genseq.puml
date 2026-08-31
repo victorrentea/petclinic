@@ -41,6 +41,6 @@ Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} Owne
 Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
 Backend -> DB: [[genseq://1ruk3w0{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1bw25vb{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://1h2w9j3{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://0meujgo{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml

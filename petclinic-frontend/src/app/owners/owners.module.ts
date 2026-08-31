@@ -6,6 +6,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {OwnerAddComponent} from './owner-add/owner-add.component';
 import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
@@ -17,6 +18,7 @@ import {PetsModule} from '../pets/pets.module';
     FormsModule,
     MatPaginatorModule,
     MatSortModule,
+    MatTooltipModule,
     OwnersRoutingModule,
     PetsModule
   ],
