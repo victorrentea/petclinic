@@ -52,10 +52,10 @@ const JAVA = [
   '}',
 ].join('\n');
 
-// JUnit shows the method as a sentence via its @DisplayName, and that sentence is the section
-// title. Rather than parse the annotation, the method name goes through the same
-// camelCase-to-words reading the DSL narration uses — they agree because the @DisplayName spells
-// out exactly what that transformation produces.
+// JUnit shows the method as a sentence via PrettyTestNames, and that sentence is the section
+// title. Rather than reimplement the generator, the method name goes through the same
+// camelCase-to-words reading the DSL narration uses — they agree because they are the same
+// transformation.
 test('a JUnit method is found through its generated display name', () => {
   expect(scenarioLine('../petclinic-backend/…/AddVisitSequenceTest.java',
     'adds a visit to an existing pet', JAVA)).toBe(4);
