@@ -124,19 +124,25 @@ display:none;
 }
 
 /* A sortable column has to look sortable before the pointer reaches it. Material fades
-    its arrow in only on hover, so the grid asked you to go hunting for which headers you
-    may click — and the plain Bootstrap th did not even get a pointer cursor. The arrow is
-    now always drawn, dimmed until that column is the one being sorted. */
+  its arrow in only on hover, so the grid asked you to go hunting for which headers you
+  may click — and the plain Bootstrap th did not even get a pointer cursor.
+  Three states, on a header background of rgb(60, 56, 52): the column being sorted is
+  white, a column you could sort is grey, and hovering one brings it to white so the
+  click is confirmed before it happens. The arrow's parts are drawn with currentColor,
+  so the colour is set once on the arrow itself. */
 #ownersTable th.mat-sort-header {
   cursor: pointer;
 }
 
 ::ng-deep #ownersTable th.mat-sort-header .mat-sort-header-arrow {
-  opacity: 0.45 !important;
+  opacity: 1 !important;
   transform: none !important;
+  color: #9a9a9a;
+  transition: color 120ms ease;
 }
 
+::ng-deep #ownersTable th.mat-sort-header:hover .mat-sort-header-arrow,
 ::ng-deep #ownersTable th.mat-sort-header[aria-sort='ascending'] .mat-sort-header-arrow,
 ::ng-deep #ownersTable th.mat-sort-header[aria-sort='descending'] .mat-sort-header-arrow {
-  opacity: 1 !important;
+  color: #fff;
 }

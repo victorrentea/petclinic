@@ -69,6 +69,21 @@ test.describe('Owners grid layout', () => {
     for (const header of headers.filter((h) => !['Name', 'City'].includes(h.label))) {
       expect(header.arrowOpacity).toBeNull();
     }
+
+    // Three states, and the middle one has to be visibly the middle one: the column being
+    // sorted reads brighter than one that merely could be, and hovering closes the gap.
+    const arrowColour = (column: string) =>
+      page.locator(`th[data-test="${column}"] .mat-sort-header-arrow`)
+        .evaluate((el) => getComputedStyle(el).color);
+
+    const active = await arrowColour('sort-name');
+    const idle = await arrowColour('sort-city');
+    expect(idle).not.toBe(active);
+
+    await page.locator('th[data-test="sort-city"]').hover();
+    await expect
+      .poll(() => arrowColour('sort-city'))
+      .toBe(active);
   });
 
   test('column positions survive paging', async ({page}) => {
