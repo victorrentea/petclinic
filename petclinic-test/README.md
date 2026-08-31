@@ -69,7 +69,7 @@ lifeline, above the arrows that sentence caused**.
 | | where the sentence comes from |
 |---|---|
 | `owner-search.feature` | the Gherkin step, keyword and all — read off the Gherkin document, so an `And` is quoted as `And` |
-| `add-visit.spec.ts` | the DSL function's own name: `openOwnerDetailPage` → `open owner detail page` |
+| `add-visit.spec.ts` | the DSL function's own name: `open_owner_detail_page` → `open owner detail page` |
 | `AddVisitSequenceTest.java` | `given("…") / when("…") / and("…") / then("…")` — see below |
 
 The spec did not have to change shape for this. `add-visit.spec.ts` imports its DSL through

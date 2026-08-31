@@ -86,7 +86,7 @@ class AddVisitSequenceTest {
     }
 
     /**
-     * The Java twin of the spec's `anOwnerWithAtLeastOnePetExists`, over MockMvc instead of axios.
+     * The Java twin of the spec's `an_owner_with_at_least_one_pet_exists`, over MockMvc instead of axios.
      * {@link victor.training.petclinic.genseq.Rest#call} rather than a bare `mockMvc.perform`: it
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */

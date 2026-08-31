@@ -9,13 +9,13 @@ import * as sentences from './add-visit.dsl';
 // the name of the function, and that turns out to be enough. Nothing below changes shape
 // for it: still named imports, still ctrl-clickable, still type-checked against the DSL.
 const {
-  anOwnerWithAtLeastOnePetExists,
-  clickAddVisitForFirstPet,
-  expectBackOnOwnerDetailPage,
-  expectPetVisitListContains,
-  fillVisitDateAndUniqueDescription,
-  openOwnerDetailPage,
-  submitVisitForm,
+  an_owner_with_at_least_one_pet_exists,
+  click_add_visit_for_first_pet,
+  expect_back_on_owner_detail_page,
+  expect_pet_visit_list_contains,
+  fill_visit_date_and_unique_description,
+  open_owner_detail_page,
+  submit_visit_form,
 } = narrate(sentences);
 
 // Scenario as a DSL: the body is a list of sentences from add-visit.dsl.ts, so
@@ -31,13 +31,13 @@ const VISIT_DATE = '2026-05-12';
 test('Add a visit to an existing pet from the owner detail page',
   {tag: [GENERATE_SEQUENCE_TAG]},
   async ({page}) => {
-    const {ownerId} = await anOwnerWithAtLeastOnePetExists();
+    const {ownerId} = await an_owner_with_at_least_one_pet_exists();
 
-    await openOwnerDetailPage(page, ownerId);
-    await clickAddVisitForFirstPet(page, 'Add Visit');
-    const description = await fillVisitDateAndUniqueDescription(page, VISIT_DATE);
-    await submitVisitForm(page);
+    await open_owner_detail_page(page, ownerId);
+    await click_add_visit_for_first_pet(page, 'Add Visit');
+    const description = await fill_visit_date_and_unique_description(page, VISIT_DATE);
+    await submit_visit_form(page);
 
-    await expectBackOnOwnerDetailPage(page, ownerId);
-    await expectPetVisitListContains(page, VISIT_DATE, description);
+    await expect_back_on_owner_detail_page(page, ownerId);
+    await expect_pet_visit_list_contains(page, VISIT_DATE, description);
   });
