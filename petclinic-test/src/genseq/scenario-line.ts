@@ -43,10 +43,10 @@ function matches(source: string, line: string, wanted: string): boolean {
     return GHERKIN.exec(line)?.[1] === wanted;
   }
   if (source.endsWith('.java')) {
-    // JUnit shows a method under @DisplayNameGeneration(PrettyTestNames) as a sentence, and
-    // that sentence is the section's title. Rather than reimplement the generator, put the
-    // method name through the same camelCase-to-words reading the DSL narration uses — the
-    // two agree because they are the same transformation.
+    // JUnit shows a method under its @DisplayName as a sentence, and that sentence is the
+    // section's title. Rather than parse the annotation, put the method name through the same
+    // camelCase-to-words reading the DSL narration uses — the two agree because the @DisplayName
+    // spells out exactly what that transformation produces.
     const method = JAVA_METHOD.exec(line)?.[1];
     return method !== undefined && sentenceOf(method) === sentenceOf(wanted);
   }

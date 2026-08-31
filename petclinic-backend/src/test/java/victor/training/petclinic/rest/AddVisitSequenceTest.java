@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
-import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import victor.training.petclinic.genseq.GenerateSequence;
-import victor.training.petclinic.tools.PrettyTestNames;
 
 /**
  * The same journey as petclinic-test/src/add-visit.spec.ts, one layer down: no Chromium, no Angular,
@@ -49,7 +48,7 @@ import victor.training.petclinic.tools.PrettyTestNames;
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
-@DisplayNameGeneration(PrettyTestNames.class)
+@DisplayName("add visit sequence test")
 @GenerateSequence
 class AddVisitSequenceTest {
 
@@ -61,6 +60,7 @@ class AddVisitSequenceTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
+    @DisplayName("adds a visit to an existing pet")
     void addsAVisitToAnExistingPet() throws Exception {
         given("an owner with at least one pet exists");
         JsonNode owner = anOwnerWithAPet();

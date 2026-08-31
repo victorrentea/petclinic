@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,6 @@ import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
-import victor.training.petclinic.tools.PrettyTestNames;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,7 +55,7 @@ import static org.mockito.Mockito.when;
  * Spring context, no database, so the whole class runs in milliseconds.
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(PrettyTestNames.class)
+@DisplayName("create visit should")
 class CreateVisitShould {
     private static final int OWNER_ID = 7;
     private static final int PET_ID = 13;
@@ -93,8 +92,10 @@ class CreateVisitShould {
     }
 
     @Nested
+    @DisplayName("fails if")
     class FailsIf {
         @Test
+        @DisplayName("the pet does not exist")
         void thePetDoesNotExist() {
             when(petRepository.findById(PET_ID)).thenReturn(Optional.empty());
 
@@ -103,6 +104,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("the pet belongs to another owner")
         void thePetBelongsToAnotherOwner() {
             anOwnerWithId(OWNER_ID + 1).addPet(rex);
             givenThePetExists();
@@ -112,6 +114,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("the date is in the past")
         void theDateIsInThePast() {
             givenThePetExists();
 
@@ -121,6 +124,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("the time has already passed today")
         void theTimeHasAlreadyPassedToday() {
             givenThePetExists();
             // today is an allowed date, but midnight is in the past for the whole of it
@@ -131,6 +135,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("the pet already has the maximum of upcoming visits")
         void thePetAlreadyHasTheMaximumOfUpcomingVisits() {
             for (int i = 0; i < PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET; i++) {
                 Visit visit = new Visit();
@@ -146,6 +151,7 @@ class CreateVisitShould {
     }
 
     @Nested
+    @DisplayName("for a valid booking")
     class ForAValidBooking {
         static final int NEW_VISIT_ID = 42;
 
@@ -161,6 +167,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("save the visit as described")
         void saveTheVisitAsDescribed() {
             petClinicMcp.createVisit(PET_ID, nextWeek, morning, "Vaccination");
 
@@ -174,6 +181,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("link the visit to the pet on both sides")
         void linkTheVisitToThePetOnBothSides() {
             petClinicMcp.createVisit(PET_ID, nextWeek, morning, "Vaccination");
 
@@ -183,6 +191,7 @@ class CreateVisitShould {
         }
 
         @Test
+        @DisplayName("confirm with the id of the new visit")
         void confirmWithTheIdOfTheNewVisit() {
             String confirmation = petClinicMcp.createVisit(PET_ID, nextWeek, morning, "Vaccination");
 
