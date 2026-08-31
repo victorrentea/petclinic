@@ -1,32 +1,32 @@
 ## 0. Clear the tree first
 
-- [ ] 0.1 Commit the uncommitted issue-#40 work (visit-date validation) on its own, and the `AGENTS.md` volumetry note on its own; verify `git status` is clean before touching anything below, so the #25 diff is readable
+- [x] 0.1 Commit the uncommitted issue-#40 work (visit-date validation) on its own, and the `AGENTS.md` volumetry note on its own; verify `git status` is clean before touching anything below, so the #25 diff is readable
 
 ## 1. Backend — page the query (TDD, red first)
 
-- [ ] 1.1 Add failing tests to `OwnerTest` (or a new `OwnerPageTest`): default listing returns 10 items with a `page` object carrying the true `totalElements`; verify they fail against today's array response
-- [ ] 1.2 Add a failing test that walking every page of `?sort=city,asc` yields disjoint id sets covering all owners exactly once — the tie-stability requirement; verify it fails without a final tie-breaker
-- [ ] 1.3 Add failing tests for the rejections: `?sort=address` → 400, `?sort=pets.visits.description` → 400, `?size=100000` → 400, `?size=7` → 400; verify each currently returns 200
-- [ ] 1.4 Change `OwnerRepository.findByLastNameStartingWith` to take a `Pageable` and return `Page<Owner>`; verify the module compiles and 1.1 gets past the repository layer
-- [ ] 1.5 Change `OwnerRestController.listOwners` to accept `Pageable`, apply the sort/size whitelist (`IllegalArgumentException` → 400 via `ExceptionControllerAdvice`), append the `id` tie-breaker, and return `PagedModel<OwnerDto>`; verify tests 1.1–1.3 go green
-- [ ] 1.6 Update the endpoint's `@Operation`/`@ApiResponse` schema and `ApiExamples.OWNERS` to the page shape; verify `mvn -pl petclinic-backend test` is green and the Swagger example parses
+- [x] 1.1 Add failing tests to `OwnerTest` (or a new `OwnerPageTest`): default listing returns 10 items with a `page` object carrying the true `totalElements`; verify they fail against today's array response
+- [x] 1.2 Add a failing test that walking every page of `?sort=city,asc` yields disjoint id sets covering all owners exactly once — the tie-stability requirement; verify it fails without a final tie-breaker
+- [x] 1.3 Add failing tests for the rejections: `?sort=address` → 400, `?sort=pets.visits.description` → 400, `?size=100000` → 400, `?size=7` → 400; verify each currently returns 200
+- [x] 1.4 Change `OwnerRepository.findByLastNameStartingWith` to take a `Pageable` and return `Page<Owner>`; verify the module compiles and 1.1 gets past the repository layer
+- [x] 1.5 Change `OwnerRestController.listOwners` to accept `Pageable`, apply the sort/size whitelist (`IllegalArgumentException` → 400 via `ExceptionControllerAdvice`), append the `id` tie-breaker, and return `PagedModel<OwnerDto>`; verify tests 1.1–1.3 go green
+- [x] 1.6 Update the endpoint's `@Operation`/`@ApiResponse` schema and `ApiExamples.OWNERS` to the page shape; verify `mvn -pl petclinic-backend test` is green and the Swagger example parses
 
 ## 2. Backend — make it fast
 
-- [ ] 2.1 Add a failing test counting queries for a 10-owner page with pets (expect 2, not 11) using the repo's existing query-counting instrumentation; verify it fails at 11
-- [ ] 2.2 Add `@BatchSize` to `Owner.pets`; verify 2.1 goes green and no `HHH90003004` warning appears in the test log
-- [ ] 2.3 Write `V9__index_owners.sql` creating `owners (last_name, first_name, id)`, `owners (city, id)` and `owners (last_name text_pattern_ops)`, with a comment naming what each serves; verify `JpaMatchesDBSchemaTest` and the Flyway boot still pass
-- [ ] 2.4 Confirm the indexes are actually used: run `EXPLAIN` for the default ordering and for the `LIKE 'Pot%'` filter against the local database and verify no sequential scan of `owners` and no separate sort node on the default ordering
+- [x] 2.1 Add a failing test counting queries for a 10-owner page with pets (expect 2, not 11) using the repo's existing query-counting instrumentation; verify it fails at 11
+- [x] 2.2 Add `@BatchSize` to `Owner.pets`; verify 2.1 goes green and no `HHH90003004` warning appears in the test log
+- [x] 2.3 Write `V9__index_owners.sql` creating `owners (last_name, first_name, id)`, `owners (city, id)` and `owners (last_name text_pattern_ops)`, with a comment naming what each serves; verify `JpaMatchesDBSchemaTest` and the Flyway boot still pass
+- [x] 2.4 Confirm the indexes are actually used: run `EXPLAIN` for the default ordering and for the `LIKE 'Pot%'` filter against the local database and verify no sequential scan of `owners` and no separate sort node on the default ordering
 
 ## 3. Frontend — paged, sorted grid
 
-- [ ] 3.1 Regenerate `openapi.yaml` (`OpenApiExtractorTest`) and `api-types.ts` (`npm run generate:api`); verify the generated page type appears and the drift check is clean
-- [ ] 3.2 Delete `src/app/owners/owner-page.ts`; verify `ng build` still succeeds (nothing imported it)
-- [ ] 3.3 Collapse `OwnerService.getOwners`/`searchOwners` into one call taking page, size, sort and lastName and returning the generated page type; verify `owner.service.spec.ts` passes after being updated to the new shape
-- [ ] 3.4 Drive `OwnerListComponent` from `queryParamMap` (page, size, sort, lastName), navigating on every interaction and resetting to page 0 on a new search; verify updated `owner-list.component.spec.ts` covers the reset-to-page-0 and deep-link cases
-- [ ] 3.5 Add `matSort` to the Name and City headers only, and a `<mat-paginator>` with `[5, 10, 20]` below the table, keeping `#ownersTable` and `td.ownerFullName` intact; import `MatSortModule`/`MatPaginatorModule` in `owners.module.ts`; verify `ng build` (strict) passes and the selectors still resolve
-- [ ] 3.6 Render the Name cell as `lastName, firstName`; verify the updated `.ownerFullName` assertion in `owner-list.component.spec.ts` passes
-- [ ] 3.7 Reuse or delete the orphan `.owners-controls` / `.owners-pagination` / `.owners-page-size` rules in `owner-list.component.css`; verify no unused pagination CSS is left behind
+- [x] 3.1 Regenerate `openapi.yaml` (`OpenApiExtractorTest`) and `api-types.ts` (`npm run generate:api`); verify the generated page type appears and the drift check is clean
+- [x] 3.2 Delete `src/app/owners/owner-page.ts`; verify `ng build` still succeeds (nothing imported it)
+- [x] 3.3 Collapse `OwnerService.getOwners`/`searchOwners` into one call taking page, size, sort and lastName and returning the generated page type; verify `owner.service.spec.ts` passes after being updated to the new shape
+- [x] 3.4 Drive `OwnerListComponent` from `queryParamMap` (page, size, sort, lastName), navigating on every interaction and resetting to page 0 on a new search; verify updated `owner-list.component.spec.ts` covers the reset-to-page-0 and deep-link cases
+- [x] 3.5 Add `matSort` to the Name and City headers only, and a `<mat-paginator>` with `[5, 10, 20]` below the table, keeping `#ownersTable` and `td.ownerFullName` intact; import `MatSortModule`/`MatPaginatorModule` in `owners.module.ts`; verify `ng build` (strict) passes and the selectors still resolve
+- [x] 3.6 Render the Name cell as `lastName, firstName`; verify the updated `.ownerFullName` assertion in `owner-list.component.spec.ts` passes
+- [x] 3.7 Reuse or delete the orphan `.owners-controls` / `.owners-pagination` / `.owners-page-size` rules in `owner-list.component.css`; verify no unused pagination CSS is left behind
 
 ## 4. Fix the other consumers of the array shape
 

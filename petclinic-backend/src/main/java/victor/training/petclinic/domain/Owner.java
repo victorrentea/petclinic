@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -52,6 +53,11 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    // The owners grid renders pet names, so a page of owners drags its pets along. Batching turns
+    // that into one extra IN(...) query for the whole page instead of one query per owner.
+    // JOIN FETCH / @EntityGraph cannot be used here: Hibernate cannot LIMIT a join-fetched
+    // collection query, so it would read every owner and paginate in memory (HHH90003004).
+    @BatchSize(size = 20)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
     private Set<Pet> pets = new HashSet<>();
 

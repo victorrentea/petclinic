@@ -1,8 +1,18 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +26,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPage;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -34,7 +45,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -45,6 +55,12 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    /** The only orderings the endpoint serves; anything else would let a client sort 100.000
+     * rows by an unindexed column, or reach through a relation into another table. */
+    private static final Set<String> SORTABLE_PROPERTIES = Set.of("lastName", "firstName", "city");
+
+    private static final Set<Integer> ALLOWED_PAGE_SIZES = Set.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -74,15 +90,50 @@ public class OwnerRestController {
         this.visitMapper = visitMapper;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time",
+            description = "Page size must be 5, 10 or 20; sortable properties are lastName, firstName and city.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPage.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @ParameterObject @PageableDefault(size = 10, sort = "lastName") Pageable pageable) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, totallyOrdered(pageable));
+        return new PagedModel<>(owners.map(ownerMapper::toOwnerDto));
+    }
+
+    /**
+     * Rejects anything outside the whitelists, then completes the requested ordering into a total
+     * one. Without a unique final tie-breaker two consecutive pages of a column full of equal
+     * values overlap, and the owners they both skip are never listed at all.
+     */
+    private Pageable totallyOrdered(Pageable pageable) {
+        if (!ALLOWED_PAGE_SIZES.contains(pageable.getPageSize())) {
+            throw new IllegalArgumentException(
+                    "Unsupported page size: " + pageable.getPageSize() + ". Allowed: " + ALLOWED_PAGE_SIZES);
+        }
+        List<Order> orders = new ArrayList<>();
+        for (Order requested : pageable.getSort()) {
+            if (!SORTABLE_PROPERTIES.contains(requested.getProperty())) {
+                throw new IllegalArgumentException(
+                        "Cannot sort by: " + requested.getProperty() + ". Sortable: " + SORTABLE_PROPERTIES);
+            }
+            addUnlessPresent(orders, requested);
+            if ("lastName".equals(requested.getProperty())) {
+                addUnlessPresent(orders, new Order(requested.getDirection(), "firstName"));
+            }
+        }
+        addUnlessPresent(orders, Order.asc("id"));
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(orders));
+    }
+
+    private void addUnlessPresent(List<Order> orders, Order order) {
+        boolean alreadySorted = orders.stream().anyMatch(o -> o.getProperty().equals(order.getProperty()));
+        if (!alreadySorted) {
+            orders.add(order);
+        }
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

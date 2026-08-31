@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners, one page at a time
+     * @description Page size must be 5, 10 or 20; sortable properties are lastName, firstName and city.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,20 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    OwnerPage: {
+      content?: components["schemas"]["OwnerDto"][];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PageMetadata: {
+      /** Format: int64 */
+      number?: number;
+      /** Format: int64 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int64 */
+      totalPages?: number;
     };
     PetDto: {
       /**
@@ -553,18 +570,27 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners, one page at a time
+   * @description Page size must be 5, 10 or 20; sortable properties are lastName, firstName and city.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index (0..N) */
+        page?: number;
+        /** @description The size of the page to be returned */
+        size?: number;
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPage"];
         };
       };
       /** @description Bad Request */

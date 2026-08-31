@@ -127,6 +127,17 @@ automatically — don't restate it in a prompt.
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract `/openapi.yaml`
 
+**`GET /api/owners` is paged, and deliberately cannot return everything.** It takes
+`page`, `size`, `sort` and `lastName`, and answers with `OwnerPage`
+(`{content, page:{size, number, totalElements, totalPages}}`) — never a bare array.
+`size` accepts only `5|10|20` and `sort` only `lastName|firstName|city`; anything else is a
+400, rejected rather than clamped, so no caller can ask the ~100k-row table for a full scan.
+Every sort ends in `id`: without a unique final tie-breaker, `LIMIT/OFFSET` over a column with
+ties returns overlapping or disjoint pages and an owner can be skipped entirely.
+The schema is bound to a concrete `OwnerPage` class rather than left as `PagedModel<OwnerDto>`
+— springdoc drops an inferred generic schema as soon as an `@ApiResponse` declares `content`,
+which is where `ApiExamples` attaches, and the `$ref` dangles.
+
 **Rejecting a request = `IllegalArgumentException`.** That is the idiom already used by
 `PetClinicMcp`, and `ExceptionControllerAdvice` maps it to a 400 ProblemDetail. Without that
 handler it falls into the advice's catch-all `@ExceptionHandler(Exception.class)` and surfaces
