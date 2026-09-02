@@ -56,6 +56,7 @@ public class OwnerRestController {
     private final PetMapper petMapper;
 
     private final VisitMapper visitMapper;
+    private final VisitDateRange visitDateRange;
 
     public OwnerRestController(
             OwnerRepository ownerRepository,
@@ -64,7 +65,8 @@ public class OwnerRestController {
             PetTypeRepository petTypeRepository,
             OwnerMapper ownerMapper,
             PetMapper petMapper,
-            VisitMapper visitMapper) {
+            VisitMapper visitMapper,
+            VisitDateRange visitDateRange) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
@@ -72,6 +74,7 @@ public class OwnerRestController {
         this.ownerMapper = ownerMapper;
         this.petMapper = petMapper;
         this.visitMapper = visitMapper;
+        this.visitDateRange = visitDateRange;
     }
 
     @Operation(operationId = "listOwners", summary = "List owners")
@@ -159,10 +162,10 @@ public class OwnerRestController {
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
-            @RequestBody VisitFieldsDto visitFieldsDto) {
+            @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        visitDateRange.check(visitFieldsDto.getDate(), pet);
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
         visit.setPet(pet);
         visitRepository.save(visit);
 

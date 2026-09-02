@@ -28,6 +28,9 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
+  petBirthDate?: string;
+  // The refused response the visit-date-range API scenarios assert on.
+  apiResponse?: any;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo

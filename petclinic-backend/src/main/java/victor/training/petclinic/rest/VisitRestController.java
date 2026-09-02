@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.validation.annotation.Validated;
@@ -26,10 +28,15 @@ import java.util.List;
 public class VisitRestController {
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final PetRepository petRepository;
+    private final VisitDateRange visitDateRange;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper,
+            PetRepository petRepository, VisitDateRange visitDateRange) {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
+        this.petRepository = petRepository;
+        this.visitDateRange = visitDateRange;
     }
 
     @GetMapping
@@ -63,6 +70,8 @@ public class VisitRestController {
     // repository-only, no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
+        Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
+        visitDateRange.check(visitDto.getDate(), pet);
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return visit.getId();
@@ -71,6 +80,7 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        visitDateRange.check(visitDto.getDate(), currentVisit.getPet());
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
