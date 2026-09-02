@@ -1918,31 +1918,31 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">UserRestController.addUser(UserDto)</span><span class="method-score">+7</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/UserRestController.java:27</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/UserRestController.java:30</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">27</td><td class="code">    public ResponseEntity&lt;UserDto&gt; addUser(@RequestBody @Validated UserDto userDto) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">28</td><td class="code">        User user = userMapper.toUser(userDto);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">29</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">30</td><td class="code">        if (user.getRoles() == null || user.getRoles().isEmpty()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
-<tr><td class="ln">31</td><td class="code">            throw new IllegalArgumentException(&quot;User must have at least a role set!&quot;);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">32</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">33</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">34</td><td class="code">        for (Role role : user.getRoles()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">3</td></tr>
-<tr class="hit"><td class="ln">35</td><td class="code">            if (!role.getName().startsWith(&quot;ROLE_&quot;)) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the if, +1 for sitting 1 level deep">if +2 · nesting 1</i></td><td class="run">5</td></tr>
-<tr><td class="ln">36</td><td class="code">                role.setName(&quot;ROLE_&quot; + role.getName());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">37</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">38</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">39</td><td class="code">            if (role.getUser() == null) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the if, +1 for sitting 1 level deep">if +2 · nesting 1</i></td><td class="run">7</td></tr>
-<tr><td class="ln">40</td><td class="code">                role.setUser(user);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">41</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">42</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">43</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">44</td><td class="code">        userRepository.save(user);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">45</td><td class="code">        return ResponseEntity.created(UriComponentsBuilder.fromPath(&quot;/api/users/{username}&quot;)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">46</td><td class="code">                .buildAndExpand(user.getUsername()).toUri())</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">47</td><td class="code">                .body(userMapper.toUserDto(user));</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">48</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">30</td><td class="code">    public ResponseEntity&lt;UserDto&gt; addUser(@RequestBody @Validated UserDto userDto) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">31</td><td class="code">        User user = userMapper.toUser(userDto);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">32</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">33</td><td class="code">        if (user.getRoles() == null || user.getRoles().isEmpty()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
+<tr><td class="ln">34</td><td class="code">            throw new IllegalArgumentException(&quot;User must have at least a role set!&quot;);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">35</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">36</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">37</td><td class="code">        for (Role role : user.getRoles()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">3</td></tr>
+<tr class="hit"><td class="ln">38</td><td class="code">            if (!role.getName().startsWith(&quot;ROLE_&quot;)) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the if, +1 for sitting 1 level deep">if +2 · nesting 1</i></td><td class="run">5</td></tr>
+<tr><td class="ln">39</td><td class="code">                role.setName(&quot;ROLE_&quot; + role.getName());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">40</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">41</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">42</td><td class="code">            if (role.getUser() == null) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the if, +1 for sitting 1 level deep">if +2 · nesting 1</i></td><td class="run">7</td></tr>
+<tr><td class="ln">43</td><td class="code">                role.setUser(user);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">44</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">45</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">46</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">47</td><td class="code">        userRepository.save(user);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">48</td><td class="code">        return ResponseEntity.created(UriComponentsBuilder.fromPath(&quot;/api/users/{username}&quot;)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">49</td><td class="code">                .buildAndExpand(user.getUsername()).toUri())</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">50</td><td class="code">                .body(userMapper.toUserDto(user));</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">51</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -2598,18 +2598,18 @@ main:has(details.explained) {
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">VetRestController.updateSpecialties(Vet)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:76</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:85</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">76</td><td class="code">    private void updateSpecialties(Vet currentVet) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">77</td><td class="code">        if (currentVet.getNrOfSpecialties() &gt; 0) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">5</td></tr>
-<tr><td class="ln">78</td><td class="code">            Set&lt;String&gt; names = currentVet.getSpecialties().stream().map(Specialty::getName)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">79</td><td class="code">                    .collect(Collectors.toSet());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">80</td><td class="code">            List&lt;Specialty&gt; vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">81</td><td class="code">            currentVet.setSpecialties(vetSpecialities);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">82</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">83</td><td class="code">        vetRepository.save(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">84</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">85</td><td class="code">    private void updateSpecialties(Vet currentVet) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">86</td><td class="code">        if (currentVet.getNrOfSpecialties() &gt; 0) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">5</td></tr>
+<tr><td class="ln">87</td><td class="code">            Set&lt;String&gt; names = currentVet.getSpecialties().stream().map(Specialty::getName)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">88</td><td class="code">                    .collect(Collectors.toSet());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">89</td><td class="code">            List&lt;Specialty&gt; vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">90</td><td class="code">            currentVet.setSpecialties(vetSpecialities);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">91</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">92</td><td class="code">        vetRepository.save(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">93</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -2666,36 +2666,36 @@ main:has(details.explained) {
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">VetRestController.updateSpecialties(Vet)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:76</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:85</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">76</td><td class="code">    private void updateSpecialties(Vet currentVet) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">77</td><td class="code">        if (currentVet.getNrOfSpecialties() &gt; 0) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">4</td></tr>
-<tr><td class="ln">78</td><td class="code">            Set&lt;String&gt; names = currentVet.getSpecialties().stream().map(Specialty::getName)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">79</td><td class="code">                    .collect(Collectors.toSet());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">80</td><td class="code">            List&lt;Specialty&gt; vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">81</td><td class="code">            currentVet.setSpecialties(vetSpecialities);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">82</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">83</td><td class="code">        vetRepository.save(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">84</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">85</td><td class="code">    private void updateSpecialties(Vet currentVet) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">86</td><td class="code">        if (currentVet.getNrOfSpecialties() &gt; 0) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">4</td></tr>
+<tr><td class="ln">87</td><td class="code">            Set&lt;String&gt; names = currentVet.getSpecialties().stream().map(Specialty::getName)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">88</td><td class="code">                    .collect(Collectors.toSet());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">89</td><td class="code">            List&lt;Specialty&gt; vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">90</td><td class="code">            currentVet.setSpecialties(vetSpecialities);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">91</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">92</td><td class="code">        vetRepository.save(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">93</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">VetRestController.updateVet(int, VetDto)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:65</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/VetRestController.java:74</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">65</td><td class="code">    public void updateVet(@PathVariable int vetId, @RequestBody VetDto vetDto) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">66</td><td class="code">        Vet currentVet = vetRepository.findById(vetId).orElseThrow();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">67</td><td class="code">        currentVet.setFirstName(vetDto.getFirstName());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">68</td><td class="code">        currentVet.setLastName(vetDto.getLastName());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">69</td><td class="code">        currentVet.clearSpecialties();</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">70</td><td class="code">        for (Specialty spec : specialtyMapper.toSpecialty(vetDto.getSpecialties())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">5</td></tr>
-<tr><td class="ln">71</td><td class="code">            currentVet.addSpecialty(spec);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">72</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">73</td><td class="code">        updateSpecialties(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">74</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">74</td><td class="code">    public void updateVet(@PathVariable int vetId, @RequestBody VetDto vetDto) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">75</td><td class="code">        Vet currentVet = vetRepository.findById(vetId).orElseThrow();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">76</td><td class="code">        currentVet.setFirstName(vetDto.getFirstName());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">77</td><td class="code">        currentVet.setLastName(vetDto.getLastName());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">78</td><td class="code">        currentVet.clearSpecialties();</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">79</td><td class="code">        for (Specialty spec : specialtyMapper.toSpecialty(vetDto.getSpecialties())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">5</td></tr>
+<tr><td class="ln">80</td><td class="code">            currentVet.addSpecialty(spec);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">81</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">82</td><td class="code">        updateSpecialties(currentVet);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">83</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3239,18 +3239,18 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetTypeRestController.deletePetType(int)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/PetTypeRestController.java:70</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/PetTypeRestController.java:73</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">70</td><td class="code">    public ResponseEntity&lt;Void&gt; deletePetType(@PathVariable int petTypeId) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">71</td><td class="code">        try {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">72</td><td class="code">            PetType petType = petTypeRepository.findById(petTypeId).orElseThrow();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">73</td><td class="code">            petTypeRepository.delete(petType);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">74</td><td class="code">            return ResponseEntity.noContent().build();</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">75</td><td class="code">        } catch (DataIntegrityViolationException ex) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the catch">catch +1</i></td><td class="run">1</td></tr>
-<tr><td class="ln">76</td><td class="code">            throw new RuntimeException(&quot;PetType is in use by existing pets and cannot be deleted&quot;, ex);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">77</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">78</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">73</td><td class="code">    public ResponseEntity&lt;Void&gt; deletePetType(@PathVariable int petTypeId) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">74</td><td class="code">        try {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">75</td><td class="code">            PetType petType = petTypeRepository.findById(petTypeId).orElseThrow();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">76</td><td class="code">            petTypeRepository.delete(petType);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">77</td><td class="code">            return ResponseEntity.noContent().build();</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">78</td><td class="code">        } catch (DataIntegrityViolationException ex) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the catch">catch +1</i></td><td class="run">1</td></tr>
+<tr><td class="ln">79</td><td class="code">            throw new RuntimeException(&quot;PetType is in use by existing pets and cannot be deleted&quot;, ex);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">80</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">81</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3297,18 +3297,18 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">SpecialtyFeedController.feed(String)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/rest/SpecialtyFeedController.java:27</p>
+<p class="meta">src/main/java/victor/training/petclinic/rest/SpecialtyFeedController.java:29</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">27</td><td class="code">    public ResponseEntity&lt;List&lt;SpecialtyFeed.Item&gt;&gt; feed(</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">28</td><td class="code">            @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">29</td><td class="code">        List&lt;SpecialtyFeed.Item&gt; items = specialtyFeed.load();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">30</td><td class="code">        String etag = specialtyFeed.etag(items);</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">31</td><td class="code">        if (etag.equals(ifNoneMatch)) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">1</td></tr>
-<tr><td class="ln">32</td><td class="code">            return ResponseEntity.status(304).eTag(etag).build();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">33</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">34</td><td class="code">        return ResponseEntity.ok().eTag(etag).body(items);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">35</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">29</td><td class="code">    public ResponseEntity&lt;List&lt;SpecialtyFeed.Item&gt;&gt; feed(</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">30</td><td class="code">            @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">31</td><td class="code">        List&lt;SpecialtyFeed.Item&gt; items = specialtyFeed.load();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">32</td><td class="code">        String etag = specialtyFeed.etag(items);</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">33</td><td class="code">        if (etag.equals(ifNoneMatch)) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">1</td></tr>
+<tr><td class="ln">34</td><td class="code">            return ResponseEntity.status(304).eTag(etag).build();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">35</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">36</td><td class="code">        return ResponseEntity.ok().eTag(etag).body(items);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">37</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3356,31 +3356,31 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.callVetAmbulance(McpSyncRequestContext)</span><span class="method-score">+6</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:210</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:214</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">210</td><td class="code">    public String callVetAmbulance(McpSyncRequestContext context) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">211</td><td class="code">        if (context == null || !context.elicitEnabled()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
-<tr><td class="ln">212</td><td class="code">            throw new IllegalStateException(</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">213</td><td class="code">                    &quot;call_vet_ambulance requires an MCP client that supports elicitation (owner must confirm).&quot;);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">214</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">215</td><td class="code">        // CONFIRMATION-style elicitation: phrase it so ACCEPT reads as &quot;Request&quot; (dispatch),</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">216</td><td class="code">        // not &quot;Cancel&quot;. Same server-side context.elicit(...) API used elsewhere; the structured</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">217</td><td class="code">        // payload carries the required address the vet ambulance should drive to.</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">218</td><td class="code">        String prompt = &quot;Request a vet ambulance to drive to your address? &quot;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">219</td><td class="code">                + &quot;Enter the address to dispatch to, then confirm to Request the ambulance.&quot;;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">220</td><td class="code">        StructuredElicitResult&lt;AmbulanceAddressInput&gt; elicit = context.elicit(e -&gt; e.message(prompt),</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">221</td><td class="code">                AmbulanceAddressInput.class);</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">222</td><td class="code">        if (elicit.action() != ElicitResult.Action.ACCEPT) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">3</td></tr>
-<tr><td class="ln">223</td><td class="code">            return &quot;Vet ambulance was not requested.&quot;;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">224</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">225</td><td class="code">        AmbulanceAddressInput input = elicit.structuredContent();</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">226</td><td class="code">        String address = input == null ? null : input.address();</td><td class="inc"><i class="chip structural" data-tip="+1 for the ternary">ternary +1</i></td><td class="run">4</td></tr>
-<tr class="hit"><td class="ln">227</td><td class="code">        if (address == null || address.isBlank()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">6</td></tr>
-<tr><td class="ln">228</td><td class="code">            throw new IllegalArgumentException(&quot;An address is required to dispatch the vet ambulance.&quot;);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">229</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">230</td><td class="code">        return &quot;Vet ambulance dispatched to &quot; + address.trim();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">231</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">214</td><td class="code">    public String callVetAmbulance(McpSyncRequestContext context) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">215</td><td class="code">        if (context == null || !context.elicitEnabled()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
+<tr><td class="ln">216</td><td class="code">            throw new IllegalStateException(</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">217</td><td class="code">                    &quot;call_vet_ambulance requires an MCP client that supports elicitation (owner must confirm).&quot;);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">218</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">219</td><td class="code">        // CONFIRMATION-style elicitation: phrase it so ACCEPT reads as &quot;Request&quot; (dispatch),</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">220</td><td class="code">        // not &quot;Cancel&quot;. Same server-side context.elicit(...) API used elsewhere; the structured</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">221</td><td class="code">        // payload carries the required address the vet ambulance should drive to.</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">222</td><td class="code">        String prompt = &quot;Request a vet ambulance to drive to your address? &quot;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">223</td><td class="code">                + &quot;Enter the address to dispatch to, then confirm to Request the ambulance.&quot;;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">224</td><td class="code">        StructuredElicitResult&lt;AmbulanceAddressInput&gt; elicit = context.elicit(e -&gt; e.message(prompt),</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">225</td><td class="code">                AmbulanceAddressInput.class);</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">226</td><td class="code">        if (elicit.action() != ElicitResult.Action.ACCEPT) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">3</td></tr>
+<tr><td class="ln">227</td><td class="code">            return &quot;Vet ambulance was not requested.&quot;;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">228</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">229</td><td class="code">        AmbulanceAddressInput input = elicit.structuredContent();</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">230</td><td class="code">        String address = input == null ? null : input.address();</td><td class="inc"><i class="chip structural" data-tip="+1 for the ternary">ternary +1</i></td><td class="run">4</td></tr>
+<tr class="hit"><td class="ln">231</td><td class="code">        if (address == null || address.isBlank()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">6</td></tr>
+<tr><td class="ln">232</td><td class="code">            throw new IllegalArgumentException(&quot;An address is required to dispatch the vet ambulance.&quot;);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">233</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">234</td><td class="code">        return &quot;Vet ambulance dispatched to &quot; + address.trim();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">235</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3396,70 +3396,70 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.createVisit(int, LocalDate, LocalTime, String)</span><span class="method-score">+3</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:121</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:125</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">121</td><td class="code">    public String createVisit(</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">122</td><td class="code">            @McpToolParam(description = &quot;Pet ID (must belong to the authenticated owner)&quot;, required = true) int petId,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">123</td><td class="code">            @McpToolParam(description = &quot;Visit date (yyyy-MM-dd); must be today or in the future&quot;,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">124</td><td class="code">                    required = true) LocalDate visitDate,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">125</td><td class="code">            @McpToolParam(description = &quot;Exact local time of the appointment (HH:mm), e.g. 08:00&quot;,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">126</td><td class="code">                    required = true) LocalTime visitTime,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">127</td><td class="code">            @McpToolParam(description = &quot;Visit description (reason, diagnosis, notes...)&quot;,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">128</td><td class="code">                    required = true) String description) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">129</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">130</td><td class="code">        Pet pet = petRepository.findById(petId)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">131</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Pet not found: &quot; + petId));</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">132</td><td class="code">        if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
-<tr><td class="ln">133</td><td class="code">            throw new IllegalArgumentException(&quot;Pet &quot; + petId + &quot; does not belong to owner &quot; + ownerId);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">134</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">135</td><td class="code">        requireFutureDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">136</td><td class="code">        if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">3</td></tr>
-<tr><td class="ln">137</td><td class="code">            throw new IllegalArgumentException(&quot;Visit time must be in the future: &quot; + visitDate + &quot; &quot; + visitTime);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">125</td><td class="code">    public String createVisit(</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">126</td><td class="code">            @McpToolParam(description = &quot;Pet ID (must belong to the authenticated owner)&quot;, required = true) int petId,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">127</td><td class="code">            @McpToolParam(description = &quot;Visit date (yyyy-MM-dd); must be today or in the future&quot;,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">128</td><td class="code">                    required = true) LocalDate visitDate,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">129</td><td class="code">            @McpToolParam(description = &quot;Exact local time of the appointment (HH:mm), e.g. 08:00&quot;,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">130</td><td class="code">                    required = true) LocalTime visitTime,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">131</td><td class="code">            @McpToolParam(description = &quot;Visit description (reason, diagnosis, notes...)&quot;,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">132</td><td class="code">                    required = true) String description) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">133</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">134</td><td class="code">        Pet pet = petRepository.findById(petId)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">135</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Pet not found: &quot; + petId));</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">136</td><td class="code">        if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i><i class="chip flat" data-tip="+1 for the ||">|| +1</i></td><td class="run">2</td></tr>
+<tr><td class="ln">137</td><td class="code">            throw new IllegalArgumentException(&quot;Pet &quot; + petId + &quot; does not belong to owner &quot; + ownerId);</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">138</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">139</td><td class="code">        requireUnderUpcomingVisitCap(pet);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">140</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">141</td><td class="code">        Visit v = new Visit();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">142</td><td class="code">        v.setDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">143</td><td class="code">        v.setTime(visitTime);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">144</td><td class="code">        v.setDescription(description);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">145</td><td class="code">        pet.addVisit(v); // maintain both sides of the Pet&lt;-&gt;Visit association</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">146</td><td class="code">        Visit saved = visitRepository.save(v);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">147</td><td class="code">        return &quot;Created visit id=&quot; + saved.getId() + &quot; for pet '&quot; + pet.getName() + &quot;' on &quot; + visitDate</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">148</td><td class="code">                + &quot; at &quot; + visitTime;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">149</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">139</td><td class="code">        requireFutureDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">140</td><td class="code">        if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">3</td></tr>
+<tr><td class="ln">141</td><td class="code">            throw new IllegalArgumentException(&quot;Visit time must be in the future: &quot; + visitDate + &quot; &quot; + visitTime);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">142</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">143</td><td class="code">        requireUnderUpcomingVisitCap(pet);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">144</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">145</td><td class="code">        Visit v = new Visit();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">146</td><td class="code">        v.setDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">147</td><td class="code">        v.setTime(visitTime);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">148</td><td class="code">        v.setDescription(description);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">149</td><td class="code">        pet.addVisit(v); // maintain both sides of the Pet&lt;-&gt;Visit association</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">150</td><td class="code">        Visit saved = visitRepository.save(v);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">151</td><td class="code">        return &quot;Created visit id=&quot; + saved.getId() + &quot; for pet '&quot; + pet.getName() + &quot;' on &quot; + visitDate</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">152</td><td class="code">                + &quot; at &quot; + visitTime;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">153</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.requireUnderUpcomingVisitCap(Pet)</span><span class="method-score">+2</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:187</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:191</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">187</td><td class="code">    private void requireUnderUpcomingVisitCap(Pet pet) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">188</td><td class="code">        LocalDate today = LocalDate.now();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">189</td><td class="code">        long upcoming = pet.getVisits().stream()</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">190</td><td class="code">                .filter(v -&gt; v.getDate() != null &amp;&amp; !v.getDate().isBefore(today))</td><td class="inc"><i class="chip flat" data-tip="+1 for the &amp;&amp;">&amp;&amp; +1</i></td><td class="run">4</td></tr>
-<tr><td class="ln">191</td><td class="code">                .count();</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">192</td><td class="code">        if (upcoming &gt;= MAX_UPCOMING_VISITS_PER_PET) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">5</td></tr>
-<tr><td class="ln">193</td><td class="code">            throw new IllegalArgumentException(</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">194</td><td class="code">                    &quot;Pet '&quot; + pet.getName() + &quot;' already has the maximum of &quot; + MAX_UPCOMING_VISITS_PER_PET</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">195</td><td class="code">                            + &quot; upcoming visits. Please cancel an existing visit before booking another.&quot;);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">196</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">197</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">191</td><td class="code">    private void requireUnderUpcomingVisitCap(Pet pet) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">192</td><td class="code">        LocalDate today = LocalDate.now();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">193</td><td class="code">        long upcoming = pet.getVisits().stream()</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">194</td><td class="code">                .filter(v -&gt; v.getDate() != null &amp;&amp; !v.getDate().isBefore(today))</td><td class="inc"><i class="chip flat" data-tip="+1 for the &amp;&amp;">&amp;&amp; +1</i></td><td class="run">4</td></tr>
+<tr><td class="ln">195</td><td class="code">                .count();</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">196</td><td class="code">        if (upcoming &gt;= MAX_UPCOMING_VISITS_PER_PET) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">5</td></tr>
+<tr><td class="ln">197</td><td class="code">            throw new IllegalArgumentException(</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">198</td><td class="code">                    &quot;Pet '&quot; + pet.getName() + &quot;' already has the maximum of &quot; + MAX_UPCOMING_VISITS_PER_PET</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">199</td><td class="code">                            + &quot; upcoming visits. Please cancel an existing visit before booking another.&quot;);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">200</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">201</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.requireFutureDate(LocalDate)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:199</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:203</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">199</td><td class="code">    private static void requireFutureDate(LocalDate d) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">200</td><td class="code">        if (d.isBefore(LocalDate.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">6</td></tr>
-<tr><td class="ln">201</td><td class="code">            throw new IllegalArgumentException(&quot;Visit date must be today or in the future: &quot; + d);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">202</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">203</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">203</td><td class="code">    private static void requireFutureDate(LocalDate d) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">204</td><td class="code">        if (d.isBefore(LocalDate.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">6</td></tr>
+<tr><td class="ln">205</td><td class="code">            throw new IllegalArgumentException(&quot;Visit date must be today or in the future: &quot; + d);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">206</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">207</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3475,37 +3475,37 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.listVisits()</span><span class="method-score">+3</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:100</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:104</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">100</td><td class="code">    public List&lt;VisitView&gt; listVisits() {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">101</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">102</td><td class="code">        Owner owner = ownerRepository.findByIdFetchingPets(ownerId)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">103</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Owner not found: &quot; + ownerId));</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">104</td><td class="code">        List&lt;VisitView&gt; result = new ArrayList&lt;&gt;();</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">105</td><td class="code">        for (Pet pet : owner.getPets()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">1</td></tr>
-<tr><td class="ln">106</td><td class="code">            // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">107</td><td class="code">            for (Visit v : pet.getVisitsSortedByDate()) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the for-each, +1 for sitting 1 level deep">for-each +2 · nesting 1</i></td><td class="run">3</td></tr>
-<tr><td class="ln">108</td><td class="code">                result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(),</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">109</td><td class="code">                        v.getDescription(), formatVet(v.getVet())));</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">110</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">111</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">112</td><td class="code">        return result;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">113</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">104</td><td class="code">    public List&lt;VisitView&gt; listVisits() {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">105</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">106</td><td class="code">        Owner owner = ownerRepository.findByIdFetchingPets(ownerId)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">107</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Owner not found: &quot; + ownerId));</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">108</td><td class="code">        List&lt;VisitView&gt; result = new ArrayList&lt;&gt;();</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">109</td><td class="code">        for (Pet pet : owner.getPets()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the for-each">for-each +1</i></td><td class="run">1</td></tr>
+<tr><td class="ln">110</td><td class="code">            // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">111</td><td class="code">            for (Visit v : pet.getVisitsSortedByDate()) {</td><td class="inc"><i class="chip nested" data-tip="+1 for the for-each, +1 for sitting 1 level deep">for-each +2 · nesting 1</i></td><td class="run">3</td></tr>
+<tr><td class="ln">112</td><td class="code">                result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(),</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">113</td><td class="code">                        v.getDescription(), formatVet(v.getVet())));</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">114</td><td class="code">            }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">115</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">116</td><td class="code">        return result;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">117</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.formatVet(Vet)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:76</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:80</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">76</td><td class="code">    private String formatVet(Vet vet) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">77</td><td class="code">        if (vet == null) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">4</td></tr>
-<tr><td class="ln">78</td><td class="code">            return null;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">79</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">80</td><td class="code">        return vet.getFirstName() + &quot; &quot; + vet.getLastName();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">81</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">80</td><td class="code">    private String formatVet(Vet vet) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">81</td><td class="code">        if (vet == null) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">4</td></tr>
+<tr><td class="ln">82</td><td class="code">            return null;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">83</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">84</td><td class="code">        return vet.getFirstName() + &quot; &quot; + vet.getLastName();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">85</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3521,47 +3521,47 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.cancelVisit(LocalDate)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:157</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:161</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">157</td><td class="code">    public String cancelVisit(</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">158</td><td class="code">            @McpToolParam(description = &quot;Visit date (yyyy-MM-dd); must be in the future&quot;,</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">159</td><td class="code">                    required = true) LocalDate visitDate) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">160</td><td class="code">        requireFutureDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">161</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">162</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">163</td><td class="code">        Owner owner = ownerRepository.findByIdFetchingPets(ownerId)</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">164</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Owner not found: &quot; + ownerId));</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">161</td><td class="code">    public String cancelVisit(</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">162</td><td class="code">            @McpToolParam(description = &quot;Visit date (yyyy-MM-dd); must be in the future&quot;,</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">163</td><td class="code">                    required = true) LocalDate visitDate) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">164</td><td class="code">        requireFutureDate(visitDate);</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">165</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">166</td><td class="code">        // Navigate the mapped Pet→Visit association and filter the matching date (lazy; safe under @Transactional).</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">167</td><td class="code">        List&lt;Visit&gt; matching = owner.getPets().stream()</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">168</td><td class="code">                .flatMap(pet -&gt; pet.getVisits().stream())</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">169</td><td class="code">                .filter(v -&gt; v.getDate().equals(visitDate))</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">170</td><td class="code">                .toList();</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">171</td><td class="code">        // Detach from the managed collection too, otherwise cascade=ALL re-persists the visit on flush.</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">172</td><td class="code">        matching.forEach(v -&gt; {</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">173</td><td class="code">            v.getPet().getVisits().remove(v);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">174</td><td class="code">            visitRepository.delete(v);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">175</td><td class="code">        });</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">176</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">177</td><td class="code">        if (matching.isEmpty()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">1</td></tr>
-<tr><td class="ln">178</td><td class="code">            return &quot;No upcoming visits found on &quot; + visitDate;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">179</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">180</td><td class="code">        return &quot;Cancelled &quot; + matching.size() + &quot; visit(s) on &quot; + visitDate;</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">181</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">166</td><td class="code">        int ownerId = McpSecurity.currentOwnerId();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">167</td><td class="code">        Owner owner = ownerRepository.findByIdFetchingPets(ownerId)</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">168</td><td class="code">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Owner not found: &quot; + ownerId));</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">169</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">170</td><td class="code">        // Navigate the mapped Pet→Visit association and filter the matching date (lazy; safe under @Transactional).</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">171</td><td class="code">        List&lt;Visit&gt; matching = owner.getPets().stream()</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">172</td><td class="code">                .flatMap(pet -&gt; pet.getVisits().stream())</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">173</td><td class="code">                .filter(v -&gt; v.getDate().equals(visitDate))</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">174</td><td class="code">                .toList();</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">175</td><td class="code">        // Detach from the managed collection too, otherwise cascade=ALL re-persists the visit on flush.</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">176</td><td class="code">        matching.forEach(v -&gt; {</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">177</td><td class="code">            v.getPet().getVisits().remove(v);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">178</td><td class="code">            visitRepository.delete(v);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">179</td><td class="code">        });</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">180</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">181</td><td class="code">        if (matching.isEmpty()) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">1</td></tr>
+<tr><td class="ln">182</td><td class="code">            return &quot;No upcoming visits found on &quot; + visitDate;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">183</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">184</td><td class="code">        return &quot;Cancelled &quot; + matching.size() + &quot; visit(s) on &quot; + visitDate;</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">185</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.requireFutureDate(LocalDate)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:199</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:203</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">199</td><td class="code">    private static void requireFutureDate(LocalDate d) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">200</td><td class="code">        if (d.isBefore(LocalDate.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">2</td></tr>
-<tr><td class="ln">201</td><td class="code">            throw new IllegalArgumentException(&quot;Visit date must be today or in the future: &quot; + d);</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">202</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">203</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">203</td><td class="code">    private static void requireFutureDate(LocalDate d) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">204</td><td class="code">        if (d.isBefore(LocalDate.now())) {</td><td class="inc"><i class="chip structural" data-tip="+1 for the if">if +1</i></td><td class="run">2</td></tr>
+<tr><td class="ln">205</td><td class="code">            throw new IllegalArgumentException(&quot;Visit date must be today or in the future: &quot; + d);</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">206</td><td class="code">        }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">207</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
@@ -3577,13 +3577,13 @@ main:has(details.explained) {
 <div class="detail-full">
 <div class="method">
 <p class="method-head"><span class="sig">PetClinicMcp.formatPet(Pet)</span><span class="method-score">+1</span></p>
-<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:83</p>
+<p class="meta">src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:87</p>
 <table class="src">
 <tbody>
-<tr><td class="ln">83</td><td class="code">    private String formatPet(Pet pet) {</td><td class="inc"></td><td class="run"></td></tr>
-<tr class="hit"><td class="ln">84</td><td class="code">        String type = pet.getType() == null ? &quot;?&quot; : pet.getType().getName();</td><td class="inc"><i class="chip structural" data-tip="+1 for the ternary">ternary +1</i></td><td class="run">1</td></tr>
-<tr><td class="ln">85</td><td class="code">        return &quot;- id=%d — %s (%s), born %s&quot;.formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">86</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">87</td><td class="code">    private String formatPet(Pet pet) {</td><td class="inc"></td><td class="run"></td></tr>
+<tr class="hit"><td class="ln">88</td><td class="code">        String type = pet.getType() == null ? &quot;?&quot; : pet.getType().getName();</td><td class="inc"><i class="chip structural" data-tip="+1 for the ternary">ternary +1</i></td><td class="run">1</td></tr>
+<tr><td class="ln">89</td><td class="code">        return &quot;- id=%d — %s (%s), born %s&quot;.formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">90</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
 </tbody>
 </table>
 </div>
