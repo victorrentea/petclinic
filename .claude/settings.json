@@ -53,6 +53,19 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-claude-md.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "//": "extend the `java` skill with .claude/java-ext.md, as a team plugin would.",
+            "//2": "Filtering on the skill name has to happen inside the script: `matcher` only",
+            "//3": "sees the tool name, and `if: Skill(java)` — the documented argument filter —",
+            "//4": "silently stops the hook from firing at all. Measured 2026-09-02, v2.1.258.",
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/extend-java-skill.sh\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
