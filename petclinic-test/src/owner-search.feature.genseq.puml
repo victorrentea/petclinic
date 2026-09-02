@@ -81,6 +81,8 @@ Backend -> DB: [[genseq://1ui76yh{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://125n4x4{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://1wn2wlw{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://0p5qgoj{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://06hjrnf{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1chbokm{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://10nowmm{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1s8lcdt{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://1o34u8l{Click for the statement behind this call} select pets ⊕]]
@@ -96,10 +98,7 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://0chbrim{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
-Backend -> DB: [[genseq://06hjrnf{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1chbokm{Click for the statement behind this call} select visits ⊕]]
-Backend -> DB: [[genseq://1aa5cr0{Click for the statement behind this call} select pets ⊕]]
-Backend --> Browser: [[genseq://0io5xca{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://0ukeq5v{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Browser: And I search owners for ""
 Browser -> Backend: List owners\nGET /api/owners
@@ -148,6 +147,8 @@ Backend -> DB: [[genseq://1ui76yh{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://125n4x4{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://1wn2wlw{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://0p5qgoj{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://06hjrnf{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1chbokm{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://10nowmm{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1s8lcdt{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://1o34u8l{Click for the statement behind this call} select pets ⊕]]
@@ -163,9 +164,6 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://0chbrim{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
-Backend -> DB: [[genseq://06hjrnf{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1chbokm{Click for the statement behind this call} select visits ⊕]]
-Backend -> DB: [[genseq://1aa5cr0{Click for the statement behind this call} select pets ⊕]]
-Backend --> Browser: [[genseq://1c5w1d8{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://0rwa933{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml
