@@ -24,6 +24,8 @@ To see how the pieces fit together, every diagram generated from the code is ren
 [ARCHITECTURE.md](ARCHITECTURE.md).
 Before sizing anything — pagination, indexes, caching, an export — the data volumes the
 business is actually aiming for are in [volumetrie.md](volumetrie.md).
+Before touching the owners grid, the design decisions behind it — and what each one was
+traded against — are recorded in [QA.md](QA.md).
 
 ## Project Overview
 
