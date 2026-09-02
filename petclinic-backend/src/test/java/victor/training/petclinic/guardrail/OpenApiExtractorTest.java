@@ -23,11 +23,12 @@ public class OpenApiExtractorTest {
     @Autowired
     MockMvc mockMvc;
 
-    @Test
+    @Test // not a test really, but a generator
     void generateOpenApiYaml() throws Exception {
-        String yaml = mockMvc.perform(get("/v3/api-docs.yaml")).andReturn().getResponse().getContentAsString();
+        String actualContractYaml = mockMvc.perform(get("/v3/api-docs.yaml")).andReturn().getResponse()
+                .getContentAsString();
         Path target = Path.of("../openapi.yaml");
         Files.createDirectories(target.getParent());
-        Files.writeString(target, yaml, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.writeString(target, actualContractYaml, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 }
