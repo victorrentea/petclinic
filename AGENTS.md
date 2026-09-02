@@ -22,6 +22,8 @@ When you need traces — starting the stack in the right order, or explaining a 
 label or a missing frontend trace — the whole OTel setup is in [OBSERVABILITY.md](OBSERVABILITY.md).
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
+Before sizing anything — pagination, indexes, caching, an export — the data volumes the
+business is actually aiming for are in [volumetrie.md](volumetrie.md).
 
 ## Project Overview
 
@@ -99,6 +101,6 @@ Core entities and relationships:
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind comments when deleting or moving stuff, to prevent later 'heresy resurrection'
 - Always run tests after any refactoring
-- Keep your explanations concise
+- Keep your explanations concise; we are experienced backend developers
 - Challenge ambiguous prompts - I love hearing I'm wrong!  
 - Before any git commit, make sure your changes are reflected in AGENTS.md
