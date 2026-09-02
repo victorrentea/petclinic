@@ -2,10 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
-import {StepMark} from './steps';
-import {scenarioLine} from './scenario-line';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
+import {lineOfTest, testHandle} from './test-location';
 
 export interface TestWindow {
   title: string;
@@ -13,12 +12,6 @@ export interface TestWindow {
   source: string;
   startMs: number;
   endMs: number;
-  /**
-   * The sentences the scenario walked through, in order, each stamped when it started —
-   * what turns a wall of HTTP arrows back into the test that caused them. Optional: a
-   * window written before this existed still renders, just without the narration.
-   */
-  steps?: StepMark[];
 }
 
 /** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
@@ -172,7 +165,7 @@ export async function generateFromWindows(
         for (const id of ids) {
           traces.push(parseTempoTrace(await deps.getTrace(id)));
         }
-        scenarios.push({title: w.title, traces: chronological(traces), steps: w.steps});
+        scenarios.push({title: w.title, traces: chronological(traces)});
         deps.log(`✅ "${w.title}": ${ids.length} trace(s)`);
       } catch (err) {
         // One scenario's Tempo error must not cost every other diagram — the runner
@@ -195,6 +188,25 @@ export async function generateFromWindows(
   return renderScenarios(fetched, rootDir, deps, options);
 }
 
+/**
+ * Point every section header at the test that produced it.
+ *
+ * The lookup needs the source file, so a caller without `readFile` (the unit tests) gets
+ * plain headers rather than links into a file nobody could confirm exists — a link that
+ * lands nowhere costs the reviewer more than no link at all.
+ *
+ * `source` is relative to this module ('src/add-visit.spec.ts'); the handle has to be
+ * relative to the repo, which is what the review page resolves against.
+ */
+function linkScenarios(
+  scenarios: DiagramScenario[], rootDir: string, source: string, deps: RenderDeps,
+): DiagramScenario[] {
+  const text = deps.readFile?.(`${rootDir}/${source}`);
+  if (text === undefined) return scenarios;
+  const repoRelative = `${path.basename(rootDir)}/${source}`;
+  return scenarios.map((s) => ({...s, link: testHandle(repoRelative, lineOfTest(text, s.title))}));
+}
+
 /** Draw the diagrams from spans already in hand — the offline half of the pipeline. */
 export function renderScenarios(
   sources: CachedSource[], rootDir: string, deps: RenderDeps,
@@ -203,7 +215,8 @@ export function renderScenarios(
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
-    const {puml, details} = renderDiagram(source, located(scenarios, source, rootDir, deps), options);
+    const {puml, details} =
+      renderDiagram(source, linkScenarios(scenarios, rootDir, source, deps), options);
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not
@@ -222,22 +235,6 @@ export function renderScenarios(
 }
 
 /**
- * Each scenario with the line it is written on, so its section header can link back to it.
- *
- * Read here rather than carried in the span cache: re-rendering an older run's spans must
- * point at where the scenario is *now*. A file that cannot be read — a diagram whose test was
- * deleted, or one being rendered somewhere the sources are not checked out — simply yields no
- * lines, and every section renders as the plain text it always did.
- */
-function located(
-  scenarios: DiagramScenario[], source: string, rootDir: string, deps: RenderDeps,
-): DiagramScenario[] {
-  const text = deps.readFile?.(`${rootDir}/${source}`);
-  if (text === undefined) return scenarios;
-  return scenarios.map((s) => ({...s, line: scenarioLine(source, s.title, text)}));
-}
-
-/**
  * Which sources a run owns. A runner regenerates only its own diagrams — the windows
  * file holds both suites' entries so that a standalone `npm run diagram` can re-render
  * everything, and without this filter a plain `npm test` would rewrite the Cucumber
@@ -245,27 +242,8 @@ function located(
  */
 export const PLAYWRIGHT_SOURCES = /\.spec\.ts$/;
 export const CUCUMBER_SOURCES = /\.feature$/;
-/** A @SpringBootTest carrying @GenerateSequence; its windows are written from the JVM. */
-export const JAVA_SOURCES = /\.java$/;
 
-// Maven cannot call runGenerate() with an argument the way the two Node runners do, so the
-// backend's run-tests-with-tracing.sh names its suite here instead. Without it a post-test
-// `npm run diagram` would take the no-owner path — replay the cache — and never go to
-// Tempo for the traces the Java run has just produced.
-const OWNED_SOURCES: Record<string, RegExp> = {
-  playwright: PLAYWRIGHT_SOURCES,
-  cucumber: CUCUMBER_SOURCES,
-  java: JAVA_SOURCES,
-};
-
-export function ownedSourcesFromEnv(
-  env: Record<string, string | undefined> = process.env,
-): RegExp | undefined {
-  return OWNED_SOURCES[env.GENSEQ_SUITE?.trim().toLowerCase() ?? ''];
-}
-
-export async function runGenerate(owned?: RegExp): Promise<void> {
-  const ownedSources = owned ?? ownedSourcesFromEnv();
+export async function runGenerate(ownedSources?: RegExp): Promise<void> {
   const root = path.join(__dirname, '..', '..');
   const windowsDir = path.join(root, 'test-results', 'trace-windows');
   const options = optionsFromEnv();

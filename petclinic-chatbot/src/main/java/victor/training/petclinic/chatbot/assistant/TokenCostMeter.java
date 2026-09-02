@@ -1,12 +1,11 @@
 package victor.training.petclinic.chatbot.assistant;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.Comparator;
 import java.util.Map;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
@@ -21,9 +20,9 @@ import org.springframework.stereotype.Component;
  * Tags mirror Spring AI's auto-recorded {@code gen_ai_client_token_usage_total}, so a Grafana panel can
  * line up tokens and spend on the same model/type dimensions.
  */
+@Slf4j
 @Component
 class TokenCostMeter {
-    private static final Logger log = LoggerFactory.getLogger(TokenCostMeter.class);
 
     /** USD per 1 token, by response-model name: {@code [inputPrice, outputPrice]}. Prices as of 2025. */
     private static final Map<String, double[]> USD_PER_TOKEN = Map.of(

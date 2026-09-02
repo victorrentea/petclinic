@@ -1,9 +1,14 @@
 package victor.training.petclinic.guardrail;
 
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -15,14 +20,25 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Generates docs/generated/DomainModel.puml from the domain classes. What the model is —
- * classes, associations, cardinalities — is read by {@link DomainModelExtractor}; this
- * test owns only the rendering: attributes, the PlantUML syntax, and the source links.
- *
- * <p>Every non-static field that is not itself an association becomes an attribute.
+ * Generates docs/generated/DomainModel.puml from the domain classes using PLAIN
+ * JAVA REFLECTION — no JPA (or any other) annotations — so it works on models that
+ * express relationships with ordinary fields, not @OneToMany/@ManyToOne. Rules,
+ * inferred from field types alone:
+ * <ul>
+ *   <li>a field whose (element) type is another domain class → an association;
+ *       every other non-static field → an attribute;</li>
+ *   <li>a collection field ⇒ the target end is "0..*"; a single reference ⇒ "1";</li>
+ *   <li>when only one side declares the reference (unidirectional), the missing end
+ *       defaults to the classic foreign-key shape: a lone single ref implies "0..*"
+ *       referrers; a lone collection implies a single "1" owner.</li>
+ * </ul>
+ * The price of dropping annotations: a unidirectional collection can't be told apart
+ * from a many-to-many join table, so it renders as one-to-many.
  */
 class DomainModelExtractorTest {
 
+    private static final String BASE_PKG = "victor.training.petclinic";
+    private static final String DOMAIN_MODEL_PKG = BASE_PKG + ".domain";
     private static final Path GENERATED_DIR = Paths.get("docs/generated");
     private static final Path SOURCE_ROOT = Paths.get("src/main/java");
 
@@ -30,13 +46,21 @@ class DomainModelExtractorTest {
     // text the pointer was already on, and the legend says what clicking does anyway.
     private static final String TOOLTIP = "{Click to open in editor}";
 
-    /** What the model *is*; this test only decides how to draw it. */
-    private final DomainModelExtractor model = new DomainModelExtractor();
+    private static final String ONE = "1";
+    private static final String MANY = "0..*";
+
+    /** A field that points at another domain class. */
+    private record Ref(Class<?> owner, Class<?> target, boolean many, String field) {
+    }
+
+    private record Association(String left, String leftCardinality,
+            String right, String rightCardinality, String label) {
+    }
 
     @Test
     void generateDomainModelDiagram() throws IOException {
-        List<Class<?>> entities = model.domainClasses();
-        List<DomainModelExtractor.Association> associations = model.associations(entities);
+        List<Class<?>> entities = discoverDomainClasses();
+        List<Association> associations = collectAssociations(entities);
 
         StringBuilder sb = new StringBuilder();
         sb.append("@startuml\n\n");
@@ -46,15 +70,15 @@ class DomainModelExtractorTest {
                 + "petclinic-backend/docs/generated/DomainModel.puml\n\n");
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n");
-        // Every class and every field is a link to its declaration. Underlining them all
-        // would put a blue rule under most of the diagram, and the affordance is not worth
-        // that: the legend says once what would otherwise be said on every row.
+        // Every class box is a link to its declaration. Underlining them would put a blue
+        // rule across the diagram, and the affordance is not worth that: the legend says
+        // once what would otherwise be said on every box.
         sb.append("skinparam hyperlinkUnderline false\n");
         sb.append("skinparam hyperlinkColor #000000\n");
         // Emitted before the classes so it survives the review diff, which copies the
         // preamble from the new side and starts its own output at the first element.
         sb.append("legend bottom\n");
-        sb.append("  Click any class or field to jump to the source code.\n");
+        sb.append("  Click any class to jump to the source code.\n");
         sb.append("end legend\n\n");
 
         for (Class<?> cls : entities) {
@@ -74,7 +98,7 @@ class DomainModelExtractorTest {
         }
         sb.append("\n");
 
-        for (DomainModelExtractor.Association a : associations) {
+        for (Association a : associations) {
             sb.append(a.left())
                     .append(" \"").append(a.leftCardinality()).append("\" -- \"")
                     .append(a.rightCardinality()).append("\" ")
@@ -93,6 +117,92 @@ class DomainModelExtractorTest {
         assertThat(GENERATED_DIR.resolve("DomainModel.puml")).exists();
     }
 
+    private List<Class<?>> discoverDomainClasses() {
+        JavaClasses classes = new ClassFileImporter()
+                .withImportOption(new ImportOption.DoNotIncludeTests())
+                .importPackages(DOMAIN_MODEL_PKG);
+        return classes.stream()
+                .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
+                .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
+                .<Class<?>>map(JavaClass::reflect)
+                .sorted(Comparator.comparing(Class::getSimpleName))
+                .toList();
+    }
+
+    // ── Associations: derived from field types alone, no annotations ───────────
+
+    private List<Association> collectAssociations(List<Class<?>> entities) {
+        Set<Class<?>> domain = new HashSet<>(entities);
+
+        // All directed field references A.field → B, grouped by the unordered {A,B} pair.
+        Map<String, List<Ref>> byPair = new LinkedHashMap<>();
+        for (Class<?> cls : entities) {
+            for (Field f : cls.getDeclaredFields()) {
+                if (isSkippable(f))
+                    continue;
+                Class<?> target = referencedDomainClass(f, domain);
+                if (target == null || target.equals(cls))
+                    continue; // skip self-references
+                byPair.computeIfAbsent(pairKey(cls, target), k -> new ArrayList<>())
+                        .add(new Ref(cls, target, isCollection(f.getType()), f.getName()));
+            }
+        }
+
+        List<Association> result = new ArrayList<>();
+        for (List<Ref> refs : byPair.values()) {
+            result.add(associationFor(refs));
+        }
+        result.sort(Comparator.comparing(Association::left).thenComparing(Association::right));
+        return result;
+    }
+
+    private Association associationFor(List<Ref> refs) {
+        Class<?> c1 = refs.get(0).owner();
+        Class<?> c2 = refs.get(0).target();
+        Class<?> a = c1.getSimpleName().compareTo(c2.getSimpleName()) <= 0 ? c1 : c2;
+        Class<?> b = a.equals(c1) ? c2 : c1;
+
+        Ref aToB = directed(refs, a, b);
+        Ref bToA = directed(refs, b, a);
+
+        String aPerB = countPerOne(bToA, aToB); // how many A relate to one B
+        String bPerA = countPerOne(aToB, bToA); // how many B relate to one A
+
+        // Put the parent ("1" side with a "0..*" child) on the left; otherwise keep A left.
+        boolean bIsParent = aPerB.equals(MANY) && bPerA.equals(ONE);
+        Class<?> left = bIsParent ? b : a;
+        Class<?> right = bIsParent ? a : b;
+        String leftMult = left.equals(a) ? aPerB : bPerA; // count of LEFT per one RIGHT
+        String rightMult = left.equals(a) ? bPerA : aPerB; // count of RIGHT per one LEFT
+
+        return new Association(left.getSimpleName(), leftMult,
+                right.getSimpleName(), rightMult, chooseLabel(refs));
+    }
+
+    /** Multiplicity at one end: read the counterpart's field to us, else a reverse default. */
+    private String countPerOne(Ref counterpartToThis, Ref thisToCounterpart) {
+        if (counterpartToThis != null)
+            return counterpartToThis.many() ? MANY : ONE;
+        if (thisToCounterpart != null)
+            return thisToCounterpart.many() ? ONE : MANY;
+        return ONE;
+    }
+
+    private Ref directed(List<Ref> refs, Class<?> from, Class<?> to) {
+        return refs.stream()
+                .filter(r -> r.owner().equals(from) && r.target().equals(to))
+                .findFirst().orElse(null);
+    }
+
+    /** Label the edge with a field name, preferring the to-one side (owner, pet, user…). */
+    private String chooseLabel(List<Ref> refs) {
+        return refs.stream()
+                .sorted(Comparator.comparing(Ref::many) // to-one (false) first
+                        .thenComparing(r -> r.owner().getSimpleName()))
+                .map(Ref::field)
+                .findFirst().orElse(null);
+    }
+
     // ── Members: every non-static field that is not itself an association ──────
 
     private List<String> renderMembers(Class<?> cls, List<Class<?>> entities) {
@@ -100,23 +210,21 @@ class DomainModelExtractorTest {
         List<String> lines = new ArrayList<>();
         if (cls.isEnum()) {
             for (Object value : cls.getEnumConstants()) {
-                String name = ((Enum<?>) value).name();
-                lines.add(linked(cls, name, name));
+                lines.add(((Enum<?>) value).name());
             }
             return lines;
         }
         for (Field f : cls.getDeclaredFields()) {
-            if (model.isSkippable(f))
+            if (isSkippable(f))
                 continue;
-            if (model.referencedDomainClass(f, domain) != null)
+            if (referencedDomainClass(f, domain) != null)
                 continue; // association, not attribute
-            lines.add(linked(cls, f.getName(),
-                    f.getName() + " : " + typeName(f.getGenericType())));
+            lines.add(f.getName() + " : " + typeName(f.getGenericType()));
         }
         return lines;
     }
 
-    // ── Source links: click a class or a field, land on the declaration ───────
+    // ── Source links: click a class, land on its declaration ──────────────────
 
     /**
      * The link the reviewer clicks, as a repo-relative `src://path:line` handle.
@@ -126,26 +234,15 @@ class DomainModelExtractorTest {
      * regenerates it produce a diff. The review page resolves the handle against its
      * own checkout when it inlines the SVG.
      *
-     * Reflection knows the members but not where they were written, so the line is
-     * found by reading the source file back — no line, no link, and the diagram is
-     * exactly what it was before.
-     */
-    /**
-     * `text`, as the clickable face of `member`'s declaration.
+     * Reflection knows the classes but not where they were written, so the line is
+     * found by reading the source file back — no line, and the link still opens the
+     * file at the top.
      *
-     * The link has to *wrap* the text: PlantUML prints the URL itself when a `[[...]]`
-     * carries no label, so a member with a link appended rendered as its own name
-     * followed by sixty characters of absolute path.
-     */
-    private String linked(Class<?> cls, String member, String text) {
-        if (sourceFileOf(cls) == null)
-            return text;
-        return "[[" + handle(cls, member) + TOOLTIP + " " + text + "]]";
-    }
-
-    /**
-     * A class *header* link needs no label: PlantUML hangs it off the class box rather
-     * than printing it, so the box itself stays the thing you click.
+     * Only the class box carries one. Every field used to be a link of its own, which
+     * made the whole diagram clickable and none of it legible as a diagram: a model is
+     * read class by class, and landing on the class is one keystroke from the field.
+     * A class *header* link needs no label either — PlantUML hangs it off the box
+     * rather than printing it, so the box itself stays the thing you click.
      */
     private String sourceLink(Class<?> cls, String member) {
         if (sourceFileOf(cls) == null)
@@ -169,10 +266,9 @@ class DomainModelExtractorTest {
     }
 
     /**
-     * The line `member` is declared on: a field or an enum constant, matched as a whole
-     * word before the `;`, `=`, `,` or `(` that can follow it. Comments and Javadoc
-     * mentioning the name are skipped, since a `*`-continued line is never a
-     * declaration.
+     * The line `member` is declared on, matched as a whole word before the `;`, `=`, `,`
+     * or `(` that can follow it. Comments and Javadoc mentioning the name are skipped,
+     * since a `*`-continued line is never a declaration.
      */
     private int lineOfDeclaration(Path source, String member) {
         Pattern declaration = Pattern.compile(
@@ -191,6 +287,37 @@ class DomainModelExtractorTest {
             return 0; // unreadable source is a missing line number, not a failed build
         }
         return 0;
+    }
+
+    // ── Reflection helpers ─────────────────────────────────────────────────────
+
+    /** The domain class a field points at (directly or as a collection element), or null. */
+    private Class<?> referencedDomainClass(Field field, Set<Class<?>> domain) {
+        Class<?> raw = field.getType();
+        if (domain.contains(raw))
+            return raw;
+        if (isCollection(raw) && field.getGenericType() instanceof ParameterizedType pt) {
+            for (Type arg : pt.getActualTypeArguments()) {
+                if (arg instanceof Class<?> c && domain.contains(c))
+                    return c;
+            }
+        }
+        return null;
+    }
+
+    private boolean isCollection(Class<?> type) {
+        return Collection.class.isAssignableFrom(type);
+    }
+
+    private boolean isSkippable(Field f) {
+        int m = f.getModifiers();
+        return Modifier.isStatic(m) || Modifier.isTransient(m) || f.isSynthetic();
+    }
+
+    private String pairKey(Class<?> a, Class<?> b) {
+        String x = a.getSimpleName();
+        String y = b.getSimpleName();
+        return x.compareTo(y) <= 0 ? x + "|" + y : y + "|" + x;
     }
 
     private String typeName(Type type) {

@@ -1,1 +1,83 @@
-@AGENTS.md
+# petclinic-test — Claude Notes
+
+- Run all commands from this directory (`petclinic-test/`).
+- Backend: `localhost:8080`, frontend: `localhost:4200` — both must be up before `npm test`.
+- `npm run test:with-apps` auto-starts both apps, but is experimental; prefer starting apps manually.
+- Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
+- Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
+- Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
+  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Everything a
+  run writes goes under `test-results/`.
+- ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
+  test file, named after it (`owner-search.feature.genseq.puml`), sectioned by scenario. Never
+  hand-edit: change the test and re-run `./run-tests-with-tracing.sh`.
+- ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
+  *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
+  the suite runs `fullyParallel` against one shared DB.
+- A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
+  `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
+  `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement
+  (`hibernate.use_sql_comments` in the backend — real HQL, but only for an `@Query` method;
+  a derived method is built through the Criteria API and comments itself `<criteria>`), the
+  Spring Data repository method above it, the Hibernate session call above it, and finally
+  `select pets` / `insert into visits` read off the SQL — which is all a lazy load leaves
+  behind, since it carries no comment and sits under no repository span.
+  The statement itself lives behind the click; `src/genseq/sql-label.ts` folds it one clause
+  per line (`SELECT` / `FROM` / `JOIN` / `WHERE` / …), clipped to 10 words a line and 8 lines
+  an arrow, with the origin comment split off — it is Hibernate talking *about* the statement.
+- A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
+  repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
+  one, else the `operationId`). The route says where a call went; the name says what it was for.
+- **A repository call is drawn as a call**: a self-hop, an activation, and its statements
+  fired from inside it — the shape a reader expects of a method that queries, and what
+  gives the transaction frame somewhere to sit.
+- **A transaction is drawn as a `group tx` frame, not an arrow.** The interceptor's
+  `Transaction.commit` is emitted as the last child of whatever opened the transaction, so
+  the renderer frames that span's whole subtree and drops the commit arrow — the frame's
+  closing edge *is* the commit. A bare `Transaction.commit` arrow said a transaction ended
+  somewhere above and left the reader to guess how far up. The frame also shows what is
+  **outside** every transaction, which is the whole story of an N+1 behind
+  open-session-in-view: in this codebase nothing above the repositories is `@Transactional`,
+  so each repository call is its own transaction and its own Hibernate session, and the lazy
+  loads that follow run in none of them. A query inside a frame does not repeat the frame's
+  label — it falls back to describing itself (`select pets`).
+  It is called just `tx`: the frame shows an *extent*, and whatever opened it is named by
+  the call the frame sits inside. Where the interceptor opens it decides what the frame
+  wraps, and all three placements are covered — on a **repository** or a **service** it sits
+  inside that call's activation; on the **handler** (`@Transactional` on a controller
+  method) the commit lands on the SERVER span, so the frame wraps the handler's *body*.
+  Framing the span itself would swallow the request and response arrows with it, and the
+  picture would lose the call it is about.
+- The **`Session.*` / `Hibernate Query` spans are dropped** when a Spring Data repository span
+  above them already said the same thing. They are kept with no repository above them — code
+  using the EntityManager directly, where the session call is the only account of the request.
+- Activation bars are drawn **only around a call that encloses something**. A leaf hop (a DB
+  query, a childless `@WithSpan`) gets a bare arrow — the box would enclose nothing and each
+  `activate`/`deactivate` pair costs vertical space the N+1-heavy diagrams cannot spare.
+- **Detail is a render-time switch, not a capture-time one.** The traces always carry
+  everything (SQL + bound values from the agent, HTTP payloads from the browser); `SEQ_SQL`
+  (`off`|`statement`|`values`) and `SEQ_HTTP_BODIES` (`0`|`1`) decide what is drawn —
+  `src/genseq/options.ts`. So re-rendering is **~1s and needs nothing running** — not even
+  Grafana: the fetched spans are cached in `test-results/trace-spans.json` and replayed
+  (`GENSEQ_REFRESH=1` forces a fresh Tempo fetch). No test run, no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
+  vars with `npm run trace:diagram`. This note is the only place that says so: a generated
+  file's legend carries the "GENERATED — DO NOT EDIT" warning and nothing else, because a
+  reader of the *image* cannot act on a list of npm scripts and it crowded out the diagram.
+- **A diagram is interactive by default** (`SEQ_INTERACTIVE=1`): the picture stays simplified
+  and each revealable arrow's **whole label** is wrapped in `[[genseq://<id>{…} <label>]]`, a
+  PlantUML link that becomes an `<a href>` in the SVG — the hook
+  `.claude/skills/human-review/scripts/build-review-html.py` binds to, so nothing ever matches
+  rendered label text. (It used to be a trailing `⊕`: a second, smaller thing to aim at when
+  the reviewer already wants to click the arrow.) One click reveals, another closes; a DB
+  panel **toggles** between `?` and the bound values, carried as the step's `alternate`.
+  That was a second click before, which swapped the text under the reader and counted itself
+  `1 / 2` — advertising neither that it existed nor what it would do. `SEQ_INTERACTIVE=0`
+  bakes the detail back into the picture, which is what `diagram:lean`/`:static`/`:full` do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
+  `.puml` textually, so a positional id would repaint everything under an inserted query.
+- The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
+  so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,
+  `*.feature` for Cucumber) — wiping it whole would shrink re-renders to the last suite that ran.
+- HTTP payloads are captured in `petclinic-frontend/src/otel.ts` (`http.request.body` /
+  `http.response.body` on the XHR client span, 4 KB cap) — no OTel agent records payloads, and
+  the browser is the only place both sides are in hand. The renderer therefore reads them off
+  the span **or its parent**, since the arrow is drawn from the backend's SERVER span.

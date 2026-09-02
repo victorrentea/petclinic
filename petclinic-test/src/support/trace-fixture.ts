@@ -3,7 +3,6 @@ import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../genseq/sequence-tag';
-import {steps} from '../genseq/steps';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
@@ -31,9 +30,6 @@ export const test = base.extend({
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, testInfo.title);
 
-    // The DSL sentences the spec is about to call announce themselves here — see
-    // narrate() in genseq/steps.ts, which add-visit.spec.ts imports its DSL through.
-    steps.start();
     const startMs = Date.now() - PRE_PAD_MS;
     await use(page);
     await flushBrowserSpans(page);
@@ -42,7 +38,6 @@ export const test = base.extend({
       source: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
       startMs,
       endMs: Date.now() + POST_PAD_MS,
-      steps: steps.take(),
     });
   },
 });

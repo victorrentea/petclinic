@@ -19,11 +19,10 @@ engineering techniques you can lift into your own projects.
   source (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **C4 model** as versioned Structurizr DSL: stable, human C1/C2 + a
   *code-coupled* C3 that is unit-tested against the real packages.
-- **Code City** — a 3D view of the codebase (size = LOC, height = complexity,
-  colour = churn) across Classes / Packages / Modules lenses, with
-  commits/committers mined from git history. Open the committed, self-contained
-  [`codecity.html`](petclinic-backend/docs/generated/codecity/codecity.html)
-  from a local clone. The generators are a tool of their own —
+- **[Code City](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codecity/codecity.html)** —
+  a 3D view of the codebase (size = LOC, height = complexity, colour = churn)
+  across Classes / Packages / Modules lenses, with commits/committers mined from
+  git history. The generators are a tool of their own —
   [victorrentea/code-city](https://github.com/victorrentea/code-city), point it at any
   Java repo; `petclinic-backend/docs/generate-codecity.sh` runs it on this one.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
@@ -68,31 +67,32 @@ Tell an agent running in this repo:
 
 ### Context Engineering
 
-- **Trim boilerplate** — remove from AGENTS.md the mvn/npm instructions any LLM already knows.
-- **Point at generated sources** — replace AGENTS.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
-- **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/AGENTS.md` that loads only there.
+- **Trim boilerplate** — remove from CLAUDE.md the mvn/npm instructions any LLM already knows.
+- **Point at generated sources** — replace CLAUDE.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
+- **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/CLAUDE.md` that loads only there.
 - **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md`
 - **Force load a skill for by file paths**: Add to skill's frontmatter `paths: petclinic-backend/**/*.java`, so it 100% activates before any `.java` edit.
 - **Reference drift-safe knowledge** — replace the drifting `## Domain Model` chapter with a link to the in-sync `DomainModel.puml`. Add a link to DB.sql and openapi.yaml
-- **Audit AGENTS.md** — check it is non-contradictory and in sync with recent code changes.
+- **Audit CLAUDE.md** — check it is non-contradictory and in sync with recent code changes.
 
 ### Tasks
 
 The tasks below have the pattern: **<description>** – <prompt to paste to agent>
 
-1. **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
-1. **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
-1. **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
-1. **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
-1. **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
-1. **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
-1. **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces 1. where is most time lost?
-1. **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
-1. **Query tuning** — optimize the "search owners by last name" query.
-1. **Speedup tests** — speedup the backend tests.
-1. **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
+- **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
+- **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
+- **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
+- **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
+- **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
+- **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
+- **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is most time lost?
+- **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
+- **Query tuning** — optimize the "search owners by last name" query.
+- **Speedup tests** — speedup the backend tests.
+- **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
   
 Some tasks above require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
+
 
 ### Tools
 Start YOUR agent in YOUR🫵 work project and tell it:

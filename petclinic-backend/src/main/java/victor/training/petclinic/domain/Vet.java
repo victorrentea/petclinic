@@ -2,12 +2,16 @@ package victor.training.petclinic.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "vets")
+@Getter
+@Setter
 public class Vet {
 
     @Id
@@ -39,35 +43,4 @@ public class Vet {
         specialties.add(specialty);
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public List<Specialty> getSpecialties() {
-        return specialties;
-    }
-
-    public void setSpecialties(List<Specialty> specialties) {
-        this.specialties = specialties;
-    }
 }

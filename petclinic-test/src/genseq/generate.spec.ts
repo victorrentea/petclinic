@@ -84,6 +84,36 @@ test('generateFromWindows writes one puml per source file, sectioned by scenario
   expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
 });
 
+// A sequence diagram is evidence only if the reviewer can reach the test that produced
+// it, and the section header is the only place in the picture that names that test.
+test('each section header links to the test that drew it', () => {
+  const written: Record<string, string> = {};
+  renderScenarios(
+    [{source: 'src/add-visit.spec.ts',
+      scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
+    '/out/petclinic-test',
+    {
+      writeFile: (p, c) => { written[p] = c; },
+      readFile: () => "test('Add a visit', async () => {});",
+      log: () => {},
+    },
+  );
+  expect(written['/out/petclinic-test/src/add-visit.spec.ts.genseq.puml']).toContain(
+    '== [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Add a visit]] ==');
+});
+
+// Nothing to read the source with means nothing to point at: a header that links into a
+// file nobody could confirm exists is worse than a header that stays plain.
+test('a header stays plain when the test source cannot be read', () => {
+  const written: Record<string, string> = {};
+  renderScenarios(
+    [{source: 'src/add-visit.spec.ts',
+      scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
+    '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
+  );
+  expect(written['/out/src/add-visit.spec.ts.genseq.puml']).toContain('== Add a visit ==');
+});
+
 test('generateFromWindows skips (no throw) when a test has zero traces', async () => {
   const logs: string[] = [];
   const deps: GenerateDeps = {

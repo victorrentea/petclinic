@@ -1,5 +1,6 @@
 package victor.training.petclinic.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -18,13 +19,10 @@ import javax.sql.DataSource;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true) // Enable @PreAuthorize method-level security
 @ConditionalOnProperty(name = "petclinic.security.enable", havingValue = "true")
+@RequiredArgsConstructor
 public class BasicAuthenticationConfig {
 
     private final DataSource dataSource;
-
-    public BasicAuthenticationConfig(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

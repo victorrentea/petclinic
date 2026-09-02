@@ -1,7 +1,5 @@
 package victor.training.petclinic.chatbot.firefighter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -10,6 +8,7 @@ import com.embabel.agent.api.annotation.AchievesGoal;
 import com.embabel.agent.api.annotation.Action;
 import com.embabel.agent.api.annotation.Agent;
 import com.embabel.agent.api.common.OperationContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,11 +34,11 @@ import org.springframework.stereotype.Component;
  * <p>A FRESH {@link FirefighterGuard} is taken per run (prototype-scoped), so recovery state never
  * leaks across incidents.
  */
+@Slf4j
 @Agent(description = "SRE firefighter: assess PetClinic service health, consult metrics/Grafana, "
         + "and recover (guarded restarts in DB→BE→FE→OTEL order) or escalate")
 @Component
 public class FirefighterAgent {
-    private static final Logger log = LoggerFactory.getLogger(FirefighterAgent.class);
 
     private final String model;
     private final Supplier<FirefighterGuard> guardSupplier;

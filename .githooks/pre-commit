@@ -62,14 +62,14 @@ if [ -n "$STAGED_JAVA" ]; then
     echo "[pre-commit] ⚠️  mvn not on PATH — skipping Spotless formatting."
   fi
 
-  # ── ast-grep: structural rules that enforce AGENTS.md conventions ────────
+  # ── ast-grep: structural rules that enforce CLAUDE.md conventions ────────
   # Scoped to the staged files only, so pre-existing violations elsewhere
   # don't block unrelated commits. Blocks on `error`; `warning` only reports.
   if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
     if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan -c "$ROOT/.config/sgconfig.yml" 2>&1); then
       echo "$SG_OUT"
       echo "[pre-commit] ❌ ast-grep rule violated — commit blocked."
-      echo "[pre-commit] Rules live in .ast-grep/rules/ — see AGENTS.md for the why."
+      echo "[pre-commit] Rules live in .ast-grep/rules/ — see CLAUDE.md for the why."
       exit 1
     fi
     [ -n "$SG_OUT" ] && echo "$SG_OUT"
@@ -85,6 +85,14 @@ fi
 # Scoped to staged files; settings (and the disabled indent checks) in
 # .config/editorconfig-checker.json.
 STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACMR || true)
+# Symlinks are dropped: git stages the link, but the checker follows it and lints
+# whatever it points at. `.claude/skills/human-review` points into another repository
+# — 287 "violations" in files this repo does not own, .pyc files among them.
+if [ -n "$STAGED_ALL" ]; then
+  STAGED_ALL=$(echo "$STAGED_ALL" | while IFS= read -r f; do
+    [ -L "$f" ] || printf '%s\n' "$f"
+  done)
+fi
 if [ -n "$STAGED_ALL" ]; then
   if command -v editorconfig-checker >/dev/null 2>&1; then
     if ! EC_OUT=$(echo "$STAGED_ALL" | xargs editorconfig-checker -no-color -config "$ROOT/.config/editorconfig-checker.json" 2>&1); then

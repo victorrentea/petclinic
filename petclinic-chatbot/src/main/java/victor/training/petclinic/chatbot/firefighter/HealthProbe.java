@@ -1,13 +1,12 @@
 package victor.training.petclinic.chatbot.firefighter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.time.Duration;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -23,9 +22,9 @@ import org.springframework.web.client.RestClient;
  * rather than throwing, so the agent can still plan a recovery. This component performs NO mutation
  * (never kills/launches), so it is safe to exercise; tests inject a stubbed instance to stay offline.
  */
+@Slf4j
 @Component
 public class HealthProbe {
-    private static final Logger log = LoggerFactory.getLogger(HealthProbe.class);
 
     private final RestClient http = RestClient.builder().build();
     private final Duration timeout = Duration.ofMillis(800);

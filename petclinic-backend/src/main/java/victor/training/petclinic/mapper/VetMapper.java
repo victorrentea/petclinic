@@ -1,55 +1,21 @@
 package victor.training.petclinic.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.rest.dto.VetDto;
 import victor.training.petclinic.rest.dto.VetFieldsDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class VetMapper {
-    private final SpecialtyMapper specialtyMapper;
+@Mapper(componentModel = "spring", uses = SpecialtyMapper.class)
+public interface VetMapper {
+    Vet toVet(VetDto vetDto);
 
-    public VetMapper(SpecialtyMapper specialtyMapper) {
-        this.specialtyMapper = specialtyMapper;
-    }
+    @Mapping(target = "id", ignore = true)
+    Vet toVet(VetFieldsDto vetFieldsDto);
 
-    public Vet toVet(VetDto vetDto) {
-        Vet vet = new Vet();
-        vet.setId(vetDto.getId());
-        vet.setFirstName(vetDto.getFirstName());
-        vet.setLastName(vetDto.getLastName());
-        vet.setSpecialties(specialtyMapper.toSpecialty(vetDto.getSpecialties()));
-        return vet;
-    }
+    VetDto toVetDto(Vet vet);
 
-    public Vet toVet(VetFieldsDto vetFieldsDto) {
-        Vet vet = new Vet();
-        vet.setFirstName(vetFieldsDto.getFirstName());
-        vet.setLastName(vetFieldsDto.getLastName());
-        vet.setSpecialties(specialtyMapper.toSpecialty(vetFieldsDto.getSpecialties()));
-        return vet;
-    }
-
-    public VetDto toVetDto(Vet vet) {
-        VetDto vetDto = new VetDto();
-        vetDto.setFirstName(vet.getFirstName());
-        vetDto.setLastName(vet.getLastName());
-        vetDto.setSpecialties(specialtyMapper.toSpecialtyDtos(vet.getSpecialties()));
-        vetDto.setId(vet.getId());
-        return vetDto;
-    }
-
-    public List<VetDto> toVetDtos(List<Vet> vets) {
-        if (vets == null) {
-            return List.of();
-        }
-        List<VetDto> dtos = new ArrayList<>(vets.size());
-        for (Vet vet : vets) {
-            dtos.add(toVetDto(vet));
-        }
-        return dtos;
-    }
+    List<VetDto> toVetDtos(List<Vet> vets);
 }

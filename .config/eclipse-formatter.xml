@@ -7,7 +7,7 @@
             sorting unconditionally — there is no flag to turn it off);
         2. the column width is an actual setting, not a hardcoded preset.
 
-    Keep in sync with .editorconfig (indent_size=4) and AGENTS.md (<= 120 chars).
+    Keep in sync with .editorconfig (indent_size=4) and CLAUDE.md (<= 120 chars).
     Do not round-trip this file through the Eclipse UI — it reshuffles the
     entries and makes diffs unreadable. Edit by hand, keep ids sorted.
 

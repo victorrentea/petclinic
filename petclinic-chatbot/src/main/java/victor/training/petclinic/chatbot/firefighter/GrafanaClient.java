@@ -1,11 +1,10 @@
 package victor.training.petclinic.chatbot.firefighter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -26,9 +25,9 @@ import org.springframework.web.client.RestClient;
  * degrades gracefully: it returns a {@link GrafanaFindings} marked {@code available=false} with the
  * reason, and NEVER throws into the agent flow.
  */
+@Slf4j
 @Component
 public class GrafanaClient {
-    private static final Logger log = LoggerFactory.getLogger(GrafanaClient.class);
 
     private final RestClient http;
 

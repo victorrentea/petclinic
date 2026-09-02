@@ -1,7 +1,5 @@
 package victor.training.petclinic.chatbot.assistant;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +7,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,15 +28,11 @@ import org.springframework.web.client.RestClient;
  * ETag are cached on disk, so a restart with no backend change reloads them and the first poll is a
  * silent 304 — no re-embedding, no re-billing. No Postgres client, no Docker.
  */
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class RagIngestion {
-    private static final Logger log = LoggerFactory.getLogger(RagIngestion.class);
-
     private final SimpleVectorStore vectorStore;
-
-    public RagIngestion(SimpleVectorStore vectorStore) {
-        this.vectorStore = vectorStore;
-    }
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${petclinic.chatbot.backend-url:http://localhost:8080}")

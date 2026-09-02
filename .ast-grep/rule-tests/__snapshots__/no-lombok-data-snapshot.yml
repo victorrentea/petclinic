@@ -1,0 +1,19 @@
+id: no-lombok-data
+snapshots:
+  ? |
+    @Data
+    @Builder
+    public class VisitDto {}
+  : labels:
+    - source: '@Data'
+      style: primary
+      start: 0
+      end: 5
+  ? |
+    @Data
+    public class OwnerDto {}
+  : labels:
+    - source: '@Data'
+      style: primary
+      start: 0
+      end: 5

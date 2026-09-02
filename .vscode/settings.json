@@ -1,11 +1,3 @@
 {
-  // Navigare din .feature în glue code (F12 / ⌘-click pe un pas), ca în IntelliJ.
-  // cucumberautocomplete e instalat, dar fără căile astea nu știe unde sunt pașii.
-  "cucumberautocomplete.steps": [
-    "petclinic-test/src/**/*.glue.ts"
-  ],
-  "cucumberautocomplete.syncfeatures": "petclinic-test/src/**/*.feature",
-  "cucumberautocomplete.strictGherkinCompletion": true,
-  "cucumberautocomplete.smartSnippets": true,
-  "cucumberautocomplete.stepsInvariants": true
+  "java.debug.settings.onBuildFailureProceed": true
 }

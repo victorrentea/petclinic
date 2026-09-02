@@ -14,7 +14,7 @@
 restLayer       = component "REST Layer"       "[rest.**] HTTP endpoints, DTOs, error handlers"        "Spring MVC"       "pkg:rest.**"
 domainModel     = component "Domain Model"      "[domain] JPA entities"                                  "JPA"              "pkg:domain"
 repositoryLayer = component "Repository Layer"  "[repository] Spring Data JPA repositories"             "Spring Data"      "pkg:repository"
-mapperLayer     = component "Mapper Layer"      "[mapper] hand-written mappers"                         "Spring"           "pkg:mapper"
+mapperLayer     = component "Mapper Layer"      "[mapper] MapStruct mappers"                            "MapStruct"        "pkg:mapper"
 security        = component "Security"          "[security] Spring Security configuration"              "Spring Security"  "pkg:security"
 mcp             = component "MCP"               "[mcp] Spring AI MCP server (SSE) — tools and resources for pet owners" "Spring AI" "pkg:mcp"
 

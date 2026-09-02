@@ -1,0 +1,13 @@
+# CLAUDE.md: "Use only Lombok's @Slf4j, @RequiredArgsConstructor, @Builder,
+# @Getter/@Setter selectively" — @Data is not on that list. It also drags in
+# @EqualsAndHashCode, which on a JPA entity triggers lazy loading and breaks
+# entity identity semantics.
+id: no-lombok-data
+language: java
+severity: warning
+message: "@Data is not on CLAUDE.md's allowed Lombok list — use @Getter/@Setter explicitly"
+note: 13 pre-existing occurrences; kept at `warning` until they are cleaned up.
+files:
+  - "petclinic-backend/src/main/**/*.java"
+rule:
+  pattern: "@Data"

@@ -1,51 +1,22 @@
 package victor.training.petclinic.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class OwnerMapper {
-    private final PetMapper petMapper;
+@Mapper(componentModel = "spring", uses = PetMapper.class)
+public interface OwnerMapper {
 
-    public OwnerMapper(PetMapper petMapper) {
-        this.petMapper = petMapper;
-    }
+    OwnerDto toOwnerDto(Owner owner);
 
-    public OwnerDto toOwnerDto(Owner owner) {
-        OwnerDto ownerDto = new OwnerDto();
-        ownerDto.setId(owner.getId());
-        ownerDto.setFirstName(owner.getFirstName());
-        ownerDto.setLastName(owner.getLastName());
-        ownerDto.setAddress(owner.getAddress());
-        ownerDto.setCity(owner.getCity());
-        ownerDto.setTelephone(owner.getTelephone());
-        ownerDto.setPets(petMapper.toPetsDto(owner.getPets()));
-        return ownerDto;
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "pets", ignore = true)
+    Owner toOwner(OwnerFieldsDto ownerDto);
 
-    public Owner toOwner(OwnerFieldsDto ownerDto) {
-        Owner owner = new Owner();
-        owner.setFirstName(ownerDto.getFirstName());
-        owner.setLastName(ownerDto.getLastName());
-        owner.setAddress(ownerDto.getAddress());
-        owner.setCity(ownerDto.getCity());
-        owner.setTelephone(ownerDto.getTelephone());
-        return owner;
-    }
+    List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection);
 
-    public List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection) {
-        if (ownerCollection == null) {
-            return List.of();
-        }
-        List<OwnerDto> dtos = new ArrayList<>(ownerCollection.size());
-        for (Owner owner : ownerCollection) {
-            dtos.add(toOwnerDto(owner));
-        }
-        return dtos;
-    }
 }

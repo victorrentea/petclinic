@@ -15,50 +15,6 @@ One reading convention, project-agnostic — the recipe is written out at the to
 
 ![Packages](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/packages.puml)
 
-### Conceptual model (hand-arranged map of the domain)
-
-Source: [`ConceptualModel.drawio.png`](ConceptualModel.drawio.png) — a real draw.io file, so the
-picture and the mxGraph XML behind it are one committed artifact. Validated by
-`ConceptualModelDiagramTest`.
-
-It draws the same concepts and links as the generated `DomainModel.puml`, and exists for
-the one thing a generated diagram cannot do: **stay in the same place**. PlantUML re-lays
-out the whole graph on every regeneration, so adding one class moves Owner across the page
-and erases the spatial memory of everyone who had learned the map. Here the layout belongs
-to the humans — and only the layout does:
-
-- **content is the code's.** A box declares `concept="Owner"`, a line `assoc="Owner-Pet"`
-  (both ends, alphabetically). The test refuses a box, a line or a cardinality the domain
-  classes do not have, refuses a missing one just as hard, and refuses a line between two
-  concepts that declares no `assoc` — so nothing can opt out of the check in silence.
-  Cardinalities are read from the **visible** end labels, never from an attribute: a second
-  copy of the claim could drift, and a diagram that passes while showing the wrong number
-  is worse than no diagram. The map marks only what is worth reading — a bare `*` at a many
-  end, and **nothing** at a to-one end, where an unmarked line says "exactly one". Silence
-  is a claim like any other here, so it is asserted too: a stray marker on a to-one end
-  fails just as a missing `*` does. Role names are not drawn at all — the map shows the
-  shape of the model; `DomainModel.puml` next to it names the fields and links them to the
-  code.
-- **position is the human's.** No coordinate is ever read as truth, so any box can be
-  dragged, resized or restyled without breaking a check.
-
-When the model grows, `scripts/conceptual-model-patch.py` adds the new box in the staging lane
-down the left-hand side, marked `placed="auto"`, and draws the new line. The test then
-**keeps failing** until a human has dragged the box where it belongs and re-run the script
-to clear the marker. That failure is the point: an automatic layout would be quicker and
-would cost exactly what this diagram is for.
-
-```sh
-python3 docs/scripts/conceptual-model-patch.py --dry-run   # what is missing
-python3 docs/scripts/conceptual-model-patch.py             # add it, re-render the PNG
-```
-
-Needs the draw.io desktop CLI (`brew install --cask drawio`) to re-render. CI only reports
-the drift — a check whose fix is a human judgement about layout has no business rendering
-Electron on a runner.
-
-![Conceptual model](ConceptualModel.drawio.png)
-
 ### C4 model (workspace, containers, components)
 
 Source: hand-written Structurizr DSL, split by stability:

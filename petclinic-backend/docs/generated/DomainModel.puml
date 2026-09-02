@@ -9,50 +9,50 @@ skinparam classAttributeIconSize 0
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #000000
 legend bottom
-  Click any class or field to jump to the source code.
+  Click any class to jump to the source code.
 end legend
 
-class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:28{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:31{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:34{Click to open in editor} firstName : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:37{Click to open in editor} lastName : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:40{Click to open in editor} address : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:43{Click to open in editor} city : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:53{Click to open in editor} telephone : String]]
+class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:32{Click to open in editor}]] {
+  id : Integer
+  firstName : String
+  lastName : String
+  address : String
+  city : String
+  telephone : String
 }
-class Pet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:29{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:32{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:28{Click to open in editor} name : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:39{Click to open in editor} birthDate : LocalDate]]
+class Pet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:33{Click to open in editor}]] {
+  id : Integer
+  name : String
+  birthDate : LocalDate
 }
-class PetType [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/PetType.java:8{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/PetType.java:11{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/PetType.java:7{Click to open in editor} name : String]]
+class PetType [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/PetType.java:12{Click to open in editor}]] {
+  id : Integer
+  name : String
 }
-class Role [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Role.java:8{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Role.java:12{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Role.java:7{Click to open in editor} name : String]]
+class Role [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Role.java:12{Click to open in editor}]] {
+  id : Integer
+  name : String
 }
-class Specialty [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:7{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:11{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:6{Click to open in editor} name : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:16{Click to open in editor} description : String]]
+class Specialty [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:11{Click to open in editor}]] {
+  id : Integer
+  name : String
+  description : String
 }
-class User [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:11{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:14{Click to open in editor} username : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:16{Click to open in editor} password : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:18{Click to open in editor} enabled : Boolean]]
+class User [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:15{Click to open in editor}]] {
+  username : String
+  password : String
+  enabled : Boolean
 }
-class Vet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:11{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:15{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:18{Click to open in editor} firstName : String]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:21{Click to open in editor} lastName : String]]
+class Vet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:15{Click to open in editor}]] {
+  id : Integer
+  firstName : String
+  lastName : String
 }
 class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:11{Click to open in editor}]] {
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:14{Click to open in editor} id : Integer]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:17{Click to open in editor} date : LocalDate]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:21{Click to open in editor} time : LocalTime]]
-  [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:24{Click to open in editor} description : String]]
+  id : Integer
+  date : LocalDate
+  time : LocalTime
+  description : String
 }
 
 Owner "1" -- "0..*" Pet : owner
