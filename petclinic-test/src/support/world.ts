@@ -1,15 +1,13 @@
 import {
-  After, AfterAll, Before, BeforeAll, BeforeStep, ITestCaseHookParameter, ITestStepHookParameter,
+  After, AfterAll, Before, BeforeAll, ITestCaseHookParameter,
   setDefaultTimeout, setWorldConstructor, World, IWorldOptions,
 } from '@cucumber/cucumber';
-import * as messages from '@cucumber/messages';
 import {Browser, BrowserContext, chromium, Page} from '@playwright/test';
 import * as path from 'path';
 import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
-import {StepMark, steps} from '../genseq/steps';
 
 setDefaultTimeout(60_000);
 
@@ -28,6 +26,7 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
+  vetName?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
@@ -61,36 +60,6 @@ BeforeAll(function () {
   forgetWindowsOf(WINDOWS_DIR, CUCUMBER_SOURCES);
 });
 
-/**
- * The keyword the .feature actually wrote — `When `, `And `, `Then `.
- *
- * A pickle step has only its text and a coarse Given/When/Then `type`, because that is
- * all a *runner* needs. The diagram is quoting the file back at the reader, so it goes to
- * the Gherkin document for the real word: an `And` narrated as `When` would be a sentence
- * the author never wrote, in a picture whose whole claim is that it shows what happened.
- */
-function keywordOf(document: messages.GherkinDocument, step: messages.PickleStep): string {
-  const nodes = new Map<string, messages.Step>();
-  const collect = (children: readonly messages.FeatureChild[] | readonly messages.RuleChild[] = []): void => {
-    for (const child of children) {
-      for (const s of child.background?.steps ?? []) nodes.set(s.id, s);
-      for (const s of child.scenario?.steps ?? []) nodes.set(s.id, s);
-      if ('rule' in child && child.rule) collect(child.rule.children);
-    }
-  };
-  collect(document.feature?.children);
-  // astNodeIds[0] is the step itself; a Scenario Outline step also lists the Examples row.
-  return nodes.get(step.astNodeIds[0])?.keyword ?? '';
-}
-
-// Every step of a traced scenario, stamped as it starts. Untraced scenarios record
-// nothing: `traceTitle` is set only for @generate_sequence, and the recorder is what the
-// window carries away in After.
-BeforeStep(function (this: PlaywrightWorld, {gherkinDocument, pickleStep}: ITestStepHookParameter) {
-  if (!this.traceTitle) return;
-  steps.mark(`${keywordOf(gherkinDocument, pickleStep)}${pickleStep.text}`);
-});
-
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {
   this.browser = await chromium.launch({headless: !process.env.HEADED});
   this.context = await this.browser.newContext({baseURL: process.env.BASE_URL || 'http://localhost:4200'});
@@ -104,7 +73,6 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
     await this.page.addInitScript((name) => {
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, pickle.name);
-    steps.start();
     this.traceStartMs = Date.now() - PRE_PAD_MS;
   }
 });
@@ -117,7 +85,6 @@ After(async function (this: PlaywrightWorld) {
       source: this.traceSource!,
       startMs: this.traceStartMs,
       endMs: Date.now() + POST_PAD_MS,
-      steps: steps.take(),
     });
   }
   await this.context?.close();
