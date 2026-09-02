@@ -6,24 +6,6 @@ skinparam hyperlinkColor #1A4FA0
 title src/owner-search.feature
 legend right
   ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-  Drawn from real Tempo traces of src/owner-search.feature, for the scenarios tagged
-  @generate_sequence. Change the test, not this file, then regenerate with
-  petclinic-test/run-tests-with-tracing.sh
- 
-  This picture is deliberately simplified. In review/review.html, click any
-  arrow marked ⊕ to reveal that one call's SQL / JSON payloads —
-  a DB arrow's panel toggles between ? and the values that were bound.
- 
-  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
-  Want more or less? The traces already carry all of it — re-rendering replays
-  the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
-  not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
-      cd petclinic-test
-      npm run diagram:reveal  # simplified, click to reveal SQL + payloads
-      npm run diagram:lean    # baked in: call flow only
-      npm run diagram:static  # baked in: + the SQL statements
-      npm run diagram:full    # baked in: + bound parameter values + JSON payloads
-      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 SEQ_INTERACTIVE=0|1 npm run trace:diagram
 end legend
 footer @generate_sequence — generated from real traces, do not edit
 participant Browser
@@ -96,6 +78,6 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0njunan{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://16lpdtf{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml

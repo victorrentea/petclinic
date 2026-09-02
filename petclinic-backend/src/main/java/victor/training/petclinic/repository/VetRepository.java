@@ -15,6 +15,10 @@ public interface VetRepository extends Repository<Vet, Integer> {
     @Query("SELECT v FROM Vet v LEFT JOIN FETCH v.specialties WHERE v.id = :id")
     Optional<Vet> findById(int id);
 
+    /** The row alone — attaching a vet to a visit needs its identity, not its specialties. */
+    @Query("SELECT v FROM Vet v WHERE v.id = :id")
+    Optional<Vet> findByIdWithoutSpecialties(int id);
+
     /**
      * The attending-vet rule, in one place: a null vetId means "no vet attended (yet)",
      * an unknown one is rejected. Both write paths that accept a vetId from a DTO
@@ -26,7 +30,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
         if (vetId == null) {
             return null;
         }
-        return findById(vetId).orElseThrow();
+        return findByIdWithoutSpecialties(vetId).orElseThrow();
     }
 
     void save(Vet vet);

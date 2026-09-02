@@ -42,7 +42,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.NoSuchElementException;
+
+import victor.training.petclinic.domain.Vet;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/owners")
 @RequiredArgsConstructor
@@ -151,12 +157,21 @@ public class OwnerRestController {
             @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         visit.setPet(new Pet().setId(petId));
-        visit.setVet(vetRepository.getByIdOrNull(visitFieldsDto.getVetId()));
+        visit.setVet(resolveVet(visitFieldsDto.getVetId()));
         visitRepository.save(visit);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
                 .buildAndExpand(petId, visit.getId()).toUri();
         return ResponseEntity.created(createdUri).build();
+    }
+
+    private Vet resolveVet(Integer vetId) {
+        try {
+            return vetRepository.getByIdOrNull(vetId);
+        } catch (NoSuchElementException e) {
+            log.warn("Rejecting visit: attending vet id {} does not exist", vetId);
+            throw e;
+        }
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")

@@ -1,0 +1,18 @@
+@startuml
+
+title Maven Module Graph
+caption Diagram generated from `mvn dependency:tree -Dincludes=<this repo's own groupId:artifactId>`
+footer */pom.xml -> petclinic-backend/docs/scripts/mavenmodules/gen-maven-modules.sh -> petclinic-backend/docs/generated/MavenModules.puml
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 30
+
+component "petclinic-backend (victor.training.agentic)" as petclinic_backend
+component "petclinic-chatbot (victor.training.petclinic)" as petclinic_chatbot
+component "petclinic-database (victor.training.agentic)" as petclinic_database
+component "refactoring-legacy (victor.training.agentic)" as refactoring_legacy
+
+
+@enduml

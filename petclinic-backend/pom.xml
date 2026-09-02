@@ -198,12 +198,21 @@
             <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
-        <!-- Bytecode reader behind EndpointComplexityExtractorTest: cyclomatic complexity and
-        the call graph, including MapStruct/Lombok code that has no source in this repo. -->
+        <!-- Bytecode reader behind EndpointComplexityExtractorTest: the CALL GRAPH (it sees
+        lambdas, method references and generated code that no source parser resolves). -->
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
             <version>9.7.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Source AST behind the same test: Cognitive Complexity needs the NESTING DEPTH of
+        each construct, which javac erases — bytecode cannot tell an if inside a loop from two
+        sibling ifs. See CognitiveComplexity. -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.26.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>

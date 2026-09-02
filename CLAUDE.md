@@ -34,9 +34,12 @@ mvn spring-boot:run              # Run backend
 mvn test                         # Run tests
 mvn clean install                # Build + regenerate MapStruct mappers
 mvn test -Dtest=ClassName#methodName # Run a single test
-mvn test -Dtest=EndpointComplexityExtractorTest # Rebuild docs/generated/endpoint-complexity.html,
-     # every entry point (@RestController handlers, @McpTool, @Scheduled, message listeners)
-     # ranked by the cyclomatic complexity of its whole call flow
+mvn test -Dtest=EndpointComplexityExtractorTest # Rebuild docs/generated/endpoint-complexity.html
+     # + endpoint-complexity-explained.html: every entry point (@RestController handlers, @McpTool,
+     # @Scheduled, message listeners) ranked by the Sonar COGNITIVE complexity of its whole call
+     # flow, with a companion report annotating each line of source that added to the score.
+     # Call graph from bytecode (ASM), score from source (JavaParser) — the nesting penalty needs
+     # a nesting level, and javac erases it.
 ```
 
 ### Frontend (petclinic-frontend/)
