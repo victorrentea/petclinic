@@ -1,0 +1,175 @@
+import {test, expect} from '@playwright/test';
+import {applyParameters, formatOriginLabel, formatSqlLabel, formatSqlLines, splitOrigin, summarizeStatement} from './sql-label';
+
+test('breaks a statement into one line per clause, keywords uppercased', () => {
+  const lines = formatSqlLines(
+    'select o1_0.id,o1_0.last_name from petclinic.owners o1_0 where o1_0.last_name like ?',
+  );
+  expect(lines).toEqual([
+    'SELECT o1_0.id, o1_0.last_name',
+    'FROM petclinic.owners o1_0',
+    'WHERE o1_0.last_name like ?',
+  ]);
+});
+
+test('keeps a multi-word keyword whole instead of splitting it', () => {
+  expect(formatSqlLines('insert into petclinic.visits (id) values (?)')).toEqual([
+    'INSERT INTO petclinic.visits (id)',
+    'VALUES (?)',
+  ]);
+  // "on conflict" must not be cut at the "on" of a join condition
+  expect(formatSqlLines('insert into t (id) values (?) on conflict do nothing')).toContain(
+    'ON CONFLICT do nothing',
+  );
+});
+
+test('breaks joins onto their own line, condition included', () => {
+  expect(formatSqlLines('select p.id from pets p left outer join visits v on v.pet_id=p.id'))
+    .toEqual([
+      'SELECT p.id',
+      'FROM pets p',
+      'LEFT OUTER JOIN visits v',
+      'ON v.pet_id=p.id',
+    ]);
+});
+
+// Hibernate's select lists run to dozens of columns — the shape of the query is
+// the point of the diagram, not every column it happens to project.
+test('truncates a clause longer than ten words', () => {
+  const columns = Array.from({length: 30}, (_, i) => `o1_0.c${i}`).join(',');
+  const [selectLine] = formatSqlLines(`select ${columns} from owners o1_0`);
+  expect(selectLine.split(' ')).toHaveLength(11); // 10 words + the ellipsis
+  expect(selectLine).toBe('SELECT o1_0.c0, o1_0.c1, o1_0.c2, o1_0.c3, o1_0.c4, o1_0.c5, o1_0.c6, o1_0.c7, o1_0.c8, …');
+});
+
+test('caps how many clause lines a single arrow may carry', () => {
+  const unions = Array.from({length: 20}, () => 'select 1').join(' union all ');
+  const lines = formatSqlLines(unions);
+  expect(lines.length).toBeLessThanOrEqual(8);
+  expect(lines[lines.length - 1]).toBe('…');
+});
+
+test('formatSqlLabel joins the clauses with PlantUML line breaks', () => {
+  expect(formatSqlLabel('select 1 from dual')).toBe('SELECT 1\\nFROM dual');
+});
+
+test('a statement with nothing to break stays a single line', () => {
+  expect(formatSqlLines('commit')).toEqual(['commit']);
+});
+
+test('applyParameters fills the placeholders in order', () => {
+  expect(applyParameters('select * from owners where last_name=? and city=?', ['Potter', 'Cluj']))
+    .toBe("select * from owners where last_name='Potter' and city='Cluj'");
+});
+
+// Capture can be off, or the agent can capture fewer values than there are
+// placeholders — the statement must survive either way.
+test('applyParameters leaves what it cannot fill alone', () => {
+  expect(applyParameters('select * from owners where id=?', [])).toBe('select * from owners where id=?');
+  expect(applyParameters('select * from o where a=? and b=?', ['1']))
+    .toBe('select * from o where a=1 and b=?');
+});
+
+// The statement sanitizer is deliberately off (it is what would rewrite bound
+// values to `?`), so real string literals reach this code — and a literal is
+// somebody's data, never grammar to fold on.
+test('a keyword inside a string literal is not a clause', () => {
+  expect(formatSqlLines("select v.id from visits v where v.description = 'sent from the vet'"))
+    .toEqual([
+      'SELECT v.id',
+      'FROM visits v',
+      "WHERE v.description = 'sent from the vet'",
+    ]);
+});
+
+test('a subquery keeps its clauses inside the line that contains it', () => {
+  const lines = formatSqlLines(
+    'select o.id,(select count(*) from pets p where p.owner_id=o.id),o.telephone from owners o',
+  );
+  // the outer o.telephone must not end up attached to the subquery's WHERE
+  expect(lines[lines.length - 1]).toBe('FROM owners o');
+  expect(lines.some((l) => l.includes('o.telephone') && l.includes('count(*)'))).toBe(true);
+  expect(lines).not.toContain('WHERE p.owner_id=o.id), o.telephone');
+});
+
+test('a `?` inside a literal is not a placeholder', () => {
+  expect(applyParameters("select * from o where o.notes = 'is this ok?' and o.id = ?", ['10']))
+    .toBe("select * from o where o.notes = 'is this ok?' and o.id = 10");
+});
+
+test('a bound value is quoted, and cannot invent a clause of its own', () => {
+  const lines = formatSqlLines(
+    'select o.id from owners o where o.city = ? and o.last_name = ?',
+    ['from Bucharest', 'Order by Smith'],
+  );
+  expect(lines).toEqual([
+    'SELECT o.id',
+    'FROM owners o',
+    "WHERE o.city = 'from Bucharest' and o.last_name = 'Order by …",
+  ]);
+});
+
+test('numbers stay bare, strings get quotes', () => {
+  expect(applyParameters('where a=? and b=? and c=?', ['7', 'Potter', 'null']))
+    .toBe("where a=7 and b='Potter' and c=null");
+});
+
+test('a backslash in the SQL cannot eat the line break after it', () => {
+  const label = formatSqlLabel("select o.id from owners o where o.last_name like ? escape '\\'");
+  expect(label).toContain("escape '\\\\'");
+});
+
+// ── Hibernate's origin comment ────────────────────────────────────────────────
+// `hibernate.use_sql_comments` prefixes each statement with what produced it. It is
+// Hibernate talking *about* the statement, so it labels the arrow and never reaches
+// the folded clauses.
+
+test('splits the leading comment off the statement', () => {
+  const {origin, statement} = splitOrigin(
+    '/* select o from Owner o where o.lastName like ?1 */ select o1_0.id from owners o1_0');
+  expect(origin).toBe('select o from Owner o where o.lastName like ?1');
+  expect(statement).toBe('select o1_0.id from owners o1_0');
+});
+
+test('a multi-line comment collapses to one line', () => {
+  expect(splitOrigin('/* load\n   com.example.Owner.pets */ select 1').origin)
+    .toBe('load com.example.Owner.pets');
+});
+
+// A trace recorded without use_sql_comments, or an inline comment further along, is
+// not an origin — only a comment the statement *opens* with is.
+test('a statement with no leading comment keeps all of itself', () => {
+  const {origin, statement} = splitOrigin('select 1 /* not an origin */');
+  expect(origin).toBeUndefined();
+  expect(statement).toBe('select 1 /* not an origin */');
+});
+
+test('the comment never reaches the folded statement', () => {
+  const lines = formatSqlLines('/* insert for com.example.Visit */ insert into visits (id) values (?)');
+  expect(lines.join(' ')).not.toContain('/*');
+  expect(lines[0]).toBe('INSERT INTO visits (id)');
+});
+
+test('an arrow-length origin is left alone, a runaway one is clipped', () => {
+  const short = 'load com.example.Owner.pets';
+  expect(formatOriginLabel(short)).toBe(short);
+  expect(formatOriginLabel(Array(40).fill('w').join(' '))).toMatch(/…$/);
+});
+
+// The fallback name for a query the trace says nothing else about — a lazy load, which
+// carries no Hibernate comment and sits under no repository span.
+test('names a statement by its verb and the table it touches', () => {
+  expect(summarizeStatement('select p1_0.id from pets p1_0 where p1_0.owner_id=?')).toBe('select pets');
+  expect(summarizeStatement('select v1_0.id from petclinic.visits v1_0')).toBe('select visits');
+  expect(summarizeStatement('insert into petclinic.visits (id) values (?)')).toBe('insert into visits');
+  expect(summarizeStatement('update owners set city=? where id=?')).toBe('update owners');
+  expect(summarizeStatement('delete from visits where id=?')).toBe('delete from visits');
+});
+
+test('the origin comment does not hide the shape of the statement', () => {
+  expect(summarizeStatement('/* <criteria> */ select o1_0.id from owners o1_0')).toBe('select owners');
+});
+
+test('SQL of no recognised shape gets no summary rather than a wrong one', () => {
+  expect(summarizeStatement('call some_procedure(?)')).toBeUndefined();
+});

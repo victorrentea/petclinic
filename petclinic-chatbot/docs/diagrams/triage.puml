@@ -1,0 +1,19 @@
+@startuml
+' Generated from victor.training.petclinic.chatbot.triage.PetTriageAgent
+' DETERMINISTIC, OFFLINE: derived by reflection over @Action method signatures.
+title PetTriageAgent
+state CostEstimate
+state OwnerSymptom
+state SpecialtyRecommendation
+state TriageReport
+state UrgencyAssessment
+CostEstimate --> TriageReport : report
+OwnerSymptom --> SpecialtyRecommendation : recommendSpecialty
+OwnerSymptom --> UrgencyAssessment : assessUrgency
+SpecialtyRecommendation --> CostEstimate : estimateCost
+SpecialtyRecommendation --> TriageReport : report
+TriageReport --> [*]
+UrgencyAssessment --> CostEstimate : estimateCost
+UrgencyAssessment --> TriageReport : report
+[*] --> OwnerSymptom
+@enduml

@@ -1,0 +1,33 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+
+    <h2>Specialties</h2>
+    <table id="specialties" class="table table-striped">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let specialty of specialties; let element_id=index">
+        <td>
+          <input [id]=element_id [readonly]="true" type="text" class="form-control" [(ngModel)]="specialty.name" name="spec_name" />
+        </td>
+        <td>
+          <button class="btn btn-default" (click)="showEditSpecialtyComponent(specialty)">Edit</button>
+          <button class="btn btn-default" (click)="deleteSpecialty(specialty)">Delete</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <div *ngIf="isInsert">
+      <app-specialty-add (newSpeciality)="onNewSpecialty($event)">...</app-specialty-add>
+    </div>
+    <div>
+      <button *ngIf="isSpecialitiesDataReceived" class="btn btn-default" (click)="gotoHome()">Home</button>
+      <button *ngIf="isSpecialitiesDataReceived" class="btn btn-default" (click)="showAddSpecialtyComponent()"> Add </button>
+    </div>
+  </div>
+</div>

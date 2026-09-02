@@ -1,0 +1,23 @@
+id: requestbody-needs-valid
+valid:
+  - |
+    class C {
+      public void create(@Valid @RequestBody OwnerDto dto) {}
+    }
+  - |
+    class C {
+      public void update(@PathVariable int id, @Validated @RequestBody VetDto dto) {}
+    }
+  - |
+    class C {
+      public void find(@PathVariable int id) {}
+    }
+invalid:
+  - |
+    class C {
+      public void create(@RequestBody OwnerDto dto) {}
+    }
+  - |
+    class C {
+      public void update(@PathVariable int id, @RequestBody VetDto dto) {}
+    }

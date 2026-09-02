@@ -1,0 +1,64 @@
+@startuml
+
+title Domain Model
+caption Diagram generated from code using Java reflection
+footer domain/*.java -> petclinic-backend/docs/generated/DomainModel.puml
+
+hide empty members
+skinparam classAttributeIconSize 0
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #000000
+legend bottom
+  Click any class to jump to the source code.
+end legend
+
+class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:32{Click to open in editor}]] {
+  id : Integer
+  firstName : String
+  lastName : String
+  address : String
+  city : String
+  telephone : String
+}
+class Pet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:33{Click to open in editor}]] {
+  id : Integer
+  name : String
+  birthDate : LocalDate
+}
+class PetType [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/PetType.java:12{Click to open in editor}]] {
+  id : Integer
+  name : String
+}
+class Role [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Role.java:12{Click to open in editor}]] {
+  id : Integer
+  name : String
+}
+class Specialty [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Specialty.java:11{Click to open in editor}]] {
+  id : Integer
+  name : String
+  description : String
+}
+class User [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/User.java:15{Click to open in editor}]] {
+  username : String
+  password : String
+  enabled : Boolean
+}
+class Vet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Vet.java:15{Click to open in editor}]] {
+  id : Integer
+  firstName : String
+  lastName : String
+}
+class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:11{Click to open in editor}]] {
+  id : Integer
+  date : LocalDate
+  time : LocalTime
+  description : String
+}
+
+Owner "1" -- "0..*" Pet : owner
+Pet "1" -- "0..*" Visit : pet
+PetType "1" -- "0..*" Pet : type
+User "1" -- "0..*" Role : user
+Vet "1" -- "0..*" Specialty : specialties
+
+@enduml

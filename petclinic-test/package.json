@@ -1,0 +1,39 @@
+{
+  "name": "qa",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for PetClinic Owners page.",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:unit": "playwright test -c playwright.unit.config.ts",
+    "trace:diagram": "ts-node src/genseq/generate.ts",
+    "diagram": "npm run trace:diagram",
+    "diagram:lean": "SEQ_SQL=off SEQ_HTTP_BODIES=0 SEQ_INTERACTIVE=0 npm run trace:diagram",
+    "diagram:static": "SEQ_INTERACTIVE=0 npm run trace:diagram",
+    "diagram:full": "SEQ_SQL=values SEQ_HTTP_BODIES=1 SEQ_INTERACTIVE=0 npm run trace:diagram",
+    "diagram:reveal": "SEQ_HTTP_BODIES=1 npm run trace:diagram",
+    "test:cucumber": "SKIP_SERVER_START=1 cucumber-js",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:with-apps": "ts-node start-apps.ts",
+    "test:docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit",
+    "start:apps": "ts-node start-apps.ts",
+    "show-report": "playwright show-report test-results/playwright-report",
+    "test:sequence": "SKIP_SERVER_START=1 playwright test --grep @generate_sequence"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.8.3",
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.5.2",
+    "axios": "^1.14.0",
+    "concurrently": "^9.2.1",
+    "tree-kill": "^1.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2",
+    "wait-on": "^9.0.4"
+  }
+}

@@ -1,0 +1,26 @@
+# CLAUDE.md: "@Validated on @RequestBody". An unvalidated request body silently
+# skips every Bean Validation constraint declared on the DTO.
+id: requestbody-needs-valid
+language: java
+severity: warning
+message: "@RequestBody without @Valid/@Validated — DTO constraints are not enforced"
+# Downgraded from `error` to `warning` on 2026-07-31. Adding @Valid to the two
+# remaining offenders is NOT a no-op: it makes VetTest.update_ok fail with 400,
+# because VetFieldsDto's @Pattern rejects a first name containing a space
+# ("James Updated"). Either the pattern or the test data is wrong — decide that,
+# fix it, then restore `severity: error`.
+files:
+  - "petclinic-backend/src/main/**/*.java"
+rule:
+  kind: formal_parameter
+  has:
+    kind: modifiers
+    has:
+      pattern: "@RequestBody"
+  not:
+    has:
+      kind: modifiers
+      has:
+        any:
+          - pattern: "@Valid"
+          - pattern: "@Validated"

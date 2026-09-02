@@ -1,0 +1,64 @@
+# A real JIRA to test jira.sh against, from Atlassian's official image.
+#
+# ONLY USABLE IF YOU ALREADY HOLD A DATA CENTER LICENCE KEY.
+# The image is free to pull, but the product is not: since 30 March 2026 Atlassian
+# no longer lets you generate Data Center trial licences yourself, and Jira Server
+# has been end-of-life since 2024. See SKILL.md for the free alternatives (the
+# hermetic fake, or Jira Cloud Free).
+#
+#   docker compose -f test/docker/docker-compose.yml up -d
+#   open http://localhost:8082      # first boot takes 3-5 minutes
+#
+# Port 8082, not 8080, so it cannot collide with the PetClinic backend.
+# Needs roughly 4 GB of free Docker disk; Postgres dies with
+# "could not extend file ... wrote only 4096" when the Docker VM disk is full.
+services:
+  jira-db:
+    image: postgres:15
+    container_name: jira-db
+    environment:
+      POSTGRES_DB: jira
+      POSTGRES_USER: jira
+      POSTGRES_PASSWORD: jira
+      # JIRA refuses to start on a database with a non-C collation.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - jira-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jira -d jira"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  jira:
+    image: atlassian/jira-software:10.3.9
+    container_name: jira
+    depends_on:
+      jira-db:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    environment:
+      # Pre-wiring the datasource skips the database step of the setup wizard.
+      ATL_JDBC_URL: jdbc:postgresql://jira-db:5432/jira
+      ATL_JDBC_USER: jira
+      ATL_JDBC_PASSWORD: jira
+      ATL_DB_DRIVER: org.postgresql.Driver
+      ATL_DB_TYPE: postgres72
+      ATL_PROXY_NAME: localhost
+      ATL_PROXY_PORT: "8082"
+      ATL_TOMCAT_SCHEME: http
+      JVM_MINIMUM_MEMORY: 1024m
+      JVM_MAXIMUM_MEMORY: 3072m
+    volumes:
+      - jira-data:/var/atlassian/application-data/jira
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/status || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 180s
+
+volumes:
+  jira-db-data:
+  jira-data:

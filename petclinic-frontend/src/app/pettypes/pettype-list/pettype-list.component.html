@@ -1,0 +1,33 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+
+    <h2>Pet Types</h2>
+    <table id="pettypes" class="table table-striped">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let pettype of pettypes; let element_id=index">
+        <td>
+          <input [id]=element_id [readonly]="true" type="text" class="form-control" [(ngModel)]="pettype.name" name="pettype_name" />
+        </td>
+        <td>
+          <button class="btn btn-default" (click)="showEditPettypeComponent(pettype)">Edit</button>
+          <button class="btn btn-default" (click)="deletePettype(pettype)">Delete</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <div *ngIf="isInsert">
+      <app-pettype-add (newPetType)="onNewPettype($event)">...</app-pettype-add>
+    </div>
+    <div>
+      <button *ngIf="isPetTypesDataReceived" class="btn btn-default" (click)="gotoHome()">Home</button>
+      <button *ngIf="isPetTypesDataReceived" class="btn btn-default" (click)="showAddPettypeComponent()"> Add </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+@startuml
+
+title Backend Logical Architecture (java packages)
+caption Diagram ArchUnit-tested vs code
+footer petclinic-backend/docs/packages.puml
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 30
+<style>
+component {
+  BackGroundColor #ECEFF1
+  LineColor #546E7A
+  FontStyle bold
+  ' only the component name is bold; the package pattern above it stays plain
+  ' (never write a stereotype in a comment — PackagesArchTest greps the raw file)
+  stereotype {
+    FontStyle plain
+  }
+}
+arrow {
+  LineColor #78909C
+}
+</style>
+
+[REST] <<..rest>>
+[MCP] <<..mcp>>
+[REST Error] <<..rest.error>>
+[Security] <<..security>>
+[Mapper] <<..mapper>>
+[Repository] <<..repository>>
+[DTO] <<..rest.dto>>
+[Domain] <<..domain>>
+
+[Repository] --> [Domain]
+[Mapper] --> [Domain]
+[Mapper] --> [DTO]
+[REST] --> [Domain]
+[REST] --> [Repository]
+[REST] --> [Mapper]
+[REST] --> [DTO]
+[MCP] --> [Domain]
+[MCP] --> [Repository]
+
+@enduml

@@ -1,0 +1,13 @@
+# pgvector for THIS module's app. Host port 5433 — the embedded Zonky Postgres
+# used by the backend/tests already owns 5432 (and lacks the pgvector extension).
+# docker run -d --name pgvector-chatbot -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 pgvector/pgvector:pg17
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"

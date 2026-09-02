@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+    Eclipse JDT formatter profile for PetClinic.
+
+    Chosen over palantir/google-java-format for two reasons:
+        1. it does NOT reorder imports (Spotless applies google/palantir import
+            sorting unconditionally — there is no flag to turn it off);
+        2. the column width is an actual setting, not a hardcoded preset.
+
+    Keep in sync with .editorconfig (indent_size=4) and CLAUDE.md (<= 120 chars).
+    Do not round-trip this file through the Eclipse UI — it reshuffles the
+    entries and makes diffs unreadable. Edit by hand, keep ids sorted.
+
+    What it does to your code (verified with `mvn spotless:apply`):
+        before:  "  public String demo(String a, ..., String z) {"    2-space indent, 127 columns
+        after:   "    public String demo(String a, ...,"              re-indented to 4, then
+        after:   "            String z) {"                            wrapped, hanging indent 8
+    indentation.size=4 fixes the indent; lineSplit=120 (Eclipse's own default is 80) forces the
+    wrap; continuation_indentation=2 x tabulation.size=4 gives the 8-space hanging indent.
+-->
+<profiles version="21">
+    <profile kind="CodeFormatterProfile" name="petclinic" version="21">
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation" value="16"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.line_length" value="120"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_block_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_javadoc_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.comment.format_line_comments" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation" value="2"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer" value="2"/>
+        <setting id="org.eclipse.jdt.core.formatter.indentation.size" value="4"/>
+        <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="false"/>
+        <setting id="org.eclipse.jdt.core.formatter.lineSplit" value="120"/>
+        <setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space"/>
+        <setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="4"/>
+        <setting id="org.eclipse.jdt.core.formatter.use_tabs_only_for_leading_indentations" value="false"/>
+    </profile>
+</profiles>

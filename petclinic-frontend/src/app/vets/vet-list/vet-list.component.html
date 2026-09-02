@@ -1,0 +1,36 @@
+<div class="container-fluid">
+  <div class="container xd-container">
+
+    <h2>Veterinarians</h2>
+
+    <table id="vets" class="table table-striped">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Specialties</th>
+        <th></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let vet of vets">
+        <td>
+          {{ vet.firstName }} {{ vet.lastName }}
+        </td>
+        <td>
+          <div *ngFor="let spec of vet.specialties">
+            {{ spec.name }}
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-default" (click)="editVet(vet)">Edit Vet</button>
+          <button class="btn btn-default" (click)="deleteVet(vet)">Delete Vet</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <div>
+      <button *ngIf="isVetDataReceived" class="btn btn-default" (click)="gotoHome()">Home</button>
+      <button *ngIf="isVetDataReceived" class="btn btn-default" (click)="addVet()">Add Vet</button>
+    </div>
+  </div>

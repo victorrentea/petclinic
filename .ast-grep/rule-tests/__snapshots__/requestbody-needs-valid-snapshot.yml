@@ -1,0 +1,36 @@
+id: requestbody-needs-valid
+snapshots:
+  ? |
+    class C {
+      public void create(@RequestBody OwnerDto dto) {}
+    }
+  : labels:
+    - source: '@RequestBody OwnerDto dto'
+      style: primary
+      start: 31
+      end: 56
+    - source: '@RequestBody'
+      style: secondary
+      start: 31
+      end: 43
+    - source: '@RequestBody'
+      style: secondary
+      start: 31
+      end: 43
+  ? |
+    class C {
+      public void update(@PathVariable int id, @RequestBody VetDto dto) {}
+    }
+  : labels:
+    - source: '@RequestBody VetDto dto'
+      style: primary
+      start: 53
+      end: 76
+    - source: '@RequestBody'
+      style: secondary
+      start: 53
+      end: 65
+    - source: '@RequestBody'
+      style: secondary
+      start: 53
+      end: 65

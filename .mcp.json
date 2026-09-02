@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+
+    "playwright": {
+      "//": "In case MCPs are disabled, tell agent to use playwright cli",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--output-dir", "petclinic-test/.playwright-mcp",
+        "--save-session"
+      ]
+    },
+
+    "postgres-db": {
+      "//": "In case MCPs are disabled, tell agent to use .claude/skills/petclinic-db-cli/db-cli.sh (same server, over the CLI)",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub@1.2.0",
+        "--transport", "stdio",
+        "--dsn", "postgres://petclinic:petclinic@localhost:5432/petclinic"
+      ]
+    },
+
+    "grafana": {
+      "command": "uvx",
+      "args": ["mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "http://localhost:3300",
+        "GRAFANA_USERNAME": "admin",
+        "GRAFANA_PASSWORD": "admin"
+      }
+    },
+
+
+    "petclinic-mcp": {
+      "type": "http",
+      "url": "http://localhost:8080/mcp",
+      "headers": {
+        "X-API-Key": "pc-mcp-7f3a9c2e1b8d4056",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs"
+      }
+    }
+  }
+}

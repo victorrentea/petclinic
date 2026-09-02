@@ -1,0 +1,17 @@
+id: no-lombok-data
+valid:
+  - |
+    @Getter
+    @Setter
+    public class OwnerDto {}
+  - |
+    @RequiredArgsConstructor
+    public class OwnerService {}
+invalid:
+  - |
+    @Data
+    public class OwnerDto {}
+  - |
+    @Data
+    @Builder
+    public class VisitDto {}
