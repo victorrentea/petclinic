@@ -1,0 +1,139 @@
+@startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+hide footbox
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #1A4FA0
+title petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java
+legend right
+  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+  Drawn from real Tempo traces of petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java, for the tests marked
+  @GenerateSequence. Change the test, not this file, then regenerate with
+  petclinic-backend/run-tests-with-tracing.sh   (needs only ./start-grafana.sh)
+ 
+  The self-calls on the leftmost lifeline are the test's own sentences — a .feature's
+  steps, a .spec.ts's DSL calls, a @SpringBootTest's given/when/then — each above the
+  calls it caused. A sentence that caused no traffic is not drawn.
+ 
+  This picture is deliberately simplified. In review/review.html, click any
+  arrow marked ⊕ to reveal that one call's SQL / JSON payloads —
+  a DB arrow's panel toggles between ? and the values that were bound.
+ 
+  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads
+  Want more or less? The traces already carry all of it — re-rendering replays
+  the spans cached in test-results/trace-spans.json (~1s): nothing has to run,
+  not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):
+      cd petclinic-test
+      npm run diagram:reveal  # simplified, click to reveal SQL + payloads
+      npm run diagram:lean    # baked in: call flow only
+      npm run diagram:static  # baked in: + the SQL statements
+      npm run diagram:full    # baked in: + bound parameter values + JSON payloads
+      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 SEQ_INTERACTIVE=0|1 npm run trace:diagram
+end legend
+footer @GenerateSequence — generated from real traces, do not edit
+participant Test
+participant Backend
+participant DB
+== [[genseq-scenario://64{Open the test at this scenario} adds a visit to an existing pet]] ==
+Test -> Test: given an owner with at least one pet exists
+activate Test
+Test -> Backend: List owners\nGET /api/owners
+activate Backend
+Backend -> DB: [[genseq://1aoufu2{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1ywvbwm{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0d1jj9s{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0zrdtil{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://11orrff{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1e02kqw{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1vijc0e{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1afgvsf{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1g0ncac{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1dje28p{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://05qnn6q{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0ko7c1b{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://04yaot5{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0g653ka{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://17b1f4y{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0qutb9k{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://005pv1s{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0ow5hm5{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1v91y5q{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0jndtsl{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1twjd9e{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://179pa5r{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0spdoa4{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://112wt6j{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1rv9amp{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0s7bw5w{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0q2g6ih{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1vr3q9y{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://07widtu{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://11eqpar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1vvzxvz{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0zn1he8{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0nzx8gf{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1hnj4n6{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1yz2s51{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://106x3nx{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1ui76yh{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://125n4x4{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1wn2wlw{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0p5qgoj{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://06hjrnf{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1chbokm{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://10nowmm{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1s8lcdt{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1o34u8l{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1xe5lsn{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://18kphn0{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://14lgvhs{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1dn4wsq{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0ccg4wn{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1w0jtro{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1klw40a{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1tjajq1{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://0chbrim{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
+Backend --> Test: [[genseq://1r19c8i{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Test
+Test -> Test: when the owner detail page is opened
+activate Test
+Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
+activate Backend
+group transaction · OwnerRepository.findById
+Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+end
+Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
+Backend --> Test: [[genseq://1u21t6e{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Test
+Test -> Test: and a visit is added for the first pet
+activate Test
+Test -> Backend: [[genseq://1k7xuy6{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+activate Backend
+group transaction · VisitRepository.save
+Backend -> DB: [[genseq://1bwb9c2{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+end
+Backend --> Test: 201
+deactivate Backend
+deactivate Test
+Test -> Test: then the visit is listed under the pet
+activate Test
+Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
+activate Backend
+group transaction · OwnerRepository.findById
+Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+end
+Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
+Backend --> Test: [[genseq://07xwj8b{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Test
+@enduml

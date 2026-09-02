@@ -48,7 +48,10 @@ class CancelVisitToolTest {
         Owner owner = ownerWithPet();
         Pet pet = owner.getPets().get(0);
         LocalDate futureDate = LocalDate.now().plusDays(7);
-        pet.addVisit(new Visit().setDate(futureDate).setDescription("Check"));
+        Visit visit = new Visit();
+        visit.setDate(futureDate);
+        visit.setDescription("Check");
+        pet.addVisit(visit);
         ownerRepository.save(owner);
         authenticateAs(owner.getId());
 
@@ -149,16 +152,16 @@ class CancelVisitToolTest {
     }
 
     private Owner ownerWithPet() {
-        Pet pet = new Pet()
-                .setName("Whiskers")
-                .setBirthDate(LocalDate.of(2022, 3, 10))
-                .setType(petRepository.findPetTypes().get(0));
-        Owner owner = new Owner()
-                .setFirstName("Test")
-                .setLastName("Owner_CVT")
-                .setAddress("1 Street")
-                .setCity("TestCity")
-                .setTelephone("0000000000");
+        Pet pet = new Pet();
+        pet.setName("Whiskers");
+        pet.setBirthDate(LocalDate.of(2022, 3, 10));
+        pet.setType(petRepository.findPetTypes().get(0));
+        Owner owner = new Owner();
+        owner.setFirstName("Test");
+        owner.setLastName("Owner_CVT");
+        owner.setAddress("1 Street");
+        owner.setCity("TestCity");
+        owner.setTelephone("0000000000");
         owner.addPet(pet);
         return ownerRepository.save(owner);
     }

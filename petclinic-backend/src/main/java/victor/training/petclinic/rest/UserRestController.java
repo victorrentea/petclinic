@@ -1,6 +1,5 @@
 package victor.training.petclinic.rest;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.UserMapper;
 import victor.training.petclinic.domain.Role;
@@ -16,11 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.ADMIN)")
 public class UserRestController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+
+    public UserRestController(UserRepository userRepository, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+    }
 
     @PostMapping
     @Transactional

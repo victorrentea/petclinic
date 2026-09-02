@@ -71,16 +71,14 @@ class CreateVisitShould {
     PetClinicMcp petClinicMcp;
 
     // ⚠️ JUnit creates a new test class instance for each @Test, so these are never shared
-    Pet rex = new Pet()
-            .setName("Rex")
-            .setBirthDate(LocalDate.of(2020, 1, 1));
+    Pet rex = aRex();
     LocalDate nextWeek = LocalDate.now().plusWeeks(1);
     LocalTime morning = LocalTime.of(10, 30);
 
     @BeforeEach
     final void before() {
         petClinicMcp = new PetClinicMcp(ownerRepository, petRepository, visitRepository);
-        new Owner().setId(OWNER_ID).addPet(rex);
+        anOwnerWithId(OWNER_ID).addPet(rex);
         rex.setId(PET_ID);
         authenticateAs(OWNER_ID);
     }
@@ -106,7 +104,7 @@ class CreateVisitShould {
 
         @Test
         void thePetBelongsToAnotherOwner() {
-            new Owner().setId(OWNER_ID + 1).addPet(rex);
+            anOwnerWithId(OWNER_ID + 1).addPet(rex);
             givenThePetExists();
 
             assertThatThrownBy(() -> petClinicMcp.createVisit(PET_ID, nextWeek, morning, "Vaccination"))
@@ -135,7 +133,9 @@ class CreateVisitShould {
         @Test
         void thePetAlreadyHasTheMaximumOfUpcomingVisits() {
             for (int i = 0; i < PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET; i++) {
-                rex.addVisit(new Visit().setDate(LocalDate.now().plusDays(i + 1)));
+                Visit visit = new Visit();
+                visit.setDate(LocalDate.now().plusDays(i + 1));
+                rex.addVisit(visit);
             }
             givenThePetExists();
 
@@ -153,7 +153,11 @@ class CreateVisitShould {
         final void before() {
             givenThePetExists();
             when(visitRepository.save(any(Visit.class)))
-                    .thenAnswer(call -> call.<Visit>getArgument(0).setId(NEW_VISIT_ID));
+                    .thenAnswer(call -> {
+                        Visit saved = call.getArgument(0);
+                        saved.setId(NEW_VISIT_ID);
+                        return saved;
+                    });
         }
 
         @Test
@@ -192,5 +196,18 @@ class CreateVisitShould {
     private static void authenticateAs(int ownerId) {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 String.valueOf(ownerId), null, List.of(new SimpleGrantedAuthority("ROLE_MCP"))));
+    }
+
+    private static Pet aRex() {
+        Pet pet = new Pet();
+        pet.setName("Rex");
+        pet.setBirthDate(LocalDate.of(2020, 1, 1));
+        return pet;
+    }
+
+    private static Owner anOwnerWithId(int ownerId) {
+        Owner owner = new Owner();
+        owner.setId(ownerId);
+        return owner;
     }
 }

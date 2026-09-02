@@ -1,8 +1,9 @@
 package victor.training.petclinic.rest.error;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +30,9 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
  * {@code HttpMessageNotWritableException} and corrupting the JSON-RPC exchange. Keeping it package-scoped lets the
  * MCP transport serialize tool failures into proper JSON-RPC errors itself.
  */
-@Slf4j
 @RestControllerAdvice(basePackages = "victor.training.petclinic.rest")
 public class ExceptionControllerAdvice {
+    private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
     private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
             HttpServletRequest request) {

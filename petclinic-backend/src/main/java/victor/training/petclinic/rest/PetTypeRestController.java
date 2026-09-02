@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.PetTypeMapper;
@@ -24,12 +23,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/pettypes")
-@RequiredArgsConstructor
 @PreAuthorize("hasAnyRole(@roles.OWNER_ADMIN, @roles.VET_ADMIN)")
 public class PetTypeRestController {
 
     private final PetTypeMapper petTypeMapper;
     private final PetTypeRepository petTypeRepository;
+
+    public PetTypeRestController(PetTypeMapper petTypeMapper, PetTypeRepository petTypeRepository) {
+        this.petTypeMapper = petTypeMapper;
+        this.petTypeRepository = petTypeRepository;
+    }
 
     @GetMapping(produces = "application/json")
     @ApiResponse(responseCode = "200", description = "OK",

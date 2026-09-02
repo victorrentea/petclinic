@@ -76,12 +76,35 @@ async function isCollectorReachable(): Promise<boolean> {
   }
 }
 
-isCollectorReachable().then((up) => {
-  if (!up) {
-    console.info('ℹ️  OTel collector not reachable — frontend telemetry disabled.');
-    return;
-  }
+/**
+ * Whether Playwright stamped this page before any of its own script ran.
+ *
+ * The e2e trace fixture sets `__E2E_TEST_NAME__` via `addInitScript`, which the browser
+ * evaluates before the document's own scripts — so by the time this module is evaluated
+ * the answer is already known, with nothing to wait for.
+ */
+function underTest(): boolean {
+  return typeof (globalThis as any).__E2E_TEST_NAME__ === 'string';
+}
 
+/**
+ * Start tracing.
+ *
+ * Called synchronously under an e2e run and only after the probe answers otherwise. That
+ * distinction is the whole point: `main.ts` imports this module before it bootstraps
+ * Angular, so anything done synchronously here is in place before the app's first HTTP
+ * call — and anything deferred to a promise is not. Angular's bootstrap request goes out
+ * while an asynchronous probe is still in flight, so the **first request of every
+ * scenario** got no span at all, and the generated diagram had nothing to put under
+ * `When I open the owners page`. The gap looked like a missing step; it was a missing
+ * instrumentation.
+ *
+ * The probe stays for everyone else. It exists so that a developer running the app with
+ * no collector pays neither the exporter nor the XHR prototype patch, and an e2e run is
+ * exactly the case where the answer is already known: the suite refuses to start unless
+ * the collector is up.
+ */
+function startTracing(): void {
   patchXhrSendOnce();
 
   const provider = new WebTracerProvider({
@@ -127,4 +150,16 @@ isCollectorReachable().then((up) => {
       }),
     ],
   });
-});
+}
+
+if (underTest()) {
+  startTracing();
+} else {
+  isCollectorReachable().then((up) => {
+    if (up) {
+      startTracing();
+    } else {
+      console.info('ℹ️  OTel collector not reachable — frontend telemetry disabled.');
+    }
+  });
+}

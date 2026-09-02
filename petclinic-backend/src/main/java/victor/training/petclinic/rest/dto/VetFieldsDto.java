@@ -5,9 +5,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 
-@Data
 public class VetFieldsDto {
 
     @NotNull
@@ -26,4 +24,28 @@ public class VetFieldsDto {
     @Valid
     @Schema(description = "The specialties of the vet.")
     private List<@Valid SpecialtyDto> specialties = new ArrayList<>();
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public List<SpecialtyDto> getSpecialties() {
+        return specialties;
+    }
+
+    public void setSpecialties(List<SpecialtyDto> specialties) {
+        this.specialties = specialties;
+    }
 }

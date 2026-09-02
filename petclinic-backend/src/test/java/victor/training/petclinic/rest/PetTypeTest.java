@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
-import victor.training.petclinic.domain.PetType;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
@@ -54,7 +53,7 @@ public class PetTypeTest {
 
     @BeforeEach
     final void before() {
-        petTypeId = petTypeRepository.save(new PetType().setName("cat")).getId();
+        petTypeId = petTypeRepository.save(TestData.aPetType("cat")).getId();
     }
 
     private PetTypeDto callGet(int petTypeId) throws Exception {
@@ -184,9 +183,9 @@ public class PetTypeTest {
     void deletePetType_inUse_returnsConflict() throws Exception {
         // create an owner and pet that references the petType
         Owner owner = ownerRepository.save(TestData.anOwner());
-        Pet pet = TestData.aPet()
-                .setOwner(owner)
-                .setType(petTypeRepository.findById(petTypeId).orElseThrow());
+        Pet pet = TestData.aPet();
+        pet.setOwner(owner);
+        pet.setType(petTypeRepository.findById(petTypeId).orElseThrow());
         petRepository.save(pet);
 
         mockMvc.perform(delete("/api/pettypes/" + petTypeId))

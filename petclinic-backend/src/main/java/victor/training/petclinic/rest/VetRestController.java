@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.SpecialtyMapper;
 import victor.training.petclinic.mapper.VetMapper;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/vets")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.VET_ADMIN)")
 public class VetRestController {
 
@@ -35,6 +33,17 @@ public class VetRestController {
     private final SpecialtyMapper specialtyMapper;
     private final VetRepository vetRepository;
     private final SpecialtyRepository specialtyRepository;
+
+    public VetRestController(
+            VetMapper vetMapper,
+            SpecialtyMapper specialtyMapper,
+            VetRepository vetRepository,
+            SpecialtyRepository specialtyRepository) {
+        this.vetMapper = vetMapper;
+        this.specialtyMapper = specialtyMapper;
+        this.vetRepository = vetRepository;
+        this.specialtyRepository = specialtyRepository;
+    }
 
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",

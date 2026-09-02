@@ -85,6 +85,14 @@ fi
 # Scoped to staged files; settings (and the disabled indent checks) in
 # .config/editorconfig-checker.json.
 STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACMR || true)
+# Symlinks are dropped: git stages the link, but the checker follows it and lints
+# whatever it points at. `.claude/skills/human-review` points into another repository
+# — 287 "violations" in files this repo does not own, .pyc files among them.
+if [ -n "$STAGED_ALL" ]; then
+  STAGED_ALL=$(echo "$STAGED_ALL" | while IFS= read -r f; do
+    [ -L "$f" ] || printf '%s\n' "$f"
+  done)
+fi
 if [ -n "$STAGED_ALL" ]; then
   if command -v editorconfig-checker >/dev/null 2>&1; then
     if ! EC_OUT=$(echo "$STAGED_ALL" | xargs editorconfig-checker -no-color -config "$ROOT/.config/editorconfig-checker.json" 2>&1); then

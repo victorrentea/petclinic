@@ -45,21 +45,22 @@ class ListVisitsToolTest {
     @Test
     void lists_visits_of_authenticated_owner() {
         PetType firstType = petRepository.findPetTypes().get(0);
-        Pet pet = new Pet()
-                .setName("Rex")
-                .setBirthDate(LocalDate.of(2020, 1, 1))
-                .setType(firstType);
-        Owner owner = new Owner()
-                .setFirstName("Tdd")
-                .setLastName("Tester")
-                .setAddress("1 Test Way")
-                .setCity("Testville")
-                .setTelephone("0000000000");
+        Pet pet = new Pet();
+        pet.setName("Rex");
+        pet.setBirthDate(LocalDate.of(2020, 1, 1));
+        pet.setType(firstType);
+        Owner owner = new Owner();
+        owner.setFirstName("Tdd");
+        owner.setLastName("Tester");
+        owner.setAddress("1 Test Way");
+        owner.setCity("Testville");
+        owner.setTelephone("0000000000");
         owner.addPet(pet);
         // addVisit keeps both sides of the association in sync, so listVisits can navigate pet.getVisits().
-        pet.addVisit(new Visit()
-                .setDate(LocalDate.of(2026, 5, 24))
-                .setDescription("Annual checkup"));
+        Visit visit = new Visit();
+        visit.setDate(LocalDate.of(2026, 5, 24));
+        visit.setDescription("Annual checkup");
+        pet.addVisit(visit);
         ownerRepository.save(owner);
 
         authenticateAs(owner.getId());
