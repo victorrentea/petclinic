@@ -20,15 +20,15 @@ and compares it against the code.
 #### Domain model
 ![Domain model](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/DomainModel.puml)
 
-#### Concept model (hand-arranged)
-![Concept model](petclinic-backend/docs/ConceptModel.drawio.png)
+#### Conceptual model (hand-arranged)
+![Conceptual model](petclinic-backend/docs/ConceptualModel.drawio.png)
 
 > The same concepts and links as above, but laid out by people and staying where they were
 > put — which is the whole point, since PlantUML re-arranges its own diagram on every
-> regeneration and resets everyone's spatial memory of it. `ConceptModelDiagramTest` owns
+> regeneration and resets everyone's spatial memory of it. `ConceptualModelDiagramTest` owns
 > the content (every box, line and cardinality must match the domain classes) and never the
 > positions; a new concept is parked in the staging lane on the left by
-> `docs/scripts/concept-model-patch.py` and keeps the build red until a human places it.
+> `docs/scripts/conceptual-model-patch.py` and keeps the build red until a human places it.
 
 #### Database (ER)
 ![Database](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/DB.puml)

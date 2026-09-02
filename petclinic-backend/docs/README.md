@@ -15,11 +15,11 @@ One reading convention, project-agnostic — the recipe is written out at the to
 
 ![Packages](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/packages.puml)
 
-### Concept model (hand-arranged map of the domain)
+### Conceptual model (hand-arranged map of the domain)
 
-Source: [`ConceptModel.drawio.png`](ConceptModel.drawio.png) — a real draw.io file, so the
+Source: [`ConceptualModel.drawio.png`](ConceptualModel.drawio.png) — a real draw.io file, so the
 picture and the mxGraph XML behind it are one committed artifact. Validated by
-`ConceptModelDiagramTest`.
+`ConceptualModelDiagramTest`.
 
 It draws the same concepts and links as the generated `DomainModel.puml`, and exists for
 the one thing a generated diagram cannot do: **stay in the same place**. PlantUML re-lays
@@ -42,22 +42,22 @@ to the humans — and only the layout does:
 - **position is the human's.** No coordinate is ever read as truth, so any box can be
   dragged, resized or restyled without breaking a check.
 
-When the model grows, `scripts/concept-model-patch.py` adds the new box in the staging lane
+When the model grows, `scripts/conceptual-model-patch.py` adds the new box in the staging lane
 down the left-hand side, marked `placed="auto"`, and draws the new line. The test then
 **keeps failing** until a human has dragged the box where it belongs and re-run the script
 to clear the marker. That failure is the point: an automatic layout would be quicker and
 would cost exactly what this diagram is for.
 
 ```sh
-python3 docs/scripts/concept-model-patch.py --dry-run   # what is missing
-python3 docs/scripts/concept-model-patch.py             # add it, re-render the PNG
+python3 docs/scripts/conceptual-model-patch.py --dry-run   # what is missing
+python3 docs/scripts/conceptual-model-patch.py             # add it, re-render the PNG
 ```
 
 Needs the draw.io desktop CLI (`brew install --cask drawio`) to re-render. CI only reports
 the drift — a check whose fix is a human judgement about layout has no business rendering
 Electron on a runner.
 
-![Concept model](ConceptModel.drawio.png)
+![Conceptual model](ConceptualModel.drawio.png)
 
 ### C4 model (workspace, containers, components)
 

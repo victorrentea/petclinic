@@ -16,9 +16,9 @@ import java.util.TreeMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Concept model guardrail — the hand-arranged map against the code.
+ * Conceptual model guardrail — the hand-arranged map against the code.
  *
- * <p>{@code docs/ConceptModel.drawio.png} draws the same concepts and links as the
+ * <p>{@code docs/ConceptualModel.drawio.png} draws the same concepts and links as the
  * generated {@code DomainModel.puml}, and exists because of the one thing a generated
  * diagram cannot do: <b>stay in the same place</b>. PlantUML re-lays out the whole graph
  * on every regeneration, so adding one class moves Owner across the page and erases the
@@ -46,15 +46,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * says "exactly one". Silence is a claim like any other here, so the test asserts it —
  * a stray marker on a to-one end fails just as a missing {@code *} does.
  *
- * <p>When the model grows, {@code docs/scripts/concept-model-patch.py} adds the new box
+ * <p>When the model grows, {@code docs/scripts/conceptual-model-patch.py} adds the new box
  * or line in the staging lane down the left-hand side and marks it {@code placed="auto"};
  * {@link #nothingIsStillWaitingInTheStagingLane()} then fails until a human has dragged
  * it where it belongs. An automatic layout would be quicker and would cost the thing this
  * diagram is for.
  */
-class ConceptModelDiagramTest {
+class ConceptualModelDiagramTest {
 
-    private static final Path DIAGRAM = Paths.get("docs/ConceptModel.drawio.png");
+    private static final Path DIAGRAM = Paths.get("docs/ConceptualModel.drawio.png");
 
     private final DomainModelExtractor model = new DomainModelExtractor();
 
@@ -64,7 +64,7 @@ class ConceptModelDiagramTest {
     void everyConceptInTheCodeIsOnTheMap() throws Exception {
         assertThat(conceptsById(diagram()).values())
                 .describedAs("Domain classes missing from %s. The model grew a concept the map "
-                        + "never learned about — run docs/scripts/concept-model-patch.py to drop "
+                        + "never learned about — run docs/scripts/conceptual-model-patch.py to drop "
                         + "it into the staging lane, then drag it where it belongs.", DIAGRAM)
                 .containsAll(conceptNames());
     }
@@ -84,7 +84,7 @@ class ConceptModelDiagramTest {
     void everyAssociationInTheCodeIsDrawn() throws Exception {
         assertThat(drawnAssociations(diagram()).keySet())
                 .describedAs("Associations between domain classes that %s does not draw. Run "
-                        + "docs/scripts/concept-model-patch.py to add the line, then route it.",
+                        + "docs/scripts/conceptual-model-patch.py to add the line, then route it.",
                         DIAGRAM)
                 .containsAll(expectedAssociations().keySet());
     }
@@ -171,7 +171,7 @@ class ConceptModelDiagramTest {
                 .describedAs("Concepts parked in the staging lane of %s, still exactly where the "
                         + "patch script dropped them. Open the file in the draw.io desktop app, "
                         + "move each one to where it belongs on the map, save, and re-run "
-                        + "docs/scripts/concept-model-patch.py to clear the marker.", DIAGRAM)
+                        + "docs/scripts/conceptual-model-patch.py to clear the marker.", DIAGRAM)
                 .isEmpty();
     }
 

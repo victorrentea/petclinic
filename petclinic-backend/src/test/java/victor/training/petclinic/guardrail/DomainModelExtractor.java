@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * <p>This lives apart from any one test because two guardrails now compare a drawing
  * against it — {@link DomainModelExtractorTest}, which regenerates the PlantUML, and
- * {@link ConceptModelDiagramTest}, which checks the hand-laid-out draw.io map. A second
+ * {@link ConceptualModelDiagramTest}, which checks the hand-laid-out draw.io map. A second
  * copy of these rules would be a second opinion about what the model is, and the two
  * pictures could then disagree while both passing.
  */

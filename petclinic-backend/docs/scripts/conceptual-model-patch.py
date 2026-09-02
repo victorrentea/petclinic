@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Bring docs/ConceptModel.drawio.png back in sync with the code — without touching the layout.
+"""Bring docs/ConceptualModel.drawio.png back in sync with the code — without touching the layout.
 
-The concept map is hand-arranged on purpose: people remember where things are, so nothing
+The conceptual model is hand-arranged on purpose: people remember where things are, so nothing
 here is allowed to move a box a human put somewhere. This script does the two jobs a human
 should not have to do by hand:
 
   * a concept or an association the code has and the map does not is ADDED — every new box
     in the staging lane down the left-hand side, marked `placed="auto"`, so
-    ConceptModelDiagramTest keeps failing until someone drags it onto the map proper;
+    ConceptualModelDiagramTest keeps failing until someone drags it onto the map proper;
   * a staged box that has since been moved is GRADUATED — the marker and the staging style
     come off, and it becomes an ordinary part of the map.
 
@@ -21,7 +21,7 @@ keeps ONE implementation of the "what is an association, and what cardinality" r
 Java guardrail still checks the picture against reflection directly, so a stale .puml
 cannot make a wrong map pass.
 
-Usage:  python3 docs/scripts/concept-model-patch.py [--dry-run]
+Usage:  python3 docs/scripts/conceptual-model-patch.py [--dry-run]
 Needs the draw.io desktop CLI (`brew install --cask drawio`) to re-render the PNG.
 """
 
@@ -39,7 +39,7 @@ import zlib
 from pathlib import Path
 
 MODULE = Path(__file__).resolve().parents[2]  # petclinic-backend/
-DIAGRAM = MODULE / "docs" / "ConceptModel.drawio.png"
+DIAGRAM = MODULE / "docs" / "ConceptualModel.drawio.png"
 TRUTH = MODULE / "docs" / "generated" / "DomainModel.puml"
 
 BOX_STYLE = (
@@ -253,10 +253,10 @@ def render(model_root):
 
     body = ET.tostring(model_root, encoding="unicode")
     mxfile = (f'<mxfile host="petclinic-guardrail">'
-              f'<diagram name="Concept Model" id="concept-model">{body}</diagram></mxfile>')
+              f'<diagram name="Conceptual Model" id="conceptual-model">{body}</diagram></mxfile>')
 
     with tempfile.TemporaryDirectory() as tmp:
-        source = Path(tmp) / "ConceptModel.drawio"
+        source = Path(tmp) / "ConceptualModel.drawio"
         source.write_text(mxfile)
         subprocess.run([
             drawio, "--export", "--format", "png", "--embed-diagram",
