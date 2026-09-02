@@ -137,18 +137,6 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Development Notes
-
-### Java Code Style
-- Keep line length ≤ 120 chars
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- DTO mapping is hand-written in `mapper/` — no MapStruct, no annotation processor
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- No Lombok: write accessors, constructors and `LoggerFactory.getLogger(...)` explicitly
-- Builder chains: one property per line, unless only two properties are set
-
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
