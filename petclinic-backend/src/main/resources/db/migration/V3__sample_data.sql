@@ -64,7 +64,7 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Rubeus',   'Hagrid',        'Gamekeepers Hut',           'Hogsmeade',        '0441463555111'),
   ('Hermione', 'Granger',       'Gryffindor Tower',          'Hogsmeade',        '0441463555112'),
   ('Salazar',  'Slytherin',     'Hogwarts Dungeons',         'Hogsmeade',        '0441463555113'),
-  ('Tintin',   'Reporter',      '26 Rue du Labrador',        'Brussels',         '0032225112233'),
+  ('Tintin',   'Śliwa',         '26 Rue du Labrador',        'Brussels',         '0032225112233'),
   ('Lady',     'Tremaine',      'Chateau Tremaine',          'Ile-de-France',    '0146203030'),
   ('Mister',   'Geppetto',      'Via dei Tessitori 7',       'Florence',         '0039055290383'),
   ('Alonso',   'Quixano',       'Campo de Montiel',          'La Mancha',        '0034926215566'),
