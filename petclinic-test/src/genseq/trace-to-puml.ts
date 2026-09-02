@@ -1,6 +1,6 @@
 import {formatOriginLabel, formatSqlDetail, formatSqlLabel, splitOrigin, summarizeStatement} from './sql-label';
 import {formatJsonDetail, jsonNote} from './json-label';
-import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, revealable} from './options';
+import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions} from './options';
 import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
 import {OperationNames, defaultOperations, operationNameOf} from './openapi-operations';
 import {linkedSectionTitle} from './test-location';
@@ -432,47 +432,29 @@ export function renderDiagram(
     sections.push({title: scenario.title, link: scenario.link, lines});
   }
 
-  const kinds = revealable(options);
   // The marker is a hyperlink, and a link that shouts blue-and-underlined would
   // read as the arrow's subject rather than as a handle beside it.
   const interactiveHeader = options.interactive ? [
     'skinparam hyperlinkUnderline false',
     'skinparam hyperlinkColor #1A4FA0',
   ] : [];
-  const interactiveLegend = options.interactive && kinds.length > 0 ? [
-    ` `,
-    `  This picture is deliberately simplified. In review/review.html, click any`,
-    `  arrow marked ${MARKER_GLYPH} to reveal that one call's ${kinds.join(' / ')} —`,
-    `  a DB arrow's panel toggles between ? and the values that were bound.`,
-  ] : [];
 
   const header = [
     '@startuml',
     // ' starts a PlantUML comment: this one warns whoever opens the *file*.
-    // Everything a reader of the *image* needs is in the legend below instead —
-    // a comment never reaches the rendered diagram, and the picture is what
-    // ends up pasted in a review, a slide or a wiki page.
+    // The legend below repeats it for a reader of the *image* — a comment never
+    // reaches the rendered diagram, and the picture is what ends up pasted in a
+    // review, a slide or a wiki page.
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
     `title ${title}`,
+    // The warning, and nothing else. How the picture was recorded, how to re-render
+    // it at another detail level and which npm script does that is documentation
+    // about the tool; it belongs in petclinic-test/CLAUDE.md and the README, not
+    // drawn beside the conversation the diagram exists to show.
     'legend right',
     `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
-    `  Drawn from real Tempo traces of ${title}, for the scenarios tagged`,
-    `  @generate_sequence. Change the test, not this file, then regenerate with`,
-    `  petclinic-test/run-tests-with-tracing.sh`,
-    ...interactiveLegend,
-    ` `,
-    `  Detail shown here: ${describeOptions(options)}`,
-    `  Want more or less? The traces already carry all of it — re-rendering replays`,
-    `  the spans cached in test-results/trace-spans.json (~1s): nothing has to run,`,
-    `  not even Grafana (GENSEQ_REFRESH=1 re-fetches from Tempo instead):`,
-    `      cd petclinic-test`,
-    `      npm run diagram:reveal  # simplified, click to reveal SQL + payloads`,
-    `      npm run diagram:lean    # baked in: call flow only`,
-    `      npm run diagram:static  # baked in: + the SQL statements`,
-    `      npm run diagram:full    # baked in: + bound parameter values + JSON payloads`,
-    `      SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1 SEQ_INTERACTIVE=0|1 npm run trace:diagram`,
     'end legend',
     // footer (bottom of every page) states the diagram's provenance
     'footer @generate_sequence — generated from real traces, do not edit',

@@ -148,13 +148,21 @@ test('payloads stay off unless asked for', () => {
   expect(puml).not.toContain('note over');
 });
 
-test('the legend states the detail level and how to change it, visibly in the image', () => {
+// The legend carries the warning and nothing else. How the picture was recorded and how
+// to re-render it at another detail level is documentation about the tool: a reader of
+// the *image* cannot act on it, and it took more room beside the diagram than the diagram.
+test('the legend warns that the file is generated, and says nothing more', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'values', httpBodies: true});
-  expect(puml).toContain('  Detail shown here: SQL shown, with values · HTTP bodies shown');
-  expect(puml).toContain('npm run diagram:lean');
-  expect(puml).toContain('SEQ_SQL=off|statement|values SEQ_HTTP_BODIES=0|1');
-  expect(puml).toContain('legend right');
-  expect(puml).toContain('end legend');
+  const legend = puml.split('legend right\n')[1].split('end legend')[0];
+  expect(legend).toBe('  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.\n');
+});
+
+test('no npm command or env var is drawn into the picture', () => {
+  const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'values', httpBodies: true});
+  expect(puml).not.toContain('Detail shown here');
+  expect(puml).not.toContain('npm run diagram');
+  expect(puml).not.toContain('SEQ_SQL=');
+  expect(puml).not.toContain('Tempo');
 });
 
 const lonelyClick: NormSpan[] = [{
@@ -292,12 +300,14 @@ test('a marker id follows the arrow content, not its position in the file', () =
     .toBe(MARKER.exec(lineWith(one.puml, 'Backend -> DB:'))![1]);
 });
 
-test('an interactive diagram tones its link markup down and says how to use it', () => {
+test('an interactive diagram tones its link markup down', () => {
   const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
     {sql: 'values', httpBodies: true, interactive: true});
   expect(puml).toContain('skinparam hyperlinkUnderline false');
-  expect(puml).toContain("click any\n  arrow marked ⊕ to reveal that one call's SQL / JSON payloads");
-  expect(puml).toContain('  Detail shown here: simplified · click an arrow to reveal its SQL / JSON payloads');
+  expect(puml).toContain('skinparam hyperlinkColor');
+  // The ⊕ on each revealable arrow is the affordance; a paragraph explaining it is not.
+  expect(puml).toContain('⊕]]');
+  expect(puml).not.toContain('deliberately simplified');
 });
 
 // ── the Hibernate session spans ───────────────────────────────────────────────

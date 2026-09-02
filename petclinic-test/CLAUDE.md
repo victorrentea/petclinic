@@ -60,7 +60,9 @@
   `src/genseq/options.ts`. So re-rendering is **~1s and needs nothing running** — not even
   Grafana: the fetched spans are cached in `test-results/trace-spans.json` and replayed
   (`GENSEQ_REFRESH=1` forces a fresh Tempo fetch). No test run, no backend, no browser: `npm run diagram:lean` / `diagram` / `diagram:full`, or the two env
-  vars with `npm run trace:diagram`. Every generated file repeats this in its own header.
+  vars with `npm run trace:diagram`. This note is the only place that says so: a generated
+  file's legend carries the "GENERATED — DO NOT EDIT" warning and nothing else, because a
+  reader of the *image* cannot act on a list of npm scripts and it crowded out the diagram.
 - **A diagram is interactive by default** (`SEQ_INTERACTIVE=1`): the picture stays simplified
   and each revealable arrow's **whole label** is wrapped in `[[genseq://<id>{…} <label>]]`, a
   PlantUML link that becomes an `<a href>` in the SVG — the hook
