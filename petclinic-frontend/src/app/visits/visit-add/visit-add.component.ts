@@ -33,7 +33,7 @@ export class VisitAddComponent implements OnInit {
               private ownerService: OwnerService,
               private router: Router,
               private route: ActivatedRoute) {
-    this.visit = {vetId: null} as unknown as Visit;
+    this.visit = {vetId: null} as Visit;
     this.currentPet = {} as Pet;
     this.currentOwner = {} as Owner;
     this.currentPetType = {} as PetType;

@@ -71,7 +71,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     fi
   fi
 
-  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$)'; then
+  if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|petclinic-test/src/.*\.genseq\.puml$)'; then
     needs_check=1
     break
   fi

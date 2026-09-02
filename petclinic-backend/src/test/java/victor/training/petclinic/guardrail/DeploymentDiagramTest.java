@@ -6,6 +6,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -230,10 +231,20 @@ class DeploymentDiagramTest {
             byte[] deflated = Base64.getDecoder().decode(base64);
             Inflater inflater = new Inflater(true); // raw deflate, no zlib header
             inflater.setInput(deflated);
-            byte[] buffer = new byte[Math.max(1024, deflated.length * 12)];
-            int size = inflater.inflate(buffer);
-            inflater.end();
-            return maybeUrlDecode(new String(buffer, 0, size, StandardCharsets.UTF_8));
+            ByteArrayOutputStream inflated = new ByteArrayOutputStream(deflated.length * 12);
+            try {
+                byte[] buffer = new byte[8192];
+                while (!inflater.finished()) {
+                    int size = inflater.inflate(buffer);
+                    if (size == 0 && (inflater.needsInput() || inflater.needsDictionary())) {
+                        break;
+                    }
+                    inflated.write(buffer, 0, size);
+                }
+            } finally {
+                inflater.end();
+            }
+            return maybeUrlDecode(inflated.toString(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new AssertionError("cannot read the compressed diagram inside " + DIAGRAM, e);
         }
