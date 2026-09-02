@@ -60,42 +60,7 @@ petclinic-backend/docs/generate-codecity.sh  # rebuilds docs/generated/codecity/
      # (gitignored); change the rendering there, here only its output is committed.
 ```
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
 ## Architecture
-
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`model/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
-- Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
 ### /human-review lives in its own repo
 
@@ -120,15 +85,7 @@ vendored copy would drift in silence.
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+REST Contract: see `openapi.yaml`
 
 ## Domain Model
 Core entities and relationships:
