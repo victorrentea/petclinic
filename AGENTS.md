@@ -28,8 +28,22 @@ To see how the pieces fit together, every diagram generated from the code is ren
 Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built; also hosts the MCP server at `/mcp`
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `petclinic-chatbot/` - separate Spring AI + Embabel app (Maven): a triage assistant that RAGs a
+  specialty knowledge base and books visits through the backend's MCP tools. Second client of the
+  backend, next to the frontend.
+- `petclinic-database/` - Maven module launching the embedded Postgres (`PostgresLauncher`) behind a
+  `NetworkLatencyProxy`, so latency can be injected on demand. `data/` is its (gitignored) cluster.
+- `petclinic-test/` - Playwright/TypeScript e2e + Cucumber suite (npm), run against the whole stack
+- `petclinic-observability/` - docker-compose for the OTel collector, Tempo and Grafana; config in
+  `otelcol-config.yaml`
+- `refactoring-legacy/` - self-contained OpenRewrite recipe module (imperative + Refaster), applied to
+  the backend from the command line; the backend build never references it
+- `openspec/` - OpenSpec `specs/` and `changes/`, the spec-driven-development workspace
+- `user-manual/` - `manual.md` plus screenshots, the end-user documentation
+- `scripts/` - repo-level guardrail helpers (`check-agents-md.sh`, `ensure-human-review.sh`,
+  `list-unversioned-deps.py`)
 
 ## Common Commands
 
