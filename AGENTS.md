@@ -97,23 +97,12 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection (`@RequiredArgsConstructor`), global exception handling via `@RestControllerAdvice`
 
-### The /human-review skill lives in its own repo
+### /human-review lives in its own repo
 
-`.claude/skills/human-review` is a **symlink** to `~/workspace/human-review/skills/human-review`
-(github.com/victorrentea/human-review, public, installable as a Claude Code plugin). Edit it
-there, not here — an edit through the symlink is an edit to that repo, and needs committing
-there too.
-
-The PlantUML differs moved with it. `docs/scripts/puml-diff/puml-diff-vs-git.sh` reaches
-them through `scripts/ensure-human-review.sh`, which uses the symlink locally and clones the
-repo into a gitignored `petclinic-backend/.tools/` otherwise. Never vendor a second copy: a
-private fork of the review pipeline drifts in silence.
-
-**The review guide is built by hand, not by CI.** It deep-links into a working tree and
-drives a whole local stack — a browser, a database, Tempo, PlantUML, a Maven build — so
-there is no online version and no PR automation for it. Run `/human-review` when you want
-one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
-which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
+`.claude/skills/human-review` is a symlink into `~/workspace/human-review`
+(github.com/victorrentea/human-review) — editing through it edits that repo, so commit there;
+`scripts/ensure-human-review.sh` fetches the same repo for the PlantUML differs, and a second
+vendored copy would drift in silence.
 
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
