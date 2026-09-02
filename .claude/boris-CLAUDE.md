@@ -14,6 +14,7 @@ Boris Cherny’s CLAUDE.md
 - For complex problems, throw more compute at it via subagents
 - One tack per subagent for focused execution
 
+
 ### 3. Self-Improvement Loop
 - After ANY correction from the user: update `tasks/lessons.md` with the pattern
 - Write rules for yourself that prevent the same mistake
