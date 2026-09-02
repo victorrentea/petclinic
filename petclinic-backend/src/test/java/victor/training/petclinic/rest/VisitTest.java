@@ -30,7 +30,9 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -57,12 +59,14 @@ public class VisitTest {
 
     int visitId;
     int petId;
+    int ownerId;
     @Autowired
     private PetTypeRepository petTypeRepository;
 
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
+        ownerId = owner.getId();
         Pet pet = TestData.aPet();
         pet.setOwner(owner);
         pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
@@ -210,6 +214,89 @@ public class VisitTest {
 
         Visit updated = visitRepository.findById(visitId).orElseThrow();
         assertThat(updated.getDescription()).isEqualTo("updated description");
+    }
+
+    // ---- GitHub issue #40: the visit date must sit between the pet's birth date
+    // and a year from now. Three entry points reach the same VisitDateRange, so all
+    // three are pinned here; VisitDateRangeTest covers what the rule decides.
+
+    private static final String ABSURDLY_OLD = "0009-07-20";
+
+    @Test
+    void createRejectsADateBeforeThePetWasBorn() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.parse(ABSURDLY_OLD));
+        newVisit.setDescription("time travel");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("birth date")));
+
+        assertThat(visitRepository.findAll()).noneMatch(v -> "time travel".equals(v.getDescription()));
+    }
+
+    @Test
+    void createRejectsADateMoreThanAYearAhead() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(2));
+        newVisit.setDescription("too far out");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("year in the future")));
+    }
+
+    @Test
+    void updateRejectsADateBeforeThePetWasBorn() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.parse(ABSURDLY_OLD));
+        update.setDescription("time travel");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("birth date")));
+
+        assertThat(visitRepository.findById(visitId).orElseThrow().getDescription())
+                .isEqualTo("rabies shot");
+    }
+
+    /** The endpoint the Angular form actually posts to — and the one that had no @Validated. */
+    @Test
+    void addVisitToOwnerRejectsADateBeforeThePetWasBorn() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto();
+        newVisit.setDate(LocalDate.parse(ABSURDLY_OLD));
+        newVisit.setDescription("time travel");
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("birth date")));
+
+        assertThat(visitRepository.findAll()).noneMatch(v -> "time travel".equals(v.getDescription()));
+    }
+
+    @Test
+    void addVisitToOwnerAcceptsADateInsideTheRange() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto();
+        newVisit.setDate(LocalDate.now());
+        newVisit.setDescription("annual checkup via the form");
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        assertThat(visitRepository.findAll())
+                .anyMatch(v -> "annual checkup via the form".equals(v.getDescription()));
     }
 
     @Test

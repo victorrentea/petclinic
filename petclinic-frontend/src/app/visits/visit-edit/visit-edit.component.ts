@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Visit} from '../visit';
+import {earliestVisitDate, latestVisitDate} from '../visit-date-bounds';
 import {Pet} from '../../pets/pet';
 import {Owner} from '../../owners/owner';
 import {PetType} from '../../pettypes/pettype';
@@ -34,24 +35,12 @@ export class VisitEditComponent implements OnInit {
     this.currentPetType = {} as PetType;
   }
 
-  /**
-   * The bounds the datepicker enforces, and the same rule the backend applies
-   * (VisitDateRange): a visit cannot predate the pet, nor sit more than a year out.
-   * GitHub issue #40.
-   *
-   * `currentPet` starts empty and is filled asynchronously, so `minVisitDate` is
-   * undefined on the first render — which the datepicker reads as "no lower bound"
-   * until the pet arrives. The backend is what makes the rule binding; this only
-   * spares the user a round-trip.
-   */
   get minVisitDate(): Date | undefined {
-    return this.currentPet?.birthDate ? new Date(this.currentPet.birthDate) : undefined;
+    return earliestVisitDate(this.currentPet);
   }
 
   get maxVisitDate(): Date {
-    const max = new Date();
-    max.setFullYear(max.getFullYear() + 1);
-    return max;
+    return latestVisitDate();
   }
 
   ngOnInit() {
