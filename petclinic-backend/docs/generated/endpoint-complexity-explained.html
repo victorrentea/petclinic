@@ -656,10 +656,10 @@ main:has(details.explained) {
 <tr><td class="ln">27</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">28</td><td class="code">        User user = new User();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">29</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">30</td><td class="code">        user.setUsername( userDto.getUsername() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">30</td><td class="code">        user.setEnabled( userDto.getEnabled() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">31</td><td class="code">        user.setPassword( userDto.getPassword() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">32</td><td class="code">        user.setEnabled( userDto.getEnabled() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">33</td><td class="code">        user.setRoles( roleDtoListToRoleSet( userDto.getRoles() ) );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">32</td><td class="code">        user.setRoles( roleDtoListToRoleSet( userDto.getRoles() ) );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">33</td><td class="code">        user.setUsername( userDto.getUsername() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">34</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">35</td><td class="code">        return user;</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">36</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
@@ -1518,9 +1518,9 @@ main:has(details.explained) {
 <tr><td class="ln">23</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">24</td><td class="code">        Specialty specialty = new Specialty();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">25</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">26</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">27</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">28</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">26</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">27</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">28</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">29</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">30</td><td class="code">        return specialty;</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">31</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
@@ -1539,8 +1539,8 @@ main:has(details.explained) {
 <tr><td class="ln">28</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">29</td><td class="code">        Vet vet = new Vet();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">30</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">31</td><td class="code">        vet.setId( vetDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">32</td><td class="code">        vet.setFirstName( vetDto.getFirstName() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">31</td><td class="code">        vet.setFirstName( vetDto.getFirstName() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">32</td><td class="code">        vet.setId( vetDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">33</td><td class="code">        vet.setLastName( vetDto.getLastName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">34</td><td class="code">        vet.setSpecialties( specialtyMapper.toSpecialty( vetDto.getSpecialties() ) );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">35</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
@@ -1608,9 +1608,9 @@ main:has(details.explained) {
 <tr><td class="ln">23</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">24</td><td class="code">        Specialty specialty = new Specialty();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">25</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">26</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">27</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">28</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">26</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">27</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">28</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">29</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">30</td><td class="code">        return specialty;</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">31</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
@@ -1938,8 +1938,8 @@ main:has(details.explained) {
 <tr><td class="ln">99</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">100</td><td class="code">        Pet pet = new Pet();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">101</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">102</td><td class="code">        pet.setName( petFieldsDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">103</td><td class="code">        pet.setBirthDate( petFieldsDto.getBirthDate() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">102</td><td class="code">        pet.setBirthDate( petFieldsDto.getBirthDate() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">103</td><td class="code">        pet.setName( petFieldsDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">104</td><td class="code">        pet.setType( toPetType( petFieldsDto.getType() ) );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">105</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">106</td><td class="code">        return pet;</td><td class="inc"></td><td class="run"></td></tr>
@@ -1989,10 +1989,10 @@ main:has(details.explained) {
 <tr><td class="ln">47</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">48</td><td class="code">        Owner owner = new Owner();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">49</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">50</td><td class="code">        owner.setFirstName( ownerDto.getFirstName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">51</td><td class="code">        owner.setLastName( ownerDto.getLastName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">52</td><td class="code">        owner.setAddress( ownerDto.getAddress() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">53</td><td class="code">        owner.setCity( ownerDto.getCity() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">50</td><td class="code">        owner.setAddress( ownerDto.getAddress() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">51</td><td class="code">        owner.setCity( ownerDto.getCity() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">52</td><td class="code">        owner.setFirstName( ownerDto.getFirstName() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">53</td><td class="code">        owner.setLastName( ownerDto.getLastName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">54</td><td class="code">        owner.setTelephone( ownerDto.getTelephone() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">55</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">56</td><td class="code">        return owner;</td><td class="inc"></td><td class="run"></td></tr>
@@ -2138,9 +2138,9 @@ main:has(details.explained) {
 <tr><td class="ln">23</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">24</td><td class="code">        Specialty specialty = new Specialty();</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">25</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">26</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">27</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
-<tr><td class="ln">28</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">26</td><td class="code">        specialty.setDescription( specialtyDto.getDescription() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">27</td><td class="code">        specialty.setId( specialtyDto.getId() );</td><td class="inc"></td><td class="run"></td></tr>
+<tr><td class="ln">28</td><td class="code">        specialty.setName( specialtyDto.getName() );</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">29</td><td class="code"></td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">30</td><td class="code">        return specialty;</td><td class="inc"></td><td class="run"></td></tr>
 <tr><td class="ln">31</td><td class="code">    }</td><td class="inc"></td><td class="run"></td></tr>
