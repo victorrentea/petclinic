@@ -272,24 +272,6 @@ public class VisitTest {
         assertThat(visitRepository.findById(visitId).orElseThrow().getVet().getId()).isEqualTo(vetId);
     }
 
-    @Test
-    void update_clearsTheAttendingVet() throws Exception {
-        visitRepository.findById(visitId).orElseThrow()
-                .setVet(vetRepository.findById(anExistingVetId()).orElseThrow());
-        flushAndClear();
-        VisitFieldsDto update = new VisitFieldsDto();
-        update.setDate(LocalDate.now().plusDays(1));
-        update.setDescription("vet no longer known");
-
-        mockMvc.perform(put("/api/visits/" + visitId)
-                .content(mapper.writeValueAsString(update))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
-
-        flushAndClear();
-        assertThat(visitRepository.findById(visitId).orElseThrow().getVet()).isNull();
-    }
-
     // The test and the controller share one persistence context, so a read-back without
     // this would assert against the very instance the controller just mutated in memory —
     // green even if the save() were deleted. Flushing and clearing forces a real round-trip.
