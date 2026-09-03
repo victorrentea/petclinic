@@ -80,8 +80,11 @@ public class OwnerRestController {
                     array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
+    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "q", required = false) String query) {
+        List<Owner> owners = query != null && !query.isBlank()
+                ? ownerRepository.searchByQuery(query)
+                : ownerRepository.findByLastNameStartingWith(lastName);
         return ownerMapper.toOwnerDtoCollection(owners);
     }
 

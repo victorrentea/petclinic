@@ -30,6 +30,10 @@ class OwnerServiceStub {
   searchOwners(lastName: string): Observable<Owner[]> {
     return of();
   }
+
+  searchOwnersByQuery(query: string): Observable<Owner[]> {
+    return of();
+  }
 }
 
 describe('OwnerListComponent', () => {
@@ -39,6 +43,7 @@ describe('OwnerListComponent', () => {
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
   let searchOwnersSpy: Spy;
+  let searchOwnersByQuerySpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
@@ -83,6 +88,8 @@ describe('OwnerListComponent', () => {
       .and.returnValue(of(testOwners));
     searchOwnersSpy = spyOn(ownerService, 'searchOwners')
       .and.returnValue(of(testOwners));
+    searchOwnersByQuerySpy = spyOn(ownerService, 'searchOwnersByQuery')
+      .and.returnValue(of(testOwners));
 
   });
 
@@ -119,11 +126,24 @@ describe('OwnerListComponent', () => {
   it('searchByLastName should call searchOwners for non-empty term', () => {
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
+    searchOwnersByQuerySpy.calls.reset();
 
     component.searchByLastName('Fr');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
+    expect(searchOwnersByQuerySpy).toHaveBeenCalledWith('Fr');
+    expect(searchOwnersSpy).not.toHaveBeenCalled();
     expect(getOwnersSpy).not.toHaveBeenCalled();
+  });
+
+  it('search form submit should call searchOwnersByQuery', () => {
+    fixture.detectChanges();
+    component.lastName = 'Fr';
+    searchOwnersByQuerySpy.calls.reset();
+
+    fixture.debugElement.query(By.css('form'))
+      .triggerEventHandler('submit', new Event('submit'));
+
+    expect(searchOwnersByQuerySpy).toHaveBeenCalledWith('Fr');
   });
 
 });

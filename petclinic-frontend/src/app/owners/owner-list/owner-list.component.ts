@@ -40,8 +40,8 @@ export class OwnerListComponent implements OnInit {
 
   searchByLastName(lastName: string)
   {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
+      const query = (lastName || '').trim();
+      if (query === '')
       {
         this.ownerService.getOwners()
           .subscribe(
@@ -49,14 +49,13 @@ export class OwnerListComponent implements OnInit {
               this.owners = owners;
             });
       }
-      if (lastName !== '')
+      if (query !== '')
       {
-        this.ownerService.searchOwners(lastName)
+        this.ownerService.searchOwnersByQuery(query)
           .subscribe(
             (owners) => {
 
               this.owners = owners;
-              console.log('this.owners ' + this.owners);
 
             },
             (error) =>
