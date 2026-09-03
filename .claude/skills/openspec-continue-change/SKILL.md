@@ -116,3 +116,7 @@ If the `instruction` field directs you to use a specific skill or command to cre
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
+
+**Proposal audience**
+
+- **The proposal is for a non-technical business reader.** It is the artifact taken into a meeting with the business to validate that we understood the requested functionality, so write it in the language of the domain, describing what people will be able to DO and SEE. No class or file names, endpoints, HTTP status codes, SQL, indexes, migrations, framework or library names, parameter names, or code blocks - state the business consequence instead. Say plainly what the user gains, what they lose, and what stays exactly as it is today, and end with the short list of points the business is being asked to confirm. Every technical decision belongs in `design.md`, which stays fully technical for the engineers - keep the two audiences apart. The Capabilities section is the exception: it is machine-read, so keep the paths exact and describe each in plain language. Write the proposal in English, whatever language the request came in.

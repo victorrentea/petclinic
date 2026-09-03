@@ -1,5 +1,43 @@
 schema: spec-driven
 
+# The proposal is read by non-technical business stakeholders, in a meeting where
+# they validate that we understood the requested functionality. Everything else
+# (specs, design, tasks) stays technical.
+rules:
+  proposal:
+    - >-
+      Write it for a non-technical business reader, not for a software engineer. It is the
+      artifact taken into a validation meeting with the business, whose only job there is to
+      confirm we understood the requested functionality.
+    - >-
+      Describe what people will be able to DO and what they will SEE, in the language of the
+      clinic (owners, pets, visits, the list, a page of results) - never in the language of
+      the code.
+    - >-
+      Ban implementation vocabulary - no class, endpoint, DTO, enum, HTTP verb or status
+      code, SQL, index, migration, framework or library name, file path, parameter name, or
+      code block. If a technical fact matters to the business, state its consequence instead
+      - say that the list arrives one screen at a time, not what the API returns.
+    - >-
+      Say plainly what changes for the user, including anything they LOSE, and what stays
+      exactly as it is today - a stakeholder can only validate what is spelled out.
+    - >-
+      Justify every decision by its business effect (speed, cost, confusion avoided), not by
+      its technical cause.
+    - >-
+      Keep it to about one page, short paragraphs and plain sentences, and state explicitly
+      what is NOT being done, so the meeting has nothing to guess.
+    - >-
+      Every technical decision belongs in design.md, which stays fully technical for the
+      engineers. Keep the two audiences apart.
+    - >-
+      The Capabilities section is the one exception - it is machine-read plumbing, so keep
+      the capability paths exact and give each a plain-language description.
+    - >-
+      Close with a short list of the points the business is being asked to confirm.
+    - >-
+      Write the proposal in English, whatever language the request came in.
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
