@@ -1,0 +1,18 @@
+id: no-lombok
+valid:
+  - |
+    import org.slf4j.Logger;
+    public class OwnerService {}
+  - |
+    import lombokish.Getter;
+    public class NotLombok {}
+invalid:
+  - |
+    import lombok.Getter;
+    public class Owner {}
+  - |
+    import lombok.*;
+    public class Owner {}
+  - |
+    import static lombok.AccessLevel.PRIVATE;
+    public class Owner {}

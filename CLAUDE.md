@@ -158,11 +158,14 @@ Core entities and relationships:
 - Keep line length ≤ 120 chars
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
-- MapStruct is used for DTO mapping
+- MapStruct generates most DTO mappers (`mapper/`); `VisitMapper` is a hand-written `@Component`
+  because its mapping is not field-to-field. MapStruct stays — it is a different library from Lombok
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on each `@RequestBody`
-- Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
-- Builder chains: one property per line, unless only two properties are set
+- No Lombok in `petclinic-backend`: accessors, constructors and loggers are written by hand
+  (`private static final Logger log = LoggerFactory.getLogger(X.class);`). Enforced by the
+  `no-lombok` ast-grep rule. `petclinic-chatbot` is a separate module and still uses it.
+- Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
 
 ### Frontend design system
 

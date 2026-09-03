@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# `git merge` runs THIS hook, never pre-commit — which is the second reason a
+# merge could slip a banned construct in unnoticed. Delegate to the real thing.
+set -e
+exec "$(dirname "$0")/pre-commit"
