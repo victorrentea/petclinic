@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+# Git exports GIT_DIR (absolute, the worktree's gitdir) into hooks. Any git call a
+# sub-script makes from a subdir then infers that subdir as the work-tree, so
+# `rev-parse --show-toplevel` returns the subdir instead of the repo root — breaking
+# this hook in any git worktree. Drop the inherited git env so every git call
+# auto-discovers the real work-tree (normal AND worktrees). Same reason as pre-push.
+unset GIT_DIR GIT_WORK_TREE
+
 ROOT="$(git rev-parse --show-toplevel)"
 
 # ── Secrets scan (gitleaks) ────────────────────────────────────────────────
@@ -63,8 +70,8 @@ if [ -n "$STAGED_JAVA" ]; then
   fi
 
   # ── ast-grep: structural rules that enforce CLAUDE.md conventions ────────
-  # Scoped to the staged files only, so pre-existing violations elsewhere
-  # don't block unrelated commits. Blocks on `error`; `warning` only reports.
+  # Reports on the staged files; see the whole-tree pass below for what
+  # actually blocks. Blocks on `error`; `warning` only reports.
   if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
     if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan -c "$ROOT/.config/sgconfig.yml" 2>&1); then
       echo "$SG_OUT"
@@ -77,6 +84,30 @@ if [ -n "$STAGED_JAVA" ]; then
     echo "[pre-commit] ⚠️  ast-grep not installed — skipping structural lint."
     echo "[pre-commit] Install with: brew install ast-grep"
   fi
+fi
+
+# ── ast-grep: whole-tree pass, ungated ─────────────────────────────────────
+# The staged-files scan above cannot see code that arrived without being staged
+# by a human — a merge resolution, most of all. That is exactly how a @Data
+# slipped back in unnoticed. A full scan of petclinic-backend/src takes ~40ms,
+# so there is no reason to gate it on anything. Warnings are printed and only
+# `error` rules block, so pre-existing warnings elsewhere stay non-blocking.
+if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
+  if ! SG_ALL=$(cd "$ROOT" && sg scan -c "$ROOT/.config/sgconfig.yml" petclinic-backend/src 2>&1); then
+    echo "$SG_ALL"
+    echo "[pre-commit] ❌ ast-grep rule violated somewhere in petclinic-backend/src — commit blocked."
+    echo "[pre-commit]    (this pass is not limited to your staged files, on purpose)"
+    exit 1
+  fi
+fi
+
+# ── Lombok must not come back through the build either ─────────────────────
+# The no-lombok ast-grep rule reads Java sources; nothing there notices the
+# dependency reappearing in the POM ahead of the first annotation.
+if grep -q 'projectlombok' "$ROOT/petclinic-backend/pom.xml" 2>/dev/null; then
+  echo "[pre-commit] ❌ org.projectlombok is back in petclinic-backend/pom.xml — commit blocked."
+  echo "[pre-commit]    Lombok was removed from the backend deliberately; see CLAUDE.md."
+  exit 1
 fi
 
 # ── .editorconfig compliance ───────────────────────────────────────────────

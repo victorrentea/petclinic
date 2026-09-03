@@ -73,9 +73,11 @@ public class VisitTest {
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
-        Pet pet = TestData.aPet()
-                .setOwner(owner)
-                .setType(petTypeRepository.save(new PetType().setName("dog")));
+        PetType dog = new PetType();
+        dog.setName("dog");
+        Pet pet = TestData.aPet();
+        pet.setOwner(owner);
+        pet.setType(petTypeRepository.save(dog));
         petRepository.save(pet);
         petId = pet.getId();
 

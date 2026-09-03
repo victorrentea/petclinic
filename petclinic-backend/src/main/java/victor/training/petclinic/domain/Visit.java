@@ -2,16 +2,12 @@ package victor.training.petclinic.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "visits")
-@Getter
-@Setter
 public class Visit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,4 +32,51 @@ public class Visit {
     @JoinColumn(name = "vet_id")
     private Vet vet;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalTime time) {
+        this.time = time;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Pet getPet() {
+        return pet;
+    }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
+    }
+
+    public Vet getVet() {
+        return vet;
+    }
+
+    public void setVet(Vet vet) {
+        this.vet = vet;
+    }
 }

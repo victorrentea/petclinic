@@ -41,19 +41,18 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 
 import victor.training.petclinic.domain.Vet;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/owners")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Logger log = LoggerFactory.getLogger(OwnerRestController.class);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -66,6 +65,25 @@ public class OwnerRestController {
     private final PetMapper petMapper;
 
     private final VisitMapper visitMapper;
+
+    public OwnerRestController(
+            OwnerRepository ownerRepository,
+            PetRepository petRepository,
+            VisitRepository visitRepository,
+            VetRepository vetRepository,
+            PetTypeRepository petTypeRepository,
+            OwnerMapper ownerMapper,
+            PetMapper petMapper,
+            VisitMapper visitMapper) {
+        this.ownerRepository = ownerRepository;
+        this.petRepository = petRepository;
+        this.visitRepository = visitRepository;
+        this.vetRepository = vetRepository;
+        this.petTypeRepository = petTypeRepository;
+        this.ownerMapper = ownerMapper;
+        this.petMapper = petMapper;
+        this.visitMapper = visitMapper;
+    }
 
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
@@ -127,7 +145,9 @@ public class OwnerRestController {
     public ResponseEntity<Void> addPetToOwner(@PathVariable int ownerId,
             @RequestBody @Validated PetFieldsDto petFieldsDto) {
         Pet pet = petMapper.toPet(petFieldsDto);
-        pet.setOwner(new Owner().setId(ownerId));
+        Owner owner = new Owner();
+        owner.setId(ownerId);
+        pet.setOwner(owner);
         pet.setType(petTypeRepository.findById(pet.getType().getId()).orElseThrow());
         petRepository.save(pet);
         UriComponents createdUri = UriComponentsBuilder.newInstance().path("/api/pets/{id}")
@@ -156,7 +176,9 @@ public class OwnerRestController {
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
             @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        visit.setPet(new Pet().setId(petId));
+        Pet pet = new Pet();
+        pet.setId(petId);
+        visit.setPet(pet);
         visit.setVet(resolveVet(visitFieldsDto.getVetId()));
         visitRepository.save(visit);
 

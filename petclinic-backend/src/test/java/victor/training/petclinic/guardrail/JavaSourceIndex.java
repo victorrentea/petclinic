@@ -35,8 +35,8 @@ import java.util.stream.Stream;
  *       in the report so nobody mistakes them for code to go and fix.</li>
  * </ul>
  *
- * <p>Lombok accessors have no source anywhere and therefore score 0 — which is the right
- * answer for a metric about understandability: there is nothing to read.
+ * <p>Methods Spring Data implements at runtime have no source anywhere and therefore score 0 —
+ * which is the right answer for a metric about understandability: there is nothing to read.
  *
  * <p>Local and anonymous classes are deliberately NOT indexed as types of their own: per the
  * Sonar definition their bodies count inside the method that declares them (one nesting level

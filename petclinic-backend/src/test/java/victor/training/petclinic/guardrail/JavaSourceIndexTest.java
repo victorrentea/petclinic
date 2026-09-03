@@ -45,8 +45,9 @@ class JavaSourceIndexTest {
 
     @Test
     void reportsNothingForAMethodThisRepoHasNoSourceFor() {
-        // Lombok writes the accessors straight into the bytecode; there is no source to read
-        assertThat(index.find("victor/training/petclinic/domain/Owner", "getFirstName", List.of())).isEmpty();
+        // Nothing outside this repo's own sources is indexed — a JDK call has nothing to read,
+        // and neither does anything Spring Data implements at runtime behind an inherited method.
+        assertThat(index.find("java/util/HashSet", "add", List.of("Object"))).isEmpty();
     }
 
     @Test

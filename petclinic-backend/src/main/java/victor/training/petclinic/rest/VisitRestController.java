@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.mapper.VisitMapper;
@@ -25,15 +25,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/visits")
-@RequiredArgsConstructor
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class VisitRestController {
+    private static final Logger log = LoggerFactory.getLogger(VisitRestController.class);
+
     private final VisitRepository visitRepository;
     private final VetRepository vetRepository;
     private final VisitMapper visitMapper;
+
+    public VisitRestController(
+            VisitRepository visitRepository,
+            VetRepository vetRepository,
+            VisitMapper visitMapper) {
+        this.visitRepository = visitRepository;
+        this.vetRepository = vetRepository;
+        this.visitMapper = visitMapper;
+    }
 
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",
