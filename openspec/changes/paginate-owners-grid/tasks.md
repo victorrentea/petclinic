@@ -33,15 +33,15 @@
 - [x] 5.3 Hand-roll sortable `Name` and `City` headers with sort arrows, keeping `#ownersTable td.ownerFullName` intact; verify clicking each header toggles direction
 - [x] 5.4 Render the name as `Last, First`; verify the grid shows `Potter, Harry`
 - [x] 5.5 Drive `lastName`, `page`, `size`, `sort`, `dir` through `ActivatedRoute.queryParams`, resetting `page` to 0 on search, sort and size change; verify reload and back-button keep the grid in place and a deep-linked URL lands on the right page
-- [ ] 5.6 Commit and push the frontend green
+- [x] 5.6 Commit and push the frontend green
 
 ## 6. End-to-end (mandatory, never skipped)
 
-- [ ] 6.1 Fix `owner-search.feature.glue.ts`: read `data.content` instead of `Array.isArray(data)`, and change the Examples table to `Potter, Harry` / `Potter, Beatrix`; verify the existing scenarios pass
-- [ ] 6.2 Rewrite `Then every owner in the clinic is listed`, which is no longer true under a 10-row page, as an assertion over the first page plus `totalElements` (or an explicit request for a page large enough); verify it passes
+- [x] 6.1 Fix `owner-search.feature.glue.ts`: read `data.content` instead of `Array.isArray(data)`, and change the Examples table to `Potter, Harry` / `Potter, Beatrix`; verify the existing scenarios pass
+- [x] 6.2 Rewrite `Then every owner in the clinic is listed`, which is no longer true under a 10-row page, as an assertion over the first page plus `totalElements` (or an explicit request for a page large enough); verify it passes
 - [ ] 6.3 Add `owner-pagination.feature` covering page sizes 5/10/20, next/previous, sort toggling on both columns, and a deep-linked URL; verify the whole Playwright suite is green against the running stack
 - [ ] 6.4 Verify `DeploymentDiagramTest` and the remaining drift guardrails are green, then push
 
 ## 7. Wrap-up
 
-- [ ] 7.1 Update `AGENTS.md` with anything a future agent needs about the paged owners contract, and verify `scripts/check-agents-md.sh` passes
+- [x] 7.1 Update `AGENTS.md` with anything a future agent needs about the paged owners contract, and verify `scripts/check-agents-md.sh` passes

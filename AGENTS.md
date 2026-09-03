@@ -91,6 +91,54 @@ vendored copy would drift in silence.
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: see `openapi.yaml`
 
+### `GET /api/owners` is paged, and its rows carry no pets
+
+It returns `PagedModel<OwnerRowDto>` — `content` plus metadata nested under `page` — not a bare
+array. Anything reading it walks the pages (`petclinic-test/src/owners-api.ts` does this once for
+the whole e2e suite); anything needing an owner's pets calls `GET /api/owners/{id}`, because the
+rows are deliberately slim: `JOIN FETCH` on a collection plus pagination makes Hibernate paginate
+in memory (`HHH000104`).
+
+- `page` (0-based, default 0), `size` (default 10, **hard cap 20** — a request for 21 is a `400`),
+  `sort` (`NAME` | `CITY` only), `dir` (`ASC` | `DESC`), alongside the existing case-sensitive
+  `lastName` prefix filter.
+- **Every ordering ends in `id`** (`last_name, first_name, id` / `city, id`). Last names are not
+  unique in the seed, and without a unique tie-breaker `LIMIT/OFFSET` can return one row on two
+  pages and skip another. The sort indexes in `V10__index_owners_for_paging.sql` carry `id` as
+  their last column for the same reason. `OwnerPaginationTest` guards both.
+- The grid sorts **in Postgres**, so its ordering is the cluster's collation, and Zonky's default
+  `initdb` is byte-wise (`C`), which drops `Śliwiński` below every ASCII surname instead of into
+  the S block. **Both clusters are therefore pinned to `en_US.UTF-8`**: the dev one in
+  `PostgresLauncher` (`setLocaleConfig("locale", …)`, applied on a fresh `initdb`), the test one in
+  `OwnerPaginationTest` (`@SpringBootTest(properties = "zonky…lc-collate=en_US.UTF-8")`). Unpin
+  either and the grid quietly orders diacritics differently from what the guard asserts. There is
+  deliberately **no `COLLATE`** in the query: JPQL cannot express it.
+- The full design interview behind all of this — including what each decision was traded against —
+  is in [QA.md](QA.md).
+
+### `GET /api/owners` is paged, and its rows carry no pets
+
+It returns `PagedModel<OwnerRowDto>` — `content` plus metadata nested under `page` — not a bare
+array. Anything reading it walks the pages (`petclinic-test/src/owners-api.ts` does this once for
+the whole e2e suite); anything needing an owner's pets calls `GET /api/owners/{id}`, because the
+rows are deliberately slim: `JOIN FETCH` on a collection plus pagination makes Hibernate paginate
+in memory (`HHH000104`).
+
+- `page` (0-based, default 0), `size` (default 10, **hard cap 20** — a request for 21 is a `400`),
+  `sort` (`NAME` | `CITY` only), `dir` (`ASC` | `DESC`), alongside the existing case-sensitive
+  `lastName` prefix filter.
+- **Every ordering ends in `id`** (`last_name, first_name, id` / `city, id`). Last names are not
+  unique in the seed, and without a unique tie-breaker `LIMIT/OFFSET` can return one row on two
+  pages and skip another. The sort indexes in `V10__index_owners_for_paging.sql` carry `id` as
+  their last column for the same reason. `OwnerPaginationTest` guards both.
+- The grid sorts **in Postgres**, so its ordering is the cluster's collation. Production is
+  `en_US.UTF-8`, where `Śliwiński` lands right after `Silver`; a default `initdb` on a CI runner
+  is byte-wise and drops it to the end. `OwnerPaginationTest` pins the embedded cluster's locale
+  via `@SpringBootTest(properties = "zonky...lc-collate=en_US.UTF-8")` so the guard means the same
+  thing everywhere. There is deliberately **no `COLLATE`** in the query: JPQL cannot express it.
+- The full design interview behind all of this — including what each decision was traded against —
+  is in [QA.md](QA.md).
+
 ## Domain Model
 Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**

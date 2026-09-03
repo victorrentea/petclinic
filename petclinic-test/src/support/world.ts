@@ -33,6 +33,8 @@ export class PlaywrightWorld extends World {
   apiResponse?: any;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
+  // Set by the pagination scenarios: the names on the page before the last navigation.
+  previousPageNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;

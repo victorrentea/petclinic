@@ -23,6 +23,14 @@ public class PostgresLauncher {
                 .setPort(5432)
                 .setDataDirectory(dataDir)
                 .setCleanDataDirectory(false)
+                // The owners grid sorts in the database, so its ordering IS the cluster's
+                // collation. Zonky's default initdb is byte-wise (C), which drops 'Śliwiński'
+                // below every ASCII name instead of into the S block. Production collates
+                // en_US.UTF-8, and OwnerPaginationTest guards that ordering -- so the dev
+                // cluster has to be initialised the same way or the grid lies locally.
+                // Only applied on a fresh initdb: an existing data/ keeps the locale it was
+                // created with, so a cluster from before this change needs a `rm -rf data`.
+                .setLocaleConfig("locale", "en_US.UTF-8")
                 .start();
 
         if (firstRun) {

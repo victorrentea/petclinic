@@ -12,6 +12,7 @@ import victor.training.petclinic.mapper.PetMapper;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.PetType;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
@@ -23,6 +24,7 @@ import victor.training.petclinic.rest.dto.OwnerRowDto;
 import victor.training.petclinic.rest.dto.OwnerRowPage;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
+import victor.training.petclinic.rest.dto.PetTypeDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -177,7 +179,7 @@ public class OwnerRestController {
         Owner owner = new Owner();
         owner.setId(ownerId);
         pet.setOwner(owner);
-        pet.setType(petTypeRepository.findById(petFieldsDto.getType().getId()).orElseThrow());
+        pet.setType(resolvePetType(petFieldsDto.getType()));
         petRepository.save(pet);
         UriComponents createdUri = UriComponentsBuilder.newInstance().path("/api/pets/{id}")
                 .buildAndExpand(pet.getId());
@@ -192,7 +194,7 @@ public class OwnerRestController {
         Pet currentPet = petRepository.findById(petId).orElseThrow();
         currentPet.setBirthDate(petFieldsDto.getBirthDate());
         currentPet.setName(petFieldsDto.getName());
-        currentPet.setType(petTypeRepository.findById(petFieldsDto.getType().getId()).orElseThrow());
+        currentPet.setType(resolvePetType(petFieldsDto.getType()));
         petRepository.save(currentPet);
     }
 
@@ -209,6 +211,18 @@ public class OwnerRestController {
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
                 .buildAndExpand(petId, visit.getId()).toUri();
         return ResponseEntity.created(createdUri).build();
+    }
+
+    /**
+     * The pet type as the database knows it. @Validated already rejects a body without a type, so
+     * the guard is unreachable over HTTP -- but it states the invariant where the dereference is,
+     * instead of leaving a NullPointerException as the answer to a direct call.
+     */
+    private PetType resolvePetType(PetTypeDto typeDto) {
+        if (typeDto == null || typeDto.getId() == null) {
+            throw new IllegalArgumentException("A pet must have a type");
+        }
+        return petTypeRepository.findById(typeDto.getId()).orElseThrow();
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")

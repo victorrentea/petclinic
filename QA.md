@@ -124,6 +124,14 @@ with the matching collation or be silently unusable.
 **Cost:** the ordering now depends on how the cluster was initialised. That is exactly what
 the guard test is for — a re-`initdb` with a different locale fails the build, not the client.
 
+**Correction, found while implementing (2026-09-03):** the fact above — "the DB is `en_US.UTF-8`"
+— was read from a cluster that no longer existed. Zonky's `initdb` defaults to byte-wise `C`, and
+that is what `start-database.sh` and CI were both running: `Śliwiński` sorted *after*
+`Wensleydale`, dead last. The decision stands — dictionary ordering is what a reader expects — so
+the fix was to make the premise true: both clusters are now pinned to `en_US.UTF-8`, the dev one in
+`PostgresLauncher`, the test one on `OwnerPaginationTest`. The guard test caught this in CI on the
+first push, which is precisely the job it was written for.
+
 ## 8. How do `page` / `size` / `sort` arrive?
 
 **Decision: explicit parameters with an enum.**

@@ -1,6 +1,7 @@
 import {Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
+import {firstOwnerWithAPet} from './owners-api';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin bound directly, in the style of owner-search.feature.glue.ts: the
@@ -34,11 +35,7 @@ function yearsFromToday(years: number): Date {
 }
 
 Given('an owner with a pet whose birth date the clinic knows', async function (this: PlaywrightWorld) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!owner) {
-    throw new Error('No owner with a pet — is the backend up and the DB seeded by Flyway?');
-  }
+  const owner = await firstOwnerWithAPet();
   const pet = owner.pets[0];
   if (!pet.birthDate) {
     throw new Error(`Pet ${pet.id} has no birth date; the range under test has no lower bound`);

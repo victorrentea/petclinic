@@ -1,6 +1,6 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import axios from 'axios';
+import {allOwnerRows} from './owners-api';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin, bound directly: the steps do the work themselves, with no DSL layer
@@ -11,10 +11,12 @@ import {PlaywrightWorld} from './support/world';
 // Nothing below decides anything: the Background states the data, the Examples
 // table states the search term and the expected result set.
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+
+// The grid shows the family name first, so the assertions read the way the screen does.
+const fullName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+// Semicolon, not comma: a name is now "Potter, Harry" and carries a comma of its own.
+const namesIn = (cell: string) => cell.split(';').map((n) => n.trim()).filter(Boolean);
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
@@ -30,11 +32,11 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * V3__sample_data.sql) fails on the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  // The endpoint is paged now, so walk every page rather than reading one array.
+  const names: string[] = (await allOwnerRows()).map(fullName);
+  if (names.length === 0) {
     throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
   }
-  const names: string[] = data.map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
   this.allOwnerNames = names;
 });
@@ -53,6 +55,21 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+/**
+ * Under pagination "every owner" no longer fits one screen, so the assertion is over the first
+ * page plus the total the grid reports: the page holds `size` of them, all real owners, and the
+ * paginator's total matches what the API says the clinic holds.
+ */
+Then('the first page lists owners of the clinic, and the total matches', async function (
+  this: PlaywrightWorld,
+) {
+  const all = this.requireAllOwnerNames();
+  const cells = this.page.locator('#ownersTable td.ownerFullName');
+
+  await expect.poll(async () => (await cells.count()), {timeout: 10_000}).toBeGreaterThan(0);
+
+  const listed = (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean);
+  expect(listed.length).toBeLessThanOrEqual(all.length);
+  expect(all).toEqual(expect.arrayContaining(listed));
+  await expect(this.page.locator('#ownersPaginator')).toContainText(`of ${all.length}`);
 });

@@ -38,48 +38,49 @@ Browser -> Browser: open owner detail page
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 group transaction · OwnerRepository.findById
-Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+Backend -> DB: [[genseq://083xusu{Click for the statement behind this call} select owners ⊕]]
 end
-Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://1uwtei0{Click for this call’s JSON body} 200 ⊕]]
+Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://1n77qqd{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Browser: click add visit for first pet
 Browser -> Backend: getPet\nGET /api/pets/{petId}
 activate Backend
 group transaction · PetRepository.findById
-Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cofzyh{Click for the statement behind this call} select pets ⊕]]
 end
-Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0helfwq{Click for this call’s JSON body} 200 ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://08rkzxz{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 group transaction · OwnerRepository.findById
-Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+Backend -> DB: [[genseq://083xusu{Click for the statement behind this call} select owners ⊕]]
 end
-Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0hh8kz8{Click for this call’s JSON body} 200 ⊕]]
+Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://1n77qqd{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Browser: submit visit form
-Browser -> Backend: [[genseq://169fsjy{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+Browser -> Backend: [[genseq://0i0qsfb{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 group transaction · PetRepository.findById
-Backend -> DB: [[genseq://0jw0huv{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://1cofzyh{Click for the statement behind this call} select pets ⊕]]
 end
 group transaction · VisitRepository.save
-Backend -> DB: [[genseq://0yhyxsr{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://02hjr7r{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 Backend --> Browser: 201
 deactivate Backend
+Browser -> Browser: expect back on owner detail page
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 group transaction · OwnerRepository.findById
-Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
+Backend -> DB: [[genseq://083xusu{Click for the statement behind this call} select owners ⊕]]
 end
-Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1cdku0l{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://068syfz{Click for this call’s JSON body} 200 ⊕]]
+Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://1vtxjdn{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml

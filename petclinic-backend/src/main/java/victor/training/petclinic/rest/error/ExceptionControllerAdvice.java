@@ -34,6 +34,10 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestControllerAdvice(basePackages = "victor.training.petclinic.rest")
 public class ExceptionControllerAdvice {
     private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+    private static final String VALIDATION_FAILED = "Validation failed: {}";
+    private static final String VALIDATION_ERROR = "Validation Error";
+    private static final String SEE_ERRORS = "Validation failed for request. See 'errors' for details.";
+    private static final String ERRORS = "errors";
 
     private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
             HttpServletRequest request) {
@@ -50,10 +54,9 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
             HttpServletRequest request) {
         List<String> errors = ValidationErrorExtractor.extract(ex);
-        log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", errors);
+        log.warn(VALIDATION_FAILED, errors);
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR, SEE_ERRORS, HttpStatus.BAD_REQUEST, request);
+        pd.setProperty(ERRORS, errors);
         return ResponseEntity.badRequest().body(pd);
     }
 
@@ -61,10 +64,9 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ProblemDetail> handleVisitDateOutOfRange(VisitDateOutOfRangeException ex,
             HttpServletRequest request) {
-        log.warn("Validation failed: {}", ex.getMessage());
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", List.of(ex.getMessage()));
+        log.warn(VALIDATION_FAILED, ex.getMessage());
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR, SEE_ERRORS, HttpStatus.BAD_REQUEST, request);
+        pd.setProperty(ERRORS, List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
     }
 
@@ -75,10 +77,9 @@ public class ExceptionControllerAdvice {
         BindingResult bindingResult = ex.getBindingResult();
         // reuse ValidationErrorExtractor style: build list of readable messages
         List<String> errors = ValidationErrorFieldExtractor.extract(bindingResult);
-        log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", errors);
+        log.warn(VALIDATION_FAILED, errors);
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR, SEE_ERRORS, HttpStatus.BAD_REQUEST, request);
+        pd.setProperty(ERRORS, errors);
         return ResponseEntity.badRequest().body(pd);
     }
 
@@ -93,10 +94,9 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
         String error = "Parameter '" + ex.getName() + "' does not accept the value '" + ex.getValue() + "'";
-        log.warn("Validation failed: {}", error);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", List.of(error));
+        log.warn(VALIDATION_FAILED, error);
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR, SEE_ERRORS, HttpStatus.BAD_REQUEST, request);
+        pd.setProperty(ERRORS, List.of(error));
         return ResponseEntity.badRequest().body(pd);
     }
 

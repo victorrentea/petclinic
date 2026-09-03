@@ -44,6 +44,8 @@ test.describe('Visits Page', () => {
   test('rows are sorted descending by date', async ({page}) => {
     const visitsPage = new VisitsPage(page);
     await visitsPage.open();
+    // The title renders before the rows arrive, so read them only once there are some
+    await expect.poll(() => visitsPage.getDates().then((d) => d.length)).toBeGreaterThan(0);
     const dates = await visitsPage.getDates();
     expect(dates.length).toBeGreaterThan(0);
     expect(dates).toEqual([...dates].sort().reverse());
