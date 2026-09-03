@@ -1,7 +1,7 @@
 ## 1. Migration and indexes
 
-- [ ] 1.1 Add `db/migration/V9__index_owners_for_paging.sql` creating `owners_name_idx (last_name, first_name, id)`, `owners_city_idx (city, id)` and `owners_last_name_prefix_idx (last_name text_pattern_ops)`; verify the backend boots against a fresh DB and `pg_indexes` lists all three
-- [ ] 1.2 Regenerate `petclinic-backend/DB.sql` and `docs/generated/DB.puml` and verify the drift guardrail test passes (CODEOWNERS-protected — regenerate before pushing)
+- [x] 1.1 Add `db/migration/V9__index_owners_for_paging.sql` creating `owners_name_idx (last_name, first_name, id)`, `owners_city_idx (city, id)` and `owners_last_name_prefix_idx (last_name text_pattern_ops)`; verify the backend boots against a fresh DB and `pg_indexes` lists all three
+- [x] 1.2 Regenerate `petclinic-backend/DB.sql` and `docs/generated/DB.puml` and verify the drift guardrail test passes (CODEOWNERS-protected — regenerate before pushing)
 - [ ] 1.3 Commit and push this group green before starting group 2
 
 ## 2. Backend query and paged endpoint (test-first)
