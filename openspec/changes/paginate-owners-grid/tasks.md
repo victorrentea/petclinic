@@ -23,16 +23,16 @@
 ## 4. Contract regeneration
 
 - [x] 4.1 Update `openapi.yaml` with the new query params and the `PagedModel<OwnerRowDto>` response; verify `npm run lint:openapi` (Spectral) passes — CODEOWNERS, the PR needs `@victorrentea/elders`
-- [ ] 4.2 Regenerate `petclinic-frontend/src/app/generated/api-types.ts` and verify the frontend still compiles
-- [ ] 4.3 Regenerate `docs/generated/endpoint-complexity.{html,json}` and verify the drift check passes; commit and push this group before touching the frontend
+- [x] 4.2 Regenerate `petclinic-frontend/src/app/generated/api-types.ts` and verify the frontend still compiles
+- [x] 4.3 Regenerate `docs/generated/endpoint-complexity.{html,json}` and verify the drift check passes; commit and push this group before touching the frontend
 
 ## 5. Frontend grid
 
-- [ ] 5.1 Collapse `OwnerService.getOwners()` + `searchOwners()` into one `findOwners(criteria)` reading `data.content`, and delete the orphan `owners/owner-page.ts`; verify nothing else imports either
-- [ ] 5.2 Import `MatPaginatorModule` and add `<mat-paginator>` with 5/10/20 under the existing Bootstrap `<table>`; verify the row count and "1 – 10 of 28" label in the running app
-- [ ] 5.3 Hand-roll sortable `Name` and `City` headers with sort arrows, keeping `#ownersTable td.ownerFullName` intact; verify clicking each header toggles direction
-- [ ] 5.4 Render the name as `Last, First`; verify the grid shows `Potter, Harry`
-- [ ] 5.5 Drive `lastName`, `page`, `size`, `sort`, `dir` through `ActivatedRoute.queryParams`, resetting `page` to 0 on search, sort and size change; verify reload and back-button keep the grid in place and a deep-linked URL lands on the right page
+- [x] 5.1 Collapse `OwnerService.getOwners()` + `searchOwners()` into one `findOwners(criteria)` reading `data.content`, and delete the orphan `owners/owner-page.ts`; verify nothing else imports either
+- [x] 5.2 Import `MatPaginatorModule` and add `<mat-paginator>` with 5/10/20 under the existing Bootstrap `<table>`; verify the row count and "1 – 10 of 28" label in the running app
+- [x] 5.3 Hand-roll sortable `Name` and `City` headers with sort arrows, keeping `#ownersTable td.ownerFullName` intact; verify clicking each header toggles direction
+- [x] 5.4 Render the name as `Last, First`; verify the grid shows `Potter, Harry`
+- [x] 5.5 Drive `lastName`, `page`, `size`, `sort`, `dir` through `ActivatedRoute.queryParams`, resetting `page` to 0 on search, sort and size change; verify reload and back-button keep the grid in place and a deep-linked URL lands on the right page
 - [ ] 5.6 Commit and push the frontend green
 
 ## 6. End-to-end (mandatory, never skipped)

@@ -27,7 +27,13 @@ import victor.training.petclinic.repository.OwnerRepository;
 /**
  * Pagination and sorting of GET /api/owners, over the Flyway-seeded owners only.
  */
-@SpringBootTest
+// The grid sorts in Postgres, so the ordering is the cluster's collation, not Java's. Production
+// runs en_US.UTF-8; a CI runner's default initdb locale is byte-wise and would drop 'Śliwiński' to
+// the end of the list. Pinning it here keeps the collation guard below meaningful everywhere.
+@SpringBootTest(properties = {
+        "zonky.test.database.postgres.initdb.properties.lc-collate=en_US.UTF-8",
+        "zonky.test.database.postgres.initdb.properties.lc-ctype=en_US.UTF-8"
+})
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")

@@ -37,6 +37,14 @@ export class ActivatedRouteStub {
   private subject = new BehaviorSubject(this.testParams);
   params = this.subject.asObservable();
 
+  // ActivatedRoute.queryParams, which the owners grid reads its page/sort state from
+  private queryParamsSubject = new BehaviorSubject<{}>({});
+  queryParams = this.queryParamsSubject.asObservable();
+
+  set testQueryParams(params: {}) {
+    this.queryParamsSubject.next(params);
+  }
+
   // Test parameters
   // tslint:disable-next-line:variable-name
   private _testParams: {};

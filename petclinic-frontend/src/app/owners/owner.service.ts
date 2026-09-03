@@ -1,10 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage, OwnerSearchCriteria } from './owner-row';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+const EMPTY_PAGE: OwnerPage = {
+  content: [],
+  page: { size: 0, number: 0, totalElements: 0, totalPages: 0 }
+};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +25,20 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  /**
+   * One page of the owners grid. Replaces the old getOwners()/searchOwners() pair, which were
+   * the same call with and without a query string.
+   */
+  findOwners(criteria: OwnerSearchCriteria): Observable<OwnerPage> {
+    const params = new HttpParams()
+      .set('lastName', criteria.lastName)
+      .set('page', criteria.page)
+      .set('size', criteria.size)
+      .set('sort', criteria.sort)
+      .set('dir', criteria.dir);
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(catchError(this.handlerError('findOwners', EMPTY_PAGE)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +64,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

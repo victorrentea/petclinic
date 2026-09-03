@@ -6,12 +6,13 @@ import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
 
 import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { OwnerService } from '../owner.service';
-import {Owner} from '../owner';
+import {OwnerPage, OwnerRow, OwnerSearchCriteria} from '../owner-row';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {PartsModule} from '../../parts/parts.module';
 import {ActivatedRouteStub} from '../../testing/router-stubs';
 import {OwnerDetailComponent} from '../owner-detail/owner-detail.component';
@@ -23,11 +24,7 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
+  findOwners(criteria: OwnerSearchCriteria): Observable<OwnerPage> {
     return of();
   }
 }
@@ -37,28 +34,26 @@ describe('OwnerListComponent', () => {
   let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
   let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
+  let findOwnersSpy: Spy;
   let de: DebugElement;
   let el: HTMLElement;
 
 
-  const testOwner: Owner = {
+  const testOwner: OwnerRow = {
     id: 1,
     firstName: 'George',
     lastName: 'Franklin',
     address: '110 W. Liberty St.',
     city: 'Madison',
-    telephone: '6085551023',
-    pets: []
+    telephone: '6085551023'
   };
-  let testOwners: Owner[];
+  let testPage: OwnerPage;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DummyComponent],
       schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
+      imports: [CommonModule, FormsModule, PartsModule, OwnersModule, NoopAnimationsModule,
         RouterTestingModule.withRoutes(
           [{path: 'owners', component: OwnerListComponent},
             {path: 'owners/add', component: OwnerAddComponent},
@@ -74,15 +69,16 @@ describe('OwnerListComponent', () => {
   }));
 
   beforeEach(() => {
-    testOwners = [testOwner];
+    testPage = {
+      content: [testOwner],
+      page: {size: 10, number: 0, totalElements: 1, totalPages: 1}
+    };
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+    findOwnersSpy = spyOn(ownerService, 'findOwners')
+      .and.returnValue(of(testPage));
 
   });
 
@@ -92,38 +88,42 @@ describe('OwnerListComponent', () => {
 
   it('should call ngOnInit() method', () => {
     fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
+    expect(findOwnersSpy.calls.any()).toBe(true, 'findOwners called');
   });
 
 
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
+  it(' should show "Last, First" after findOwners observable (async) ', waitForAsync(() => {
     fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
+    fixture.whenStable().then(() => { // wait for async findOwners
       fixture.detectChanges();        // update view with name
       de = fixture.debugElement.query(By.css('.ownerFullName'));
       el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
+      expect(el.innerText).toBe(testOwner.lastName + ', ' + testOwner.firstName);
     });
   }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+  it('searchByLastName should put the term in the URL and go back to page 0', () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = spyOn(router, 'navigate');
 
     component.searchByLastName('Fr');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    const queryParams = navigateSpy.calls.mostRecent().args[1].queryParams;
+    expect(queryParams.lastName).toBe('Fr');
+    expect(queryParams.page).toBe(0);
+  });
+
+  it('sortBy should flip the direction on a second click of the same column', () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = spyOn(router, 'navigate');
+
+    component.criteria = {lastName: '', page: 3, size: 10, sort: 'NAME', dir: 'ASC'};
+    component.sortBy('NAME');
+
+    const queryParams = navigateSpy.calls.mostRecent().args[1].queryParams;
+    expect(queryParams.sort).toBe('NAME');
+    expect(queryParams.dir).toBe('DESC');
+    expect(queryParams.page).toBe(0);
   });
 
 });
