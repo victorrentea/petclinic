@@ -52,11 +52,8 @@
             [class.has-error]="type.dirty && !type.valid">
             <label for="type" class="col-sm-2 control-label">Type </label>
             <div class="col-sm-10">
-              <select id="type" name="type" class="form-control" required [(ngModel)]="pet.type" #type="ngModel">
-                <option *ngFor="let type of petTypes"
-                        [ngValue]="type">{{ type.name }}
-                </option>
-              </select>
+              <app-combo inputId="type" name="type" required [(ngModel)]="pet.type" #type="ngModel"
+                [options]="petTypes"></app-combo>
               <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="type.valid"
                     [class.glyphicon-remove]="!type.valid" aria-hidden="true"></span>
 
