@@ -502,7 +502,7 @@ td {
 <tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Owner.getPetById(int)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.lambda$0(int, Pet)</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.lambda$getPetById$0(int, Pet)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>OwnerRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>OwnerRestController.getOwnersPet(int, int)</td><td>controller</td><td class="num">1</td></tr>
 <tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
@@ -1428,7 +1428,7 @@ td {
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
 <tr><td>PetClinicMcp.createVisit(int, LocalDate, LocalTime, String)</td><td>other</td><td class="num">4</td></tr>
-<tr><td>PetClinicMcp.lambda$8(LocalDate, Visit)</td><td>other</td><td class="num">3</td></tr>
+<tr><td>PetClinicMcp.lambda$requireUnderUpcomingVisitCap$7(LocalDate, Visit)</td><td>other</td><td class="num">3</td></tr>
 <tr><td>PetClinicMcp.requireFutureDate(LocalDate)</td><td>other</td><td class="num">2</td></tr>
 <tr><td>PetClinicMcp.requireUnderUpcomingVisitCap(Pet)</td><td>other</td><td class="num">2</td></tr>
 <tr><td>McpSecurity.currentOwnerId()</td><td>other</td><td class="num">1</td></tr>
@@ -1437,7 +1437,7 @@ td {
 <tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getVisits()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$3(int)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$createVisit$2(int)</td><td>other</td><td class="num">1</td></tr>
 <tr><td>PetRepository.findById(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>Visit.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
@@ -1463,7 +1463,7 @@ td {
 <tbody>
 <tr><td>PetClinicMcp.callVetAmbulance(McpSyncRequestContext)</td><td>other</td><td class="num">7</td></tr>
 <tr><td>PetClinicMcp.AmbulanceAddressInput.address()</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$9(String, McpRequestContextTypes$ElicitationSpec)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$callVetAmbulance$8(String, McpRequestContextTypes$ElicitationSpec)</td><td>other</td><td class="num">1</td></tr>
 </tbody>
 </table>
 </div>
@@ -1484,10 +1484,10 @@ td {
 <tr><td>Owner.getPets()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>OwnerRepository.findByIdFetchingPets(int) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>Pet.getVisits()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$4(int)</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$5(Pet)</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$6(LocalDate, Visit)</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$7(Visit)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$cancelVisit$3(int)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$cancelVisit$4(Pet)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$cancelVisit$5(LocalDate, Visit)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$cancelVisit$6(Visit)</td><td>other</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>VisitRepository.delete(Visit) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
@@ -1513,7 +1513,7 @@ td {
 <tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetClinicMcp.VisitView.&lt;init&gt;(int, int, String, LocalDate, LocalTime, String)</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$2(int)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$listVisits$1(int)</td><td>other</td><td class="num">1</td></tr>
 <tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
@@ -1546,7 +1546,7 @@ td {
 <tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetClinicMcp.getOwnerProfile()</td><td>other</td><td class="num">1</td></tr>
-<tr><td>PetClinicMcp.lambda$0(int)</td><td>other</td><td class="num">1</td></tr>
+<tr><td>PetClinicMcp.lambda$getOwnerProfile$0(int)</td><td>other</td><td class="num">1</td></tr>
 <tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
 </tbody>
 </table>
