@@ -55,10 +55,10 @@ class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/do
   description : String
 }
 
-Owner "1" -- "0..*" Pet : owner
-Pet "1" -- "0..*" Visit : pet
-PetType "1" -- "0..*" Pet : type
-User "1" -- "0..*" Role : user
-Vet "1" -- "0..*" Specialty : specialties
+Owner "owner" <--> "~* pets" Pet
+Pet "~*" --> "type" PetType
+Pet "pet" <--> "~* visits" Visit
+User "user" <--> "~* roles" Role
+Vet --> "~* specialties" Specialty
 
 @enduml

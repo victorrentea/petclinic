@@ -61,10 +61,18 @@ ROW_GAP = 90
 
 # ── the code's model, as the generated PlantUML states it ────────────────────────
 
-def marker(cardinality):
+# An association end in DomainModel.puml is a quoted label holding a multiplicity and/or a
+# role name — `"~* visits"`, `"vet"`, `"~*"` — and an end with neither is written without
+# quotes at all. The `~` is PlantUML's Creole escape, there so a leading `*` renders as a
+# star rather than a bullet; it is not part of the multiplicity.
+ASSOCIATION_RE = re.compile(
+    r'^(\w+)(?:\s+"([^"]*)")?\s+(<?--+>)\s+(?:"([^"]*)"\s+)?(\w+)\s*$', re.MULTILINE)
+
+
+def marker(end_label):
     """What the map shows at an end: a bare * for many, nothing at all for exactly one.
     An unmarked line reads as 1, so the to-one end carries no label to go stale."""
-    return "*" if cardinality == "0..*" else ""
+    return "*" if end_label.lstrip().lstrip("~").startswith("*") else ""
 
 
 def read_truth():
@@ -72,13 +80,11 @@ def read_truth():
     text = TRUTH.read_text()
     concepts = set(re.findall(r"^(?:class|enum)\s+(\w+)", text, re.MULTILINE))
     associations = {}
-    for left, left_card, right_card, right, label in re.findall(
-            r'^(\w+)\s+"([^"]+)"\s+--\s+"([^"]+)"\s+(\w+)(?:\s*:\s*(\S+))?\s*$',
-            text, re.MULTILINE):
+    for left, left_end, _arrow, right_end, right in ASSOCIATION_RE.findall(text):
         key = "-".join(sorted([left, right]))
         associations[key] = dict(
-            left=left, left_card=marker(left_card),
-            right=right, right_card=marker(right_card))
+            left=left, left_card=marker(left_end),
+            right=right, right_card=marker(right_end))
     if not concepts:
         sys.exit(f"{TRUTH} lists no classes — run the guardrail tests to regenerate it first.")
     return concepts, associations
