@@ -146,6 +146,17 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Frontend design system
+
+`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
+single-select in a form goes through `<app-combo>` (`ComboComponent`) — it is a
+`ControlValueAccessor`, so `[(ngModel)]`, `formControlName` and `required` work on it
+exactly as on the `<select>` it replaces, and it carries `data-ds="combo"` into the DOM,
+which is what the design-system audit looks for. The selector keeps the repo's `app-`
+prefix (ESLint `component-selector` enforces it), not the `pc-` of the CSS classes.
+A raw `<select>` in a form template is a bug, not a shortcut. The multi-select on
+vet-edit is still a `mat-select`; the design system has no multi-select yet.
+
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names

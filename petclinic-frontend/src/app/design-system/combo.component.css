@@ -1,0 +1,34 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+/* The design-system signature: a slightly softer corner than a bare Bootstrap
+  control, our own chevron instead of the platform one, and a ring on focus. */
+.pc-combo__control {
+  border-radius: 6px;
+  padding-right: 26px;
+  background-image: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.pc-combo__control:focus {
+  border-color: #4a90d9;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.25);
+}
+
+.pc-combo__chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #6b7280;
+  pointer-events: none;
+}

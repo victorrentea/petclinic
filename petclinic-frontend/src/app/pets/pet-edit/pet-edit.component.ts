@@ -52,6 +52,8 @@ export class PetEditComponent implements OnInit {
 
   }
 
+  sameType = (a: PetType, b: PetType) => a?.id === b?.id;
+
   onSubmit(pet: Pet) {
     pet.type = this.currentType;
     const that = this;
