@@ -14,7 +14,7 @@ Wired into `.githooks/pre-commit`, scoped to staged Java files.
 
 | rule | CLAUDE.md line it enforces | severity |
 |---|---|---|
-| `no-lombok-data` | "Use only Lombok's @Slf4j, @RequiredArgsConstructor, @Builder, @Getter/@Setter" | warning (13 pre-existing) |
+| `no-lombok-data` | "Use only Lombok's @Slf4j, @RequiredArgsConstructor, @Builder, @Getter/@Setter" | error |
 | `requestbody-needs-valid` | "@Validated on @RequestBody" | error |
 
 Every rule must ship with `valid:` / `invalid:` cases in `rule-tests/`.

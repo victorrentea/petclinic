@@ -4,9 +4,8 @@
 # entity identity semantics.
 id: no-lombok-data
 language: java
-severity: warning
+severity: error
 message: "@Data is not on CLAUDE.md's allowed Lombok list — use @Getter/@Setter explicitly"
-note: 13 pre-existing occurrences; kept at `warning` until they are cleaned up.
 files:
   - "petclinic-backend/src/main/**/*.java"
 rule:

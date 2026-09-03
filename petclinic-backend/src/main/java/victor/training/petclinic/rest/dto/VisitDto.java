@@ -6,9 +6,7 @@ import org.springframework.lang.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 
-@Data
 public class VisitDto {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -52,4 +50,92 @@ public class VisitDto {
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Last name of the vet (server-populated).")
     private @Nullable String vetLastName;
+
+    public @Nullable LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(@Nullable LocalDate date) {
+        this.date = date;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getPetId() {
+        return petId;
+    }
+
+    public void setPetId(Integer petId) {
+        this.petId = petId;
+    }
+
+    public @Nullable String getPetName() {
+        return petName;
+    }
+
+    public void setPetName(@Nullable String petName) {
+        this.petName = petName;
+    }
+
+    public @Nullable Integer getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(@Nullable Integer ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public @Nullable String getOwnerFirstName() {
+        return ownerFirstName;
+    }
+
+    public void setOwnerFirstName(@Nullable String ownerFirstName) {
+        this.ownerFirstName = ownerFirstName;
+    }
+
+    public @Nullable String getOwnerLastName() {
+        return ownerLastName;
+    }
+
+    public void setOwnerLastName(@Nullable String ownerLastName) {
+        this.ownerLastName = ownerLastName;
+    }
+
+    public @Nullable Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(@Nullable Integer vetId) {
+        this.vetId = vetId;
+    }
+
+    public @Nullable String getVetFirstName() {
+        return vetFirstName;
+    }
+
+    public void setVetFirstName(@Nullable String vetFirstName) {
+        this.vetFirstName = vetFirstName;
+    }
+
+    public @Nullable String getVetLastName() {
+        return vetLastName;
+    }
+
+    public void setVetLastName(@Nullable String vetLastName) {
+        this.vetLastName = vetLastName;
+    }
 }

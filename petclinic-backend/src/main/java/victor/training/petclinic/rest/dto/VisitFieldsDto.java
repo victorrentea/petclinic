@@ -6,9 +6,7 @@ import org.springframework.lang.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 
-@Data
 public class VisitFieldsDto {
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -24,4 +22,28 @@ public class VisitFieldsDto {
     @Min(0)
     @Schema(example = "1", description = "The ID of the vet that attended the visit.")
     private @Nullable Integer vetId;
+
+    public @Nullable LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(@Nullable LocalDate date) {
+        this.date = date;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public @Nullable Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(@Nullable Integer vetId) {
+        this.vetId = vetId;
+    }
 }
