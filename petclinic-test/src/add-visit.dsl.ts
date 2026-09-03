@@ -5,6 +5,14 @@ import axios from 'axios';
 // The sentences of add-visit.spec.ts, as plain functions: named for what the
 // reader of a scenario wants to see, not for the widget being clicked. The
 // selectors live here so the spec never mentions one.
+//
+// add-visit.feature tells the same story in Gherkin and its glue binds the steps to
+// these very same functions. That is deliberate: with identical mechanics underneath,
+// the only thing left to compare between the two scenarios is how each one reads —
+// which is the whole point of keeping both. It also means one selector change here
+// fixes both, instead of a second copy of these locators rotting in the glue.
+//
+// Named in snake_case, so a scenario body reads as a sentence rather than as calls.
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
@@ -61,6 +69,17 @@ export async function select_first_vet_in_visit_form(page: Page): Promise<string
   const vetName = (await firstVet.textContent() || '').trim();
   await vetSelect.selectOption({label: vetName});
   return vetName;
+}
+
+/**
+ * Picks the vet the scenario named, rather than whichever one comes first.
+ *
+ * Both sentences earn their place: the Playwright scenario does not care who attended, so
+ * it says "the first vet"; a Gherkin scenario that says "with Helen Leary attending" has to
+ * mean Helen Leary, or the Then below is asserting whatever the When happened to pick.
+ */
+export async function select_attending_vet(page: Page, vetName: string): Promise<void> {
+  await page.locator('select#vetId').selectOption({label: vetName});
 }
 
 export async function submit_visit_form(page: Page): Promise<void> {
