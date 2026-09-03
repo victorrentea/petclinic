@@ -78,12 +78,13 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0raqg63{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://1yhsbtc{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Browser -> Backend: List owners\nGET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith
 activate Backend
+Backend -> DB: petclinic
 Backend -> DB: [[genseq://1aoufu2{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
 deactivate Backend
 Backend -> DB: [[genseq://1hjadar{Click for the statement behind this call} select pets ⊕]]
@@ -146,6 +147,6 @@ Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0vnxq7x{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://1s0iwm3{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 @enduml
