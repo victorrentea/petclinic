@@ -86,6 +86,16 @@
   `1 / 2` — advertising neither that it existed nor what it would do. `SEQ_INTERACTIVE=0`
   bakes the detail back into the picture, which is what `diagram:lean`/`:static`/`:full` do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
   `.puml` textually, so a positional id would repaint everything under an inserted query.
+- ⚠️ **`narrate()` records step marks that nothing renders.** `src/genseq/steps.ts` is real and
+  works — `add-visit.spec.ts` imports its DSL through `narrate(sentences)`, and every sentence
+  stamps its own name into `StepRecorder`. But **`src/genseq/generate.ts` never references
+  `steps`**, and neither does `trace-to-puml.ts`, `support/trace-fixture.ts` or `support/world.ts`.
+  The renderer half of `632208ac` ("pune propozițiile testului pe diagramă") is not in this repo,
+  on this branch or on `main`. So no diagram carries step narration today — verified by grepping
+  the generated `.puml` of both styles after a traced run. Do not read a missing sentence as a
+  regression, and do not wire up more marks expecting them to appear: the consumer is what is
+  missing, not the marks. Keep the wrapper anyway — it is what `main` has, it costs nothing, and
+  it is where the narration will attach when the renderer lands.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,
   `*.feature` for Cucumber) — wiping it whole would shrink re-renders to the last suite that ran.

@@ -117,6 +117,15 @@ See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living 
   Grafana *first*, otherwise the backend runs with telemetry silently disabled.
 - Browser spans need a flush window: a scenario that finishes in <~5s closes the page before the
   frontend exporter ships anything, so no frontend traces reach Tempo.
+- ⚠️ **Moving the backend off :8080 silently loses every sequence diagram.**
+  `petclinic-frontend/src/otel.ts` hard-codes `propagateTraceHeaderCorsUrls: [/localhost:8080/]`
+  in **two** places. The API is cross-origin from the dev server, so that list is the only
+  reason the browser attaches `traceparent` at all. Run the backend on any other port — a
+  second stack beside a session already holding :8080, say — and the browser stops propagating:
+  the browser spans and the backend spans land in **different traces**, the renderer finds only
+  the browser half, and it writes a `.genseq.puml` with a title, a legend and no arrows. No
+  error, no warning, no empty-diagram check — the same shape of trap as starting the backend
+  before Grafana. Widen the regex to match the port you chose, or the diagrams are worthless.
 - The agent is pinned at **2.20.1** and told to capture the maximum: SQL unsanitized, **bound
   query parameters** (`db.query.parameter.<n>`, which need `OTEL_SEMCONV_STABILITY_OPT_IN=database/dup`
   and only exist from agent ~2.20 — 2.10 has no such flag). What a sequence diagram *shows* is
