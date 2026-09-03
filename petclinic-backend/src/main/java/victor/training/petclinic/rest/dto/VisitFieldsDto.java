@@ -19,11 +19,15 @@ public class VisitFieldsDto {
     @Schema(example = "rabies shot", description = "The description for the visit.")
     private String description;
 
-    public LocalDate getDate() {
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet that attended the visit.")
+    private @Nullable Integer vetId;
+
+    public @Nullable LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(@Nullable LocalDate date) {
         this.date = date;
     }
 
@@ -33,5 +37,13 @@ public class VisitFieldsDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public @Nullable Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(@Nullable Integer vetId) {
+        this.vetId = vetId;
     }
 }

@@ -6,11 +6,13 @@ import {NgModule} from '@angular/core';
 import {VisitService} from './visit.service';
 import {VisitAddComponent} from './visit-add/visit-add.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
+import {VetNamePipe} from './vet-name.pipe';
 import {FormsModule} from '@angular/forms';
 import {PetsRoutingModule} from '../pets/pets-routing.module';
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import {DesignSystemModule} from '../design-system/design-system.module';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -26,6 +28,7 @@ export const MY_DATE_FORMATS = {
 
 @NgModule({
   imports: [
+    DesignSystemModule,
     CommonModule,
     FormsModule,
     MatDatepickerModule,
@@ -37,13 +40,15 @@ export const MY_DATE_FORMATS = {
     VisitListComponent,
     VisitEditComponent,
     VisitAddComponent,
-    VisitsPageComponent
+    VisitsPageComponent,
+    VetNamePipe
   ],
   exports: [
     VisitListComponent,
     VisitEditComponent,
     VisitAddComponent,
-    VisitsPageComponent
+    VisitsPageComponent,
+    VetNamePipe
   ],
   providers: [
     VisitService,

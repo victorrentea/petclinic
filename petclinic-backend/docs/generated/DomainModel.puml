@@ -60,5 +60,6 @@ Pet "~*" --> "type" PetType
 Pet "pet" <--> "~* visits" Visit
 User "user" <--> "~* roles" Role
 Vet --> "~* specialties" Specialty
+Visit "~*" --> "vet" Vet
 
 @enduml

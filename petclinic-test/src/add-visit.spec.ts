@@ -13,15 +13,19 @@ const {
   click_add_visit_for_first_pet,
   expect_back_on_owner_detail_page,
   expect_pet_visit_list_contains,
+  expect_pet_visit_list_shows_no_vet,
+  expect_pet_visit_list_shows_vet,
   fill_visit_date_and_unique_description,
   open_owner_detail_page,
+  select_first_vet_in_visit_form,
   submit_visit_form,
 } = narrate(sentences);
 
 // Scenario as a DSL: the body is a list of sentences from add-visit.dsl.ts, so
 // it reads like Gherkin without a parser, a regex step lookup or a shared
 // mutable World — and every sentence stays ctrl-clickable, renameable and
-// type-checked. owner-search.feature is the Gherkin half of the comparison.
+// type-checked. add-visit.feature is the Gherkin half of the comparison, over
+// the same feature; owner-search.feature is the other pair.
 //
 // @generate_sequence turns this run into add-visit.spec.ts.genseq.puml, right here
 // in this folder — one section per tagged test in the file.
@@ -40,4 +44,22 @@ test('Add a visit to an existing pet from the owner detail page',
 
     await expect_back_on_owner_detail_page(page, ownerId);
     await expect_pet_visit_list_contains(page, VISIT_DATE, description);
+    await expect_pet_visit_list_shows_no_vet(page, VISIT_DATE, description);
+  });
+
+// The vet link crosses browser -> API -> DB, so this one is tagged too: its trace is the
+// diagram a reviewer of that change needs.
+test('Add a visit attended by a vet',
+  {tag: [GENERATE_SEQUENCE_TAG]},
+  async ({page}) => {
+    const {ownerId} = await an_owner_with_at_least_one_pet_exists();
+
+    await open_owner_detail_page(page, ownerId);
+    await click_add_visit_for_first_pet(page, 'Add Visit');
+    const description = await fill_visit_date_and_unique_description(page, VISIT_DATE);
+    const vetName = await select_first_vet_in_visit_form(page);
+    await submit_visit_form(page);
+
+    await expect_back_on_owner_detail_page(page, ownerId);
+    await expect_pet_visit_list_shows_vet(page, VISIT_DATE, description, vetName);
   });

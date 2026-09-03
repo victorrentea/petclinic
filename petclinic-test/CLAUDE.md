@@ -14,6 +14,18 @@
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.
+  The two booking scenarios are the standing exceptions: `add-visit.spec.ts` and
+  `add-visit.feature` each book a real visit, because that *is* the feature under test. What
+  keeps them safe is that the runners are **sequential** — `run-tests-with-tracing.sh` runs
+  Playwright, then Cucumber — so no row appears while `visits.spec.ts` is counting. Running
+  `npm test` and `npm run test:cucumber` at the same time breaks that, and so does filming a
+  demo against the same stack: rows will appear in the visits list mid-take.
+- `add-visit.feature` is the only `.feature` whose glue sits on a DSL: it binds to
+  `add-visit.dsl.ts`, the same functions `add-visit.spec.ts` calls, so the two scenarios differ
+  *only* in how they read. `owner-search.feature.glue.ts` deliberately does not — see
+  `README.md`. The DSL sentences are snake_case (`open_owner_detail_page`) so a scenario body
+  reads as prose; `sentenceOf()` in `src/genseq/steps.ts` collapses underscores and camelCase
+  alike, so the diagram narration is unaffected by which convention a sentence uses.
 - A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
   `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
   `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement
@@ -74,6 +86,16 @@
   `1 / 2` — advertising neither that it existed nor what it would do. `SEQ_INTERACTIVE=0`
   bakes the detail back into the picture, which is what `diagram:lean`/`:static`/`:full` do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
   `.puml` textually, so a positional id would repaint everything under an inserted query.
+- ⚠️ **`narrate()` records step marks that nothing renders.** `src/genseq/steps.ts` is real and
+  works — `add-visit.spec.ts` imports its DSL through `narrate(sentences)`, and every sentence
+  stamps its own name into `StepRecorder`. But **`src/genseq/generate.ts` never references
+  `steps`**, and neither does `trace-to-puml.ts`, `support/trace-fixture.ts` or `support/world.ts`.
+  The renderer half of `632208ac` ("pune propozițiile testului pe diagramă") is not in this repo,
+  on this branch or on `main`. So no diagram carries step narration today — verified by grepping
+  the generated `.puml` of both styles after a traced run. Do not read a missing sentence as a
+  regression, and do not wire up more marks expecting them to appear: the consumer is what is
+  missing, not the marks. Keep the wrapper anyway — it is what `main` has, it costs nothing, and
+  it is where the narration will attach when the renderer lands.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,
   `*.feature` for Cucumber) — wiping it whole would shrink re-renders to the last suite that ran.

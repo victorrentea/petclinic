@@ -11,7 +11,9 @@ import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
 import {Visit} from '../visit';
 import {Pet} from '../../pets/pet';
 import {Observable, of} from 'rxjs';
+import {By} from '@angular/platform-browser';
 import Spy = jasmine.Spy;
+import {VetNamePipe} from '../vet-name.pipe';
 
 class VisitServiceStub {
   deleteVisit(visitId: string): Observable<number> {
@@ -30,7 +32,7 @@ describe('VisitListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VisitListComponent],
+      declarations: [VisitListComponent, VetNamePipe],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
@@ -66,7 +68,10 @@ describe('VisitListComponent', () => {
       id: 1,
       date: '2016-09-07',
       description: '',
-      pet: testPet
+      pet: testPet,
+      vetId: 2,
+      vetFirstName: 'Helen',
+      vetLastName: 'Leary'
     }];
 
     visitService = fixture.debugElement.injector.get(VisitService);
@@ -81,6 +86,12 @@ describe('VisitListComponent', () => {
 
   it('should create VisitListComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should show the attending vet', () => {
+    fixture.detectChanges();
+    const vetCell = fixture.debugElement.query(By.css('.visit-vet'));
+    expect(vetCell.nativeElement.textContent).toContain('Helen Leary');
   });
 
   it('should call deleteVisit() method', () => {

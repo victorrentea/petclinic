@@ -13,6 +13,7 @@ import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
@@ -40,15 +41,23 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.NoSuchElementException;
+
+import victor.training.petclinic.domain.Vet;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Logger log = LoggerFactory.getLogger(OwnerRestController.class);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
+    private final VetRepository vetRepository;
     private final PetTypeRepository petTypeRepository;
 
     private final OwnerMapper ownerMapper;
@@ -61,6 +70,7 @@ public class OwnerRestController {
             OwnerRepository ownerRepository,
             PetRepository petRepository,
             VisitRepository visitRepository,
+            VetRepository vetRepository,
             PetTypeRepository petTypeRepository,
             OwnerMapper ownerMapper,
             PetMapper petMapper,
@@ -68,6 +78,7 @@ public class OwnerRestController {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
+        this.vetRepository = vetRepository;
         this.petTypeRepository = petTypeRepository;
         this.ownerMapper = ownerMapper;
         this.petMapper = petMapper;
@@ -158,17 +169,31 @@ public class OwnerRestController {
 
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
+    // Booking is one unit of work: resolve the vet, then save the visit. Without this each
+    // repository call opened and committed its own transaction, so a failure to save left
+    // the request half-done and the sequence diagram showed two transactions for one POST.
+    @Transactional
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
-            @RequestBody VisitFieldsDto visitFieldsDto) {
+            @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
+        visit.setVet(resolveVet(visitFieldsDto.getVetId()));
         visitRepository.save(visit);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
                 .buildAndExpand(petId, visit.getId()).toUri();
         return ResponseEntity.created(createdUri).build();
+    }
+
+    private Vet resolveVet(Integer vetId) {
+        try {
+            return vetRepository.getByIdOrNull(vetId);
+        } catch (NoSuchElementException e) {
+            log.warn("Rejecting visit: attending vet id {} does not exist", vetId);
+            throw e;
+        }
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")
