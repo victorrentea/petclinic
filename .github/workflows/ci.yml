@@ -139,6 +139,12 @@ jobs:
         working-directory: petclinic-backend
         run: mvn -B -ntp -DskipTests spotless:check
 
+      # ─ ast-grep — the structural rules in .ast-grep/rules/. The pre-commit hook runs
+      #    the same scan, and `--no-verify` walks straight past it. Errors fail the
+      #    build; warnings only print. ─
+      - name: Structural lint (ast-grep) — backstops the pre-commit hook
+        run: npx --yes -p @ast-grep/cli@0.42.3 ast-grep scan -c .config/sgconfig.yml petclinic-backend/src
+
       - name: Run backend tests (+ JaCoCo report)
         working-directory: petclinic-backend
         run: mvn -B -ntp test

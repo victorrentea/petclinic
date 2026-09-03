@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   <li><b>JavaParser over src/main/java + target/generated-sources/annotations</b> — the SCORE
  *       per method, from the AST, which is where nesting still exists. See
  *       {@link CognitiveComplexity} for the rules and {@link JavaSourceIndex} for the matching.
- *       A method with no source (a Lombok accessor, a Spring Data query implemented at runtime)
+ *       A method with no source (a Spring Data query implemented at runtime, a JDK call)
  *       scores 0: cognitive complexity measures what a reader must hold in their head, and
  *       there is nothing there to read.</li>
  *   <li><b>Entry points</b> = every way the outside world gets into the app: @GetMapping /
@@ -63,7 +63,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>The headline number is the plain SUM of the per-method scores over the DISTINCT methods
  * reachable from the handler (cycles counted once). Cognitive Complexity is already 0 for
  * straight-line code, so summing needs none of McCabe's {@code -1} bookkeeping: a flow of forty
- * Lombok setters still scores 0.
+ * plain setters still scores 0.
  *
  * <p>Known limits: only static targets are known, so a call through an interface with several
  * implementations counts them ALL; runtime-generated code (Spring Data, proxies, AOP) is
@@ -557,7 +557,7 @@ class EndpointComplexityExtractorTest {
 
         List<Node> nodes = depthOf.keySet().stream().map(this::toNode).toList();
         // A plain sum: straight-line code already scores 0, so nothing has to be subtracted to
-        // stop forty Lombok setters outweighing one nested loop.
+        // stop forty plain setters outweighing one nested loop.
         Map<String, Integer> cognitiveByLayer = new LinkedHashMap<>();
         for (String layer : LAYERS) {
             int cognitive = nodes.stream()
@@ -686,8 +686,8 @@ class EndpointComplexityExtractorTest {
                 + "petclinic-backend/target/classes (ASM), scored on the source in src/main/java and "
                 + "target/generated-sources/annotations (JavaParser), because nesting depth — half of the "
                 + "metric — does not survive compilation. A call reaching an interface with several "
-                + "implementations counts all of them; a method with no source in this repo (a Lombok "
-                + "accessor, a Spring Data query generated at runtime) scores 0 and is tagged "
+                + "implementations counts all of them; a method with no source in this repo (a Spring Data "
+                + "query generated at runtime, a JDK call) scores 0 and is tagged "
                 + "<span class=\"tag\">runtime</span> — there is nothing there to read.</p>\n");
         sb.append(htmlTail());
         return sb.toString();
@@ -728,8 +728,8 @@ class EndpointComplexityExtractorTest {
                         .thenComparing(n -> n.key().display()))
                 .forEach(n -> sb.append("<tr><td>").append(escape(n.key().display()))
                         .append(n.unresolved()
-                                ? " <span class=\"tag\" data-tip=\"No source in this repo — a Lombok "
-                                        + "accessor, or generated at runtime (Spring Data). Nothing to "
+                                ? " <span class=\"tag\" data-tip=\"No source in this repo — generated "
+                                        + "at runtime (Spring Data), or a JDK call. Nothing to "
                                         + "read, so it scores 0.\">runtime</span>"
                                 : "")
                         .append("</td><td>").append(n.layer())

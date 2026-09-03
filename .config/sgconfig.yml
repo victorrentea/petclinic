@@ -2,12 +2,9 @@
 # Run manually:  sg scan -c .config/sgconfig.yml
 # Test rules:    sg test -c .config/sgconfig.yml
 #
-# What it flags, concretely (rule no-lombok-data, on rest/dto/SpecialtyDto.java):
-#     @Data                       <- warning: not on CLAUDE.md's allowed Lombok list
-#     public class SpecialtyDto {
-# demanded instead:
-#     @Getter @Setter
-#     public class SpecialtyDto {
+# What it flags, concretely (rule no-lombok, on any petclinic-backend source):
+#     import lombok.Getter;       <- error: Lombok is not used in petclinic-backend
+# demanded instead: the accessor, constructor or Logger field written by hand.
 ruleDirs:
   - ../.ast-grep/rules
 testConfigs:

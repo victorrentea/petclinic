@@ -1,0 +1,26 @@
+id: no-lombok
+snapshots:
+  ? |
+    import lombok.*;
+    public class Owner {}
+  : labels:
+    - source: import lombok.*;
+      style: primary
+      start: 0
+      end: 16
+  ? |
+    import lombok.Getter;
+    public class Owner {}
+  : labels:
+    - source: import lombok.Getter;
+      style: primary
+      start: 0
+      end: 21
+  ? |
+    import static lombok.AccessLevel.PRIVATE;
+    public class Owner {}
+  : labels:
+    - source: import static lombok.AccessLevel.PRIVATE;
+      style: primary
+      start: 0
+      end: 41
