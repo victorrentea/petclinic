@@ -18,7 +18,7 @@
 
 - [x] 3.1 Write the failing test asserting `?sort=BANANA` and `?dir=SIDEWAYS` return `400`, not `500`
 - [x] 3.2 Add `@ExceptionHandler(MethodArgumentTypeMismatchException.class)` to `ExceptionControllerAdvice` returning a `ProblemDetail`; verify 3.1 passes
-- [ ] 3.3 Commit and push groups 2–3 green
+- [x] 3.3 Commit and push groups 2–3 green
 
 ## 4. Contract regeneration
 
@@ -39,8 +39,8 @@
 
 - [x] 6.1 Fix `owner-search.feature.glue.ts`: read `data.content` instead of `Array.isArray(data)`, and change the Examples table to `Potter, Harry` / `Potter, Beatrix`; verify the existing scenarios pass
 - [x] 6.2 Rewrite `Then every owner in the clinic is listed`, which is no longer true under a 10-row page, as an assertion over the first page plus `totalElements` (or an explicit request for a page large enough); verify it passes
-- [ ] 6.3 Add `owner-pagination.feature` covering page sizes 5/10/20, next/previous, sort toggling on both columns, and a deep-linked URL; verify the whole Playwright suite is green against the running stack
-- [ ] 6.4 Verify `DeploymentDiagramTest` and the remaining drift guardrails are green, then push
+- [x] 6.3 Add `owner-pagination.feature` covering page sizes 5/10/20, next/previous, sort toggling on both columns, and a deep-linked URL; verify the whole Playwright suite is green against the running stack
+- [x] 6.4 Verify `DeploymentDiagramTest` and the remaining drift guardrails are green, then push
 
 ## 7. Wrap-up
 
