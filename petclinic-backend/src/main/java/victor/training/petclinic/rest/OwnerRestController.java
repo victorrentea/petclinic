@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -214,15 +215,16 @@ public class OwnerRestController {
     }
 
     /**
-     * The pet type as the database knows it. @Validated already rejects a body without a type, so
-     * the guard is unreachable over HTTP -- but it states the invariant where the dereference is,
-     * instead of leaving a NullPointerException as the answer to a direct call.
+     * The pet type as the database knows it. A body without a type never reaches here -- the DTO's
+     * field is {@code @NotNull} and the parameter is {@code @Validated}, so that is already a 400.
+     * Expressed through Optional rather than a null check so the absent case has one answer, not a
+     * second exception type on a path nobody can take.
      */
     private PetType resolvePetType(PetTypeDto typeDto) {
-        if (typeDto == null || typeDto.getId() == null) {
-            throw new IllegalArgumentException("A pet must have a type");
-        }
-        return petTypeRepository.findById(typeDto.getId()).orElseThrow();
+        return Optional.ofNullable(typeDto)
+                .map(PetTypeDto::getId)
+                .flatMap(petTypeRepository::findById)
+                .orElseThrow();
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")
