@@ -63,7 +63,7 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Wendy',     'Darling',      '14 Kensington Gardens',     'London',           '0442079372122'),
   ('Rubeus',   'Hagrid',        'Gamekeepers Hut',           'Hogsmeade',        '0441463555111'),
   ('Hermione', 'Granger',       'Gryffindor Tower',          'Hogsmeade',        '0441463555112'),
-  ('Salazar',  'Slytherin',     'Hogwarts Dungeons',         'Hogsmeade',        '0441463555113'),
+  ('Salazar',  'Śliwiński',     'Hogwarts Dungeons',         'Hogsmeade',        '0441463555113'),
   ('Tintin',   'Reporter',      '26 Rue du Labrador',        'Brussels',         '0032225112233'),
   ('Lady',     'Tremaine',      'Chateau Tremaine',          'Ile-de-France',    '0146203030'),
   ('Mister',   'Geppetto',      'Via dei Tessitori 7',       'Florence',         '0039055290383'),
@@ -82,7 +82,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Toby',            DATE '2020-09-14', 2, 19),  -- Wendy's neighbourhood dog
   ('Norbert',         DATE '2021-07-22', 3, 20),  -- Hagrid's Norwegian Ridgeback
   ('Crookshanks',     DATE '2019-03-15', 1, 21),  -- Hermione's half-Kneazle
-  ('Basilisk',        DATE '2022-10-05', 4, 22),  -- the basilisk of Slytherin
+  ('Basilisk',        DATE '2022-10-05', 4, 22),  -- Salazar's basilisk
   ('Snowy',           DATE '2018-06-20', 2, 23),  -- Tintin's Milou
   ('Lucifer',         DATE '2021-12-01', 1, 24),  -- Lady Tremaine's cat
   ('Jaq',             DATE '2024-02-11', 6, 24),  -- Cinderella's mouse friend
