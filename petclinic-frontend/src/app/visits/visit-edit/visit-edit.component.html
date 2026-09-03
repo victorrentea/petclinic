@@ -51,10 +51,8 @@
         <div class="form-group">
           <label for="vetId" class="col-sm-2 control-label">Vet</label>
           <div class="col-sm-10">
-            <select id="vetId" name="vetId" class="form-control" [(ngModel)]="visit.vetId">
-              <option [ngValue]="null">-- not assigned --</option>
-              <option *ngFor="let vet of vets" [ngValue]="vet.id">{{ vet.firstName }} {{ vet.lastName }}</option>
-            </select>
+            <app-combo inputId="vetId" name="vetId" [(ngModel)]="visit.vetId"
+              [options]="vetOptions" valueKey="id" placeholder="-- not assigned --"></app-combo>
           </div>
         </div>
 

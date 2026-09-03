@@ -23,6 +23,7 @@ export class VisitEditComponent implements OnInit {
   currentOwner: Owner;
   currentPetType: PetType;
   vets: Vet[] = [];
+  vetOptions: {id: number; name: string}[] = [];
   updateSuccess = false;
   errorMessage: string;
 
@@ -39,7 +40,10 @@ export class VisitEditComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.vetService.getVets().subscribe(vets => this.vets = vets);
+    this.vetService.getVets().subscribe(vets => {
+      this.vets = vets;
+      this.vetOptions = vets.map(vet => ({id: vet.id, name: `${vet.firstName} ${vet.lastName}`}));
+    });
     const visitId = this.route.snapshot.params.id;
     this.visitService.getVisitById(visitId).subscribe(
       visit => {
