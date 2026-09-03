@@ -47,12 +47,8 @@
               <input id="type1" name="type1" class="form-control" type="text" value="{{ currentType.name }}" readonly/>
             </div>
             <div class="col-sm-8">
-              <select id="type" name="pettype" class="form-control" required [(ngModel)]="currentType"  #pettype="ngModel">
-                <option *ngFor="let type of petTypes"
-                        [selected]="type.id === currentType.id ? true : null"
-                        [ngValue]="type">{{ type.name }}
-                </option>
-              </select>
+              <app-combo inputId="type" name="pettype" required [(ngModel)]="currentType" #pettype="ngModel"
+                [options]="petTypes" [compareWith]="sameType"></app-combo>
               <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="pettype.valid" [class.glyphicon-remove]="!pettype.valid" aria-hidden="true"></span>
               <span class="help-block" *ngIf="pettype.dirty && pettype.hasError('required')">First name is required</span>
               <span class="help-block" *ngIf="pettype.dirty && pettype.hasError('minlength')">First name must be at least 2 characters long</span>

@@ -1,0 +1,9 @@
+<select class="pc-combo__control form-control"
+        [attr.id]="inputId"
+        [disabled]="disabled"
+        (change)="pick($any($event.target).value)"
+        (blur)="blur()">
+  <option *ngIf="placeholder !== null || selectedIndex === -1" value="" [selected]="selectedIndex === -1">{{ placeholder }}</option>
+  <option *ngFor="let option of options; let i = index" [value]="i" [selected]="i === selectedIndex">{{ labelOf(option) }}</option>
+</select>
+<span class="pc-combo__chevron" aria-hidden="true"></span>

@@ -164,6 +164,17 @@ Core entities and relationships:
 - Use (only) Lombok's `@Slf4j`, `@RequiredArgsConstructor`, `@Builder`, `@Getter`/`@Setter`
 - Builder chains: one property per line, unless only two properties are set
 
+### Frontend design system
+
+`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
+single-select in a form goes through `<app-combo>` (`ComboComponent`) — it is a
+`ControlValueAccessor`, so `[(ngModel)]`, `formControlName` and `required` work on it
+exactly as on the `<select>` it replaces, and it carries `data-ds="combo"` into the DOM,
+which is what a design-system audit looks for. The selector keeps the repo's `app-`
+prefix (ESLint `component-selector` enforces it), not the `pc-` of the CSS classes.
+A raw `<select>` in a form template is a bug, not a shortcut. The multi-select on
+vet-edit is still a `mat-select`; the design system has no multi-select yet.
+
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
