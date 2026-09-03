@@ -13,7 +13,7 @@ export interface OwnerWithPet {
   petId: number;
 }
 
-export async function anOwnerWithAtLeastOnePetExists(): Promise<OwnerWithPet> {
+export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
   const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
   const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
   if (!ownerWithPet) {
@@ -22,12 +22,12 @@ export async function anOwnerWithAtLeastOnePetExists(): Promise<OwnerWithPet> {
   return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
 }
 
-export async function openOwnerDetailPage(page: Page, ownerId: number): Promise<void> {
+export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {
   await page.goto(`/owners/${ownerId}`);
   await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
 }
 
-export async function clickAddVisitForFirstPet(page: Page, buttonLabel: string): Promise<void> {
+export async function click_add_visit_for_first_pet(page: Page, buttonLabel: string): Promise<void> {
   await page.locator('app-pet-list').first().locator(`button:has-text("${buttonLabel}")`).click();
   await page.locator('h2:has-text("New Visit")').waitFor({state: 'visible', timeout: 10_000});
 }
@@ -42,7 +42,7 @@ export async function clickAddVisitForFirstPet(page: Page, buttonLabel: string):
  * "unique" description. The assertions then matched both rows and failed on strict mode,
  * blaming whichever test came second. A random suffix is what actually makes it unique.
  */
-export async function fillVisitDateAndUniqueDescription(page: Page, date: string): Promise<string> {
+export async function fill_visit_date_and_unique_description(page: Page, date: string): Promise<string> {
   const description = `Annual check-up ${Date.now()}-${randomUUID().slice(0, 8)}`;
   await page.locator('input[name="date"]').fill(date);
   await page.locator('input#description').fill(description);
@@ -55,7 +55,7 @@ export async function fillVisitDateAndUniqueDescription(page: Page, date: string
  * index 1 — the placeholder's position is an incidental fact about the template,
  * and anchoring on it turns a reordered option into a baffling failure here.
  */
-export async function selectFirstVetInVisitForm(page: Page): Promise<string> {
+export async function select_first_vet_in_visit_form(page: Page): Promise<string> {
   const vetSelect = page.locator('select#vetId');
   const firstVet = vetSelect.locator('option:not([value$="null"]):not([value=""])').first();
   const vetName = (await firstVet.textContent() || '').trim();
@@ -63,16 +63,16 @@ export async function selectFirstVetInVisitForm(page: Page): Promise<string> {
   return vetName;
 }
 
-export async function submitVisitForm(page: Page): Promise<void> {
+export async function submit_visit_form(page: Page): Promise<void> {
   await page.locator('button[type="submit"]:has-text("Add Visit")').click();
 }
 
-export async function expectBackOnOwnerDetailPage(page: Page, ownerId: number): Promise<void> {
+export async function expect_back_on_owner_detail_page(page: Page, ownerId: number): Promise<void> {
   await page.waitForURL(new RegExp(`/owners/${ownerId}$`), {timeout: 10_000});
   await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
 }
 
-export async function expectPetVisitListContains(page: Page, date: string, description: string): Promise<void> {
+export async function expect_pet_visit_list_contains(page: Page, date: string, description: string): Promise<void> {
   await expect(visitRow(page, date, description)).toBeVisible({timeout: 10_000});
 }
 
@@ -83,13 +83,13 @@ export async function expectPetVisitListContains(page: Page, date: string, descr
  * optional, and legacy and MCP-booked visits have none. Asserting the dash is what makes
  * the no-vet case a statement rather than the absence of one.
  */
-export async function expectPetVisitListShowsNoVet(
+export async function expect_pet_visit_list_shows_no_vet(
   page: Page, date: string, description: string): Promise<void> {
   await expect(visitRow(page, date, description).locator('.visit-vet'))
     .toHaveText('—', {timeout: 10_000});
 }
 
-export async function expectPetVisitListShowsVet(
+export async function expect_pet_visit_list_shows_vet(
   page: Page, date: string, description: string, vetName: string): Promise<void> {
   await expect(visitRow(page, date, description)).toContainText(vetName, {timeout: 10_000});
 }
