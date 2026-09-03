@@ -29,6 +29,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </ul>
  * The price of dropping annotations: a unidirectional collection can't be told apart
  * from a many-to-many join table, so it renders as one-to-many.
+ *
+ * <p>How an association is drawn, since the notation is the whole point of the picture:
+ * <pre>
+ *   Visit "~*" --&gt; "vet" Vet                 unidirectional: only Visit maps the other
+ *   Pet "pet" &lt;--&gt; "~* visits" Visit         bidirectional: each side maps the other
+ * </pre>
+ * <ul>
+ *   <li>a single arrow means one side declares the field, and it points the way the code
+ *       navigates; a double arrow means both sides do — a fact about the code the old
+ *       undirected "--" hid;</li>
+ *   <li>the role name sits in the end label of the class it names, next to that end's
+ *       multiplicity, instead of dangling off the line as a trailing ": label" that says
+ *       nothing about which end it belongs to;</li>
+ *   <li>multiplicity is trimmed to what carries information — "*" for many, and nothing
+ *       at all for one. See {@link #end(String, String)} for why the "*" is written "~*".</li>
+ * </ul>
  */
 class DomainModelExtractorTest {
 
@@ -84,14 +100,17 @@ class DomainModelExtractorTest {
         sb.append("\n");
 
         for (DomainModelExtractor.Association a : associations) {
-            sb.append(a.left())
-                    .append(" \"").append(a.leftCardinality()).append("\" -- \"")
-                    .append(a.rightCardinality()).append("\" ")
-                    .append(a.right());
-            if (a.label() != null && !a.label().isBlank()) {
-                sb.append(" : ").append(a.label());
+            String leftEnd = end(a.leftCardinality(), a.leftRole());
+            String rightEnd = end(a.rightCardinality(), a.rightRole());
+            sb.append(a.left());
+            if (!leftEnd.isEmpty()) {
+                sb.append(" \"").append(leftEnd).append("\"");
             }
-            sb.append("\n");
+            sb.append(a.bidirectional() ? " <--> " : " --> ");
+            if (!rightEnd.isEmpty()) {
+                sb.append("\"").append(rightEnd).append("\" ");
+            }
+            sb.append(a.right()).append("\n");
         }
 
         sb.append("\n@enduml\n");
@@ -100,6 +119,28 @@ class DomainModelExtractorTest {
         Files.writeString(GENERATED_DIR.resolve("DomainModel.puml"), sb.toString());
 
         assertThat(GENERATED_DIR.resolve("DomainModel.puml")).exists();
+    }
+
+    // ── Association ends: multiplicity and role name, drawn at the end they belong to ──
+
+    /**
+     * One end of an association, as PlantUML's quoted end label: the multiplicity followed
+     * by the role name, either of which may be absent.
+     *
+     * Only what carries information is drawn. "0..*" becomes a bare "*"; "1" becomes
+     * nothing at all, because an unmarked end already reads as exactly one and a printed
+     * "1" is noise on every to-one end in the picture. An end with neither multiplicity
+     * nor role gets no label, and the caller omits the quotes rather than emitting "".
+     *
+     * The "*" is escaped as "~*": PlantUML runs end labels through Creole, where a line
+     * starting with "* " is a bullet list, so an unescaped "* pets" renders as "• pets".
+     */
+    private String end(String cardinality, String role) {
+        String multiplicity = DomainModelExtractor.MANY.equals(cardinality) ? "~*" : "";
+        if (role == null || role.isBlank()) {
+            return multiplicity;
+        }
+        return multiplicity.isEmpty() ? role : multiplicity + " " + role;
     }
 
     // ── Members: every non-static field that is not itself an association ──────

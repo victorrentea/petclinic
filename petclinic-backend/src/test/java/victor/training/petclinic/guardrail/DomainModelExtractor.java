@@ -27,7 +27,11 @@ import java.util.Set;
  *   <li>a collection field ⇒ the target end is "0..*"; a single reference ⇒ "1";</li>
  *   <li>when only one side declares the reference (unidirectional), the missing end
  *       defaults to the classic foreign-key shape: a lone single ref implies "0..*"
- *       referrers; a lone collection implies a single "1" owner.</li>
+ *       referrers; a lone collection implies a single "1" owner;</li>
+ *   <li>the association is BIDIRECTIONAL when both classes declare a field for the
+ *       other, and unidirectional when only one does — a fact about the code the
+ *       cardinalities alone cannot state, so each end also carries the role name the
+ *       far class knows it by (the field through which it is reached).</li>
  * </ul>
  * The price of dropping annotations: a unidirectional collection can't be told apart
  * from a many-to-many join table, so it reads as one-to-many.
@@ -53,9 +57,18 @@ class DomainModelExtractor {
      * One line between two concepts. {@code leftCardinality} is how many LEFT relate to
      * one RIGHT — the end drawn next to the left concept, exactly as PlantUML's
      * {@code Left "1" -- "0..*" Right} reads.
+     *
+     * <p>A role is the name the class at the FAR end reaches this end by, so
+     * {@code leftRole} is the field {@code right} declares pointing at {@code left}. It is
+     * null on the end nobody navigates to — which is exactly what makes the association
+     * unidirectional, and why {@code bidirectional} is simply "both roles are present".
+     *
+     * <p>When the association is unidirectional, {@code left} is the class that declares
+     * the field, so the drawn arrow reads left to right.
      */
-    record Association(String left, String leftCardinality,
-            String right, String rightCardinality, String label) {
+    record Association(String left, String leftCardinality, String leftRole,
+            String right, String rightCardinality, String rightRole,
+            boolean bidirectional) {
 
         /**
          * The identity of this line, independent of which end got drawn on the left: the
@@ -124,15 +137,27 @@ class DomainModelExtractor {
         String aPerB = countPerOne(bToA, aToB); // how many A relate to one B
         String bPerA = countPerOne(aToB, bToA); // how many B relate to one A
 
-        // Put the parent ("1" side with a "0..*" child) on the left; otherwise keep A left.
-        boolean bIsParent = aPerB.equals(MANY) && bPerA.equals(ONE);
-        Class<?> left = bIsParent ? b : a;
-        Class<?> right = bIsParent ? a : b;
+        boolean bidirectional = aToB != null && bToA != null;
+        // Bidirectional: put the parent ("1" side with a "0..*" child) on the left.
+        // Unidirectional: put the class that declares the field on the left, so the arrow
+        // the renderer draws points left→right, the way the code navigates.
+        boolean bIsLeft = bidirectional
+                ? aPerB.equals(MANY) && bPerA.equals(ONE)
+                : bToA != null;
+        Class<?> left = bIsLeft ? b : a;
+        Class<?> right = bIsLeft ? a : b;
         String leftMult = left.equals(a) ? aPerB : bPerA; // count of LEFT per one RIGHT
         String rightMult = left.equals(a) ? bPerA : aPerB; // count of RIGHT per one LEFT
 
-        return new Association(left.getSimpleName(), leftMult,
-                right.getSimpleName(), rightMult, chooseLabel(refs));
+        return new Association(left.getSimpleName(), leftMult, roleOf(refs, right, left),
+                right.getSimpleName(), rightMult, roleOf(refs, left, right),
+                bidirectional);
+    }
+
+    /** The name {@code from} reaches {@code to} by, i.e. the role drawn at the {@code to} end. */
+    private String roleOf(List<Ref> refs, Class<?> from, Class<?> to) {
+        Ref ref = directed(refs, from, to);
+        return ref == null ? null : ref.field();
     }
 
     /** Multiplicity at one end: read the counterpart's field to us, else a reverse default. */
@@ -147,15 +172,6 @@ class DomainModelExtractor {
     private Ref directed(List<Ref> refs, Class<?> from, Class<?> to) {
         return refs.stream()
                 .filter(r -> r.owner().equals(from) && r.target().equals(to))
-                .findFirst().orElse(null);
-    }
-
-    /** Label the edge with a field name, preferring the to-one side (owner, pet, user…). */
-    private String chooseLabel(List<Ref> refs) {
-        return refs.stream()
-                .sorted(Comparator.comparing(Ref::many) // to-one (false) first
-                        .thenComparing(r -> r.owner().getSimpleName()))
-                .map(Ref::field)
                 .findFirst().orElse(null);
     }
 
