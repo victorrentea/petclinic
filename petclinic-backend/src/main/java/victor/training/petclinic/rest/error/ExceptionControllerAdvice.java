@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -78,6 +79,24 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    /**
+     * A query parameter that does not parse -- {@code ?sort=BANANA} against an enum, a
+     * non-numeric {@code ?page=} -- is the client's mistake. Without this handler it falls
+     * through to {@link #handleGeneralException} and is reported as a 500, which pages whoever
+     * is on call for a typo in a URL.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String error = "Parameter '" + ex.getName() + "' does not accept the value '" + ex.getValue() + "'";
+        log.warn("Validation failed: {}", error);
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", List.of(error));
         return ResponseEntity.badRequest().body(pd);
     }
 

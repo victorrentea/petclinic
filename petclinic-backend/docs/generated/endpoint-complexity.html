@@ -315,77 +315,8 @@ td {
 <div class="chart">
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners</span>
-<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 11 decision points"></i></span>
-<span class="value">12</span>
-</summary>
-<div class="detail"><p class="meta">OwnerRestController.listOwners(String) — 55 methods, call depth 7</p>
-<table class="flow">
-<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
-<tbody>
-<tr><td>VisitMapper.toVisitDto(Visit)</td><td>mapper</td><td class="num">4</td></tr>
-<tr><td>OwnerMapper.toOwnerDtoCollection(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapper.toPetsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>VisitMapper.toVisitsDto(List)</td><td>mapper</td><td class="num">3</td></tr>
-<tr><td>PetMapper.toPetDto(Pet)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>PetMapper.toPetTypeDto(PetType)</td><td>mapper</td><td class="num">2</td></tr>
-<tr><td>Owner.getAddress()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getCity()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getPets()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Owner.getTelephone()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setAddress(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setCity(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setPets(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerDto.setTelephone(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>OwnerMapper.toOwnerDto(Owner)</td><td>mapper</td><td class="num">1</td></tr>
-<tr><td>OwnerRepository.findByLastNameStartingWith(String) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
-<tr><td>OwnerRestController.listOwners(String)</td><td>controller</td><td class="num">1</td></tr>
-<tr><td>Pet.getBirthDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getOwner()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getVisitsSortedByDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setType(PetTypeDto)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetDto.setVisits(List)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getName()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetTypeDto.setName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDate()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getDescription()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Visit.getPet()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setDescription(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerFirstName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setOwnerLastName(String)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetId(Integer)</td><td>model</td><td class="num">1</td></tr>
-<tr><td>VisitDto.setPetName(String)</td><td>model</td><td class="num">1</td></tr>
-</tbody>
-</table>
-</div>
-</details>
-<details class="row">
-<summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}</span>
-<span class="bar"><i class="seg" style="width:81.82%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
 <span class="value">10</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.getOwner(int) — 54 methods, call depth 6</p>
@@ -453,7 +384,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets</span>
-<span class="bar"><i class="seg" style="width:81.82%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:100.00%;background:var(--series-2)" data-tip="mapper: 9 decision points"></i></span>
 <span class="value">10</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.listPets() — 41 methods, call depth 5</p>
@@ -508,7 +439,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/users</span>
-<span class="bar"><i class="seg" style="width:45.45%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:36.36%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:55.56%;background:var(--series-1)" data-tip="controller: 5 decision points"></i><i class="seg" style="width:44.44%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">10</span>
 </summary>
 <div class="detail"><p class="meta">UserRestController.addUser(UserDto) — 34 methods, call depth 4</p>
@@ -556,7 +487,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/owners/{ownerId}/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:77.78%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.getOwnersPet(int, int) — 42 methods, call depth 4</p>
@@ -612,7 +543,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:77.78%;background:var(--series-2)" data-tip="mapper: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.getPet(int) — 40 methods, call depth 4</p>
@@ -666,7 +597,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:45.45%;background:var(--series-2)" data-tip="mapper: 5 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:55.56%;background:var(--series-2)" data-tip="mapper: 5 decision points"></i></span>
 <span class="value">6</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.listVisits() — 23 methods, call depth 3</p>
@@ -703,7 +634,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets/{petId}/visits</span>
-<span class="bar"><i class="seg" style="width:36.36%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:44.44%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">OwnerRestController.addVisitToOwner(int, int, VisitFieldsDto) — 14 methods, call depth 2</p>
@@ -731,7 +662,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:36.36%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:44.44%;background:var(--series-2)" data-tip="mapper: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.listVets() — 22 methods, call depth 5</p>
@@ -767,7 +698,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-1)" data-tip="controller: 2 decision points"></i><i class="seg" style="width:22.22%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.updateVet(int, VetDto) — 25 methods, call depth 3</p>
@@ -806,7 +737,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/visits</span>
-<span class="bar"><i class="seg" style="width:36.36%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:44.44%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.addVisit(VisitDto) — 21 methods, call depth 4</p>
@@ -841,7 +772,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:36.36%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:44.44%;background:var(--series-1)" data-tip="controller: 4 decision points"></i></span>
 <span class="value">5</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.updateVisit(int, VisitFieldsDto) — 11 methods, call depth 2</p>
@@ -866,7 +797,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-POST">POST</b> /api/vets</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-1)" data-tip="controller: 1 decision points"></i><i class="seg" style="width:22.22%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.addVet(VetDto) — 27 methods, call depth 4</p>
@@ -907,7 +838,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/visits/{visitId}</span>
-<span class="bar"><i class="seg" style="width:27.27%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:33.33%;background:var(--series-2)" data-tip="mapper: 3 decision points"></i></span>
 <span class="value">4</span>
 </summary>
 <div class="detail"><p class="meta">VisitRestController.getVisit(int) — 22 methods, call depth 2</p>
@@ -943,7 +874,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/pettypes</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.listPetTypes() — 9 methods, call depth 3</p>
@@ -966,7 +897,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyRestController.listSpecialties() — 11 methods, call depth 3</p>
@@ -991,7 +922,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/vets/{vetId}</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-2)" data-tip="mapper: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">VetRestController.getVet(int) — 21 methods, call depth 4</p>
@@ -1025,11 +956,36 @@ td {
 </details>
 <details class="row">
 <summary>
-<span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="endpoint"><b class="verb v-GET">GET</b> /api/owners</span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
-<div class="detail"><p class="meta">OwnerRestController.addPetToOwner(int, PetFieldsDto) — 23 methods, call depth 3</p>
+<div class="detail"><p class="meta">OwnerRestController.listOwners(String, int, int, OwnerRestController$SortField, Sort$Direction) — 11 methods, call depth 2</p>
+<table class="flow">
+<thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
+<tbody>
+<tr><td>OwnerRestController.SortField.towards(Sort$Direction)</td><td>controller</td><td class="num">2</td></tr>
+<tr><td>Owner.getAddress()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getCity()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getFirstName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getId()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getLastName()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>Owner.getTelephone()</td><td>model</td><td class="num">1</td></tr>
+<tr><td>OwnerMapper.toOwnerRowDto(Owner)</td><td>mapper</td><td class="num">1</td></tr>
+<tr><td>OwnerRepository.findByLastNameStartingWith(String, Pageable) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
+<tr><td>OwnerRestController.listOwners(String, int, int, OwnerRestController$SortField, Sort$Direction)</td><td>controller</td><td class="num">1</td></tr>
+<tr><td>OwnerRowDto.&lt;init&gt;(Integer, String, String, String, String, String)</td><td>model</td><td class="num">1</td></tr>
+</tbody>
+</table>
+</div>
+</details>
+<details class="row">
+<summary>
+<span class="endpoint"><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="value">2</span>
+</summary>
+<div class="detail"><p class="meta">OwnerRestController.addPetToOwner(int, PetFieldsDto) — 21 methods, call depth 3</p>
 <table class="flow">
 <thead><tr><th>method</th><th>layer</th><th class="num">CC</th></tr></thead>
 <tbody>
@@ -1039,7 +995,6 @@ td {
 <tr><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td>controller</td><td class="num">1</td></tr>
 <tr><td>Pet.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.getId()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>Pet.getType()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setBirthDate(LocalDate)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>Pet.setOwner(Owner)</td><td>model</td><td class="num">1</td></tr>
@@ -1050,7 +1005,6 @@ td {
 <tr><td>PetMapper.toPet(PetFieldsDto)</td><td>mapper</td><td class="num">1</td></tr>
 <tr><td>PetRepository.save(Pet) <span class="tag" data-tip="No implementation in target/classes — generated at runtime (Spring Data) or external. Counted as 1.">runtime</span></td><td>repository</td><td class="num">1</td></tr>
 <tr><td>PetType.&lt;init&gt;()</td><td>model</td><td class="num">1</td></tr>
-<tr><td>PetType.getId()</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.setId(Integer)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetType.setName(String)</td><td>model</td><td class="num">1</td></tr>
 <tr><td>PetTypeDto.getId()</td><td>model</td><td class="num">1</td></tr>
@@ -1063,7 +1017,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-PUT">PUT</b> /api/pets/{petId}</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-2)" data-tip="mapper: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetRestController.updatePet(int, PetDto) — 14 methods, call depth 2</p>
@@ -1091,7 +1045,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetTypeRestController.deletePetType(int) — 3 methods, call depth 1</p>
@@ -1108,7 +1062,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-GET">GET</b> /api/specialties/feed</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-1)" data-tip="controller: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">SpecialtyFeedController.feed(String) — 9 methods, call depth 3</p>
@@ -1466,7 +1420,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> create_visit</span>
-<span class="bar"><i class="seg" style="width:63.64%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:77.78%;background:var(--series-5)" data-tip="other: 7 decision points"></i></span>
 <span class="value">8</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.createVisit(int, LocalDate, LocalTime, String) — 20 methods, call depth 3</p>
@@ -1500,7 +1454,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> call_vet_ambulance</span>
-<span class="bar"><i class="seg" style="width:54.55%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:66.67%;background:var(--series-5)" data-tip="other: 6 decision points"></i></span>
 <span class="value">7</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.callVetAmbulance(McpSyncRequestContext) — 3 methods, call depth 1</p>
@@ -1517,7 +1471,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> cancel_visit</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.cancelVisit(LocalDate) — 13 methods, call depth 2</p>
@@ -1544,7 +1498,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> list_visits</span>
-<span class="bar"><i class="seg" style="width:18.18%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:22.22%;background:var(--series-5)" data-tip="other: 2 decision points"></i></span>
 <span class="value">3</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.listVisits() — 13 methods, call depth 1</p>
@@ -1571,7 +1525,7 @@ td {
 <details class="row">
 <summary>
 <span class="endpoint"><b class="verb v-MCP">MCP</b> get_owner_profile</span>
-<span class="bar"><i class="seg" style="width:9.09%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
+<span class="bar"><i class="seg" style="width:11.11%;background:var(--series-5)" data-tip="other: 1 decision points"></i></span>
 <span class="value">2</span>
 </summary>
 <div class="detail"><p class="meta">PetClinicMcp.getOwnerProfile() — 16 methods, call depth 2</p>
@@ -1603,7 +1557,6 @@ td {
 <table class="summary">
 <thead><tr><th>kind</th><th>entry point</th><th>handler</th><th class="num">flow CC</th><th class="num">methods</th><th class="num">depth</th></tr></thead>
 <tbody>
-<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String)</td><td class="num">12</td><td class="num">55</td><td class="num">7</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners/{ownerId}</td><td>OwnerRestController.getOwner(int)</td><td class="num">10</td><td class="num">54</td><td class="num">6</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/pets</td><td>PetRestController.listPets()</td><td class="num">10</td><td class="num">41</td><td class="num">5</td></tr>
 <tr><td>http</td><td><b class="verb v-POST">POST</b> /api/users</td><td>UserRestController.addUser(UserDto)</td><td class="num">10</td><td class="num">34</td><td class="num">4</td></tr>
@@ -1624,7 +1577,8 @@ td {
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/vets/{vetId}</td><td>VetRestController.getVet(int)</td><td class="num">3</td><td class="num">21</td><td class="num">4</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> cancel_visit</td><td>PetClinicMcp.cancelVisit(LocalDate)</td><td class="num">3</td><td class="num">13</td><td class="num">2</td></tr>
 <tr><td>mcp</td><td><b class="verb v-MCP">MCP</b> list_visits</td><td>PetClinicMcp.listVisits()</td><td class="num">3</td><td class="num">13</td><td class="num">1</td></tr>
-<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">2</td><td class="num">23</td><td class="num">3</td></tr>
+<tr><td>http</td><td><b class="verb v-GET">GET</b> /api/owners</td><td>OwnerRestController.listOwners(String, int, int, OwnerRestController$SortField, Sort$Direction)</td><td class="num">2</td><td class="num">11</td><td class="num">2</td></tr>
+<tr><td>http</td><td><b class="verb v-POST">POST</b> /api/owners/{ownerId}/pets</td><td>OwnerRestController.addPetToOwner(int, PetFieldsDto)</td><td class="num">2</td><td class="num">21</td><td class="num">3</td></tr>
 <tr><td>http</td><td><b class="verb v-PUT">PUT</b> /api/pets/{petId}</td><td>PetRestController.updatePet(int, PetDto)</td><td class="num">2</td><td class="num">14</td><td class="num">2</td></tr>
 <tr><td>http</td><td><b class="verb v-DELETE">DELETE</b> /api/pettypes/{petTypeId}</td><td>PetTypeRestController.deletePetType(int)</td><td class="num">2</td><td class="num">3</td><td class="num">1</td></tr>
 <tr><td>http</td><td><b class="verb v-GET">GET</b> /api/specialties/feed</td><td>SpecialtyFeedController.feed(String)</td><td class="num">2</td><td class="num">9</td><td class="num">3</td></tr>

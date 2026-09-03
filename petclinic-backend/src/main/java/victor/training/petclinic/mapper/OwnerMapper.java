@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,16 @@ public class OwnerMapper {
         ownerDto.setTelephone(owner.getTelephone());
         ownerDto.setPets(petMapper.toPetsDto(owner.getPets()));
         return ownerDto;
+    }
+
+    public OwnerRowDto toOwnerRowDto(Owner owner) {
+        return new OwnerRowDto(
+                owner.getId(),
+                owner.getFirstName(),
+                owner.getLastName(),
+                owner.getAddress(),
+                owner.getCity(),
+                owner.getTelephone());
     }
 
     public Owner toOwner(OwnerFieldsDto ownerDto) {

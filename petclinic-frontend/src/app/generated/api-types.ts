@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,73 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One owner as shown in the owners grid, without their pets. */
+    OwnerRowDto: {
+      /**
+       * @description The postal address of the owner.
+       * @example 110 W. Liberty St.
+       */
+      address?: string;
+      /**
+       * @description The city of the pet owner.
+       * @example Madison
+       */
+      city?: string;
+      /**
+       * @description The first name of the pet owner.
+       * @example George
+       */
+      firstName?: string;
+      /**
+       * Format: int32
+       * @description The ID of the pet owner.
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description The last name of the pet owner.
+       * @example Franklin
+       */
+      lastName?: string;
+      /**
+       * @description The telephone number of the pet owner.
+       * @example 6085551023
+       */
+      telephone?: string;
+    };
+    /** @description One page of the owners grid. */
+    OwnerRowPage: {
+      /** @description The owners on this page. */
+      content?: components["schemas"]["OwnerRowDto"][];
+      /** @description Where this page sits in the whole result set. */
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PageMetadata: {
+      /**
+       * Format: int64
+       * @description Zero-based page number.
+       * @example 0
+       */
+      number?: number;
+      /**
+       * Format: int64
+       * @description Rows per page.
+       * @example 10
+       */
+      size?: number;
+      /**
+       * Format: int64
+       * @description Owners matching the filter, across all pages.
+       * @example 28
+       */
+      totalElements?: number;
+      /**
+       * Format: int64
+       * @description Number of pages available.
+       * @example 3
+       */
+      totalPages?: number;
     };
     PetDto: {
       /**
@@ -553,18 +620,22 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: "NAME" | "CITY";
+        dir?: "ASC" | "DESC";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerRowPage"];
         };
       };
       /** @description Bad Request */

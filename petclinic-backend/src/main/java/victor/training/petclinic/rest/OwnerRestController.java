@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +19,8 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto;
+import victor.training.petclinic.rest.dto.OwnerRowPage;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -34,17 +39,21 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/owners")
+@Validated
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    /** Protects the endpoint at 100.000 owners: the UI's 5/10/20 selector is a convention, not a guarantee. */
+    static final int MAX_PAGE_SIZE = 20;
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -77,15 +86,43 @@ public class OwnerRestController {
         this.visitDateRange = visitDateRange;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    /**
+     * The fields the owners grid can be ordered by.
+     * <p>
+     * An enum rather than a raw {@code Pageable}: a Pageable would accept any entity property, so
+     * {@code sort=telephone} or {@code sort=pets.name} would trigger an unindexed sort over the whole
+     * table. Every ordering ends in {@code id} because last names are not unique -- without a unique
+     * tie-breaker, LIMIT/OFFSET may return one row on two consecutive pages and skip another.
+     */
+    public enum SortField {
+        NAME(Sort.by("lastName", "firstName", "id")), CITY(Sort.by("city", "id"));
+
+        private final Sort ascending;
+
+        SortField(Sort ascending) {
+            this.ascending = ascending;
+        }
+
+        Sort towards(Direction direction) {
+            return direction.isDescending() ? ascending.descending() : ascending;
+        }
+    }
+
+    @Operation(operationId = "listOwners", summary = "List one page of owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerRowPage.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerRowDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
+            @RequestParam(name = "size", defaultValue = "10") @Min(1) @Max(MAX_PAGE_SIZE) int size,
+            @RequestParam(name = "sort", defaultValue = "NAME") SortField sort,
+            @RequestParam(name = "dir", defaultValue = "ASC") Direction dir) {
+        PageRequest pageRequest = PageRequest.of(page, size, sort.towards(dir));
+        return new PagedModel<>(ownerRepository.findByLastNameStartingWith(lastName, pageRequest)
+                .map(ownerMapper::toOwnerRowDto));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
@@ -140,7 +177,7 @@ public class OwnerRestController {
         Owner owner = new Owner();
         owner.setId(ownerId);
         pet.setOwner(owner);
-        pet.setType(petTypeRepository.findById(pet.getType().getId()).orElseThrow());
+        pet.setType(petTypeRepository.findById(petFieldsDto.getType().getId()).orElseThrow());
         petRepository.save(pet);
         UriComponents createdUri = UriComponentsBuilder.newInstance().path("/api/pets/{id}")
                 .buildAndExpand(pet.getId());

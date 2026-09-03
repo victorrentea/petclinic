@@ -28,6 +28,7 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -128,10 +129,11 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        // the list is paged now, so ask for the page this owner is on rather than the first one
+        List<OwnerRowDto> owners = search("/api/owners?lastName=Franklin");
 
         assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
+                .extracting(OwnerRowDto::id, OwnerRowDto::firstName, OwnerRowDto::lastName)
                 .contains(Assertions.tuple(ownerId, "George", "Franklin"));
     }
 
@@ -141,14 +143,14 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerRowDto> owners = search("/api/owners?lastName=Java");
 
         assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getLastName)
+                .extracting(OwnerRowDto::id, OwnerRowDto::lastName)
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private List<OwnerRowDto> search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,13 +158,14 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(mapper.readTree(responseJson).get("content").toString(),
+                new TypeReference<List<OwnerRowDto>>() {
+                });
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerRowDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
     }

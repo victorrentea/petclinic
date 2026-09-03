@@ -11,7 +11,6 @@ import static victor.training.petclinic.genseq.Steps.then;
 import static victor.training.petclinic.genseq.Steps.when;
 
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -91,12 +90,16 @@ class AddVisitSequenceTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did V3__sample_data.sql change?"));
+        // the grid pages over slim rows that carry no pets, so the detail endpoint answers "has a pet"
+        JsonNode page = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
+        for (JsonNode row : page.path("content")) {
+            JsonNode owner = json(call(mockMvc, get("/api/owners/" + row.path("id").asInt()))
+                    .andExpect(status().isOk()));
+            if (!owner.path("pets").isEmpty()) {
+                return owner;
+            }
+        }
+        throw new AssertionError("No owner with a pet in the seeded data — did V3__sample_data.sql change?");
     }
 
     private JsonNode json(ResultActions response) throws Exception {

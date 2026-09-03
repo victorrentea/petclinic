@@ -195,6 +195,41 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+          maximum: 20
+          minimum: 1
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: NAME
+          enum:
+          - NAME
+          - CITY
+      - in: query
+        name: dir
+        required: false
+        schema:
+          type: string
+          default: ASC
+          enum:
+          - ASC
+          - DESC
       responses:
         "200":
           content:
@@ -203,32 +238,26 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                    page:
+                      size: 10
+                      number: 0
+                      totalElements: 28
+                      totalPages: 3
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerRowPage"
           description: OK
         "400":
           content:
@@ -248,7 +277,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: List one page of owners
       tags:
       - owner-rest-controller
     post:
@@ -1684,6 +1713,70 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerRowDto:
+      type: object
+      description: "One owner as shown in the owners grid, without their pets."
+      properties:
+        address:
+          type: string
+          description: The postal address of the owner.
+          example: 110 W. Liberty St.
+        city:
+          type: string
+          description: The city of the pet owner.
+          example: Madison
+        firstName:
+          type: string
+          description: The first name of the pet owner.
+          example: George
+        id:
+          type: integer
+          format: int32
+          description: The ID of the pet owner.
+          example: 1
+        lastName:
+          type: string
+          description: The last name of the pet owner.
+          example: Franklin
+        telephone:
+          type: string
+          description: The telephone number of the pet owner.
+          example: "6085551023"
+    OwnerRowPage:
+      type: object
+      description: One page of the owners grid.
+      properties:
+        content:
+          type: array
+          description: The owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerRowDto"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+          description: Where this page sits in the whole result set.
+    PageMetadata:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int64
+          description: Zero-based page number.
+          example: 0
+        size:
+          type: integer
+          format: int64
+          description: Rows per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "Owners matching the filter, across all pages."
+          example: 28
+        totalPages:
+          type: integer
+          format: int64
+          description: Number of pages available.
+          example: 3
     PetDto:
       type: object
       properties:
