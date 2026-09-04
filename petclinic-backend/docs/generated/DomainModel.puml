@@ -54,6 +54,7 @@ class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/do
   time : LocalTime
   description : String
 }
+class VisitDateRange [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VisitDateRange.java:9{Click to open in editor}]]
 
 Owner "owner" <--> "~* pets" Pet
 Pet "~*" --> "type" PetType

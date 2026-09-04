@@ -198,6 +198,44 @@ public class VisitTest {
     }
 
     @Test
+    void create_rejectsDateBeforePetWasBorn() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        newVisit.setDescription("time travel check-up");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_rejectsDateMoreThanAYearAhead() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        newVisit.setDescription("far future check-up");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void update_rejectsDateOutsideTheAllowedRange() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(PetTest.BIRTH_DATE.minusYears(100));
+        update.setDescription("time travel check-up");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void update_ok() throws Exception {
         VisitFieldsDto update = new VisitFieldsDto();
         update.setDate(LocalDate.now().plusDays(1));

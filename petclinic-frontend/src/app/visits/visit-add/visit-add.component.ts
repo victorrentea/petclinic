@@ -23,6 +23,9 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
+  // Bug #40: a visit can neither predate the pet nor be booked more than a year ahead.
+  minVisitDate: moment.Moment;
+  maxVisitDate = moment().add(1, 'year');
 
   constructor(private visitService: VisitService,
               private petService: PetService,
@@ -42,6 +45,7 @@ export class VisitAddComponent implements OnInit {
     this.petService.getPetById(petId).subscribe(
       pet => {
         this.currentPet = pet;
+        this.minVisitDate = pet.birthDate ? moment(pet.birthDate) : null;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(

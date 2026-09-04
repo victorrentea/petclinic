@@ -145,6 +145,16 @@ prefix (ESLint `component-selector` enforces it), not the `pc-` of the CSS class
 A raw `<select>` in a form template is a bug, not a shortcut. The multi-select on
 vet-edit is still a `mat-select`; the design system has no multi-select yet.
 
+### Visit dates are bounded (bug #40)
+
+A visit date must sit between the pet's birth date and one year from today. Enforced twice:
+`VisitDateRange` in the backend domain (thrown as `IllegalArgumentException`, which
+`ExceptionControllerAdvice` now maps to **400**, not 500), and `[min]`/`[max]` on the
+`mat-datepicker` inputs of `visit-add` / `visit-edit`, which disables the submit button.
+Covered by `petclinic-test/src/visit-date-range.spec.ts` — that spec deliberately posts only
+dates the API must reject, because `visits.spec.ts` compares the whole visit list in the same
+parallel run. `petclinic-test/tools/record-bug40.ts` films the before/after clip.
+
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
