@@ -60,7 +60,7 @@ public class UserTest {
     }
 
     @Test
-    void create_noRoles_triggers_server_error() throws Exception {
+    void create_noRoles_rejectedAsBadRequest() throws Exception {
         // Send roles as null so the service sees user.getRoles() == null and throws
         UserDto newUser = new UserDto();
         newUser.setUsername("norolesuser");
@@ -71,6 +71,6 @@ public class UserTest {
         mockMvc.perform(post("/api/users")
                 .content(mapper.writeValueAsString(newUser))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

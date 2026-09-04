@@ -9,6 +9,29 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "visits")
 public class Visit {
+    /** Bug #40: a visit may not be booked further ahead than this. */
+    public static final int MAX_YEARS_AHEAD = 1;
+
+    /**
+     * Bug #40: a visit date may neither predate the pet nor sit far in the future.
+     * The frontend applies the same bounds to its datepicker; this is the enforcement.
+     */
+    public static void validateDate(LocalDate visitDate, LocalDate petBirthDate) {
+        if (visitDate == null) {
+            return; // absence of a date is a separate concern
+        }
+        if (petBirthDate != null && visitDate.isBefore(petBirthDate)) {
+            throw new IllegalArgumentException(
+                    "Visit date " + visitDate + " is before the pet was born (" + petBirthDate + ")");
+        }
+        LocalDate latest = LocalDate.now().plusYears(MAX_YEARS_AHEAD);
+        if (visitDate.isAfter(latest)) {
+            throw new IllegalArgumentException(
+                    "Visit date " + visitDate + " is more than " + MAX_YEARS_AHEAD
+                            + " year ahead (after " + latest + ")");
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Integer id;
