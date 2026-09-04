@@ -1,6 +1,6 @@
 ---
 name: java-code-style
-description: Java code style rules for petclinic-backend — constructor injection, no Lombok, MapStruct, @Transactional, @Validated, equals/hashCode/toString. Use whenever writing, editing, or reviewing Java code in petclinic-backend.
+description: Java code style rules for petclinic-backend — constructor injection, no Lombok, MapStruct, @Transactional, @Validated, equals/hashCode/toString. Use whenever writing, editing, or reviewing Java code.
 ---
 
 # Java code style (petclinic-backend)

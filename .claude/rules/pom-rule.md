@@ -1,4 +1,5 @@
 ---
+# programatically activated by claude code when touching a file of this glob pattern
 paths:
   - "**/pom.xml"
 ---
