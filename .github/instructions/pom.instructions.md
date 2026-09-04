@@ -56,7 +56,6 @@ No output → it is unmanaged: add a property-backed version.
 
 | artifact | managed by parent? | correct form |
 | --- | --- | --- |
-| `org.mapstruct:*` | no | needs `${mapstruct.version}` |
 | `org.springdoc:springdoc-openapi-starter-webmvc-ui` | no | needs an explicit version |
 | `io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations` | no | needs an explicit version |
 

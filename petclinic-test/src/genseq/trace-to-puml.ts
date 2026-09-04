@@ -451,7 +451,7 @@ export function renderDiagram(
     `title ${title}`,
     // The warning, and nothing else. How the picture was recorded, how to re-render
     // it at another detail level and which npm script does that is documentation
-    // about the tool; it belongs in petclinic-test/CLAUDE.md and the README, not
+    // about the tool; it belongs in petclinic-test/AGENTS.md and the README, not
     // drawn beside the conversation the diagram exists to show.
     'legend right',
     `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,

@@ -1,10 +1,12 @@
-# ast-grep — structural lint rules that enforce conventions written in CLAUDE.md.
+# ast-grep — structural lint rules that enforce conventions written in AGENTS.md.
 # Run manually:  sg scan -c .config/sgconfig.yml
 # Test rules:    sg test -c .config/sgconfig.yml
 #
-# What it flags, concretely (rule no-lombok, on any petclinic-backend source):
-#     import lombok.Getter;       <- error: Lombok is not used in petclinic-backend
-# demanded instead: the accessor, constructor or Logger field written by hand.
+# What it flags, concretely (rules no-lombok / no-mapstruct, on any Java source):
+#     import lombok.Getter;       <- error: Lombok is not used in this repo
+#     import org.mapstruct.Mapper;<- error: MapStruct is not used in this repo
+# demanded instead: the accessor, constructor, Logger field or mapping method
+# written by hand.
 ruleDirs:
   - ../.ast-grep/rules
 testConfigs:

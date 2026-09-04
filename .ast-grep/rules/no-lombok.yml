@@ -1,25 +1,20 @@
-# Lombok is gone from petclinic-backend: the dependency, the annotation
-# processor paths and lombok.config were all removed. Accessors, constructors
-# and loggers are written by hand — see CLAUDE.md "Java Code Style".
+# Lombok is gone from the whole repo: the dependency, the annotation processor
+# paths and lombok.config were all removed, from petclinic-backend and from
+# petclinic-chatbot alike. Accessors, constructors and loggers are written by
+# hand — see AGENTS.md "Java Code Style".
 #
 # The import is the invariant worth checking: no Lombok annotation compiles
 # without one, and this catches all three spellings — `import lombok.Getter;`,
 # `import lombok.*;` and `import static lombok.AccessLevel.PRIVATE;`.
-#
-# Scoped to petclinic-backend on purpose: petclinic-chatbot is a separate
-# module that still uses @Slf4j/@RequiredArgsConstructor, and this ruling did
-# not cover it.
 id: no-lombok
 language: java
 severity: error
-message: "Lombok is not used in petclinic-backend — write the accessor, constructor or logger by hand"
+message: "Lombok is not used in this repo — write the accessor, constructor or logger by hand"
 note: |
   @Getter/@Setter  -> accessors
   @RequiredArgsConstructor -> an explicit constructor
   @Slf4j -> private static final Logger log = LoggerFactory.getLogger(X.class);
   @Data -> accessors plus only the equals/hashCode/toString the class actually needs
-files:
-  - "petclinic-backend/src/**/*.java"
 rule:
   kind: import_declaration
   regex: '^import\s+(static\s+)?lombok\.'

@@ -5,7 +5,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,10 +30,11 @@ import org.springframework.stereotype.Component;
  * the {@code @Scope("prototype")} bean). The actual OS kill+relaunch is delegated to the injected
  * {@link ProcessControl}, which tests stub.
  */
-@Slf4j
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE) // fresh recovery state per incident
 public class FirefighterGuard {
+    private static final Logger log = LoggerFactory.getLogger(FirefighterGuard.class);
+
 
     private static final int MAX_PER_SERVICE = 2;
     private static final int MAX_TOTAL = 3;

@@ -92,7 +92,7 @@ somebody else broke it**. Any red build you catch is yours to fix.
    not the test, unless the test is provably wrong. Do not delete, skip, or loosen a
    test to get green; that is defeating the gate, not repairing it.
 3. **Reproduce locally when it's cheap** (`mvn test -Dtest=...`, `npm test`). Beware
-   the traps in the project's CLAUDE.md — never run `mvn test` while IntelliJ is
+   the traps in the project's AGENTS.md — never run `mvn test` while IntelliJ is
    building, and remember `-Dtest=...` makes coverage look falsely low.
 4. **Fix, commit, push.** The push re-arms the tripwire, which hands you a fresh SHA —
    so a new watch starts on its own. Don't hand-roll a second watch for the same push.

@@ -42,12 +42,5 @@ and compares it against the code.
 #### C4 — System Context
 ![C4 System Context](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C1-Context.puml)
 
-#### Code City (3D)
-[Open the Code City in your browser →](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codecity/codecity.html)
-
-> Regenerate with `petclinic-backend/docs/generate-codecity.sh`. It clones the generators —
-> [victorrentea/code-city](https://github.com/victorrentea/code-city), a standalone tool
-> that works on any Java repo — into `petclinic-backend/.tools/codecity/` and runs them on this one.
-
 > More C4 views (containers, per-component focus) live in
 > [`petclinic-backend/docs/README.md`](petclinic-backend/docs/README.md).
