@@ -31,6 +31,20 @@ jobs:
           # and gives SonarCloud accurate SCM blame info.
           fetch-depth: 0
 
+      - name: Check line length in changed Java files
+        run: |
+          scripts/check-java-line-length-test.sh
+          zero='0000000000000000000000000000000000000000'
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          if [ -z "$base" ] || [ "$base" = "$zero" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base='HEAD~1'
+          fi
+          scripts/check-java-line-length.sh "${base}...HEAD"
+
       # ── Hook parity: gitleaks runs in pre-commit; CI re-runs it so a
       #    `git commit --no-verify` can't slip a secret past review. ──────────
       - name: Install gitleaks

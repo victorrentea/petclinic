@@ -86,6 +86,12 @@ if [ -n "$STAGED_JAVA" ]; then
   fi
 fi
 
+# ── Java line length in changed files ─────────────────────────────────────
+if ! "$ROOT/scripts/check-java-line-length.sh" --cached; then
+  echo "[pre-commit] ❌ Java line-length limit exceeded — commit blocked."
+  exit 1
+fi
+
 # ── ast-grep: whole-tree pass, ungated ─────────────────────────────────────
 # The staged-files scan above cannot see code that arrived without being staged
 # by a human — a merge resolution, most of all. That is exactly how a @Data
