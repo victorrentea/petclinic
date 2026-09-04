@@ -20,14 +20,7 @@
         <java.version>21</java.version>
 
         <!-- Third-party libraries -->
-        <mapstruct.version>1.6.3</mapstruct.version>
         <spring-ai.version>1.1.2</spring-ai.version>
-
-        <!-- IDE-urile pe m2e (VS Code / Eclipse) nu ruleaza ele procesoarele de
-        adnotari, ci folosesc sursele generate de Maven in
-        target/generated-sources/annotations.
-        Dupa ce schimbi un mapper, ruleaza `mvn compile` ca sa se regenereze. -->
-        <m2e.apt.activation>maven_execution</m2e.apt.activation>
     </properties>
 
     <dependencyManagement>
@@ -103,17 +96,6 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
         <!-- Test libs -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -184,23 +166,6 @@
             <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
-        <!-- Bytecode reader behind EndpointComplexityExtractorTest: the CALL GRAPH (it sees
-        lambdas, method references and generated code that no source parser resolves). -->
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>9.7.1</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Source AST behind the same test: Cognitive Complexity needs the NESTING DEPTH of
-        each construct, which javac erases — bytecode cannot tell an if inside a loop from two
-        sibling ifs. See CognitiveComplexity. -->
-        <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-core</artifactId>
-            <version>3.26.2</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.structurizr</groupId>
             <artifactId>structurizr-core</artifactId>
@@ -266,19 +231,6 @@
                         <endWithNewline/>
                         <eclipse><file>${project.basedir}/../.config/eclipse-formatter.xml</file></eclipse>
                     </java>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>1.6.3</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

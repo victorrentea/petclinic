@@ -19,12 +19,6 @@ engineering techniques you can lift into your own projects.
   source (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 - **C4 model** as versioned Structurizr DSL: stable, human C1/C2 + a
   *code-coupled* C3 that is unit-tested against the real packages.
-- **[Code City](https://victorrentea.github.io/petclinic/petclinic-backend/docs/generated/codecity/codecity.html)** —
-  a 3D view of the codebase (size = LOC, height = complexity, colour = churn)
-  across Classes / Packages / Modules lenses, with commits/committers mined from
-  git history. The generators are a tool of their own —
-  [victorrentea/code-city](https://github.com/victorrentea/code-city), point it at any
-  Java repo; `petclinic-backend/docs/generate-codecity.sh` runs it on this one.
 - **E2E traces → sequence diagrams.** Tempo/OpenTelemetry spans from a browser
   run are replayed into a PlantUML sequence diagram.
 - **MCP server** hosted by the backend at `/mcp` (Spring AI) — tools/resources
@@ -123,9 +117,6 @@ From the https://github.com/victorrentea/petclinic repo…
 - get the mechanism that generates `DomainModel.puml` from code.
 - adopt the database migrations scripts technique
 - get the mechanism to auto-build `DB.puml` from the incremental DB scripts.
-- run the Code City 3D visualization on the sources of my project XYZ, using
-  https://github.com/victorrentea/code-city (`git clone` it, then
-  `./generate.sh <my-repo>` and open the `codecity.html` it writes).
 - show me where my GitHub Copilot AI credits went — per day, per model and per session — using
   https://github.com/victorrentea/copilot-usage.
 - copy the idea to keep the backend Java in sync with `openapi.yaml`, and the frontend `api-types.ts` - prove that a change in a backend Dto fails the FE build, ran automatically prepush and on CI.

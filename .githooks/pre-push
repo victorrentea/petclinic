@@ -12,6 +12,15 @@ unset GIT_DIR GIT_WORK_TREE
 
 ZERO=0000000000000000000000000000000000000000
 
+# ── AGENTS.md layout (ungated, fast — no Maven) ─────────────────────────────
+# Backstops the PreToolUse hook in .claude/settings.json, which only sees Write/Edit
+# tool calls: Claude Code's `#` memory shortcut and /memory write CLAUDE.md directly
+# and slip past it. This catches that before it reaches the remote.
+if ! bash "$ROOT/scripts/check-agents-md.sh"; then
+  echo "[pre-push] ❌ AGENTS.md / CLAUDE.md layout is broken — push blocked."
+  exit 1
+fi
+
 # ── Unversioned-deps list must be in sync (ungated, fast — no Maven) ─────────
 # Backstops a `git commit --no-verify` that bypassed pre-commit. Ungated because
 # chatbot/database pom changes fall outside the backend-only path gate below.

@@ -1,0 +1,15 @@
+id: no-mapstruct
+valid:
+  - |
+    import org.springframework.stereotype.Component;
+    public class OwnerMapper {}
+  - |
+    import org.mapstructish.Mapper;
+    public class NotMapStruct {}
+invalid:
+  - |
+    import org.mapstruct.Mapper;
+    public interface OwnerMapper {}
+  - |
+    import org.mapstruct.*;
+    public interface OwnerMapper {}

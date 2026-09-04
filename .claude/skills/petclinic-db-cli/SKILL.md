@@ -81,7 +81,7 @@ Do not reinstall `mcptools`; check `command -v npx` first.
 
 `owners`, `pets` (`type_id` → `types`, `owner_id` → `owners`), `visits`
 (`pet_id`), `vets`, `specialties`, `vet_specialties`, `users`, `roles`.
-Full model: see the ER model section in `CLAUDE.md`.
+Full model: see the ER model section in `AGENTS.md`.
 
 ## Rules
 
@@ -89,7 +89,7 @@ Full model: see the ER model section in `CLAUDE.md`.
 - Prefer one aggregated SQL query over several small ones — each call pays a
   ~2s server startup.
 - An empty database is usually not a bug: Flyway seeds it when the **backend**
-  boots (see `CLAUDE.md` → Database).
+  boots (see `AGENTS.md` → Database).
 
 ## Why not a direct Postgres client
 

@@ -111,7 +111,7 @@ You MAY read these for context (do not implement beyond this chapter):
   - $dir/design.md     (how)
   - $dir/specs/        (what)
   - $dir/tasks.md      (full task list, for orientation only)
-  - CLAUDE.md          (repo rules — follow them, incl. red-green TDD when this chapter has a test task)
+  - AGENTS.md          (repo rules — follow them, incl. red-green TDD when this chapter has a test task)
 
 Rules:
   - Implement ONLY this chapter's tasks. Keep diffs minimal and idiomatic.

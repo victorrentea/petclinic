@@ -1,4 +1,4 @@
-# CLAUDE.md: "@Validated on @RequestBody". An unvalidated request body silently
+# AGENTS.md: "@Validated on @RequestBody". An unvalidated request body silently
 # skips every Bean Validation constraint declared on the DTO.
 id: requestbody-needs-valid
 language: java

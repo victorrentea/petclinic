@@ -1,7 +1,7 @@
 # ast-grep rules
 
 Structural lint rules that enforce conventions already written in prose in
-[CLAUDE.md](../CLAUDE.md). A convention nobody checks is a suggestion.
+[AGENTS.md](../AGENTS.md). A convention nobody checks is a suggestion.
 
 ```sh
 sg scan                 # scan the repo
@@ -15,9 +15,10 @@ the tree without anyone staging it, and a staged-files-only scan cannot see it. 
 does not fire `pre-commit` at all, so `.githooks/pre-merge-commit` delegates to it.
 `severity: error` blocks the commit; `severity: warning` only reports.
 
-| rule | CLAUDE.md line it enforces | severity |
+| rule | AGENTS.md line it enforces | severity |
 |---|---|---|
-| `no-lombok` | "No Lombok in petclinic-backend" — matches any `import lombok.…` | error (0 occurrences) |
+| `no-lombok` | "No Lombok" — matches any `import lombok.…` | error (0 occurrences) |
+| `no-mapstruct` | "DTO mapping is hand-written — no MapStruct" — matches any `import org.mapstruct.…` | error (0 occurrences) |
 | `requestbody-needs-valid` | "@Validated on @RequestBody" | error |
 
 Every rule must ship with `valid:` / `invalid:` cases in `rule-tests/`.

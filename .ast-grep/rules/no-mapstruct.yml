@@ -1,0 +1,14 @@
+# MapStruct is gone too, and for the same reason as Lombok: the mappers in
+# petclinic-backend are hand-written `@Component`s, so a clone builds with
+# javac alone and no annotation processor has to run before the code reads
+# straight. The import is what a returning @Mapper needs first.
+id: no-mapstruct
+language: java
+severity: error
+message: "MapStruct is not used in this repo — write the mapping out in a @Component"
+note: |
+  @Mapper -> a @Component class with plain toXDto/toX methods
+  @Mapping(source=…, target=…) -> the assignment it stands for
+rule:
+  kind: import_declaration
+  regex: '^import\s+(static\s+)?org\.mapstruct\.'

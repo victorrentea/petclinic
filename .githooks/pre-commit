@@ -69,14 +69,14 @@ if [ -n "$STAGED_JAVA" ]; then
     echo "[pre-commit] ⚠️  mvn not on PATH — skipping Spotless formatting."
   fi
 
-  # ── ast-grep: structural rules that enforce CLAUDE.md conventions ────────
+  # ── ast-grep: structural rules that enforce AGENTS.md conventions ────────
   # Reports on the staged files; see the whole-tree pass below for what
   # actually blocks. Blocks on `error`; `warning` only reports.
   if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
     if ! SG_OUT=$(cd "$ROOT" && echo "$STAGED_JAVA" | xargs sg scan -c "$ROOT/.config/sgconfig.yml" 2>&1); then
       echo "$SG_OUT"
       echo "[pre-commit] ❌ ast-grep rule violated — commit blocked."
-      echo "[pre-commit] Rules live in .ast-grep/rules/ — see CLAUDE.md for the why."
+      echo "[pre-commit] Rules live in .ast-grep/rules/ — see AGENTS.md for the why."
       exit 1
     fi
     [ -n "$SG_OUT" ] && echo "$SG_OUT"
@@ -101,14 +101,20 @@ if command -v sg >/dev/null 2>&1 && sg scan --help >/dev/null 2>&1; then
   fi
 fi
 
-# ── Lombok must not come back through the build either ─────────────────────
-# The no-lombok ast-grep rule reads Java sources; nothing there notices the
-# dependency reappearing in the POM ahead of the first annotation.
-if grep -q 'projectlombok' "$ROOT/petclinic-backend/pom.xml" 2>/dev/null; then
-  echo "[pre-commit] ❌ org.projectlombok is back in petclinic-backend/pom.xml — commit blocked."
-  echo "[pre-commit]    Lombok was removed from the backend deliberately; see CLAUDE.md."
-  exit 1
-fi
+# ── Lombok and MapStruct must not come back through the build either ───────
+# The ast-grep rules read Java sources; nothing there notices a dependency
+# reappearing in a POM ahead of the first annotation that uses it.
+for pom in "$ROOT"/petclinic-*/pom.xml; do
+  [ -f "$pom" ] || continue
+  for artifact in projectlombok mapstruct; do
+    if grep -q "$artifact" "$pom" 2>/dev/null; then
+      echo "[pre-commit] ❌ $artifact is back in ${pom#$ROOT/} — commit blocked."
+      echo "[pre-commit]    Both were removed on purpose so a clone builds with javac"
+      echo "[pre-commit]    alone, no annotation processor in the way; see AGENTS.md."
+      exit 1
+    fi
+  done
+done
 
 # ── .editorconfig compliance ───────────────────────────────────────────────
 # Nothing else in this repo reads .editorconfig — no IDE is in the loop, and
