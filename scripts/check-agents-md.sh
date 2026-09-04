@@ -20,13 +20,17 @@ cd "$ROOT"
 
 POINTER='@AGENTS.md'
 
-# Tracked symlinks that are a deliberate, reviewed exception. Both are skill
-# plumbing, never instructions: a Windows clone that materialises them as text
-# stubs loses a skill, it does not feed an agent a one-word rulebook.
-#   .claude/skills/human-review -> the /human-review skill's own repo, checked out
-#     next to this one; an absolute path, so it is machine-local by construction.
+# Tracked symlinks that are a deliberate, reviewed exception. This is skill
+# plumbing, never instructions: a Windows clone that materialises it as a text
+# stub loses a skill, it does not feed an agent a one-word rulebook.
 #   .github/skills -> ../.claude/skills, so Copilot finds the same folder.
-ALLOWED_SYMLINKS=(.claude/skills/human-review .github/skills)
+#
+# `.claude/skills/human-review` used to be on this list and is deliberately gone:
+# it was an absolute path into one laptop's home directory, committed to a public
+# repository, and it meant every clone carried a symlink that resolved to nothing
+# for everyone but its author. The skill is a plugin now — see AGENTS.md — so a
+# local checkout is symlinked in untracked and gitignored instead.
+ALLOWED_SYMLINKS=(.github/skills)
 
 fail=0
 err() { echo "[agents-md] ❌ $*"; fail=1; }

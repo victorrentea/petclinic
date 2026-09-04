@@ -79,17 +79,37 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
 
-### The /human-review skill lives in its own repo
+### /human-review is a plugin, and nothing of it lives in this repo
 
-`.claude/skills/human-review` is a **symlink** to `~/workspace/human-review/skills/human-review`
-(github.com/victorrentea/human-review, public, installable as a Claude Code plugin). Edit it
-there, not here — an edit through the symlink is an edit to that repo, and needs committing
-there too.
+It is installed, not vendored:
 
-The PlantUML differs moved with it. `docs/scripts/puml-diff/puml-diff-vs-git.sh` reaches
-them through `scripts/ensure-human-review.sh`, which uses the symlink locally and clones the
-repo into a gitignored `petclinic-backend/.tools/` otherwise. Never vendor a second copy: a
-private fork of the review pipeline drifts in silence.
+```
+/plugin marketplace add victorrentea/human-review
+/plugin install human-review@human-review
+```
+
+Everything petclinic-specific about it is **`human-review.json`** at the root — the traced
+test run, the Code City generator, the complexity extractor, the screens the design-system
+audit visits. The skill itself knows nothing about this project, and a step this file does
+not describe is skipped and named on the built page. That is the only file to touch when a
+command here changes.
+
+`scripts/ensure-human-review.sh` resolves the skill for the two scripts that borrow its
+PlantUML differs (`docs/scripts/puml-diff/puml-diff-vs-git.sh`): installed plugin first,
+then a local checkout symlinked into `.claude/skills/`, then a clone into a gitignored
+`petclinic-backend/.tools/`. Never vendor a second copy — a private fork of the review
+pipeline drifts in silence.
+
+⚠️ **That symlink is untracked, and putting it back in git is a mistake with a history.**
+It was committed for a while as mode 120000 pointing at `/Users/<someone>/workspace/…`, so
+every clone of this public repo carried a link that resolved for exactly one person on one
+laptop. `scripts/check-agents-md.sh` no longer allowlists it; if you develop the skill
+locally, symlink it in and leave it ignored.
+
+**Run the review passes before you ask for the guide.** `/human-review` no longer invokes
+`/code-review` or `/simplify` — it writes up the passes that already ran in the
+conversation, and stops with an explanation if it finds none. So the order is: finish the
+work, run whichever passes you trust, *then* `/human-review`.
 
 **The review guide is built by hand, not by CI.** It deep-links into a working tree and
 drives a whole local stack — a browser, a database, Tempo, PlantUML, a Maven build — so
