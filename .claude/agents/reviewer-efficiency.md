@@ -4,6 +4,7 @@ description: >
   Single-focused code reviewer for EFFICIENCY only. Internal — spawned by
   the /multi-review skill only, not for direct human use. Flags wasteful work the diff introduces.
 tools: Bash, Read, Grep
+skills: java-code-style
 model: opus
 ---
 
