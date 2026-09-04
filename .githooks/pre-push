@@ -40,8 +40,22 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   if [ "$remote_sha" = "$ZERO" ]; then
     paths=$(git log --name-only --pretty=format: "$local_sha" --not --remotes="$REMOTE" 2>/dev/null || true)
+    default_ref=$(git symbolic-ref --quiet --short "refs/remotes/$REMOTE/HEAD" || true)
+    if [ -n "$default_ref" ]; then
+      java_base=$(git merge-base "$local_sha" "$default_ref")
+      java_diff=("$java_base...$local_sha")
+    else
+      empty_tree=$(git hash-object -t tree /dev/null)
+      java_diff=("$empty_tree" "$local_sha")
+    fi
   else
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
+    java_diff=("$remote_sha...$local_sha")
+  fi
+
+  if ! "$ROOT/scripts/check-java-line-length.sh" --source-ref "$local_sha" "${java_diff[@]}"; then
+    echo "[pre-push] ❌ Java line-length limit exceeded — push blocked."
+    exit 1
   fi
 
   # Guard: after a petclinic-backend/DB.sql change in the pushed range, the committed
@@ -82,7 +96,6 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   if printf '%s\n' "$paths" | grep -qE '^(petclinic-backend/|openapi\.yaml$|petclinic-test/src/.*\.genseq\.puml$)'; then
     needs_check=1
-    break
   fi
 done
 
