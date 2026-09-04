@@ -154,6 +154,12 @@ now maps to **400**, not 500 — `UserTest` used to assert that 500), and `[min]
 The rule lives *on the entity*, not in a class of its own: every class in `domain/` is a
 concept to `ConceptualModelDiagramTest`, and a date policy is not one — a standalone
 `VisitDateRange` failed that guardrail.
+
+The date and description fields are one component, `visit-fields/`, used by both pages.
+They were two copies of the same markup, and the two lines the bounds added tipped
+Sonar's new-code duplication over its 3% gate. It takes its `ControlContainer` from the
+surrounding `NgForm` via `viewProviders`, which is what keeps the parent's
+`visitForm.value` and its `[disabled]` binding working across the component boundary.
 Covered by `petclinic-test/src/visit-date-range.spec.ts` — that spec deliberately posts only
 dates the API must reject, because `visits.spec.ts` compares the whole visit list in the same
 parallel run. `petclinic-test/tools/record-bug40.ts` films the before/after clip.

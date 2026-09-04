@@ -5,6 +5,7 @@ import {VisitEditComponent} from './visit-edit/visit-edit.component';
 import {NgModule} from '@angular/core';
 import {VisitService} from './visit.service';
 import {VisitAddComponent} from './visit-add/visit-add.component';
+import {VisitFieldsComponent} from './visit-fields/visit-fields.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {FormsModule} from '@angular/forms';
 import {PetsRoutingModule} from '../pets/pets-routing.module';
@@ -37,6 +38,7 @@ export const MY_DATE_FORMATS = {
     VisitListComponent,
     VisitEditComponent,
     VisitAddComponent,
+    VisitFieldsComponent,
     VisitsPageComponent
   ],
   exports: [
