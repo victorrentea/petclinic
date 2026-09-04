@@ -134,6 +134,13 @@ Core entities and relationships:
 
 ## Development Notes
 
+### Target scale: 100,000 owners
+
+The business stated (Sep 2026) it expects **~100,000 owners in production within a year**.
+The 25 seeded rows are a dev convenience, not the design point: any list endpoint, grid or
+query touching owners must be **paged and sorted server-side** — never "load them all and
+filter in the browser". This is the reason `listOwners` takes a `Pageable`.
+
 ### Frontend design system
 
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
