@@ -35,15 +35,18 @@ jobs:
         run: |
           scripts/check-java-line-length-test.sh
           zero='0000000000000000000000000000000000000000'
+          default_branch='${{ github.event.repository.default_branch }}'
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base='${{ github.event.pull_request.base.sha }}'
+          elif [ "${{ github.ref_name }}" != "$default_branch" ]; then
+            base="$(git merge-base HEAD "origin/$default_branch")"
           else
             base='${{ github.event.before }}'
           fi
           if [ -z "$base" ] || [ "$base" = "$zero" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             base='HEAD~1'
           fi
-          scripts/check-java-line-length.sh "${base}...HEAD"
+          scripts/check-java-line-length.sh --source-ref HEAD "${base}...HEAD"
 
       # ── Hook parity: gitleaks runs in pre-commit; CI re-runs it so a
       #    `git commit --no-verify` can't slip a secret past review. ──────────
