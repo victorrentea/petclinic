@@ -8,22 +8,30 @@
 #
 # Callers reach into it, e.g. `$(ensure-human-review.sh)/puml-diff/puml_diff.py`.
 #
-# Locally the skill is symlinked into .claude/skills/, so the differs are already on disk.
-# On a CI runner nothing is symlinked, so they are cloned into a gitignored .tools/ —
-# the same shape as the Code City renderer and the OTel agent.
+# Three ways it can already be here, tried in that order: an installed Claude Code
+# plugin (the ordinary case — `/plugin install human-review@human-review`), a local
+# checkout symlinked into .claude/skills/ for developing the skill itself, or nothing,
+# in which case it is cloned into a gitignored .tools/ — the same shape as the Code
+# City renderer and the OTel agent.
+#
+# The symlink is untracked on purpose: it points at one machine's home directory, so
+# committing it put a path that resolves for exactly one person into a public repo.
 #
 # Usage:  SKILL="$(scripts/ensure-human-review.sh)"
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
+PLUGIN="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/human-review}/skills/human-review"
 SKILL_COPY="$ROOT/.claude/skills/human-review"
 VENDORED="$ROOT/petclinic-backend/.tools/human-review/skills/human-review"
 REPO="https://github.com/victorrentea/human-review.git"
 
-if [ -f "$SKILL_COPY/puml-diff/puml_diff.py" ]; then
-  echo "$SKILL_COPY"
-  exit 0
-fi
+for candidate in "$PLUGIN" "$SKILL_COPY"; do
+  if [ -f "$candidate/puml-diff/puml_diff.py" ]; then
+    echo "$candidate"
+    exit 0
+  fi
+done
 
 if [ ! -f "$VENDORED/puml-diff/puml_diff.py" ]; then
   echo "[human-review] fetching the skill from $REPO" >&2

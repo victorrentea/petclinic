@@ -105,5 +105,9 @@ rag-vector-store.json
 # jqwik sample database (petclinic-backend) — local test state, never commit
 /petclinic-backend/.jqwik-database
 
-# /human-review skill, fetched on demand by scripts/ensure-puml-diff.sh — a tool, not source
+# /human-review skill, fetched on demand by scripts/ensure-human-review.sh — a tool, not source
 /petclinic-backend/.tools/human-review/
+
+# A local checkout of the skill, symlinked in for development. Machine-local by
+# construction (it is an absolute path), so it is never committed — see AGENTS.md.
+/.claude/skills/human-review

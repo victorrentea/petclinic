@@ -1,0 +1,50 @@
+{
+  "//": "Configuration for the /human-review plugin (github.com/victorrentea/human-review).",
+  "//2": "The skill itself knows nothing about this project; everything petclinic-specific",
+  "//3": "lives here. A step this file does not describe is skipped and named under the",
+  "//4": "strip on the built page, which is the honest rendering of 'we have no such thing'.",
+
+  "base": "origin/main",
+  "spec": "openapi.yaml",
+
+  "steps": {
+    "diagrams": {
+      "drawio": {
+        "diagram": "petclinic-backend/docs/ConceptualModel.drawio.png",
+        "concepts": "petclinic-backend/docs/generated/DomainModel.puml",
+        "name": "conceptual"
+      }
+    },
+    "sequence": {
+      "commands": [
+        "cd petclinic-test && ./run-tests-with-tracing.sh",
+        "cd petclinic-backend && mvn -o -Pgenseq test -Dgroups=genseq",
+        "cd petclinic-test && GENSEQ_REFRESH=1 npm run trace:diagram"
+      ]
+    },
+    "city": {
+      "regenerate": "petclinic-backend/docs/generate-codecity.sh"
+    },
+    "video": {
+      "out": ".human-review/assets/feature.webm"
+    },
+    "complexity": {
+      "extract": "cd petclinic-backend && mvn -q test -Dtest=EndpointComplexityExtractorTest",
+      "before": ".human-review/assets/complexity-before.json",
+      "after": "petclinic-backend/docs/generated/endpoint-complexity.json"
+    },
+    "logging": {
+      "paths": ["petclinic-backend"]
+    },
+    "dsaudit": {
+      "base-new": "http://localhost:4300",
+      "base-old": "http://localhost:4301",
+      "label-old": "main",
+      "source": ["petclinic-frontend/src"],
+      "screens": {
+        "Book a visit": "pets/11/visits/add",
+        "Edit a pet": "pets/11/edit"
+      }
+    }
+  }
+}
