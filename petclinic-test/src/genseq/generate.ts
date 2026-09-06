@@ -203,8 +203,25 @@ function linkScenarios(
 ): DiagramScenario[] {
   const text = deps.readFile?.(`${rootDir}/${source}`);
   if (text === undefined) return scenarios;
-  const repoRelative = `${path.basename(rootDir)}/${source}`;
-  return scenarios.map((s) => ({...s, link: testHandle(repoRelative, lineOfTest(text, s.title))}));
+  return scenarios.map(
+    (s) => ({...s,
+      link: testHandle(repoRelative(rootDir, source), lineOfTest(text, s.title, source))}));
+}
+
+/** `source` resolved against the repo root — the path the review page can open. */
+function repoRelative(rootDir: string, source: string): string {
+  return path.normalize(path.join(path.basename(rootDir), source));
+}
+
+/**
+ * What the diagram calls itself. A Java source is filed next to its .java file, so its
+ * window's `source` climbs out of here as `../petclinic-backend/…` — a correct path and a
+ * useless heading, since `..` only means something to a reader who knows which directory
+ * the generator ran in. Those are named from the repo root; a source that stays inside
+ * petclinic-test keeps the module-relative name it has always had.
+ */
+function titleFor(rootDir: string, source: string): string {
+  return source.startsWith('..') ? repoRelative(rootDir, source) : source;
 }
 
 /** Draw the diagrams from spans already in hand — the offline half of the pipeline. */
@@ -215,8 +232,8 @@ export function renderScenarios(
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
-    const {puml, details} =
-      renderDiagram(source, linkScenarios(scenarios, rootDir, source, deps), options);
+    const {puml, details} = renderDiagram(
+      titleFor(rootDir, source), linkScenarios(scenarios, rootDir, source, deps), options);
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not
@@ -242,8 +259,27 @@ export function renderScenarios(
  */
 export const PLAYWRIGHT_SOURCES = /\.spec\.ts$/;
 export const CUCUMBER_SOURCES = /\.feature$/;
+/** A @SpringBootTest carrying @GenerateSequence; its windows are written from the JVM. */
+export const JAVA_SOURCES = /\.java$/;
 
-export async function runGenerate(ownedSources?: RegExp): Promise<void> {
+// Maven cannot call runGenerate() with an argument the way the two Node runners do, so the
+// backend's run-tests-with-tracing.sh names its suite here instead. Without it a post-test
+// `npm run diagram` would take the no-owner path — replay the cache — and never go to
+// Tempo for the traces the Java run has just produced.
+const OWNED_SOURCES: Record<string, RegExp> = {
+  playwright: PLAYWRIGHT_SOURCES,
+  cucumber: CUCUMBER_SOURCES,
+  java: JAVA_SOURCES,
+};
+
+export function ownedSourcesFromEnv(
+  env: Record<string, string | undefined> = process.env,
+): RegExp | undefined {
+  return OWNED_SOURCES[env.GENSEQ_SUITE?.trim().toLowerCase() ?? ''];
+}
+
+export async function runGenerate(owned?: RegExp): Promise<void> {
+  const ownedSources = owned ?? ownedSourcesFromEnv();
   const root = path.join(__dirname, '..', '..');
   const windowsDir = path.join(root, 'test-results', 'trace-windows');
   const options = optionsFromEnv();

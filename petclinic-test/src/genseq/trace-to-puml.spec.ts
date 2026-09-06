@@ -481,3 +481,55 @@ test('the frame is called tx, wherever it was opened', () => {
   expect(spansToPuml(onService, 'tx', STATIC)).toContain('group tx\n');
   expect(spansToPuml(onService, 'tx', STATIC)).not.toContain('transaction ·');
 });
+
+// ── A @SpringBootTest drives the very same renderer ─────────────────────────────
+// Nothing in a trace otherwise separates the test from the code it drives: a MockMvc
+// call and the controller it reaches run in one JVM under one `service.name`. The test
+// spans therefore name their own lifeline (Steps.java sets `genseq.participant=Test`),
+// and the renderer has to honour it — without it the whole picture collapses onto
+// Backend and loses the only hop it exists to show.
+test('a span may declare its own participant, and Test sorts leftmost', () => {
+  // The shape SequenceTraceExtension actually emits: a per-test root that opens the
+  // lifeline, a span per sentence under it, and the instrumented work under those.
+  const spans: NormSpan[] = [
+    {
+      traceId: 'j', spanId: 'j-root', parentSpanId: '', name: 'test: reads an owner back',
+      kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6,
+      attributes: {'genseq.participant': 'Test', 'test.name': 'reads an owner back'},
+    },
+    {
+      traceId: 'j', spanId: 'j-step', parentSpanId: 'j-root', name: 'given an owner with a pet',
+      kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
+      attributes: {'genseq.participant': 'Test'},
+    },
+    {
+      traceId: 'j', spanId: 'j-server', parentSpanId: 'j-step', name: 'GET /api/owners/{ownerId}',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_150 * 1e6,
+      attributes: {'http.status_code': '200'},
+    },
+  ];
+  const puml = renderPuml('petclinic-backend/src/test/java/OwnerTest.java', [{
+    title: 'reads an owner back',
+    traces: [spans],
+  }], STATIC);
+
+  expect(puml.indexOf('participant Test')).toBeLessThan(puml.indexOf('participant Backend'));
+  // the sentence lands on the test's lifeline, and the call crosses to the backend
+  expect(puml).toContain('Test -> Test: given an owner with a pet');
+  expect(puml).toContain('Test -> Backend: ');
+  expect(puml).not.toContain('participant Browser');
+});
+
+// The footer states the diagram's provenance, and the three runners are not
+// interchangeable: a @SpringBootTest's picture naming the Cucumber/Playwright tag would
+// send its reader looking for a `@generate_sequence` that the .java file does not carry.
+test('a Java diagram names the annotation a @SpringBootTest actually carries', () => {
+  const java = renderPuml('petclinic-backend/src/test/java/OwnerTest.java', [{
+    title: 'reads an owner back', traces: [],
+  }], STATIC);
+  expect(java).toContain('footer @GenerateSequence');
+  expect(java).not.toContain('@generate_sequence');
+
+  const spec = renderPuml('src/add-visit.spec.ts', [{title: 'adds a visit', traces: []}], STATIC);
+  expect(spec).toContain('footer @generate_sequence');
+});

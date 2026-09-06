@@ -51,3 +51,24 @@ test('the header wraps the title in the link, and is the bare title without one'
     .toBe(`[[src://x.spec.ts:3${TEST_LINK_TOOLTIP} Add a visit]]`);
   expect(linkedSectionTitle('Add a visit', undefined)).toBe('Add a visit');
 });
+
+// A @SpringBootTest's section is titled with the sentence JUnit shows for the method
+// (@DisplayNameGeneration(PrettyTestNames)), which is never written in the .java file —
+// the method is `adds_a_visit_to_an_existing_pet`. Matching the title as a literal
+// substring therefore finds nothing, and the diagram loses the line it links to.
+const JAVA = [
+  'class AddVisitSequenceTest {',
+  '    @Test',
+  '    void adds_a_visit_to_an_existing_pet() {',
+  '    }',
+].join('\n');
+
+test('a Java test is found by the sentence JUnit displays, not by a literal match', () => {
+  expect(lineOfTest(JAVA, 'adds a visit to an existing pet', 'OwnerTest.java')).toBe(3);
+});
+
+test('naming the source keeps the .spec.ts and .feature lookups working', () => {
+  expect(lineOfTest(SPEC, 'Add a visit attended by a vet', 'src/add-visit.spec.ts')).toBe(4);
+  expect(lineOfTest(FEATURE, 'Searching with an empty last name lists every owner',
+    'src/owner-search.feature')).toBe(4);
+});

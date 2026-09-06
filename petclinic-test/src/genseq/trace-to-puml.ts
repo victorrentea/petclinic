@@ -65,7 +65,16 @@ export function parseTempoTrace(tempoJson: any): NormSpan[] {
 
 const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 
+// A span may name its own lifeline. Nothing in a trace otherwise separates the test
+// from the code it drives when both run in one JVM: a @SpringBootTest's MockMvc call and
+// the controller it reaches carry the same `service.name`, so without this they collapse
+// onto one participant and the picture loses the only hop it was drawn to show.
+// Set by petclinic-backend's genseq/Steps.java; the two are one contract.
+const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
+
 function participantOf(span: NormSpan): string {
+  const declared = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
+  if (declared) return declared;
   if (span.serviceName === 'petclinic-frontend') return 'Browser';
   // both the old and the stable database semconv, since the agent can emit either
   const isDb = ['db.system', 'db.system.name', 'db.statement', 'db.query.text']
@@ -239,7 +248,15 @@ const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 // transaction ended somewhere above, and leaves the reader to guess how far up.
 const TRANSACTION_COMMIT = 'Transaction.commit';
 
-const PARTICIPANT_ORDER = ['Browser', 'Backend', 'DB'];
+/** The opt-in a reader will find in the source this diagram was drawn from. */
+function optInOf(title: string): string {
+  return title.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
+}
+
+// Left to right is the direction a call travels. Browser and Test never appear together:
+// one is a browser suite's lifeline, the other a @SpringBootTest's, and each drives the
+// backend from the same place on the page.
+const PARTICIPANT_ORDER = ['Browser', 'Test', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));
@@ -456,8 +473,10 @@ export function renderDiagram(
     'legend right',
     `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'end legend',
-    // footer (bottom of every page) states the diagram's provenance
-    'footer @generate_sequence — generated from real traces, do not edit',
+    // footer (bottom of every page) states the diagram's provenance, naming the opt-in
+    // the reader will actually find in the file above: a .feature/.spec.ts carries the
+    // `@generate_sequence` tag, a @SpringBootTest the `@GenerateSequence` annotation.
+    `footer ${optInOf(title)} — generated from real traces, do not edit`,
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   // The header is the one place the picture can say which test produced it, so it is

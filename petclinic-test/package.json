@@ -20,7 +20,8 @@
     "test:docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit",
     "start:apps": "ts-node start-apps.ts",
     "show-report": "playwright show-report test-results/playwright-report",
-    "test:sequence": "SKIP_SERVER_START=1 playwright test --grep @generate_sequence"
+    "test:sequence": "SKIP_SERVER_START=1 playwright test --grep @generate_sequence",
+    "diagram:java": "GENSEQ_SUITE=java npm run trace:diagram"
   },
   "keywords": [],
   "author": "",
