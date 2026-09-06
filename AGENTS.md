@@ -157,14 +157,11 @@ Core entities and relationships:
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
-- DTO mapping is hand-written in `mapper/` — no MapStruct, no annotation processor
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on each `@RequestBody`
-- No Lombok: write accessors, constructors and `LoggerFactory.getLogger(...)` explicitly
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
 
 ### Frontend design system
-
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 `ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form

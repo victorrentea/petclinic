@@ -1,7 +1,11 @@
 # Lombok is gone from the whole repo: the dependency, the annotation processor
 # paths and lombok.config were all removed, from petclinic-backend and from
-# petclinic-chatbot alike. Accessors, constructors and loggers are written by
-# hand — see AGENTS.md "Java Code Style".
+# petclinic-chatbot alike. Accessors, constructors and loggers are written by hand.
+#
+# This rule is the statement of record. AGENTS.md spends no line on it on purpose:
+# the library is in no pom, so there is nothing for a reader to be warned off — and
+# a ban repeated in prose is one more thing to go stale. `.githooks/pre-commit`
+# covers the other direction, the dependency coming back ahead of the first import.
 #
 # The import is the invariant worth checking: no Lombok annotation compiles
 # without one, and this catches all three spellings — `import lombok.Getter;`,
