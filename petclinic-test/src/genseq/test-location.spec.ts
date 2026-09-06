@@ -58,13 +58,30 @@ test('the header wraps the title in the link, and is the bare title without one'
 // substring therefore finds nothing, and the diagram loses the line it links to.
 const JAVA = [
   'class AddVisitSequenceTest {',
+  '',
+  '    @Test',
+  '    void addsAVisitToAnExistingPet() throws Exception {',
+  '    }',
+  '',
   '    @Test',
   '    void adds_a_visit_to_an_existing_pet() {',
   '    }',
+  '}',
 ].join('\n');
 
 test('a Java test is found by the sentence JUnit displays, not by a literal match', () => {
-  expect(lineOfTest(JAVA, 'adds a visit to an existing pet', 'OwnerTest.java')).toBe(3);
+  // camelCase is what this repo writes; snake_case reads the same through sentenceOf,
+  // and PrettyTestNames shows both as the same sentence.
+  expect(lineOfTest(JAVA, 'adds a visit to an existing pet', 'OwnerTest.java')).toBe(4);
+});
+
+// Only a method declaration counts. A field, a comment or a call that happens to read like
+// the title is not the place a reviewer wants to land.
+test('a Java line that is not a method declaration is never taken for one', () => {
+  const noise = ['class T {', '    // adds a visit to an existing pet', '}'].join('\n');
+  expect(lineOfTest(noise, 'adds a visit to an existing pet', 'T.java')).toBe(2);
+  const callSite = ['class T {', '    void other() { addsAVisitToAnExistingPet(); }', '}'].join('\n');
+  expect(lineOfTest(callSite, 'adds a visit to an existing pet', 'T.java')).toBe(0);
 });
 
 test('naming the source keeps the .spec.ts and .feature lookups working', () => {
