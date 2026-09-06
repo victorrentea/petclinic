@@ -31,8 +31,8 @@ if ! git -C "$ROOT" show "$OLD_REF:$REL" >"$OLD" 2>/dev/null; then
   : >"$OLD"
 fi
 
-# The differ ships with the /human-review skill now — resolved from the symlinked
-# skill locally, fetched on a runner. Keeping a copy here would be a second,
+# The differ ships with the /human-review plugin now — resolved from the installed
+# plugin locally, fetched on a runner. Keeping a copy here would be a second,
 # silently drifting fork of the review pipeline.
 python3 "$("$ROOT/scripts/ensure-human-review.sh")/puml-diff/puml_diff.py" "$OLD" "$ABS" --out "$MERGED"
 echo "[puml-diff] wrote $MERGED" >&2
