@@ -52,10 +52,33 @@ touch -t 203001010000 "$CFG/plugins/cache/human-review/human-review/bbbbbbbbbbbb
 
 run() { (cd "$REPO" && env "$@" bash "$ENSURE"); }
 
-# 1. The installed plugin, newest commit, when nothing overrides it.
+# 1. The installed plugin the CLI says it installed — with a second, superseded sha
+#    directory sitting right beside it. This is the regression that motivated reading the
+#    manifest at all: a plugin update leaves the old sha directory in place with an
+#    identical mtime, so ordering by timestamp tie-breaks alphabetically and hands back the
+#    *superseded* skill. Silently, and for as long as nobody compares SKILL.md by eye.
+cat > "$CFG/plugins/installed_plugins.json" <<JSON
+{"plugins": {"human-review@human-review": [
+  {"scope": "user", "installPath": "$(dirname "$(dirname "$NEW_SHA")")", "version": "bbbbbbbbbbbb"}
+]}}
+JSON
 got="$(run CLAUDE_CONFIG_DIR="$CFG")"
-[ "$got" = "$NEW_SHA" ] || fail "expected the newest installed plugin, got: $got"
-ok "the installed plugin wins, and the newest commit of it"
+[ "$got" = "$NEW_SHA" ] || fail "expected the sha the manifest names, got: $got"
+ok "the installed plugin is read from the CLI's manifest, not guessed"
+
+# 1b. The same layout with the manifest gone. Two candidates and no way to tell them
+#     apart is not a licence to pick one — it falls through to the marketplace clone.
+mv "$CFG/plugins/installed_plugins.json" "$TMP/manifest.bak"
+got="$(run CLAUDE_CONFIG_DIR="$CFG")"
+[ "$got" = "$MARKET" ] || fail "ambiguous sha dirs should fall through, got: $got"
+ok "two indistinguishable installs are declined rather than guessed between"
+
+# 1c. With only one install and no manifest, the scan is unambiguous and may answer.
+rm -rf "$(dirname "$(dirname "$OLD_SHA")")"
+got="$(run CLAUDE_CONFIG_DIR="$CFG")"
+[ "$got" = "$NEW_SHA" ] || fail "a single install should still resolve, got: $got"
+ok "a single install resolves without the manifest"
+mv "$TMP/manifest.bak" "$CFG/plugins/installed_plugins.json"
 
 # 2. $HUMAN_REVIEW_HOME beats the installed plugin — somebody who sets it means it.
 HOME_DIR="$TMP/dev/skills/human-review"
@@ -69,8 +92,8 @@ got="$(run CLAUDE_CONFIG_DIR="$CFG" HUMAN_REVIEW_HOME=/nope/nothing)"
 [ "$got" = "$NEW_SHA" ] || fail "a bogus override broke the cascade, got: $got"
 ok "a bogus \$HUMAN_REVIEW_HOME falls through instead of failing"
 
-# 4. With no plugin installed, the marketplace's own clone answers.
-rm -rf "$CFG/plugins/cache"
+# 4. With no plugin installed at all, the marketplace's own clone answers.
+rm -rf "$CFG/plugins/cache" "$CFG/plugins/installed_plugins.json"
 got="$(run CLAUDE_CONFIG_DIR="$CFG")"
 [ "$got" = "$MARKET" ] || fail "expected the marketplace clone, got: $got"
 ok "the marketplace clone answers when the plugin is not installed"

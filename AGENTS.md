@@ -102,8 +102,11 @@ a runner. Never vendor a second copy — a private fork of the review pipeline d
 silence.
 
 The installed plugin's path carries the installed commit
-(`~/.claude/plugins/cache/human-review/human-review/<sha>/`), so that script globs for the
-newest rather than naming a directory that changes on every plugin update.
+(`~/.claude/plugins/cache/human-review/human-review/<sha>/`), so that script asks the CLI's
+own `installed_plugins.json` which one it installed rather than naming a directory that
+changes on every update — or guessing. An update leaves the previous sha's directory in
+place with an identical mtime, so "the newest one" tie-breaks alphabetically and hands back
+the superseded skill; that happened, and `ensure-human-review-test.sh` now pins it.
 
 ⚠️ **There is no symlink here any more, and putting one back in git is a mistake with a
 history.** `.claude/skills/human-review` was committed for a while as mode 120000 pointing
