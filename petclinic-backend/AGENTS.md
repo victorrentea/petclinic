@@ -27,12 +27,14 @@ lesson: run both and read the two trees side by side. Keep them in sync when the
 - Constructor injection, global exception handling via `@RestControllerAdvice`
 
 **A @SpringBootTest as a sequence diagram:** annotate the class `@GenerateSequence`
-(`src/test/java/.../genseq/`) and say its sentences with `Steps.given/when/and/then(String)`;
-the diagram is filed beside the test as `<TheTest>.java.genseq.puml` — see
-`rest/AddVisitSequenceTest.java`. The annotation is also a JUnit tag, so a plain `mvn test`
-costs nothing: nothing is captured unless the OTel agent is attached and Tempo is up.
-⚠️ **The runner that regenerates these did not survive onto main** — the committed `.puml`
-still names `petclinic-backend/run-tests-with-tracing.sh`, and neither it, the pom's `genseq`
-profile nor `petclinic-test`'s `diagram:java` script are here. Edit the test and the picture
-goes stale with no way to redraw it. The pipeline it belongs to is described in
-`petclinic-test/README.md` and `petclinic-test/AGENTS.md`.
+(`src/test/java/.../genseq/`), say its sentences with `Steps.given/when/and/then(String)`, and
+`./run-tests-with-tracing.sh` draws `<TheTest>.java.genseq.puml` beside the test — the same
+pipeline that draws the browser suites' diagrams, only Tempo has to be running
+(`./start-grafana.sh`; the tests boot their own embedded Postgres). The OTel agent is attached
+only under `-Pgenseq`, so a plain `mvn test` is unaffected and the annotation costs nothing.
+The tooling and the reasoning live in `petclinic-test/README.md` and `petclinic-test/AGENTS.md`.
+
+`Steps.java` sets `genseq.participant=Test` on every span it opens, and the renderer keys the
+test's lifeline off it. That attribute is the whole contract: one JVM, one `service.name`, so
+nothing else in the trace tells the test apart from the code it drives — drop it on either
+side and the picture collapses onto `Backend` with the REST hop gone.

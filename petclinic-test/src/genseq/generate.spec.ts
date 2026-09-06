@@ -3,11 +3,30 @@ import {parseTempoTrace} from './trace-to-puml';
 import {DETAIL_INDEX_VERSION} from './detail-index';
 import * as fs from 'fs';
 import * as path from 'path';
-import {CachedSource, GenerateDeps, TestWindow, detailsPathFor, diagramPathFor, generateFromWindows, mergeCachedSources, renderScenarios, slugify, spanCachePathFor} from './generate';
+import {CachedSource, GenerateDeps, JAVA_SOURCES, TestWindow, detailsPathFor, diagramPathFor, generateFromWindows, mergeCachedSources, ownedSourcesFromEnv, renderScenarios, slugify, spanCachePathFor} from './generate';
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
 );
+
+// GENSEQ_SUITE is the only way Maven can tell the generator which suite it owns — the two
+// Node runners pass a regex to runGenerate() directly. When this mapping went missing, a Java
+// run still wrote its windows, and `npm run diagram:java` still exited 0: with no owner it took
+// the replay-the-cache path and silently re-rendered the previous run's diagrams instead.
+test('GENSEQ_SUITE=java makes a run own the .java sources', () => {
+  expect(ownedSourcesFromEnv({GENSEQ_SUITE: 'java'})).toBe(JAVA_SOURCES);
+  expect(JAVA_SOURCES.test('petclinic-backend/src/test/java/.../AddVisitSequenceTest.java')).toBe(true);
+  expect(JAVA_SOURCES.test('src/add-visit.spec.ts')).toBe(false);
+});
+
+test('an unset or unknown GENSEQ_SUITE owns nothing, which is the replay path', () => {
+  expect(ownedSourcesFromEnv({})).toBeUndefined();
+  expect(ownedSourcesFromEnv({GENSEQ_SUITE: 'kotlin'})).toBeUndefined();
+});
+
+test('GENSEQ_SUITE is read case- and space-insensitively', () => {
+  expect(ownedSourcesFromEnv({GENSEQ_SUITE: '  Java '})).toBe(JAVA_SOURCES);
+});
 
 test('slugify makes filesystem-safe names', () => {
   expect(slugify('Add a visit!')).toBe('add-a-visit');
@@ -263,4 +282,44 @@ test('a run replaces its own sources in the span cache and keeps the rest', () =
 test('an empty cache merges to just what was fetched', () => {
   const fresh = [{source: 'a.feature', scenarios: []}];
   expect(mergeCachedSources([], fresh as any)).toEqual(fresh);
+});
+
+// A Java diagram is filed next to its .java file, so its window's `source` climbs out of
+// petclinic-test with `../petclinic-backend/…`. That is a correct path and a useless
+// title: `..` is only meaningful to a reader who knows which directory the generator
+// happened to run in. Both the heading and the click-through handle name it from the
+// repo root instead, which is what the review page resolves against anyway.
+test('a source outside petclinic-test is titled from the repo root, not with ../', () => {
+  const written: Record<string, string> = {};
+  renderScenarios(
+    [{source: '../petclinic-backend/src/test/java/OwnerTest.java', scenarios: [{
+      title: 'reads an owner back', traces: [],
+    }]}],
+    '/repo/petclinic-test',
+    {
+      writeFile: (p, c) => {written[p] = c;},
+      readFile: () => undefined,
+      removeFile: () => undefined,
+      log: () => undefined,
+    },
+  );
+  const puml = Object.values(written)[0];
+  expect(puml).toContain('title petclinic-backend/src/test/java/OwnerTest.java');
+  expect(puml).not.toContain('..');
+});
+
+// …while a source that stays inside keeps the module-relative name it always had.
+test('a petclinic-test source keeps its module-relative title', () => {
+  const written: Record<string, string> = {};
+  renderScenarios(
+    [{source: 'src/add-visit.spec.ts', scenarios: [{title: 'adds a visit', traces: []}]}],
+    '/repo/petclinic-test',
+    {
+      writeFile: (p, c) => {written[p] = c;},
+      readFile: () => undefined,
+      removeFile: () => undefined,
+      log: () => undefined,
+    },
+  );
+  expect(Object.values(written)[0]).toContain('title src/add-visit.spec.ts');
 });

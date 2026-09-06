@@ -38,6 +38,19 @@
   async collector probe, so the opening navigation produced no trace and the diagram lost its
   first sentence. The probe is kept for everyone else and skipped when `__E2E_TEST_NAME__` is
   already on the page.
+- A `@SpringBootTest` annotated `@GenerateSequence` feeds the *same* pipeline: the JVM writes a
+  trace window into `test-results/trace-windows/` and `npm run diagram:java` (`GENSEQ_SUITE=java`)
+  fetches and renders it. `GENSEQ_SUITE` is how Maven names its suite — the two Node runners pass
+  a regex to `runGenerate()` directly, and with no owner the generator takes the replay-the-cache
+  path and never asks Tempo for the traces the Java run just produced. Its diagram is filed next
+  to the `.java` file, so its window's `source` climbs out of here as `../petclinic-backend/…`,
+  which the heading renders from the repo root instead — `..` means nothing to a reader who does
+  not know where the generator ran. There the sentences are real spans — one JVM, one OTel
+  context — and **`genseq.participant=Test` is what keeps the test off the app's lifeline**: it is
+  a contract with `petclinic-backend`'s `genseq/Steps.java`, and either half dropping it collapses
+  the whole picture onto `Backend`. Code:
+  `petclinic-backend/src/test/java/victor/training/petclinic/genseq/`, run with
+  `petclinic-backend/run-tests-with-tracing.sh` (needs only Tempo up).
 - A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
   repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
   one, else the `operationId`). The route says where a call went; the name says what it was for.
