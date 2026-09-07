@@ -1,31 +1,25 @@
 # Project Memory
-
 Coding agents auto-load this file in any new conversation in this folder.
-It's the most important file in any repo, pushed on git, added to on any AI failure/slop, carefully 👱🏻‍♂️-curated every retrospective.
-**This file is the single source of truth. Never write rules into `CLAUDE.md`.**
-`CLAUDE.md` next to it holds one line — `@AGENTS.md` — and exists only because Claude
-Code does not read AGENTS.md; that import is how it reaches this file. Copilot CLI and
-Codex read this [standard](https://agents.md) file natively and have no import of their
-own, so anything written into CLAUDE.md would be visible to Claude Code alone. It is not
-a symlink, and must never become one again: Git for Windows checks symlinks out as text
-files containing their target path, so a clone would hand every agent the word "CLAUDE.md"
-as its complete instructions. `scripts/check-agents-md.sh` enforces all of this (pre-push
-and CI, on Linux and on Windows).
+It's the most important file on this Git repo.
+Add to rules here to prevent AI fail/slop.
+Review carefully its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
-Copilot: use this file over your proprietary .github/copilot-instructions.md
+## AGENTS.md is the single source of truth
+Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
+GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
+Warning: git-pushed symlinks don't work reliably when clonsed on Windows machines.
 
 ## Additional Knowledge
-
 Load one of these when the task calls for it — they are the sole source of truth on their subject.
 
 When a guardrail test fails, or a living diagram no longer matches the code, the drift
-checks and what each of them asserts are in [GUARDRAILS.md](GUARDRAILS.md).
+checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS.md).
+
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Project Overview
-
-Full-stack PetClinic application with Angular frontend and Spring Boot backend, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
+Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
@@ -78,6 +72,13 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
+
+### Frontend UX design system
+`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
+single-select in a form goes through `<app-combo>` (`ComboComponent`), a
+`ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
+template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
+design system has no multi-select yet.
 
 ### /human-review is a plugin, and nothing of it lives in this repo
 
@@ -150,7 +151,6 @@ REST Contract:
 - PetTypes: `/api/pettypes`
 - Specialties: `/api/specialties`
 - Users: `/api/users`
-OpenAPI docs: http://localhost:8080/swagger-ui.html
 
 ## Domain Model
 Core entities and relationships:
@@ -159,22 +159,13 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Development Notes
-
-### Frontend UX design system
-`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
-single-select in a form goes through `<app-combo>` (`ComboComponent`), a
-`ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
-template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
-design system has no multi-select yet.
-
-### Java Code Style
+## Java Code Style
 - Keep line length < 120 chars
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
 - Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
+- Apply `@Validated` on every `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
 
 ## Core Values
@@ -182,6 +173,6 @@ design system has no multi-select yet.
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind comments when deleting or moving stuff, to prevent later 'heresy resurrection'
 - Always run tests after any complex refactoring
-- Keep your explanations concise as for senior engineers with a pinch of ADHD
-- Challenge ambiguous prompts - I love hearing I'm wrong!  
+- Be brief
+- Challenge ambiguous prompts - I love hearing I'm wrong! I want a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md
