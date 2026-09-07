@@ -9,6 +9,7 @@ import {Owner} from '../../owners/owner';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
+import {earliestVisitDate, latestVisitDate} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-add',
@@ -68,6 +69,14 @@ export class VisitAddComponent implements OnInit {
       },
       error => this.errorMessage = error as any
     );
+  }
+
+  get minVisitDate(): Date | null {
+    return earliestVisitDate(this.currentPet);
+  }
+
+  get maxVisitDate(): Date {
+    return latestVisitDate();
   }
 
   gotoOwnerDetail() {

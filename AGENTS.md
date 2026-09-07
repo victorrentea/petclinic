@@ -177,6 +177,19 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
+### Visit date range
+A visit date is pinned to `[pet.birthDate, today + 1 year]` on **both** sides of the wire
+(GitHub issue #40 — the form used to accept year 0009 and the API stored it). The lower bound
+is per-pet, so it cannot be a Bean Validation annotation on the DTO: `VisitRestController`
+loads the pet and checks the range itself, throwing `VisitDateOutOfRangeException` → 400.
+⚠️ That exception lives in `rest.error` — which is why `packages.puml` now carries
+`[REST] --> [REST Error]`. It does **not** belong in `domain`: `ConceptualModelDiagramTest`
+reads every class there as a domain concept and demands it be drawn on the conceptual map.
+The frontend half is `petclinic-frontend/src/app/visits/visit-date-range.ts`, shared by
+visit-add and visit-edit so the datepicker offers exactly the range the API will accept.
+⚠️ Its `parseLocalDate` exists because `new Date('2018-08-06')` is parsed as **UTC** midnight,
+which lands on the previous day west of Greenwich and would shift the bound by one.
+
 ## Task Modifiers
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names

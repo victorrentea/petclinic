@@ -9,15 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.VisitDateOutOfRangeException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,10 +29,13 @@ import java.util.List;
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class VisitRestController {
     private final VisitRepository visitRepository;
+    private final PetRepository petRepository;
     private final VisitMapper visitMapper;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+    public VisitRestController(VisitRepository visitRepository, PetRepository petRepository,
+            VisitMapper visitMapper) {
         this.visitRepository = visitRepository;
+        this.petRepository = petRepository;
         this.visitMapper = visitMapper;
     }
 
@@ -63,6 +70,8 @@ public class VisitRestController {
     // repository-only, no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
+        Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
+        requireDateWithinRange(visitDto.getDate(), pet);
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return visit.getId();
@@ -71,9 +80,25 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        requireDateWithinRange(visitDto.getDate(), currentVisit.getPet());
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
+    }
+
+    /**
+     * A visit can neither predate the pet nor be booked more than a year ahead (GitHub issue #40).
+     * The lower bound is per-pet, so this cannot live as an annotation on the DTO.
+     */
+    private void requireDateWithinRange(LocalDate date, Pet pet) {
+        if (date == null) {
+            return;
+        }
+        LocalDate earliest = pet.getBirthDate();
+        LocalDate latest = LocalDate.now().plusYears(1);
+        if ((earliest != null && date.isBefore(earliest)) || date.isAfter(latest)) {
+            throw new VisitDateOutOfRangeException(date, earliest, latest);
+        }
     }
 
     @Transactional
