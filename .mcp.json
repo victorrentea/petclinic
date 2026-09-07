@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "context7": {
+      "//": "⚠️ you need a paid license to use this in corporate env",
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
@@ -35,7 +36,6 @@
         "GRAFANA_PASSWORD": "admin"
       }
     },
-
 
     "petclinic-mcp": {
       "type": "http",
