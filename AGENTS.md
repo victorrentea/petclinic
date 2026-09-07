@@ -9,15 +9,6 @@ Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENT
 GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
 Warning: git-pushed symlinks don't work reliably when clonsed on Windows machines.
 
-## Additional Knowledge
-Load one of these when the task calls for it — they are the sole source of truth on their subject.
-
-When a guardrail test fails, or a living diagram no longer matches the code, the drift
-checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS.md).
-
-To see how the pieces fit together, every diagram generated from the code is rendered in
-[ARCHITECTURE.md](ARCHITECTURE.md).
-
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
@@ -77,6 +68,15 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
+
+## Additional Knowledge
+Load one of these when the task calls for it — they are the sole source of truth on their subject.
+
+When a guardrail test fails, or a living diagram no longer matches the code, the drift
+checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS.md).
+
+To see how the pieces fit together, every diagram generated from the code is rendered in
+[ARCHITECTURE.md](ARCHITECTURE.md).
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
