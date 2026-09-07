@@ -12,6 +12,9 @@ if [[ ! -d "$CHATBOT_DIR" ]]; then
   exit 1
 fi
 
+source "$SCRIPT_DIR/scripts/preflight.sh"
+require_ports_free petclinic-chatbot 8082
+
 # OpenAI key — used for both chat and embeddings. Take it from the env, else from
 # secrets.env (gitignored). Never commit the key.
 if [[ -z "${OPENAI_API_KEY:-}" && -f "$SCRIPT_DIR/secrets.env" ]]; then
@@ -29,4 +32,5 @@ echo "RAG embeddings are cached on disk (rag-vector-store.json) — delete it to
 echo ""
 
 cd "$CHATBOT_DIR"
+announce_exit_failures petclinic-chatbot
 mvn -ntp spring-boot:run

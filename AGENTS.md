@@ -35,6 +35,11 @@ Each script is foreground; run them in separate terminals.
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
+Each app prints `✅ started <name> on port <n>` once it is actually ready, and `❌ …` when
+it is not coming — wait for whichever line appears, never for a fixed timeout. A port
+already held by an orphan from a previous run is reported in under a second, before
+anything is built or wiped; the scripts never kill the squatter, they print its PID and
+stop, so freeing it is your call.
 
 ### Backend (petclinic-backend/)
 ```sh
