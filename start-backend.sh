@@ -12,6 +12,11 @@ if [[ ! -d "$BACKEND_DIR" ]]; then
   exit 1
 fi
 
+# Ahead of the OTel download and `mvn clean`, which would otherwise burn ~12s
+# only for Spring to report "Port 8080 was already in use".
+source "$SCRIPT_DIR/scripts/preflight.sh"
+require_ports_free petclinic-backend 8080
+
 # 2.20+ is what can capture bound query parameters (db.query.parameter.<n>);
 # 2.10 has no such flag, so the diagrams could only ever show `?`.
 AGENT_VERSION="2.20.1"
@@ -67,6 +72,7 @@ fi
 echo ""
 
 cd "$BACKEND_DIR"
+announce_exit_failures petclinic-backend
 if [[ -n "$OTEL_JVM_ARGS" ]]; then
   mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="$OTEL_JVM_ARGS"
 else
