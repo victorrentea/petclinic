@@ -161,6 +161,13 @@ Core entities and relationships:
 
 ## Development Notes
 
+### Frontend UX design system
+`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
+single-select in a form goes through `<app-combo>` (`ComboComponent`), a
+`ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
+template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
+design system has no multi-select yet.
+
 ### Java Code Style
 - Keep line length < 120 chars
 - Keep methods under 30 lines
@@ -170,18 +177,11 @@ Core entities and relationships:
 - Apply `@Validated` on each `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
 
-### Frontend design system
-`petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
-single-select in a form goes through `<app-combo>` (`ComboComponent`), a
-`ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
-template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
-design system has no multi-select yet.
-
-## Task Modifiers
+## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind comments when deleting or moving stuff, to prevent later 'heresy resurrection'
-- Always run tests after any refactoring
-- Keep your explanations concise
+- Always run tests after any complex refactoring
+- Keep your explanations concise as for senior engineers with a pinch of ADHD
 - Challenge ambiguous prompts - I love hearing I'm wrong!  
-- Before any git commit, make sure your changes are reflected in AGENTS.md
+- Before any git commit, make sure to update any drifted knowledge in AGENTS.md
