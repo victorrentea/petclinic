@@ -63,7 +63,9 @@ public class VetRestController {
     @PostMapping
     public ResponseEntity<Void> addVet(@RequestBody @Validated VetDto vetDto) {
         Vet vet = vetMapper.toVet(vetDto);
-        updateSpecialties(vet);
+        vet.setId(null); // id is server-generated; ignore any client-supplied value
+        resolveManagedSpecialties(vet);
+        vetRepository.save(vet);
         URI createdVetUri = UriComponentsBuilder.fromPath("/api/vets/{id}")
                 .buildAndExpand(vet.getId()).toUri();
         return ResponseEntity.created(createdVetUri).build();
@@ -78,17 +80,18 @@ public class VetRestController {
         for (Specialty spec : specialtyMapper.toSpecialty(vetDto.getSpecialties())) {
             currentVet.addSpecialty(spec);
         }
-        updateSpecialties(currentVet);
+        resolveManagedSpecialties(currentVet);
+        vetRepository.save(currentVet);
     }
 
-    private void updateSpecialties(Vet currentVet) {
-        if (currentVet.getNrOfSpecialties() > 0) {
-            Set<String> names = currentVet.getSpecialties().stream().map(Specialty::getName)
+    // replaces the (possibly transient) specialties on the vet with the managed entities found by name
+    private void resolveManagedSpecialties(Vet vet) {
+        if (vet.getNrOfSpecialties() > 0) {
+            Set<String> names = vet.getSpecialties().stream().map(Specialty::getName)
                     .collect(Collectors.toSet());
-            List<Specialty> vetSpecialities = specialtyRepository.findSpecialtiesByNameIn(names);
-            currentVet.setSpecialties(vetSpecialities);
+            List<Specialty> managedSpecialties = specialtyRepository.findSpecialtiesByNameIn(names);
+            vet.setSpecialties(managedSpecialties);
         }
-        vetRepository.save(currentVet);
     }
 
     @DeleteMapping("{vetId}")
