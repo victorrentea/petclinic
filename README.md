@@ -83,6 +83,7 @@ The tasks below have the pattern: **<description>** – <prompt to paste to agen
 - **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
 - **Query tuning** — optimize the "search owners by last name" query.
 - **Speedup tests** — speedup the backend tests.
+- **Rule → guardrail** — replace the AGENTS.md rule "Keep line length < 120 chars" with a script that enforces it on `git push`, over the Java files the push actually changes.
 - **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
   
 Some tasks above require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
