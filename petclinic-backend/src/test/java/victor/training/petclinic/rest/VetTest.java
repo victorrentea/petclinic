@@ -128,7 +128,7 @@ public class VetTest {
     @Test
     void update_ok() throws Exception {
         VetDto existing = callGet(vetId);
-        existing.setFirstName("James Updated");
+        existing.setFirstName("JamesUpdated");
 
         mockMvc.perform(put("/api/vets/" + vetId)
                 .content(mapper.writeValueAsString(existing))
@@ -137,7 +137,7 @@ public class VetTest {
 
         // assert the update took place
         VetDto updated = callGet(vetId);
-        assertThat(updated.getFirstName()).isEqualTo("James Updated");
+        assertThat(updated.getFirstName()).isEqualTo("JamesUpdated");
     }
 
     @Test

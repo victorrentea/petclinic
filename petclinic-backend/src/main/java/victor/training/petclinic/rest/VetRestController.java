@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.SpecialtyMapper;
 import victor.training.petclinic.mapper.VetMapper;
@@ -71,7 +70,7 @@ public class VetRestController {
     }
 
     @PutMapping("{vetId}")
-    public void updateVet(@PathVariable int vetId, @RequestBody VetDto vetDto) {
+    public void updateVet(@PathVariable int vetId, @RequestBody @Validated VetDto vetDto) {
         Vet currentVet = vetRepository.findById(vetId).orElseThrow();
         currentVet.setFirstName(vetDto.getFirstName());
         currentVet.setLastName(vetDto.getLastName());
@@ -92,7 +91,6 @@ public class VetRestController {
         vetRepository.save(currentVet);
     }
 
-    @Transactional
     @DeleteMapping("{vetId}")
     public void deleteVet(@PathVariable int vetId) {
         Vet vet = vetRepository.findById(vetId).orElseThrow();
