@@ -30,6 +30,13 @@ Full-stack PetClinic application with Angular frontend and Spring Boot backend, 
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `petclinic-database/` - Embedded PostgreSQL launcher (Maven module), used by `./start-database.sh`
+- `petclinic-chatbot/` - Spring AI RAG chatbot module (Maven-built)
+- `petclinic-observability/` - Grafana/Tempo/otel-collector stack (`./start-grafana.sh`, docker-compose)
+- `petclinic-test/` - end-to-end tests (Playwright/Cucumber, npm-built); see `petclinic-test/AGENTS.md`
+- `refactoring-legacy/` - self-contained OpenRewrite recipes module (Maven-built), not wired into the backend build
+- `user-manual/` - end-user documentation (`manual.md` + screenshots)
+- `scripts/` - repo-wide helper/check scripts (e.g. `check-agents-md.sh`)
 
 ## Common Commands
 
@@ -40,23 +47,6 @@ Each script is foreground; run them in separate terminals.
 ./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
-```
-
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
 ```
 
 ## Architecture
@@ -123,16 +113,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 - Default test user: `admin`/`admin`
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
-OpenAPI docs: http://localhost:8080/swagger-ui.html
+REST Contract kept in sync with BE and FE code: `openapi.yaml`.
 
 ## Domain Model
 Core entities and relationships:
@@ -143,15 +124,6 @@ Core entities and relationships:
 
 ## Development Notes
 
-### Java Code Style
-- Keep line length < 120 chars
-- Keep methods under 30 lines
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on each `@RequestBody`
-- Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
-
 ### Frontend design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
@@ -159,28 +131,11 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
-### Visit date range
-A visit date is pinned to `[pet.birthDate, today + 1 year]` on **both** sides of the wire
-(GitHub issue #40 — the form used to accept year 0009 and the API stored it). The lower bound
-is per-pet, so it cannot be a Bean Validation annotation on the DTO: `VisitRestController`
-loads the pet and checks the range itself, throwing `VisitDateOutOfRangeException` → 400.
-⚠️ That exception lives in `rest.error` — which is why `packages.puml` now carries
-`[REST] --> [REST Error]`. It does **not** belong in `domain`: `ConceptualModelDiagramTest`
-reads every class there as a domain concept and demands it be drawn on the conceptual map.
-The frontend half is `<app-visit-date-field>` (`visits/visit-date-field/`) — the whole Date
-form-group, used by both visit-add and visit-edit, over the bounds in `visits/visit-date-range.ts`,
-so the datepicker offers exactly the range the API will accept. It exists as a component
-because Sonar's `new_duplicated_lines_density` gate (3%) counts the two templates' identical
-lines: state the field once. It hands the parent's `NgForm` down through `viewProviders`, which
-is what keeps its `name="date"` a control of the surrounding form.
-⚠️ Its `parseLocalDate` exists because `new Date('2018-08-06')` is parsed as **UTC** midnight,
-which lands on the previous day west of Greenwich and would shift the bound by one.
-
-## Task Modifiers
+## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind comments when deleting or moving stuff, to prevent later 'heresy resurrection'
-- Always run tests after any refactoring
-- Keep your explanations concise
+- Always run tests after any complex refactoring
+- Keep your explanations concise as for senior engineers with a pinch of ADHD
 - Challenge ambiguous prompts - I love hearing I'm wrong!  
-- Before any git commit, make sure your changes are reflected in AGENTS.md
+- Before any git commit, make sure to update any drifted knowledge in AGENTS.md

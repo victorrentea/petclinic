@@ -23,7 +23,7 @@ public class OpenApiExtractorTest {
     @Autowired
     MockMvc mockMvc;
 
-    @Test
+    @Test // not a test
     void generateOpenApiYaml() throws Exception {
         String yaml = mockMvc.perform(get("/v3/api-docs.yaml")).andReturn().getResponse().getContentAsString();
         Path target = Path.of("../openapi.yaml");
