@@ -40,12 +40,12 @@
         }
       ]
     },
-    "1fv50ul": {
+    "1vbj9c7": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Harry\",\n  \"lastName\": \"Potter\",\n  \"address\": \"4 Privet Drive\",\n  \"city\": \"Little Whinging\",\n  \"telephone\": \"0119084455\",\n  \"id\": 2,\n  \"pets\": [\n    {\n      \"name\": \"Hedwig\",\n      \"birthDate\": \"2018-08-06\",\n      \"type\": {\n        \"name\": \"bird\",\n        \"id\": 5\n      },\n      \"id\": 2,\n      \"ownerId\": 2,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788516851415\",\n          \"id\": 42,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"0026-09-04\",\n          \"description\": \"asdasd\",\n          \"id\": 29,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Harry\",\n  \"lastName\": \"Potter\",\n  \"address\": \"4 Privet Drive\",\n  \"city\": \"Little Whinging\",\n  \"telephone\": \"0119084455\",\n  \"id\": 2,\n  \"pets\": [\n    {\n      \"name\": \"Hedwig\",\n      \"birthDate\": \"2018-08-06\",\n      \"type\": {\n        \"name\": \"bird\",\n        \"id\": 5\n      },\n      \"id\": 2,\n      \"ownerId\": 2,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788519674962\",\n          \"id\": 43,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788516851415\",\n          \"id\": 42,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"0026-09-04\",\n          \"description\": \"asdasd\",\n          \"id\": 29,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     },
@@ -62,16 +62,25 @@
         }
       ]
     },
-    "1jmhw1b": {
+    "00pxq5p": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"name\": \"Hedwig\",\n  \"birthDate\": \"2018-08-06\",\n  \"type\": {\n    \"name\": \"bird\",\n    \"id\": 5\n  },\n  \"id\": 2,\n  \"ownerId\": 2,\n  \"visits\": [\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1788516851415\",\n      \"id\": 42,\n      \"petId\": 2,\n      \"petName\": \"Hedwig\",\n      \"ownerId\": 2,\n      \"ownerFirstName\": \"Harry\",\n      \"ownerLastName\": \"Potter\"\n    },\n    {\n      \"date\": \"0026-09-04\",\n      \"description\": \"asdasd\",\n      \"id\": 29,\n      \"petId\": 2,\n      \"petName\": \"Hedwig\",\n      \"ownerId\": 2,\n      \"ownerFirstName\": \"Harry\",\n      \"ownerLastName\": \"Potter\"\n    }\n  ]\n}"
+          "text": "{\n  \"name\": \"Hedwig\",\n  \"birthDate\": \"2018-08-06\",\n  \"type\": {\n    \"name\": \"bird\",\n    \"id\": 5\n  },\n  \"id\": 2,\n  \"ownerId\": 2,\n  \"visits\": [\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1788516851415\",\n      \"id\": 42,\n      \"petId\": 2,\n      \"petName\": \"Hedwig\",\n      \"ownerId\": 2,\n      \"ownerFirstName\": \"Harry\",\n      \"ownerLastName\": \"Potter\"\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1788519674962\",\n      \"id\": 43,\n      \"petId\": 2,\n      \"petName\": \"Hedwig\",\n      \"ownerId\": 2,\n      \"ownerFirstName\": \"Harry\",\n      \"ownerLastName\": \"Potter\"\n    },\n    {\n      \"date\": \"0026-09-04\",\n      \"description\": \"asdasd\",\n      \"id\": 29,\n      \"petId\": 2,\n      \"petName\": \"Hedwig\",\n      \"ownerId\": 2,\n      \"ownerFirstName\": \"Harry\",\n      \"ownerLastName\": \"Potter\"\n    }\n  ]\n}"
         }
       ]
     },
-    "0zdhg4g": {
+    "1vz7gdn": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"firstName\": \"Harry\",\n  \"lastName\": \"Potter\",\n  \"address\": \"4 Privet Drive\",\n  \"city\": \"Little Whinging\",\n  \"telephone\": \"0119084455\",\n  \"id\": 2,\n  \"pets\": [\n    {\n      \"name\": \"Hedwig\",\n      \"birthDate\": \"2018-08-06\",\n      \"type\": {\n        \"name\": \"bird\",\n        \"id\": 5\n      },\n      \"id\": 2,\n      \"ownerId\": 2,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788516851415\",\n          \"id\": 42,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788519674962\",\n          \"id\": 43,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"0026-09-04\",\n          \"description\": \"asdasd\",\n          \"id\": 29,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        }\n      ]\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "0dtdyev": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -79,26 +88,26 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1788519674962', 2, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1788525290197', 2, ?)"
           }
         }
       ]
     },
-    "0ewb2ka": {
+    "0r8ruy3": {
       "title": "Browser → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
       "steps": [
         {
           "label": "request body",
-          "text": "{\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Hedwig\",\n    \"birthDate\": \"2018-08-06\",\n    \"type\": {\n      \"name\": \"bird\",\n      \"id\": 5\n    },\n    \"id\": 2,\n    \"ownerId\": 2,\n    \"visits\": [\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1788516851415\",\n        \"id\": 42,\n        \"petId\": 2,\n        \"petName\": \"Hedwig\",\n        \"ownerId\": 2,\n        \"ownerFirstName\": \"Harry\",\n        \"ownerLastName\": \"Potter\"\n      },\n      {\n        \"date\": \"0026-09-04\",\n        \"description\": \"asdasd\",\n        \"id\": 29,\n        \"petId\": 2,\n        \"petName\": \"Hedwig\",\n        \"ownerId\": 2,\n        \"ownerFirstName\": \"Harry\",\n        \"ownerLastName\": \"Potter\"\n      }\n    ]\n  },\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1788519674962\"\n}"
+          "text": "{\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Hedwig\",\n    \"birthDate\": \"2018-08-06\",\n    \"type\": {\n      \"name\": \"bird\",\n      \"id\": 5\n    },\n    \"id\": 2,\n    \"ownerId\": 2,\n    \"visits\": [\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1788516851415\",\n        \"id\": 42,\n        \"petId\": 2,\n        \"petName\": \"Hedwig\",\n        \"ownerId\": 2,\n        \"ownerFirstName\": \"Harry\",\n        \"ownerLastName\": \"Potter\"\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1788519674962\",\n        \"id\": 43,\n        \"petId\": 2,\n        \"petName\": \"Hedwig\",\n        \"ownerId\": 2,\n        \"ownerFirstName\": \"Harry\",\n        \"ownerLastName\": \"Potter\"\n      },\n      {\n        \"date\": \"0026-09-04\",\n        \"description\": \"asdasd\",\n        \"id\": 29,\n        \"petId\": 2,\n        \"petName\": \"Hedwig\",\n        \"ownerId\": 2,\n        \"ownerFirstName\": \"Harry\",\n        \"ownerLastName\": \"Potter\"\n      }\n    ]\n  },\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1788525290197\"\n}"
         }
       ]
     },
-    "1vbj9c7": {
+    "1jrnel3": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Harry\",\n  \"lastName\": \"Potter\",\n  \"address\": \"4 Privet Drive\",\n  \"city\": \"Little Whinging\",\n  \"telephone\": \"0119084455\",\n  \"id\": 2,\n  \"pets\": [\n    {\n      \"name\": \"Hedwig\",\n      \"birthDate\": \"2018-08-06\",\n      \"type\": {\n        \"name\": \"bird\",\n        \"id\": 5\n      },\n      \"id\": 2,\n      \"ownerId\": 2,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788519674962\",\n          \"id\": 43,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788516851415\",\n          \"id\": 42,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"0026-09-04\",\n          \"description\": \"asdasd\",\n          \"id\": 29,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Harry\",\n  \"lastName\": \"Potter\",\n  \"address\": \"4 Privet Drive\",\n  \"city\": \"Little Whinging\",\n  \"telephone\": \"0119084455\",\n  \"id\": 2,\n  \"pets\": [\n    {\n      \"name\": \"Hedwig\",\n      \"birthDate\": \"2018-08-06\",\n      \"type\": {\n        \"name\": \"bird\",\n        \"id\": 5\n      },\n      \"id\": 2,\n      \"ownerId\": 2,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788525290197\",\n          \"id\": 44,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788516851415\",\n          \"id\": 42,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1788519674962\",\n          \"id\": 43,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        },\n        {\n          \"date\": \"0026-09-04\",\n          \"description\": \"asdasd\",\n          \"id\": 29,\n          \"petId\": 2,\n          \"petName\": \"Hedwig\",\n          \"ownerId\": 2,\n          \"ownerFirstName\": \"Harry\",\n          \"ownerLastName\": \"Potter\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }
