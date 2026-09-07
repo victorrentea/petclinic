@@ -5,7 +5,7 @@ import {Pet} from '../pets/pet';
 
 /** The pet's birth date — a visit cannot predate the animal it is for. Null when unknown. */
 export function earliestVisitDate(pet: Pet): Date | null {
-  if (!pet || !pet.birthDate) {
+  if (!pet?.birthDate) {
     return null;
   }
   return parseLocalDate(String(pet.birthDate));
