@@ -212,6 +212,71 @@ public class VisitTest {
         assertThat(updated.getDescription()).isEqualTo("updated description");
     }
 
+    private int postVisitOn(LocalDate date) throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(date);
+        newVisit.setDescription("annual checkup");
+        return mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getStatus();
+    }
+
+    // Issue #40: the date used to be unbounded, so year 0009 was accepted and stored.
+    @Test
+    void create_rejectsDateBeforeThePetWasBorn() throws Exception {
+        assertThat(postVisitOn(PetTest.BIRTH_DATE.minusDays(1))).isEqualTo(400);
+    }
+
+    @Test
+    void create_rejectsTheAbsurdYearFromTheBugReport() throws Exception {
+        assertThat(postVisitOn(LocalDate.of(9, 7, 20))).isEqualTo(400);
+    }
+
+    @Test
+    void create_rejectsDateMoreThanOneYearAhead() throws Exception {
+        assertThat(postVisitOn(LocalDate.now().plusYears(1).plusDays(1))).isEqualTo(400);
+    }
+
+    @Test
+    void create_acceptsTheBirthDateItself() throws Exception {
+        assertThat(postVisitOn(PetTest.BIRTH_DATE)).isEqualTo(201);
+    }
+
+    @Test
+    void create_acceptsExactlyOneYearAhead() throws Exception {
+        assertThat(postVisitOn(LocalDate.now().plusYears(1))).isEqualTo(201);
+    }
+
+    @Test
+    void create_explainsWhyTheDateWasRejected() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.of(9, 7, 20));
+        newVisit.setDescription("annual checkup");
+
+        String body = mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).contains("0009-07-20").contains("must be between");
+    }
+
+    @Test
+    void update_rejectsDateBeforeThePetWasBorn() throws Exception {
+        VisitFieldsDto fields = new VisitFieldsDto();
+        fields.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        fields.setDescription("backdated");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(fields))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     void findVisitsByPetId() {
         // Add a second visit for the same pet

@@ -61,24 +61,6 @@ npm run e2e                         # Protractor e2e tests
 
 ## Architecture
 
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
-- Constructor injection, global exception handling via `@RestControllerAdvice`
-
 ### /human-review is a plugin, and nothing of it lives in this repo
 
 It is installed, not vendored:
@@ -185,8 +167,12 @@ loads the pet and checks the range itself, throwing `VisitDateOutOfRangeExceptio
 ⚠️ That exception lives in `rest.error` — which is why `packages.puml` now carries
 `[REST] --> [REST Error]`. It does **not** belong in `domain`: `ConceptualModelDiagramTest`
 reads every class there as a domain concept and demands it be drawn on the conceptual map.
-The frontend half is `petclinic-frontend/src/app/visits/visit-date-range.ts`, shared by
-visit-add and visit-edit so the datepicker offers exactly the range the API will accept.
+The frontend half is `<app-visit-date-field>` (`visits/visit-date-field/`) — the whole Date
+form-group, used by both visit-add and visit-edit, over the bounds in `visits/visit-date-range.ts`,
+so the datepicker offers exactly the range the API will accept. It exists as a component
+because Sonar's `new_duplicated_lines_density` gate (3%) counts the two templates' identical
+lines: state the field once. It hands the parent's `NgForm` down through `viewProviders`, which
+is what keeps its `name="date"` a control of the surrounding form.
 ⚠️ Its `parseLocalDate` exists because `new Date('2018-08-06')` is parsed as **UTC** midnight,
 which lands on the previous day west of Greenwich and would shift the bound by one.
 

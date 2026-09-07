@@ -44,16 +44,20 @@ public class ExceptionControllerAdvice {
         return pd;
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
-            HttpServletRequest request) {
-        List<String> errors = ValidationErrorExtractor.extract(ex);
+    /** The one 400 body every validation failure gets, whoever detected it. */
+    private ResponseEntity<ProblemDetail> validationFailed(List<String> errors, HttpServletRequest request) {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
+            HttpServletRequest request) {
+        return validationFailed(ValidationErrorExtractor.extract(ex), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -61,24 +65,14 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
             HttpServletRequest request) {
         BindingResult bindingResult = ex.getBindingResult();
-        // reuse ValidationErrorExtractor style: build list of readable messages
-        List<String> errors = ValidationErrorFieldExtractor.extract(bindingResult);
-        log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", errors);
-        return ResponseEntity.badRequest().body(pd);
+        return validationFailed(ValidationErrorFieldExtractor.extract(bindingResult), request);
     }
 
     @ExceptionHandler(VisitDateOutOfRangeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ProblemDetail> handleVisitDateOutOfRange(VisitDateOutOfRangeException ex,
             HttpServletRequest request) {
-        log.warn("Validation failed: {}", ex.getMessage());
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", List.of(ex.getMessage()));
-        return ResponseEntity.badRequest().body(pd);
+        return validationFailed(List.of(ex.getMessage()), request);
     }
 
     @ExceptionHandler(Exception.class)
