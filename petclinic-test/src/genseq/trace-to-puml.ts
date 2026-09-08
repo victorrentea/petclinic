@@ -4,6 +4,7 @@ import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions} from './options';
 import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
 import {OperationNames, defaultOperations, operationNameOf} from './openapi-operations';
 import {linkedSectionTitle} from './test-location';
+import {linkedMethodLabel} from './code-location';
 
 export interface NormSpan {
   traceId: string;
@@ -266,7 +267,7 @@ function orderedParticipants(present: Set<string>): string[] {
 
 function emitTrace(
   spans: NormSpan[], lines: string[], present: Set<string>, options: DiagramOptions,
-  collector: DetailCollector, operations: OperationNames,
+  collector: DetailCollector, operations: OperationNames, methodLinks: MethodLinks,
 ): void {
   const byId = new Map(spans.map((s) => [s.spanId, s]));
   // Indexed once: filtering the whole span array per span made an N+1-heavy trace
@@ -387,7 +388,10 @@ function emitTrace(
       // a self-span (e.g. @WithSpan) whose children — DB calls, downstream
       // requests — render inside its own lifetime
       present.add(p);
-      out.push(`${p} -> ${p}: ${span.name}`);
+      // The one arrow with a free link slot: a crossing arrow already spends its on the
+      // ⊕ that unfolds the SQL or the JSON body, and PlantUML gives a message label
+      // exactly one link. So this is where the picture can point at the code.
+      out.push(`${p} -> ${p}: ${linkedMethodLabel(span.name, methodLinks(span))}`);
     }
 
     if (inner.length > 0) out.push(`activate ${p}`);
@@ -410,6 +414,17 @@ function emitTrace(
 }
 
 /** One tagged test, with every trace its interactions produced. */
+/**
+ * Where a self-call arrow's method lives, as a `src://` handle — see code-location.ts.
+ *
+ * A function rather than a table because only the generator can read the working tree:
+ * the unit tests render from spans alone and get plain labels, which is the same bargain
+ * the section-header links strike in generate.ts.
+ */
+export type MethodLinks = (span: NormSpan) => string | undefined;
+
+const NO_METHOD_LINKS: MethodLinks = () => undefined;
+
 export interface DiagramScenario {
   title: string;
   traces: NormSpan[][];
@@ -428,6 +443,7 @@ export function renderDiagram(
   scenarios: DiagramScenario[],
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
   operations: OperationNames = defaultOperations(),
+  methodLinks: MethodLinks = NO_METHOD_LINKS,
 ): RenderedDiagram {
   // A trace can carry spans yet draw nothing — a lone browser `click`, say. Render
   // each in isolation and keep only what has content, so an empty trace cannot
@@ -440,7 +456,7 @@ export function renderDiagram(
     for (const spans of scenario.traces) {
       const traceLines: string[] = [];
       const drawn = new Set<string>();
-      emitTrace(spans, traceLines, drawn, options, collector, operations);
+      emitTrace(spans, traceLines, drawn, options, collector, operations, methodLinks);
       if (traceLines.length === 0) continue;
       drawn.forEach((p) => present.add(p));
       lines.push(...traceLines);
@@ -495,8 +511,9 @@ export function renderPuml(
   scenarios: DiagramScenario[],
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
   operations: OperationNames = defaultOperations(),
+  methodLinks: MethodLinks = NO_METHOD_LINKS,
 ): string {
-  return renderDiagram(title, scenarios, options, operations).puml;
+  return renderDiagram(title, scenarios, options, operations, methodLinks).puml;
 }
 
 interface DiagramSection {

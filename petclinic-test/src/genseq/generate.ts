@@ -1,10 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
-import {parseTempoTrace, renderDiagram, DiagramScenario, NormSpan} from './trace-to-puml';
+import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan}
+  from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfTest, testHandle} from './test-location';
+import {methodHandle} from './code-location';
+import {defaultOperations} from './openapi-operations';
 
 export interface TestWindow {
   title: string;
@@ -208,6 +211,34 @@ function linkScenarios(
       link: testHandle(repoRelative(rootDir, source), lineOfTest(text, s.title, source))}));
 }
 
+/**
+ * Point every self-call arrow at the method the span was opened on.
+ *
+ * The same bargain `linkScenarios` strikes just above: without `readFile` there is no
+ * working tree to confirm the class against, so the arrows keep their plain labels rather
+ * than carry links nobody checked.
+ *
+ * The handle has to be relative to the repo, and `rootDir` is the petclinic-test module
+ * inside it — hence the climb to its parent, which is where a backend class's
+ * `petclinic-backend/src/main/java/…` path is rooted.
+ */
+function methodLinksFor(rootDir: string, deps: RenderDeps): MethodLinks {
+  const readFile = deps.readFile;
+  if (!readFile) return () => undefined;
+  const repoRoot = path.dirname(rootDir);
+  const cache = new Map<string, string | undefined>();
+  return (span) => {
+    // One trace draws the same repository method many times over — an N+1 is exactly what
+    // these pictures are for — and each hit would otherwise re-read and re-scan the file.
+    const key = [span.serviceName, span.attributes['code.namespace'],
+      span.attributes['code.function']].join('#');
+    if (!cache.has(key)) {
+      cache.set(key, methodHandle(span.attributes, span.serviceName, repoRoot, readFile));
+    }
+    return cache.get(key);
+  };
+}
+
 /** `source` resolved against the repo root — the path the review page can open. */
 function repoRelative(rootDir: string, source: string): string {
   return path.normalize(path.join(path.basename(rootDir), source));
@@ -233,7 +264,8 @@ export function renderScenarios(
   for (const {source, scenarios} of sources) {
     const filePath = diagramPathFor(rootDir, source);
     const {puml, details} = renderDiagram(
-      titleFor(rootDir, source), linkScenarios(scenarios, rootDir, source, deps), options);
+      titleFor(rootDir, source), linkScenarios(scenarios, rootDir, source, deps), options,
+      defaultOperations(), methodLinksFor(rootDir, deps));
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not
