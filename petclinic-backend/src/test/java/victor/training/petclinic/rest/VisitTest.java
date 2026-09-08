@@ -3,6 +3,7 @@ package victor.training.petclinic.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.PetType;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -55,6 +59,12 @@ public class VisitTest {
     @Autowired
     OwnerRepository ownerRepository;
 
+    @Autowired
+    VetRepository vetRepository;
+
+    @Autowired
+    EntityManager entityManager;
+
     int visitId;
     int petId;
     @Autowired
@@ -63,9 +73,11 @@ public class VisitTest {
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
+        PetType dog = new PetType();
+        dog.setName("dog");
         Pet pet = TestData.aPet();
         pet.setOwner(owner);
-        pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
+        pet.setType(petTypeRepository.save(dog));
         petRepository.save(pet);
         petId = pet.getId();
 
@@ -210,6 +222,68 @@ public class VisitTest {
 
         Visit updated = visitRepository.findById(visitId).orElseThrow();
         assertThat(updated.getDescription()).isEqualTo("updated description");
+    }
+
+    @Test
+    void create_withVet() throws Exception {
+        int vetId = anExistingVetId();
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(LocalDate.now());
+        newVisit.setDescription("attended checkup");
+        newVisit.setVetId(vetId);
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        assertThat(visitRepository.findAll())
+                .filteredOn(v -> "attended checkup".equals(v.getDescription()))
+                .singleElement()
+                .satisfies(v -> assertThat(v.getVet().getId()).isEqualTo(vetId));
+    }
+
+    @Test
+    void getById_exposesTheAttendingVet() throws Exception {
+        Vet vet = vetRepository.findById(anExistingVetId()).orElseThrow();
+        visitRepository.findById(visitId).orElseThrow().setVet(vet);
+        flushAndClear();
+
+        VisitDto responseDto = callGet(visitId);
+
+        assertThat(responseDto.getVetId()).isEqualTo(vet.getId());
+        assertThat(responseDto.getVetFirstName()).isEqualTo(vet.getFirstName());
+        assertThat(responseDto.getVetLastName()).isEqualTo(vet.getLastName());
+    }
+
+    @Test
+    void update_changesTheAttendingVet() throws Exception {
+        int vetId = anExistingVetId();
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.now().plusDays(1));
+        update.setDescription("re-assigned to another vet");
+        update.setVetId(vetId);
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        flushAndClear();
+        assertThat(visitRepository.findById(visitId).orElseThrow().getVet().getId()).isEqualTo(vetId);
+    }
+
+    // The test and the controller share one persistence context, so a read-back without
+    // this would assert against the very instance the controller just mutated in memory —
+    // green even if the save() were deleted. Flushing and clearing forces a real round-trip.
+    private void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    private int anExistingVetId() {
+        return vetRepository.findAll().get(0).getId();
     }
 
     @Test
