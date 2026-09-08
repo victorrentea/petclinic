@@ -122,6 +122,12 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Volumetry
+The PO's target is **100,000 owners** in production. The seeded dev database holds 28, so
+any screen or query over owners that looks fine locally will not be fine in production:
+never load or sort the full owners table in the browser or in memory — page and sort it in
+the database.
+
 ## Development Notes
 
 ### Frontend design system

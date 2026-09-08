@@ -58,6 +58,7 @@ petclinic-frontend/typings
 petclinic-backend/src/test/postman/reports/
 # otel agent jar + the Code City generators clone: tools, not our source
 petclinic-backend/.tools/
+petclinic-backend/.codecity-tool/
 
 # Generated diagram renders — sources (.puml/.dsl) are tracked; renders viewed via PlantUML proxy URLs (see docs/generated/INDEX.md)
 petclinic-backend/docs/generated/**/*.svg

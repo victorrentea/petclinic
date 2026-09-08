@@ -11,7 +11,7 @@ tools:
   mcp__petclinic-mcp__create_visit, 
   mcp__petclinic-mcp__cancel_visit, 
   mcp__petclinic-mcp__call_vet_ambulance
-model: sonnet
+model: haiku
 ---
 
 # PetClinic Support
