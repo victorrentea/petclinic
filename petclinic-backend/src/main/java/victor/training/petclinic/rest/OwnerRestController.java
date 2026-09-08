@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -160,15 +161,27 @@ public class OwnerRestController {
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
             @RequestBody VisitFieldsDto visitFieldsDto) {
+        int visitId = bookVisit(petId, visitFieldsDto);
+
+        URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
+                .buildAndExpand(petId, visitId).toUri();
+        return ResponseEntity.created(createdUri).build();
+    }
+
+    // Explicit span so the booking step shows up in the Tempo trace — and in the sequence
+    // diagram generated from it — beside the auto-instrumented SERVER and JDBC spans, which
+    // on their own say "a POST happened, an INSERT happened" and never name the step.
+    // The OTel Java agent instruments @WithSpan at the bytecode level, so it works on a
+    // private, self-invoked method (Spring AOP would not) — keeping the repository-only,
+    // no-service-layer house style.
+    @WithSpan("book-visit")
+    private int bookVisit(int petId, VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
         visitRepository.save(visit);
-
-        URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
-                .buildAndExpand(petId, visit.getId()).toUri();
-        return ResponseEntity.created(createdUri).build();
+        return visit.getId();
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")
