@@ -23,7 +23,18 @@
       ]
     },
     "city": {
-      "regenerate": "petclinic-backend/docs/generate-codecity.sh"
+      "//": "`tests` runs before the city is drawn: its CRAP and coverage colours need a",
+      "//2": "JaCoCo report, and -Dmaven.test.failure.ignore=true is what makes the report",
+      "//3": "goal run at all when a test fails. Without it Maven aborts in the test phase",
+      "//4": "and the city is coloured from whatever stale report was left on disk.",
+      "//5": "`baseline` is the coverage the default branch measured and committed; the",
+      "//6": "page reads it out of git at the diff's base ref to draw the before/after of",
+      "//7": "coverage and CRAP, with no second checkout and no second test run. Refresh it",
+      "//8": "only on the default branch: regenerate-codecity.sh --write-baseline.",
+      "tests": "cd petclinic-backend && mvn -o test -Dmaven.test.failure.ignore=true",
+      "out": "petclinic-backend/docs/generated/codecity",
+      "title": "Code City",
+      "baseline": "petclinic-backend/docs/generated/codecity/coverage-baseline.tsv"
     },
     "video": {
       "out": ".human-review/assets/feature.webm"
