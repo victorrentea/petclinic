@@ -15,6 +15,8 @@ import {MatMomentDateModule} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 import {Owner} from '../../owners/owner';
 
 class PetServiceStub {
@@ -40,6 +42,13 @@ class VisitServiceStub {
   }
 }
 
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of([{id: 1, firstName: 'James', lastName: 'Carter', specialties: []}]);
+  }
+}
+
 describe('VisitAddComponent', () => {
   let component: VisitAddComponent;
   let fixture: ComponentFixture<VisitAddComponent>;
@@ -57,6 +66,7 @@ describe('VisitAddComponent', () => {
         {provide: PetService, useClass: PetServiceStub},
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
