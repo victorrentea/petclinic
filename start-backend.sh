@@ -64,6 +64,22 @@ if [[ -f "$AGENT_JAR" ]]; then
   fi
 fi
 
+# Acceptance coverage: the browser suite exercises THIS JVM, which surefire's agent never
+# sees, so nothing it runs would otherwise count towards coverage at all. `tcpserver` (not
+# a destfile) because the exec has to be readable while the app is still up: a dump on
+# shutdown depends on the process getting a signal it survives long enough to handle, and
+# under Playwright's webServer teardown it does not reliably get one.
+JACOCO_JVM_ARGS=""
+if [[ -n "${JACOCO_E2E:-}" ]]; then
+  JACOCO_AGENT_JAR="${JACOCO_AGENT_JAR:-$(ls "$HOME"/.m2/repository/org/jacoco/org.jacoco.agent/*/org.jacoco.agent-*-runtime.jar 2>/dev/null | sort -V | tail -1)}"
+  if [[ -f "$JACOCO_AGENT_JAR" ]]; then
+    JACOCO_JVM_ARGS="-javaagent:$JACOCO_AGENT_JAR=output=tcpserver,address=127.0.0.1,port=${JACOCO_PORT:-6300}"
+    echo "📈 JaCoCo agent attached → dump with: mvn jacoco:dump -Djacoco.port=${JACOCO_PORT:-6300}"
+  else
+    echo "⚠️  JACOCO_E2E set but no agent jar found in ~/.m2 — run 'mvn test' once to fetch it." >&2
+  fi
+fi
+
 echo "🚀 Starting Petclinic Backend (Spring Boot)..."
 echo "Backend will be available at: http://localhost:8080/"
 if [[ -n "$OTEL_JVM_ARGS" ]]; then
@@ -73,8 +89,9 @@ echo ""
 
 cd "$BACKEND_DIR"
 announce_exit_failures petclinic-backend
-if [[ -n "$OTEL_JVM_ARGS" ]]; then
-  mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="$OTEL_JVM_ARGS"
+JVM_ARGS="$(echo "$OTEL_JVM_ARGS $JACOCO_JVM_ARGS" | xargs)"
+if [[ -n "$JVM_ARGS" ]]; then
+  mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="$JVM_ARGS"
 else
   mvn clean spring-boot:run
 fi
