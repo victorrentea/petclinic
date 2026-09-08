@@ -8,7 +8,8 @@ import {OwnerListComponent} from './owner-list.component';
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import { OwnerService } from '../owner.service';
-import {Owner} from '../owner';
+import {OwnerListItem} from '../owner';
+import {OwnerPage} from '../owner-page';
 import {Observable, of} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
@@ -23,11 +24,11 @@ import Spy = jasmine.Spy;
 
 
 class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
+  getOwners(page?: number, size?: number, sort?: string): Observable<OwnerPage> {
     return of();
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
+  searchOwners(lastName: string, page?: number, size?: number, sort?: string): Observable<OwnerPage> {
     return of();
   }
 }
@@ -39,20 +40,21 @@ describe('OwnerListComponent', () => {
   let ownerService = new OwnerServiceStub();
   let getOwnersSpy: Spy;
   let searchOwnersSpy: Spy;
+  let activatedRoute: ActivatedRouteStub;
   let de: DebugElement;
   let el: HTMLElement;
 
 
-  const testOwner: Owner = {
+  const testOwner: OwnerListItem = {
     id: 1,
     firstName: 'George',
     lastName: 'Franklin',
     address: '110 W. Liberty St.',
     city: 'Madison',
     telephone: '6085551023',
-    pets: []
+    petNames: []
   };
-  let testOwners: Owner[];
+  let testOwnerPage: OwnerPage;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -74,15 +76,16 @@ describe('OwnerListComponent', () => {
   }));
 
   beforeEach(() => {
-    testOwners = [testOwner];
+    testOwnerPage = {content: [testOwner], totalElements: 1, totalPages: 1, number: 0, size: 10};
 
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
     ownerService = fixture.debugElement.injector.get(OwnerService);
+    activatedRoute = fixture.debugElement.injector.get(ActivatedRoute) as any;
     getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
+      .and.returnValue(of(testOwnerPage));
     searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
+      .and.returnValue(of(testOwnerPage));
 
   });
 
@@ -102,11 +105,22 @@ describe('OwnerListComponent', () => {
       fixture.detectChanges();        // update view with name
       de = fixture.debugElement.query(By.css('.ownerFullName'));
       el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
+      expect(el.innerText).toBe((testOwner.lastName.toString() + ' ' + testOwner.firstName.toString()));
     });
   }));
 
+  it('searchByLastName should call searchOwners with the given term', () => {
+    fixture.detectChanges();
+    getOwnersSpy.calls.reset();
+    searchOwnersSpy.calls.reset();
+
+    component.searchByLastName('Fr');
+
+    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr', 0, 10, 'lastName,asc');
+  });
+
   it('searchByLastName should call getOwners for empty term', () => {
+    fixture.detectChanges();
     getOwnersSpy.calls.reset();
     searchOwnersSpy.calls.reset();
 
@@ -116,14 +130,27 @@ describe('OwnerListComponent', () => {
     expect(searchOwnersSpy).not.toHaveBeenCalled();
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+  it('sortBy should toggle direction when clicking the active column twice', () => {
+    fixture.detectChanges();
 
-    component.searchByLastName('Fr');
+    component.sortBy('lastName'); // already lastName,asc by default -> becomes desc
+    expect(component.sortDirection).toBe('desc');
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, 10, 'lastName,desc');
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+    component.sortBy('lastName');
+    expect(component.sortDirection).toBe('asc');
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, 10, 'lastName,asc');
+  });
+
+  it('sortBy should switch to the new column ascending when clicking a different column', () => {
+    fixture.detectChanges();
+
+    component.sortBy('city');
+
+    expect(component.sortProperty).toBe('city');
+    expect(component.sortDirection).toBe('asc');
+    expect(getOwnersSpy).toHaveBeenCalledWith(0, 10, 'city,asc');
   });
 
 });
+

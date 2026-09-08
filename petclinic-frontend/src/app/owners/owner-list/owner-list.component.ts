@@ -1,8 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {OwnerListItem} from '../owner';
+import {OwnerPage} from '../owner-page';
+import {ActivatedRoute, Router} from '@angular/router';
+import {finalize} from 'rxjs/operators';
+
+/** Properties the backend allows sorting the owners list by - see `OwnerRestController`. */
+type SortableProperty = 'lastName' | 'city';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-owner-list',
@@ -10,27 +15,40 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./owner-list.component.css']
 })
 export class OwnerListComponent implements OnInit {
+  readonly pageSizes = [5, 10, 20];
+
   errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
+  lastName = '';
+  ownerPage: OwnerPage;
+  isOwnersDataReceived = false;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  page = 0;
+  size = 10;
+  sortProperty: SortableProperty = 'lastName';
+  sortDirection: SortDirection = 'asc';
 
+  constructor(private route: ActivatedRoute, private router: Router, private ownerService: OwnerService) {
   }
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    // ActivatedRoute.queryParams emits the current params immediately on subscribe,
+    // so this both loads the initial (possibly bookmarked) state and reacts to
+    // later browser back/forward navigation between pages.
+    this.route.queryParams.subscribe(params => {
+      this.readStateFrom(params);
+      this.fetchOwners();
+    });
   }
 
-  onSelect(owner: Owner) {
+  get owners(): OwnerListItem[] {
+    return this.ownerPage?.content ?? [];
+  }
+
+  get sortParam(): string {
+    return `${this.sortProperty},${this.sortDirection}`;
+  }
+
+  onSelect(owner: OwnerListItem) {
     this.router.navigate(['/owners', owner.id]);
   }
 
@@ -38,35 +56,61 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-        this.ownerService.getOwners()
-          .subscribe(
-            (owners) => {
-              this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-        this.ownerService.searchOwners(lastName)
-          .subscribe(
-            (owners) => {
-
-              this.owners = owners;
-              console.log('this.owners ' + this.owners);
-
-            },
-            (error) =>
-            {
-              this.owners = null;
-            }
-          );
-
-      }
+  searchByLastName(lastName: string) {
+    this.lastName = lastName;
+    this.page = 0;
+    this.fetchOwners();
+    this.syncUrl();
   }
 
+  sortBy(property: SortableProperty) {
+    this.sortDirection = this.sortProperty === property && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortProperty = property;
+    this.page = 0;
+    this.fetchOwners();
+    this.syncUrl();
+  }
 
+  changePageSize(size: number) {
+    this.size = size;
+    this.page = 0;
+    this.fetchOwners();
+    this.syncUrl();
+  }
+
+  goToPage(page: number) {
+    if (page >= 0 && page < this.ownerPage.totalPages) {
+      this.page = page;
+      this.fetchOwners();
+      this.syncUrl();
+    }
+  }
+
+  private readStateFrom(params: {[key: string]: string}) {
+    this.page = params.page !== undefined ? Number(params.page) : 0;
+    this.size = params.size !== undefined ? Number(params.size) : 10;
+    const [property, direction] = (params.sort ?? 'lastName,asc').split(',');
+    this.sortProperty = property as SortableProperty;
+    this.sortDirection = (direction as SortDirection) || 'asc';
+  }
+
+  /** Reflects the current page/size/sort in the URL so it stays bookmarkable, without re-fetching. */
+  private syncUrl() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {page: this.page, size: this.size, sort: this.sortParam}
+    });
+  }
+
+  private fetchOwners() {
+    const request = this.lastName
+      ? this.ownerService.searchOwners(this.lastName, this.page, this.size, this.sortParam)
+      : this.ownerService.getOwners(this.page, this.size, this.sortParam);
+
+    request.pipe(
+      finalize(() => this.isOwnersDataReceived = true)
+    ).subscribe(
+      ownerPage => this.ownerPage = ownerPage,
+      error => this.errorMessage = error as any);
+  }
 }

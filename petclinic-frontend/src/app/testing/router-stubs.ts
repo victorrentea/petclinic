@@ -33,13 +33,22 @@ export class RouterStub {
 @Injectable()
 export class ActivatedRouteStub {
 
+  // Test parameters
+  // tslint:disable-next-line:variable-name
+  private _testParams: {};
+
+  // Test query parameters
+  // tslint:disable-next-line:variable-name
+  private _testQueryParams: {} = {};
+
   // ActivatedRoute.params is Observable
   private subject = new BehaviorSubject(this.testParams);
   params = this.subject.asObservable();
 
-  // Test parameters
-  // tslint:disable-next-line:variable-name
-  private _testParams: {};
+  // ActivatedRoute.queryParams is Observable
+  private queryParamsSubject = new BehaviorSubject(this.testQueryParams);
+  queryParams = this.queryParamsSubject.asObservable();
+
   get testParams() {
     return this._testParams;
   }
@@ -49,9 +58,18 @@ export class ActivatedRouteStub {
     this.subject.next(params);
   }
 
+  get testQueryParams() {
+    return this._testQueryParams;
+  }
+
+  set testQueryParams(params: {}) {
+    this._testQueryParams = params;
+    this.queryParamsSubject.next(params);
+  }
+
   // ActivatedRoute.snapshot.params
   get snapshot() {
     this.testParams = {id: 1};
-    return {params: this.testParams};
+    return {params: this.testParams, queryParams: this.testQueryParams};
   }
 }

@@ -1,9 +1,7 @@
-import { Owner } from './owner';
+import { components } from '../generated/api-types';
+import { OwnerListItem } from './owner';
 
-export interface OwnerPage {
-  content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+/** A single page of the paginated, sorted owners list - see `OwnerPageDto` in `openapi.yaml`. */
+export type OwnerPage = Required<Omit<components['schemas']['OwnerPageDto'], 'content'>> & {
+  content: OwnerListItem[];
+};

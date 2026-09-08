@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+const EMPTY_OWNER_PAGE: OwnerPage = {content: [], totalElements: 0, totalPages: 0, number: 0, size: 10};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +22,10 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwners(page = 0, size = 10, sort?: string): Observable<OwnerPage> {
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params: this.buildParams({page, size, sort})})
+      .pipe(catchError(this.handlerError('getOwners', EMPTY_OWNER_PAGE)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -50,13 +53,20 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
+  searchOwners(lastName: string, page = 0, size = 10, sort?: string): Observable<OwnerPage> {
     return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params: this.buildParams({lastName, page, size, sort})})
+      .pipe(catchError(this.handlerError('searchOwners', EMPTY_OWNER_PAGE)));
+  }
+
+  private buildParams(query: {lastName?: string; page: number; size: number; sort?: string}): HttpParams {
+    let params = new HttpParams().set('page', query.page).set('size', query.size);
+    if (query.lastName !== undefined && query.lastName !== '') {
+      params = params.set('lastName', query.lastName);
+    }
+    if (query.sort !== undefined) {
+      params = params.set('sort', query.sort);
+    }
+    return params;
   }
 }

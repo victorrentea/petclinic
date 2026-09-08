@@ -22,14 +22,14 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="!ownerPage">No owners with LastName starting with "{{lastName}}"</div>
+    <div class="table-responsive" id="ownersTable"  *ngIf="ownerPage">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th><a href="#" (click)="sortBy('lastName'); $event.preventDefault()">Name</a></th>
           <th>Address</th>
-          <th>City</th>
+          <th><a href="#" (click)="sortBy('city'); $event.preventDefault()">City</a></th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -38,21 +38,30 @@
         <tbody>
         <tr *ngFor="let owner of owners">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+            (click)="onSelect(owner)">{{ owner.lastName }} {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
+        <tr *ngFor="let name of owner.petNames">
+          {{ name }}
         </tr>
         </td>
         </tr>
         </tbody>
       </table>
+      <div class="form-inline" id="ownersPagination">
+        <button class="btn btn-default" [disabled]="page <= 0" (click)="goToPage(page - 1)">Previous</button>
+        <span> Page {{ page + 1 }} of {{ ownerPage.totalPages || 1 }} ({{ ownerPage.totalElements }} owners) </span>
+        <button class="btn btn-default" [disabled]="page + 1 >= ownerPage.totalPages" (click)="goToPage(page + 1)">Next</button>
+        <label for="pageSize"> Page size </label>
+        <app-combo inputId="pageSize" name="pageSize" [ngModelOptions]="{standalone: true}"
+          [options]="pageSizes" [ngModel]="size" (ngModelChange)="changePageSize($event)"></app-combo>
+      </div>
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>
     </div>
   </div>
 </div>
+
