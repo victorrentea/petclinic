@@ -16,7 +16,7 @@ Test -> Test: given an owner with at least one pet exists
 activate Test
 Test -> Backend: List owners\nGET /api/owners
 activate Backend
-Backend -> Backend: OwnerRepository.findByLastNameStartingWith
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:12{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
 activate Backend
 Backend -> DB: [[genseq://1aoufu2{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
 deactivate Backend
@@ -87,7 +87,7 @@ Test -> Test: when the owner detail page is opened
 activate Test
 Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
-Backend -> Backend: OwnerRepository.findById
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
 activate Backend
 group tx
 Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
@@ -102,7 +102,7 @@ Test -> Test: and a visit is added for the first pet
 activate Test
 Test -> Backend: [[genseq://0rpqxjs{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
-Backend -> Backend: VisitRepository.save
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
 group tx
 Backend -> DB: [[genseq://0bowbe8{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
@@ -115,7 +115,7 @@ Test -> Test: then the visit is listed under the pet
 activate Test
 Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
-Backend -> Backend: OwnerRepository.findById
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
 activate Backend
 group tx
 Backend -> DB: [[genseq://0totfe9{Click for the statement behind this call} select owners ⊕]]
