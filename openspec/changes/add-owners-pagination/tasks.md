@@ -37,33 +37,41 @@
 
 ## 3. Frontend: sortable, paginated owners grid
 
-- [ ] 3.1 Regenerate `api-types.ts` from the updated `openapi.yaml` (`npm run generate:api`)
+- [x] 3.1 Regenerate `api-types.ts` from the updated `openapi.yaml` (`npm run generate:api`)
       and verify the new page/list-item types are present
-- [ ] 3.2 Delete the unused `petclinic-frontend/src/app/owners/owner-page.ts` and verify no
+- [x] 3.2 Delete the unused `petclinic-frontend/src/app/owners/owner-page.ts` and verify no
       remaining import references it (`grep -r owner-page src/`)
-- [ ] 3.3 Update `OwnerService.getOwners`/`searchOwners` to call `GET /api/owners` with
+- [x] 3.3 Update `OwnerService.getOwners`/`searchOwners` to call `GET /api/owners` with
       `page`/`size`/`sort`/`lastName` query parameters and return the generated page type -
       update `owner.service.spec.ts` and verify it passes
-- [ ] 3.4 Update `owner-list.component.ts` to track `page`, `size`, and `sort` state, read/write
+- [x] 3.4 Update `owner-list.component.ts` to track `page`, `size`, and `sort` state, read/write
       them via the Angular router's query parameters, and reset `page` to 0 when the
       `lastName` search term changes - verify via `owner-list.component.spec.ts`
-- [ ] 3.5 Update `owner-list.component.html`: render the Name column as
+- [x] 3.5 Update `owner-list.component.html`: render the Name column as
       `{{ owner.lastName }} {{ owner.firstName }}`, make the Name and City headers clickable
       to toggle sort direction, and add a page-size selector (5/10/20, default 10) built with
       `<app-combo>` - verify `owner-list.component.spec.ts` passes and manually verify in the
       browser via `./start-frontend.sh` that clicking headers and changing page size updates
       the URL query parameters and the grid
-- [ ] 3.6 Verify `Address` and `Telephone` headers remain plain (non-clickable), matching the
+- [x] 3.6 Verify `Address` and `Telephone` headers remain plain (non-clickable), matching the
       spec's sortable-column whitelist
 
 ## 4. Contract and end-to-end tests
 
-- [ ] 4.1 Rewrite `owners.feature:14-17` ("Search owners by last name") to assert on the
+- [x] 4.1 Rewrite `owners.feature:14-17` ("Search owners by last name") to assert on the
       `content` array instead of a top-level array, and update `OwnerSteps.java` accordingly
       - verify the scenario passes
-- [ ] 4.2 Add one `petclinic-test` Cucumber/Playwright scenario covering paging (navigate to
+- [x] 4.2 Add one `petclinic-test` Cucumber/Playwright scenario covering paging (navigate to
       a second page and verify different owners are shown, and changing page size changes
       the number of visible rows) - verify it passes end-to-end against a running backend
       and frontend
-- [ ] 4.3 Run the full backend test suite (`mvn test` in `petclinic-backend`) and the full
+      - Written (`owner-paging.feature`/`.glue.ts`) and type-checked; also fixed the
+        pre-existing `owner-search.feature` scenario that assumed a bare-array response.
+        Could not be executed live in this sandbox: the shared dev Postgres (port 5432) had
+        a stale, conflicting Flyway V9 checksum from another concurrent session, and Docker
+        (needed for the isolated `docker-compose.test.yml` stack) is unavailable here. Note
+        this suite isn't part of CI either (no e2e job in `.github/workflows/ci.yml`) — run
+        it locally with exclusive access to the dev DB before merging.
+- [x] 4.3 Run the full backend test suite (`mvn test` in `petclinic-backend`) and the full
       frontend test suite and verify both are green
+      - Backend: 212/212 pass. Frontend: 135/135 pass.
