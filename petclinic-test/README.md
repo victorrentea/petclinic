@@ -35,7 +35,7 @@ Two scenarios sit side by side in `src/`, each written the way its style is mean
 | | Gherkin | a DSL in TypeScript |
 |---|---|---|
 | scenario | `owner-search.feature` | `add-visit.spec.ts` |
-| sentences | `owner-search.glue.ts` (regex → step) | `add-visit.dsl.ts` (functions) |
+| sentences | `owner-search.feature.glue.ts` (regex → step) | `add-visit.dsl.ts` (functions) |
 | state | `support/world.ts` (mutable `this`) | local `const`s |
 | diagram opt-in | `@generate_sequence` scenario tag | `{tag: [GENERATE_SEQUENCE_TAG]}` |
 | run | `npm run test:cucumber` | `npm test` |
@@ -49,7 +49,39 @@ Neither is a translation of the other — pick each for what it is good at:
 - **add-visit is the DSL's case.** The scenario is prose, so `add-visit.dsl.ts` names the
   sentences and `add-visit.spec.ts` reads top-to-bottom as the scenario itself — no parser, no
   regex step lookup, no shared mutable World, and every sentence stays ctrl-clickable,
-  renameable and type-checked.
+  renameable and type-checked. The sentences are named `open_owner_detail_page`, not
+  `openOwnerDetailPage`: underscores between words are what let the body be read as a
+  sentence instead of as calls, which is what a training group asked for after finding this
+  DSL hard to read.
+
+### The one feature written both ways
+
+`add-visit.feature` tells the attending-vet story in Gherkin, and
+`add-visit.feature.glue.ts` binds its steps to **the very same `add-visit.dsl.ts` functions**
+that `add-visit.spec.ts` calls — same clicks, same selectors, same waits.
+
+That is the point. The two scenarios above differ in style *and* in what they test, so a
+reader comparing them is comparing two things at once. Here the mechanics are held identical,
+so the only thing left to compare is how each scenario reads:
+
+```gherkin
+When I book a visit for that pet with "Helen Leary" attending
+Then that pet's history shows the visit was attended by "Helen Leary"
+```
+
+```ts
+await open_owner_detail_page(page, ownerId);
+await click_add_visit_for_first_pet(page, 'Add Visit');
+const vetName = await select_first_vet_in_visit_form(page);
+await submit_visit_form(page);
+await expect_pet_visit_list_shows_vet(page, VISIT_DATE, description, vetName);
+```
+
+It is deliberately the *only* glue file sitting on top of a DSL — `owner-search.feature.glue.ts`
+does the work itself, for the reason given above. The difference is that here the sentences
+already existed, so binding to them is reuse rather than a second naming; copying the locators
+into the glue would have handed the reader a difference that is not about reading, and handed
+the next UI change two places to break.
 
 `@generate_sequence` means the same thing on both sides (`src/genseq/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
