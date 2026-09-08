@@ -154,6 +154,24 @@ class OwnerPaginationTest {
     }
 
     @Test
+    void sortByCity_ordersDiacriticsByBaseLetterNotAfterAscii() throws Exception {
+        Owner owner1 = ownerNamed(PREFIX + "Diacritic", "A");
+        owner1.setCity("Adamowo");
+        ownerRepository.save(owner1);
+        Owner owner2 = ownerNamed(PREFIX + "Diacritic", "B");
+        owner2.setCity("\u015aliwice"); // "Śliwice" - should sort with the S's, not after Z
+        ownerRepository.save(owner2);
+        Owner owner3 = ownerNamed(PREFIX + "Diacritic", "C");
+        owner3.setCity("Zabrze");
+        ownerRepository.save(owner3);
+
+        OwnerPageDto page = callGet("/api/owners?lastName=" + PREFIX + "Diacritic&sort=city,asc");
+
+        assertThat(page.getContent()).extracting("city")
+                .containsExactly("Adamowo", "\u015aliwice", "Zabrze");
+    }
+
+    @Test
     void stableTieBreaker_noOwnerDuplicatedOrSkippedAcrossPages() throws Exception {
         Set<Integer> createdIds = new HashSet<>();
         for (int i = 0; i < 13; i++) {

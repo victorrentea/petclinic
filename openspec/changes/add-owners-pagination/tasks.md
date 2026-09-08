@@ -24,13 +24,13 @@
 
 ## 2. Database migration for collation and indexes
 
-- [ ] 2.1 Add `db/migration/V9__owners_icu_collation_and_sort_indexes.sql` altering
+- [x] 2.1 Add `db/migration/V9__owners_icu_collation_and_sort_indexes.sql` altering
       `owners.last_name`, `owners.first_name`, `owners.city` to `COLLATE "und-x-icu"` and
       creating indexes `(last_name, first_name, id)` and `(city, last_name, first_name, id)`
-- [ ] 2.2 Start the backend against `./start-database.sh` and verify Flyway applies `V9__`
+- [x] 2.2 Start the backend against `./start-database.sh` and verify Flyway applies `V9__`
       cleanly with no errors, and existing rows are unaffected (row count and values
       unchanged)
-- [ ] 2.3 Re-run the stable-ordering and Unicode-collation backend tests (from 1.4 and the
+- [x] 2.3 Re-run the stable-ordering and Unicode-collation backend tests (from 1.4 and the
       spec's diacritic scenario) against the migrated schema and verify they pass, including
       a case proving a diacritic name (e.g. "Śliwiński") sorts with its base letter rather
       than after all ASCII letters
