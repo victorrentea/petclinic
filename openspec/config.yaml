@@ -21,6 +21,19 @@ githubCopilot:
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
 
+rules:
+  proposal:
+    - Write for a business/functional review with a non-Java-technical stakeholder — plain
+      language only, describing user-visible/business behavior and impact.
+    - Never mention class/DTO/method names, library or framework choices, migration file
+      names, SQL/collation details, or other implementation internals.
+    - Every technical rationale, alternative considered, and implementation decision belongs
+      in design.md, not here — reference design.md instead of restating it.
+  design:
+    - This is where all technical decisions, rationale, alternatives considered, and
+      implementation-level details live (class/DTO names, library/framework choices,
+      migrations, SQL, collation, indexing, etc.) — proposal.md must stay free of them.
+
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
 # This is separate from artifact rules above.
