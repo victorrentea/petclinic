@@ -1,24 +1,24 @@
 ## 1. Backend: paginated, sorted, slim owners listing (TDD)
 
-- [ ] 1.1 Write `OwnerTest` (or a new slice test) asserting `GET /api/owners` returns a page
+- [x] 1.1 Write `OwnerTest` (or a new slice test) asserting `GET /api/owners` returns a page
       object `{content, totalElements, totalPages, number, size}` with default `page=0`,
       `size=10` - verify the test fails against the current bare-array response
-- [ ] 1.2 Write tests for `?page=`/`?size=` composing with existing `?lastName=` filter,
+- [x] 1.2 Write tests for `?page=`/`?size=` composing with existing `?lastName=` filter,
       including a page index past the last page returning 200 with empty `content` -
       verify tests fail (no `Pageable` support yet)
-- [ ] 1.3 Write tests for the sort whitelist: `sort=lastName,asc`/`sort=city,asc` succeed;
+- [x] 1.3 Write tests for the sort whitelist: `sort=lastName,asc`/`sort=city,asc` succeed;
       `sort=telephone,asc` and `sort=pets.name,asc` return 400 - verify tests fail
-- [ ] 1.4 Write a test proving stable tie-breaker ordering (owners sharing a sort key never
+- [x] 1.4 Write a test proving stable tie-breaker ordering (owners sharing a sort key never
       duplicate or skip across consecutive pages) using the seeded duplicate last names
       (`Potter`, `Darling`) - verify it fails
-- [ ] 1.5 Write a test proving the list payload omits pet visits/type (slim
+- [x] 1.5 Write a test proving the list payload omits pet visits/type (slim
       `OwnerListItemDto` shape) while still including pet names - verify it fails
-- [ ] 1.6 Add `OwnerListItemDto` and `OwnerPageDto` in `rest/dto/`, update `OwnerMapper` with
+- [x] 1.6 Add `OwnerListItemDto` and `OwnerPageDto` in `rest/dto/`, update `OwnerMapper` with
       a mapping to the slim item DTO, add `Pageable`/whitelisted-`Sort`-aware query method(s)
       to `OwnerRepository`, and update `OwnerRestController.listOwners` to accept
       `page`/`size`/`sort`, validate the whitelist, and return `OwnerPageDto` - run the tests
       from 1.1-1.5 and verify they all pass
-- [ ] 1.7 Run `OpenApiExtractorTest` (or the project's openapi regeneration command) and
+- [x] 1.7 Run `OpenApiExtractorTest` (or the project's openapi regeneration command) and
       verify `openapi.yaml` regenerates cleanly with the new response/parameter shapes and no
       drift failure
 

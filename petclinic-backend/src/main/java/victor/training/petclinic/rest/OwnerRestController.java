@@ -1,8 +1,10 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,9 +18,11 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.InvalidSortPropertyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +38,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -77,12 +80,43 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    @Transactional
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", required = false) String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, resolveSort(sort));
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageRequest);
+        return ownerMapper.toOwnerPageDto(owners);
+    }
+
+    /**
+     * Maps the {@code sort} query parameter to a fixed, hand-picked {@link Sort} that always ends
+     * in {@code id} as a tie-breaker. Only a small whitelist of indexed, collation-aware columns is
+     * accepted - anything else (e.g. a nested property like {@code pets.name}) is rejected with 400
+     * rather than handed to Spring Data's default resolver, which would happily build an unindexed
+     * join/sort on a 100k-row table.
+     */
+    private Sort resolveSort(String sort) {
+        String property = "lastName";
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (sort != null && !sort.isBlank()) {
+            String[] parts = sort.split(",", 2);
+            property = parts[0];
+            if (parts.length > 1 && "desc".equalsIgnoreCase(parts[1])) {
+                direction = Sort.Direction.DESC;
+            }
+        }
+        Sort tieBreakingSort = switch (property) {
+            case "lastName" -> Sort.by("lastName", "firstName", "id");
+            case "city" -> Sort.by("city", "lastName", "firstName", "id");
+            default -> throw new InvalidSortPropertyException(property, OwnerRepository.SORTABLE_PROPERTIES);
+        };
+        return direction == Sort.Direction.DESC ? tieBreakingSort.descending() : tieBreakingSort.ascending();
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

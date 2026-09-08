@@ -75,6 +75,13 @@ public class ExceptionControllerAdvice {
         return validationFailed(List.of(ex.getMessage()), request);
     }
 
+    @ExceptionHandler(InvalidSortPropertyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleInvalidSortProperty(InvalidSortPropertyException ex,
+            HttpServletRequest request) {
+        return validationFailed(List.of(ex.getMessage()), request);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

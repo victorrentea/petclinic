@@ -170,6 +170,56 @@ export interface components {
        */
       telephone: string;
     };
+    /** @description A summary of a pet owner, as shown in the paginated owners list. */
+    OwnerListItemDto: {
+      /** @example 110 W. Liberty St. */
+      address?: string;
+      /** @example Madison */
+      city?: string;
+      /** @example George */
+      firstName?: string;
+      /**
+       * Format: int32
+       * @description The ID of the pet owner.
+       * @example 1
+       */
+      id?: number;
+      /** @example Franklin */
+      lastName?: string;
+      /** @description The names of the pets owned by this individual. */
+      petNames?: string[];
+      /** @example 6085551023 */
+      telephone?: string;
+    };
+    /** @description A single page of the paginated, sorted owners list. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content?: components["schemas"]["OwnerListItemDto"][];
+      /**
+       * Format: int32
+       * @description The current page number (0-based).
+       * @example 0
+       */
+      number?: number;
+      /**
+       * Format: int32
+       * @description The number of elements per page.
+       * @example 10
+       */
+      size?: number;
+      /**
+       * Format: int64
+       * @description Total number of owners matching the filter, across all pages.
+       * @example 42
+       */
+      totalElements?: number;
+      /**
+       * Format: int32
+       * @description Total number of pages.
+       * @example 5
+       */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +608,16 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

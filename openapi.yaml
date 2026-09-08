@@ -195,6 +195,25 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -203,32 +222,28 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      petNames:
+                      - Leo
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      petNames: []
+                    totalElements: 2
+                    totalPages: 1
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1684,6 +1699,64 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerListItemDto:
+      type: object
+      description: "A summary of a pet owner, as shown in the paginated owners list."
+      properties:
+        address:
+          type: string
+          example: 110 W. Liberty St.
+        city:
+          type: string
+          example: Madison
+        firstName:
+          type: string
+          example: George
+        id:
+          type: integer
+          format: int32
+          description: The ID of the pet owner.
+          example: 1
+        lastName:
+          type: string
+          example: Franklin
+        petNames:
+          type: array
+          description: The names of the pets owned by this individual.
+          items:
+            type: string
+        telephone:
+          type: string
+          example: "6085551023"
+    OwnerPageDto:
+      type: object
+      description: "A single page of the paginated, sorted owners list."
+      properties:
+        content:
+          type: array
+          description: The owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerListItemDto"
+        number:
+          type: integer
+          format: int32
+          description: The current page number (0-based).
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: The number of elements per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "Total number of owners matching the filter, across all pages."
+          example: 42
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages.
+          example: 5
     PetDto:
       type: object
       properties:

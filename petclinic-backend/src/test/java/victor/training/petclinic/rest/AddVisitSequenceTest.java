@@ -91,12 +91,14 @@ class AddVisitSequenceTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
+        JsonNode page = json(call(mockMvc, get("/api/owners?size=1000")).andExpect(status().isOk()));
+        int ownerId = StreamSupport.stream(page.path("content").spliterator(), false)
+                .filter(o -> !o.path("petNames").isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did V3__sample_data.sql change?"));
+                        "No owner with a pet in the seeded data — did V3__sample_data.sql change?"))
+                .path("id").asInt();
+        return json(call(mockMvc, get("/api/owners/{ownerId}", ownerId)).andExpect(status().isOk()));
     }
 
     private JsonNode json(ResultActions response) throws Exception {

@@ -28,12 +28,13 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerListItemDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -128,10 +129,10 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        List<OwnerListItemDto> owners = search("/api/owners?size=100").getContent();
 
         assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
+                .extracting(OwnerListItemDto::getId, OwnerListItemDto::getFirstName, OwnerListItemDto::getLastName)
                 .contains(Assertions.tuple(ownerId, "George", "Franklin"));
     }
 
@@ -141,14 +142,14 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        List<OwnerListItemDto> owners = search("/api/owners?lastName=Java").getContent();
 
         assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getLastName)
+                .extracting(OwnerListItemDto::getId, OwnerListItemDto::getLastName)
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private OwnerPageDto search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,13 +157,12 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageDto.class);
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        List<OwnerListItemDto> results = search("/api/owners?lastName=NonExistent").getContent();
 
         assertThat(results).isEmpty();
     }
