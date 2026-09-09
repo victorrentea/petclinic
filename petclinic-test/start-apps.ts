@@ -61,7 +61,7 @@ async function startDatabase(): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
     console.log('Starting database (embedded Postgres)...');
 
-    const repoRoot = path.join(__dirname, '..', '..');
+    const repoRoot = path.join(__dirname, '..');
 
     const database = spawn('./start-database.sh', [], {
       cwd: repoRoot,
@@ -83,7 +83,7 @@ async function startBackend(): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
     console.log('Starting backend...');
 
-    const backendDir = path.join(__dirname, '..', '..', 'petclinic-backend');
+    const backendDir = path.join(__dirname, '..', 'petclinic-backend');
     const mvnCmd = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
 
     // Runs against the embedded Postgres started above (default profile). No H2.
@@ -110,7 +110,7 @@ async function startFrontend(): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
     console.log('Starting frontend...');
 
-    const frontendDir = path.join(__dirname, '..', '..', 'petclinic-frontend');
+    const frontendDir = path.join(__dirname, '..', 'petclinic-frontend');
 
     const frontend = spawn('npm', ['start'], {
       cwd: frontendDir,
