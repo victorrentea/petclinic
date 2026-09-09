@@ -71,7 +71,10 @@ const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 // the controller it reaches carry the same `service.name`, so without this they collapse
 // onto one participant and the picture loses the only hop it was drawn to show.
 // Set by petclinic-backend's genseq/Steps.java; the two are one contract.
-const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
+export const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
+
+/** The lifeline a @SpringBootTest's own `given`/`when`/`then` marks are drawn on. */
+export const TEST_PARTICIPANT = 'Test';
 
 function participantOf(span: NormSpan): string {
   const declared = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
@@ -421,7 +424,14 @@ function emitTrace(
  * the unit tests render from spans alone and get plain labels, which is the same bargain
  * the section-header links strike in generate.ts.
  */
-export type MethodLinks = (span: NormSpan) => string | undefined;
+/**
+ * Where one arrow's label should point, if anywhere.
+ *
+ * The scenario comes with it because a step arrow is resolved *inside* the section being
+ * drawn: two scenarios in one file can open with the same sentence, and without knowing
+ * which one is on screen both arrows would point at the first one's line.
+ */
+export type MethodLinks = (span: NormSpan, scenario?: DiagramScenario) => string | undefined;
 
 const NO_METHOD_LINKS: MethodLinks = () => undefined;
 
@@ -453,10 +463,13 @@ export function renderDiagram(
   const sections: DiagramSection[] = [];
   for (const scenario of scenarios) {
     const lines: string[] = [];
+    // Bound to the section being drawn, so `emitTrace` and everything under it stay
+    // unaware that a link can depend on which scenario it is in.
+    const scoped: MethodLinks = (span) => methodLinks(span, scenario);
     for (const spans of scenario.traces) {
       const traceLines: string[] = [];
       const drawn = new Set<string>();
-      emitTrace(spans, traceLines, drawn, options, collector, operations, methodLinks);
+      emitTrace(spans, traceLines, drawn, options, collector, operations, scoped);
       if (traceLines.length === 0) continue;
       drawn.forEach((p) => present.add(p));
       lines.push(...traceLines);

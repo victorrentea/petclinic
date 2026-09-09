@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
-import {lineOfTest, testHandle, linkedSectionTitle, TEST_LINK_TOOLTIP} from './test-location';
+import {lineOfTest, testHandle, linkedSectionTitle, TEST_LINK_TOOLTIP,
+  lineOfStep, stepHandle, lineOfHandle, STEP_LINK_TOOLTIP} from './test-location';
 
 const SPEC = [
   "import {test} from './support/trace-fixture';",
@@ -88,4 +89,57 @@ test('naming the source keeps the .spec.ts and .feature lookups working', () => 
   expect(lineOfTest(SPEC, 'Add a visit attended by a vet', 'src/add-visit.spec.ts')).toBe(4);
   expect(lineOfTest(FEATURE, 'Searching with an empty last name lists every owner',
     'src/owner-search.feature')).toBe(4);
+});
+
+// ── the sentence arrows ──────────────────────────────────────────────────────────
+
+const JAVA_TEST = [
+  'class AddVisitSequenceTest {',                                     // 1
+  '',                                                                 // 2
+  '    @Test',                                                        // 3
+  '    void addsAVisitToAnExistingPet() {',                           // 4
+  '        given("an owner with at least one pet exists");',          // 5
+  '        when("the owner detail page is opened");',                 // 6
+  '    }',                                                            // 7
+  '',                                                                 // 8
+  '    @Test',                                                        // 9
+  '    void remembersTheVetWhoAttendedIt() {',                        // 10
+  '        given("an owner with at least one pet exists");',          // 11
+  '        and("the clinic has a vet who can attend it");',           // 12
+  '    }',                                                            // 13
+].join('\n');
+
+test('a step arrow finds the call that stamped its sentence', () => {
+  expect(lineOfStep(JAVA_TEST, 'when the owner detail page is opened')).toBe(6);
+  expect(lineOfStep(JAVA_TEST, 'and the clinic has a vet who can attend it')).toBe(12);
+});
+
+test('a sentence both scenarios say resolves inside the one being drawn', () => {
+  // Both scenarios open with the identical `given`. Scanning from the top would send the
+  // second section's arrow to the first section's line — the whole reason `from` exists.
+  const sentence = 'given an owner with at least one pet exists';
+  expect(lineOfStep(JAVA_TEST, sentence, 4)).toBe(5);
+  expect(lineOfStep(JAVA_TEST, sentence, 10)).toBe(11);
+});
+
+test('a sentence this checkout does not write in those words gets no line', () => {
+  // One assembled at runtime — given("a visit on " + date) — cannot be matched, and a
+  // nearby line that merely mentions the words is a worse answer than none.
+  expect(lineOfStep(JAVA_TEST, 'given an owner who moved away')).toBe(0);
+  expect(lineOfStep(JAVA_TEST, 'open the owner detail page')).toBe(0);   // no keyword
+  expect(lineOfStep(JAVA_TEST, 'given')).toBe(0);                        // no sentence
+});
+
+test('an arrow is linked only when its line is known', () => {
+  expect(stepHandle('petclinic-backend/T.java', 11))
+    .toBe(`src://petclinic-backend/T.java:11${STEP_LINK_TOOLTIP}`);
+  // An arrow landing on the top of a file the section header already opens has cost a
+  // click to say nothing, so it stays a plain label.
+  expect(stepHandle('petclinic-backend/T.java', 0)).toBeUndefined();
+});
+
+test('the scenario line is read back out of the header handle', () => {
+  expect(lineOfHandle(testHandle('a/B.java', 42))).toBe(42);
+  expect(lineOfHandle(testHandle('a/B.java', 0))).toBe(0);
+  expect(lineOfHandle(undefined)).toBe(0);
 });

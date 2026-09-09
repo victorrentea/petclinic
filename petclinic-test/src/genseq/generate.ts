@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
-import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan}
-  from './trace-to-puml';
+import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan,
+  PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
-import {lineOfTest, testHandle} from './test-location';
+import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
 import {methodHandle} from './code-location';
 import {defaultOperations} from './openapi-operations';
 
@@ -222,12 +222,22 @@ function linkScenarios(
  * inside it — hence the climb to its parent, which is where a backend class's
  * `petclinic-backend/src/main/java/…` path is rooted.
  */
-function methodLinksFor(rootDir: string, deps: RenderDeps): MethodLinks {
+function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): MethodLinks {
   const readFile = deps.readFile;
   if (!readFile) return () => undefined;
   const repoRoot = path.dirname(rootDir);
   const cache = new Map<string, string | undefined>();
-  return (span) => {
+  return (span, scenario) => {
+    // A step arrow is the test talking about itself. `given("…")` is written in the test
+    // file and nowhere else, so there are no `code.*` attributes to follow — the sentence
+    // is looked up in the source instead, from the scenario's own declaration line so that
+    // two scenarios opening with the same words do not both point at the first one.
+    if (span.attributes[PARTICIPANT_ATTRIBUTE]?.trim() === TEST_PARTICIPANT) {
+      const text = readFile(`${rootDir}/${source}`);
+      if (text === undefined) return undefined;
+      return stepHandle(repoRelative(rootDir, source),
+        lineOfStep(text, span.name, lineOfHandle(scenario?.link)));
+    }
     // One trace draws the same repository method many times over — an N+1 is exactly what
     // these pictures are for — and each hit would otherwise re-read and re-scan the file.
     const key = [span.serviceName, span.attributes['code.namespace'],
@@ -265,7 +275,7 @@ export function renderScenarios(
     const filePath = diagramPathFor(rootDir, source);
     const {puml, details} = renderDiagram(
       titleFor(rootDir, source), linkScenarios(scenarios, rootDir, source, deps), options,
-      defaultOperations(), methodLinksFor(rootDir, deps));
+      defaultOperations(), methodLinksFor(rootDir, deps, source));
     deps.writeFile(filePath, puml);
     deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
     // Only the .puml paths are returned: the sidecar is part of one diagram, not
