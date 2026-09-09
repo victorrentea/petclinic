@@ -20,8 +20,13 @@ export class TooltipService implements OnDestroy {
   private static readonly EDGE_PX = 8;
 
   private bubble?: HTMLElement;
+  private style?: HTMLStyleElement;
   private showTimer?: number;
   private started = false;
+  /** Kept so ngOnDestroy can take them off again; a listener that outlives its
+      service is a leak, and in a test it makes the previous case's tooltip appear
+      during the next one. */
+  private teardown: Array<() => void> = [];
 
   /** Wires the listeners once; further calls are ignored. */
   start(): void {
@@ -31,24 +36,40 @@ export class TooltipService implements OnDestroy {
     this.started = true;
     this.injectStyles();
 
-    document.addEventListener('mouseover', (e) => this.onEnter(e));
-    document.addEventListener('mouseout', () => this.hide());
-    document.addEventListener('focusin', (e) => this.onEnter(e));
-    document.addEventListener('focusout', () => this.hide());
-    document.addEventListener('keydown', (e) => {
+    this.on(document, 'mouseover', (e) => this.onEnter(e));
+    this.on(document, 'mouseout', () => this.hide());
+    this.on(document, 'focusin', (e) => this.onEnter(e));
+    this.on(document, 'focusout', () => this.hide());
+    this.on(document, 'keydown', (e) => {
       if ((e as KeyboardEvent).key === 'Escape') {
         this.hide();
       }
     });
     // A fixed bubble positioned once would float away from its trigger, and on
     // touch a tap would leave it stuck open.
-    window.addEventListener('scroll', () => this.hide(), true);
-    document.addEventListener('touchstart', () => this.hide(), { passive: true });
+    this.on(window, 'scroll', () => this.hide(), true);
+    this.on(document, 'touchstart', () => this.hide(), { passive: true });
+  }
+
+  private on(
+    target: EventTarget,
+    type: string,
+    handler: (e: Event) => void,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    target.addEventListener(type, handler, options);
+    this.teardown.push(() => target.removeEventListener(type, handler, options));
   }
 
   ngOnDestroy(): void {
     this.hide();
+    this.teardown.forEach((off) => off());
+    this.teardown = [];
     this.bubble?.remove();
+    this.bubble = undefined;
+    this.style?.remove();
+    this.style = undefined;
+    this.started = false;
   }
 
   private onEnter(event: Event): void {
@@ -111,8 +132,8 @@ export class TooltipService implements OnDestroy {
 
   /** Shipped from here, so a page cannot pick up the behaviour without the look. */
   private injectStyles(): void {
-    const style = document.createElement('style');
-    style.textContent = `
+    this.style = document.createElement('style');
+    this.style.textContent = `
 .pc-tooltip {
   position: fixed;
   z-index: 10000;
@@ -134,6 +155,6 @@ export class TooltipService implements OnDestroy {
   opacity: 1;
   transform: translateY(0);
 }`;
-    document.head.appendChild(style);
+    document.head.appendChild(this.style);
   }
 }
