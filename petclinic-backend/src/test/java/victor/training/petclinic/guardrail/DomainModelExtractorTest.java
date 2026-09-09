@@ -52,7 +52,7 @@ class DomainModelExtractorTest {
     private static final Path SOURCE_ROOT = Paths.get("src/main/java");
 
     // One wording for every link. Naming the member in its own tooltip only repeated the
-    // text the pointer was already on, and the legend says what clicking does anyway.
+    // text the pointer was already on; this says the one thing the pointer does not.
     private static final String TOOLTIP = "{Click to open in editor}";
 
     /** What the model *is*; this test only decides how to draw it. */
@@ -72,15 +72,10 @@ class DomainModelExtractorTest {
         sb.append("hide empty members\n");
         sb.append("skinparam classAttributeIconSize 0\n");
         // Every class box is a link to its declaration. Underlining them would put a blue
-        // rule across the diagram, and the affordance is not worth that: the legend says
-        // once what would otherwise be said on every box.
+        // rule across the diagram, and the affordance is not worth that: hovering a class
+        // already spells out what a click does, so nothing on the picture needs to.
         sb.append("skinparam hyperlinkUnderline false\n");
-        sb.append("skinparam hyperlinkColor #000000\n");
-        // Emitted before the classes so it survives the review diff, which copies the
-        // preamble from the new side and starts its own output at the first element.
-        sb.append("legend bottom\n");
-        sb.append("  Click any class to jump to the source code.\n");
-        sb.append("end legend\n\n");
+        sb.append("skinparam hyperlinkColor #000000\n\n");
 
         for (Class<?> cls : entities) {
             sb.append(cls.isEnum() ? "enum " : "class ").append(cls.getSimpleName())
