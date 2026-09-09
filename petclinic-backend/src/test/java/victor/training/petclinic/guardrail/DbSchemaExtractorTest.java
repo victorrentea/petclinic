@@ -41,7 +41,7 @@ class DbSchemaExtractorTest {
                     .load()
                     .migrate();
 
-            Path output = projectRoot().resolve("petclinic-backend").resolve("DB.sql");
+            Path output = projectRoot().resolve("petclinic-backend/docs/generated/DB.sql");
             ProcessBuilder pb = new ProcessBuilder(pgDump,
                     "-h", "localhost",
                     "-p", String.valueOf(pg.getPort()),

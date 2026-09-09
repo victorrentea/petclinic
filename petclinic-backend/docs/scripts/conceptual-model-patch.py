@@ -42,17 +42,43 @@ MODULE = Path(__file__).resolve().parents[2]  # petclinic-backend/
 DIAGRAM = MODULE / "docs" / "ConceptualModel.drawio.png"
 TRUTH = MODULE / "docs" / "generated" / "DomainModel.puml"
 
+# Red is the one thing this script is allowed to say about its own work: "a machine put
+# this here, and it is not laid out yet". It goes on the *stroke* and nowhere else — the
+# border of a box, the line of an edge. Words stay black: a red label says the same thing
+# the red border already says, in ink the reader has to stop and read as meaning.
+TODO_COLOR = "#FF0000"
+# Every line on the map is drawn at the same weight, so a line the reader has not seen
+# before is told apart by its colour and never by its thickness. A fresh edge that came
+# out heavier than its neighbours read as "important" — which is not what it is.
+STROKE_W = "2"
+
 BOX_STYLE = (
     "rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;"
-    "fontSize=15;fontStyle=1;")
-STAGED_BOX_STYLE = ("rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;"
-                    "dashed=1;fontSize=15;fontStyle=1;")
-EDGE_STYLE = "endArrow=none;html=1;strokeColor=#333333;fontSize=12;"
+    f"strokeWidth={STROKE_W};fontSize=15;fontStyle=1;")
+STAGED_BOX_STYLE = (
+    "rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;"
+    f"strokeColor={TODO_COLOR};strokeWidth={STROKE_W};dashed=1;fontSize=15;fontStyle=1;")
+EDGE_STYLE = f"endArrow=none;html=1;strokeColor=#333333;strokeWidth={STROKE_W};fontSize=12;"
+# A line this script routed is a to-do like a staged box is: it is joined to the right two
+# concepts and it is routed by nobody. It turns black when a human has looked at it.
+STAGED_EDGE_STYLE = (
+    f"endArrow=none;html=1;strokeColor={TODO_COLOR};strokeWidth={STROKE_W};fontSize=12;")
 # the * is the only marker on the map, so it is read at a glance; no white label
-# background either, which would chew a notch out of the box border underneath it
+# background either, which would chew a notch out of the box border underneath it —
+# and, in a dark theme, invert into a black slab nobody drew
 LABEL_STYLE = (
     "edgeLabel;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;"
     "labelBackgroundColor=none;")
+
+# The one note this script writes, and the only thing on the map addressed to a person.
+# Red, because that is how the report tells a to-do from a drawing, and because it is the
+# note itself that is the to-do — there is no stroke on a text shape to carry it.
+NOTE_ID = "note-relayout"
+NOTE_TEXT = (
+    "Please re-lay out the red elements and set their colour back to default, "
+    "then delete this label.")
+NOTE_STYLE = f"text;html=1;align=center;fontSize=13;fontColor={TODO_COLOR};"
+NOTE_W, NOTE_H = 260, 60
 
 BOX_W, BOX_H = 140, 50
 LANE_GAP = 300  # how far left of the map the staging lane sits
@@ -201,7 +227,28 @@ def patch(model_root, concepts, associations):
         root.extend(edge_cells(key, a))
         changes.append(f"drew       {key} — check how it routes")
 
+    # 4. say, on the map itself, what the red means and how to clear it
+    if any(c.startswith(("staged", "drew")) for c in changes) and not note_drawn(cells):
+        x, y = staging_origin(model_root)
+        root.append(relayout_note(x, y - ROW_GAP))
+        changes.append("wrote      the re-layout note — delete it once the map is drawn")
+
     return changes
+
+
+def note_drawn(cells):
+    """Once is enough: a second run must not stack a second copy of the same sentence."""
+    return any(cell_attr(cell, obj, "id") == NOTE_ID for cell, obj in cells)
+
+
+def relayout_note(x, y):
+    """The instruction, parked at the head of the staging lane — where the red is."""
+    obj = ET.Element("object", {"label": NOTE_TEXT, "id": NOTE_ID})
+    cell = ET.SubElement(obj, "mxCell", {"style": NOTE_STYLE, "vertex": "1", "parent": "1"})
+    ET.SubElement(cell, "mxGeometry", {
+        "x": str(x), "y": str(y),
+        "width": str(NOTE_W), "height": str(NOTE_H), "as": "geometry"})
+    return obj
 
 
 def staging_origin(model_root):
@@ -233,7 +280,7 @@ def edge_cells(key, a):
     edge_id = "e-" + key.lower()
     obj = ET.Element("object", {"label": "", "assoc": key, "id": edge_id})
     cell = ET.SubElement(obj, "mxCell", {
-        "style": EDGE_STYLE, "edge": "1", "parent": "1",
+        "style": STAGED_EDGE_STYLE, "edge": "1", "parent": "1",
         "source": f"c-{a['left'].lower()}", "target": f"c-{a['right'].lower()}"})
     ET.SubElement(cell, "mxGeometry", {"relative": "1", "as": "geometry"})
 
