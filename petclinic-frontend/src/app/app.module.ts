@@ -16,11 +16,14 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {HttpErrorInterceptor} from './http-error.interceptor';
 
+import {DesignSystemModule} from './design-system/design-system.module';
+
 @NgModule({
   declarations: [
     AppComponent,
   ],
   imports: [
+    DesignSystemModule,
     BrowserModule,
     FormsModule,
     HttpClientModule,

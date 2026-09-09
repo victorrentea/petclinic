@@ -78,6 +78,11 @@ export class OwnerListComponent implements OnInit {
     return currentSortDirection(this.route.snapshot.queryParamMap.get('sort'));
   }
 
+  /** The whole Pets list as one line, for the cell's tooltip. */
+  petNamesOf(owner: Owner): string {
+    return owner.pets.map((pet) => pet.name).join(', ');
+  }
+
   onSelect(owner: Owner) {
     this.router.navigate(['/owners', owner.id]);
   }

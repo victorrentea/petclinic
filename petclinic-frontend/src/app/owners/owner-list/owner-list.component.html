@@ -44,28 +44,30 @@
 
         <tbody>
         <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+          <td class="ownerFullName" [data-tip]="owner.lastName + ', ' + owner.firstName"><a
+            routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
-          <td>
-            <span *ngFor="let pet of owner.pets" class="petName">{{ pet.name }}<br/></span>
+          <td [data-tip]="owner.address">{{ owner.address }}</td>
+          <td [data-tip]="owner.city">{{ owner.city }}</td>
+          <td [data-tip]="owner.telephone">{{ owner.telephone }}</td>
+          <td [data-tip]="petNamesOf(owner)">
+            <span *ngFor="let pet of owner.pets" class="petName">{{ pet.name }}</span>
           </td>
         </tr>
         </tbody>
       </table>
 
-      <mat-paginator [length]="page.totalElements"
+      <!-- Add Owner shares the pager's row: the pager's own controls sit on the
+          right, so the empty left half is where the action belongs. -->
+      <div class="owners-footer">
+        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <mat-paginator [length]="page.totalElements"
                       [pageIndex]="page.number"
                       [pageSize]="page.size"
                       [pageSizeOptions]="pageSizes"
                       (page)="onPage($event)"
                       aria-label="Select a page of owners">
-      </mat-paginator>
-
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        </mat-paginator>
       </div>
     </div>
   </div>

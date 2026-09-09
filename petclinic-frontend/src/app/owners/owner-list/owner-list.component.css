@@ -39,6 +39,30 @@ display:none;
   margin-bottom: 16px;
 }
 
+/* One strip under the table holding both the action and the pager. The white
+  background moves off the paginator and onto this row, so it runs the full
+  width and the button sits inside it rather than on the page behind. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff;
+  padding-left: 16px;
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+  background: transparent;
+}
+
+@media (max-width: 576px) {
+  .owners-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .owners-pagination {
   display: flex;
   align-items: center;
@@ -76,4 +100,97 @@ display:none;
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* Fixed column widths.
+  With the browser's default auto layout each column is sized from the content of
+    the page currently shown, so re-sorting reshuffles every boundary — the columns
+  visibly jump sideways on each click. Fixed layout sizes them from these rules
+  instead, so a sort only reorders rows. Percentages, so the table still adapts to
+    the viewport; they are taken from the widest content observed across the sorts
+  and sum to 100. */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+#ownersTable th:nth-child(1), #ownersTable td:nth-child(1) { width: 22%; }  /* Name */
+#ownersTable th:nth-child(2), #ownersTable td:nth-child(2) { width: 26%; }  /* Address */
+#ownersTable th:nth-child(3), #ownersTable td:nth-child(3) { width: 18%; }  /* City */
+#ownersTable th:nth-child(4), #ownersTable td:nth-child(4) { width: 19%; }  /* Telephone */
+#ownersTable th:nth-child(5), #ownersTable td:nth-child(5) { width: 15%; }  /* Pets */
+
+/* A value too long for its column is cut with an ellipsis rather than wrapped, so
+  every row keeps the same height and the grid stays scannable. The full value is
+  one hover away: each cell carries a data-tip, and the tooltip suppresses itself
+  when the text is not actually clipped. */
+#ownersTable td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The Pets cell stacks one name per line, so it clips per line, not as a block.
+  display:block replaces the <br/> that used to separate the names — keeping both
+  left a blank line between every pet. line-height is inherited so the first pet
+    sits on the same baseline as the other columns' text; a block span otherwise
+    starts a couple of pixels higher than the inline text beside it. */
+#ownersTable td .petName {
+  display: block;
+  line-height: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The header follows the reader down a long page: without it you lose track of
+  which column you are reading a third of the way down.
+  Bootstrap's .table-responsive sets overflow-x:auto, which makes this div a
+    scroll container and traps position:sticky inside it — the header would pin to
+    the div, not to the viewport, and so never appear to stick at all. The overflow
+  is no longer needed: table-layout is fixed and the widths are percentages, so
+    the table always fits its container and never scrolls sideways. */
+#ownersTable {
+  overflow: visible;
+}
+
+#ownersTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Sort arrows are always visible, so a column advertises that it can be sorted
+  instead of only admitting it on hover.
+  Three things are overridden, and nothing else — the arrow keeps Material's own
+    shape, and the active column keeps Material's transform, which is what turns the
+  arrow over between ascending and descending.
+
+    ::ng-deep is needed because Material builds the arrow's elements at runtime, so
+    they never receive this component's scoping attribute. Anchored to #ownersTable
+    so it cannot leak to another table.
+
+  Not th[aria-sort]: Material writes aria-sort="none" on idle headers too, so that
+    selector would match every sortable column and nothing would read as active. */
+#ownersTable ::ng-deep .mat-sort-header-arrow {
+  opacity: 1 !important;
+}
+
+/* 1. Idle arrows hold still. Material slides the arrow in on hover, which is a nice
+      reveal when it starts invisible and just a twitch once it is always shown. */
+#ownersTable ::ng-deep th:not([aria-sort='ascending']):not([aria-sort='descending'])
+    .mat-sort-header-arrow {
+  transform: translateY(0) !important;
+}
+
+/* 2. Idle arrows are grey: present, clearly not the current sort. The arrow's parts
+      are drawn with `background: currentColor`, so `color` is what tints them —
+      setting their background directly loses to Material's own rule. */
+#ownersTable ::ng-deep th:not([aria-sort='ascending']):not([aria-sort='descending'])
+    .mat-sort-header-arrow {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 3. The active sort is bright white against the header's near-white text. */
+#ownersTable ::ng-deep th[aria-sort='ascending'] .mat-sort-header-arrow,
+#ownersTable ::ng-deep th[aria-sort='descending'] .mat-sort-header-arrow {
+  color: #fff !important;
 }

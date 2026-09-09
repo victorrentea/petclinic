@@ -7,13 +7,14 @@
     "start": "ng serve",
     "generate:api": "openapi-typescript ../openapi.yaml -o src/app/generated/api-types.ts",
     "lint:openapi": "spectral lint ../openapi.yaml --ruleset ../.config/spectral.yaml --fail-severity=error",
-    "prebuild": "npm run generate:api",
+    "prebuild": "npm run generate:api && npm run lint:tooltips",
     "build": "bash scripts/build-strict.sh",
     "build:raw": "ng build",
     "test": "ng test",
     "test-headless": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "lint:tooltips": "node scripts/check-no-native-title.js"
   },
   "private": true,
   "dependencies": {

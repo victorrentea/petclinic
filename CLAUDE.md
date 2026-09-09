@@ -211,6 +211,11 @@ still be taken in the database everyone runs against.
 
 ### Frontend design system
 
+**House UX style lives in [ux_design.md](ux_design.md)** — data-grid rules (fixed column
+widths, ellipsis + tooltip on overflow, sticky header, always-visible sort arrows) and
+the app's single tooltip. Read it before building or restyling any screen; it is
+binding for new UI, and each rule records the failure that produced it.
+
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`) — it is a
 `ControlValueAccessor`, so `[(ngModel)]`, `formControlName` and `required` work on it
@@ -219,6 +224,11 @@ which is what a design-system audit looks for. The selector keeps the repo's `ap
 prefix (ESLint `component-selector` enforces it), not the `pc-` of the CSS classes.
 A raw `<select>` in a form template is a bug, not a shortcut. The multi-select on
 vet-edit is still a `mat-select`; the design system has no multi-select yet.
+
+The other standardised widget is the **tooltip** (`tooltip.service.ts` +
+`[data-tip]`). The native `title` attribute is banned and
+`petclinic-frontend/scripts/check-no-native-title.js` fails the build on one — it runs
+from `prebuild`, so CI's strict frontend build already enforces it.
 
 ### Visit dates are bounded (bug #40)
 
