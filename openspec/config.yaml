@@ -1,5 +1,44 @@
 schema: spec-driven
 
+# Repeated here on purpose: the same intent is written into the spec-driven schema
+# itself (schemas/spec-driven/schema.yaml + templates/), but that lives in the
+# globally installed npm package and is wiped by `npm i -g @fission-ai/openspec`.
+# These rules are committed with the repo, so they survive an upgrade.
+rules:
+  proposal:
+    - >-
+      AUDIENCE: a non-technical product owner who does not know JSON, HTTP, SQL or
+      any framework, and has never opened a file in this repo. They must be able to
+      read the proposal end to end and approve it without asking what a word means.
+    - >-
+      Keep OUT of proposal.md: wire formats, payload shapes, endpoint paths,
+      parameters, status codes; class/file/module/table/column/index names; library,
+      framework and pattern choices and the alternatives weighed; lists of affected
+      files or generated artifacts; migration mechanics, rollback steps, performance
+      analysis. All of it belongs in design.md, which loses nothing by holding it.
+    - >-
+      Describe changes as the people using the product would experience them, not as
+      the mechanism that produces them. Give the reason behind a rule in plain words
+      whenever the product owner should weigh in on it.
+    - >-
+      Use Impact to say what the change asks of the business: what changes and what
+      explicitly does not, anything found while planning that contradicts what was
+      assumed or agreed, any decision the product owner should rule on (with your
+      recommendation and how reversible it is), what the release needs from people,
+      and what is deliberately not being done.
+    - >-
+      A non-technical proposal does not mean less engineering research. Inspect the
+      code as thoroughly as ever; the findings shape the specs, design and tasks —
+      they just do not surface in this file.
+  design:
+    - >-
+      This is the ONLY place the technical detail lives, because proposal.md is
+      written for a non-technical reader. State the contract in full — shapes,
+      paths, parameters, defaults, error cases, and what stays unchanged — plus the
+      affected files, modules, tests and generated artifacts. Never assume the
+      proposal covered any of it.
+    - Number decisions (D1, D2, ...) so the specs and tasks can cite them.
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.

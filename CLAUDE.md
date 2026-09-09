@@ -81,6 +81,25 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
+### OpenSpec: proposal.md is for the business, design.md is for us
+
+Planning artifacts live in `openspec/changes/<name>/`. The two documents have **different
+readers**, and that is not a style preference:
+
+- **`proposal.md` is reviewed with a non-technical product owner.** No wire formats, endpoint
+  paths, status codes, class/file/table names, framework choices, affected-file lists or
+  migration mechanics. Describe what the user experiences, and what the change asks of the
+  business. A capability path is the one unavoidable technical token.
+- **`design.md` is therefore the only place the contract exists.** State it in full — shapes,
+  parameters, defaults, error cases, affected surface, alternatives rejected, rollback. Never
+  assume the proposal covered it; it cannot. Number decisions `D1…` so specs and tasks cite them.
+  Written for senior engineers: verdict first, tables over prose, no paragraph past three lines.
+
+`openspec/config.yaml` carries these as `rules.proposal` / `rules.design`, which the CLI merges
+into `openspec instructions`. The same intent is also patched into the globally installed
+`@fission-ai/openspec` schema — **that copy is wiped by `npm i -g`, the config.yaml one is not.**
+If a generated proposal comes back full of JSON and class names, the global package was upgraded.
+
 ### Living Architecture & Guardrails
 
 See [GUARDRAILS.md](GUARDRAILS.md) for the full list of guardrail tests, living architecture diagrams, and CI drift checks.

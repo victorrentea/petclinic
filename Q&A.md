@@ -59,6 +59,12 @@ Design interview log. Issue: *the grid should be sortable by any column; paginat
 | **Q19** | Count query on every page request? | **Accept it** | An index-only `count(*)` over 100k rows is single-digit ms. Revisit only if the table reaches tens of millions. |
 | **Q20** | Deep-offset paging (page 5,000) | **Accept `OFFSET`** | Keyset pagination is faster but cannot do "jump to page N" or `totalPages`, both of which `mat-paginator` needs. Note it as a known ceiling. |
 
+## Decided later
+
+| # | Question | Decision | Why |
+|---|---|---|---|
+| **Q21** | A page size outside 5/10/20 — `size=1000`? | **400** — *decided by Victor, 9 Sep 2026* | Spring otherwise clamps silently at `max-page-size` (2000), so the client believes it got the size it asked for, and a 2000-row page stays reachable at 100k owners. Same reasoning as the Q12 sort whitelist: the server owns the vocabulary and says so out loud. Surfaced as the one open call in the OpenSpec proposal. |
+
 ## Open ceiling, deliberately not solved
 
 `Śliwiński` sorts correctly here only because the dev DB is `en_US.UTF-8` (F7). If production runs `C` collation, name sorting silently changes. Worth confirming with ops before go-live.
