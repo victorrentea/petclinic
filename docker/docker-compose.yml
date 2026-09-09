@@ -97,7 +97,7 @@ services:
       ro.victorrentea.petclinic.env: "1"
     environment:
       PROJECT: ${COMPOSE_PROJECT_NAME:?run through ../start-docker.sh}
-      IDLE_TTL: ${IDLE_TTL:-1800}
+      IDLE_TTL: ${IDLE_TTL:-7200}
     volumes:
       # Root-equivalent on the host. This is a local development convenience: it is the
       # only way a container can remove its own siblings.

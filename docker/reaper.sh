@@ -8,7 +8,7 @@
 set -eu
 
 LOG=/activity/access.log
-TTL="${IDLE_TTL:-1800}"
+TTL="${IDLE_TTL:-7200}"
 MINE="label=ro.victorrentea.petclinic.env=1"
 
 [ -n "${PROJECT:-}" ] || { echo "reaper: PROJECT is empty, refusing to match anything"; exit 1; }
