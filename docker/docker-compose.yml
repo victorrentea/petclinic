@@ -19,10 +19,6 @@ services:
       POSTGRES_DB: petclinic
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # The reset snapshot. In a volume, not the container's /tmp: a recreated db
-      # container (a repulled postgres tag, an edited compose file) would otherwise lose
-      # it and retake the "seed" from whatever the reviewer had already typed in.
-      - seed:/seed
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U petclinic -d petclinic"]
       interval: 5s
@@ -57,6 +53,28 @@ services:
       - "127.0.0.1::4200"
     volumes:
       - activity:/activity
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # Deliberately a container and not a Spring endpoint. An in-app reset guarded by a
+  # profile or a property is one wrong value away from answering in production; this one
+  # is absent from the backend artefact entirely, has no published port, and is routed
+  # only by the nginx config that exists inside the container image.
+  reset:
+    build:
+      context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/docker/reset
+    labels:
+      ro.victorrentea.petclinic.env: "1"
+    environment:
+      PGHOST: db
+      PGUSER: petclinic
+      PGPASSWORD: petclinic
+      PGDATABASE: petclinic
+    volumes:
+      - seed:/seed
+    # Not `db`: the seed is only the seed once Flyway has run, and Flyway runs inside the
+    # backend's startup.
     depends_on:
       backend:
         condition: service_healthy
