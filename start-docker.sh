@@ -7,7 +7,7 @@
 #
 #   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh]
 #   ./start-docker.sh url   [name]        # the URL again
-#   ./start-docker.sh reset [name]        # database back to the seed (bounces the backend)
+#   ./start-docker.sh reset [name]        # database back to the seed
 #   ./start-docker.sh ls
 #   ./start-docker.sh down  [name|--all]
 #
@@ -96,18 +96,6 @@ compose() { COMPOSE_PROJECT_NAME="$1" PETCLINIC_SRC="${2:-$REPO}" IDLE_TTL="${ID
 
 port_of() { compose "$1" "" port frontend 4200 2>/dev/null | tail -1 | sed 's/.*://' || true; }
 
-# The seed is only reachable by replaying Flyway on an empty database, so `reset` restores
-# a dump taken the first time the instance came up rather than re-running migrations. It
-# lives in a volume, not the container's /tmp, and is moved into place only once complete —
-# a half-written dump that `test -s` accepts would become a permanent, broken "seed".
-snapshot() {
-    compose "$1" "" exec -T db sh -c '
-        set -e
-        [ -s /seed/seed.sql ] && exit 0
-        pg_dump -U petclinic petclinic > /seed/seed.sql.part
-        mv /seed/seed.sql.part /seed/seed.sql'
-}
-
 cmd_up() {
     local ref="" name="" fresh=""
     while [ $# -gt 0 ]; do
@@ -160,9 +148,6 @@ cmd_up() {
 
     echo "🐳 building $name${sha:+ from $sha}  (this takes a few minutes the first time)"
     compose "$name" "$src" up -d --build --wait
-    # Not fatal: the stack is already serving, and losing the URL over a failed dump would
-    # leave the reviewer hunting for the port by hand.
-    snapshot "$name" || echo "⚠️  no seed snapshot taken — 'reset' will not work here"
 
     local p; p="$(port_of "$name")"
     [ -n "$p" ] || die "the stack came up but no host port was published"
@@ -182,37 +167,15 @@ cmd_url() {
 
 # Same starting point every time, so repeated deep links cannot pile up duplicate rows or
 # trip a unique constraint.
+# One implementation, reachable two ways. The button on the review page and this command
+# both POST the same endpoint, so the terminal and the browser can never drift apart.
 cmd_reset() {
     local name; name="$(resolve "${1:-}")"
-    # ON_ERROR_STOP, or psql exits 0 on a failed statement and a half-restored schema
-    # reports success. lock_timeout, because DROP SCHEMA needs an exclusive lock on every
-    # table and would otherwise queue behind a live transaction with the whole app behind
-    # it. client_min_messages, or the cascade prints a NOTICE per dropped table.
-    compose "$name" "" exec -T \
-        -e PGOPTIONS='-c client_min_messages=warning -c lock_timeout=5s' db sh -c '
-        set -e
-        test -s /seed/seed.sql
-        psql -v ON_ERROR_STOP=1 -qU petclinic -d petclinic \
-            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-        psql -v ON_ERROR_STOP=1 -qU petclinic -d petclinic -f /seed/seed.sql' >/dev/null \
-        || die "reset failed — the database may be half-restored; ./start-docker.sh up --name $name --fresh"
-
-    # The backend must be bounced, not just left running. PgJDBC promotes a query to a
-    # server-side prepared statement after a few executions, and those plans hold the
-    # relation OIDs that DROP SCHEMA just invalidated; a pooled connection that survives
-    # the reset answers with "cached plan must not change result type" for up to Hikari's
-    # 30-minute maxLifetime. Sequence hi-blocks cached in the JVM go stale the same way.
-    printf '🌱 %s reset to the seed, restarting the backend' "$name"
-    compose "$name" "" restart backend >/dev/null
-    local i
-    for i in $(seq 1 60); do
-        case "$(docker inspect --format '{{.State.Health.Status}}' \
-                "$(compose "$name" "" ps -q backend)" 2>/dev/null)" in
-            healthy) echo " — ready"; return ;;
-        esac
-        printf '.'; sleep 2
-    done
-    echo ""; die "the backend did not come back healthy after the reset"
+    local p; p="$(port_of "$name")"
+    [ -n "$p" ] || die "$name is not running"
+    curl -fsS -X POST "http://localhost:$p/__reset" >/dev/null \
+        || die "reset failed — docker compose logs reset (project $name)"
+    echo "🌱 $name reset to the seed"
 }
 
 cmd_ls() {
