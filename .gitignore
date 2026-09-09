@@ -59,6 +59,11 @@ petclinic-backend/src/test/postman/reports/
 # otel agent jar + the Code City generators clone: tools, not our source
 petclinic-backend/.tools/
 
+# draw.io's autosave backup of whatever is open in the editor — `.$<name>.bkp` beside
+# the file it shadows. It reappears every time ConceptualModel.drawio.png is opened,
+# and it is the editor's crash insurance, not a second copy of the diagram.
+.$*.bkp
+
 # Generated diagram renders — sources (.puml/.dsl) are tracked; renders viewed via PlantUML proxy URLs (see docs/generated/INDEX.md)
 petclinic-backend/docs/generated/**/*.svg
 petclinic-backend/docs/generated/**/*.png
