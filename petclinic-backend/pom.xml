@@ -218,6 +218,57 @@
                         <phase>test</phase>
                         <goals><goal>report</goal></goals>
                     </execution>
+                    <!--
+                        The acceptance suite runs in a DIFFERENT JVM: Playwright drives a
+                        backend started by `spring-boot:run`, which surefire's agent never
+                        touches. That JVM is given its own agent (see start-backend.sh /
+                        petclinic-test/start-apps.ts, both gated on JACOCO_E2E=1) writing
+                        target/jacoco-e2e.exec, and the three executions below turn the two
+                        .exec files into the two reports the Code City colours by:
+
+                        target/site/jacoco/            everything, both suites merged
+                        target/site/jacoco-acceptance/ only what the browser exercised
+
+                        Bound to no phase on purpose — a normal `mvn test` must not need an
+                        acceptance run to succeed. They are invoked by id:
+                        mvn jacoco:merge@merge-all jacoco:report@report-all \
+                            jacoco:report@report-acceptance
+                    -->
+                    <execution>
+                        <id>merge-all</id>
+                        <phase>none</phase>
+                        <goals><goal>merge</goal></goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>jacoco.exec</include>
+                                        <include>jacoco-e2e.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.build.directory}/jacoco-all.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report-all</id>
+                        <phase>none</phase>
+                        <goals><goal>report</goal></goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-all.exec</dataFile>
+                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report-acceptance</id>
+                        <phase>none</phase>
+                        <goals><goal>report</goal></goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/jacoco-e2e.exec</dataFile>
+                            <outputDirectory>${project.build.directory}/site/jacoco-acceptance</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

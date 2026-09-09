@@ -31,9 +31,19 @@
       "//6": "page reads it out of git at the diff's base ref to draw the before/after of",
       "//7": "coverage and CRAP, with no second checkout and no second test run. Refresh it",
       "//8": "only on the default branch: regenerate-codecity.sh --write-baseline.",
-      "tests": "cd petclinic-backend && mvn -o test -Dmaven.test.failure.ignore=true",
+      "//9": "Two suites, measured separately. The unit run instruments its own JVM;",
+      "//10": "the acceptance run drives a SEPARATELY started backend, which is given its",
+      "//11": "own agent by JACOCO_E2E=1 and dumped in Playwright's globalTeardown while",
+      "//12": "it is still up. The last command merges the two .exec files into the two",
+      "//13": "reports the city colours by: everything, and the browser alone.",
+      "tests": [
+        "cd petclinic-backend && mvn -o test -Dmaven.test.failure.ignore=true",
+        "cd petclinic-test && JACOCO_E2E=1 npm test",
+        "cd petclinic-backend && mvn -o -q jacoco:merge@merge-all jacoco:report@report-all jacoco:report@report-acceptance"
+      ],
       "out": "petclinic-backend/docs/generated/codecity",
       "title": "Code City",
+      "acceptance": "petclinic-backend/target/site/jacoco-acceptance/jacoco.xml",
       "baseline": "petclinic-backend/docs/generated/codecity/coverage-baseline.tsv"
     },
     "video": {

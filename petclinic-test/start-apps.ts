@@ -4,6 +4,8 @@ import {spawn, ChildProcess} from 'child_process';
 import axios from 'axios';
 import * as net from 'net';
 import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs';
 
 const DB_PORT = 5432;
 const BACKEND_PORT = 8080;
@@ -79,6 +81,23 @@ async function startDatabase(): Promise<ChildProcess> {
   });
 }
 
+/** The newest JaCoCo agent Maven has already downloaded, as a -javaagent argument. */
+function jacocoJvmArg(): string | null {
+  const base = path.join(os.homedir(), '.m2', 'repository', 'org', 'jacoco', 'org.jacoco.agent');
+  if (!fs.existsSync(base)) return null;
+  const jars = fs.readdirSync(base)
+    .map(v => path.join(base, v, `org.jacoco.agent-${v}-runtime.jar`))
+    .filter(fs.existsSync)
+    .sort();
+  const jar = jars[jars.length - 1];
+  if (!jar) {
+    console.warn('JACOCO_E2E set, but no agent jar in ~/.m2 — run `mvn test` once to fetch it.');
+    return null;
+  }
+  const port = process.env.JACOCO_PORT || '6300';
+  return `-javaagent:${jar}=output=tcpserver,address=127.0.0.1,port=${port}`;
+}
+
 async function startBackend(): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
     console.log('Starting backend...');
@@ -86,8 +105,20 @@ async function startBackend(): Promise<ChildProcess> {
     const backendDir = path.join(__dirname, '..', 'petclinic-backend');
     const mvnCmd = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
 
+    // Acceptance coverage: this is the JVM the browser suite actually exercises, and
+    // surefire's JaCoCo agent never touches it. With JACOCO_E2E=1 it gets an agent of its
+    // own, in tcpserver mode so the exec can be pulled while the app is still running —
+    // global-teardown.ts dumps it before Playwright tears this process down, which is the
+    // only moment both "the suite has finished" and "the backend is still up" are true.
+    const jacocoArgs = process.env.JACOCO_E2E ? jacocoJvmArg() : null;
+    const mvnArgs = ['spring-boot:run'];
+    if (jacocoArgs) {
+      mvnArgs.push(`-Dspring-boot.run.jvmArguments=${jacocoArgs}`);
+      console.log(`Backend instrumented for acceptance coverage: ${jacocoArgs}`);
+    }
+
     // Runs against the embedded Postgres started above (default profile). No H2.
-    const backend = spawn(mvnCmd, ['spring-boot:run'], {
+    const backend = spawn(mvnCmd, mvnArgs, {
       cwd: backendDir,
       stdio: 'inherit',
       shell: true,
