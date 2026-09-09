@@ -1,0 +1,5 @@
+# Only pom.xml and src/ are COPY'd; without this the whole module — target/ and a warm
+# build's hundreds of MB with it — is uploaded to the daemon on every build.
+target
+.tools
+*.iml
