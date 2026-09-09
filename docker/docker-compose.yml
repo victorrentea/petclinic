@@ -26,6 +26,10 @@ services:
       retries: 30
 
   backend:
+    # Tagged by the source it was built from, not by the instance name: compose would
+    # otherwise default to <project>-backend and store a separate copy per instance.
+    # Two instances of the same commit now share one image.
+    image: petclinic-env-backend:${PETCLINIC_TAG:-worktree}
     build:
       context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/petclinic-backend
     labels:
@@ -41,6 +45,10 @@ services:
         condition: service_healthy
 
   frontend:
+    # Tagged by the source it was built from, not by the instance name: compose would
+    # otherwise default to <project>-frontend and store a separate copy per instance.
+    # Two instances of the same commit now share one image.
+    image: petclinic-env-frontend:${PETCLINIC_TAG:-worktree}
     build:
       context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/petclinic-frontend
     labels:
@@ -62,6 +70,7 @@ services:
   # is absent from the backend artefact entirely, has no published port, and is routed
   # only by the nginx config that exists inside the container image.
   reset:
+    image: petclinic-env-reset:${PETCLINIC_TAG:-worktree}
     build:
       context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/docker/reset
     labels:
