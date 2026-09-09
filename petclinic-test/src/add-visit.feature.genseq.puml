@@ -4,10 +4,7 @@ hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
 title src/add-visit.feature
-legend right
-  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-end legend
-footer @generate_sequence — generated from real traces, do not edit
+footer @generate_sequence — generated from real traces of end-to-end test runs, do not edit ❗
 participant Browser
 participant Backend
 participant DB
