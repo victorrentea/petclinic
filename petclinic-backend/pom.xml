@@ -137,9 +137,28 @@
             <version>2.0.7</version>
             <scope>test</scope>
         </dependency>
+        <!--
+            The embedded-postgres default binary is PostgreSQL 14, so without an explicit
+            binary per platform the tests silently run on a different major version than
+            ./start-database.sh does. That skew stayed invisible until V10 used the
+            built-in "unicode" ICU collation, which exists only from PostgreSQL 16:
+            green on a developer's Mac, red on CI. Pin 16.2 for every platform.
+        -->
         <dependency>
             <groupId>io.zonky.test.postgres</groupId>
             <artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
+            <version>16.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.zonky.test.postgres</groupId>
+            <artifactId>embedded-postgres-binaries-linux-amd64</artifactId>
+            <version>16.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.zonky.test.postgres</groupId>
+            <artifactId>embedded-postgres-binaries-linux-arm64v8</artifactId>
             <version>16.2.0</version>
             <scope>test</scope>
         </dependency>
