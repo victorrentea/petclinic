@@ -44,13 +44,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
   fi
 
-  # Guard: after a petclinic-backend/DB.sql change in the pushed range, the committed
+  # Guard: after a petclinic-backend/docs/generated/DB.sql change in the pushed range, the committed
   # DB.puml must be IN SYNC with DB.sql (catches a `git commit --no-verify` that bypassed
   # pre-commit). We verify by regenerating the diagram and comparing content — NOT by
   # requiring DB.puml to also appear in the changed paths: an index-only DB.sql change
   # legitimately leaves the ER diagram untouched (it deliberately omits indexes), so a
   # path-based check would false-positive.
-  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/DB.sql'; then
+  if printf '%s\n' "$paths" | grep -qx 'petclinic-backend/docs/generated/DB.sql'; then
     PUML='petclinic-backend/docs/generated/DB.puml'
     if command -v python3 >/dev/null 2>&1; then
       GEN_TMP="$(mktemp)"
@@ -63,7 +63,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       fi
       if ! cmp -s "$ROOT/$PUML" "$GEN_TMP"; then
         rm -f "$GEN_TMP"
-        echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML is stale (out of sync with DB.sql)."
+        echo "[pre-push] ❌ petclinic-backend/docs/generated/DB.sql changed but $PUML is stale (out of sync with DB.sql)."
         echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh"
         echo "[pre-push]         git add $PUML"
         echo "[pre-push]    then amend/commit and push again (or avoid --no-verify so pre-commit handles it)."
@@ -73,7 +73,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     elif ! printf '%s\n' "$paths" | grep -qx "$PUML"; then
       # Degraded fallback (no python3 to regenerate): keep the original path-based backstop.
       echo "[pre-push] ⚠️  python3 missing — cannot verify DB.puml content; using path-based backstop."
-      echo "[pre-push] ❌ petclinic-backend/DB.sql changed but $PUML was not regenerated."
+      echo "[pre-push] ❌ petclinic-backend/docs/generated/DB.sql changed but $PUML was not regenerated."
       echo "[pre-push]    Run: ./petclinic-backend/docs/scripts/db/gen-db-schema-diagram.sh"
       echo "[pre-push]         git add $PUML"
       exit 1
@@ -116,7 +116,6 @@ fi
 DRIFT_PATHS=(
   "$ROOT/petclinic-backend/docs/generated"
   "$ROOT/openapi.yaml"
-  "$ROOT/petclinic-backend/DB.sql"
 )
 if ! git diff --quiet HEAD -- "${DRIFT_PATHS[@]}"; then
   echo "[pre-push] ❌ Generated artifacts drifted from committed state:"

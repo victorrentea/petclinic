@@ -4,7 +4,7 @@ import os
 import db_schema_to_puml as m
 
 HERE = os.path.dirname(__file__)
-DB_SQL = os.path.join(HERE, "..", "..", "..", "DB.sql")
+DB_SQL = os.path.join(HERE, "..", "..", "generated", "DB.sql")
 
 
 def _real_schema_sql():
@@ -64,7 +64,7 @@ def test_caption_states_how_the_diagram_stays_in_sync():
 
 def test_footer_credits_generator_and_makes_no_diff_claim():
     puml = m.generate(_real_schema_sql())
-    assert "footer db/migration/** -> petclinic-backend/DB.sql -> petclinic-backend/docs/generated/DB.puml" in puml
+    assert "footer db/migration/*.sql -> DB -> dump to DB.sql -> converted to DB.puml" in puml
     assert "red" not in puml.lower()
 
 

@@ -122,7 +122,7 @@ plant_tier1() {
   # the moment DB.sql gets staged (DB.sql is not in .editorconfig-checker.json's excludes).
   # It also puts DB.sql in the pushed range, which is what arms the db-puml guard below.
   seed db-sql "pre-push drift gate (DbSchemaExtractorTest rewrites DB.sql) + editorconfig" -- \
-    append petclinic-backend/DB.sql '' "-- $MARK: hand-edited schema snapshot   "
+    append petclinic-backend/docs/generated/DB.sql '' "-- $MARK: hand-edited schema snapshot   "
 
   seed db-puml "pre-push DB.sql↔DB.puml regenerate-and-compare guard" -- \
     sub petclinic-backend/docs/generated/DB.puml \

@@ -162,10 +162,10 @@ if git diff --cached --name-only | grep -qx 'openapi.yaml'; then
 fi
 
 # ── DB schema → ER diagram (plain snapshot) ────────────────────────────────
-# Gated: only run when petclinic-backend/DB.sql is staged — that's the sole input. Regenerates
+# Gated: only run when petclinic-backend/docs/generated/DB.sql is staged — that's the sole input. Regenerates
 # docs/generated/DB.puml as a plain snapshot of the current schema and stages it
 # so the diagram is committed alongside the schema change.
-if git diff --cached --name-only | grep -qx 'petclinic-backend/DB.sql'; then
+if git diff --cached --name-only | grep -qx 'petclinic-backend/docs/generated/DB.sql'; then
   if command -v python3 >/dev/null 2>&1; then
     DBDIAG_OUT=$(mktemp)
     trap 'rm -f "$NPM_OUT" "$DBDIAG_OUT"' EXIT
