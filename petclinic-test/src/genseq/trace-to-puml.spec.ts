@@ -148,13 +148,15 @@ test('payloads stay off unless asked for', () => {
   expect(puml).not.toContain('note over');
 });
 
-// The legend carries the warning and nothing else. How the picture was recorded and how
-// to re-render it at another detail level is documentation about the tool: a reader of
-// the *image* cannot act on it, and it took more room beside the diagram than the diagram.
-test('the legend warns that the file is generated, and says nothing more', () => {
+// The warning rides the footer rather than a `legend right` panel. How the picture was
+// recorded and how to re-render it at another detail level is documentation about the
+// tool: a reader of the *image* cannot act on it, and the box took more room beside the
+// diagram than the diagram.
+test('the generated-file warning rides the footer, not a legend box', () => {
   const puml = spansToPuml(parseTempoTrace(fixture), 'add a visit', {...STATIC, sql: 'values', httpBodies: true});
-  const legend = puml.split('legend right\n')[1].split('end legend')[0];
-  expect(legend).toBe('  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.\n');
+  expect(puml).not.toContain('legend');
+  expect(puml).toContain(
+    'footer @generate_sequence — generated from real traces of end-to-end test runs, do not edit ❗');
 });
 
 test('no npm command or env var is drawn into the picture', () => {

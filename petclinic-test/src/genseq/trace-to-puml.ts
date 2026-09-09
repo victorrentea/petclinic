@@ -475,24 +475,20 @@ export function renderDiagram(
   const header = [
     '@startuml',
     // ' starts a PlantUML comment: this one warns whoever opens the *file*.
-    // The legend below repeats it for a reader of the *image* — a comment never
-    // reaches the rendered diagram, and the picture is what ends up pasted in a
+    // A comment never reaches the rendered diagram, so the footer below repeats the
+    // warning for a reader of the *image* — the picture is what ends up pasted in a
     // review, a slide or a wiki page.
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
     `title ${title}`,
-    // The warning, and nothing else. How the picture was recorded, how to re-render
-    // it at another detail level and which npm script does that is documentation
-    // about the tool; it belongs in petclinic-test/AGENTS.md and the README, not
-    // drawn beside the conversation the diagram exists to show.
-    'legend right',
-    `  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
-    'end legend',
     // footer (bottom of every page) states the diagram's provenance, naming the opt-in
     // the reader will actually find in the file above: a .feature/.spec.ts carries the
     // `@generate_sequence` tag, a @SpringBootTest the `@GenerateSequence` annotation.
-    `footer ${optInOf(title)} — generated from real traces, do not edit`,
+    // It also carries the "do not edit" warning, which used to sit in a `legend right`
+    // panel: a framed box floating beside the conversation the diagram exists to show,
+    // for a line that reads just as well under it.
+    `footer ${optInOf(title)} — generated from real traces of end-to-end test runs, do not edit ❗`,
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
   // The header is the one place the picture can say which test produced it, so it is
