@@ -15,7 +15,7 @@
 # --fresh rebuilds and drops the instance's volumes. With more than one instance up, every
 # command needs the name: none of them will guess which one you meant.
 #
-# Instances reap themselves after 30 idle minutes (--ttl to change).
+# Instances reap themselves after 2 idle hours (--ttl to change).
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -91,7 +91,8 @@ resolve() {
     echo "$all"
 }
 
-compose() { COMPOSE_PROJECT_NAME="$1" PETCLINIC_SRC="${2:-$REPO}" IDLE_TTL="${IDLE_TTL:-1800}" \
+compose() { COMPOSE_PROJECT_NAME="$1" PETCLINIC_SRC="${2:-$REPO}" IDLE_TTL="${IDLE_TTL:-7200}" \
+            PETCLINIC_TAG="${PETCLINIC_TAG:-worktree}" \
             docker compose -f "$COMPOSE_FILE" "${@:3}"; }
 
 port_of() { compose "$1" "" port frontend 4200 2>/dev/null | tail -1 | sed 's/.*://' || true; }
@@ -107,7 +108,7 @@ cmd_up() {
             *) die "unknown option: $1" ;;
         esac
     done
-    export IDLE_TTL="${IDLE_TTL:-1800}"
+    export IDLE_TTL="${IDLE_TTL:-7200}"
 
     docker info >/dev/null 2>&1 || die "Docker is not running. Start Docker Desktop and retry."
     gc
@@ -124,6 +125,8 @@ cmd_up() {
             || die "commit $sha predates the container setup — it has no petclinic-frontend/nginx.conf"
     fi
     : "${name:=petclinic-${sha:-worktree}}"
+    # What the images are tagged with, so instances of the same commit share them.
+    export PETCLINIC_TAG="${sha:-worktree}"
     # The marker label protects `ls`/`gc`, but `down` runs plain `docker compose -p`, which
     # is not label-filtered. Refusing to reuse an existing unrelated project name is what
     # keeps `--name petclinic-chatbot` from arming exactly the disaster the label prevents.
