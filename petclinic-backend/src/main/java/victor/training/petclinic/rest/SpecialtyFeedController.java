@@ -14,7 +14,7 @@ import java.util.List;
  * poll returns 304 Not Modified and no body. Deliberately NOT under the VET_ADMIN-guarded
  * {@link SpecialtyRestController}: this is a read-only public feed any internal client may poll without
  * a user token. The backing list is cached ({@link SpecialtyFeed}), so frequent polling never reaches
- * the database.
+ * the database. https://interact.victorrentea.ro/xy5gdu/slides
  */
 @RestController
 @RequestMapping("/api")

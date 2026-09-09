@@ -19,6 +19,7 @@ import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
@@ -75,12 +76,21 @@ public class PetClinicMcp {
                 petLines);
     }
 
+    /** Null when no vet is assigned yet — the LLM then simply omits the vet from its answer. */
+    private String formatVet(Vet vet) {
+        if (vet == null) {
+            return null;
+        }
+        return vet.getFirstName() + " " + vet.getLastName();
+    }
+
     private String formatPet(Pet pet) {
         String type = pet.getType() == null ? "?" : pet.getType().getName();
         return "- id=%d — %s (%s), born %s".formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());
     }
 
-    public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description) {
+    public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description,
+            String vetName) {
     }
 
     public record AmbulanceAddressInput(String address) {
@@ -100,7 +110,7 @@ public class PetClinicMcp {
             // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.
             for (Visit v : pet.getVisitsSortedByDate()) {
                 result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(),
-                        v.getDescription()));
+                        v.getDescription(), formatVet(v.getVet())));
             }
         }
         return result;
