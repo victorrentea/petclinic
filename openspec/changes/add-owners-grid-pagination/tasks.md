@@ -144,5 +144,5 @@ Group 1 produces a document a non-technical reader signs off on. It is written a
 - [x] 9.3 Update `CLAUDE.md` with the new listing contract, the sort whitelist and the
       `@BatchSize` reason, so the next session does not reintroduce `JOIN FETCH` + `Pageable`;
       verify the file mentions why the diagram/regeneration steps above are mandatory
-- [ ] 9.4 Commit and push; verify CI is green, and note in the PR that `openapi.yaml`, `DB.sql`
+- [x] 9.4 Commit and push; verify CI is green, and note in the PR that `openapi.yaml`, `DB.sql`
       and `db/migration/` are CODEOWNERS-protected and need an elders review
