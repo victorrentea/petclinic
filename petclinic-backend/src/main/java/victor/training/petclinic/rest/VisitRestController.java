@@ -79,6 +79,7 @@ public class VisitRestController {
     // repository-only, no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
+        log.info("Booking visit for pet {}: {}", visitDto.getPetId(), visitDto.getDescription());
         Visit visit = visitMapper.toVisit(visitDto);
         visit.setVet(resolveVet(visitDto.getVetId()));
         visitRepository.save(visit);
