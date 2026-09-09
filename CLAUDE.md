@@ -160,6 +160,55 @@ The 25 seeded rows are a dev convenience, not the design point: any list endpoin
 query touching owners must be **paged and sorted server-side** — never "load them all and
 filter in the browser". This is the reason `listOwners` takes a `Pageable`.
 
+### The owners listing is paged (GH #25)
+
+`GET /api/owners` returns **`OwnerPageDto`** — `{content, totalElements, totalPages, number,
+size}` — never a bare array. Ours rather than Spring's `Page`, because Boot 3.5 logs
+*"Serializing PageImpl instances as-is is not supported"* and the frontend's TypeScript is
+generated from `openapi.yaml`, so an unstable upstream shape would break the UI silently.
+
+- **Sorting is whitelisted server-side** in `OwnerListingRequest`: only `name`
+  (→ `lastName, firstName`) and `city`. Anything else → **400**, never a raw client string
+  into `Sort.by` — that throws `PropertyReferenceException`, a 500 that lists the entity's
+  fields. Page size must be 5, 10 or 20; other sizes are refused rather than silently
+  clamped at Spring's `max-page-size`.
+- **`id` is appended to every sort.** Without it, owners sharing a sort value come back in a
+  different order per query, so one appears on two pages and another on none — which reads
+  as lost data, not as a paging bug. Guarded by `OwnerSortingTest` and by the acceptance
+  feature, both walking the pages **sorted by city at size 5**: London's 7 owners straddle
+  the page-3/page-4 boundary. Not the Potters — they are positions 16-17 by name and share
+  a page at 5, 10 *and* 20, so nothing splits them.
+- **`Owner.pets` is `@BatchSize(10)`, never `JOIN FETCH` + `Pageable`.** That combination
+  makes Hibernate page **in memory** (HHH000104): it reads the whole join, then slices —
+  fatal at 100k owners, and the exact failure this design exists to prevent.
+- **Collation is pinned on the columns**, not on each `ORDER BY` (`V10__index_owners.sql`).
+  The dev database was created `C`, which files `Śliwiński` after `Wensleydale` instead of
+  between `Silver` and `Tremaine`. `ALTER COLUMN … COLLATE "unicode"` (the built-in ICU root
+  collation — present in any PG ≥ 16, needs no OS locale, deterministic so `LIKE` still
+  works) makes ordering a property of our schema rather than of the server's locale, and no
+  query can forget it. `EXPLAIN` confirms both sorts are index-only scans with **no Sort
+  node**; a hand-written `COLLATE "C"` brings the Sort node straight back.
+  ⚠️ `text_pattern_ops` on `last_name` is now **required**, not insurance: a btree in a
+  linguistic collation cannot serve `LIKE 'Pot%'`.
+- **The grid is a projection of the URL.** `lastName`, `page`, `size` and `sort` live in the
+  query string; every action navigates and the reload is what re-fetches. Refresh, Back and a
+  pasted link therefore take the same path as a click. `matSort` + `mat-paginator` are
+  attached to the **existing Bootstrap table** — `mat-table` would take the striping and the
+  `#ownersTable` / `.ownerFullName` selectors the e2e suite keys on.
+- The Name cell renders **`Potter, Harry`**, so the column's sort key is what the reader sees.
+
+⚠️ **`GET /api/owners` has seven consumers, not one.** A `Q&A.md` design interview recorded
+`owner-list.component` as the only one and was wrong six times over. When its shape changes,
+all of these break: the component, `owner-search.feature.glue.ts`, `add-visit.dsl.ts`,
+`visit-date-range.spec.ts`, `OwnerTest.search()`, `AddVisitSequenceTest` and
+`OwnerSearchThroughLatencyProxyTest`. Grep for `api/owners` across **all five modules** before
+changing it; the frontend is never the whole story.
+
+⚠️ **Check `flyway_schema_history` before picking a migration number.** `V9` was taken by
+`V9__link_visit_to_vet` on another branch and already applied to the shared dev database, so
+this feature's migration is `V10`. A number that is free in `db/migration/` on your branch can
+still be taken in the database everyone runs against.
+
 ### Frontend design system
 
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every

@@ -13,7 +13,9 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  // The listing is paged: ask for a page big enough to find a suitable owner in.
+  const {data: page} = await axios.get(`${API_BASE}/owners`, {params: {size: 20}, timeout: 10_000});
+  const owners = page.content;
   const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');

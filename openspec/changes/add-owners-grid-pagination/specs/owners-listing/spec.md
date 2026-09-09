@@ -73,6 +73,10 @@ formats and holds nulls, so its order would be arbitrary, and pets is a collecti
 Sorting by name SHALL order by last name, then first name, so owners who share a last name
 stay adjacent and in a predictable order.
 
+Text ordering SHALL follow the conventions a reader expects for names — in particular, letters
+carrying diacritics SHALL sort with their base letter rather than after the entire alphabet.
+The ordering SHALL NOT depend on how the database server was configured.
+
 Any sort property outside the allowed set SHALL be refused with a client error, and the
 error SHALL NOT disclose internal property or type names.
 
@@ -92,6 +96,14 @@ error SHALL NOT disclose internal property or type names.
 - **WHEN** a client requests the listing sorted by city descending
 - **THEN** the owners are ordered by city descending
 
+#### Scenario: Accented names sort with their unaccented letter
+
+- **WHEN** the listing is sorted by name ascending and the clinic holds an owner whose last name
+  begins with an accented letter, such as `Śliwiński`
+- **THEN** that owner appears among the owners whose last name begins with the corresponding
+  unaccented letter — between `Silver` and `Tremaine` — and never after every other owner
+- **AND** this holds regardless of how the database server itself was configured
+
 #### Scenario: An unknown sort property is refused
 
 - **WHEN** a client requests the listing sorted by `telephone`, `password` or any property
@@ -105,10 +117,11 @@ Consecutive pages of one listing SHALL together contain each matching owner exac
 Owners whose sort values are equal SHALL be ordered by a stable, unique tiebreak, so no
 owner is repeated on two pages or skipped between them.
 
-#### Scenario: Duplicate sort values do not shuffle between pages
+#### Scenario: Owners sharing a sort value do not shuffle between pages
 
-- **WHEN** the clinic holds owners with duplicate last names, and a client walks every page
-  of the listing at a size that puts a duplicated last name across a page boundary
+- **WHEN** a client walks every page of the listing at a page size that puts a group of owners
+  sharing one sort value across a page boundary — for example sorting by city, where the
+  largest group of owners in the same city spans two pages
 - **THEN** the concatenation of all pages contains every owner exactly once
 - **AND** repeating the walk returns the owners in the same order
 

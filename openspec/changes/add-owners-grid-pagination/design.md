@@ -20,8 +20,8 @@
 | `Owner.pets` LAZY `Set`; mapper walks `getPets()` per row | N+1 now, still N+1 after paging unless batched → D3 |
 | Boot 3.5.11: *"Serializing PageImpl as-is is not supported"* | Wire contract must be ours → D2 |
 | `owners` has **zero indexes** (`V1` indexes types/pets/visits, skips owners) | → D7 |
-| Dev DB is `en_US.UTF-8` | Plain btree can't serve `LIKE 'Pot%'` → D7; and see Risks |
-| 28 seeded owners, **duplicate surnames** (Potter ×2, Darling ×2) | Tiebreak is load-bearing, not hygiene → D5 |
+| **DB collation is `C`** (verified 9 Sep 2026 — `Q&A.md` F7 says `en_US.UTF-8` and is wrong) | Byte order: `Śliwiński` sorts **after Wensleydale**, not among the S's → D7 pins the collation per column |
+| 28 seeded owners; ties: Potter ×2, Darling ×2, **London ×7** | Tiebreak is load-bearing → D5. Only the London tie straddles a page boundary at an offered size |
 
 **Guardrails that go red if artifacts aren't regenerated:** `OpenApiExtractorTest`, TS↔OpenAPI
 sync, `DbSchemaExtractorTest`, `DB.sql`↔`DB.puml` pre-push, Spectral, Spotless, SonarCloud.
@@ -33,8 +33,8 @@ vocabulary · paging stable across duplicate surnames · linkable, reload-proof 
 
 **Non-Goals** — keyset pagination (Q20: `mat-paginator` needs jump-to-page + `totalPages`) ·
 dropping the per-request `count(*)` (Q19: index-only, single-digit ms at 100k) · seeding 100k
-rows (Q17) · sorting/filtering on address, telephone, pets · fixing the collation ceiling (F7 —
-flagged to ops, not solved).
+rows (Q17) · sorting/filtering on address, telephone, pets · changing the database's own
+collation (D7 pins it per column instead, so the server's locale stops mattering).
 
 ## Contract
 
@@ -109,9 +109,14 @@ Accept `sort=<prop>,<dir>` → map through an explicit whitelist (`name` → `la
 **Why whitelist:** raw string into `Sort.by` throws `PropertyReferenceException` — a **500 that
 enumerates the entity's properties**. Wrong status *and* an info leak. It also decouples API sort
 vocabulary from field names: one API sort, two columns underneath.
-**Why the tiebreak is not optional:** with two Potters and two Darlings, a page boundary inside a
-tie lets Postgres return either order per query → **same owner on two pages, another on none**.
-Reads as data loss, not a paging bug. Nobody reports it. Tested at backend *and* e2e level.
+**Why the tiebreak is not optional:** a page boundary inside a tie lets Postgres return either
+order per query → **same owner on two pages, another on none**. Reads as data loss, not a paging
+bug. Nobody reports it. Tested at backend *and* e2e level.
+
+**Which tie to test with (verified against the live seed):** *not* the Potters — they sit at
+positions 16–17 in name order, so they land on the same page at 5, 10 **and** 20. Nothing splits
+them. Use **City sort at size 5**: London holds 7 owners at positions 13–19, so the page-3/page-4
+boundary falls inside the tie. Stronger than the 2-row Potter case, and no seed mutation.
 
 ### D6 · `size` ∉ {5,10,20} → **400**, not clamped
 **Decided by Victor, 9 Sep 2026.** The issue says "5, 10 or 20"; the interview never covered
@@ -124,9 +129,20 @@ for, and a 2000-row page stays reachable at 100k. Same logic as D5.
 
 | Index | Serves | Why this shape |
 |---|---|---|
-| `(last_name, first_name, id)` | default sort | index order **is** the ORDER BY, tiebreak included → plain index walk, no Sort node |
-| `(city, id)` | City sort | same, other allowed sort |
-| `(last_name text_pattern_ops)` | existing `LIKE 'Pot%'` | plain btree can't serve prefix LIKE under `en_US.UTF-8` (F7) |
+| `(last_name COLLATE "en_US.UTF-8", first_name COLLATE "en_US.UTF-8", id)` | default sort | index order **is** the ORDER BY, tiebreak and collation included → plain index walk, no Sort node |
+| `(city COLLATE "en_US.UTF-8", id)` | City sort | same, other allowed sort |
+| `(last_name text_pattern_ops)` | existing `LIKE 'Pot%'` | **now required**: once the column sorts linguistically, a plain btree can no longer serve a prefix LIKE |
+
+**Collation is pinned per column, deliberately.** The database was created `C` (byte order), which
+sorts `Śliwiński` after `Wensleydale` — wrong for users, who expect him between `Silver` and
+`Tremaine`. Rather than rebuild the database, the sort columns and their indexes carry
+`COLLATE "en_US.UTF-8"` explicitly, so **ordering is a property of our schema, not of whatever
+locale the server happened to be created with.** Verified on the live DB: the collation exists
+and produces `… Schroedinger, Silver, Śliwiński, Tremaine, Weasley, Wensleydale`.
+
+Every `ORDER BY` must use the same collation as the index, or the index stops serving it and a
+Sort node reappears. That coupling lives in D5's whitelist — it emits collated sort expressions,
+which is the whole reason the whitelist maps names to expressions rather than to bare properties.
 
 Three indexes on a table that had none is a big *relative* change, small absolute one — owners
 change rarely, write amplification isn't a concern. `V8` is current, so `V9`.
@@ -189,7 +205,7 @@ reads SHALL-prose willingly and it doesn't execute — task 1.3 keeps both in sy
 |---|---|
 | e2e breaks in **three** places at once (D8) | Feature + glue + Examples in the same commit as the contract; run `owner-search.feature` locally — a red e2e is not CI's job to discover |
 | `Potter, Harry` is a visible UI change nobody outside the interview asked for | Agreed with the business precisely so the sort key isn't hidden (Q3; F8 — first names here are often titles: *Mister* Geppetto, *Lady* Tremaine). Call it out in the release note |
-| **Collation** — `Śliwiński` sorts right only because dev is `en_US.UTF-8` (F7) | **Unsolved. Confirm production collation with ops before go-live.** `text_pattern_ops` is collation-independent; the `ORDER BY` is not |
+| **Collation drift between environments** | **Solved, not deferred** (D7): sorts and indexes pin `COLLATE "en_US.UTF-8"`, so prod's own locale is irrelevant. `Q&A.md` F7 claimed dev was `en_US.UTF-8`; it is `C` — the ordering it called a future prod risk was already the dev behaviour. Residual risk: a hand-written `ORDER BY` that forgets the COLLATE silently drops the index |
 | Deep-offset paging (Q20) | Accepted ceiling — `OFFSET 50000` scans and discards 50k index entries. Documented, revisit if anyone ever pages that deep |
 | `@BatchSize` is **easy to delete silently** — page still renders, just N+1 | No fail-gate. A statement-count test would catch it; GUARDRAILS.md already lists "Performance / N+1 drift" as *considered, not scheduled*. Out of scope — backend test asserts contents, not statement count |
 | Four generated artifacts drift at once (Q18) | Regenerate **before** committing so CI doesn't race an auto-commit. Three are CODEOWNERS-protected → factor the elder review into timing |

@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,24 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  const expectedPage: OwnerPage = {
+    content: expectedOwners,
+    totalElements: 2,
+    totalPages: 1,
+    number: 0,
+    size: 10,
+  };
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+  it('asks for one page of owners, with every part of the query in the URL', () => {
+    ownerService
+      .getOwnerPage({ lastName: '', page: 0, size: 10, sort: 'name,asc' })
+      .subscribe((page) => expect(page).toEqual(expectedPage), fail);
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?lastName=&page=0&size=10&sort=name,asc'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedPage);
   });
 
   it('search the owner by id', () => {
@@ -131,15 +142,15 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
+  it('carries the search term, the page and the sort in the same request', () => {
+    ownerService
+      .getOwnerPage({ lastName: 'Fr', page: 2, size: 5, sort: 'city,desc' })
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners));
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
+      ownerService.entityUrl + '?lastName=Fr&page=2&size=5&sort=city,desc'
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush({ ...expectedPage, number: 2, size: 5 });
   });
 });

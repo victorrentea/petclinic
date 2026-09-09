@@ -5,8 +5,8 @@ Feature: Search owners by last name
 
   Background:
     Given the clinic has these owners
-      | Harry Potter   |
-      | Beatrix Potter |
+      | Potter, Harry   |
+      | Potter, Beatrix |
 
   Scenario Outline: Filter owners by a case-sensitive prefix of the last name
     When I open the owners page
@@ -14,16 +14,16 @@ Feature: Search owners by last name
     Then exactly these owners are listed: "<owners>"
 
     Examples:
-      | search | owners                       |
-      | Potter | Harry Potter, Beatrix Potter |
-      | Pot    | Harry Potter, Beatrix Potter |
+      | search | owners                         |
+      | Potter | Potter, Harry; Potter, Beatrix |
+      | Pot    | Potter, Harry; Potter, Beatrix |
       | otter  |                              |
       | Harry  |                              |
       | potter |                              |
       | Zzzz   |                              |
 
   @generate_sequence
-  Scenario: Searching with an empty last name lists every owner
+  Scenario: Searching with an empty last name lists the clinic's owners, a page at a time
     When I open the owners page
     And I search owners for ""
-    Then every owner in the clinic is listed
+    Then the first page of owners is listed

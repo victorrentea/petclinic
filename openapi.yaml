@@ -187,6 +187,8 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "One page of owners. Sortable by 'name' or 'city' only; any other\
+        \ property is rejected. Page size must be 5, 10 or 20."
       operationId: listOwners
       parameters:
       - in: query
@@ -195,6 +197,26 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "name,asc"
       responses:
         "200":
           content:
@@ -203,39 +225,39 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
+                    totalElements: 28
+                    totalPages: 3
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
-          description: Bad Request
+          content: {}
+          description: "Unsupported page size, sort column or direction"
         "404":
           content:
             '*/*':
@@ -1684,6 +1706,41 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      description: "One page of owners, with the totals needed to render a pager."
+      properties:
+        content:
+          type: array
+          description: "The owners on this page, in the requested order."
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: Zero-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: How many owners this page can hold.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: How many owners match the filter across all pages.
+          example: 28
+        totalPages:
+          type: integer
+          format: int32
+          description: How many pages the matching owners fill.
+          example: 3
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
     PetDto:
       type: object
       properties:

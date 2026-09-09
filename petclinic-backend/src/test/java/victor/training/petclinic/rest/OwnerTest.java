@@ -156,8 +156,10 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        // The listing is paged now: the owners are under "content".
+        return mapper.readValue(mapper.readTree(responseJson).get("content").traverse(),
+                new TypeReference<List<OwnerDto>>() {
+                });
     }
 
     @Test

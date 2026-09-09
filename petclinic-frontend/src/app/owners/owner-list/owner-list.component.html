@@ -22,14 +22,21 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="isEmpty">No owners with LastName starting with "{{lastName}}"</div>
+
+    <!-- matSort is a directive on the existing Bootstrap table: mat-table would take
+        the striping and the #ownersTable / .ownerFullName selectors with it. -->
+    <div class="table-responsive" id="ownersTable" *ngIf="!isEmpty">
+      <table class="table table-striped"
+            matSort
+            [matSortActive]="activeSortColumn"
+            [matSortDirection]="activeSortDirection"
+            (matSortChange)="onSort($event)">
         <thead>
         <tr>
-          <th>Name</th>
+          <th mat-sort-header="name">Name</th>
           <th>Address</th>
-          <th>City</th>
+          <th mat-sort-header="city">City</th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -38,18 +45,25 @@
         <tbody>
         <tr *ngFor="let owner of owners">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+            (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <span *ngFor="let pet of owner.pets" class="petName">{{ pet.name }}<br/></span>
+          </td>
         </tr>
         </tbody>
       </table>
+
+      <mat-paginator [length]="page.totalElements"
+                      [pageIndex]="page.number"
+                      [pageSize]="page.size"
+                      [pageSizeOptions]="pageSizes"
+                      (page)="onPage($event)"
+                      aria-label="Select a page of owners">
+      </mat-paginator>
+
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

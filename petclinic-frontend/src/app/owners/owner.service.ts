@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerPage, OwnerQuery } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -19,10 +20,31 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  /**
+   * One page of owners. Replaces the old getOwners()/searchOwners() pair: the filter
+   * is just another parameter of the same request now, and the server decides the
+   * page, the order and what it will not order by.
+   */
+  getOwnerPage(query: OwnerQuery): Observable<OwnerPage> {
+    const params = new HttpParams()
+      .set('lastName', query.lastName)
+      .set('page', query.page)
+      .set('size', query.size)
+      .set('sort', query.sort);
+
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, { params })
+      .pipe(
+        catchError(
+          this.handlerError('getOwnerPage', {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            number: query.page,
+            size: query.size,
+          } as OwnerPage)
+        )
+      );
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -50,13 +72,4 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
-  }
 }

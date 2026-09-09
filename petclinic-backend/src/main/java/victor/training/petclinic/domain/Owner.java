@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.core.style.ToStringCreator;
 
 import jakarta.persistence.CascadeType;
@@ -52,6 +53,11 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    // Batched, never JOIN FETCHed: a LEFT JOIN FETCH combined with a Pageable makes
+    // Hibernate page in memory (HHH000104) - it reads the whole join, then slices -
+    // which is fatal at the 100k owners this listing is designed for. Batching turns
+    // a page's lazy loads into one "... where owner_id in (?,?,...)" instead.
+    @BatchSize(size = 10)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
     private Set<Pet> pets = new HashSet<>();
 

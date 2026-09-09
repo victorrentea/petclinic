@@ -12,7 +12,7 @@ legend bottom
   Click any class to jump to the source code.
 end legend
 
-class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:28{Click to open in editor}]] {
+class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Owner.java:29{Click to open in editor}]] {
   id : Integer
   firstName : String
   lastName : String

@@ -13,8 +13,10 @@ import {PlaywrightWorld} from './support/world';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+// Surname first, the order the Name column sorts in - and what the cell now renders.
+const fullName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+// Semicolon-separated: the names themselves now contain a comma ("Potter, Harry").
+const namesIn = (cell: string) => cell.split(';').map((n) => n.trim()).filter(Boolean);
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
@@ -30,11 +32,17 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * V3__sample_data.sql) fails on the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  // The listing is paged now, so ask for a page large enough to hold the whole seed
+  // rather than expecting an array.
+  const {data} = await axios.get(`${API_BASE}/owners`, {params: {size: 20}, timeout: 10_000});
+  const first = data?.content;
+  if (!Array.isArray(first) || first.length === 0) {
     throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
   }
-  const names: string[] = data.map(fullName);
+  const rest = data.totalPages > 1
+    ? (await axios.get(`${API_BASE}/owners`, {params: {size: 20, page: 1}, timeout: 10_000})).data.content
+    : [];
+  const names: string[] = [...first, ...rest].map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
   this.allOwnerNames = names;
 });
@@ -53,6 +61,13 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+// The grid pages now, so "every owner" can no longer mean "every row on screen".
+// What the user can still check at a glance is that the first page is full and drawn
+// from the clinic's owners; walking every page is owners-pagination.feature's job.
+Then('the first page of owners is listed', async function (this: PlaywrightWorld) {
+  const cells = this.page.locator('#ownersTable td.ownerFullName');
+  await expect.poll(async () => (await cells.allTextContents()).length, {timeout: 10_000}).toBe(10);
+
+  const listed = (await cells.allTextContents()).map((t) => t.trim());
+  expect(this.requireAllOwnerNames()).toEqual(expect.arrayContaining(listed));
 });

@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description One page of owners. Sortable by 'name' or 'city' only; any other property is rejected. Page size must be 5, 10 or 20.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,35 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, with the totals needed to render a pager. */
+    OwnerPageDto: {
+      /** @description The owners on this page, in the requested order. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based index of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description How many owners this page can hold.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many owners match the filter across all pages.
+       * @example 28
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description How many pages the matching owners fill.
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,24 +585,29 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description One page of owners. Sortable by 'name' or 'city' only; any other property is rejected. Page size must be 5, 10 or 20.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Unsupported page size, sort column or direction */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */

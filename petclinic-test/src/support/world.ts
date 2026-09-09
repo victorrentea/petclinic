@@ -29,6 +29,10 @@ export class PlaywrightWorld extends World {
   vetName?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
+  // Set by the owners-pagination scenarios: the names collected by walking every
+  // page, once and then again, so the two walks can be compared for stability.
+  firstWalk?: string[];
+  secondWalk?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -44,6 +48,13 @@ export class PlaywrightWorld extends World {
       throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
     return this.allOwnerNames;
+  }
+
+  requireFirstWalk(): string[] {
+    if (!this.firstWalk) {
+      throw new Error('Expected the scenario to have stepped through all pages first');
+    }
+    return this.firstWalk;
   }
 }
 
