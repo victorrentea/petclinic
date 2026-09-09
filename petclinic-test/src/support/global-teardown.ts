@@ -29,7 +29,20 @@ function dumpAcceptanceCoverage(): void {
     ], {cwd: backendDir, stdio: 'inherit'});
     console.log('acceptance coverage dumped -> petclinic-backend/target/jacoco-e2e.exec');
   } catch (e) {
-    console.warn(`could not dump acceptance coverage (is the backend still up?): ${e}`);
+    // Almost always the same cause, and it is not obvious from Maven's "Connection
+    // refused": Playwright's webServer probes ONLY port 4200, so a frontend left running
+    // from an earlier session makes it reuse the whole stack and never run start-apps.ts
+    // — the backend it talks to is then somebody else's, started without an agent. The
+    // run goes green and the acceptance colour is silently empty, which is exactly the
+    // shape of failure this project keeps writing down.
+    console.warn(
+      'could not dump acceptance coverage: nothing is listening on the agent port ' +
+      `${port}.\n` +
+      '  The backend under test was almost certainly NOT instrumented. Playwright only\n' +
+      '  probes :4200, so an already-running frontend makes it reuse the whole stack and\n' +
+      '  skip start-apps.ts. Free :4200 and :8080 first, or start the backend yourself\n' +
+      '  with JACOCO_E2E=1 ./start-backend.sh and run with SKIP_SERVER_START=true.\n' +
+      `  ${e}`);
   }
 }
 
