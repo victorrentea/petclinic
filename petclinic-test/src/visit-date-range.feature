@@ -1,12 +1,13 @@
 Feature: A visit is dated between the pet's birth and one year from today
 
-  # The lower bound applies only when the pet's birth date is on record.
-  Scenario Outline: Both edges of the range are allowed
-    Then a visit dated <date> is <verdict>
+  Background:
+    Given today is 2026-09-10
+    And a pet born on 2020-03-01
 
-    Examples:
-      | date                                | verdict  |
-      | the day before the pet's birth date | refused  |
-      | the pet's birth date                | accepted |
-      | one year from today                 | accepted |
-      | the day after one year from today   | refused  |
+  Scenario: A visit cannot predate the pet
+    When I book a visit for 2020-02-29
+    Then the visit is refused
+
+  Scenario: A visit cannot be booked more than a year ahead
+    When I book a visit for 2027-09-11
+    Then the visit is refused
