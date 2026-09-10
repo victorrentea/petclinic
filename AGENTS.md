@@ -132,6 +132,24 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
+### The visit-date rule is specified in Gherkin, and the ticket mirrors it
+
+`petclinic-test/src/visit-date-range.feature` states bug #40's rule — a visit date sits
+between the pet's birth date and one year from today, **both edges inclusive** — as four
+Examples rows: each edge, and its nearest neighbour outside the range. That is the minimum
+that pins inclusivity; drop either "accepted" row and an off-by-one implementation still
+passes. It has **no step definitions on purpose**: it is the contract, not a test.
+
+GitHub renders a code snippet box only for a permalink pinned to a commit SHA, so a link to
+`main` would stay a bare link and a permalink would freeze. `.github/workflows/sync-issue-spec.yml`
+therefore rewrites issue #40's body between `<!-- spec:begin -->` / `<!-- spec:end -->` on every
+push that touches the file. **Edit the `.feature`, never the ticket** — the next push overwrites
+whatever was typed there.
+
+⚠️ The rule the feature states is the REST/UI one. The MCP `create_visit` tool enforces
+something else entirely (`PetClinicMcp.requireFutureDate`: no upper bound at all, and the past
+refused outright), and never calls `Visit.validateDate`. Reconciling them is open work.
+
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
