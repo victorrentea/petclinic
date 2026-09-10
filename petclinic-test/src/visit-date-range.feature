@@ -1,4 +1,4 @@
-Feature: A visit is dated between the pet's birth and one year from today
+Feature: A visit is dated between the pet's birth and one year from today.
 
   Background:
     Given today is 2026-09-10
