@@ -1,0 +1,41 @@
+# GitHub renders a code snippet box only for permalinks pinned to a commit SHA;
+# a link to a branch stays a bare link. So a ticket cannot both *show* a file and
+# *follow* it. This closes that gap: whenever the spec changes on main, the issue
+# body is rewritten with the file's current text, between the markers.
+name: Embed the spec in its issue
+
+on:
+  push:
+    branches: [main]
+    paths: ['petclinic-test/src/visit-date-range.feature']
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  embed:
+    runs-on: ubuntu-latest
+    env:
+      ISSUE: 40
+      SPEC: petclinic-test/src/visit-date-range.feature
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rewrite the issue body between the markers
+        run: |
+          gh issue view "$ISSUE" --json body -q .body > body.md
+          {
+            sed -n '1,/<!-- spec:begin -->/p' body.md
+            echo '```gherkin'
+            cat "$SPEC"
+            echo '```'
+            echo
+            echo "_Kept in sync with [\`$SPEC\`](https://github.com/${{ github.repository }}/blob/main/$SPEC) by [this workflow](https://github.com/${{ github.repository }}/blob/main/.github/workflows/sync-issue-spec.yml) — edit the file, not this ticket._"
+            sed -n '/<!-- spec:end -->/,$p' body.md
+          } > new-body.md
+          if diff -q body.md new-body.md >/dev/null; then
+            echo "Already in sync."
+          else
+            gh issue edit "$ISSUE" --body-file new-body.md
+          fi
