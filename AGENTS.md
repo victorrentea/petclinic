@@ -79,6 +79,10 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
+An owner's name is rendered by the `ownerName` pipe (`src/app/shared/`, exported by
+`SharedModule`) as `"Last, First"` — never interpolate `firstName`/`lastName` by hand in a
+template, or the screens drift apart from the sort order.
+
 ### /human-review is a plugin, and nothing of it lives in this repo
 
 It is installed, not vendored:
@@ -160,6 +164,11 @@ refused outright), and never calls `Visit.validateDate`. Reconciling them is ope
   demo fixture, not the sizing. Anything that lists or searches owners must page and sort in
   the database — never load the table into the browser or the JVM — and every sortable or
   filterable column needs an index.
+- **`GET /api/owners` is a page, not a list** (since the owners grid): `page`, `size` (only
+  5/10/20 — anything else is a 400), `sort` (`NAME`/`CITY`), `dir`, optional `lastName`
+  prefix. `NAME` means last name first, then first name; both sorts tiebreak on `id`.
+  `V9__owner_sort_indexes.sql` backs them with `owners_name_idx` / `owners_city_idx`
+  (ICU collation where available, default collation otherwise).
 
 ### Security
 - Disabled by default

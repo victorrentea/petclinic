@@ -135,6 +135,10 @@ step: confirm on Zonky whether `CREATE COLLATION ... provider = icu` succeeds
 (`SELECT * FROM pg_collation WHERE collprovider = 'i'`); if it never does, the ICU branch is
 exercised only in real Postgres and the ICU scenario in the spec runs against dev Postgres, not
 CI. `EXPLAIN` on the 100k dataset must show an Index Scan on `owners_name_idx` with no Sort node.
+**Correction (task 2.6):** the "Smith, Śliwiński, Taylor" example above and in spec.md had the
+order backwards — verified against real Postgres ICU, the correct ascending order is
+**Śliwiński, Smith, Taylor** (base-letter comparison: "Sliwinski" vs "Smith", second letter
+'l' < 'm'). spec.md is corrected; this note stays as a record of the mistake.
 
 **D8. OFFSET paging.** `LIMIT/OFFSET` from `PageRequest`; worst page at 100k costs a few ms.
 Keyset would break "jump to page N" that `MatPaginator` offers.
@@ -182,7 +186,9 @@ benchmark; add a gitignored `scripts/gen-owners-100k.sql` generator (documented 
   columns] → `lastName` prefix filter (`LIKE 'Pot%'`) stays correct under ICU; it may stop
   using a future btree index unless that index carries the same collation — none exists today.
 - [Breaking `GET /api/owners` for unknown consumers] → grep confirmed only the Angular list and
-  the e2e glue read the array; the MCP owner resource is verified during implementation.
+  the e2e glue read the array. **Verified (task 2.8):** the MCP tools (`PetClinicMcp`) and the
+  chatbot's `AssistantFlowTest` only call `GET /api/owners/{id}` (single owner), never the list
+  endpoint — no other backend or chatbot consumer needs adapting.
 - [Guardrail races] → regenerate `openapi.yaml`, `api-types.ts`, `ApiExamples.OWNERS` and the
   wiremock mapping in the same commit as the controller change; never run a partial Maven suite
   after a full one before committing (jacoco.csv trap).
@@ -207,5 +213,7 @@ benchmark; add a gitignored `scripts/gen-owners-100k.sql` generator (documented 
 ## Open Questions
 
 - Whether Zonky's bundled Postgres ships ICU (determines whether the diacritic scenario is
-  CI-covered or manual). Answered by the first implementation task; does not change the
-  approach.
+  CI-covered or manual). **Answered (task 1.1):** yes — Zonky embeds Postgres 16.2 and
+  `CREATE COLLATION t (provider = icu, locale = 'und')` succeeds. The diacritic-ordering
+  scenario (task 2.6) runs in CI unconditionally; the `@EnabledIf` guard from D7/2.6 is kept
+  as defensive documentation but is expected to always evaluate true.

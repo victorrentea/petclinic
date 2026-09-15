@@ -81,7 +81,9 @@ order from an index rather than sorting the whole table.
 #### Scenario: Diacritic in last name
 - **WHEN** the clinic holds "Smith", "Śliwiński" and "Taylor" and the client sorts by name
   ascending
-- **THEN** the order is Smith, Śliwiński, Taylor
+- **THEN** the order is Śliwiński, Smith, Taylor — ICU compares base letters position by
+  position ("Sliwinski" vs "Smith": second letter 'l' < 'm'), so the diacritic sorts before
+  Smith, not after it
 
 ### Requirement: Paging is stable across pages
 Walking every page of a given `sort`/`dir`/`size` SHALL yield each owner exactly once: no
