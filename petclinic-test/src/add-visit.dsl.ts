@@ -13,12 +13,18 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!ownerWithPet) {
+  // The grid only carries pet *names*; fetch the full owner (with pet ids) for
+  // the first candidate the grid says has at least one pet.
+  const {data: page} = await axios.get(`${API_BASE}/owners`, {params: {size: 20}, timeout: 10_000});
+  const candidate = page.content.find((o: any) => Array.isArray(o.petNames) && o.petNames.length > 0);
+  if (!candidate) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  const {data: owner} = await axios.get(`${API_BASE}/owners/${candidate.id}`, {timeout: 10_000});
+  if (!Array.isArray(owner.pets) || owner.pets.length === 0) {
+    throw new Error(`Owner ${candidate.id} listed pets in the grid but has none on GET /owners/${candidate.id}`);
+  }
+  return {ownerId: owner.id, petId: owner.pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

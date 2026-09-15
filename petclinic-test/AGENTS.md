@@ -107,3 +107,6 @@
   `http.response.body` on the XHR client span, 4 KB cap) — no OTel agent records payloads, and
   the browser is the only place both sides are in hand. The renderer therefore reads them off
   the span **or its parent**, since the arrow is drawn from the backend's SERVER span.
+- **Owner names in Examples cells are separated by `;`, not `,`** — an owner renders as
+  `"Potter, Harry"` (the `ownerName` pipe), so a comma-separated list is ambiguous. The glue
+  splits on `;` and trims (`namesIn`).

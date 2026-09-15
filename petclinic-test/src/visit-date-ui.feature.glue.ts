@@ -14,15 +14,24 @@ function toIsoDate(date: Date): string {
 }
 
 Given('an owner with a pet exists', async function (this: PlaywrightWorld) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.some((p: any) => p.birthDate));
-  if (!ownerWithPet) {
-    throw new Error('No owner with a pet that has a birth date found; cannot run visit-date-ui scenario');
+  // The grid only carries pet *names*; fetch the full owner (with pet ids and
+  // birth dates) for each candidate the grid says has at least one pet.
+  const {data: page} = await axios.get(`${API_BASE}/owners`, {params: {size: 20}, timeout: 10_000});
+  const candidateIds = page.content
+    .filter((o: any) => Array.isArray(o.petNames) && o.petNames.length > 0)
+    .map((o: any) => o.id);
+
+  for (const ownerId of candidateIds) {
+    const {data: owner} = await axios.get(`${API_BASE}/owners/${ownerId}`, {timeout: 10_000});
+    const pet = (owner.pets || []).find((p: any) => p.birthDate);
+    if (pet) {
+      this.ownerId = owner.id;
+      this.petId = pet.id;
+      this.petBirthDate = pet.birthDate;
+      return;
+    }
   }
-  const pet = ownerWithPet.pets.find((p: any) => p.birthDate);
-  this.ownerId = ownerWithPet.id;
-  this.petId = pet.id;
-  this.petBirthDate = pet.birthDate;
+  throw new Error('No owner with a pet that has a birth date found; cannot run visit-date-ui scenario');
 });
 
 When('I open the Add Visit form for that pet', async function (this: PlaywrightWorld) {
