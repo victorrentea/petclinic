@@ -2,6 +2,7 @@ package victor.training.petclinic.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,26 @@ public class PetTypeTest {
 
     int petTypeId;
 
+    // The one test below runs with NOT_SUPPORTED, so everything it writes is committed and
+    // outlives the class — a stray owner then shifts the fixture counts other tests assert on.
+    Pet committedPet;
+    Owner committedOwner;
+
     @BeforeEach
     final void before() {
         petTypeId = petTypeRepository.save(TestData.aPetType("cat")).getId();
+    }
+
+    @AfterEach
+    final void deleteWhatWasCommitted() {
+        if (committedPet == null) {
+            return;
+        }
+        petRepository.delete(committedPet);
+        ownerRepository.delete(committedOwner);
+        petTypeRepository.findById(petTypeId).ifPresent(petTypeRepository::delete);
+        committedPet = null;
+        committedOwner = null;
     }
 
     private PetTypeDto callGet(int petTypeId) throws Exception {
@@ -187,6 +205,8 @@ public class PetTypeTest {
         pet.setOwner(owner);
         pet.setType(petTypeRepository.findById(petTypeId).orElseThrow());
         petRepository.save(pet);
+        committedPet = pet;
+        committedOwner = owner;
 
         mockMvc.perform(delete("/api/pettypes/" + petTypeId))
                 .andExpect(status().isInternalServerError())
