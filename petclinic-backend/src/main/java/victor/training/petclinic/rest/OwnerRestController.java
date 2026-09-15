@@ -2,7 +2,11 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,9 +20,12 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerListItemDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.InvalidQueryParameterException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +42,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,6 +52,12 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    public enum SortField {
+        NAME, CITY
+    }
+
+    private static final Set<Integer> ALLOWED_SIZES = Set.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -78,12 +90,40 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "NAME") SortField sort,
+            @RequestParam(name = "dir", defaultValue = "asc") String dir) {
+        if (!ALLOWED_SIZES.contains(size)) {
+            throw new InvalidQueryParameterException("size",
+                    "Parameter 'size' must be one of " + ALLOWED_SIZES + " but was " + size);
+        }
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(dir);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidQueryParameterException("dir",
+                    "Parameter 'dir' must be one of [asc, desc] but was '" + dir + "'");
+        }
+        Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName,
+                PageRequest.of(page, size, sortFor(sort, direction)));
+        List<Integer> ownerIds = ownerPage.getContent().stream().map(Owner::getId).toList();
+        List<PetRepository.OwnerPetName> petNames = petRepository.findOwnerIdAndNameByOwnerIdIn(ownerIds);
+        List<OwnerListItemDto> items = ownerMapper.toListItems(ownerPage, petNames);
+        return new OwnerPageDto(items, ownerPage.getTotalElements(), ownerPage.getTotalPages(),
+                ownerPage.getNumber(), ownerPage.getSize());
+    }
+
+    private static Sort sortFor(SortField field, Sort.Direction dir) {
+        return switch (field) {
+            case NAME -> Sort.by(dir, "lastName", "firstName", "id");
+            case CITY -> Sort.by(dir, "city", "id");
+        };
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

@@ -195,6 +195,35 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: NAME
+          enum:
+          - NAME
+          - CITY
+      - in: query
+        name: dir
+        required: false
+        schema:
+          type: string
+          default: asc
       responses:
         "200":
           content:
@@ -203,32 +232,28 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      petNames:
+                      - Leo
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      petNames: []
+                    totalElements: 2
+                    totalPages: 1
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1684,6 +1709,67 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerListItemDto:
+      type: object
+      properties:
+        address:
+          type: string
+          description: The owner's address.
+          example: 110 W. Liberty St.
+        city:
+          type: string
+          description: The owner's city.
+          example: Madison
+        firstName:
+          type: string
+          description: The owner's first name.
+          example: George
+        id:
+          type: integer
+          format: int32
+          description: The ID of the pet owner.
+          example: 1
+        lastName:
+          type: string
+          description: The owner's last name.
+          example: Franklin
+        petNames:
+          type: array
+          description: "The names of the owner's pets, sorted alphabetically."
+          items:
+            type: string
+        telephone:
+          type: string
+          description: The owner's telephone number.
+          example: "6085551023"
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerListItemDto"
+        number:
+          type: integer
+          format: int32
+          description: 0-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Number of owners requested per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "Total number of owners matching the filter, across all pages."
+          example: 28
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages.
+          example: 3
     PetDto:
       type: object
       properties:

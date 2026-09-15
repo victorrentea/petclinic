@@ -170,6 +170,69 @@ export interface components {
        */
       telephone: string;
     };
+    OwnerListItemDto: {
+      /**
+       * @description The owner's address.
+       * @example 110 W. Liberty St.
+       */
+      address?: string;
+      /**
+       * @description The owner's city.
+       * @example Madison
+       */
+      city?: string;
+      /**
+       * @description The owner's first name.
+       * @example George
+       */
+      firstName?: string;
+      /**
+       * Format: int32
+       * @description The ID of the pet owner.
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description The owner's last name.
+       * @example Franklin
+       */
+      lastName?: string;
+      /** @description The names of the owner's pets, sorted alphabetically. */
+      petNames?: string[];
+      /**
+       * @description The owner's telephone number.
+       * @example 6085551023
+       */
+      telephone?: string;
+    };
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content?: components["schemas"]["OwnerListItemDto"][];
+      /**
+       * Format: int32
+       * @description 0-based index of this page.
+       * @example 0
+       */
+      number?: number;
+      /**
+       * Format: int32
+       * @description Number of owners requested per page.
+       * @example 10
+       */
+      size?: number;
+      /**
+       * Format: int64
+       * @description Total number of owners matching the filter, across all pages.
+       * @example 28
+       */
+      totalElements?: number;
+      /**
+       * Format: int32
+       * @description Total number of pages.
+       * @example 3
+       */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +621,17 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        page?: number;
+        size?: number;
+        sort?: "NAME" | "CITY";
+        dir?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

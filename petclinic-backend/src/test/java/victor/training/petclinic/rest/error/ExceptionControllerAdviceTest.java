@@ -5,9 +5,11 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Set;
@@ -41,6 +43,28 @@ class ExceptionControllerAdviceTest {
         assertThat(pd.getProperties()).containsKey("timestamp");
         assertThat(pd.getProperties()).extracting("errors")
                 .isEqualTo(List.of("Telephone must be numeric (value: abc)"));
+    }
+
+    private enum SampleEnum {
+        NAME, CITY
+    }
+
+    @Test
+    void handleMethodArgumentTypeMismatch_namesTheParameterAndAcceptedValues() {
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
+                "address", SampleEnum.class, "sort", (MethodParameter) null, null);
+
+        ResponseEntity<ProblemDetail> response = advice.handleMethodArgumentTypeMismatch(ex, requestTo("/api/owners"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        ProblemDetail pd = response.getBody();
+        assertThat(pd).isNotNull();
+        assertThat(pd.getProperties()).containsEntry("parameter", "sort");
+        assertThat(pd.getDetail())
+                .contains("sort")
+                .contains("address")
+                .contains("NAME")
+                .contains("CITY");
     }
 
     private HttpServletRequest requestTo(String uri) {

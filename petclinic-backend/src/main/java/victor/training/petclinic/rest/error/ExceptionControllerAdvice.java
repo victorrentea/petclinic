@@ -12,8 +12,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -41,7 +44,7 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
         pd.setDetail(detail);
-        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
+        pd.setType(URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
@@ -78,6 +81,34 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String parameterName = ex.getName();
+        Class<?> requiredType = ex.getRequiredType();
+        String acceptedValues = requiredType != null && requiredType.isEnum()
+                ? Arrays.toString(requiredType.getEnumConstants())
+                : String.valueOf(requiredType);
+        String detail = "Parameter '" + parameterName + "' has invalid value '" + ex.getValue()
+                + "'. Accepted values: " + acceptedValues;
+        log.warn(detail);
+        ProblemDetail pd = buildProblemDetail("Invalid Query Parameter", detail, HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("parameter", parameterName);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(InvalidQueryParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleInvalidQueryParameter(InvalidQueryParameterException ex,
+            HttpServletRequest request) {
+        log.warn("Invalid query parameter '{}': {}", ex.getParameterName(), ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Invalid Query Parameter", ex.getMessage(), HttpStatus.BAD_REQUEST,
+                request);
+        pd.setProperty("parameter", ex.getParameterName());
         return ResponseEntity.badRequest().body(pd);
     }
 
