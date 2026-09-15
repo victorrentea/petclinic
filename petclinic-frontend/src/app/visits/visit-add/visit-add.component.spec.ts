@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import {SharedModule} from '../../shared/shared.module';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -52,7 +53,7 @@ describe('VisitAddComponent', () => {
     TestBed.configureTestingModule({
       declarations: [VisitAddComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule],
+      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule, SharedModule],
       providers: [
         {provide: PetService, useClass: PetServiceStub},
         {provide: VisitService, useClass: VisitServiceStub},

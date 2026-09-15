@@ -1,9 +1,7 @@
-import { Owner } from './owner';
+import { components } from '../generated/api-types';
 
-export interface OwnerPage {
-  content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+export type OwnerListItem = Required<components['schemas']['OwnerListItemDto']>;
+
+export type OwnerPage = Required<components['schemas']['OwnerPageDto']> & {
+  content: OwnerListItem[];
+};

@@ -54,4 +54,19 @@ export class ActivatedRouteStub {
     this.testParams = {id: 1};
     return {params: this.testParams};
   }
+
+  // ActivatedRoute.queryParams is Observable
+  private queryParamsSubject = new BehaviorSubject(this.testQueryParams);
+  queryParams = this.queryParamsSubject.asObservable();
+
+  // tslint:disable-next-line:variable-name
+  private _testQueryParams: {};
+  get testQueryParams() {
+    return this._testQueryParams;
+  }
+
+  set testQueryParams(params: {}) {
+    this._testQueryParams = params;
+    this.queryParamsSubject.next(params);
+  }
 }

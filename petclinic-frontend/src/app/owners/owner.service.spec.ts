@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -141,5 +142,34 @@ describe('OwnerService', () => {
     );
     expect(req.request.method).toEqual('GET');
     req.flush(expectedOwners);
+  });
+
+  it('getOwnersPage requests a page with the grid query params', () => {
+    const expectedPage: OwnerPage = {
+      content: [
+        { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.',
+          city: 'Madison', telephone: '6085551023', petNames: ['Leo'] }
+      ],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 10
+    };
+
+    ownerService
+      .getOwnersPage({ page: 0, size: 10, sort: 'NAME', dir: 'asc', lastName: '' })
+      .subscribe((page) => expect(page).toEqual(expectedPage), fail);
+
+    const req = httpTestingController.expectOne(
+      (r) =>
+        r.url === ownerService.entityUrl &&
+        r.params.get('page') === '0' &&
+        r.params.get('size') === '10' &&
+        r.params.get('sort') === 'NAME' &&
+        r.params.get('dir') === 'asc' &&
+        r.params.get('lastName') === ''
+    );
+    expect(req.request.method).toEqual('GET');
+    req.flush(expectedPage);
   });
 });

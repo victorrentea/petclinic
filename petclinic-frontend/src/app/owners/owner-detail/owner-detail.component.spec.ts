@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
 import { Observable, of } from 'rxjs';
+import { SharedModule } from '../../shared/shared.module';
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
@@ -31,7 +32,7 @@ describe('OwnerDetailComponent', () => {
       TestBed.configureTestingModule({
         declarations: [OwnerDetailComponent],
         schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule, RouterTestingModule],
+        imports: [FormsModule, RouterTestingModule, SharedModule],
         providers: [
           { provide: OwnerService, useClass: OwnerServiceStub },
           { provide: Router, useClass: RouterStub },
@@ -45,7 +46,7 @@ describe('OwnerDetailComponent', () => {
       TestBed.configureTestingModule({
         declarations: [OwnerDetailComponent],
         schemas: [CUSTOM_ELEMENTS_SCHEMA],
-        imports: [FormsModule, RouterTestingModule],
+        imports: [FormsModule, RouterTestingModule, SharedModule],
         providers: [
           { provide: OwnerService, useValue: ownerService },
           { provide: Router, useClass: RouterStub },
@@ -84,7 +85,7 @@ describe('OwnerDetailComponent', () => {
       de = fixture.debugElement.query(By.css('.ownerFullName'));
       el = de.nativeElement;
       expect(el.innerText).toBe(
-        owner.firstName.toString() + ' ' + owner.lastName.toString()
+        owner.lastName.toString() + ', ' + owner.firstName.toString()
       );
     });
   });

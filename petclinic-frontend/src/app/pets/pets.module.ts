@@ -12,6 +12,7 @@ import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-a
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {DesignSystemModule} from '../design-system/design-system.module';
+import {SharedModule} from '../shared/shared.module';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -34,7 +35,8 @@ export const MY_DATE_FORMATS = {
     MatDatepickerModule,
     MatMomentDateModule,
     PetsRoutingModule,
-    VisitsModule
+    VisitsModule,
+    SharedModule
   ],
   declarations: [
     PetListComponent,

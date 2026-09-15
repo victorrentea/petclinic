@@ -55,6 +55,79 @@ display:none;
   width: auto;
 }
 
+/* Match the app's branded table header (see .table>thead>tr>th in petclinic.css) —
+  Material's mat-table doesn't carry the `.table` class that rule targets. */
+:host ::ng-deep .mat-mdc-header-row {
+  background-color: #3c3834;
+}
+
+:host ::ng-deep .mat-mdc-header-cell {
+  color: #f1f1f1;
+  font-weight: 700;
+  border-bottom: 2px solid #34302d;
+}
+
+/* Every sortable header shows a faint, always-visible arrow — so it reads as
+  clickable without having to hover first — and the active column's arrow
+  stands out clearly against it. */
+:host ::ng-deep .mat-sort-header-arrow {
+  opacity: 0.6 !important;
+  color: #f1f1f1;
+}
+
+:host ::ng-deep .mat-sort-header-sorted .mat-sort-header-arrow {
+  opacity: 1 !important;
+  color: #6db33f;
+  transform: scale(1.2) !important;
+}
+
+:host ::ng-deep .mat-sort-header-sorted .mat-sort-header-content {
+  color: #6db33f;
+}
+
+/* Fixed column widths so the grid doesn't reflow/jump as content changes
+  between pages and sorts. */
+:host ::ng-deep table.mat-mdc-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+:host ::ng-deep .mat-column-name {
+  width: 22%;
+}
+
+:host ::ng-deep .mat-column-address {
+  width: 26%;
+}
+
+:host ::ng-deep .mat-column-city {
+  width: 16%;
+}
+
+:host ::ng-deep .mat-column-telephone {
+  width: 16%;
+}
+
+:host ::ng-deep .mat-column-pets {
+  width: 20%;
+}
+
+:host ::ng-deep .mat-mdc-cell,
+:host ::ng-deep .mat-mdc-header-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 @media (max-width: 576px) {
   #nameGroup {
     flex-direction: column;

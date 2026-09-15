@@ -17,7 +17,7 @@
         <td>{{ currentPet.name }}</td>
         <td>{{ currentPet.birthDate }}</td>
         <td>{{ currentPetType.name }}</td>
-        <td>{{ currentOwner.firstName }} {{ currentOwner.lastName }}</td>
+        <td>{{ currentOwner | ownerName }}</td>
       </tr>
 
     </table>

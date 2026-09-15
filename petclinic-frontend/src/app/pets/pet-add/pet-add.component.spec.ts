@@ -17,6 +17,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import {Owner} from '../../owners/owner';
 import {PetType} from '../../pettypes/pettype';
 import Spy = jasmine.Spy;
+import {SharedModule} from '../../shared/shared.module';
 
 const testOwner: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
@@ -52,7 +53,7 @@ describe('PetAddComponent', () => {
     TestBed.configureTestingModule({
       declarations: [PetAddComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule],
+      imports: [FormsModule, MatDatepickerModule, MatMomentDateModule, SharedModule],
       providers: [
         {provide: PetService, useClass: PetServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
