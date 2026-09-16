@@ -9,8 +9,9 @@
   `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Everything a
   run writes goes under `test-results/`.
 - ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
-  test file, named after it (`owner-search.feature.genseq.puml`), sectioned by scenario. Never
-  hand-edit: change the test and re-run `./run-tests-with-tracing.sh`.
+  tagged *scenario*, named `<test>.<scenario-slug>.genseq.puml`. Never hand-edit: change the test
+  and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its diagram; the generator
+  sweeps the old one.
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.

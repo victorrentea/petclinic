@@ -36,7 +36,7 @@ import victor.training.petclinic.tools.PrettyTestNames;
 /**
  * The same journey as petclinic-test/src/add-visit.spec.ts, one layer down: no Chromium, no Angular,
  * no running server — and the same picture out the other end
- * (AddVisitSequenceTest.java.genseq.puml, drawn beside this file).
+ * (AddVisitSequenceTest.java.<test>.genseq.puml, one per test method, beside this file).
  * <p>
  * Put next to the other REST tests on purpose. The claim being made is that any @SpringBootTest here
  * becomes a sequence diagram by adding one annotation and saying its sentences out loud; a demo

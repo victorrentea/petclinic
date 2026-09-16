@@ -12,7 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * The Java twin of the <code>@generate_sequence</code> tag the .feature and .spec.ts tests carry:
  * put it on a @SpringBootTest and every test method in it is captured as a trace and drawn as a
- * PlantUML sequence diagram next to the test — <code>OwnerSequenceTest.java.genseq.puml</code>.
+ * PlantUML sequence diagram per test method, next to the class —
+ * <code>OwnerSequenceTest.java.reads-an-owner-back.genseq.puml</code>.
  * <p>
  * Nothing happens unless the OpenTelemetry Java agent is attached and Tempo is up, which is what
  * <code>./run-tests-with-tracing.sh</code> arranges (mvn -Pgenseq). Under a plain <code>mvn test</code>

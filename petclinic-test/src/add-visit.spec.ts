@@ -27,7 +27,7 @@ const {
 // type-checked. add-visit.feature is the Gherkin half of the comparison, over
 // the same feature; owner-search.feature is the other pair.
 //
-// @generate_sequence turns this run into add-visit.spec.ts.genseq.puml, right here
+// @generate_sequence turns this run into add-visit.spec.ts.<scenario>.genseq.puml, right here
 // in this folder — one section per tagged test in the file.
 
 const VISIT_DATE = '2026-05-12';
