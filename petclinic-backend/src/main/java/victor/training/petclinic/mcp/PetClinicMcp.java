@@ -45,10 +45,51 @@ public class PetClinicMcp {
     }
 
     @McpTool(
+            name = "create_visit",
+            description = """
+                    Create a new vet visit for one of the authenticated owner's pets (date/time,
+                    pet, description). Books the visit directly — no confirmation prompt.
+                    """,
+            annotations = @McpAnnotations(destructiveHint = true))
+    @Transactional
+    public String createVisit(
+            @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future",
+                    required = true) LocalDate visitDate,
+            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00",
+                    required = true) LocalTime visitTime,
+            @McpToolParam(description = "Visit description (reason, diagnosis, notes...)",
+                    required = true) String description) {
+        int ownerId = McpSecurity.currentOwnerId();
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
+        if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
+            throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
+        }
+        requireFutureDate(visitDate);
+        if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
+        }
+        requireUnderUpcomingVisitCap(pet);
+
+        Visit v = new Visit();
+        v.setDate(visitDate);
+        v.setTime(visitTime);
+        v.setDescription(description);
+        pet.addVisit(v); // maintain both sides of the Pet<->Visit association
+        Visit saved = visitRepository.save(v);
+        return "Created visit id=" + saved.getId() + " for pet '" + pet.getName() + "' on " + visitDate
+                + " at " + visitTime;
+    }
+
+    @McpTool(
             name = "get_owner_profile",
-            description = "Fetch the authenticated owner's profile — name, address, phone and the list of "
-                    + "pets. Takes NO arguments: the owner is resolved from the per-request identity header the "
-                    + "calling application attaches (not from anything the model supplies), so it cannot be spoofed.",
+            description = """
+                    Fetch the authenticated owner's profile — name, address, phone and the list of
+                    pets. Takes NO arguments: the owner is resolved from the per-request identity
+                    header the calling application attaches (not from anything the model supplies),
+                    so it cannot be spoofed.
+                    """,
             annotations = @McpAnnotations(readOnlyHint = true, destructiveHint = false, openWorldHint = false))
     @Transactional(readOnly = true)
     public String getOwnerProfile() {
@@ -88,7 +129,9 @@ public class PetClinicMcp {
 
     @McpTool(
             name = "list_visits",
-            description = "List veterinary visits for every pet of the authenticated owner.",
+            description = """
+                    List veterinary visits for every pet of the authenticated owner.
+                    """,
             annotations = @McpAnnotations(readOnlyHint = true, destructiveHint = false, openWorldHint = false))
     @Transactional(readOnly = true)
     public List<VisitView> listVisits() {
@@ -107,45 +150,11 @@ public class PetClinicMcp {
     }
 
     @McpTool(
-            name = "create_visit",
-            description = "Create a new vet visit for one of the authenticated owner's pets "
-                    + "(date/time, pet, description). Books the visit directly — no confirmation prompt.",
-            annotations = @McpAnnotations(destructiveHint = true))
-    @Transactional
-    public String createVisit(
-            @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future",
-                    required = true) LocalDate visitDate,
-            @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00",
-                    required = true) LocalTime visitTime,
-            @McpToolParam(description = "Visit description (reason, diagnosis, notes...)",
-                    required = true) String description) {
-        int ownerId = McpSecurity.currentOwnerId();
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found: " + petId));
-        if (pet.getOwner() == null || pet.getOwner().getId() != ownerId) {
-            throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
-        }
-        requireFutureDate(visitDate);
-        if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
-        }
-        requireUnderUpcomingVisitCap(pet);
-
-        Visit v = new Visit();
-        v.setDate(visitDate);
-        v.setTime(visitTime);
-        v.setDescription(description);
-        pet.addVisit(v); // maintain both sides of the Pet<->Visit association
-        Visit saved = visitRepository.save(v);
-        return "Created visit id=" + saved.getId() + " for pet '" + pet.getName() + "' on " + visitDate
-                + " at " + visitTime;
-    }
-
-    @McpTool(
             name = "cancel_visit",
-            description = "Cancel an upcoming vet visit for one of the authenticated owner's pets. "
-                    + "Only visits dated strictly in the future can be cancelled.",
+            description = """
+                    Cancel an upcoming vet visit for one of the authenticated owner's pets. Only
+                    visits dated strictly in the future can be cancelled.
+                    """,
             annotations = @McpAnnotations(destructiveHint = true))
     @Transactional
     public String cancelVisit(
@@ -198,8 +207,11 @@ public class PetClinicMcp {
 
     @McpTool(
             name = "call_vet_ambulance",
-            description = "Dispatch a veterinary ambulance to drive (by car) to a given address for an "
-                    + "emergency. ELICITS the address from the user and asks them to confirm the dispatch request.",
+            description = """
+                    Dispatch a veterinary ambulance to drive (by car) to a given address for an
+                    emergency. ELICITS the address from the user and asks them to confirm the
+                    dispatch request.
+                    """,
             annotations = @McpAnnotations(destructiveHint = false))
     public String callVetAmbulance(McpSyncRequestContext context) {
         if (context == null || !context.elicitEnabled()) {
