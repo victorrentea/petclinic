@@ -12,6 +12,13 @@ trim_trailing_whitespace = true
 [*.{java,xml}]
 indent_size = 4
 
+# Was a prose rule in AGENTS.md that only an agent re-reading the file would honour.
+# Enforced instead by the editorconfig-checker pass in .githooks/pre-commit, which is
+# scoped to staged files: a long line blocks the commit only in a file you touched.
+# XML is out on purpose — namespace-laden root elements blow past 120 with nothing to gain.
+[*.java]
+max_line_length = 120
+
 [*.{md,md.demo}]
 max_line_length = off
 trim_trailing_whitespace = false
