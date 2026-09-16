@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import victor.training.petclinic.domain.VisitDateOutOfRangeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,15 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(VisitDateOutOfRangeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleVisitDateOutOfRangeException(VisitDateOutOfRangeException ex,
+            HttpServletRequest request) {
+        log.warn("Visit date rejected: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Invalid Visit Date", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(pd);
     }
 

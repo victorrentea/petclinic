@@ -39,6 +39,11 @@ export class PlaywrightWorld extends World {
   visitDescription?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
+  // Set by the visit-date-range scenarios (bug #40).
+  bugFortyBackgroundToday?: Date;
+  bugFortyBackgroundBirth?: Date;
+  bugFortyPetBirthDate?: Date;
+  bugFortyVisitDate?: string;
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
