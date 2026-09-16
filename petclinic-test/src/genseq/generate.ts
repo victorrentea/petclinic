@@ -25,6 +25,9 @@ export interface RenderDeps {
   /** Optional: without it, re-rendering at a level with nothing to reveal leaves the
    *  previous level's sidecar behind, claiming a detail the picture no longer offers. */
   removeFile?: (filePath: string) => void;
+  /** Optional: what a directory holds, so a renamed or deleted scenario's diagram can be
+   *  swept rather than left on disk describing a run that no longer happens. */
+  listFiles?: (dir: string) => string[];
   log: (msg: string) => void;
 }
 
@@ -80,18 +83,50 @@ export function spanCachePathFor(rootDir: string): string {
   return `${rootDir}/test-results/trace-spans.json`;
 }
 
-/** The diagram sits next to its test, named after it: owner-search.feature.genseq.puml */
-export function diagramPathFor(rootDir: string, source: string): string {
-  return `${rootDir}/${source}.genseq.puml`;
+/**
+ * The diagram sits next to its test, named after the *scenario* it draws:
+ * `add-visit.feature.remembers-the-vet.genseq.puml`.
+ *
+ * It used to be one file per test file, with the scenarios stacked inside it under
+ * `== header ==` dividers. That made the unit of the picture the class, which is not a
+ * unit anybody reviews: a reader looking for "remembers the vet" got four screens of
+ * arrows with the one they wanted somewhere in the middle, and the review page could
+ * offer no finer handle than the file. One scenario, one picture, one thing to open.
+ *
+ * The slug is the scenario's own title, which is what the reader is looking for and what
+ * the tags in the source say. It moves when the scenario is renamed — a rename then reads
+ * as a diagram deleted and another added, which is what a renamed test *is* to anyone
+ * reading the branch.
+ */
+export function diagramPathFor(rootDir: string, source: string, slug?: string): string {
+  return `${rootDir}/${source}${slug ? `.${slug}` : ''}.genseq.puml`;
 }
 
 /**
- * What the diagram's markers reveal, beside the diagram: owner-search.feature.genseq.json.
+ * What one diagram's markers reveal, beside it: `<test>.<scenario>.genseq.json`.
  * A sidecar rather than comments inside the .puml — a payload is arbitrary text, and
  * smuggling it through PlantUML's comment syntax is an escaping problem nobody needs.
  */
-export function detailsPathFor(rootDir: string, source: string): string {
-  return `${rootDir}/${source}.genseq.json`;
+export function detailsPathFor(rootDir: string, source: string, slug?: string): string {
+  return `${rootDir}/${source}${slug ? `.${slug}` : ''}.genseq.json`;
+}
+
+/**
+ * One slug per scenario, all different.
+ *
+ * Two scenarios in a file can slugify the same way — "Add a visit" and "Add a visit!" —
+ * and two pictures writing to one path would leave the second silently standing in for
+ * both. Ties are numbered in the order the file declares them, so the numbering is stable
+ * as long as the file is.
+ */
+export function uniqueSlugs(titles: string[]): string[] {
+  const seen = new Map<string, number>();
+  return titles.map((title) => {
+    const base = slugify(title) || 'scenario';
+    const n = seen.get(base) ?? 0;
+    seen.set(base, n + 1);
+    return n === 0 ? base : `${base}-${n + 1}`;
+  });
 }
 
 /**
@@ -272,25 +307,78 @@ export function renderScenarios(
 ): string[] {
   const written: string[] = [];
   for (const {source, scenarios} of sources) {
-    const filePath = diagramPathFor(rootDir, source);
-    const {puml, details} = renderDiagram(
-      titleFor(rootDir, source), linkScenarios(scenarios, rootDir, source, deps), options,
-      defaultOperations(), methodLinksFor(rootDir, deps, source));
-    deps.writeFile(filePath, puml);
-    deps.log(`📊 ${source}: ${scenarios.length} scenario(s) → ${filePath}`);
-    // Only the .puml paths are returned: the sidecar is part of one diagram, not
-    // another one, and every caller counts what it gets back as "diagrams".
-    written.push(filePath);
-    const revealed = Object.keys(details.details).length;
-    const detailsPath = detailsPathFor(rootDir, source);
-    if (revealed > 0) {
-      deps.writeFile(detailsPath, `${JSON.stringify(details, null, 2)}\n`);
-      deps.log(`   🔍 ${revealed} revealable arrow(s) → ${detailsPath}`);
-    } else {
-      deps.removeFile?.(detailsPath);
-    }
+    const linked = linkScenarios(scenarios, rootDir, source, deps);
+    const title = titleFor(rootDir, source);
+    const methodLinks = methodLinksFor(rootDir, deps, source);
+    const slugs = uniqueSlugs(linked.map((s) => s.title));
+    const mine = new Set<string>();
+    linked.forEach((scenario, i) => {
+      const slug = slugs[i];
+      const filePath = diagramPathFor(rootDir, source, slug);
+      const detailsPath = detailsPathFor(rootDir, source, slug);
+      // One scenario per call, so the divider `renderDiagram` draws is this diagram's
+      // own header and the picture under it is one test from end to end.
+      const {puml, details} = renderDiagram(
+        title, [scenario], options, defaultOperations(), methodLinks);
+      // A scenario whose traces draw nothing — a lone click, a run that recorded no
+      // server span — used to cost a header inside a shared file and nothing more. On its
+      // own it would be a file containing a title and no conversation, which the review
+      // page would pair with the test and present as evidence. There is none.
+      if (!drewSomething(puml)) {
+        deps.log(`📭 ${source}: “${scenario.title}” drew nothing — no diagram`);
+        deps.removeFile?.(filePath);
+        deps.removeFile?.(detailsPath);
+        return;
+      }
+      mine.add(filePath);
+      mine.add(detailsPath);
+      deps.writeFile(filePath, puml);
+      deps.log(`📊 ${source}: “${scenario.title}” → ${filePath}`);
+      // Only the .puml paths are returned: the sidecar is part of one diagram, not
+      // another one, and every caller counts what it gets back as "diagrams".
+      written.push(filePath);
+      const revealed = Object.keys(details.details).length;
+      if (revealed > 0) {
+        deps.writeFile(detailsPath, `${JSON.stringify(details, null, 2)}\n`);
+        deps.log(`   🔍 ${revealed} revealable arrow(s) → ${detailsPath}`);
+      } else {
+        deps.removeFile?.(detailsPath);
+      }
+    });
+    sweepStale(rootDir, source, mine, deps);
   }
   return written;
+}
+
+/** Did this scenario draw a conversation, or only a heading? */
+function drewSomething(puml: string): boolean {
+  return /^== /m.test(puml);
+}
+
+/**
+ * Delete the diagrams of scenarios this file no longer has.
+ *
+ * With one file per test file there was nothing to sweep: the file was rewritten whole,
+ * so a deleted scenario simply stopped appearing in it. Per scenario, a rename or a
+ * deletion leaves the old picture on disk — committed, paired with the test by the review
+ * page, and describing a run that no longer exists. Needs `listFiles`; a caller without
+ * one (the unit tests) writes what it writes and sweeps nothing.
+ */
+function sweepStale(
+  rootDir: string, source: string, mine: Set<string>, deps: RenderDeps,
+): void {
+  if (!deps.listFiles || !deps.removeFile) return;
+  const full = path.resolve(`${rootDir}/${source}`);
+  const dir = path.dirname(full);
+  const prefix = `${path.basename(full)}.`;
+  for (const name of deps.listFiles(dir)) {
+    if (!name.startsWith(prefix)) continue;
+    if (!name.endsWith('.genseq.puml') && !name.endsWith('.genseq.json')) continue;
+    const found = path.join(dir, name);
+    if (mine.has(found) || [...mine].some((m) => path.resolve(m) === found)) continue;
+    deps.removeFile(found);
+    deps.log(`🧹 removed ${found} — no scenario draws it any more`);
+  }
 }
 
 /**
@@ -338,6 +426,7 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       writeFile: (p, c) => fs.writeFileSync(p, c),
       readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
+      listFiles: (d) => (fs.existsSync(d) ? fs.readdirSync(d) : []),
       log: (m) => console.log(m),
     }, options);
     console.log(`📊 Re-rendered ${paths.length} diagram(s) from ${cacheFile} — Grafana not needed`);
@@ -366,6 +455,7 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       writeFile: (p, c) => fs.writeFileSync(p, c),
       readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
+      listFiles: (d) => (fs.existsSync(d) ? fs.readdirSync(d) : []),
       log: (m) => console.log(m),
     };
 
