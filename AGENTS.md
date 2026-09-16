@@ -13,8 +13,15 @@ Warning: git-pushed symlinks don't work reliably when cloned on Windows not havi
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
-- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
+- `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built; also hosts the Spring AI MCP server at `/mcp`
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `petclinic-database/` - embedded PostgreSQL module (Java jar), backs `./start-database.sh`
+- `petclinic-chatbot/` - Spring AI triage assistant (RAG + MCP tool calls into the backend)
+- `petclinic-test/` - Playwright/TypeScript E2E tests for the Owners page
+- `petclinic-observability/` - Grafana/OTel collector docker-compose stack (`./start-grafana.sh`)
+- `refactoring-legacy/` - standalone OpenRewrite recipes module, run against the backend from the CLI
+- `docker/` - shared docker-compose + Testcontainers reaper helpers
+- `user-manual/` - generated end-user manual (`manual.md` + screenshots)
 
 ## Common Commands
 
