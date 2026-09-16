@@ -57,7 +57,6 @@ import victor.training.petclinic.tools.PrettyTestNames;
 // picture is JUnit's arbitrary method order — and adding a test reshuffles every section, which
 // the differ can only report as a rewrite. @Order makes the diagram read the way this file does.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@GenerateSequence
 class AddVisitSequenceTest {
 
     private static final String VISIT_DATE = "2026-05-12";
@@ -67,6 +66,10 @@ class AddVisitSequenceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    // On the method, not on the class: this is the one run worth a picture. The class is
+    // where the controller's cheap end-to-end tests collect, and annotating it would draw
+    // every one of them.
+    @GenerateSequence
     @Test
     @Order(1)
     void addsAVisitToAnExistingPet() throws Exception {

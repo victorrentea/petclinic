@@ -135,11 +135,14 @@ test('generateFromWindows writes one puml per scenario', async () => {
     '/out/src/owner-search.feature.search-owners.genseq.puml',
   ]);
   const addVisit = written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'];
-  expect(addVisit).toContain('== Add a visit ==');
+  // The scenario names the picture; the file it lives in is in the footer, and the
+  // divider that used to separate chapters is gone with the chapters.
+  expect(addVisit).toContain('title Add a visit');
+  expect(addVisit).not.toContain('== ');
   // …and the other scenario is a picture of its own, not a section further down this one
-  expect(addVisit).not.toContain('== Cancel a visit ==');
+  expect(addVisit).not.toContain('Cancel a visit');
   expect(written['/out/src/add-visit.spec.ts.cancel-a-visit.genseq.puml'])
-    .toContain('== Cancel a visit ==');
+    .toContain('title Cancel a visit');
   // the arrow is wrapped in its reveal link now, so match the label inside it
   expect(addVisit).toContain('addVisit\\nPOST /api/visits');
   expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
@@ -160,7 +163,7 @@ test('each section header links to the test that drew it', () => {
     },
   );
   expect(written['/out/petclinic-test/src/add-visit.spec.ts.add-a-visit.genseq.puml']).toContain(
-    '== [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Add a visit]] ==');
+    'title [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Add a visit]]');
 });
 
 // Nothing to read the source with means nothing to point at: a header that links into a
@@ -173,7 +176,7 @@ test('a header stays plain when the test source cannot be read', () => {
     '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
   );
   expect(written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'])
-    .toContain('== Add a visit ==');
+    .toContain('title Add a visit');
 });
 
 test('generateFromWindows skips (no throw) when a test has zero traces', async () => {
@@ -301,7 +304,7 @@ test('renderScenarios redraws from the cache at another detail level, touching n
     {sql: 'off', httpBodies: false, interactive: false});
 
   const puml = written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'];
-  expect(puml).toContain('== Add a visit ==');
+  expect(puml).toContain('title Add a visit');
   expect(puml).not.toContain('SELECT');
 });
 
@@ -347,8 +350,10 @@ test('a source outside petclinic-test is titled from the repo root, not with ../
       log: () => undefined,
     },
   );
+  // The title is the scenario now, so it is the FOOTER that has to name the file from
+  // the repo root — same fact, same `..` to keep out of it, one line lower.
   const puml = Object.values(written)[0];
-  expect(puml).toContain('title petclinic-backend/src/test/java/OwnerTest.java');
+  expect(puml).toContain('in petclinic-backend/src/test/java/OwnerTest.java —');
   expect(puml).not.toContain('..');
 });
 
@@ -366,5 +371,5 @@ test('a petclinic-test source keeps its module-relative title', () => {
       log: () => undefined,
     },
   );
-  expect(Object.values(written)[0]).toContain('title src/add-visit.spec.ts');
+  expect(Object.values(written)[0]).toContain('in src/add-visit.spec.ts —');
 });

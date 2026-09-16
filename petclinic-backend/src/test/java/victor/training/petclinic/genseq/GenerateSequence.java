@@ -11,9 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * The Java twin of the <code>@generate_sequence</code> tag the .feature and .spec.ts tests carry:
- * put it on a @SpringBootTest and every test method in it is captured as a trace and drawn as a
- * PlantUML sequence diagram per test method, next to the class —
- * <code>OwnerSequenceTest.java.reads-an-owner-back.genseq.puml</code>.
+ * put it on a test method and that run is captured as a trace and drawn as a PlantUML sequence
+ * diagram next to the class — <code>OwnerSequenceTest.java.reads-an-owner-back.genseq.puml</code>.
+ * <p>
+ * Per method, like its Gherkin twin, which tags a scenario and not a feature file. On a class it
+ * still means "every test in here", and that is the reading to avoid: a @SpringBootTest is where
+ * the cheap end-to-end tests of a controller collect, so annotating the class draws a picture of
+ * every one of them — five diagrams, committed, re-rendered on every traced run, to answer a
+ * question somebody asked about one.
  * <p>
  * Nothing happens unless the OpenTelemetry Java agent is attached and Tempo is up, which is what
  * <code>./run-tests-with-tracing.sh</code> arranges (mvn -Pgenseq). Under a plain <code>mvn test</code>
@@ -25,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * needs no Angular, no Chromium and no running server, and the two pictures can be put side by side.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @ExtendWith(SequenceTraceExtension.class)
 // Also a tag, so the runner can ask for exactly these tests (mvn -Dgroups=genseq) without

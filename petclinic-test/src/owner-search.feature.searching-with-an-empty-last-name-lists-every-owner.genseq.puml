@@ -3,15 +3,11 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title src/owner-search.feature
-legend right
-  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-end legend
-footer @generate_sequence — generated from real traces, do not edit
+title [[src://petclinic-test/src/owner-search.feature:26{Click to open the test} Searching with an empty last name lists every owner]]
+footer @generate_sequence in src/owner-search.feature — generated from real traces of end-to-end test runs, do not edit ❗
 participant Browser
 participant Backend
 participant DB
-== [[src://petclinic-test/src/owner-search.feature:26{Click to open the test} Searching with an empty last name lists every owner]] ==
 Browser -> Backend: List owners\nGET /api/owners
 activate Backend
 Backend -> Backend: OwnerRepository.findByLastNameStartingWith

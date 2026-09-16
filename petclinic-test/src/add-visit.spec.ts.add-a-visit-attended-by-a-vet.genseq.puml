@@ -3,15 +3,11 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title src/add-visit.spec.ts
-legend right
-  ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
-end legend
-footer @generate_sequence — generated from real traces, do not edit
+title [[src://petclinic-test/src/add-visit.spec.ts:52{Click to open the test} Add a visit attended by a vet]]
+footer @generate_sequence in src/add-visit.spec.ts — generated from real traces of end-to-end test runs, do not edit ❗
 participant Browser
 participant Backend
 participant DB
-== [[src://petclinic-test/src/add-visit.spec.ts:52{Click to open the test} Add a visit attended by a vet]] ==
 Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]

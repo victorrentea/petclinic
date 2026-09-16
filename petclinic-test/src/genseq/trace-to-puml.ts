@@ -253,8 +253,8 @@ const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 const TRANSACTION_COMMIT = 'Transaction.commit';
 
 /** The opt-in a reader will find in the source this diagram was drawn from. */
-function optInOf(title: string): string {
-  return title.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
+function optInOf(source: string): string {
+  return source.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
 }
 
 // Left to right is the direction a call travels. Browser and Test never appear together:
@@ -485,6 +485,19 @@ export function renderDiagram(
     'skinparam hyperlinkColor #1A4FA0',
   ] : [];
 
+  // One scenario per picture is the normal case now, and then the title IS the scenario:
+  // `adds a visit to an existing pet`, clickable, straight into the test at its own line.
+  //
+  // It used to be the file path, with the scenario repeated underneath as a `== divider ==`
+  // — two headings, a hundred characters of `petclinic-backend/src/test/java/victor/…`
+  // above four words that were the thing the reader came for. The divider's job was to
+  // separate scenarios inside one file; with one scenario there is nothing to separate,
+  // and the link it carried moves up into the title rather than being lost.
+  //
+  // Several sections still draw the old way. Nothing this generator writes takes that
+  // path any more, but `renderDiagram` is a public function and a caller handing it two
+  // scenarios means two chapters, which need naming and separating.
+  const solo = sections.length === 1 ? sections[0] : undefined;
   const header = [
     '@startuml',
     // ' starts a PlantUML comment: this one warns whoever opens the *file*.
@@ -494,20 +507,25 @@ export function renderDiagram(
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
-    `title ${title}`,
+    `title ${solo ? linkedSectionTitle(solo.title, solo.link) : title}`,
     // footer (bottom of every page) states the diagram's provenance, naming the opt-in
     // the reader will actually find in the file above: a .feature/.spec.ts carries the
     // `@generate_sequence` tag, a @SpringBootTest the `@GenerateSequence` annotation.
     // It also carries the "do not edit" warning, which used to sit in a `legend right`
     // panel: a framed box floating beside the conversation the diagram exists to show,
     // for a line that reads just as well under it.
-    `footer ${optInOf(title)} — generated from real traces of end-to-end test runs, do not edit ❗`,
+    //
+    // …and, since the title stopped being the file, the file. A `.puml` embedded in a
+    // README or pasted into a slide is read with nothing around it to say where it came
+    // from; here it costs a few words on a line that was already there.
+    `footer ${optInOf(title)} in ${title} — generated from real traces of end-to-end `
+    + 'test runs, do not edit ❗',
     ...orderedParticipants(present).map((p) => `participant ${p}`),
   ];
-  // The header is the one place the picture can say which test produced it, so it is
-  // also the place to put the link there: PlantUML renders a creole link inside a
-  // divider, and the review page resolves the handle against its own checkout.
-  const body = sections.flatMap(
+  // A divider per chapter, only where there are chapters to tell apart. PlantUML renders
+  // a creole link inside one, and the review page resolves the handle against its own
+  // checkout — the same trade the title now makes.
+  const body = solo ? solo.lines : sections.flatMap(
     (s) => [`== ${linkedSectionTitle(s.title, s.link)} ==`, ...s.lines]);
   return {
     puml: [...header, ...body, '@enduml', ''].join('\n'),
