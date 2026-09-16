@@ -68,11 +68,7 @@
     "video": {
       "out": ".human-review/assets/feature.webm"
     },
-    "complexity": {
-      "extract": "cd petclinic-backend && mvn -q test -Dtest=EndpointComplexityExtractorTest",
-      "before": ".human-review/assets/complexity-before.json",
-      "after": "petclinic-backend/docs/generated/endpoint-complexity.json"
-    },
+    "//complexity": "Nothing to configure: EndpointComplexityExtractorTest was removed from this repo on 4 Sep 2026, and /human-review measures both sides itself now (endpoint-complexity.py), reading the baseline from the merge-base.",
     "logging": {
       "paths": ["petclinic-backend"]
     },
