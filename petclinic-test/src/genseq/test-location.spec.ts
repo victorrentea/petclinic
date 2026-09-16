@@ -58,7 +58,7 @@ test('the header wraps the title in the link, and is the bare title without one'
 // the method is `adds_a_visit_to_an_existing_pet`. Matching the title as a literal
 // substring therefore finds nothing, and the diagram loses the line it links to.
 const JAVA = [
-  'class AddVisitSequenceTest {',
+  'class AddVisitApiTest {',
   '',
   '    @Test',
   '    void addsAVisitToAnExistingPet() throws Exception {',
@@ -85,13 +85,13 @@ test('a Java line that is not a method declaration is never taken for one', () =
   expect(lineOfTest(callSite, 'adds a visit to an existing pet', 'T.java')).toBe(0);
 });
 
-// The regression this ordering exists for. AddVisitSequenceTest's javadoc names the
+// The regression this ordering exists for. AddVisitApiTest's javadoc names the
 // .feature scenario each Java test mirrors, so a literal-first scan opened the section
 // header in the middle of a paragraph about a different file, fourteen lines above the
 // test it claims to open.
 test('a javadoc quoting the scenario never outranks the method that is the test', () => {
   const documented = [
-    'class AddVisitSequenceTest {',                                        // 1
+    'class AddVisitApiTest {',                                        // 1
     '    /**',                                                             // 2
     '     * The branch\'s own feature, one layer below the browser: the same',  // 3
     '     * "A visit remembers the vet who attended it" scenario in add-visit.feature.', // 4
@@ -101,7 +101,7 @@ test('a javadoc quoting the scenario never outranks the method that is the test'
     '    }',                                                               // 8
     '}',                                                                   // 9
   ].join('\n');
-  expect(lineOfTest(documented, 'remembers the vet who attended it', 'AddVisitSequenceTest.java'))
+  expect(lineOfTest(documented, 'remembers the vet who attended it', 'AddVisitApiTest.java'))
     .toBe(7);
 });
 
@@ -114,7 +114,7 @@ test('naming the source keeps the .spec.ts and .feature lookups working', () => 
 // ── the sentence arrows ──────────────────────────────────────────────────────────
 
 const JAVA_TEST = [
-  'class AddVisitSequenceTest {',                                     // 1
+  'class AddVisitApiTest {',                                     // 1
   '',                                                                 // 2
   '    @Test',                                                        // 3
   '    void addsAVisitToAnExistingPet() {',                           // 4

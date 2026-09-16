@@ -2,7 +2,7 @@
 #
 # run-tests-with-tracing.sh — run the @GenerateSequence @SpringBootTests with the OpenTelemetry
 # Java agent attached, so each one's trace is captured in Tempo and turned into a PlantUML
-# sequence diagram per scenario beside the test itself (…/AddVisitSequenceTest.java.<scenario>.genseq.puml).
+# sequence diagram per scenario beside the test itself (…/AddVisitApiTest.java.<scenario>.genseq.puml).
 #
 # The backend twin of petclinic-test/run-tests-with-tracing.sh, and deliberately the same
 # pipeline: the JVM writes the very same "trace window" the browser suites write, and the very

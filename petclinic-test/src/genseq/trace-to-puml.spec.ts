@@ -220,6 +220,31 @@ test('two scenarios that both draw keep their dividers, and the file stays the t
   expect(puml).toContain('== Add another ==');
 });
 
+// A Java method name read back as a sentence is half a name: `remembers the vet who
+// attended it` says nothing about which class, and therefore which endpoint, it is about.
+// The page that lists these pictures lists them by their headings, so the heading carries
+// the class. A .feature/.spec.ts title is already a whole sentence and keeps it.
+test('a Java scenario is headed by its class, a Playwright one by itself', () => {
+  const java = renderPuml(
+    'petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java',
+    [{title: 'remembers the vet who attended it', traces: [parseTempoTrace(fixture)]}]);
+  expect(java).toContain('title AddVisitApiTest: remembers the vet who attended it');
+
+  const spec = renderPuml('add-visit.spec.ts',
+    [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]);
+  expect(spec).toContain('title Add a visit');
+
+  // Two chapters in one Java file are two qualified headings, for the same reason.
+  const two = renderPuml(
+    'petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java',
+    [
+      {title: 'adds a visit', traces: [parseTempoTrace(fixture)]},
+      {title: 'remembers the vet', traces: [parseTempoTrace(fixture)]},
+    ]);
+  expect(two).toContain('== AddVisitApiTest: adds a visit ==');
+  expect(two).toContain('== AddVisitApiTest: remembers the vet ==');
+});
+
 // ── progressive disclosure ────────────────────────────────────────────────────
 // The default picture is the simplified one, and every arrow that has more to say
 // carries a link marker whose id addresses that arrow's detail in the sidecar.

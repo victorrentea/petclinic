@@ -15,7 +15,7 @@ const fixture = JSON.parse(
 // the replay-the-cache path and silently re-rendered the previous run's diagrams instead.
 test('GENSEQ_SUITE=java makes a run own the .java sources', () => {
   expect(ownedSourcesFromEnv({GENSEQ_SUITE: 'java'})).toBe(JAVA_SOURCES);
-  expect(JAVA_SOURCES.test('petclinic-backend/src/test/java/.../AddVisitSequenceTest.java')).toBe(true);
+  expect(JAVA_SOURCES.test('petclinic-backend/src/test/java/.../AddVisitApiTest.java')).toBe(true);
   expect(JAVA_SOURCES.test('src/add-visit.spec.ts')).toBe(false);
 });
 
