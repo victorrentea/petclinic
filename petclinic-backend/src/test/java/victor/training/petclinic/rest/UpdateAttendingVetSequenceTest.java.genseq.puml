@@ -1,0 +1,77 @@
+@startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+hide footbox
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #1A4FA0
+title petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java
+footer @GenerateSequence — generated from real traces of end-to-end test runs, do not edit ❗
+participant Client
+participant Backend
+participant DB
+== [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:62{Click to open the test} changes the attending vet on a visit]] ==
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:63{Click to open the line of the test that says this} given a visit exists ↗]]
+activate Client
+Client -> Backend: listVisits\nGET /api/visits
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:19{Click to open VisitRepository.findAllWithPetAndOwner} VisitRepository.findAllWithPetAndOwner ↗]]
+activate Backend
+Backend -> DB: [[genseq://1706k1o{Click for the statement behind this call} SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner LEFT JOIN … ⊕]]
+Backend -> DB: [[genseq://0xm9qzg{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://070fg5f{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://1heb9yw{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://0cvbten{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://0g8ptx2{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://0i1m34t{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+Backend -> DB: [[genseq://094wceq{Click for the statement behind this call} VisitRepository.findAllWithPetAndOwner ⊕]]
+deactivate Backend
+Backend --> Client: [[genseq://0hg53e9{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Client
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:68{Click to open the line of the test that says this} and a vet other than the current one is available ↗]]
+activate Client
+Client -> Backend: listVets\nGET /api/vets
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:13{Click to open VetRepository.findAll} VetRepository.findAll ↗]]
+activate Backend
+group tx
+Backend -> DB: [[genseq://0p6yxbc{Click for the statement behind this call} SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties ⊕]]
+end
+deactivate Backend
+Backend --> Client: [[genseq://0u2tomr{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Client
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:71{Click to open the line of the test that says this} when the visit is re-assigned to that vet ↗]]
+activate Client
+Client -> Backend: [[genseq://1moiud8{Click for this call’s JSON body} updateVisit\nPUT /api/visits/{visitId} ⊕]]
+activate Backend
+group tx
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:12{Click to open VisitRepository.findById} VisitRepository.findById ↗]]
+activate Backend
+Backend -> DB: [[genseq://0x9fgiq{Click for the statement behind this call} VisitRepository.findById ⊕]]
+deactivate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:29{Click to open VetRepository.getByIdOrNull} VetRepository.getByIdOrNull ↗]]
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:20{Click to open VetRepository.findByIdWithoutSpecialties} VetRepository.findByIdWithoutSpecialties ↗]]
+activate Backend
+Backend -> DB: [[genseq://0exss5m{Click for the statement behind this call} SELECT v FROM Vet v WHERE v.id = :id ⊕]]
+deactivate Backend
+deactivate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
+end
+Backend --> Client: 200
+deactivate Backend
+deactivate Client
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:80{Click to open the line of the test that says this} then the visit shows the new attending vet ↗]]
+activate Client
+Client -> Backend: getVisit\nGET /api/visits/{visitId}
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:12{Click to open VisitRepository.findById} VisitRepository.findById ↗]]
+activate Backend
+group tx
+Backend -> DB: [[genseq://0kol4wa{Click for the statement behind this call} select visits ⊕]]
+end
+deactivate Backend
+Backend --> Client: [[genseq://0juggqu{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+deactivate Client
+@enduml

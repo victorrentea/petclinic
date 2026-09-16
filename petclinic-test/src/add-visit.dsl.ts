@@ -110,7 +110,8 @@ export async function expect_pet_visit_list_shows_no_vet(
 
 export async function expect_pet_visit_list_shows_vet(
   page: Page, date: string, description: string, vetName: string): Promise<void> {
-  await expect(visitRow(page, date, description)).toContainText(vetName, {timeout: 10_000});
+  await expect(visitRow(page, date, description).locator('.visit-vet'))
+    .toHaveText(vetName, {timeout: 10_000});
 }
 
 function visitRow(page: Page, date: string, description: string) {
