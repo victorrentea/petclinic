@@ -28,10 +28,25 @@ set -uo pipefail
 AGENT=claude
 [ "${1:-}" = "--copilot" ] && AGENT=copilot
 
-# Cheap pre-filter on the hook JSON: skip the (common) tool calls that never
-# mention a push, before paying for any git work. Both agents put the executed
-# command in the payload on stdin, so one grep serves both.
-grep -q 'git push' || exit 0
+# Cheap pre-filter: skip the (common) tool calls that never ran a push, before
+# paying for any git work. Read the COMMAND out of the payload rather than
+# grepping the payload whole — `grep -q 'git push'` over the raw JSON fires on a
+# tool call that merely *read* a file mentioning a push, and .claude/settings.json
+# is such a file (it denies `git push --no-verify`). Seen for real: Copilot opened
+# settings.json two minutes after a push, the pre-filter passed, the reflog check
+# agreed, and the agent was handed a "push landed, watch CI" instruction it had
+# every reason to treat as prompt injection. Both agents carry the command in the
+# payload, under a different key, so one extraction serves both.
+CMD_RAN=$(python3 -c "
+import sys, json
+try:
+  d = json.load(sys.stdin)
+except Exception:
+  raise SystemExit
+args = d.get('tool_input') or d.get('toolArgs') or {}
+print(args.get('command') or '')
+" 2>/dev/null) || exit 0
+case "$CMD_RAN" in *"git push"*) ;; *) exit 0 ;; esac
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" || exit 0
 cd "$REPO_ROOT" || exit 0
