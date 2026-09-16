@@ -257,6 +257,25 @@ function optInOf(source: string): string {
   return source.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
 }
 
+/**
+ * A scenario's heading, qualified by the class it lives in — for Java, and only for Java.
+ *
+ * `remembers the vet who attended it` is a method name read back as a sentence, and a
+ * method name is only half a name: the other half is the class, which is where a Java
+ * reader looks for the scope of what is being tested. On a review page listing every
+ * picture by its heading, two classes can easily each have a `creates one` and neither
+ * line says which endpoint it is about.
+ *
+ * A `.feature` scenario or a Playwright `test(...)` title is already a whole sentence
+ * written to stand alone — `Add a visit attended by a vet` — so prefixing it with the
+ * file it happens to sit in adds a word nobody needs and takes the room the sentence uses.
+ */
+function qualifiedTitle(title: string, source: string): string {
+  if (!source.endsWith('.java')) return title;
+  const cls = source.split('/').pop()!.replace(/\.java$/, '');
+  return `${cls}: ${title}`;
+}
+
 // Left to right is the direction a call travels. Browser and Client never appear together:
 // one is a browser suite's lifeline, the other a @SpringBootTest's, and each drives the
 // backend from the same place on the page.
@@ -507,7 +526,7 @@ export function renderDiagram(
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
-    `title ${solo ? linkedSectionTitle(solo.title, solo.link) : title}`,
+    `title ${solo ? linkedSectionTitle(qualifiedTitle(solo.title, title), solo.link) : title}`,
     // footer (bottom of every page) states the diagram's provenance, naming the opt-in
     // the reader will actually find in the file above: a .feature/.spec.ts carries the
     // `@generate_sequence` tag, a @SpringBootTest the `@GenerateSequence` annotation.
@@ -526,7 +545,7 @@ export function renderDiagram(
   // a creole link inside one, and the review page resolves the handle against its own
   // checkout — the same trade the title now makes.
   const body = solo ? solo.lines : sections.flatMap(
-    (s) => [`== ${linkedSectionTitle(s.title, s.link)} ==`, ...s.lines]);
+    (s) => [`== ${linkedSectionTitle(qualifiedTitle(s.title, title), s.link)} ==`, ...s.lines]);
   return {
     puml: [...header, ...body, '@enduml', ''].join('\n'),
     details: collector.toIndex(),

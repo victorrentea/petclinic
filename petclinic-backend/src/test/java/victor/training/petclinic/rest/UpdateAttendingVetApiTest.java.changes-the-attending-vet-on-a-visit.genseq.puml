@@ -3,12 +3,12 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:62{Click to open the test} changes the attending vet on a visit]]
-footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java — generated from real traces of end-to-end test runs, do not edit ❗
+title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java:63{Click to open the test} UpdateAttendingVetApiTest: changes the attending vet on a visit]]
+footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java — generated from real traces of end-to-end test runs, do not edit ❗
 participant Client
 participant Backend
 participant DB
-Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:63{Click to open the line of the test that says this} given a visit exists ↗]]
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java:64{Click to open the line of the test that says this} given a visit exists ↗]]
 activate Client
 Client -> Backend: listVisits\nGET /api/visits
 activate Backend
@@ -26,7 +26,7 @@ deactivate Backend
 Backend --> Client: [[genseq://0hg53e9{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Client
-Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:68{Click to open the line of the test that says this} and a vet other than the current one is available ↗]]
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java:69{Click to open the line of the test that says this} and a vet other than the current one is available ↗]]
 activate Client
 Client -> Backend: listVets\nGET /api/vets
 activate Backend
@@ -39,7 +39,7 @@ deactivate Backend
 Backend --> Client: [[genseq://0u2tomr{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Client
-Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:71{Click to open the line of the test that says this} when the visit is re-assigned to that vet ↗]]
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java:72{Click to open the line of the test that says this} when the visit is re-assigned to that vet ↗]]
 activate Client
 Client -> Backend: [[genseq://1moiud8{Click for this call’s JSON body} updateVisit\nPUT /api/visits/{visitId} ⊕]]
 activate Backend
@@ -60,7 +60,7 @@ end
 Backend --> Client: 200
 deactivate Backend
 deactivate Client
-Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetSequenceTest.java:80{Click to open the line of the test that says this} then the visit shows the new attending vet ↗]]
+Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/UpdateAttendingVetApiTest.java:81{Click to open the line of the test that says this} then the visit shows the new attending vet ↗]]
 activate Client
 Client -> Backend: getVisit\nGET /api/visits/{visitId}
 activate Backend

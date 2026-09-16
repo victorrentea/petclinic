@@ -33,14 +33,14 @@ import victor.training.petclinic.tools.PrettyTestNames;
 /**
  * The API-only twin of {@link VisitTest#update_changesTheAttendingVet}, one layer down: no
  * Chromium, no Angular, no running server — just the picture this PR's "link a visit with a vet"
- * change is actually about (UpdateAttendingVetSequenceTest.java.genseq.puml, drawn beside this
+ * change is actually about (UpdateAttendingVetApiTest.java.genseq.puml, drawn beside this
  * file).
  * <p>
- * Put next to the other REST tests on purpose, exactly like {@link AddVisitSequenceTest}: the
+ * Put next to the other REST tests on purpose, exactly like {@link AddVisitApiTest}: the
  * claim is that any @SpringBootTest here becomes a sequence diagram by adding one annotation and
  * saying its sentences out loud.
  * <p>
- * Deliberately NOT @Transactional, for the same reason as {@link AddVisitSequenceTest}: a test
+ * Deliberately NOT @Transactional, for the same reason as {@link AddVisitApiTest}: a test
  * transaction wrapped round the MockMvc calls would swallow the repository-level transactions and
  * collapse the diagram's DB frames — the two updateVisit()/resolveVet() round-trips that make the
  * picture worth reading — into one box.
@@ -50,7 +50,7 @@ import victor.training.petclinic.tools.PrettyTestNames;
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
 @DisplayNameGeneration(PrettyTestNames.class)
-class UpdateAttendingVetSequenceTest {
+class UpdateAttendingVetApiTest {
 
     @Autowired
     MockMvc mockMvc;

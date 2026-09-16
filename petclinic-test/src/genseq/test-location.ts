@@ -33,7 +33,7 @@ const JAVA_METHOD = /\bvoid\s+([A-Za-z_$][\w$]*)\s*\(/;
  * uses; the two agree because they are the same transformation.
  *
  * It used to scan for the literal text first and fall back to the method, which put the
- * declaration second to any *prose* that happened to quote it. AddVisitSequenceTest's
+ * declaration second to any *prose* that happened to quote it. AddVisitApiTest's
  * javadoc names the .feature scenario its Java twin mirrors, so the header opened
  * fourteen lines above the test, in the middle of a paragraph about a different file.
  * The declaration is the only line in a .java file that *is* the test; a comment about
@@ -108,7 +108,7 @@ export function lineOfHandle(handle: string | undefined): number {
  * or 0 when this checkout does not say it in those words.
  *
  * `from` is where to start looking, and it is not an optimisation: two scenarios in one
- * file routinely open with the identical sentence (both of AddVisitSequenceTest's do),
+ * file routinely open with the identical sentence (both of AddVisitApiTest's do),
  * and a scan from the top would point every one of them at the first. The caller passes
  * the scenario's own declaration line, so each section's arrows resolve inside it.
  *

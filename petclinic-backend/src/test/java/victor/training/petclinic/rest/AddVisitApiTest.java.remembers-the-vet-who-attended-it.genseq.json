@@ -794,19 +794,6 @@
         }
       ]
     },
-    "0x8aana": {
-      "title": "select owners",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=1"
-          }
-        }
-      ]
-    },
     "1hh1kku": {
       "title": "Backend → Client: 200",
       "steps": [
@@ -866,6 +853,19 @@
         {
           "label": "request body",
           "text": "{\n  \"vetId\": 4,\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1789574169560\"\n}"
+        }
+      ]
+    },
+    "0x8aana": {
+      "title": "select owners",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=1"
+          }
         }
       ]
     },
