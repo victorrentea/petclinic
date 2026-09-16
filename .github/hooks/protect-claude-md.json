@@ -1,0 +1,22 @@
+{
+  "//": "Copilot CLI counterpart of the PreToolUse guard in .claude/settings.json:",
+  "//2": "CLAUDE.md is a one-line @AGENTS.md import — a rule written there would reach",
+  "//3": "Claude Code only. Copilot fires this for EVERY tool (repo hooks take no",
+  "//4": "matcher), which suits us: the script itself decides, and it watches the shell",
+  "//5": "as well as the file tools, because asked to append a line Copilot runs",
+  "//6": "`echo >> CLAUDE.md` rather than touching `create`/`edit` at all.",
+  "//7": "--copilot only switches how it refuses: exit 2 tells Copilot's model nothing",
+  "//8": "but \"hook exited with code 2\". See the script header for what was measured.",
+  "//9": "$(git rev-parse --show-toplevel) is the project root BOTH agents understand:",
+  "//10": "Copilot never sets $CLAUDE_PROJECT_DIR, and git needs no env var at all.",
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/protect-claude-md.sh\" --copilot",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

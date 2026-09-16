@@ -1,0 +1,17 @@
+{
+  "//": "Copilot CLI counterpart of the PostToolUse(Write|Edit) check in .claude/settings.json:",
+  "//2": "warn when a freshly edited .java file carries fully-qualified class names.",
+  "//3": "Copilot has no matcher on repo hooks, so the script self-filters: it exits 0",
+  "//4": "unless the payload carries a path ending in .java. --copilot only switches the",
+  "//5": "output envelope (top-level additionalContext instead of hookSpecificOutput).",
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/post-java-edit.sh\" --copilot",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}
