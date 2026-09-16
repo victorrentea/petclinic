@@ -74,7 +74,7 @@ const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 export const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
 
 /** The lifeline a @SpringBootTest's own `given`/`when`/`then` marks are drawn on. */
-export const TEST_PARTICIPANT = 'Test';
+export const CLIENT_PARTICIPANT = 'Client';
 
 function participantOf(span: NormSpan): string {
   const declared = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
@@ -257,10 +257,10 @@ function optInOf(title: string): string {
   return title.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
 }
 
-// Left to right is the direction a call travels. Browser and Test never appear together:
+// Left to right is the direction a call travels. Browser and Client never appear together:
 // one is a browser suite's lifeline, the other a @SpringBootTest's, and each drives the
 // backend from the same place on the page.
-const PARTICIPANT_ORDER = ['Browser', 'Test', 'Backend', 'DB'];
+const PARTICIPANT_ORDER = ['Browser', 'Client', 'Backend', 'DB'];
 
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));

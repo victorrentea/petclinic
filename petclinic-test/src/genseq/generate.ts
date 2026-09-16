@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan,
-  PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
+  PARTICIPANT_ATTRIBUTE, CLIENT_PARTICIPANT} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
@@ -232,7 +232,7 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
     // file and nowhere else, so there are no `code.*` attributes to follow — the sentence
     // is looked up in the source instead, from the scenario's own declaration line so that
     // two scenarios opening with the same words do not both point at the first one.
-    if (span.attributes[PARTICIPANT_ATTRIBUTE]?.trim() === TEST_PARTICIPANT) {
+    if (span.attributes[PARTICIPANT_ATTRIBUTE]?.trim() === CLIENT_PARTICIPANT) {
       const text = readFile(`${rootDir}/${source}`);
       if (text === undefined) return undefined;
       return stepHandle(repoRelative(rootDir, source),

@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <ol>
  * <li>opens a root span stamped <code>test.name</code>, which is the only handle the generator has
  * on this run — it searches Tempo for <code>{ span.test.name = "…" }</code>;</li>
- * <li>declares that span's lifeline to be <em>Test</em>, so the picture can show the test calling
+ * <li>declares that span's lifeline to be <em>Client</em>, so the picture can show the test calling
  * the application rather than the application calling itself;</li>
  * <li>writes <code>petclinic-test/test-results/trace-windows/&lt;hash&gt;.json</code> — the start
  * and end of the interval whose traces belong to this test.</li>
@@ -71,7 +71,7 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
         Span span = GlobalOpenTelemetry.getTracer("petclinic-genseq")
                 .spanBuilder("test: " + context.getDisplayName())
                 .setAttribute(TEST_NAME, context.getDisplayName())
-                .setAttribute(Steps.PARTICIPANT, Steps.TEST_PARTICIPANT)
+                .setAttribute(Steps.PARTICIPANT, Steps.CLIENT_PARTICIPANT)
                 .startSpan();
         // No agent attached: this is an ordinary `mvn test`, the tracer is a no-op and there
         // will be nothing in Tempo to draw. Recording a window anyway would overwrite the one a

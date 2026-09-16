@@ -487,22 +487,22 @@ test('the frame is called tx, wherever it was opened', () => {
 // ── A @SpringBootTest drives the very same renderer ─────────────────────────────
 // Nothing in a trace otherwise separates the test from the code it drives: a MockMvc
 // call and the controller it reaches run in one JVM under one `service.name`. The test
-// spans therefore name their own lifeline (Steps.java sets `genseq.participant=Test`),
+// spans therefore name their own lifeline (Steps.java sets `genseq.participant=Client`),
 // and the renderer has to honour it — without it the whole picture collapses onto
 // Backend and loses the only hop it exists to show.
-test('a span may declare its own participant, and Test sorts leftmost', () => {
+test('a span may declare its own participant, and Client sorts leftmost', () => {
   // The shape SequenceTraceExtension actually emits: a per-test root that opens the
   // lifeline, a span per sentence under it, and the instrumented work under those.
   const spans: NormSpan[] = [
     {
       traceId: 'j', spanId: 'j-root', parentSpanId: '', name: 'test: reads an owner back',
       kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6,
-      attributes: {'genseq.participant': 'Test', 'test.name': 'reads an owner back'},
+      attributes: {'genseq.participant': 'Client', 'test.name': 'reads an owner back'},
     },
     {
       traceId: 'j', spanId: 'j-step', parentSpanId: 'j-root', name: 'given an owner with a pet',
       kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
-      attributes: {'genseq.participant': 'Test'},
+      attributes: {'genseq.participant': 'Client'},
     },
     {
       traceId: 'j', spanId: 'j-server', parentSpanId: 'j-step', name: 'GET /api/owners/{ownerId}',
@@ -515,10 +515,10 @@ test('a span may declare its own participant, and Test sorts leftmost', () => {
     traces: [spans],
   }], STATIC);
 
-  expect(puml.indexOf('participant Test')).toBeLessThan(puml.indexOf('participant Backend'));
+  expect(puml.indexOf('participant Client')).toBeLessThan(puml.indexOf('participant Backend'));
   // the sentence lands on the test's lifeline, and the call crosses to the backend
-  expect(puml).toContain('Test -> Test: given an owner with a pet');
-  expect(puml).toContain('Test -> Backend: ');
+  expect(puml).toContain('Client -> Client: given an owner with a pet');
+  expect(puml).toContain('Client -> Backend: ');
   expect(puml).not.toContain('participant Browser');
 });
 

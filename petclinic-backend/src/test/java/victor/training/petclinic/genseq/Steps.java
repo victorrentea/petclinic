@@ -27,7 +27,7 @@ import io.opentelemetry.context.Scope;
  * <p>
  * Everything the sentence goes on to do — the MockMvc call, the repository save, the SQL underneath
  * it — lands inside that span, and that parentage is what the renderer draws as an arrow leaving
- * the Test lifeline.
+ * the Client lifeline.
  */
 public final class Steps {
 
@@ -38,7 +38,7 @@ public final class Steps {
      */
     static final AttributeKey<String> PARTICIPANT = AttributeKey.stringKey("genseq.participant");
 
-    static final String TEST_PARTICIPANT = "Test";
+    static final String CLIENT_PARTICIPANT = "Client";
 
     /** The step currently open on this thread — JUnit runs a test's before/body/after on one. */
     private static final ThreadLocal<Open> current = new ThreadLocal<>();
@@ -70,7 +70,7 @@ public final class Steps {
         close();
         Span span = GlobalOpenTelemetry.getTracer("petclinic-genseq")
                 .spanBuilder(sentence)
-                .setAttribute(PARTICIPANT, TEST_PARTICIPANT)
+                .setAttribute(PARTICIPANT, CLIENT_PARTICIPANT)
                 .startSpan();
         // The scope is deliberately held open across the statements that follow rather than
         // closed by a try-with-resources: the sentence lasts until the next sentence starts.
