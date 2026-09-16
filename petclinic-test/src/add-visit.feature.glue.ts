@@ -1,5 +1,4 @@
 import {Given, When, Then} from '@cucumber/cucumber';
-import {expect} from '@playwright/test';
 import axios from 'axios';
 import {PlaywrightWorld} from './support/world';
 import {
@@ -62,15 +61,19 @@ Given('a pet registered with the clinic', async function (this: PlaywrightWorld)
 
 /**
  * Named in the Background rather than picked at random, because the Then names her too.
- * Checking her here means a changed seed (Flyway's db/seed/R__seed.sql) fails on the Given
- * instead of looking like a booking that lost its vet.
+ * A Given establishes state rather than assuming it, so this creates her when she isn't
+ * already there — the scenario no longer depends on what happens to be seeded in
+ * Flyway's db/seed/R__seed.sql.
  */
 Given("{string} is one of the clinic's vets", async function (this: PlaywrightWorld, vetName: string) {
   const {data} = await axios.get(`${API_BASE}/vets`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('The API returned no vets — is the backend up and the DB seeded by Flyway?');
+  if (Array.isArray(data) && data.map(fullName).includes(vetName)) {
+    return;
   }
-  expect(data.map(fullName)).toContain(vetName);
+  const [firstName, ...lastNameParts] = vetName.split(' ');
+  await axios.post(`${API_BASE}/vets`,
+    {firstName, lastName: lastNameParts.join(' '), specialties: []},
+    {timeout: 10_000});
 });
 
 When('I book a visit for that pet with {string} attending',
