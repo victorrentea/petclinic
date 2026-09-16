@@ -170,6 +170,11 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+### Expected data volumes
+The `owners` table is expected to reach **~100.000 rows within a year** (business input, per Bizu).
+Treat owner listing and search as a large dataset: paging, sorting and filtering belong in the
+database — never "fetch them all and filter in the browser".
+
 ## Java Code Style
 - Keep line length < 120 chars
 - Keep methods under 30 lines
@@ -185,5 +190,8 @@ Core entities and relationships:
 - Don't leave behind CYA comments when deleting or moving stuff
 - Always run tests after any complex refactoring
 - Be brief
+- Inspect the running UI through Playwright's default **accessibility snapshot**, never by taking a
+  screenshot and feeding the image back to the model — pixels burn tokens to re-derive text the
+  snapshot already hands over. Screenshots are for the human (`open -a Preview`), not for the agent.
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md
