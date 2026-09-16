@@ -3,12 +3,11 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java
-footer @GenerateSequence — generated from real traces of end-to-end test runs, do not edit ❗
+title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java:127{Click to open the test} remembers the vet who attended it]]
+footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java — generated from real traces of end-to-end test runs, do not edit ❗
 participant Client
 participant Backend
 participant DB
-== [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java:127{Click to open the test} remembers the vet who attended it]] ==
 Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitSequenceTest.java:128{Click to open the line of the test that says this} given an owner with at least one pet exists ↗]]
 activate Client
 Client -> Backend: List owners\nGET /api/owners

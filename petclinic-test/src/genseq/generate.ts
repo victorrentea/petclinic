@@ -350,9 +350,15 @@ export function renderScenarios(
   return written;
 }
 
-/** Did this scenario draw a conversation, or only a heading? */
+/** Did this scenario draw a conversation, or only a heading?
+ *
+ * Asked of the participants, not of a `== divider ==`: a solo scenario is named by the
+ * title now and draws no divider at all. A lifeline is only declared when some trace
+ * actually emitted a line on it, so `participant` is the marker that survives both
+ * spellings — and it is the one that means what the question asks.
+ */
 function drewSomething(puml: string): boolean {
-  return /^== /m.test(puml);
+  return /^participant /m.test(puml);
 }
 
 /**

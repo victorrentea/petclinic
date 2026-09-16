@@ -57,7 +57,6 @@ import victor.training.petclinic.tools.PrettyTestNames;
 // picture is JUnit's arbitrary method order — and adding a test reshuffles every section, which
 // the differ can only report as a rewrite. @Order makes the diagram read the way this file does.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@GenerateSequence
 class AddVisitSequenceTest {
 
     private static final String VISIT_DATE = "2026-05-12";
@@ -121,6 +120,10 @@ class AddVisitSequenceTest {
      * booking the visit is exactly the user who has to be allowed to read /api/vets, so a
      * test that skipped the list would also skip the authorisation question it raises.
      */
+    // On the method, not on the class: this branch's question is the attending vet, so
+    // this is the run worth a picture. Its sibling above is the same controller exercised
+    // for a different reason, and annotating the class would draw both.
+    @GenerateSequence
     @Test
     @Order(2)
     @WithMockUser(roles = {"OWNER_ADMIN", "VET_ADMIN"})

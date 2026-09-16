@@ -50,7 +50,6 @@ import victor.training.petclinic.tools.PrettyTestNames;
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
 @DisplayNameGeneration(PrettyTestNames.class)
-@GenerateSequence
 class UpdateAttendingVetSequenceTest {
 
     @Autowired
@@ -58,6 +57,8 @@ class UpdateAttendingVetSequenceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    // On the method, like its Gherkin twin tags a scenario and not a feature file.
+    @GenerateSequence
     @Test
     void changesTheAttendingVetOnAVisit() throws Exception {
         given("a visit exists");
