@@ -9,6 +9,7 @@ import {Owner} from '../../owners/owner';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
+import {computeVisitDateBounds} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-add',
@@ -47,7 +48,9 @@ export class VisitAddComponent implements OnInit {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
-        this.minDate = pet.birthDate ? moment(pet.birthDate).toDate() : undefined;
+        const {minDate, maxDate} = computeVisitDateBounds(pet.birthDate);
+        this.minDate = minDate;
+        this.maxDate = maxDate;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
           owner => {
             this.currentOwner = owner;

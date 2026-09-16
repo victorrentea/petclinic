@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import victor.training.petclinic.domain.VisitDateOutOfRangeException;
 
 import java.util.List;
 import java.util.Set;
@@ -41,6 +42,21 @@ class ExceptionControllerAdviceTest {
         assertThat(pd.getProperties()).containsKey("timestamp");
         assertThat(pd.getProperties()).extracting("errors")
                 .isEqualTo(List.of("Telephone must be numeric (value: abc)"));
+    }
+
+    @Test
+    void handleVisitDateOutOfRangeException_rendersBadRequestProblemDetail() {
+        VisitDateOutOfRangeException ex = new VisitDateOutOfRangeException("Visit date 2099-01-01 is too far out");
+
+        ResponseEntity<ProblemDetail> response = advice.handleVisitDateOutOfRangeException(ex,
+                requestTo("/api/visits"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        ProblemDetail pd = response.getBody();
+        assertThat(pd).isNotNull();
+        assertThat(pd.getTitle()).isEqualTo("Invalid Visit Date");
+        assertThat(pd.getDetail()).isEqualTo("Visit date 2099-01-01 is too far out");
+        assertThat(pd.getType()).hasToString("http://localhost/api/visits");
     }
 
     private HttpServletRequest requestTo(String uri) {
