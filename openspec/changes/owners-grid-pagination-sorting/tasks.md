@@ -14,17 +14,20 @@
   prefix filter and returns `Page<Owner>`, and verify with a repository test that filtering,
   paging, and the requested sort are all applied
 - [ ] 2.3 Update `OwnerRestController#listOwners` to accept `Pageable pageable` (via
-  `@PageableDefault(size = 10, sort = "lastName")`), map the result through `PageDto<OwnerDto>`, and
+  `@PageableDefault(size = 10, sort = "name")`), map the result through `PageDto<OwnerDto>`, and
   verify `GET /api/owners` with no parameters returns page 0, size 10 in the new envelope shape
-- [ ] 2.4 Add a sort-property allowlist check (`lastName`, `firstName`, `address`, `city`,
-  `telephone`) in the controller, rejecting any other property (including `pets`) with 400 via
-  `ExceptionControllerAdvice`, and verify with tests for an allowlisted, a non-allowlisted, and an
-  unknown sort property
+- [ ] 2.4 Add a sort-key allowlist check (`name`, `city`) in the controller, expanding `name` into
+  `Sort.Order`s on `lastName` then `firstName` (same direction as requested) and passing `city`
+  through unchanged, rejecting any other key — including the raw entity properties `lastName` and
+  `firstName` — with 400 via `ExceptionControllerAdvice`, and verify with tests for `name`, `city`,
+  a rejected raw property (`lastName`, `firstName`), a non-allowlisted property (`address`,
+  `telephone`), and an unknown sort key
 - [ ] 2.5 Add an explicit `size > 20` guard returning 400, and verify with a test that `size=21`
   (and other over-cap values) is rejected while `size=20` succeeds
 - [ ] 2.6 Apply an `id ASC` tiebreaker and `NULLS LAST` (both directions) to every resolved `Sort`,
-  and verify with a test using owners that share a sort-column value (and a null `telephone`) that
-  page boundaries stay stable and non-overlapping across repeated requests
+  and verify with a test using owners that share a sort-column value (and a null value in a
+  nullable sortable column, e.g. `city`) that page boundaries stay stable and non-overlapping
+  across repeated requests
 - [ ] 2.7 Regenerate `openapi.yaml` via `OpenApiExtractorTest` (do not hand-edit), and verify the
   generated spec documents `page`/`size`/`sort` parameters and the new response envelope
 
@@ -38,9 +41,8 @@
   and verify the existing component spec (updated) renders a page of owners
 - [ ] 3.3 Fix the pre-existing invalid markup for the `Pets` cell (`<tr>` nested inside a `<td>`),
   and verify the rendered table has exactly one `<tr>` per owner row
-- [ ] 3.4 Render the `Name` column as `"LastName, FirstName"` and wire its sort to `lastName,
-  firstName`, and verify with a component test that clicking the header issues a request sorted by
-  `lastName,firstName`
+- [ ] 3.4 Render the `Name` column as `"LastName, FirstName"` and wire its sort to `sort=name`, and
+  verify with a component test that clicking the header issues a request with `sort=name`
 - [ ] 3.5 Wire the paginator to offer page sizes 5, 10, and 20, and verify selecting a size issues a
   new request with that `size` and `page=0`
 - [ ] 3.6 Make last-name search reset to page 0 while keeping the current sort, and verify with a

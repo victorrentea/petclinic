@@ -58,7 +58,7 @@ class DomainModelExtractorTest {
     /** What the model *is*; this test only decides how to draw it. */
     private final DomainModelExtractor model = new DomainModelExtractor();
 
-    @Test
+    @Test // not a test
     void generateDomainModelDiagram() throws IOException {
         List<Class<?>> entities = model.domainClasses();
         List<DomainModelExtractor.Association> associations = model.associations(entities);

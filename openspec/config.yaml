@@ -19,6 +19,14 @@ schema: spec-driven
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
 
+rules:
+  proposal:
+    - Write proposal.md for a non-technical reviewer (e.g. a product owner) - plain business
+      language only, no JSON, code, HTTP/API syntax, config keys, class/library/framework names.
+    - Move every technical detail (API shapes, code/class names, library or framework choices,
+      config keys, schema/DDL, algorithms) into design.md instead; proposal.md may reference
+      design.md for "how".
+
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
 # This is separate from artifact rules above.

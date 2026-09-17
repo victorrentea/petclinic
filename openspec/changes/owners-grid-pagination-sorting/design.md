@@ -25,8 +25,8 @@ which in turn doesn't serve `ORDER BY`) — the two cannot be covered by one ind
   /api/owners` endpoint.
 - Keep the endpoint safe against unbounded requests: capped page size, allowlisted sort
   properties, both rejected with 400 rather than silently truncated or 500ing.
-- Keep pagination deterministic even with many equal sort values (repeated cities, null
-  telephones).
+- Keep pagination deterministic even with many equal sort values (repeated cities, blank values
+  in nullable sortable columns).
 - Preserve the `#ownersTable` / `td.ownerFullName` E2E selectors the Playwright suite depends on.
 
 **Non-Goals:**
@@ -35,8 +35,9 @@ which in turn doesn't serve `ORDER BY`) — the two cannot be covered by one ind
 - No deep-linking of page/sort/filter state into the URL.
 - No multi-column simultaneous sort in the UI (backend allows repeating `sort=`, but `MatSort`
   itself only drives one column at a time).
-- No change to `city`/`address`/`telephone` indexing — they stay unindexed; that's the accepted
-  cost of "any column" sortable at this scale, not solved here.
+- No change to `city` indexing — it stays unindexed as a sortable column; `address` and
+  `telephone` are excluded from sorting entirely (Decision 4), so their indexing isn't a concern
+  here.
 
 ## Decisions
 
@@ -61,32 +62,47 @@ turning it on would introduce an off-by-one translation neither side needs.
 `spring.data.web.pageable.max-page-size` property.**
 That property is global (would affect any future `Pageable` endpoint) and — more importantly —
 truncates an out-of-range `size` silently before the controller ever sees the request, so there's
-no way to return a 400 for it. Instead: `@PageableDefault(size = 10, sort = "lastName")` on the
+no way to return a 400 for it. Instead: `@PageableDefault(size = 10, sort = "name")` on the
 parameter (default visible at the endpoint, not three files away in `.properties`), plus an
 explicit `size > 20` check in the controller that throws into the existing
 `ExceptionControllerAdvice` (which already maps `ConstraintViolationException` → 400) for a real
 400 response. Spring has no per-endpoint max-size annotation, so this local guard doesn't reinvent
 anything — it's the only way to get a local, explicit cap.
 
-**4. Sort allowlist validated in the controller/repository layer, not left to raw property binding.**
-`{lastName, firstName, address, city, telephone}` only; `pets` excluded (it's a collection, not a
-sortable scalar) and any other property name rejected with 400. Without this, an unrecognized
-Spring Data property throws a runtime exception that surfaces as 500, and a property like
-`pets.name` would let a client force an arbitrary join across a 100k-row table.
+**4. Sort keys are two opaque, UI-facing names — `{name, city}` — not raw JPA entity properties.**
+`lastName` and `firstName` are deliberately *not* independently sortable. The grid has exactly one
+sortable identity column (Decision 6), so accepting `lastName`/`firstName` as separate sort keys
+would let a client ask for combinations the UI can never produce — sort by first name alone, or
+`sort=lastName,asc&sort=firstName,desc` with mismatched directions — none of which correspond to
+anything meaningful to show. `name` is resolved server-side into `Sort.Order`s on `lastName` then
+`firstName`, both carrying the direction the client requested; `city` maps directly to the `city`
+column. `pets` is excluded because it's a collection, not a sortable scalar. `address` and
+`telephone` are excluded on evidence, not by default: querying the database showed 27 of 28 seeded
+owners have a distinct `address` and a distinct `telephone` value each (vs. only 20 distinct `city`
+values), so an alphabetical/numeric sort on either produces an order with no grouping value —
+sorting by `telephone` in particular just orders by country-code prefix. Any name outside `{name,
+city}` — including raw entity property names like `lastName`, `firstName`, or `id` — is rejected
+with 400. Without this validation, an unrecognized Spring Data property throws a runtime exception
+that surfaces as 500, and a property like `pets.name` would let a client force an arbitrary join
+across a 100k-row table; keeping the vocabulary opaque also means the API never leaks the entity's
+actual field names.
 
 **5. Every sort gets an `id ASC` tiebreaker plus `NULLS LAST` in both directions.**
-Needed because ties are common (many owners share a city; `NULL` telephones exist in seed data) and
-Postgres's own default (`NULLS LAST` on ASC, `NULLS FIRST` on DESC) would make a second click on
-`Telephone` dump every empty-phone row to the top, reading as broken. Implemented by adding an
-explicit `Sort.Order` with `id` ascending after the requested sort, and applying
-`.nullsLast()` to each requested `Sort.Order`. Collation is left as the database default
-(`en_US.UTF-8`), so sorting stays case-sensitive, consistent with the already case-sensitive
-`lastName` prefix search.
+Needed because ties are common (many owners share a city) and nullable sortable columns exist in
+the schema even where the current seed has no nulls; Postgres's own default (`NULLS LAST` on ASC,
+`NULLS FIRST` on DESC) would otherwise make a second click on a nullable column dump every blank row
+to the top, reading as broken. Implemented by adding an explicit `Sort.Order` with `id` ascending
+after the requested sort, and applying `.nullsLast()` to each requested `Sort.Order`. Collation is
+left as the database default (`en_US.UTF-8`), so sorting stays case-sensitive, consistent with the
+already case-sensitive `lastName` prefix search.
 
-**6. `Name` stays one column ("LastName, FirstName"), sorted by `lastName, firstName`.**
+**6. `Name` stays one column ("LastName, FirstName"), sorted by the composite `name` key.**
 Considered splitting into separate `First name`/`Last name` columns so "any column" sortable is
 literally true per-column; rejected in favor of keeping the grid width unchanged, since a single
-combined column sorted primarily by last name already reads as sorted.
+combined column sorted primarily by last name already reads as sorted. Clicking the header sends
+`sort=name,<direction>`; the server expands this into `lastName` then `firstName`, both in that
+same direction (Decision 4), so reversing the column reverses the tiebreak too and the compound key
+stays coherent in both directions.
 
 **7. `Owner.pets` gets `@BatchSize`.**
 A collection `JOIN FETCH` alongside `Pageable` triggers Hibernate's `HHH000104` warning and
@@ -94,11 +110,12 @@ pagination happens in memory; leaving the collection lazy without `@BatchSize` m
 per page. `@BatchSize` gets one extra query per page instead of either problem.
 
 **8. `owners(last_name, first_name, id)` composite index; no `text_pattern_ops` yet.**
-Backs the default and most common explicit sort. `city`/`address`/`telephone` stay unindexed —
-adding an index per allowlisted column "just in case" isn't justified without evidence, and it's
-the real, visible cost of promising sortability on every column. `text_pattern_ops` (needed for the
-`LIKE 'Pot%'` prefix search under the non-C collation) is deferred until profiling shows it's
-needed; it can't be combined with the plain btree in one index.
+Backs the default and most common explicit sort. `city` — the one other allowlisted sort column —
+stays unindexed: adding an index "just in case" isn't justified without evidence, and it's the
+real, visible cost of keeping `city` sortable at this scale. `address` and `telephone` need no
+indexing decision at all, since Decision 4 excludes them from sorting outright. `text_pattern_ops`
+(needed for the `LIKE 'Pot%'` prefix search under the non-C collation) is deferred until profiling
+shows it's needed; it can't be combined with the plain btree in one index.
 
 **9. `totalElements` computed via `COUNT(*)` per request.**
 An alternative (`Slice` instead of `Page`) would drop the total from the response entirely and
@@ -114,10 +131,10 @@ last-page state; the count query is accepted as the cost of that UX.
   index; revisit with `Slice`-based "next page exists" UX if COUNT proves to be the bottleneck.
 - **[Risk]** Allowlist must be kept in sync if new sortable owner fields are added later.
   → **Mitigation:** allowlist lives next to the endpoint, single place to update; validated by a
-  test that asserts unknown/`pets` sort properties are rejected.
-- **[Risk]** `city`/`address`/`telephone` remain unindexed, so sorting by those columns at 100k rows
-  does a full sort without index support. → **Mitigation:** explicitly accepted trade-off (see
-  Decision 8), revisit only if profiling shows it matters.
+  test that asserts unknown/`pets`/`address`/`telephone` sort properties are rejected.
+- **[Risk]** `city` remains unindexed, so sorting by it at 100k rows does a full sort without index
+  support. → **Mitigation:** explicitly accepted trade-off (see Decision 8), revisit only if
+  profiling shows it matters.
 
 ## Migration Plan
 

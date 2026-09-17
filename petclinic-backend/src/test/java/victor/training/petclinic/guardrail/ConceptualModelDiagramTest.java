@@ -60,7 +60,7 @@ class ConceptualModelDiagramTest {
 
     // ── concepts ──────────────────────────────────────────────────────────────────
 
-    @Test
+    @Test // actually a test
     void everyConceptInTheCodeIsOnTheMap() throws Exception {
         assertThat(conceptsById(diagram()).values())
                 .describedAs("Domain classes missing from %s. The model grew a concept the map "
