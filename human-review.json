@@ -101,7 +101,24 @@
       "limit": 16
     },
     "video": {
-      "out": ".human-review/assets/feature.webm"
+      "//": "`app` is how the run gets the application the film is recorded against, and",
+      "//2": "it exists because the recorder's old liveness check tested the PORT, not the",
+      "//3": "commit: anything answering on :4200 and :8080 was filmed. This machine keeps",
+      "//4": "several checkouts of this repository (petclinic, petclinic-main,",
+      "//5": "petclinic-pr) and each can serve :4200 — so on 17 Sep 2026 a review of",
+      "//6": "test-pr shipped a film of main, narrated from test-pr's diff, with every",
+      "//7": "caption asserting what the frames denied.",
+      "//8": "Now the run owns its own instance: `up` builds the commit under review into",
+      "//9": "containers of its own and prints the host port it got, `down` runs in a",
+      "//10": "finally. {sha}/{shortsha} come from `git rev-parse HEAD`, never from here.",
+      "//11": "--ttl 1800 because this instance exists for one 40-second take; the default",
+      "//12": "two idle hours would keep a whole stack up long after the film was cut.",
+      "out": ".human-review/assets/feature.webm",
+      "app": {
+        "up": "./start-docker.sh up --ref {sha} --ttl 1800",
+        "url": "./start-docker.sh url petclinic-{shortsha}",
+        "down": "./start-docker.sh down petclinic-{shortsha}"
+      }
     },
     "//complexity": "Nothing to configure: EndpointComplexityExtractorTest was removed from this repo on 4 Sep 2026, and /human-review measures both sides itself now (endpoint-complexity.py), reading the baseline from the merge-base.",
     "logging": {
