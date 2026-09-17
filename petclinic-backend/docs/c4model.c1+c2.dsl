@@ -39,6 +39,10 @@ workspace "PetClinic" "Veterinary practice management system" {
             include *
             autoLayout
         }
+        container petClinic "C2-BackendOutbound" "Backend and what it calls" {
+            include backend->
+            autoLayout
+        }
         component backend "C3-Components-All" "All components inside Backend" {
             include *
             autoLayout

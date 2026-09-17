@@ -1,0 +1,27 @@
+@startuml
+title <size:24>Container View: PetClinic</size>\n<size:24>Backend and what it calls</size>
+
+set separator none
+left to right direction
+
+<style>
+  root {
+    BackgroundColor: #ffffff
+    FontColor: #444444
+  }
+</style>
+
+!include <C4/C4>
+!include <C4/C4_Context>
+!include <C4/C4_Container>
+
+System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
+  Container(PetClinic.Database, "Database", $techn="PostgreSQL", $descr="Stores all data", $tags="", $link="")
+  Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API", $tags="", $link="")
+}
+
+Rel(PetClinic.Backend, PetClinic.Database, "Reads/writes", $techn="JPA", $tags="", $link="")
+
+SHOW_LEGEND(true)
+hide stereotypes
+@enduml
