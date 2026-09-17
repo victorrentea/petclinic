@@ -50,28 +50,23 @@
       }
     },
     "city": {
-      "//": "`tests` runs before the city is drawn: its CRAP and coverage colours need a",
-      "//2": "JaCoCo report, and -Dmaven.test.failure.ignore=true is what makes the report",
-      "//3": "goal run at all when a test fails. Without it Maven aborts in the test phase",
-      "//4": "and the city is coloured from whatever stale report was left on disk.",
-      "//5": "`baseline` is the coverage the default branch measured and committed; the",
-      "//6": "page reads it out of git at the diff's base ref to draw the before/after of",
-      "//7": "coverage and CRAP, with no second checkout and no second test run. Refresh it",
-      "//8": "only on the default branch: regenerate-codecity.sh --write-baseline.",
-      "//9": "Two suites, measured separately. The unit run instruments its own JVM;",
-      "//10": "the acceptance run drives a SEPARATELY started backend, which is given its",
-      "//11": "own agent by JACOCO_E2E=1 and dumped in Playwright's globalTeardown while",
-      "//12": "it is still up. The last command merges the two .exec files into the two",
-      "//13": "reports the city colours by: everything, and the browser alone.",
+      "//": "`tests` is here for the TRACES, not for the city: it is the browser run whose",
+      "//2": "Playwright report the Tests tab harvests, which is why PW_TRACE=on and why the",
+      "//3": "`traces` step below runs nothing of its own. Recording the same suite twice",
+      "//4": "would double the longest step on the page for a second, differently-flaky",
+      "//5": "opinion about the same branch.",
+      "//6": "It used to carry two more commands and two more keys: an instrumented",
+      "//7": "`mvn test`, JACOCO_E2E=1 on the acceptance run, a jacoco:merge, plus",
+      "//8": "`acceptance` and `baseline`. All of that existed for the city's CRAP and",
+      "//9": "coverage colours, which are switched off in code-city itself now (generate.sh",
+      "//10": "step [3]) — the four options stay in its COLOR dropdown marked unavailable.",
+      "//11": "Minutes of Maven and a second Playwright run per review, for two colours",
+      "//12": "nothing draws any more. The committed coverage-baseline.tsv went with them.",
       "tests": [
-        "cd petclinic-backend && mvn -o test -Dmaven.test.failure.ignore=true",
-        "cd petclinic-test && JACOCO_E2E=1 PW_TRACE=on npm test",
-        "cd petclinic-backend && mvn -o -q jacoco:merge@merge-all jacoco:report@report-all jacoco:report@report-acceptance"
+        "cd petclinic-test && PW_TRACE=on npm test"
       ],
       "out": "petclinic-backend/docs/generated/codecity",
-      "title": "Code City",
-      "acceptance": "petclinic-backend/target/site/jacoco-acceptance/jacoco.xml",
-      "baseline": "petclinic-backend/docs/generated/codecity/coverage-baseline.tsv"
+      "title": "Code City"
     },
     "traces": {
       "//": "Playwright's own recordings of the run, carried onto the page so a reviewer",
