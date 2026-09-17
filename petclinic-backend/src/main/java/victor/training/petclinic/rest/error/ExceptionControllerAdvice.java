@@ -50,9 +50,15 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
             HttpServletRequest request) {
         List<String> errors = ValidationErrorExtractor.extract(ex);
+        // Rejections raised by hand (page size cap, sort key allowlist) carry their reason in the
+        // message and no violations; without this the client would get an empty "errors" array.
+        String detail = "Validation failed for request. See 'errors' for details.";
+        if (errors.isEmpty() && ex.getMessage() != null) {
+            errors = List.of(ex.getMessage());
+            detail = ex.getMessage();
+        }
         log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
-                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        ProblemDetail pd = buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }

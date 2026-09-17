@@ -1,6 +1,7 @@
 import {Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
+import {fetchAllOwners} from './support/owners-api';
 import {PlaywrightWorld} from './support/world';
 
 // Bug #40: a visit must fall between the pet's birth date and one year from today.
@@ -38,16 +39,16 @@ Given(/^a pet born on (\d{4}-\d{2}-\d{2})$/, async function (this: PlaywrightWor
 
   // Any seeded pet whose real birth is well over a year old works: old enough that "one day
   // before its birth" and "one year from today" never collide.
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithOldPet = owners.find((o: any) =>
-    Array.isArray(o.pets) && o.pets.some((p: any) => daysBetween(new Date(p.birthDate), new Date()) > 400));
+  const owners = await fetchAllOwners(API_BASE);
+  const ownerWithOldPet = owners.find((o) =>
+    Array.isArray(o.pets) && o.pets.some((p) => daysBetween(new Date(p.birthDate!), new Date()) > 400));
   if (!ownerWithOldPet) {
     throw new Error('No seeded pet old enough to exercise the visit-date-range rule');
   }
-  const pet = ownerWithOldPet.pets.find((p: any) => daysBetween(new Date(p.birthDate), new Date()) > 400);
+  const pet = ownerWithOldPet.pets!.find((p) => daysBetween(new Date(p.birthDate!), new Date()) > 400)!;
   this.ownerId = ownerWithOldPet.id;
   this.petId = pet.id;
-  this.bugFortyPetBirthDate = new Date(pet.birthDate);
+  this.bugFortyPetBirthDate = new Date(pet.birthDate!);
 });
 
 When(/^I book a visit for (\d{4}-\d{2}-\d{2})$/, async function (this: PlaywrightWorld, visitLiteral: string) {

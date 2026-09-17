@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
@@ -46,7 +47,10 @@ public class Pet {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    // OwnerDto serializes every pet's visits, so a page of owners would otherwise issue one visits
+    // query per pet — the same N+1 @BatchSize solves on Owner.pets (design.md Decision 7).
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     private Set<Visit> visits = new HashSet<>();
 
     public List<Visit> getVisitsSortedByDate() {

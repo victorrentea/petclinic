@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import victor.training.petclinic.domain.Owner;
 
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends Repository<Owner, Integer>, OwnerRepositoryCustom {
 
     List<Owner> findByLastNameStartingWith(String lastName);
 

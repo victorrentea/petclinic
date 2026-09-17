@@ -3,6 +3,58 @@
 display:none;
 }
 
+/* Material defaults header cells to rgba(0,0,0,.54), which is unreadably faint on white */
+#ownersTable th.mat-mdc-header-cell {
+  color: #000;
+  font-weight: 700;
+}
+
+/* Material only reveals the sort arrow on hover, so which columns are sortable is
+  undiscoverable. Keep every arrow visible: grey when idle, black when sorting. */
+#ownersTable ::ng-deep .mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  color: #9e9e9e;
+}
+
+#ownersTable ::ng-deep th[aria-sort='ascending'] .mat-sort-header-arrow,
+#ownersTable ::ng-deep th[aria-sort='descending'] .mat-sort-header-arrow {
+  color: #000;
+}
+
+/* Without a fixed layout the browser re-measures every column against the rows it
+  happens to be showing, so columns visibly jump on each sort or page change. */
+#ownersTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable .mat-column-name { width: 22%; }
+#ownersTable .mat-column-address { width: 26%; }
+#ownersTable .mat-column-city { width: 16%; }
+#ownersTable .mat-column-telephone { width: 20%; }
+#ownersTable .mat-column-pets { width: 16%; }
+
+#ownersTable th,
+#ownersTable td {
+  overflow-wrap: break-word;
+}
+
+/* MatPaginator has no content projection, so the Add Owner button sits beside it in a
+  shared flex row that reads as one white bar. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding-left: 16px;
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+  background: transparent;
+}
+
 #nameGroup {
   display: flex;
   align-items: center;

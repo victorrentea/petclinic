@@ -195,6 +195,34 @@ paths:
         schema:
           type: string
           default: ""
+      - description: Zero-based page index (0..N)
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - description: The size of the page to be returned
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          default: 10
+          maximum: 20
+          minimum: 1
+      - description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: array
+          default:
+          - "name,ASC"
+          items:
+            type: string
       responses:
         "200":
           content:
@@ -203,32 +231,35 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
+                    totalElements: 2
+                    totalPages: 1
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1684,6 +1715,34 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The elements on this page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: 0-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Number of elements requested per page.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of elements across all pages.
+          example: 42
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages.
+          example: 5
     PetDto:
       type: object
       properties:

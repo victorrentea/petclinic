@@ -99,12 +99,17 @@ class AddVisitSequenceTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did db/seed/R__seed.sql change?"));
+        for (int pageIndex = 0; pageIndex < 3; pageIndex++) {
+            JsonNode page = json(call(mockMvc, get("/api/owners?size=20&page=" + pageIndex))
+                    .andExpect(status().isOk()));
+            var found = StreamSupport.stream(page.path("content").spliterator(), false)
+                    .filter(o -> !o.path("pets").isEmpty())
+                    .findFirst();
+            if (found.isPresent()) {
+                return found.get();
+            }
+        }
+        throw new AssertionError("No owner with a pet in the seeded data — did db/seed/R__seed.sql change?");
     }
 
     /** The one visit this scenario booked — never `visits[0]`, whose position the seed data owns. */

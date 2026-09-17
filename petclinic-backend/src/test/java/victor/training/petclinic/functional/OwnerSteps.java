@@ -23,7 +23,8 @@ public class OwnerSteps {
     @Autowired
     private JdbcTemplate jdbc;
 
-    @When("I register an owner with first name {string}, last name {string}, address {string}, city {string}, telephone {string}")
+    @When("I register an owner with first name {string}, last name {string}, address {string}, "
+            + "city {string}, telephone {string}")
     public void iRegisterAnOwner(String firstName, String lastName, String address, String city, String telephone) {
         String body = """
                 {"firstName":"%s","lastName":"%s","address":"%s","city":"%s","telephone":"%s"}
@@ -51,7 +52,7 @@ public class OwnerSteps {
                 .baseUri(http.baseUri())
                 .get("/api/owners?lastName=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
-        List<String> lastNames = response.jsonPath().getList("lastName", String.class);
+        List<String> lastNames = response.jsonPath().getList("content.lastName", String.class);
         assertThat(lastNames).contains(lastName);
     }
 
@@ -66,12 +67,12 @@ public class OwnerSteps {
 
     @Then("the response JSON array has size {int}")
     public void theResponseJsonArrayHasSize(int expected) {
-        assertThat(http.getLastResponse().jsonPath().getList("$").size()).isEqualTo(expected);
+        assertThat(http.getLastResponse().jsonPath().getList("content").size()).isEqualTo(expected);
     }
 
     @Then("every item in the response has {string} equal to {string}")
     public void everyItemInTheResponseHasFieldEqualTo(String field, String value) {
-        List<String> values = http.getLastResponse().jsonPath().getList(field, String.class);
+        List<String> values = http.getLastResponse().jsonPath().getList("content." + field, String.class);
         assertThat(values).isNotEmpty();
         assertThat(values).allMatch(v -> v.equals(value));
     }

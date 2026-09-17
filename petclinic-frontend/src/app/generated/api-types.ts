@@ -170,6 +170,34 @@ export interface components {
        */
       telephone: string;
     };
+    OwnerPageDto: {
+      /** @description The elements on this page. */
+      content?: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description 0-based index of this page.
+       * @example 0
+       */
+      number?: number;
+      /**
+       * Format: int32
+       * @description Number of elements requested per page.
+       * @example 10
+       */
+      size?: number;
+      /**
+       * Format: int64
+       * @description Total number of elements across all pages.
+       * @example 42
+       */
+      totalElements?: number;
+      /**
+       * Format: int32
+       * @description Total number of pages.
+       * @example 5
+       */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +586,19 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index (0..N) */
+        page?: number;
+        /** @description The size of the page to be returned */
+        size?: number;
+        /** @description Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

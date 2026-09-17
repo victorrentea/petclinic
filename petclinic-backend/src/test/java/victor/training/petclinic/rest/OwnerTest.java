@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.PetType;
@@ -34,6 +35,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -63,6 +65,9 @@ public class OwnerTest {
 
     @Autowired
     PetTypeRepository petTypeRepository;
+
+    @Autowired
+    JdbcTemplate jdbc;
 
     int ownerId;
     int petId;
@@ -128,7 +133,7 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        List<OwnerDto> owners = search("/api/owners?lastName=Franklin");
 
         assertThat(owners)
                 .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -148,7 +153,7 @@ public class OwnerTest {
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private JsonNode searchPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,7 +161,12 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
+        return mapper.readTree(responseJson);
+    }
+
+    private List<OwnerDto> search(String uriTemplate) throws Exception {
+        JsonNode content = searchPage(uriTemplate).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
         });
     }
 
@@ -165,6 +175,193 @@ public class OwnerTest {
         List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
+    }
+
+    @Test
+    void getAll_defaultsToPageZeroSizeTen() throws Exception {
+        JsonNode page = searchPage("/api/owners");
+
+        assertThat(page.get("number").asInt()).isEqualTo(0);
+        assertThat(page.get("size").asInt()).isEqualTo(10);
+        assertThat(page.get("content").size()).isLessThanOrEqualTo(10);
+        assertThat(page.get("totalElements").asLong()).isGreaterThanOrEqualTo(page.get("content").size());
+    }
+
+    @Test
+    void size21_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?size=21")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void size20_isAccepted() throws Exception {
+        mockMvc.perform(get("/api/owners?size=20")).andExpect(status().isOk());
+    }
+
+    @Test
+    void sortByName_isAccepted() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=name,asc")).andExpect(status().isOk());
+    }
+
+    @Test
+    void size21_isRejected_withTheReasonInTheResponse() throws Exception {
+        mockMvc.perform(get("/api/owners?size=21"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value("Page size must not exceed 20"))
+                .andExpect(jsonPath("$.detail").value("Page size must not exceed 20"));
+    }
+
+    @Test
+    void unknownSortKey_isRejected_withTheReasonInTheResponse() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=doesNotExist,asc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(
+                        org.hamcrest.Matchers.startsWith("Unsupported sort key 'doesNotExist'")));
+    }
+
+    // First names are deliberately out of step with the last names, so ordering by first name
+    // first — or forcing first name ascending — produces a different sequence and fails.
+    private void insertNameSortFixture() {
+        insertOwner("SortProbeA", "Zoe", "Anytown");
+        insertOwner("SortProbeA", "Adam", "Anytown");
+        insertOwner("SortProbeB", "Bob", "Anytown");
+    }
+
+    @Test
+    void sortByName_ordersByLastNameThenFirstName() throws Exception {
+        insertNameSortFixture();
+
+        List<String> ascending = firstNamesOfPage("SortProbe", 0, 10, "name,asc");
+
+        assertThat(ascending).containsExactly("Adam", "Zoe", "Bob");
+    }
+
+    @Test
+    void sortByNameDesc_reversesLastNameAndFirstNameTogether() throws Exception {
+        insertNameSortFixture();
+
+        List<String> descending = firstNamesOfPage("SortProbe", 0, 10, "name,desc");
+
+        assertThat(descending).containsExactly("Bob", "Zoe", "Adam");
+    }
+
+    @Test
+    void sortByCity_isAccepted() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=city,desc")).andExpect(status().isOk());
+    }
+
+    @Test
+    void moreThanTwoSortKeys_areRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=name,asc&sort=city,asc&sort=name,desc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value("At most 2 sort keys may be requested"));
+    }
+
+    @Test
+    void lastNameFilter_treatsPercentAsALiteralCharacter() throws Exception {
+        String responseJson = mockMvc.perform(get("/api/owners").queryParam("lastName", "%"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // an unescaped "%" would turn the prefix filter into a match-everything full scan
+        assertThat(mapper.readTree(responseJson).get("totalElements").asLong()).isZero();
+    }
+
+    @Test
+    void lastNameFilter_treatsUnderscoreAsALiteralCharacter() throws Exception {
+        insertOwner("Underscore", "Uma", "Anytown");
+
+        List<OwnerDto> owners = search("/api/owners?lastName=U_derscore");
+
+        assertThat(owners).isEmpty();
+    }
+
+    @Test
+    void sortByRawLastName_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=lastName,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByRawFirstName_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=firstName,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByRawId_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=id,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByAddress_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=address,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByTelephone_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=telephone,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByPets_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=pets,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sortByUnknownKey_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?sort=doesNotExist,asc")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void tiedAndNullSortValuesStayStableAndNonOverlappingAcrossPages() throws Exception {
+        String prefix = "TieProbe";
+        insertOwner(prefix + "1", "A", "SameCity");
+        insertOwner(prefix + "2", "B", "SameCity");
+        insertOwner(prefix + "3", "C", "SameCity");
+        insertOwner(prefix + "4", "D", null);
+
+        List<String> page0 = lastNamesOfPage(prefix, 0, 2, "city,asc");
+        List<String> page1 = lastNamesOfPage(prefix, 1, 2, "city,asc");
+
+        assertThat(page0).doesNotContainAnyElementsOf(page1);
+        assertThat(page0).hasSize(2);
+        assertThat(page1).hasSize(2);
+        // owners with a null city are ordered last, regardless of the ascending direction requested
+        assertThat(page1).last().isEqualTo(prefix + "4");
+        // repeating the same request returns the same, stable order
+        assertThat(lastNamesOfPage(prefix, 0, 2, "city,asc")).isEqualTo(page0);
+    }
+
+    @Test
+    void nullSortValuesStayLastWhenSortingDescending() throws Exception {
+        String prefix = "NullProbe";
+        insertOwner(prefix + "1", "A", "Zzz-last-alphabetically");
+        insertOwner(prefix + "2", "B", "Aaa-first-alphabetically");
+        insertOwner(prefix + "3", "C", null);
+        insertOwner(prefix + "4", "D", "Mmm-middle");
+
+        List<String> descending = lastNamesOfPage(prefix, 0, 10, "city,desc");
+
+        // without explicit NULLS LAST, Postgres' DESC default (NULLS FIRST) would put it first
+        assertThat(descending).last().isEqualTo(prefix + "3");
+    }
+
+    private List<String> firstNamesOfPage(String lastNamePrefix, int page, int size, String sort) throws Exception {
+        return ownersOfPage(lastNamePrefix, page, size, sort).stream().map(OwnerDto::getFirstName).toList();
+    }
+
+    private List<String> lastNamesOfPage(String lastNamePrefix, int page, int size, String sort) throws Exception {
+        return ownersOfPage(lastNamePrefix, page, size, sort).stream().map(OwnerDto::getLastName).toList();
+    }
+
+    private List<OwnerDto> ownersOfPage(String lastNamePrefix, int page, int size, String sort) throws Exception {
+        JsonNode content = searchPage("/api/owners?lastName=" + lastNamePrefix
+                + "&page=" + page + "&size=" + size + "&sort=" + sort).get("content");
+        return mapper.convertValue(content, new TypeReference<List<OwnerDto>>() {
+        });
+    }
+
+    private void insertOwner(String lastName, String firstName, String city) {
+        jdbc.update("INSERT INTO owners (first_name, last_name, address, city, telephone) "
+                + "VALUES (?, ?, 'addr', ?, '0000000000')", firstName, lastName, city);
     }
 
     @Test

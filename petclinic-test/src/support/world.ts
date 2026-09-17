@@ -37,8 +37,12 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
+  // Set by the owner-search scenarios: every owner the API knows, displayed as
+  // the grid shows them ("LastName, FirstName").
   allOwnerNames?: string[];
+  // Set by the owner-search pagination scenario: the owners shown on the page
+  // just navigated away from, to check the next page doesn't repeat them.
+  previousPageOwnerNames?: string[];
   // Set by the visit-date-range scenarios (bug #40).
   bugFortyBackgroundToday?: Date;
   bugFortyBackgroundBirth?: Date;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -52,7 +53,10 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    // Paged owner listing loads pets lazily per row (no JOIN FETCH alongside Pageable, see design.md
+    // Decision 7); @BatchSize turns that into one extra query per page instead of one per owner.
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     private Set<Pet> pets = new HashSet<>();
 
     public List<Pet> getPets() {

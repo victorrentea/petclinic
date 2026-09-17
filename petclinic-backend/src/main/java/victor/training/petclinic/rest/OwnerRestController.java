@@ -1,8 +1,14 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -16,6 +22,8 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
+import victor.training.petclinic.rest.dto.PageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -35,12 +43,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 
 @RestController
 @RequestMapping("/api/owners")
@@ -75,15 +85,28 @@ public class OwnerRestController {
         this.visitMapper = visitMapper;
     }
 
+    private static final int MAX_PAGE_SIZE = 20;
+
     @Operation(operationId = "listOwners", summary = "List owners")
+    @Parameter(name = "size", in = ParameterIn.QUERY,
+            description = "The size of the page to be returned",
+            schema = @Schema(type = "integer", defaultValue = "10", minimum = "1", maximum = "20"))
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PageDto<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @ParameterObject @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        if (pageable.getPageSize() > MAX_PAGE_SIZE) {
+            throw new ConstraintViolationException(
+                    "Page size must not exceed " + MAX_PAGE_SIZE, Set.of());
+        }
+        Sort resolvedSort = OwnerSortResolver.resolve(pageable.getSort());
+        Pageable resolvedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), resolvedSort);
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, resolvedPageable);
+        return PageDto.from(owners, ownerMapper::toOwnerDto);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

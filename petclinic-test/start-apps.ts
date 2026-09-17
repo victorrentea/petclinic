@@ -17,23 +17,31 @@ let databaseProcess: ChildProcess | null = null;
 let backendProcess: ChildProcess | null = null;
 let frontendProcess: ChildProcess | null = null;
 
-async function waitForService(url: string, serviceName: string): Promise<void> {
+async function waitForService(url: string, serviceName: string, validate?: (data: unknown) => boolean): Promise<void> {
   console.log(`Waiting for ${serviceName} at ${url}...`);
 
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
-      await axios.get(url, { timeout: 5000 });
-      console.log(`${serviceName} is ready!`);
-      return;
-    } catch (error) {
-      if (i < MAX_RETRIES - 1) {
-        process.stdout.write('.');
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      const {data} = await axios.get(url, { timeout: 5000 });
+      if (!validate || validate(data)) {
+        console.log(`${serviceName} is ready!`);
+        return;
       }
+    } catch (error) {
+      // retried below
+    }
+    if (i < MAX_RETRIES - 1) {
+      process.stdout.write('.');
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
   }
 
   throw new Error(`${serviceName} failed to start within timeout`);
+}
+
+/** GET /api/owners now returns a page envelope ({content, totalElements, ...}), not a bare array. */
+function isOwnersPageEnvelope(data: unknown): boolean {
+  return !!data && typeof data === 'object' && Array.isArray((data as {content?: unknown}).content);
 }
 
 async function waitForPort(port: number, serviceName: string): Promise<void> {
@@ -191,7 +199,8 @@ async function main() {
     backendProcess = await startBackend();
     await waitForService(
       `http://127.0.0.1:${BACKEND_PORT}/api/owners`,
-      'Backend'
+      'Backend',
+      isOwnersPageEnvelope
     );
 
     // Start frontend
