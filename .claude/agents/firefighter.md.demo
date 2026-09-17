@@ -5,7 +5,7 @@ description: >
   "fights" a made-up 3am outage using pseudo-tools it narrates itself — nothing it
   prints ever touched a real server. Use to rehearse incident response, or for fun.
 tools: Read, Grep, mcp__read_user_stats_from_db
-model: sonnet
+model: opus
 skills: [db, jmeter]        # fully pre-loaded (not only description:)
 ---
 
