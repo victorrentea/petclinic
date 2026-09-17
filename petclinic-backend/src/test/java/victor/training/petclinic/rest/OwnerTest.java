@@ -148,6 +148,45 @@ public class OwnerTest {
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
+    @Test
+    void getAllWithGeneralSearch_matchesVisibleColumns_caseInsensitiveContains() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Alicexyz");
+        owner2.setLastName("Zimmerxyz");
+        owner2.setAddress("QzxyUniqueStreet");
+        owner2.setCity("Bucharestxyz");
+        owner2.setTelephone("9191919191");
+        int owner2Id = ownerRepository.save(owner2).getId();
+
+        List<OwnerDto> byName = search("/api/owners?q=MERxy");
+        List<OwnerDto> byAddress = search("/api/owners?q=Yuniques");
+        List<OwnerDto> byCity = search("/api/owners?q=HAREstx");
+        List<OwnerDto> byPhone = search("/api/owners?q=91919");
+
+        assertThat(byName).extracting(OwnerDto::getId).containsExactly(owner2Id);
+        assertThat(byAddress).extracting(OwnerDto::getId).containsExactly(owner2Id);
+        assertThat(byCity).extracting(OwnerDto::getId).containsExactly(owner2Id);
+        assertThat(byPhone).extracting(OwnerDto::getId).containsExactly(owner2Id);
+    }
+
+    @Test
+    void getAllWithGeneralSearch_matchesPetName_caseInsensitiveContains() throws Exception {
+        Owner owner2 = TestData.anOwner();
+        owner2.setFirstName("Bob");
+        owner2.setLastName("PetMatch");
+        owner2 = ownerRepository.save(owner2);
+
+        Pet pet2 = new Pet();
+        pet2.setName("UniquePetName");
+        pet2.setBirthDate(LocalDate.now());
+        pet2.setType(petType);
+        pet2.setOwner(owner2);
+        petRepository.save(pet2);
+
+        List<OwnerDto> owners = search("/api/owners?q=EPETNA");
+        assertThat(owners).extracting(OwnerDto::getId).containsExactly(owner2.getId());
+    }
+
     private List<OwnerDto> search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
