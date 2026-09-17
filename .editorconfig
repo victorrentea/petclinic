@@ -12,6 +12,12 @@ trim_trailing_whitespace = true
 [*.{java,xml}]
 indent_size = 4
 
+# PEP 8 indents Python with 4 spaces, and black's line continuations are multiples
+# of 4 too - under the repo default of 2 every wrapped call would be flagged.
+[*.py]
+indent_size = 4
+max_line_length = 100
+
 # Was a prose rule in AGENTS.md that only an agent re-reading the file would honour.
 # Enforced instead by the editorconfig-checker pass in .githooks/pre-commit, which is
 # scoped to staged files: a long line blocks the commit only in a file you touched.
