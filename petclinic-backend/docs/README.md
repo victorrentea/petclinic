@@ -117,6 +117,14 @@ Source: [`generated/c4views/C1-Context.puml`](generated/c4views/C1-Context.puml)
 
 Source: [`generated/c4views/C2-Containers.puml`](generated/c4views/C2-Containers.puml)
 
+#### C2 — Backend and what it calls (outbound only)
+
+The same container model narrowed to the Backend's **efferent** edges (`include backend->`): the Backend plus every container or external system it calls out to — today only the Database. Its callers (the Frontend, the people) are deliberately absent, so the picture answers "what does the Backend depend on to do its job" without the noise of who depends on it.
+
+![C2 — Backend and what it calls](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C2-BackendOutbound.puml)
+
+Source: [`generated/c4views/C2-BackendOutbound.puml`](generated/c4views/C2-BackendOutbound.puml)
+
 #### C3 — All components
 
 ![C3 — All components](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/victorrentea/petclinic/main/petclinic-backend/docs/generated/c4views/C3-Components-All.puml)
