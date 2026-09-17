@@ -2,7 +2,7 @@
 #
 # run-tests-with-tracing.sh — run the @GenerateSequence @SpringBootTests with the OpenTelemetry
 # Java agent attached, so each one's trace is captured in Tempo and turned into a PlantUML
-# sequence diagram per scenario beside the test itself (…/AddVisitApiTest.java.<scenario>.genseq.puml).
+# sequence diagram per scenario in petclinic-test/generated (AddVisitApiTest.java.<scenario>.genseq.puml).
 #
 # The backend twin of petclinic-test/run-tests-with-tracing.sh, and deliberately the same
 # pipeline: the JVM writes the very same "trace window" the browser suites write, and the very
@@ -55,11 +55,12 @@ log "Fetching the traces and drawing the diagrams…"
 (cd "$TEST_DIR" && npm run --silent diagram:java)
 diagram_status=$?
 
-# find, not a glob: `**` needs globstar, off by default; and not mapfile, which macOS's
-# system bash 3.2 does not have.
+# Only this suite's own: the directory holds the browser suites' diagrams too, and a run
+# that drew nothing must not report theirs as its own. find, not a glob: `**` needs
+# globstar, off by default; and not mapfile, which macOS's system bash 3.2 does not have.
 diagrams=()
 while IFS= read -r d; do diagrams+=("$d"); done \
-  < <(find "$BACKEND_DIR/src/test/java" -name '*.genseq.puml' | sort)
+  < <(find "$TEST_DIR/generated" -name '*.java.*.genseq.puml' | sort)
 if ((${#diagrams[@]})); then
   log "📊 Collected ${#diagrams[@]} sequence diagram(s):"
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done

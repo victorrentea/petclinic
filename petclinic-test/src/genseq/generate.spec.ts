@@ -32,11 +32,15 @@ test('slugify makes filesystem-safe names', () => {
   expect(slugify('Add a visit!')).toBe('add-a-visit');
 });
 
-test('the diagram is filed next to its test, named after the scenario it draws', () => {
+test('the diagram is filed under generated/, named after the test and the scenario', () => {
   expect(diagramPathFor('/root', 'src/owner-search.feature', 'lists-every-owner'))
-    .toBe('/root/src/owner-search.feature.lists-every-owner.genseq.puml');
+    .toBe('/root/generated/owner-search.feature.lists-every-owner.genseq.puml');
   expect(diagramPathFor('/root', 'src/add-visit.spec.ts', 'add-a-visit'))
-    .toBe('/root/src/add-visit.spec.ts.add-a-visit.genseq.puml');
+    .toBe('/root/generated/add-visit.spec.ts.add-a-visit.genseq.puml');
+  // A Java suite's source climbs out of this module; only its base name lands here, and
+  // the path back to it rides inside the picture as the src:// handle on its title.
+  expect(diagramPathFor('/root', '../petclinic-backend/src/test/java/x/AddVisitApiTest.java',
+    'adds-a-visit')).toBe('/root/generated/AddVisitApiTest.java.adds-a-visit.genseq.puml');
 });
 
 // Two titles can slugify the same way, and two pictures writing to one path would leave
@@ -59,12 +63,12 @@ test('what the markers reveal is filed beside the diagram, and is not itself a d
   );
 
   expect(detailsPathFor('/out', 'src/add-visit.spec.ts', 'add-a-visit'))
-    .toBe('/out/src/add-visit.spec.ts.add-a-visit.genseq.json');
-  const index = JSON.parse(written['/out/src/add-visit.spec.ts.add-a-visit.genseq.json']);
+    .toBe('/out/generated/add-visit.spec.ts.add-a-visit.genseq.json');
+  const index = JSON.parse(written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.json']);
   expect(index.version).toBe(DETAIL_INDEX_VERSION);
   // every id in the index is addressed by a marker in the picture beside it
   for (const id of Object.keys(index.details)) {
-    expect(written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'])
+    expect(written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'])
       .toContain(`[[genseq://${id}{`);
   }
 });
@@ -81,8 +85,8 @@ test('the static path writes the picture alone, and drops a sidecar left by an e
     {writeFile: (p, c) => { written[p] = c; }, removeFile: (p) => removed.push(p), log: () => {}},
     {sql: 'values', httpBodies: true, interactive: false},
   );
-  expect(Object.keys(written)).toEqual(['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml']);
-  expect(removed).toEqual(['/out/src/add-visit.spec.ts.add-a-visit.genseq.json']);
+  expect(Object.keys(written)).toEqual(['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml']);
+  expect(removed).toEqual(['/out/generated/add-visit.spec.ts.add-a-visit.genseq.json']);
 });
 
 // A rename or a deletion used to take care of itself: the one file per source was
@@ -109,8 +113,8 @@ test('a diagram no scenario draws any more is swept', () => {
     {sql: 'statement', httpBodies: true, interactive: true},
   );
   expect(removed).toEqual([
-    '/out/src/add-visit.spec.ts.cancel-a-visit.genseq.puml',
-    '/out/src/add-visit.spec.ts.cancel-a-visit.genseq.json',
+    '/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.puml',
+    '/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.json',
   ]);
 });
 
@@ -130,18 +134,18 @@ test('generateFromWindows writes one puml per scenario', async () => {
   const paths = await generateFromWindows(windows, '/out', deps);
 
   expect(paths).toEqual([
-    '/out/src/add-visit.spec.ts.add-a-visit.genseq.puml',
-    '/out/src/add-visit.spec.ts.cancel-a-visit.genseq.puml',
-    '/out/src/owner-search.feature.search-owners.genseq.puml',
+    '/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml',
+    '/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.puml',
+    '/out/generated/owner-search.feature.search-owners.genseq.puml',
   ]);
-  const addVisit = written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'];
+  const addVisit = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
   // The scenario names the picture; the file it lives in is in the footer, and the
   // divider that used to separate chapters is gone with the chapters.
   expect(addVisit).toContain('title Add a visit');
   expect(addVisit).not.toContain('== ');
   // …and the other scenario is a picture of its own, not a section further down this one
   expect(addVisit).not.toContain('Cancel a visit');
-  expect(written['/out/src/add-visit.spec.ts.cancel-a-visit.genseq.puml'])
+  expect(written['/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.puml'])
     .toContain('title Cancel a visit');
   // the arrow is wrapped in its reveal link now, so match the label inside it
   expect(addVisit).toContain('addVisit\\nPOST /api/visits');
@@ -162,7 +166,7 @@ test('each section header links to the test that drew it', () => {
       log: () => {},
     },
   );
-  expect(written['/out/petclinic-test/src/add-visit.spec.ts.add-a-visit.genseq.puml']).toContain(
+  expect(written['/out/petclinic-test/generated/add-visit.spec.ts.add-a-visit.genseq.puml']).toContain(
     'title [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Add a visit]]');
 });
 
@@ -175,7 +179,7 @@ test('a header stays plain when the test source cannot be read', () => {
       scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
     '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
   );
-  expect(written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'])
+  expect(written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'])
     .toContain('title Add a visit');
 });
 
@@ -212,7 +216,7 @@ test('generateFromWindows retries a window until Tempo has ingested it', async (
   );
   expect(searches).toBe(3);
   expect(slept).toEqual([250, 250]);
-  expect(paths).toEqual(['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml']);
+  expect(paths).toEqual(['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml']);
 });
 
 test('generateFromWindows gives up after the configured number of attempts', async () => {
@@ -269,7 +273,7 @@ test('traces are ordered by the server clock, not by the browser root span', asy
     },
   );
 
-  const puml = written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'];
+  const puml = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
   expect(puml.indexOf('GET /api/pets')).toBeLessThan(puml.indexOf('POST /api/visits'));
 });
 
@@ -303,7 +307,7 @@ test('renderScenarios redraws from the cache at another detail level, touching n
   renderScenarios(cached, '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
     {sql: 'off', httpBodies: false, interactive: false});
 
-  const puml = written['/out/src/add-visit.spec.ts.add-a-visit.genseq.puml'];
+  const puml = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
   expect(puml).toContain('title Add a visit');
   expect(puml).not.toContain('SELECT');
 });
