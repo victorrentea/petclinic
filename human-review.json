@@ -22,6 +22,24 @@
         "cd petclinic-test && GENSEQ_REFRESH=1 npm run trace:diagram"
       ]
     },
+    "c2": {
+      "//": "The C4 container view, PROJECTED from the sequence diagrams the step above",
+      "//2": "draws. Nothing here is a drawing, and every key is optional: with no `c2`",
+      "//3": "block at all the tab is still built, from the lifelines and arrows alone.",
+      "//4": "`containers` corrects the only thing a sequence diagram cannot say — what",
+      "//5": "KIND of thing a lifeline is — and names the stack, which is never guessed.",
+      "//6": "`Test` -> `as: Client` is not cosmetic: the Java suite renamed its own",
+      "//7": "participant, and without the fold the C2 delta reports a container added",
+      "//8": "and a container removed on a branch that changed no integration at all.",
+      "system": "PetClinic",
+      "containers": {
+        "Browser": {"kind": "container", "tech": "Angular"},
+        "Client": {"kind": "container", "tech": "JUnit + RestAssured"},
+        "Test": {"as": "Client"},
+        "Backend": {"kind": "container", "tech": "Java / Spring Boot"},
+        "DB": {"kind": "db", "tech": "PostgreSQL"}
+      }
+    },
     "city": {
       "//": "`tests` runs before the city is drawn: its CRAP and coverage colours need a",
       "//2": "JaCoCo report, and -Dmaven.test.failure.ignore=true is what makes the report",
