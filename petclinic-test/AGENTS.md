@@ -6,12 +6,15 @@
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
-  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Everything a
-  run writes goes under `test-results/`.
-- ⚠️ `src/*.genseq.puml` and their `src/*.genseq.json` sidecars are **generated** — one pair per
-  tagged *scenario*, named `<test>.<scenario-slug>.genseq.puml`. Never hand-edit: change the test
-  and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its diagram; the generator
-  sweeps the old one.
+  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
+  lives under `src/`: throwaway run output goes to `test-results/`, and the committed diagrams to
+  `generated/`.
+- ⚠️ `generated/*.genseq.puml` and their `generated/*.genseq.json` sidecars are **generated** but
+  tracked — one pair per tagged *scenario*, named `<test>.<scenario-slug>.genseq.puml`, for all
+  three suites (Playwright, Cucumber and the backend's `@GenerateSequence`). Never hand-edit:
+  change the test and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its
+  diagram; the generator sweeps the old one. The path back to the test is *inside* the picture
+  (the `src://` handle on its title), not in the file's location.
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.

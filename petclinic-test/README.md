@@ -85,8 +85,11 @@ the next UI change two places to break.
 
 `@generate_sequence` means the same thing on both sides (`src/genseq/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
-Tempo window and get a diagram. **One scenario, one picture**, filed next to its test and named
-after the scenario it draws — `src/add-visit.spec.ts.add-a-visit-attended-by-a-vet.genseq.puml`.
+Tempo window and get a diagram. **One scenario, one picture**, filed under `generated/` and named
+after the test file and the scenario it draws —
+`generated/add-visit.spec.ts.add-a-visit-attended-by-a-vet.genseq.puml`. The backend's own
+`@GenerateSequence` diagrams land there too, so one directory holds everything a run draws
+and `src/` holds only what a person wrote.
 A tagged file with three scenarios is three files, because the class is not a unit anybody
 reviews: a reader after one scenario should not have to scroll past two others to find it.
 They are generated artifacts and say so on their first lines; edit the test, not the `.puml`.
@@ -149,8 +152,8 @@ Two files come out of a run, and both belong to the diagram:
 
 | | |
 |---|---|
-| `src/<test>.<scenario>.genseq.puml` | the picture, with a stable id on each revealable arrow |
-| `src/<test>.<scenario>.genseq.json` | what those ids reveal — statements, bound values, payloads |
+| `generated/<test>.<scenario>.genseq.puml` | the picture, with a stable id on each revealable arrow |
+| `generated/<test>.<scenario>.genseq.json` | what those ids reveal — statements, bound values, payloads |
 
 The id is a **hash of the detail**, never a counter: `.claude/skills/human-review/scripts/puml-diff.sh` renders the
 diagram as a *textual* diff against `origin/main`, so a positional id would shift with

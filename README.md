@@ -125,7 +125,7 @@ From the https://github.com/victorrentea/petclinic repo…
 - get how to run critical tests before every push and again remotely in CI.
 - copy the CODEOWNERS idea to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
 - write 3 .feature tests for the most critical flows of my app XYZ
-- adopt the technique to generate sequence diagrams from key e2e tests, one per scenario, as in `petclinic-test/src/*.genseq.puml`.
+- adopt the technique to generate sequence diagrams from key e2e tests, one per scenario, as in `petclinic-test/generated/*.genseq.puml`.
 - get the code review skill using local sonar scanner and multi-agent review
 - assemble a reviewer's guide for a change set — diagram deltas, Code City, a video of the
   feature, complexity delta and snippets deep-linked into the editor — with

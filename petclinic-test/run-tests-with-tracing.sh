@@ -3,7 +3,7 @@
 # run-tests-with-tracing.sh — run the e2e tests against an ALREADY-RUNNING stack
 # so each @generate_sequence scenario's browser↔backend↔DB trace is captured in
 # Tempo and turned into a PlantUML sequence diagram
-# (petclinic-test/src/<test file>.<scenario>.genseq.puml, next to the test itself).
+# (petclinic-test/generated/<test file>.<scenario>.genseq.puml).
 #
 # This script assumes the full telemetry stack is already up, started the
 # canonical way (so the backend has the OpenTelemetry Java agent attached):
@@ -68,7 +68,7 @@ cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 
 # Clean slate once, for both suites: each regenerates only the diagrams of its
 # own source files, so neither may do this sweep itself.
-rm -f "$UI_TEST_DIR"/src/*.genseq.puml "$UI_TEST_DIR"/src/*.genseq.json
+rm -f "$UI_TEST_DIR"/generated/*.genseq.puml "$UI_TEST_DIR"/generated/*.genseq.json
 
 log "Running the tagged Playwright spec…"
 npm run test:sequence
@@ -81,7 +81,7 @@ cucumber_status=$?
 
 # --- report the diagrams produced ------------------------------------------
 shopt -s nullglob
-diagrams=("$UI_TEST_DIR"/src/*.genseq.puml)
+diagrams=("$UI_TEST_DIR"/generated/*.genseq.puml)
 if ((${#diagrams[@]})); then
   log "📊 Collected ${#diagrams[@]} sequence diagram(s):"
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done

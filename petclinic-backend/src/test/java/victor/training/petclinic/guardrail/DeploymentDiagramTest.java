@@ -34,9 +34,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *       span, so the actor arrows are {@code no}.</li>
  * </ul>
  *
- * <p>The other side of the comparison is not a second drawing: it is
- * {@code petclinic-test/src/*.genseq.puml}, generated from real OpenTelemetry traces of
- * the Playwright suite. So this test asks the only question that matters about an
+ * <p>The other side of the comparison is not a second drawing: it is the browser suites'
+ * {@code petclinic-test/generated/*.genseq.puml}, generated from real OpenTelemetry traces
+ * of the Playwright and Cucumber runs. So this test asks the only question that matters about an
  * architecture diagram — <b>is it still true?</b> — in both directions:
  *
  * <ol>
@@ -52,7 +52,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DeploymentDiagramTest {
 
     private static final Path DIAGRAM = Paths.get("docs/Deployment.drawio.png");
-    private static final Path TRACE_DIAGRAMS = Paths.get("../petclinic-test/src");
+    private static final Path TRACE_DIAGRAMS = Paths.get("../petclinic-test/generated");
+
+    /**
+     * Only the suites that drive a real deployment: a scenario written in {@code .spec.ts}
+     * or {@code .feature} clicks a browser that talks to a running server over HTTP.
+     *
+     * The {@code .java} diagrams share the directory and are deliberately not read here. A
+     * {@code @SpringBootTest} calling controllers through MockMvc is deployed nowhere — it
+     * draws {@code Test -> Backend}, an arrow no operator could point at, and this test
+     * would demand it on a picture of what ships. The C2 projector drops the same lifeline
+     * for the same reason (see {@code human-review.json}).
+     */
+    private static final Pattern DEPLOYED_SUITE = Pattern.compile("\\.(?:spec\\.ts|feature)\\..*\\.genseq\\.puml$");
 
     /** A call from one deployed container to another, named as the traces name them. */
     private record Edge(String from, String to) {
@@ -160,7 +172,7 @@ class DeploymentDiagramTest {
         Set<Edge> edges = new LinkedHashSet<>();
         List<Path> sources;
         try (Stream<Path> files = Files.list(TRACE_DIAGRAMS)) {
-            sources = files.filter(p -> p.getFileName().toString().endsWith(".genseq.puml")).toList();
+            sources = files.filter(p -> DEPLOYED_SUITE.matcher(p.getFileName().toString()).find()).toList();
         }
         assertThat(sources)
                 .describedAs("trace-generated sequence diagrams under %s — without them this "
