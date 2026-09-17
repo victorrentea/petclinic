@@ -16,6 +16,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
@@ -40,6 +42,17 @@ class PetServiceStub {
   }
 }
 
+const availableVets: Vet[] = [
+  {id: 1, firstName: 'James', lastName: 'Carter', specialties: []},
+  {id: 2, firstName: 'Helen', lastName: 'Leary', specialties: []},
+];
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of(availableVets);
+  }
+}
+
 describe('VisitEditComponent', () => {
   let component: VisitEditComponent;
   let fixture: ComponentFixture<VisitEditComponent>;
@@ -57,6 +70,7 @@ describe('VisitEditComponent', () => {
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
         {provide: PetService, useClass: PetServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -118,5 +132,23 @@ describe('VisitEditComponent', () => {
     component.currentOwner = visitEditOwner as any;
     component.gotoOwnerDetail();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('should offer every vet by full name, to pick from or to leave alone', () => {
+    expect(component.vetOptions).toEqual([
+      {id: 1, name: 'James Carter'},
+      {id: 2, name: 'Helen Leary'},
+    ]);
+  });
+
+  /** #37: clearing the vet has to reach the server as an explicit null, or it will not stick. */
+  it('should send a null vet when the field was cleared', () => {
+    component.currentOwner = visitEditOwner as any;
+    component.currentPet = testPet;
+    spyOn(visitService, 'updateVisit').and.callThrough();
+
+    component.onSubmit({id: 1, date: '2023-05-01', description: 'updated', vetId: null, pet: testPet});
+
+    expect(visitService.updateVisit).toHaveBeenCalledWith('1', jasmine.objectContaining({vetId: null}));
   });
 });

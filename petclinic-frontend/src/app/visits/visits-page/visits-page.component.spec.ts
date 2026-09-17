@@ -24,6 +24,7 @@ describe('VisitsPageComponent', () => {
     {
       id: 1, date: '2024-01-15', description: 'rabies shot', pet: null as any,
       petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
+      vetId: 4, vetFirstName: 'Rafael', vetLastName: 'Ortega',
     },
     {
       id: 2, date: '2025-06-04', description: 'checkup', pet: null as any,
@@ -70,6 +71,18 @@ describe('VisitsPageComponent', () => {
       fixture.detectChanges();
       const empty = fixture.debugElement.query(By.css('.no-visits'));
       expect(empty.nativeElement.textContent).toContain('No visits found.');
+    });
+  }));
+
+  it('names the attending vet, and says "none" for a visit that has none', waitForAsync(() => {
+    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
+    fixture.detectChanges();
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      // sorted descending by date, so the vet-less 2025 visit leads and the 2024 one is second
+      const cells = fixture.debugElement.queryAll(By.css('td.visit-vet'))
+        .map(cell => cell.nativeElement.textContent.trim());
+      expect(cells).toEqual(['none', 'Rafael Ortega', 'none']);
     });
   }));
 
