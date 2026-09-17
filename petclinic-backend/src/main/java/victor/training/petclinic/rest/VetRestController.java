@@ -45,6 +45,9 @@ public class VetRestController {
         this.specialtyRepository = specialtyRepository;
     }
 
+    // Widened past the class's VET_ADMIN, like pettypes: the visit forms are owner-admin screens
+    // and have to fill a vet picker. Only this read moves; adding and editing vets stay VET_ADMIN.
+    @PreAuthorize("hasAnyRole(@roles.OWNER_ADMIN, @roles.VET_ADMIN)")
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",

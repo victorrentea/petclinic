@@ -198,7 +198,7 @@ public class OwnerRestController {
 
     /** No id, no vet — that is a normal booking. An id naming nobody is a 404, not a silent none. */
     private Vet attendingVet(Integer vetId) {
-        return vetId == null ? null : vetRepository.findById(vetId).orElseThrow();
+        return vetId == null ? null : vetRepository.findByIdWithoutSpecialties(vetId).orElseThrow();
     }
 
     // After the insert, never before: a booking that could not be saved is a text nobody

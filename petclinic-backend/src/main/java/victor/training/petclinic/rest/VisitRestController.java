@@ -91,7 +91,7 @@ public class VisitRestController {
 
     /** No id, no vet — that is a normal visit. An id naming nobody is a 404, not a silent none. */
     private Vet attendingVet(Integer vetId) {
-        return vetId == null ? null : vetRepository.findById(vetId).orElseThrow();
+        return vetId == null ? null : vetRepository.findByIdWithoutSpecialties(vetId).orElseThrow();
     }
 
     @Transactional
