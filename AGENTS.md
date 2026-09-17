@@ -56,6 +56,9 @@ npm run e2e                         # Protractor e2e tests
 2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
 4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
+5. Notification (`notification/`) - `NotificationSender` + a fake SMS sender, called after a
+   visit is booked. Takes plain values, never an entity, and reaches no repository — which is
+   what lets it be drawn as its own participant (see below) rather than a layer of the backend
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
@@ -74,6 +77,19 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
+
+### A module can be its own lifeline in the generated sequence diagrams
+A span carrying `genseq.participant="<name>"` is drawn on a lifeline of that name. It exists so
+a `@SpringBootTest`'s own sentences stay off the app's lifeline (`Test`), and
+`notification/FakeSmsNotificationSender` uses it for the opposite reason: to show a call
+*entering* a module that runs in the backend's own process, and leaving it for the (fake) SMS
+gateway. Everything else in a trace — `service.name`, span kind — says "backend" for all three.
+
+A name that is not a bare identifier (`Notification module`) is quoted by the generator, on its
+`participant` line and on every arrow. That also keeps it out of `DeploymentDiagramTest`, which
+matches `\w+ -> \w+` — rightly, because a logical module ships inside the Backend container and
+has no box of its own on a picture of what is deployed. `human-review.json` folds it onto
+`Backend` for the same reason, and marks `SMS gateway` external.
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every

@@ -10,6 +10,7 @@ import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.notification.NotificationSender;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
@@ -67,6 +68,8 @@ public class OwnerRestController {
 
     private final VisitMapper visitMapper;
 
+    private final NotificationSender notificationSender;
+
     public OwnerRestController(
             OwnerRepository ownerRepository,
             PetRepository petRepository,
@@ -75,7 +78,8 @@ public class OwnerRestController {
             PetTypeRepository petTypeRepository,
             OwnerMapper ownerMapper,
             PetMapper petMapper,
-            VisitMapper visitMapper) {
+            VisitMapper visitMapper,
+            NotificationSender notificationSender) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
@@ -84,6 +88,7 @@ public class OwnerRestController {
         this.ownerMapper = ownerMapper;
         this.petMapper = petMapper;
         this.visitMapper = visitMapper;
+        this.notificationSender = notificationSender;
     }
 
     @Operation(operationId = "listOwners", summary = "List owners")
@@ -176,7 +181,7 @@ public class OwnerRestController {
     @Transactional
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
             @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
-        int visitId = bookVisit(petId, visitFieldsDto);
+        int visitId = bookVisit(ownerId, petId, visitFieldsDto);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
                 .buildAndExpand(petId, visitId).toUri();
@@ -190,13 +195,14 @@ public class OwnerRestController {
     // private, self-invoked method (Spring AOP would not) — keeping the repository-only,
     // no-service-layer house style.
     @WithSpan("book-visit")
-    private int bookVisit(int petId, VisitFieldsDto visitFieldsDto) {
+    private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
         visit.setVet(resolveVet(visitFieldsDto.getVetId()));
         visitRepository.save(visit);
+        notifyOwner(ownerId, petId, visit);
         return visit.getId();
     }
 
@@ -207,6 +213,15 @@ public class OwnerRestController {
             log.warn("Rejecting visit: attending vet id {} does not exist", vetId);
             throw e;
         }
+    }
+
+    // After the insert, never before: a booking that could not be saved is a text nobody
+    // should have received. The owner is loaded here and not in the module — a notifier that
+    // reaches for a repository is a notifier that needs a database.
+    private void notifyOwner(int ownerId, int petId, Visit visit) {
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow();
+        String petName = owner.getPetById(petId).map(Pet::getName).orElse("your pet");
+        notificationSender.visitBooked(owner.getTelephone(), petName, visit.getDate());
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")

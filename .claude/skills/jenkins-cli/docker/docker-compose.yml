@@ -1,0 +1,14 @@
+# Throwaway Jenkins for the live test suite. Not part of the petclinic stack.
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml logs jenkins | grep -A2 password
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk21
+    container_name: jenkins-cli-sandbox
+    ports:
+      - "8088:8080"      # 8080 is taken by the petclinic backend
+      - "50000:50000"
+    volumes:
+      - jenkins-home:/var/jenkins_home
+volumes:
+  jenkins-home:

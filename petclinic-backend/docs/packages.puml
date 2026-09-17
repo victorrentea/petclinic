@@ -30,6 +30,7 @@ arrow {
 [Security] <<..security>>
 [Mapper] <<..mapper>>
 [Repository] <<..repository>>
+[Notification] <<..notification>>
 [DTO] <<..rest.dto>>
 [Domain] <<..domain>>
 
@@ -40,6 +41,7 @@ arrow {
 [REST] --> [Repository]
 [REST] --> [Mapper]
 [REST] --> [DTO]
+[REST] --> [Notification]
 [MCP] --> [Domain]
 [MCP] --> [Repository]
 

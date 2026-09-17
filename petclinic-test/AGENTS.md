@@ -76,6 +76,13 @@
   the whole picture onto `Backend`. Code:
   `petclinic-backend/src/test/java/victor/training/petclinic/genseq/`, run with
   `petclinic-backend/run-tests-with-tracing.sh` (needs only Tempo up).
+- **Any span can name its own lifeline**, not just a test's: `genseq.participant=<name>` is
+  read for whatever sets it. `petclinic-backend`'s `notification` module sets
+  `Notification module` on the call into it and `SMS gateway` on the (fake) call out, which is
+  the only way a hop inside one JVM can be drawn as a hop at all. A name that is not a bare
+  PlantUML identifier is wrapped in quotes by `pumlName()` — on the `participant` line and on
+  every arrow, activation and note — and **only** when it needs it: quoting `Backend` too would
+  repaint every committed diagram, which the review page diffs textually.
 - A `Browser -> Backend` arrow carries the **operation's name above its route**, read from the
   repo's `openapi.yaml` by `src/genseq/openapi-operations.ts` (a `summary` where the API has
   one, else the `operationId`). The route says where a call went; the name says what it was for.
