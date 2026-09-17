@@ -44,6 +44,12 @@
       "//14": "a fact about the test rig and not about anything that ships.",
       "//15": "`Test` -> `as` folds the base branch's older participant name in first, so",
       "//16": "one `drop` covers a suite that renamed its own lifeline on this branch.",
+      "//17": "`Notification module` -> `as: Backend` for the opposite reason to the drop",
+      "//18": "above: it is a real lifeline in the sequence diagrams, because it is worth",
+      "//19": "seeing a call leave the module — but it is not a deployed thing. It ships",
+      "//20": "inside the backend jar, in the backend's process. Folding it onto Backend",
+      "//21": "keeps its outgoing call on the C2 as `Backend -> SMS gateway`, which is what",
+      "//22": "an operator would actually see on the wire.",
       "system": "PetClinic",
       "containers": {
         "Browser": {"kind": "container", "tech": "Angular 16"},
@@ -51,6 +57,8 @@
         "Test": {"as": "Spring Boot test"},
         "Spring Boot test": {"drop": true},
         "Backend": {"kind": "container", "tech": "Java 21 / Spring Boot 3.5"},
+        "Notification module": {"as": "Backend"},
+        "SMS gateway": {"kind": "external", "tech": "SMS provider (simulated)"},
         "DB": {"kind": "db", "tech": "PostgreSQL"}
       }
     },

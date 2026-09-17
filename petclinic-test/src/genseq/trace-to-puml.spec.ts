@@ -578,3 +578,44 @@ test('a Java diagram names the annotation a @SpringBootTest actually carries', (
   const spec = renderPuml('src/add-visit.spec.ts', [{title: 'adds a visit', traces: []}], STATIC);
   expect(spec).toContain('footer @generate_sequence');
 });
+
+// ── A module of the backend, drawn as a participant of its own ───────────────────
+// Same mechanism as `Test` above, used for the opposite reason: the Notification module
+// runs *inside* the backend, so nothing in the trace separates it either. It names its
+// own lifeline, and the (fake) SMS gateway it calls names another — which is how a
+// reader sees a call leaving the module at all.
+//
+// Neither name is a bare PlantUML identifier, so both have to be quoted everywhere they
+// appear, or `participant Notification module` is a syntax error and every arrow after
+// it is drawn against a lifeline called `Notification`.
+test('a multi-word participant is quoted on its declaration and on every arrow', () => {
+  const spans: NormSpan[] = [
+    {
+      traceId: 'n', spanId: 'n-server', parentSpanId: '', name: 'POST /api/owners/1/pets/3/visits',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6,
+      attributes: {'http.status_code': '201'},
+    },
+    {
+      traceId: 'n', spanId: 'n-notify', parentSpanId: 'n-server', name: 'notify-visit-booked',
+      kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
+      attributes: {'genseq.participant': 'Notification module'},
+    },
+    {
+      traceId: 'n', spanId: 'n-sms', parentSpanId: 'n-notify', name: 'send-sms',
+      kind: 'INTERNAL', serviceName: 'petclinic-backend', startNano: 1_200 * 1e6,
+      attributes: {'genseq.participant': 'SMS gateway'},
+    },
+  ];
+  const puml = renderPuml('src/add-visit.spec.ts', [{
+    title: 'books a visit', traces: [spans],
+  }], STATIC);
+
+  expect(puml).toContain('participant "Notification module"');
+  expect(puml).toContain('participant "SMS gateway"');
+  expect(puml).toContain('Backend -> "Notification module": notify-visit-booked');
+  expect(puml).toContain('"Notification module" -> "SMS gateway": send-sms');
+  expect(puml).toContain('activate "Notification module"');
+  expect(puml).toContain('deactivate "Notification module"');
+  // the one-word lifelines are left exactly as they were: the .puml is diffed textually
+  expect(puml).toContain('participant Backend');
+});

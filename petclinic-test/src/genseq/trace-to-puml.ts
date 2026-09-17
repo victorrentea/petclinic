@@ -281,6 +281,22 @@ function qualifiedTitle(title: string, source: string): string {
 // backend from the same place on the page.
 const PARTICIPANT_ORDER = ['Browser', 'Test', 'Backend', 'DB'];
 
+// A lifeline whose name is not a bare identifier — `Notification module` — has to be
+// quoted, on its own `participant` line and on every arrow that touches it, or PlantUML
+// reads the first word as the whole name and chokes on the rest. Quoted only where it is
+// needed: writing `participant "Backend"` too would repaint every committed diagram, and
+// the `.puml` is diffed textually by the review page.
+//
+// The one-word names are also what the deployment guardrail matches (`\w+ -> \w+` in
+// DeploymentDiagramTest), so a multi-word lifeline is invisible to it — which is the
+// right answer for a *logical* module that ships inside the Backend container and has no
+// box of its own on a picture of what is deployed.
+const BARE_IDENTIFIER = /^[A-Za-z_]\w*$/;
+
+export function pumlName(participant: string): string {
+  return BARE_IDENTIFIER.test(participant) ? participant : `"${participant}"`;
+}
+
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));
   const rest = [...present].filter((p) => !PARTICIPANT_ORDER.includes(p)).sort();
@@ -389,7 +405,8 @@ function emitTrace(
 
     // The baked-in notes and the click-to-reveal markers are the same fact drawn two
     // ways, so a diagram carries one or the other, never both.
-    const bodies = options.httpBodies && !options.interactive && crossing ? `${pp}, ${p}` : undefined;
+    const bodies = options.httpBodies && !options.interactive && crossing
+      ? `${pumlName(pp!)}, ${pumlName(p)}` : undefined;
 
     if (crossing) {
       present.add(pp!);
@@ -404,7 +421,7 @@ function emitTrace(
       const title = p === 'DB' ? text : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
       const label = linkLabel(text, collector, title, steps, tooltip);
-      out.push(`${pp} -> ${p}: ${label}`);
+      out.push(`${pumlName(pp!)} -> ${pumlName(p)}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {
       // a self-span (e.g. @WithSpan) whose children — DB calls, downstream
@@ -413,20 +430,20 @@ function emitTrace(
       // The one arrow with a free link slot: a crossing arrow already spends its on the
       // ⊕ that unfolds the SQL or the JSON body, and PlantUML gives a message label
       // exactly one link. So this is where the picture can point at the code.
-      out.push(`${p} -> ${p}: ${linkedMethodLabel(span.name, methodLinks(span))}`);
+      out.push(`${pumlName(p)} -> ${pumlName(p)}: ${linkedMethodLabel(span.name, methodLinks(span))}`);
     }
 
-    if (inner.length > 0) out.push(`activate ${p}`);
+    if (inner.length > 0) out.push(`activate ${pumlName(p)}`);
     out.push(...body);
     // Only a meaningful return (an HTTP status) earns an arrow back.
     const label = crossing ? returnLabel(span) : undefined;
     if (label) {
       const steps = bodySteps(bodyOf(span, parent, 'http.response.body'), 'response body', options);
-      out.push(`${p} --> ${pp}: ${
+      out.push(`${pumlName(p)} --> ${pumlName(pp!)}: ${
         linkLabel(label, collector, `${p} → ${pp}: ${label}`, steps, BODY_TOOLTIP)}`);
     }
     if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.response.body')));
-    if (inner.length > 0) out.push(`deactivate ${p}`);
+    if (inner.length > 0) out.push(`deactivate ${pumlName(p)}`);
   };
 
   const roots = spans
@@ -539,7 +556,7 @@ export function renderDiagram(
     // from; here it costs a few words on a line that was already there.
     `footer ${optInOf(title)} in ${title} — generated from real traces of end-to-end `
     + 'test runs, do not edit ❗',
-    ...orderedParticipants(present).map((p) => `participant ${p}`),
+    ...orderedParticipants(present).map((p) => `participant ${pumlName(p)}`),
   ];
   // A divider per chapter, only where there are chapters to tell apart. PlantUML renders
   // a creole link inside one, and the review page resolves the handle against its own
