@@ -27,15 +27,15 @@
         }
       ]
     },
-    "13apewa": {
+    "1eq1h2q": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=1"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=1"
           }
         }
       ]
@@ -46,6 +46,24 @@
         {
           "label": "response body",
           "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": []\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "0p6yxbc": {
+      "title": "SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
+        }
+      ]
+    },
+    "1nmg2oo": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "[\n  {\n    \"firstName\": \"Rafael\",\n    \"lastName\": \"Ortega\",\n    \"specialties\": [\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 4\n  },\n  {\n    \"firstName\": \"James\",\n    \"lastName\": \"Carter\",\n    \"specialties\": [],\n    \"id\": 1\n  },\n  {\n    \"firstName\": \"Helen\",\n    \"lastName\": \"Leary\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 2\n  },\n  {\n    \"firstName\": \"Linda\",\n    \"lastName\": \"Douglas\",\n    \"specialties\": [\n      {\n        \"id\": 3,\n        \"name\": \"dentistry\",\n        \"description\": \"bad breath, tooth pain, bleeding gums, difficulty eating, dropping food, drooling, broken tooth, loose tooth, pawing at the mouth, reluctance to chew.\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 3\n  },\n  {\n    \"firstName\": \"Sharon\",\n    \"lastName\": \"Jenkins\",\n    \"specialties\": [],\n    \"id\": 6\n  },\n  {\n    \"firstName\": \"Henry\",\n    \"lastName\": \"Stevens\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 5\n  }\n]"
         }
       ]
     },
@@ -68,6 +86,63 @@
         {
           "label": "response body",
           "text": "{\n  \"name\": \"Axel\",\n  \"birthDate\": \"2018-12-24\",\n  \"type\": {\n    \"name\": \"hamster\",\n    \"id\": 6\n  },\n  \"id\": 1,\n  \"ownerId\": 1,\n  \"visits\": []\n}"
+        }
+      ]
+    },
+    "0exss5m": {
+      "title": "SELECT v FROM Vet v WHERE v.id = :id",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=4"
+          }
+        }
+      ]
+    },
+    "1nngwt3": {
+      "title": "insert for victor.training.petclinic.domain.Visit",
+      "steps": [
+        {
+          "label": "",
+          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
+          "alternate": {
+            "label": "",
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1789665297146-771dbb70', 1, 4, ?)"
+          }
+        }
+      ]
+    },
+    "1y42tra": {
+      "title": "OwnerRepository.findById",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=1"
+          }
+        }
+      ]
+    },
+    "1g8n7aj": {
+      "title": "Browser → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
+      "steps": [
+        {
+          "label": "request body",
+          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1789665297146-771dbb70\",\n  \"vetId\": 4,\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": []\n  }\n}"
+        }
+      ]
+    },
+    "1s39g32": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789665297146-0e1fea77\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789665297146-771dbb70\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }

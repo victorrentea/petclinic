@@ -8,6 +8,8 @@ footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petc
 participant Client
 participant Backend
 participant DB
+participant "Notification module"
+participant "SMS gateway"
 Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:131{Click to open the line of the test that says this} given an owner with at least one pet exists ↗]]
 activate Client
 Client -> Backend: List owners\nGET /api/owners
@@ -76,7 +78,7 @@ Backend -> DB: [[genseq://1klw40a{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1ksbt81{Click for the statement behind this call} select visits ⊕]]
 Backend -> DB: [[genseq://1m8kh81{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
-Backend --> Client: [[genseq://1hh1kku{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Client: [[genseq://0b08qp6{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Client
 Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:136{Click to open the line of the test that says this} and the clinic has a vet who can attend it ↗]]
@@ -94,10 +96,10 @@ deactivate Backend
 deactivate Client
 Client -> Client: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:141{Click to open the line of the test that says this} when a visit is booked for that pet with that vet attending ↗]]
 activate Client
-Client -> Backend: [[genseq://14d7tgi{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+Client -> Backend: [[genseq://05giitz{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 group tx
-Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:193{Click to open OwnerRestController.bookVisit} book-visit ↗]]
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:198{Click to open OwnerRestController.bookVisit} book-visit ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:29{Click to open VetRepository.getByIdOrNull} VetRepository.getByIdOrNull ↗]]
 activate Backend
@@ -108,8 +110,17 @@ deactivate Backend
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
-Backend -> DB: [[genseq://1f536j7{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://109cyck{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 deactivate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
+activate Backend
+Backend -> DB: [[genseq://1y42tra{Click for the statement behind this call} OwnerRepository.findById ⊕]]
+deactivate Backend
+Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
+Backend -> "Notification module": notify-visit-booked
+activate "Notification module"
+"Notification module" -> "SMS gateway": send-sms
+deactivate "Notification module"
 deactivate Backend
 end
 Backend --> Client: 201
@@ -127,7 +138,7 @@ end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Client: [[genseq://1jt6ak7{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Client: [[genseq://0q1tzwu{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Client
 @enduml
