@@ -1,0 +1,46 @@
+schema: spec-driven
+
+# Per-artifact rules
+rules:
+  proposal:
+    - "Audience is the Product Owner, not an engineer. Someone who has never seen the codebase must be able to review it and say yes or no."
+    - "No technical decisions and no technical vocabulary - no endpoint paths, HTTP verbs, status codes, JSON, payload shapes, class/file/table/column names, annotations, libraries, frameworks or CLI commands. All of that belongs in design.md."
+    - "State changes as externally observable behaviour ('the grid shows one page at a time, 10 rows by default'), never as the mechanism that produces it."
+    - "When scope is narrower than what was asked, say so and justify it in user terms."
+    - "Describe a breaking change by who is affected and whether anything outside our own release notices it."
+    - "The Capabilities section is OpenSpec machinery, not prose for the PO - capability paths plus one plain-language line each."
+    - "End with a pointer that technical decisions, alternatives and risks live in design.md."
+  design:
+    - "This is where every technical decision lands, including ones a reader might expect in the proposal: contracts, parameter names and defaults, schema and data-model changes, library choices, generated artifacts, and the exact list of call sites that break."
+    - "Give each decision its rationale and the alternative rejected, with the fact that decided it - measured or read from the code, not assumed."
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

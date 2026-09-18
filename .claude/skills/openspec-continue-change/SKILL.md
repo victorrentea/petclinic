@@ -100,6 +100,19 @@ After each invocation, show:
 - What artifacts are now unlocked
 - Prompt: "Want to continue? Just ask me to continue or tell me what to do next."
 
+**Audience split: proposal.md is for the Product Owner, design.md is for engineers**
+
+- proposal.md is reviewed by a non-technical Product Owner. Keep every technical decision, and
+  every technical word, out of it: no endpoint paths, HTTP verbs, status codes, JSON, payload
+  shapes, class/file/table/column names, annotations, libraries, frameworks or CLI commands.
+  Describe what a user observes, not the mechanism behind it.
+- design.md absorbs all of it - the contract, parameter names and defaults, schema changes,
+  library choices, generated artifacts, and the exact list of call sites that break - each with
+  its rationale and the alternative rejected.
+- The project's `openspec/config.yaml` states this as `rules.proposal` / `rules.design`, so it
+  also reaches `openspec instructions`; this note is the reminder for workflows that draft the
+  files before reading those rules.
+
 **Artifact Creation Guidelines**
 
 The artifact types and their purpose depend on the schema. The `instruction` field from the instructions output is the authoritative guidance for each artifact - follow it even when the artifact has a familiar name (proposal.md, tasks.md, etc.), since custom schemas may define different content or a different process for the same file names.

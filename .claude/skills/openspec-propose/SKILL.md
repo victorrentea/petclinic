@@ -143,6 +143,19 @@ After completing all artifacts, summarize:
 - What's ready: "All artifacts needed for implementation are ready."
 - Prompt: "The artifacts are ready for review. When you are ready, run `/opsx:apply` or ask me to apply this change."
 
+**Audience split: proposal.md is for the Product Owner, design.md is for engineers**
+
+- proposal.md is reviewed by a non-technical Product Owner. Keep every technical decision, and
+  every technical word, out of it: no endpoint paths, HTTP verbs, status codes, JSON, payload
+  shapes, class/file/table/column names, annotations, libraries, frameworks or CLI commands.
+  Describe what a user observes, not the mechanism behind it.
+- design.md absorbs all of it - the contract, parameter names and defaults, schema changes,
+  library choices, generated artifacts, and the exact list of call sites that break - each with
+  its rationale and the alternative rejected.
+- The project's `openspec/config.yaml` states this as `rules.proposal` / `rules.design`, so it
+  also reaches `openspec instructions`; this note is the reminder for workflows that draft the
+  files before reading those rules.
+
 **Artifact Creation Guidelines**
 
 - Follow the `instruction` field from `openspec instructions` for each artifact type - it is the authoritative guidance, even for familiar artifact names
