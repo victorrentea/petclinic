@@ -61,6 +61,18 @@ export class VisitsPage {
     return out;
   }
 
+  /**
+   * The Vet cell of the row describing `description`, as a locator rather than a value — the
+   * caller polls it, because the row lands on this page only once the booking has round-tripped.
+   *
+   * Deliberately NOT a field on `VisitRow`: `visits.spec.ts` compares the whole row against the
+   * API with `toEqual`, so widening that shape would rewrite an assertion that is about
+   * something else.
+   */
+  vetOfVisitDescribed(description: string): Locator {
+    return this.rows.filter({hasText: description}).locator('td.visit-vet');
+  }
+
   async clickFirstOwnerLink(): Promise<void> {
     await this.rows.first().locator('a.owner-link').click();
   }
