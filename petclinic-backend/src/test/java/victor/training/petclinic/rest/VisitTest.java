@@ -213,6 +213,44 @@ public class VisitTest {
     }
 
     @Test
+    void create_beforePetWasBorn() throws Exception {
+        VisitDto newVisit = new VisitDto();
+        newVisit.setPetId(petId);
+        newVisit.setDate(PetTest.BIRTH_DATE.minusDays(1));
+        newVisit.setDescription("too early");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addToOwnersPet_moreThanAYearAhead() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto();
+        newVisit.setDate(LocalDate.now().plusYears(1).plusDays(1));
+        newVisit.setDescription("too late");
+        int ownerId = petRepository.findById(petId).orElseThrow().getOwner().getId();
+
+        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void update_year0009() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto();
+        update.setDate(LocalDate.of(9, 7, 20));
+        update.setDescription("absurd year");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void findVisitsByPetId() {
         // Add a second visit for the same pet
         Visit visit2 = new Visit();

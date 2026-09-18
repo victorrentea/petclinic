@@ -21,6 +21,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
 
@@ -82,6 +83,21 @@ public class Pet {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    /** A visit is dated between this pet's birth and one year from today. */
+    public void checkVisitDate(LocalDate visitDate, LocalDate today) {
+        if (visitDate == null) {
+            return;
+        }
+        if (birthDate != null && visitDate.isBefore(birthDate)) {
+            throw new ValidationException(
+                    "Visit date " + visitDate + " is before the pet was born (" + birthDate + ")");
+        }
+        if (visitDate.isAfter(today.plusYears(1))) {
+            throw new ValidationException(
+                    "Visit date " + visitDate + " is more than one year ahead");
+        }
     }
 
     public PetType getType() {
