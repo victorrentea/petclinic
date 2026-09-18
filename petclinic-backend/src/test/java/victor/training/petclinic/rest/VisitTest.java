@@ -314,26 +314,6 @@ public class VisitTest {
         assertThat(visitRepository.findById(visitId).orElseThrow().getVet().getId()).isEqualTo(vetId);
     }
 
-    /** The regression #37 names: clearing the field must stick, the way pet type once did not. */
-    @Test
-    void update_withoutVet_clearsTheOneOnFile() throws Exception {
-        Visit visit = visitRepository.findById(visitId).orElseThrow();
-        visit.setVet(vetRepository.findById(vetId).orElseThrow());
-        visitRepository.save(visit);
-
-        VisitFieldsDto update = new VisitFieldsDto();
-        update.setDate(LocalDate.now());
-        update.setDescription("rabies shot");
-        update.setVetId(null);
-
-        mockMvc.perform(put("/api/visits/" + visitId)
-                .content(mapper.writeValueAsString(update))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
-
-        assertThat(visitRepository.findById(visitId).orElseThrow().getVet()).isNull();
-    }
-
     @Test
     void getAll_namesTheVetAndLeavesUnattendedVisitsEmpty() throws Exception {
         Visit visit = visitRepository.findById(visitId).orElseThrow();

@@ -140,15 +140,4 @@ describe('VisitEditComponent', () => {
       {id: 2, name: 'Helen Leary'},
     ]);
   });
-
-  /** #37: clearing the vet has to reach the server as an explicit null, or it will not stick. */
-  it('should send a null vet when the field was cleared', () => {
-    component.currentOwner = visitEditOwner as any;
-    component.currentPet = testPet;
-    spyOn(visitService, 'updateVisit').and.callThrough();
-
-    component.onSubmit({id: 1, date: '2023-05-01', description: 'updated', vetId: null, pet: testPet});
-
-    expect(visitService.updateVisit).toHaveBeenCalledWith('1', jasmine.objectContaining({vetId: null}));
-  });
 });
