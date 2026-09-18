@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+
+import victor.training.petclinic.domain.VisitDateOutOfRangeException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -67,6 +69,18 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    // A 400 of its own, not a ConstraintViolation: the rule needs the *pet* to be resolved
+    // (its birth date is the lower bound), which no annotation on the DTO can reach.
+    @ExceptionHandler(VisitDateOutOfRangeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleVisitDateOutOfRange(VisitDateOutOfRangeException ex,
+            HttpServletRequest request) {
+        log.warn("Visit refused: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
     }
 

@@ -37,6 +37,13 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
+  // Set by the visit-date-range scenarios: the day the feature says it is, the
+  // fixture pet's real birth date, and what each half of the booking attempt did.
+  featureToday?: string;
+  petBirthDate?: string;
+  attemptedVisitDate?: string;
+  uiSubmitWasOffered?: boolean;
+  apiBookingStatus?: number;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo

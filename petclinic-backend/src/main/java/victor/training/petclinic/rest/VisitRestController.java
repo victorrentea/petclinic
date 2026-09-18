@@ -11,7 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.domain.VisitDateOutOfRangeException;
+import victor.training.petclinic.domain.VisitDateRange;
+import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,10 +34,13 @@ public class VisitRestController {
     private static final Logger log = LoggerFactory.getLogger(VisitRestController.class);
 
     private final VisitRepository visitRepository;
+    private final PetRepository petRepository;
     private final VisitMapper visitMapper;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+    public VisitRestController(VisitRepository visitRepository, PetRepository petRepository,
+            VisitMapper visitMapper) {
         this.visitRepository = visitRepository;
+        this.petRepository = petRepository;
         this.visitMapper = visitMapper;
     }
 
@@ -68,6 +76,7 @@ public class VisitRestController {
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
         log.info("Booking visit for pet {}: {}", visitDto.getPetId(), visitDto.getDescription());
+        checkDateAllowedFor(visitDto.getPetId(), visitDto.getDate());
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return visit.getId();
@@ -76,9 +85,20 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
+        // The pet comes from the visit being edited — moving a visit out of range is the same
+        // mistake as booking it out of range, and this endpoint is the other way to make it.
+        checkDateAllowedFor(currentVisit.getPet().getId(), visitDto.getDate());
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
+    }
+
+    private void checkDateAllowedFor(Integer petId, LocalDate date) {
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        VisitDateRange allowed = VisitDateRange.forPetBornOn(pet.getBirthDate(), LocalDate.now());
+        if (!allowed.allows(date)) {
+            throw new VisitDateOutOfRangeException(date, allowed);
+        }
     }
 
     @Transactional

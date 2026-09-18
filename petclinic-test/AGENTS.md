@@ -18,6 +18,15 @@
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.
+- **A test that needs its own pet hangs it off the *last* owner, never owner 1.**
+  `add-visit.spec.ts` clicks "Add Visit" on the first pet of the first owner that has one,
+  and the suite is `fullyParallel` against one database — a fixture pet in that list is a
+  race. Clean up through `DELETE /api/pets/{id}` (there is none under `/api/owners/{id}/pets`,
+  which answers 405), and delete the pet's visits first or the constraint keeps it alive.
+- `visit-date-range.feature`'s dates are a **calendar fixture, not literals**: its glue shifts
+  every one by the gap between the feature's stated "today" and the real one, because the rule
+  is relative to today and nothing can move the application's clock. The offsets carry the
+  meaning, so the feature still means what it says when read in 2030.
 - A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
   `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
   `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement

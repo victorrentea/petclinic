@@ -91,6 +91,25 @@ matches `\w+ -> \w+` — rightly, because a logical module ships inside the Back
 has no box of its own on a picture of what is deployed. `human-review.json` folds it onto
 `Backend` for the same reason, and marks `SMS gateway` external.
 
+### A visit's date range lives in the domain, and is checked on every way in
+`domain/VisitDateRange` (issue #40) is a value, not a bean: "today" is a parameter, so the
+boundaries are unit-testable and the app needs no `Clock` bean — and no endpoint for moving
+time, which `no-reset-endpoint.spec.ts` would object to on the same grounds it rejects a
+data reset. A visit is dated between the pet's birth date (open, if the pet has none) and
+one year from today.
+
+There are **three** write paths and all three check it: `POST /api/visits`,
+`POST /api/owners/{id}/pets/{petId}/visits`, and `PUT /api/visits/{id}` — editing a visit
+into the year 9 is the same mistake as booking it there. The lower bound needs the pet's
+birth date, which no annotation on the DTO can reach, hence a check in the controller
+rather than a constraint. `VisitDateOutOfRangeException` is in `domain` because the MCP
+tools break the rule the same way a POST does; `ExceptionControllerAdvice` maps it to 400,
+which is the one edge `packages.puml` gained (`REST Error -> Domain`).
+
+`petclinic-frontend/src/app/visits/visit-date-range.ts` states the same bounds for both
+visit forms via the datepicker's `[min]`/`[max]`. That only spares the user a round trip —
+it enforces nothing, and the backend never trusts it.
+
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a

@@ -42,6 +42,7 @@ arrow {
 [REST] --> [Mapper]
 [REST] --> [DTO]
 [REST] --> [Notification]
+[REST Error] --> [Domain]
 [MCP] --> [Domain]
 [MCP] --> [Repository]
 

@@ -8,6 +8,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
+import {earliestVisitDate, latestVisitDate} from '../visit-date-range';
 import {PetService} from '../../pets/pet.service';
 
 @Component({
@@ -52,6 +53,17 @@ export class VisitEditComponent implements OnInit {
         )
       },
       error => this.errorMessage = error as any);
+  }
+
+  // Issue #40: the datepicker used to take any date at all. [min]/[max] both grey out the
+  // impossible days in the calendar and mark a typed-in date invalid, which is what keeps
+  // the submit button disabled. The backend re-checks it — this is convenience, not enforcement.
+  get earliestVisitDate(): Date | null {
+    return earliestVisitDate(this.currentPet);
+  }
+
+  get latestVisitDate(): Date {
+    return latestVisitDate();
   }
 
   onSubmit(visit: Visit) {
