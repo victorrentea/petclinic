@@ -68,6 +68,16 @@
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/watch-ci-after-push.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "//": "append my personal rule file when a team skill activates, without editing the skill",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/skill-extension.sh\""
+          }
+        ]
       }
     ]
   }
