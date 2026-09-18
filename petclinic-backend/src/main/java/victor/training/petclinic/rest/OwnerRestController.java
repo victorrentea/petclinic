@@ -3,6 +3,8 @@ package victor.training.petclinic.rest;
 import java.net.URI;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -49,6 +51,7 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Logger log = LoggerFactory.getLogger(OwnerRestController.class);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -190,8 +193,13 @@ public class OwnerRestController {
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
-        visit.setVet(attendingVet(visitFieldsDto.getVetId()));
+        Vet vet = attendingVet(visitFieldsDto.getVetId());
+        visit.setVet(vet);
         visitRepository.save(visit);
+        log.info("Booked visit {} for pet {}", visit.getId(), petId);
+        if (vet != null) {
+            log.debug("Attending vet: {}", vet.getLastName());
+        }
         notifyOwner(ownerId, petId, visit);
         return visit.getId();
     }
