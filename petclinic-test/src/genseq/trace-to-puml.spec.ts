@@ -648,3 +648,45 @@ test('a crossing arrow with nothing to reveal links to the method it was opened 
     + '[[src://petclinic-backend/src/main/java/Sender.java:42'
     + '{Click to open Sender.visitBooked} notify-visit-booked \u2197]]');
 });
+
+// ── A driver call with no statement is not a query ───────────────────────────────
+// The JDBC instrumentation times every call into the driver, so borrowing or validating a
+// pooled connection arrives as a CLIENT span with the whole database semconv on it and
+// `db.statement` / `db.query.text` present but empty. Drawn, it is `Backend -> DB: petclinic`
+// — an arrow with nothing to say and nothing behind its ⊕.
+test('a DB span with an empty statement draws nothing at all', () => {
+  const connection: NormSpan = {
+    traceId: 'j', spanId: 'j-conn', parentSpanId: 'j-server', name: 'petclinic',
+    kind: 'CLIENT', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
+    attributes: {
+      'db.system': 'postgresql', 'db.system.name': 'postgresql',
+      'db.name': 'petclinic', 'db.namespace': 'petclinic',
+      'db.connection_string': 'postgresql://localhost:5433',
+      'server.address': 'localhost', 'server.port': '5433',
+      'db.statement': '', 'db.query.text': '',
+    },
+  };
+  const server: NormSpan = {
+    traceId: 'j', spanId: 'j-server', parentSpanId: '', name: 'GET /api/owners',
+    kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6,
+    attributes: {'http.status_code': '200'},
+  };
+  const query: NormSpan = {
+    ...connection,
+    spanId: 'j-select', name: 'SELECT petclinic.owners', startNano: 1_200 * 1e6,
+    attributes: {...connection.attributes, 'db.statement': 'select o1_0.id from owners o1_0'},
+  };
+
+  const withoutStatement = renderPuml(
+    'src/owners.spec.ts', [{title: 'lists owners', traces: [[server, connection]]}], STATIC);
+  expect(withoutStatement).not.toContain('-> DB');
+  expect(withoutStatement).not.toContain('participant DB');
+  expect(withoutStatement).not.toContain('activate DB');
+
+  // the same span with a statement on it is the arrow it always was
+  const withStatement = renderPuml(
+    'src/owners.spec.ts', [{title: 'lists owners', traces: [[server, query]]}], STATIC);
+  expect(withStatement).toContain('participant DB');
+  expect(withStatement).toContain(
+    'Backend -> DB: select owners\\nSELECT o1_0.id\\nFROM owners o1_0');
+});

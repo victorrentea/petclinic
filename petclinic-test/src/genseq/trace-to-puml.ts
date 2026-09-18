@@ -95,6 +95,35 @@ function sqlOf(span: NormSpan): string | undefined {
   return sql?.trim() || undefined;
 }
 
+/**
+ * True for a DB span the driver opened without a statement to run.
+ *
+ * The JDBC instrumentation times every call *into the driver*, not only the ones that carry
+ * SQL: borrowing and validating a pooled connection, `setAutoCommit`, the liveness check a
+ * pool fires between borrows. Those arrive as CLIENT spans named after the database rather
+ * than after a statement (`petclinic`), wearing the whole database semconv —
+ *
+ *     {"db.system": "postgresql", "db.name": "petclinic", "db.namespace": "petclinic",
+ *      "db.connection_string": "postgresql://localhost:5433", "server.address": "localhost",
+ *      "server.port": "5433", "db.user": "petclinic", "thread.name": "http-nio-8081-exec-9",
+ *      "db.statement": "", "db.query.text": ""}
+ *
+ * — with both statement attributes *present and empty*. (Seven of them in the span cache of
+ * a full run, `test-results/trace-spans.json`: three inside one add-visit scenario, one in
+ * owner-search; each a leaf under `OwnerRepository.findById`, `VetRepository.findAll` or
+ * `Hibernate Query`.)
+ *
+ * They draw as `Backend -> DB: petclinic`: an arrow that names no call, hides no statement
+ * behind its `⊕`, and repeats whatever query is drawn next to it. So the diagram drops them.
+ *
+ * A DB span whose *name* is a statement (`SELECT petclinic.owners`) is kept even with no
+ * statement text — that is a real query recorded by an agent that was not asked to capture
+ * the SQL, and the name is the label the arrow has always carried.
+ */
+function isStatementlessDbSpan(span: NormSpan): boolean {
+  return sqlOf(span) === undefined && !DB_NAME_RE.test(span.name);
+}
+
 const PARAMETER_KEY_RE = /^db\.query\.parameter\.(\d+)$/;
 
 /** The bound values, in placeholder order — captured only when the agent is asked to. */
@@ -368,6 +397,9 @@ function emitTrace(
     if (span.name === TRANSACTION_COMMIT && parentSpan && opensTransaction(parentSpan)) return;
 
     const p = participantOf(span);
+    // A call into the driver that carries no statement is not a query — see
+    // `isStatementlessDbSpan`. Dropped whole: no arrow, no activation, no note.
+    if (p === 'DB' && isStatementlessDbSpan(span)) return;
     const parent = parentSpan;
     const pp = parent ? participantOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
