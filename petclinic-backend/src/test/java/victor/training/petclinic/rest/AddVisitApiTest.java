@@ -48,12 +48,7 @@ import victor.training.petclinic.tools.PrettyTestNames;
  * lazy loads of the N+1 falling outside every one of them — would vanish into a single box. What is
  * left behind is a row in an embedded database that is thrown away with the JVM.
  */
-// RANDOM_PORT, although the scenario below drives the application through MockMvc: the last thing
-// booking a visit does is notify the owner, and the notification module posts the SMS to this
-// application's own /api/fake-sms — which is the hop the diagram draws as
-// "Notification module" -> "SMS gateway", and the only one in the picture that crosses a socket.
-// With no server bound there is nothing to post to.
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
