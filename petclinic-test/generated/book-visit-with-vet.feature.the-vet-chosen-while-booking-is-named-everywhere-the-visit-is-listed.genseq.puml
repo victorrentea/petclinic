@@ -20,7 +20,7 @@ end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://1867f23{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Browser: [[genseq://0k9x4kf{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:191{Click to open OwnerRestController.bookVisit} book-visit ↗]]
 activate Backend
@@ -31,7 +31,7 @@ deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
 group tx
-Backend -> DB: [[genseq://0shh6wx{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://0wuudg7{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
@@ -41,10 +41,9 @@ Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} sele
 end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
-Backend -> "Notification module": [[src://petclinic-backend/src/main/java/victor/training/petclinic/notification/FakeSmsNotificationSender.java:64{Click to open FakeSmsNotificationSender.visitBooked} notify-visit-booked ↗]]
+Backend -> "Notification module": [[src://petclinic-backend/src/main/java/victor/training/petclinic/notification/FakeSmsNotificationSender.java:45{Click to open FakeSmsNotificationSender.visitBooked} notify-visit-booked ↗]]
 activate "Notification module"
-"Notification module" -> "SMS gateway": POST /api/fake-sms
-"SMS gateway" --> "Notification module": 200
+"Notification module" -> "SMS gateway": [[src://petclinic-backend/src/main/java/victor/training/petclinic/notification/FakeSmsNotificationSender.java:47{Click to open FakeSmsNotificationSender.sendSms} send-sms ↗]]
 deactivate "Notification module"
 deactivate Backend
 Browser -> Backend: listVisits\nGET /api/visits

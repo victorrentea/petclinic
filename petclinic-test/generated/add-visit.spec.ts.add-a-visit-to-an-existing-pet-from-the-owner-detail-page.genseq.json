@@ -40,12 +40,12 @@
         }
       ]
     },
-    "0meh876": {
+    "0tvg3tn": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764780887\",\n          \"id\": 30,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764782479\",\n          \"id\": 31,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": []\n    }\n  ]\n}"
         }
       ]
     },
@@ -62,12 +62,12 @@
         }
       ]
     },
-    "1bsqqcg": {
+    "0ts0dcp": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"name\": \"Axel\",\n  \"birthDate\": \"2018-12-24\",\n  \"type\": {\n    \"name\": \"hamster\",\n    \"id\": 6\n  },\n  \"id\": 1,\n  \"ownerId\": 1,\n  \"visits\": [\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1789764780887\",\n      \"id\": 30,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\",\n      \"vetId\": null,\n      \"vetFirstName\": null,\n      \"vetLastName\": null\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1789764782479\",\n      \"id\": 31,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\",\n      \"vetId\": 4,\n      \"vetFirstName\": \"Rafael\",\n      \"vetLastName\": \"Ortega\"\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1789764761122\",\n      \"id\": 29,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\",\n      \"vetId\": 4,\n      \"vetFirstName\": \"Rafael\",\n      \"vetLastName\": \"Ortega\"\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1789764761122\",\n      \"id\": 28,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\",\n      \"vetId\": null,\n      \"vetFirstName\": null,\n      \"vetLastName\": null\n    }\n  ]\n}"
+          "text": "{\n  \"name\": \"Axel\",\n  \"birthDate\": \"2018-12-24\",\n  \"type\": {\n    \"name\": \"hamster\",\n    \"id\": 6\n  },\n  \"id\": 1,\n  \"ownerId\": 1,\n  \"visits\": []\n}"
         }
       ]
     },
@@ -89,16 +89,7 @@
         }
       ]
     },
-    "1dntyok": {
-      "title": "Backend → Browser: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764780887\",\n          \"id\": 30,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764782479\",\n          \"id\": 31,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        }\n      ]\n    }\n  ]\n}"
-        }
-      ]
-    },
-    "055v36x": {
+    "0mgbrlu": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -106,26 +97,26 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1789764795800', 1, ?, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1789766291109', 1, ?, ?)"
           }
         }
       ]
     },
-    "0c9fz5h": {
+    "06reo0d": {
       "title": "Browser → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
       "steps": [
         {
           "label": "request body",
-          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1789764795800\",\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": [\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1789764780887\",\n        \"id\": 30,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": null,\n        \"vetFirstName\": null,\n        \"vetLastName\": null\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1789764782479\",\n        \"id\": 31,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": 4,\n        \"vetFirstName\": \"Rafael\",\n        \"vetLastName\": \"Ortega\"\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1789764761122\",\n        \"id\": 29,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": 4,\n        \"vetFirstName\": \"Rafael\",\n        \"vetLastName\": \"Ortega\"\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1789764761122\",\n        \"id\": 28,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": null,\n        \"vetFirstName\": null,\n        \"vetLastName\": null\n      }\n    ]\n  }\n}"
+          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1789766291109\",\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": []\n  }\n}"
         }
       ]
     },
-    "03yep3v": {
+    "0ilsnr9": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764782479\",\n          \"id\": 31,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764795800\",\n          \"id\": 32,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764761122\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789764780887\",\n          \"id\": 30,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789766291106\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789766291109\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }
