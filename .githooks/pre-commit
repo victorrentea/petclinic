@@ -56,10 +56,37 @@ fi
 STAGED_JAVA=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^petclinic-backend/.*\.java$' || true)
 if [ -n "$STAGED_JAVA" ]; then
   if command -v mvn >/dev/null 2>&1; then
-    if ! SPOTLESS_OUT=$(cd "$ROOT/petclinic-backend" && mvn spotless:apply -q 2>&1); then
+    # Scope spotless:apply to exactly the staged files. Plain `mvn spotless:apply`
+    # reformats the WHOLE petclinic-backend module on every commit — on a machine
+    # running several Claude sessions against the same checkout, that silently
+    # rewrote another session's un-staged, in-progress edit in
+    # FakeSmsNotificationSender.java (removeUnusedImports clipped an import it was
+    # mid-typing) twice in one day. `spotlessFiles` (spotless-maven-plugin 2.44.0,
+    # confirmed present in petclinic-backend/pom.xml) takes a comma-separated list
+    # of regexes matched against each file's ABSOLUTE path, so the staged relative
+    # paths are prefixed with $ROOT and dot-escaped before joining.
+    # `ratchetFrom` was considered and rejected: it scopes by git history ("files
+    # changed since ref X"), not by what's staged right now — a file with mixed
+    # staged/unstaged hunks, or a file changed on disk but not part of this commit,
+    # would still get swept in.
+    #
+    # Detected *before* spotless runs (after, the working tree no longer differs
+    # from itself, so this could not be found post-hoc): staged files that also
+    # carry unstaged edits on top. Spotless formats the working-tree file as a
+    # whole, so it reformats that unstaged part too, even though only the staged
+    # part is added to this commit. We warn instead of trying to stash/split it —
+    # see repo policy: never stash in this shared checkout.
+    UNSTAGED_TOO=$(comm -12 <(echo "$STAGED_JAVA" | sort) <(git diff --name-only | sort))
+
+    SPOTLESS_FILES=$(echo "$STAGED_JAVA" | sed "s#^#$ROOT/#; s/[.]/\\\\./g" | paste -sd, -)
+    if ! SPOTLESS_OUT=$(cd "$ROOT/petclinic-backend" && mvn spotless:apply -q "-DspotlessFiles=$SPOTLESS_FILES" 2>&1); then
       echo "$SPOTLESS_OUT"
       echo "[pre-commit] ❌ Spotless failed — commit blocked."
       exit 1
+    fi
+    if [ -n "$UNSTAGED_TOO" ]; then
+      echo "[pre-commit] ⚠️  Spotless reformatted the whole working-tree file for the files below, including unstaged edits on top of what's staged — only the staged part is going into this commit, the unstaged part just got reformatted along with it:"
+      echo "$UNSTAGED_TOO" | sed 's/^/[pre-commit]      /'
     fi
     # Re-stage the formatted files so the commit contains the formatted version.
     while IFS= read -r f; do
