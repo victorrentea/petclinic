@@ -184,6 +184,6 @@ Core entities and relationships:
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind CYA comments when deleting or moving stuff
 - Always run tests after any complex refactoring
-- Be brief
+- Be brief, as for experienced full stack engineers with a pinch of ADHD
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md
