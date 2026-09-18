@@ -188,6 +188,20 @@ Core entities and relationships:
 - Apply `@Validated` on every `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
 
+## A feature is not done until one Gherkin scenario drives it through the UI
+
+Every user-facing feature gets at least one `.feature` scenario in `petclinic-test/src/`
+(bound by the `*.feature.glue.ts` beside it) that opens the screens a user opens. It is the
+acceptance test of the story — the one artefact a non-programmer can read.
+
+`petclinic-backend/src/test/resources/features/` does not count: that suite is Cucumber over
+the REST API, so a field the backend stores and no page shows passes all of it. A `*.spec.ts`
+does not count either — it is a second account of the same journey, written for the people
+who write it (`add-visit.spec.ts` and `book-visit-with-vet.feature` are deliberately a pair).
+
+Tag it `@generate_sequence` when the feature crosses the stack, so the story reaches the
+review page with a picture of what its run did.
+
 ## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
