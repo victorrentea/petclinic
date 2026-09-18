@@ -38,7 +38,11 @@ import victor.training.petclinic.rest.dto.VisitFieldsDto;
 
 // Covers the POST/create endpoints of OwnerRestController (addOwner, addPetToOwner, addVisitToOwner)
 // whose success paths were uncovered by Sonar new-code coverage.
-@SpringBootTest
+//
+// RANDOM_PORT, although every call below goes through MockMvc and never touches the port: booking a
+// visit notifies the owner, and the notification module posts the SMS to this application's own
+// /api/fake-sms. Without a server bound there is nothing to post to.
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")

@@ -76,16 +76,35 @@ export const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
 /** The lifeline a @SpringBootTest's own `given`/`when`/`then` marks are drawn on. */
 export const TEST_PARTICIPANT = 'Test';
 
+/** both the old and the stable database semconv, since the agent can emit either */
+function isDbSpan(span: NormSpan): boolean {
+  return ['db.system', 'db.system.name', 'db.statement', 'db.query.text']
+    .some((key) => key in span.attributes) || DB_NAME_RE.test(span.name);
+}
+
 function participantOf(span: NormSpan): string {
   const declared = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
   if (declared) return declared;
   if (span.serviceName === 'petclinic-frontend') return 'Browser';
-  // both the old and the stable database semconv, since the agent can emit either
-  const isDb = ['db.system', 'db.system.name', 'db.statement', 'db.query.text']
-    .some((key) => key in span.attributes) || DB_NAME_RE.test(span.name);
-  if (span.kind === 'CLIENT' && isDb) return 'DB';
+  if (span.kind === 'CLIENT' && isDbSpan(span)) return 'DB';
   if (span.serviceName === 'petclinic-backend') return 'Backend';
   return span.serviceName || 'unknown';
+}
+
+/**
+ * True for a span that is one end of an HTTP call and names no lifeline of its own.
+ *
+ * An HTTP CLIENT span is the **caller's** side: the outgoing call, opened before anything has
+ * crossed anywhere. The hop is the SERVER span on the other side, so the CLIENT span belongs on
+ * whatever lifeline its caller is on — see `lifelineOf`.
+ *
+ * A database CLIENT span is the exception the model already made: there is no SERVER span coming
+ * back from Postgres, so that one span has to stand for the whole call and is drawn as `DB`.
+ */
+function isOutgoingCall(span: NormSpan): boolean {
+  return span.kind === 'CLIENT'
+    && !span.attributes[PARTICIPANT_ATTRIBUTE]?.trim()
+    && !isDbSpan(span);
 }
 
 // `db.statement` is the OTel agent's SQL; `db.query.text` is the same thing
@@ -322,6 +341,31 @@ function emitTrace(
   const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
   /**
+   * The lifeline a span is drawn on — `participantOf`, except that an outgoing HTTP call stays
+   * with its caller (see `isOutgoingCall`).
+   *
+   * That is what keeps one call one arrow when both of its ends are in the trace. The browser
+   * suites never needed the rule — `service.name` alone puts the fetch span on `Browser` and the
+   * backend's SERVER span on `Backend` — but a **self-call** has both ends under one
+   * `service.name`, and without it the module's request out and the gateway's request in are drawn
+   * as two hops through `Backend`, which is three arrows for one POST.
+   *
+   * The CLIENT span could not simply declare a participant instead: the agent opens it inside the
+   * HTTP client, below any code the application can put in the way.
+   */
+  const lifelines = new Map<string, string>();
+  const lifelineOf = (span: NormSpan): string => {
+    const known = lifelines.get(span.spanId);
+    if (known !== undefined) return known;
+    const parent = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
+    // Memoised before recursing: a trace is a tree, but a malformed one must not hang the render.
+    lifelines.set(span.spanId, participantOf(span));
+    const resolved = isOutgoingCall(span) && parent ? lifelineOf(parent) : participantOf(span);
+    lifelines.set(span.spanId, resolved);
+    return resolved;
+  };
+
+  /**
    * A span that opened a transaction: the interceptor committed inside it.
    *
    * In this codebase that is every Spring Data repository method, because nothing above
@@ -367,9 +411,9 @@ function emitTrace(
     const parentSpan = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
     if (span.name === TRANSACTION_COMMIT && parentSpan && opensTransaction(parentSpan)) return;
 
-    const p = participantOf(span);
+    const p = lifelineOf(span);
     const parent = parentSpan;
-    const pp = parent ? participantOf(parent) : undefined;
+    const pp = parent ? lifelineOf(parent) : undefined;
     const crossing = pp !== undefined && pp !== p;
     // A repository call is drawn as a call: a self-hop, an activation, and its statements
     // fired from inside it. That is the shape a reader expects of a method that queries,
@@ -420,16 +464,20 @@ function emitTrace(
       // opened is called `SELECT petclinic.owners`.
       const title = p === 'DB' ? text : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
-      const label = linkLabel(text, collector, title, steps, tooltip);
+      // PlantUML gives a message label exactly one link, so the two candidates take turns:
+      // the ⊕ that unfolds the SQL or the JSON body wins where there is something to unfold,
+      // and where there is not the slot is free for the code the span was opened on.
+      // `notify-visit-booked` is that case — a crossing @WithSpan arrow that reveals nothing,
+      // and until this it was the only kind of arrow in the picture with no way back to its method.
+      const label = steps.length > 0
+        ? linkLabel(text, collector, title, steps, tooltip)
+        : linkedMethodLabel(text, methodLinks(span));
       out.push(`${pumlName(pp!)} -> ${pumlName(p)}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {
       // a self-span (e.g. @WithSpan) whose children — DB calls, downstream
       // requests — render inside its own lifetime
       present.add(p);
-      // The one arrow with a free link slot: a crossing arrow already spends its on the
-      // ⊕ that unfolds the SQL or the JSON body, and PlantUML gives a message label
-      // exactly one link. So this is where the picture can point at the code.
       out.push(`${pumlName(p)} -> ${pumlName(p)}: ${linkedMethodLabel(span.name, methodLinks(span))}`);
     }
 
