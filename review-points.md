@@ -128,6 +128,7 @@ this will show up as a new-code finding on a pre-existing violation.
 - file: petclinic-backend/src/main/resources/db/migration/V4__visit_vet.sql:5
 - alternative: the default RESTRICT — a vet who has attended anything can no longer be
   deleted, and `DELETE /api/vets/{id}` starts failing on real data
+- confidence: 0.55
 - why: #37 says a visit with no vet is normal and "never an error", so a vet's departure
   landing their old visits in that case is the reading that keeps the ticket's own rule
   true. RESTRICT would invent a new failure mode the ticket never asks for.
@@ -136,33 +137,57 @@ The index on `vet_id` is there for the same reason, not for searching (which is
 explicitly out of scope): without it the FK check behind a vet delete scans `visits`.
 It matches how `pet_id` and `owner_id` are already indexed.
 
+The confidence is barely above a coin flip because #37 never mentions deleting a vet at
+all — I inferred the rule from a sentence written about booking — and the ticket's own
+insistence that historical visits keep their state cuts the other way just as well: a
+clinic that wants to know who saw the animal in 2024 would rather the delete failed than
+have the answer quietly erased.
+
 ### An unknown vetId is a 404, not a quietly unattended visit
 - file: petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java:93
 - alternative: the house `petOfId` pattern — build a `Vet` carrying only the id, run no
   query, and let the foreign key reject a bad one as a 500
+- confidence: 0.7
 - why: `petId` already takes the stub route, so consistency argued for it; correctness
   won. A typo'd vet id is a client error and reads like one, at the cost of one lean
   query per booking.
 
+#37 says nothing about bad input, so none of this came from the ticket — but every other
+unknown id in this codebase already answers 404 through `.orElseThrow()`, and only
+`petOfId` pulls the other way. That precedent is what holds the number up; the
+consistency argument is what keeps it off 0.9.
+
 ### A visit with no vet reads "none", and the dropdown offers "-- none --"
 - file: petclinic-frontend/src/app/visits/visit.ts:14
 - alternative: an em dash, or leaving the cell empty and letting the reader infer
+- confidence: 0.9
 - why: #37's fourth requirement is that the visit reads as *having none* — not "Unknown",
   not blank-because-broken. A blank cell is indistinguishable from a failed load, which
   is the thing the requirement rules out.
+
+The highest number here, because this is the one decision the ticket argues out loud and
+even names the wrong answers. It is not 1.0 only because the ticket dictates the meaning
+and not the string: an em dash would satisfy every word of the requirement too.
 
 ### The seed gives some visits a vet and deliberately withholds one from others
 - file: petclinic-backend/src/main/resources/db/seed/R__seed.sql:118
 - alternative: leave every seeded visit unattended, since the ticket only says old rows
   keep no vet
+- confidence: 0.45
 - why: a demo dataset where nothing has a vet cannot show the feature at all, and one
   where everything does never exercises the "none" rendering. The older batch (the four
   visits on Alice's cats) stays vet-less as the pre-change history; Milton's three cover
   both.
 
+Below a coin flip, and the entry I most expect to be argued with: #37 does not mention
+the seed, and its sentence about pre-existing rows keeping no vet reads, taken strictly,
+as an instruction to leave the dataset alone. I weighted demo value over that strict
+reading, and which vet got which visit is invention with no source but my own taste.
+
 ### The vet rides on VisitDto as three flat fields, not a nested VetDto
 - file: petclinic-backend/src/main/java/victor/training/petclinic/rest/dto/VisitDto.java:46
 - alternative: `vet: VetDto`, the shape the vet screens already speak
+- confidence: 0.8
 - why: `VisitDto` already flattens the owner into `ownerId`/`ownerFirstName`/
   `ownerLastName`, and a nested `VetDto` carries `specialties`, which would put a vet's
   whole specialty list on every row of the all-visits table.
@@ -171,13 +196,21 @@ It matches how `pet_id` and `owner_id` are already indexed.
 - file: petclinic-backend/src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:48
 - alternative: read "everywhere throughout the app" to include the MCP surface and let the
   assistant book with a vet
+- confidence: 0.6
 - why: the ticket's own four requirements name the booking form, the edit form, the
   owner's page and the all-visits screen. The MCP tools keep booking without a vet, which
   is a valid visit under this change, so nothing there breaks.
 
+The number is low because #37 contradicts itself on exactly this point: its opening line
+says the vet should show "everywhere throughout the app", and its third requirement then
+narrows that to "today that means the owner's page and the all-visits screen". I took the
+narrowing as the operative one, but `list_visits` does show an owner their visits with
+details, so a reader who weights the opening line will say I left a screen out.
+
 ### Two generated files were written by hand because their generators cannot run here
 - file: petclinic-frontend/src/app/generated/api-types.ts:346
 - alternative: leave them stale and let CI's regenerate-and-auto-commit fix them
+- confidence: 0.85
 - why: stale TS types mean `visit.vetId` does not compile, so the working tree would not
   build for anyone who pulled it.
 
@@ -188,3 +221,9 @@ pre-commit hook bootstrapped its own venv, regenerated the file, and staged a re
 byte-identical to what I had written. The frontend's Karma suite and `ng build` could not
 be run at all for the same reason; the backend suite, Spotless and every guardrail test
 are green.
+
+This entry is a confession about the environment, not a reading of #37, so its number
+scores something narrower than the others: how sure I am that hand-writing beat leaving
+the files stale. Quite sure — stale types break the build for whoever pulls next — and
+`DB.puml` came back byte-identical from the real generator, which is as close to proof as
+this gets. It is not higher because `api-types.ts` got no such check.
