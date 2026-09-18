@@ -37,14 +37,6 @@ public class BasicAuthenticationConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests((authz) -> authz
-                // The fake SMS gateway: an endpoint this application calls on itself, right after
-                // a visit is booked, to show the trace context crossing a socket. The caller is the
-                // backend, not a user, and it carries no credentials — so the one hole is opened
-                // here explicitly rather than by weakening anything the users reach.
-                // Spelled as a literal on purpose: the path lives in
-                // notification.FakeSmsGatewayController.PATH, and this package may not depend on
-                // that one (C3ArchTest / PackagesArchTest check the package graph).
-                .requestMatchers("/api/fake-sms").permitAll()
                 .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults());
         // @formatter:on
