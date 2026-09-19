@@ -15,7 +15,8 @@ public interface VisitRepository extends Repository<Visit, Integer> {
 
     List<Visit> findAll();
 
-    @Query("SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner")
+    // LEFT on the vet, and only there: a visit without one still belongs on the list.
+    @Query("SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner LEFT JOIN FETCH v.vet")
     List<Visit> findAllWithPetAndOwner();
 
     void delete(Visit visit);

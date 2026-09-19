@@ -70,19 +70,35 @@ public class VisitSteps {
         http.rememberId("visit:current", visitId);
     }
 
+    @Given("a visit for {string} on {string} described as {string} attended by vet {string}")
+    public void aVisitAttendedByVet(String petName, String date, String description, String vetLastName) {
+        int petId = http.idOf("pet:" + petName);
+        Integer vetId = jdbc.queryForObject(
+                "SELECT id FROM vets WHERE last_name = ?", Integer.class, vetLastName);
+        Integer visitId = jdbc.queryForObject(
+                "INSERT INTO visits (pet_id, visit_date, description, vet_id)"
+                        + " VALUES (?, ?, ?, ?) RETURNING id",
+                Integer.class, petId, LocalDate.parse(date), description, vetId);
+        http.rememberId("visit:current", visitId);
+    }
+
     @When("I update that visit's description to {string}")
     public void iUpdateVisitDescription(String newDescription) {
         int visitId = http.idOf("visit:current");
         var existing = RestAssured.given().baseUri(http.baseUri()).get("/api/visits/" + visitId);
         assertThat(existing.statusCode()).isEqualTo(200);
 
+        // PUT replaces the whole visit, so every field it does not resend is cleared — vetId
+        // included. Read it back off the GET rather than omitting it, or renaming a visit
+        // would quietly unassign the vet who attended it.
         String body = """
-                {"id":%d,"petId":%d,"date":"%s","description":"%s"}
+                {"id":%d,"petId":%d,"date":"%s","description":"%s","vetId":%s}
                 """.formatted(
                 visitId,
                 existing.jsonPath().getInt("petId"),
                 existing.jsonPath().getString("date"),
-                newDescription);
+                newDescription,
+                existing.jsonPath().get("vetId"));
 
         http.setLastResponse(RestAssured.given()
                 .baseUri(http.baseUri())
@@ -97,5 +113,13 @@ public class VisitSteps {
         var response = RestAssured.given().baseUri(http.baseUri()).get("/api/visits/" + visitId);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.jsonPath().getString("description")).isEqualTo(expected);
+    }
+
+    @Then("the visit is still attended by vet {string}")
+    public void theVisitIsStillAttendedBy(String vetLastName) {
+        int visitId = http.idOf("visit:current");
+        var response = RestAssured.given().baseUri(http.baseUri()).get("/api/visits/" + visitId);
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.jsonPath().getString("vetLastName")).isEqualTo(vetLastName);
     }
 }

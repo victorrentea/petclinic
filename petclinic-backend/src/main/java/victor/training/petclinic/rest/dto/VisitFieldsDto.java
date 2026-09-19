@@ -19,6 +19,12 @@ public class VisitFieldsDto {
     @Schema(example = "rabies shot", description = "The description for the visit.")
     private String description;
 
+    // Absent and explicitly null mean the same thing here — no vet — so that clearing the
+    // field in the edit form persists as empty instead of silently keeping the old vet.
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet attending the visit; null for none.")
+    private @Nullable Integer vetId;
+
     public LocalDate getDate() {
         return date;
     }
@@ -33,5 +39,13 @@ public class VisitFieldsDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
     }
 }
