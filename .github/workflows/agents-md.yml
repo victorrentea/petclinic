@@ -33,8 +33,17 @@ jobs:
         run: |
           set -e
           echo "core.symlinks = $(git config --get core.symlinks || echo '<unset>')"
-          for f in AGENTS.md petclinic-backend/AGENTS.md petclinic-test/AGENTS.md; do
+          # Every tracked AGENTS.md, not a hardcoded list: a module added tomorrow
+          # gets covered the day it appears, not the day someone remembers this file.
+          for f in $(git ls-files '*AGENTS.md'); do
             bytes=$(wc -c <"$f" | tr -d ' ')
+            # A stub always *has* content — the target path, e.g. "CLAUDE.md". An empty
+            # file cannot be one, and petclinic-backend/AGENTS.md is empty on purpose
+            # (its text was parked as demo material in 3175741), so 0 bytes is not a bug.
+            if [ "$bytes" -eq 0 ]; then
+              echo "$f -> empty on purpose; nothing here to mistake for a symlink target"
+              continue
+            fi
             echo "$f -> ${bytes} bytes"
             if [ "$bytes" -lt 200 ]; then
               echo "::error file=$f::Only ${bytes} bytes after a Windows checkout — this is a symlink stub, not instructions."
