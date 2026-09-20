@@ -20,6 +20,6 @@ Feature: Record which vet attends a visit
     Then that pet's history names the vet who attended
     And the clinic's visit list names that same vet against the visit
 
-  Scenario: A visit nobody attended says so, rather than saying nothing
+  Scenario: A visit need not be set a vet
     When I book a visit for that pet with nobody attending
     Then that pet's history says nobody attended
