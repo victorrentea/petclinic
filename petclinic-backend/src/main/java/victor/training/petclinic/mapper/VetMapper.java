@@ -34,12 +34,11 @@ public class VetMapper {
     }
 
     public VetDto toVetDto(Vet vet) {
-        VetDto vetDto = new VetDto();
-        vetDto.setFirstName(vet.getFirstName());
-        vetDto.setLastName(vet.getLastName());
-        vetDto.setSpecialties(specialtyMapper.toSpecialtyDtos(vet.getSpecialties()));
-        vetDto.setId(vet.getId());
-        return vetDto;
+        return new VetDto()
+                .setFirstName(vet.getFirstName())
+                .setLastName(vet.getLastName())
+                .setSpecialties(specialtyMapper.toSpecialtyDtos(vet.getSpecialties()))
+                .setId(vet.getId());
     }
 
     public List<VetDto> toVetDtos(List<Vet> vets) {

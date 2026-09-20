@@ -38,31 +38,35 @@ public class VetDto {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public VetDto setFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public VetDto setLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
 
     public List<SpecialtyDto> getSpecialties() {
         return specialties;
     }
 
-    public void setSpecialties(List<SpecialtyDto> specialties) {
+    public VetDto setSpecialties(List<SpecialtyDto> specialties) {
         this.specialties = specialties;
+        return this;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public VetDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 }

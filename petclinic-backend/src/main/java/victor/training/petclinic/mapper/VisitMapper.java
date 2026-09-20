@@ -32,19 +32,19 @@ public class VisitMapper {
     public VisitDto toVisitDto(Visit visit) {
         Pet pet = visit.getPet();
         Owner owner = pet == null ? null : pet.getOwner();
-        VisitDto visitDto = new VisitDto();
+        VisitDto visitDto = new VisitDto()
+                .setDate(visit.getDate())
+                .setDescription(visit.getDescription())
+                .setId(visit.getId());
         if (pet != null) {
-            visitDto.setPetId(pet.getId());
-            visitDto.setPetName(pet.getName());
+            visitDto.setPetId(pet.getId())
+                    .setPetName(pet.getName());
         }
         if (owner != null) {
-            visitDto.setOwnerId(owner.getId());
-            visitDto.setOwnerFirstName(owner.getFirstName());
-            visitDto.setOwnerLastName(owner.getLastName());
+            visitDto.setOwnerId(owner.getId())
+                    .setOwnerFirstName(owner.getFirstName())
+                    .setOwnerLastName(owner.getLastName());
         }
-        visitDto.setDate(visit.getDate());
-        visitDto.setDescription(visit.getDescription());
-        visitDto.setId(visit.getId());
         return visitDto;
     }
 

@@ -144,9 +144,9 @@ public class VisitTest {
 
     @Test
     void create_invalid() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now());
         // missing description - validation error
 
         mockMvc.perform(post("/api/visits")
@@ -183,10 +183,10 @@ public class VisitTest {
 
     @Test
     void create_ok() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("annual checkup");
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("annual checkup");
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -199,9 +199,9 @@ public class VisitTest {
 
     @Test
     void update_ok() throws Exception {
-        VisitFieldsDto update = new VisitFieldsDto();
-        update.setDate(LocalDate.now().plusDays(1));
-        update.setDescription("updated description");
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now().plusDays(1))
+                .setDescription("updated description");
 
         mockMvc.perform(put("/api/visits/" + visitId)
                 .content(mapper.writeValueAsString(update))

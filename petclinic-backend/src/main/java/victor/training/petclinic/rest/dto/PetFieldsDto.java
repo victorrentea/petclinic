@@ -29,23 +29,26 @@ public class PetFieldsDto {
         return name;
     }
 
-    public void setName(String name) {
+    public PetFieldsDto setName(String name) {
         this.name = name;
+        return this;
     }
 
     public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
+    public PetFieldsDto setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+        return this;
     }
 
     public PetTypeDto getType() {
         return type;
     }
 
-    public void setType(PetTypeDto type) {
+    public PetFieldsDto setType(PetTypeDto type) {
         this.type = type;
+        return this;
     }
 }

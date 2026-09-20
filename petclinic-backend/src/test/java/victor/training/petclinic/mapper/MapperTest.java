@@ -73,16 +73,16 @@ class MapperTest {
 
     @Test
     void dtoToPet_rebuilds_the_owner_reference_and_the_visits() {
-        PetDto dto = new PetDto();
-        dto.setId(3);
-        dto.setName("Leo");
-        dto.setBirthDate(BIRTH_DATE);
-        dto.setOwnerId(7);
-        dto.setType(aPetTypeDto());
-        VisitDto visitDto = new VisitDto();
-        visitDto.setDescription("rabies shot");
-        visitDto.setPetId(3);
-        dto.setVisits(List.of(visitDto));
+        VisitDto visitDto = new VisitDto()
+                .setDescription("rabies shot")
+                .setPetId(3);
+        PetDto dto = new PetDto()
+                .setId(3)
+                .setName("Leo")
+                .setBirthDate(BIRTH_DATE)
+                .setOwnerId(7)
+                .setType(aPetTypeDto())
+                .setVisits(List.of(visitDto));
 
         Pet pet = petMapper.toPet(dto);
 
@@ -94,10 +94,10 @@ class MapperTest {
 
     @Test
     void fieldsDtoToPet_leaves_the_server_owned_fields_untouched() {
-        PetFieldsDto fields = new PetFieldsDto();
-        fields.setName("Leo");
-        fields.setBirthDate(BIRTH_DATE);
-        fields.setType(aPetTypeDto());
+        PetFieldsDto fields = new PetFieldsDto()
+                .setName("Leo")
+                .setBirthDate(BIRTH_DATE)
+                .setType(aPetTypeDto());
 
         Pet pet = petMapper.toPet(fields);
 
@@ -152,12 +152,12 @@ class MapperTest {
 
     @Test
     void fieldsDtoToOwner_leaves_the_id_to_the_database() {
-        OwnerFieldsDto fields = new OwnerFieldsDto();
-        fields.setFirstName("Sherlock");
-        fields.setLastName("Holmes");
-        fields.setAddress("Baker St 221B");
-        fields.setCity("London");
-        fields.setTelephone("1234567890");
+        OwnerFieldsDto fields = new OwnerFieldsDto()
+                .setFirstName("Sherlock")
+                .setLastName("Holmes")
+                .setAddress("Baker St 221B")
+                .setCity("London")
+                .setTelephone("1234567890");
 
         Owner owner = ownerMapper.toOwner(fields);
 
@@ -197,11 +197,11 @@ class MapperTest {
 
     @Test
     void dtoToVisit_keeps_only_the_pet_id() {
-        VisitDto dto = new VisitDto();
-        dto.setId(11);
-        dto.setDate(BIRTH_DATE);
-        dto.setDescription("rabies shot");
-        dto.setPetId(3);
+        VisitDto dto = new VisitDto()
+                .setId(11)
+                .setDate(BIRTH_DATE)
+                .setDescription("rabies shot")
+                .setPetId(3);
 
         Visit visit = visitMapper.toVisit(dto);
 
@@ -212,9 +212,9 @@ class MapperTest {
 
     @Test
     void fieldsDtoToVisit_carries_no_pet_at_all() {
-        VisitFieldsDto fields = new VisitFieldsDto();
-        fields.setDate(BIRTH_DATE);
-        fields.setDescription("rabies shot");
+        VisitFieldsDto fields = new VisitFieldsDto()
+                .setDate(BIRTH_DATE)
+                .setDescription("rabies shot");
 
         Visit visit = visitMapper.toVisit(fields);
 
@@ -237,10 +237,10 @@ class MapperTest {
 
     @Test
     void specialtyMaps_both_ways() {
-        SpecialtyDto dto = new SpecialtyDto();
-        dto.setId(2);
-        dto.setName("radiology");
-        dto.setDescription("limping");
+        SpecialtyDto dto = new SpecialtyDto()
+                .setId(2)
+                .setName("radiology")
+                .setDescription("limping");
 
         Specialty specialty = specialtyMapper.toSpecialty(dto);
 
@@ -255,11 +255,11 @@ class MapperTest {
     void vetMaps_both_ways_with_its_specialties() {
         SpecialtyDto specialtyDto = new SpecialtyDto();
         specialtyDto.setName("radiology");
-        VetDto dto = new VetDto();
-        dto.setId(4);
-        dto.setFirstName("James");
-        dto.setLastName("Carter");
-        dto.setSpecialties(List.of(specialtyDto));
+        VetDto dto = new VetDto()
+                .setId(4)
+                .setFirstName("James")
+                .setLastName("Carter")
+                .setSpecialties(List.of(specialtyDto));
 
         Vet vet = vetMapper.toVet(dto);
 
@@ -272,10 +272,10 @@ class MapperTest {
 
     @Test
     void fieldsDtoToVet_leaves_the_id_to_the_database() {
-        VetFieldsDto fields = new VetFieldsDto();
-        fields.setFirstName("James");
-        fields.setLastName("Carter");
-        fields.setSpecialties(List.of());
+        VetFieldsDto fields = new VetFieldsDto()
+                .setFirstName("James")
+                .setLastName("Carter")
+                .setSpecialties(List.of());
 
         Vet vet = vetMapper.toVet(fields);
 
@@ -288,11 +288,11 @@ class MapperTest {
     void userMaps_both_ways_turning_its_roles_between_a_list_and_a_set() {
         RoleDto roleDto = new RoleDto();
         roleDto.setName("OWNER_ADMIN");
-        UserDto dto = new UserDto();
-        dto.setUsername("john.doe");
-        dto.setPassword("secret");
-        dto.setEnabled(true);
-        dto.setRoles(List.of(roleDto));
+        UserDto dto = new UserDto()
+                .setUsername("john.doe")
+                .setPassword("secret")
+                .setEnabled(true)
+                .setRoles(List.of(roleDto));
 
         User user = userMapper.toUser(dto);
 
@@ -305,9 +305,9 @@ class MapperTest {
 
     @Test
     void aUserWithoutRoles_maps_to_empty_collections_never_to_null() {
-        UserDto dto = new UserDto();
-        dto.setUsername("john.doe");
-        dto.setRoles(null);
+        UserDto dto = new UserDto()
+                .setUsername("john.doe")
+                .setRoles(null);
 
         User user = userMapper.toUser(dto);
 
@@ -344,10 +344,9 @@ class MapperTest {
     }
 
     private static PetTypeDto aPetTypeDto() {
-        PetTypeDto dto = new PetTypeDto();
-        dto.setId(1);
-        dto.setName("cat");
-        return dto;
+        return new PetTypeDto()
+                .setId(1)
+                .setName("cat");
     }
 
     private static Visit aVisit(LocalDate date, String description) {

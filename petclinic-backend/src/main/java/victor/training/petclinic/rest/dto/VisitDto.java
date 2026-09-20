@@ -45,63 +45,71 @@ public class VisitDto {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public VisitDto setDate(LocalDate date) {
         this.date = date;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public VisitDto setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public VisitDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 
     public Integer getPetId() {
         return petId;
     }
 
-    public void setPetId(Integer petId) {
+    public VisitDto setPetId(Integer petId) {
         this.petId = petId;
+        return this;
     }
 
     public String getPetName() {
         return petName;
     }
 
-    public void setPetName(String petName) {
+    public VisitDto setPetName(String petName) {
         this.petName = petName;
+        return this;
     }
 
     public Integer getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(Integer ownerId) {
+    public VisitDto setOwnerId(Integer ownerId) {
         this.ownerId = ownerId;
+        return this;
     }
 
     public String getOwnerFirstName() {
         return ownerFirstName;
     }
 
-    public void setOwnerFirstName(String ownerFirstName) {
+    public VisitDto setOwnerFirstName(String ownerFirstName) {
         this.ownerFirstName = ownerFirstName;
+        return this;
     }
 
     public String getOwnerLastName() {
         return ownerLastName;
     }
 
-    public void setOwnerLastName(String ownerLastName) {
+    public VisitDto setOwnerLastName(String ownerLastName) {
         this.ownerLastName = ownerLastName;
+        return this;
     }
 }

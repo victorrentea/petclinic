@@ -29,15 +29,48 @@ public class OwnerDto extends OwnerFieldsDto {
         return id;
     }
 
-    public void setId(Integer id) {
+    public OwnerDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 
     public List<PetDto> getPets() {
         return pets;
     }
 
-    public void setPets(List<PetDto> pets) {
+    public OwnerDto setPets(List<PetDto> pets) {
         this.pets = pets;
+        return this;
+    }
+
+    // Covariant overrides: keep the OwnerDto type while chaining the inherited setters.
+    @Override
+    public OwnerDto setFirstName(String firstName) {
+        super.setFirstName(firstName);
+        return this;
+    }
+
+    @Override
+    public OwnerDto setLastName(String lastName) {
+        super.setLastName(lastName);
+        return this;
+    }
+
+    @Override
+    public OwnerDto setAddress(String address) {
+        super.setAddress(address);
+        return this;
+    }
+
+    @Override
+    public OwnerDto setCity(String city) {
+        super.setCity(city);
+        return this;
+    }
+
+    @Override
+    public OwnerDto setTelephone(String telephone) {
+        super.setTelephone(telephone);
+        return this;
     }
 }

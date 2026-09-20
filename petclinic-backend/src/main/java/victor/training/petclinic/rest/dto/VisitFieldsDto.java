@@ -23,15 +23,17 @@ public class VisitFieldsDto {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public VisitFieldsDto setDate(LocalDate date) {
         this.date = date;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public VisitFieldsDto setDescription(String description) {
         this.description = description;
+        return this;
     }
 }

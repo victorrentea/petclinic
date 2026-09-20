@@ -13,7 +13,8 @@ public class PetTypeFieldsDto {
         return name;
     }
 
-    public void setName(String name) {
+    public PetTypeFieldsDto setName(String name) {
         this.name = name;
+        return this;
     }
 }

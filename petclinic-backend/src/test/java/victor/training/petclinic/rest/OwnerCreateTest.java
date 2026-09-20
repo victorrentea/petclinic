@@ -87,12 +87,12 @@ class OwnerCreateTest {
 
     @Test
     void addOwner_created() throws Exception {
-        OwnerFieldsDto dto = new OwnerFieldsDto();
-        dto.setFirstName("Nikola");
-        dto.setLastName("Tesla");
-        dto.setAddress("10 Coil Ave");
-        dto.setCity("Smiljan");
-        dto.setTelephone("0700000111");
+        OwnerFieldsDto dto = new OwnerFieldsDto()
+                .setFirstName("Nikola")
+                .setLastName("Tesla")
+                .setAddress("10 Coil Ave")
+                .setCity("Smiljan")
+                .setTelephone("0700000111");
 
         mockMvc.perform(post("/api/owners")
                 .content(mapper.writeValueAsString(dto))
@@ -105,12 +105,12 @@ class OwnerCreateTest {
 
     @Test
     void addOwner_invalid_isBadRequest() throws Exception {
-        OwnerFieldsDto dto = new OwnerFieldsDto();
-        dto.setFirstName(""); // violates @Size(min=1)
-        dto.setLastName("Tesla");
-        dto.setAddress("10 Coil Ave");
-        dto.setCity("Smiljan");
-        dto.setTelephone("0700000111");
+        OwnerFieldsDto dto = new OwnerFieldsDto()
+                .setFirstName("") // violates @Size(min=1)
+                .setLastName("Tesla")
+                .setAddress("10 Coil Ave")
+                .setCity("Smiljan")
+                .setTelephone("0700000111");
 
         mockMvc.perform(post("/api/owners")
                 .content(mapper.writeValueAsString(dto))
@@ -120,13 +120,13 @@ class OwnerCreateTest {
 
     @Test
     void addPetToOwner_created() throws Exception {
-        PetFieldsDto dto = new PetFieldsDto();
-        dto.setName("Spike");
-        dto.setBirthDate(LocalDate.of(2022, 1, 1));
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        dto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+                .setId(petType.getId())
+                .setName(petType.getName());
+        PetFieldsDto dto = new PetFieldsDto()
+                .setName("Spike")
+                .setBirthDate(LocalDate.of(2022, 1, 1))
+                .setType(typeDto);
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets")
                 .content(mapper.writeValueAsString(dto))
@@ -137,9 +137,9 @@ class OwnerCreateTest {
 
     @Test
     void addVisitToOwner_created() throws Exception {
-        VisitFieldsDto dto = new VisitFieldsDto();
-        dto.setDate(LocalDate.of(2026, 6, 1));
-        dto.setDescription("Routine checkup");
+        VisitFieldsDto dto = new VisitFieldsDto()
+                .setDate(LocalDate.of(2026, 6, 1))
+                .setDescription("Routine checkup");
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
                 .content(mapper.writeValueAsString(dto))

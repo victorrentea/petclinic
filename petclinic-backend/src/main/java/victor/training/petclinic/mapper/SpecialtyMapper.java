@@ -19,11 +19,10 @@ public class SpecialtyMapper {
     }
 
     public SpecialtyDto toSpecialtyDto(Specialty specialty) {
-        SpecialtyDto specialtyDto = new SpecialtyDto();
-        specialtyDto.setId(specialty.getId());
-        specialtyDto.setName(specialty.getName());
-        specialtyDto.setDescription(specialty.getDescription());
-        return specialtyDto;
+        return new SpecialtyDto()
+                .setId(specialty.getId())
+                .setName(specialty.getName())
+                .setDescription(specialty.getDescription());
     }
 
     public List<SpecialtyDto> toSpecialtyDtos(List<Specialty> specialties) {
