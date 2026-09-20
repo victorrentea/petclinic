@@ -34,25 +34,25 @@ public class VisitMapper {
         Pet pet = visit.getPet();
         Owner owner = pet == null ? null : pet.getOwner();
         Vet vet = visit.getVet();
-        VisitDto visitDto = new VisitDto();
+        VisitDto visitDto = new VisitDto()
+                .setDate(visit.getDate())
+                .setDescription(visit.getDescription())
+                .setId(visit.getId());
         if (pet != null) {
-            visitDto.setPetId(pet.getId());
-            visitDto.setPetName(pet.getName());
+            visitDto.setPetId(pet.getId())
+                    .setPetName(pet.getName());
         }
         if (owner != null) {
-            visitDto.setOwnerId(owner.getId());
-            visitDto.setOwnerFirstName(owner.getFirstName());
-            visitDto.setOwnerLastName(owner.getLastName());
+            visitDto.setOwnerId(owner.getId())
+                    .setOwnerFirstName(owner.getFirstName())
+                    .setOwnerLastName(owner.getLastName());
         }
         // Left null when nobody is assigned: the visit has no vet, which is not an error.
         if (vet != null) {
-            visitDto.setVetId(vet.getId());
-            visitDto.setVetFirstName(vet.getFirstName());
-            visitDto.setVetLastName(vet.getLastName());
+            visitDto.setVetId(vet.getId())
+                    .setVetFirstName(vet.getFirstName())
+                    .setVetLastName(vet.getLastName());
         }
-        visitDto.setDate(visit.getDate());
-        visitDto.setDescription(visit.getDescription());
-        visitDto.setId(visit.getId());
         return visitDto;
     }
 

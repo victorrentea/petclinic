@@ -19,15 +19,17 @@ public class PetTypeDto {
         return name;
     }
 
-    public void setName(String name) {
+    public PetTypeDto setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public PetTypeDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 }

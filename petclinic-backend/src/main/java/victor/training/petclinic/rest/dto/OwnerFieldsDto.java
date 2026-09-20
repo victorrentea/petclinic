@@ -35,39 +35,44 @@ public class OwnerFieldsDto {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public OwnerFieldsDto setFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public OwnerFieldsDto setLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public OwnerFieldsDto setAddress(String address) {
         this.address = address;
+        return this;
     }
 
     public String getCity() {
         return city;
     }
 
-    public void setCity(String city) {
+    public OwnerFieldsDto setCity(String city) {
         this.city = city;
+        return this;
     }
 
     public String getTelephone() {
         return telephone;
     }
 
-    public void setTelephone(String telephone) {
+    public OwnerFieldsDto setTelephone(String telephone) {
         this.telephone = telephone;
+        return this;
     }
 }

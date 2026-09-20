@@ -24,16 +24,16 @@ public class PetMapper {
     }
 
     public PetDto toPetDto(Pet pet) {
-        PetDto petDto = new PetDto();
+        PetDto petDto = new PetDto()
+                .setVisits(visitMapper.toVisitsDto(pet.getVisitsSortedByDate()))
+                .setName(pet.getName())
+                .setBirthDate(pet.getBirthDate())
+                .setType(toPetTypeDto(pet.getType()))
+                .setId(pet.getId());
         Owner owner = pet.getOwner();
         if (owner != null) {
             petDto.setOwnerId(owner.getId());
         }
-        petDto.setVisits(visitMapper.toVisitsDto(pet.getVisitsSortedByDate()));
-        petDto.setName(pet.getName());
-        petDto.setBirthDate(pet.getBirthDate());
-        petDto.setType(toPetTypeDto(pet.getType()));
-        petDto.setId(pet.getId());
         return petDto;
     }
 
@@ -82,10 +82,9 @@ public class PetMapper {
         if (petType == null) {
             return null;
         }
-        PetTypeDto petTypeDto = new PetTypeDto();
-        petTypeDto.setName(petType.getName());
-        petTypeDto.setId(petType.getId());
-        return petTypeDto;
+        return new PetTypeDto()
+                .setName(petType.getName())
+                .setId(petType.getId());
     }
 
     public PetType toPetType(PetTypeDto petTypeDto) {

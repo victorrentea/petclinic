@@ -24,12 +24,11 @@ public class UserMapper {
     }
 
     public UserDto toUserDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUsername(user.getUsername());
-        userDto.setPassword(user.getPassword());
-        userDto.setEnabled(user.getEnabled());
-        userDto.setRoles(toRoleDtos(user.getRoles()));
-        return userDto;
+        return new UserDto()
+                .setUsername(user.getUsername())
+                .setPassword(user.getPassword())
+                .setEnabled(user.getEnabled())
+                .setRoles(toRoleDtos(user.getRoles()));
     }
 
     private Role toRole(RoleDto roleDto) {

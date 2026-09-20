@@ -15,7 +15,8 @@ public class RoleDto {
         return name;
     }
 
-    public void setName(String name) {
+    public RoleDto setName(String name) {
         this.name = name;
+        return this;
     }
 }

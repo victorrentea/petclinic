@@ -17,15 +17,14 @@ public class OwnerMapper {
     }
 
     public OwnerDto toOwnerDto(Owner owner) {
-        OwnerDto ownerDto = new OwnerDto();
-        ownerDto.setId(owner.getId());
-        ownerDto.setFirstName(owner.getFirstName());
-        ownerDto.setLastName(owner.getLastName());
-        ownerDto.setAddress(owner.getAddress());
-        ownerDto.setCity(owner.getCity());
-        ownerDto.setTelephone(owner.getTelephone());
-        ownerDto.setPets(petMapper.toPetsDto(owner.getPets()));
-        return ownerDto;
+        return new OwnerDto()
+                .setId(owner.getId())
+                .setFirstName(owner.getFirstName())
+                .setLastName(owner.getLastName())
+                .setAddress(owner.getAddress())
+                .setCity(owner.getCity())
+                .setTelephone(owner.getTelephone())
+                .setPets(petMapper.toPetsDto(owner.getPets()));
     }
 
     public Owner toOwner(OwnerFieldsDto ownerDto) {

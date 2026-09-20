@@ -29,23 +29,26 @@ public class VetFieldsDto {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
+    public VetFieldsDto setFirstName(String firstName) {
         this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
+    public VetFieldsDto setLastName(String lastName) {
         this.lastName = lastName;
+        return this;
     }
 
     public List<SpecialtyDto> getSpecialties() {
         return specialties;
     }
 
-    public void setSpecialties(List<SpecialtyDto> specialties) {
+    public VetFieldsDto setSpecialties(List<SpecialtyDto> specialties) {
         this.specialties = specialties;
+        return this;
     }
 }

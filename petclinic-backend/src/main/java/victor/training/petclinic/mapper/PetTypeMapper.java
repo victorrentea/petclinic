@@ -18,10 +18,9 @@ public class PetTypeMapper {
     }
 
     public PetTypeDto toPetTypeDto(PetType petType) {
-        PetTypeDto petTypeDto = new PetTypeDto();
-        petTypeDto.setName(petType.getName());
-        petTypeDto.setId(petType.getId());
-        return petTypeDto;
+        return new PetTypeDto()
+                .setName(petType.getName())
+                .setId(petType.getId());
     }
 
     public PetTypeFieldsDto toPetTypeFieldsDto(PetType petType) {

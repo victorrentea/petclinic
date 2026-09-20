@@ -157,9 +157,9 @@ public class VisitTest {
 
     @Test
     void create_invalid() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now());
         // missing description - validation error
 
         mockMvc.perform(post("/api/visits")
@@ -196,10 +196,10 @@ public class VisitTest {
 
     @Test
     void create_ok() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("annual checkup");
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("annual checkup");
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -212,9 +212,9 @@ public class VisitTest {
 
     @Test
     void update_ok() throws Exception {
-        VisitFieldsDto update = new VisitFieldsDto();
-        update.setDate(LocalDate.now().plusDays(1));
-        update.setDescription("updated description");
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now().plusDays(1))
+                .setDescription("updated description");
 
         mockMvc.perform(put("/api/visits/" + visitId)
                 .content(mapper.writeValueAsString(update))
@@ -229,10 +229,10 @@ public class VisitTest {
 
     @Test
     void create_withoutVet_leavesItUnassigned() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("no vet yet");
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("no vet yet");
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -248,11 +248,11 @@ public class VisitTest {
 
     @Test
     void create_withVet_recordsWhoAttends() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("attended checkup");
-        newVisit.setVetId(vetId);
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("attended checkup")
+                .setVetId(vetId);
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -268,10 +268,10 @@ public class VisitTest {
 
     @Test
     void bookingUnderTheOwnerRecordsTheVet() throws Exception {
-        VisitFieldsDto booking = new VisitFieldsDto();
-        booking.setDate(LocalDate.now());
-        booking.setDescription("booked with a vet");
-        booking.setVetId(vetId);
+        VisitFieldsDto booking = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("booked with a vet")
+                .setVetId(vetId);
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
                 .content(mapper.writeValueAsString(booking))
@@ -287,11 +287,11 @@ public class VisitTest {
 
     @Test
     void create_unknownVet_notFound() throws Exception {
-        VisitDto newVisit = new VisitDto();
-        newVisit.setPetId(petId);
-        newVisit.setDate(LocalDate.now());
-        newVisit.setDescription("booked with a ghost");
-        newVisit.setVetId(99999);
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("booked with a ghost")
+                .setVetId(99999);
 
         mockMvc.perform(post("/api/visits")
                 .content(mapper.writeValueAsString(newVisit))
@@ -301,10 +301,10 @@ public class VisitTest {
 
     @Test
     void update_assignsTheVet() throws Exception {
-        VisitFieldsDto update = new VisitFieldsDto();
-        update.setDate(LocalDate.now());
-        update.setDescription("rabies shot");
-        update.setVetId(vetId);
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("rabies shot")
+                .setVetId(vetId);
 
         mockMvc.perform(put("/api/visits/" + visitId)
                 .content(mapper.writeValueAsString(update))

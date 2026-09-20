@@ -47,47 +47,53 @@ public class PetDto {
         return name;
     }
 
-    public void setName(String name) {
+    public PetDto setName(String name) {
         this.name = name;
+        return this;
     }
 
     public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
+    public PetDto setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+        return this;
     }
 
     public PetTypeDto getType() {
         return type;
     }
 
-    public void setType(PetTypeDto type) {
+    public PetDto setType(PetTypeDto type) {
         this.type = type;
+        return this;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public PetDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 
     public Integer getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(Integer ownerId) {
+    public PetDto setOwnerId(Integer ownerId) {
         this.ownerId = ownerId;
+        return this;
     }
 
     public List<VisitDto> getVisits() {
         return visits;
     }
 
-    public void setVisits(List<VisitDto> visits) {
+    public PetDto setVisits(List<VisitDto> visits) {
         this.visits = visits;
+        return this;
     }
 }

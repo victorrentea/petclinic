@@ -226,13 +226,13 @@ public class OwnerTest {
 
     @Test
     void createPet_invalid() throws Exception {
-        PetDto newPet = new PetDto();
+        PetTypeDto typeDto = new PetTypeDto()
+                .setId(petType.getId())
+                .setName(petType.getName());
         // missing name - validation error
-        newPet.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        newPet.setType(typeDto);
+        PetDto newPet = new PetDto()
+                .setBirthDate(LocalDate.now())
+                .setType(typeDto);
 
         mockMvc.perform(post("/api/owners/" + ownerId + "/pets")
                 .content(mapper.writeValueAsString(newPet))
@@ -263,14 +263,14 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_ok() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setId(petId);
-        petDto.setName("Rosy Updated");
-        petDto.setBirthDate(LocalDate.of(2020, 1, 15));
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+                .setId(petType.getId())
+                .setName(petType.getName());
+        PetDto petDto = new PetDto()
+                .setId(petId)
+                .setName("Rosy Updated")
+                .setBirthDate(LocalDate.of(2020, 1, 15))
+                .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/" + ownerId + "/pets/" + petId)
                 .content(mapper.writeValueAsString(petDto))
@@ -280,13 +280,13 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_ownerNotFound() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setName("Thor");
-        petDto.setBirthDate(LocalDate.now());
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+                .setId(petType.getId())
+                .setName(petType.getName());
+        PetDto petDto = new PetDto()
+                .setName("Thor")
+                .setBirthDate(LocalDate.now())
+                .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/99999/pets/" + petId)
                 .content(mapper.writeValueAsString(petDto))
@@ -296,13 +296,13 @@ public class OwnerTest {
 
     @Test
     void updateOwnerPet_petNotFound() throws Exception {
-        PetDto petDto = new PetDto();
-        petDto.setName("Ghost");
-        petDto.setBirthDate(LocalDate.of(2020, 1, 1));
-        PetTypeDto typeDto = new PetTypeDto();
-        typeDto.setId(petType.getId());
-        typeDto.setName(petType.getName());
-        petDto.setType(typeDto);
+        PetTypeDto typeDto = new PetTypeDto()
+                .setId(petType.getId())
+                .setName(petType.getName());
+        PetDto petDto = new PetDto()
+                .setName("Ghost")
+                .setBirthDate(LocalDate.of(2020, 1, 1))
+                .setType(typeDto);
 
         mockMvc.perform(put("/api/owners/" + ownerId + "/pets/99999")
                 .content(mapper.writeValueAsString(petDto))

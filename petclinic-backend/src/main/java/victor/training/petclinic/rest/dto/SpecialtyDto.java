@@ -24,23 +24,26 @@ public class SpecialtyDto {
         return id;
     }
 
-    public void setId(Integer id) {
+    public SpecialtyDto setId(Integer id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public SpecialtyDto setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public SpecialtyDto setDescription(String description) {
         this.description = description;
+        return this;
     }
 }
