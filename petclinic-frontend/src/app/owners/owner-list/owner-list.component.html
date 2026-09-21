@@ -6,7 +6,7 @@
           class="form-horizontal" id="search-owner-form">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
+          <label class="col-sm-2 control-label" for="lastName">Last name </label>
           <div class="col-sm-10">
             <input class="form-control" size="30"
               maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
@@ -22,23 +22,40 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="!ownerPage">No owners with LastName starting with "{{appliedLastName}}"</div>
+    <div class="table-responsive" id="ownersTable" *ngIf="ownerPage">
+      <table class="table table-striped owners-grid">
+        <!-- Fixed widths: without them every page and every re-sort re-measures the
+            columns against its own 10 rows, so the grid jumps as you page through it. -->
+        <colgroup>
+          <col class="col-owner-name"/>
+          <col class="col-owner-address"/>
+          <col class="col-owner-city"/>
+          <col class="col-owner-telephone"/>
+          <col class="col-owner-pets"/>
+        </colgroup>
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
+          <th scope="col" class="owners-sortable" [attr.aria-sort]="ariaSort('name')">
+            <button type="button" class="owners-sort" id="sortByName" (click)="sortBy('name')">
+              Name <span class="owners-sort-indicator" aria-hidden="true">{{ sortIndicator('name') }}</span>
+            </button>
+          </th>
+          <th scope="col">Address</th>
+          <th scope="col" class="owners-sortable" [attr.aria-sort]="ariaSort('city')">
+            <button type="button" class="owners-sort" id="sortByCity" (click)="sortBy('city')">
+              City <span class="owners-sort-indicator" aria-hidden="true">{{ sortIndicator('city') }}</span>
+            </button>
+          </th>
+          <th scope="col">Telephone</th>
+          <th scope="col">Pets</th>
         </tr>
         </thead>
 
         <tbody>
         <tr *ngFor="let owner of owners">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+            (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
@@ -50,6 +67,26 @@
         </tr>
         </tbody>
       </table>
+
+      <div class="owners-controls" data-test="owners-paginator">
+        <div class="owners-page-size">
+          <label for="pageSize">Rows per page</label>
+          <app-combo
+            inputId="pageSize"
+            [options]="pageSizes"
+            [ngModel]="size"
+            (ngModelChange)="changeSize($event)"></app-combo>
+        </div>
+        <div class="owners-pagination">
+          <button type="button" class="btn btn-default" id="previousPage"
+                  [disabled]="isFirstPage" (click)="goToPage(pageIndex - 1)">Previous</button>
+          <span id="pageIndicator">Page {{ pageIndex + 1 }} of {{ totalPages }}
+            ({{ ownerPage.totalElements }} owners)</span>
+          <button type="button" class="btn btn-default" id="nextPage"
+                  [disabled]="isLastPage" (click)="goToPage(pageIndex + 1)">Next</button>
+        </div>
+      </div>
+
       <div>
         <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
       </div>

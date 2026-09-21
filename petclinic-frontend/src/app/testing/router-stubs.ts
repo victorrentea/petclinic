@@ -2,9 +2,10 @@
 export {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router';
 
 import {Component, Directive, HostListener, Injectable, Input} from '@angular/core';
-import {NavigationExtras} from '@angular/router';
+import {convertToParamMap, NavigationExtras, ParamMap, Params} from '@angular/router';
 // Only implements params and part of snapshot.params
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 @Directive({
   selector: '[appRouterLink]',
@@ -53,5 +54,18 @@ export class ActivatedRouteStub {
   get snapshot() {
     this.testParams = {id: 1};
     return {params: this.testParams};
+  }
+
+  // ActivatedRoute.queryParamMap is Observable
+  private queryParamsSubject = new BehaviorSubject<Params>({});
+  queryParamMap: Observable<ParamMap> = this.queryParamsSubject.pipe(map(convertToParamMap));
+
+  /** Pushes a new query string at whoever is subscribed, as a real navigation would. */
+  set testQueryParams(params: Params) {
+    this.queryParamsSubject.next(params);
+  }
+
+  get testQueryParams(): Params {
+    return this.queryParamsSubject.value;
   }
 }

@@ -128,7 +128,9 @@ public class OwnerTest {
 
     @Test
     void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+        // A page wide enough to hold the whole seed: the endpoint pages now, and "all the owners"
+        // is no longer what an unparameterised call returns.
+        List<OwnerDto> owners = search("/api/owners?size=100");
 
         assertThat(owners)
                 .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
@@ -156,8 +158,10 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        // The endpoint pages: the owners live under `content`, beside totalElements/number/size.
+        return mapper.readValue(mapper.readTree(responseJson).path("content").traverse(),
+                new TypeReference<List<OwnerDto>>() {
+                });
     }
 
     @Test

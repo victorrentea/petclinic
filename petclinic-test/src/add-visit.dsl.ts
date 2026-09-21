@@ -1,5 +1,5 @@
 import {expect, Page} from '@playwright/test';
-import axios from 'axios';
+import {fetchAllOwners} from './support/api-client';
 
 // The sentences of add-visit.spec.ts, as plain functions: named for what the
 // reader of a scenario wants to see, not for the widget being clicked. The
@@ -13,9 +13,9 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!ownerWithPet) {
+  const owners = await fetchAllOwners(API_BASE);
+  const ownerWithPet = owners.find((o) => o.pets && o.pets.length > 0);
+  if (!ownerWithPet?.pets?.length) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
   return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};

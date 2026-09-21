@@ -7,7 +7,7 @@ import { HttpResponse } from '@angular/common/http';
 
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
-import { Owner } from './owner';
+import { Owner, OwnerPage } from './owner';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +48,37 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  const pageOf = (owners: Owner[]): OwnerPage => ({
+    content: owners,
+    totalElements: owners.length,
+    totalPages: 1,
+    number: 0,
+    size: 10
+  });
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+  it('asks for the first page with the default size and sort when given no query', () => {
+    ownerService
+      .listOwners()
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners), fail);
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?lastName=&page=0&size=10&sort=name,asc'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(pageOf(expectedOwners));
+  });
+
+  it('carries the whole page envelope through', () => {
+    ownerService.listOwners({page: 2, size: 5}).subscribe((page) => {
+      expect(page.number).toEqual(2);
+      expect(page.totalElements).toEqual(30);
+      expect(page.totalPages).toEqual(6);
+    }, fail);
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?lastName=&page=2&size=5&sort=name,asc'
+    );
+    req.flush({content: expectedOwners, totalElements: 30, totalPages: 6, number: 2, size: 5});
   });
 
   it('search the owner by id', () => {
@@ -131,15 +154,15 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
+  it('sends every grid control as a request parameter', () => {
+    ownerService
+      .listOwners({lastName: 'Fr', page: 1, size: 20, sort: 'city,desc'})
+      .subscribe((page) => expect(page.content).toEqual(expectedOwners));
 
     const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
+      ownerService.entityUrl + '?lastName=Fr&page=1&size=20&sort=city,desc'
     );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(pageOf(expectedOwners));
   });
 });

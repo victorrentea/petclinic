@@ -77,3 +77,64 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Only the two server-sortable columns get the affordance; the rest stay plain text. */
+th.owners-sortable {
+  padding: 0;
+}
+
+button.owners-sort {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.owners-sort:hover,
+button.owners-sort:focus {
+  text-decoration: underline;
+}
+
+.owners-sort-indicator {
+  margin-left: 4px;
+}
+
+#pageIndicator {
+  min-width: 14em;
+  text-align: center;
+}
+
+/* The column widths are the table's, not the current page's — see the colgroup comment. */
+table.owners-grid {
+  table-layout: fixed;
+}
+
+table.owners-grid th,
+table.owners-grid td {
+  overflow-wrap: break-word;
+}
+
+.col-owner-name {
+  width: 24%;
+}
+
+.col-owner-address {
+  width: 26%;
+}
+
+.col-owner-city {
+  width: 14%;
+}
+
+.col-owner-telephone {
+  width: 18%;
+}
+
+.col-owner-pets {
+  width: 18%;
+}

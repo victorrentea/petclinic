@@ -101,6 +101,16 @@ the display (search filters on last name, so search and sort would disagree, and
 people up by given name). *Scope:* only the grid. `owner-detail.component.html` keeps
 `{{firstName}} {{lastName}}` — a single record is not a sorted column.
 
+**Every client-supplied paging value is validated in the controller, not by the framework.**
+`PageRequest.of` throws `IllegalArgumentException` on `size=0` or `page=-1`, and
+`ExceptionControllerAdvice`'s `@ExceptionHandler(Exception.class)` catch-all turns that into a 500
+— the same leak the sort whitelist exists to prevent. So `page >= 0` and `1 <= size <= 1000` are
+checked before any query, raising the same `ResponseStatusException(BAD_REQUEST, ...)` the sort
+whitelist uses. *Why 1000 and inclusive:* the browser suites' `fetchAllOwners()` fixture helper
+asks for `size=1000` to get the whole clinic, so the upper bound is a documented, tested value
+rather than an arbitrary one. *Why not restrict `size` to {5,10,20}:* those three are what the grid
+offers a user; the API stays general, and the fixtures depend on that.
+
 **Grid state goes through the Router as `?lastName=&page=&size=&sort=`,** with the component
 reacting to `queryParamMap` and navigating (not re-fetching directly) on every control. One source
 of truth, deep links work, the back button works, and the e2e suites can navigate straight to a
@@ -133,6 +143,15 @@ Java ones; these four do not fail until run.
 *Generated and vendored artifacts* — `openapi.yaml` (via `OpenApiExtractorTest`; hand-editing is
 denied in `.claude/settings.json`), then `src/app/generated/api-types.ts` via
 `npm run generate:api`. `src/app/owners/owner-page.ts` is deleted once the generated type exists.
+
+*Fixtures that want the whole clinic, not a page* — three of the four browser call sites are not
+"read `content` instead": `add-visit.dsl.ts` wants the first owner **with a pet**, and both
+visit-date-range helpers take `.at(-1)`, the clinic's **last** owner, which `petclinic-test/AGENTS.md`
+mandates so they cannot race add-visit. Page 0 of `name,asc` is exactly where the `Acceptance*`
+leftovers pile up, and none of them has a pet — so a naive `content` read makes those fixtures fail
+on any dev DB with ten or more of them. They go through one `fetchAllOwners()` helper that requests
+an explicitly large page and trips if `content.length < totalElements`, rather than page-walking in
+three files.
 
 *Tooling* — `human-review.json` → `steps.dsaudit.screens` currently lists only "Book a visit" and
 "Edit a pet"; the owners grid is added so the design-system audit visits the screen this change

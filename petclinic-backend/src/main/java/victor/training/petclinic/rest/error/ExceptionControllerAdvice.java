@@ -12,12 +12,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
 import victor.training.petclinic.domain.VisitDateOutOfRangeException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -82,6 +84,20 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    // Spring's own status-carrying exception, thrown by a controller that refuses a request on a
+    // rule no annotation can express (the owners sort whitelist). Without this handler the
+    // catch-all below would turn a deliberate 400 into a 500.
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ProblemDetail> handleResponseStatus(ResponseStatusException ex,
+            HttpServletRequest request) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        String detail = Objects.requireNonNullElse(ex.getReason(), status.getReasonPhrase());
+        log.warn("Request refused with {}: {}", status.value(), detail);
+        ProblemDetail pd = buildProblemDetail(status.getReasonPhrase(), detail, status, request);
+        pd.setProperty("errors", List.of(detail));
+        return ResponseEntity.status(status).body(pd);
     }
 
     @ExceptionHandler(Exception.class)

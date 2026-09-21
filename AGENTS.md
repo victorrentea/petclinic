@@ -183,13 +183,36 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners` (paged), `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`
 - PetTypes: `/api/pettypes`
 - Specialties: `/api/specialties`
 - Users: `/api/users`
+
+### The owners list is paged, sorted and whitelisted server-side
+`GET /api/owners` returns a `Page` envelope, never a bare array — `lastName` filters,
+`page`/`size`/`sort` page and order it, defaults `0`/`10`/`name,asc`. Three rules are enforced in
+`OwnerRestController`, not in the frontend:
+- `sort` accepts exactly two keys, `name` (→ `lastName, firstName`) and `city`. Anything else,
+  including a relation path like `pets.name`, is 400. Address, telephone and pet count are not
+  sortable **by decision** — house numbers, ragged phone strings and a 0–2 range all sort into
+  nonsense; see `openspec/changes/paginate-owners-grid/design.md`.
+- `id` is appended as the last sort key by the server. Without it `LIMIT/OFFSET` over the two
+  Potters, two Darlings and six Londons in the seed can show one owner on two pages, or none.
+- `page >= 0` and `1 <= size <= 1000`, checked before any query, because `PageRequest.of` throws
+  into the catch-all advice and would otherwise 500. The 1000 is inclusive and load-bearing: the
+  browser suites' `fetchAllOwners()` asks for exactly that to fetch the whole clinic.
+
+`Owner.pets` carries `@BatchSize(size = 20)`, so a page costs 2 queries, not 1+N. `JOIN FETCH` is
+wrong here — Hibernate cannot paginate a fetched collection and silently pages in memory
+(`HHH000104`).
+
+The grid renders a name **surname first** ("Baskerville, Henry") because it is sorted by surname;
+an owner's own page still reads given-name-first. Test fixtures that build or parse a displayed
+grid name must account for that comma — `owner-search.feature` separates expected owners with `;`
+for exactly this reason.
 
 ## Domain Model
 Core entities and relationships:

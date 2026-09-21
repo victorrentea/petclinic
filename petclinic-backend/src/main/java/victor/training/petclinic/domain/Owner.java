@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -52,7 +53,11 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    // Batched, not JOIN FETCH: Hibernate cannot paginate a fetched collection in SQL — it logs
+    // HHH000104 and pages in memory after loading every row. Paging caps N at the page size;
+    // @BatchSize then turns those N selects into one, sized to cover the largest offered page.
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     private Set<Pet> pets = new HashSet<>();
 
     public List<Pet> getPets() {

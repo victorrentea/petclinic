@@ -29,15 +29,20 @@ public final class ApiExamples {
                                  { "id": 3, "name": "dentistry", "description": "teeth" } ] }
             ]""";
 
+    // A page envelope, not a bare array: GET /api/owners returns one page of owners plus the
+    // counters the grid's paginator reads.
     public static final String OWNERS = """
-            [
-              { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
-                "city": "Madison", "telephone": "6085551023",
-                "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                            "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
-              { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
-                "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
-            ]""";
+            {
+              "content": [
+                { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
+                  "city": "Madison", "telephone": "6085551023",
+                  "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
+                              "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+                { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
+                  "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
+              ],
+              "totalElements": 2, "totalPages": 1, "number": 0, "size": 10
+            }""";
 
     public static final String PETS = """
             [

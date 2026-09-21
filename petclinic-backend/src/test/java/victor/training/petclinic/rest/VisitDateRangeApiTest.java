@@ -58,7 +58,8 @@ class VisitDateRangeApiTest {
     @BeforeEach
     void createAPetWithAKnownBirthDate() throws Exception {
         bornOn = LocalDate.now().minusDays(PET_AGE_DAYS);
-        ownerId = json(mockMvc.perform(get("/api/owners")).andExpect(status().isOk())).get(0).path("id").asInt();
+        ownerId = json(mockMvc.perform(get("/api/owners")).andExpect(status().isOk()))
+                .path("content").get(0).path("id").asInt();
         JsonNode petType = json(mockMvc.perform(get("/api/pettypes")).andExpect(status().isOk())).get(0);
 
         mockMvc.perform(post("/api/owners/{ownerId}/pets", ownerId)

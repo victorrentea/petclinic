@@ -27,6 +27,11 @@ the response SHALL never contain more than `size` owners regardless of how many 
 - **WHEN** the client requests a `page` beyond the last one
 - **THEN** the response is 200 with an empty `content` and the unchanged `totalElements`
 
+#### Scenario: A page or size outside the allowed range
+- **WHEN** the client requests a negative page, a size below 1, or a size above the documented
+  maximum
+- **THEN** the response is HTTP 400 explaining the bound, not a server error
+
 #### Scenario: Only the offered page sizes reach the user
 - **WHEN** the user picks a rows-per-page value in the grid
 - **THEN** the only values offered are 5, 10 and 20
@@ -98,6 +103,19 @@ matching owners. Changing the filter in the grid SHALL reset the view to the fir
 #### Scenario: Searching from a later page
 - **WHEN** the user is on page 3 and types a new last name into the search box
 - **THEN** the grid shows the first page of the new result, not an empty page 3
+
+### Requirement: Changing what a page means returns to the first page
+
+Any control that changes which owners a page index refers to — the last-name filter, the
+ordering, or the page size — SHALL return the grid to the first page.
+
+#### Scenario: Re-sorting from a later page
+- **WHEN** the user is on page 3 and clicks a column header to re-order the grid
+- **THEN** the grid shows the first page of the new ordering
+
+#### Scenario: Enlarging the page from near the end
+- **WHEN** the user is on the last page at 5 rows per page and switches to 20
+- **THEN** the grid shows the first page at the new size, never a page past the end
 
 ### Requirement: Grid state is addressable
 

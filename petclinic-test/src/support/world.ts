@@ -44,8 +44,6 @@ export class PlaywrightWorld extends World {
   attemptedVisitDate?: string;
   uiSubmitWasOffered?: boolean;
   apiBookingStatus?: number;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -57,13 +55,6 @@ export class PlaywrightWorld extends World {
 
   constructor(options: IWorldOptions) {
     super(options);
-  }
-
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
-      throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
-    }
-    return this.allOwnerNames;
   }
 }
 

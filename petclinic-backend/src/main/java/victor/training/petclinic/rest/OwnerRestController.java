@@ -2,8 +2,11 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -34,15 +37,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 
@@ -50,6 +53,8 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    private static final int MAX_PAGE_SIZE = 1000;
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -83,15 +88,92 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
+    // useReturnTypeSchema: keep springdoc's schema for Page<OwnerDto> and only add the example —
+    // spelling a schema out here would replace it with a hand-maintained twin.
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time")
+    @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true,
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public Page<OwnerDto> listOwners(
+            @Parameter(description = "Prefix of the last name to filter by") //
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page index, 0 or greater") //
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Owners per page, between 1 and 1000") //
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(description = "<key>,<asc|desc> where key is one of: name, city") //
+            @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        checkPagingBounds(page, size);
+        PageRequest pageRequest = PageRequest.of(page, size, OwnerSortField.parseSort(sort));
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageRequest);
+        return owners.map(ownerMapper::toOwnerDto);
+    }
+
+    /**
+     * Same reason the sort key is whitelisted: a client-supplied number must not reach a 500 thrown
+     * from inside {@code PageRequest.of}. Checked before any query runs. The upper bound is
+     * inclusive — the browser suite pulls the whole clinic with {@code ?size=1000} for its fixtures.
+     */
+    private static void checkPagingBounds(int page, int size) {
+        if (page < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Page index must be 0 or greater, but was " + page + ".");
+        }
+        if (size < 1 || size > MAX_PAGE_SIZE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Page size must be between 1 and " + MAX_PAGE_SIZE + ", but was " + size + ".");
+        }
+    }
+
+    /**
+     * The two columns a clinic user may order the grid by. Binding a raw {@code Pageable} instead
+     * would let a caller sort by {@code pets.name} — Spring adds the join silently — or by a typo,
+     * which surfaces as a 500 from deep inside JPA. This is also where {@code name} expands to the
+     * two columns it actually means.
+     */
+    enum OwnerSortField {
+        NAME("lastName", "firstName"), //
+        CITY("city");
+
+        private final String[] columns;
+
+        OwnerSortField(String... columns) {
+            this.columns = columns;
+        }
+
+        /**
+         * Parses {@code <key>,<asc|desc>} and closes the ordering with the id. Equal keys would
+         * otherwise come back in any order per query, so under LIMIT/OFFSET the same owner could
+         * land on two pages or none — which is why the caller never gets to omit the tiebreak.
+         */
+        static Sort parseSort(String sortParam) {
+            String[] parts = sortParam.split(",", 2);
+            OwnerSortField field = named(parts[0]);
+            return Sort.by(directionIn(parts), field.columns).and(Sort.by("id"));
+        }
+
+        private static Sort.Direction directionIn(String[] parts) {
+            if (parts.length < 2) {
+                return Sort.Direction.ASC;
+            }
+            return Sort.Direction.fromOptionalString(parts[1])
+                    .orElseThrow(() -> badRequest(
+                            "Unknown sort direction '" + parts[1] + "'. Use 'asc' or 'desc'."));
+        }
+
+        private static OwnerSortField named(String key) {
+            for (OwnerSortField field : values()) {
+                if (field.name().equalsIgnoreCase(key)) {
+                    return field;
+                }
+            }
+            throw badRequest("Cannot sort owners by '" + key + "'. Sortable columns: name, city.");
+        }
+
+        private static ResponseStatusException badRequest(String message) {
+            return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        }
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

@@ -1,0 +1,101 @@
+{
+  "version": 2,
+  "details": {
+    "06lhb5c": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "0rcs8yy": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "alternate": {
+            "label": "",
+            "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          }
+        }
+      ]
+    },
+    "1ruk3w0": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id = any (?)"
+        }
+      ]
+    },
+    "16xt6fr": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=11"
+          }
+        }
+      ]
+    },
+    "112wt6j": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=15"
+          }
+        }
+      ]
+    },
+    "1v91y5q": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=14"
+          }
+        }
+      ]
+    },
+    "0jndtsl": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=13"
+          }
+        }
+      ]
+    },
+    "1l8cryh": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancebrjmpfqr\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"London\",\n      \"telephone\": \"6085551023\",\n      \"id\": 32,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptanceiteylilm\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"London\",\n      \"telephone\": \"6085551023\",\n      \"id\": 33,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancekeyzdqfu\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"Turin\",\n      \"telephone\": \"6085551023\",\n      \"id\": 30,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancekklzixln\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"Turin\",\n      \"telephone\": \"6085551023\",\n      \"id\": 31,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancentglkqjz\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"London\",\n      \"telephone\": \"6085551023\",\n      \"id\": 29,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancerydobrmr\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"Turin\",\n      \"telephone\": \"6085551023\",\n      \"id\": 34,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Henry\",\n      \"lastName\": \"Baskerville\",\n      \"address\": \"Baskerville Hall\",\n      \"city\": \"Dartmoor\",\n      \"telephone\": \"0441626832093\",\n      \"id\": 9,\n      \"pets\": [\n        {\n          \"name\": \"Baskerville\",\n          \"birthDate\": \"2017-02-24\",\n          \"type\": {\n            \"name\": \"dog\",\n            \"id\": 2\n          },\n          \"id\": 11,\n          \"ownerId\": 9,\n          \"visits\": [\n            {\n              \"date\": \"2026-05-12\",\n              \"description\": \"Annual check-up 1789738325819\",\n              \"id\": 42,\n              \"petId\": 11,\n              \"petName\": \"Baskerville\",\n              \"ownerId\": 9,\n              \"ownerFirstName\": \"Henry\",\n              \"ownerLastName\": \"Baskerville\"\n            },\n            {\n              \"date\": \"2026-05-12\",\n              \"description\": \"Annual check-up 1789738363207\",\n              \"id\": 43,\n              \"petId\": 11,\n              \"petName\": \"Baskerville\",\n              \"ownerId\": 9,\n              \"ownerFirstName\": \"Henry\",\n              \"ownerLastName\": \"Baskerville\"\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"firstName\": \"James\",\n      \"lastName\": \"Bond\",\n      \"address\": \"30 Wellington Square\",\n      \"city\": \"London\",\n      \"telephone\": \"0442073527070\",\n      \"id\": 12,\n      \"pets\": []\n    },\n    {\n      \"firstName\": \"Sam\",\n      \"lastName\": \"Carraclough\",\n      \"address\": \"Greenall Bridge\",\n      \"city\": \"Yorkshire\",\n      \"telephone\": \"0441943876543\",\n      \"id\": 14,\n      \"pets\": [\n        {\n          \"name\": \"Lassie\",\n          \"birthDate\": \"2020-05-12\",\n          \"type\": {\n            \"name\": \"dog\",\n            \"id\": 2\n          },\n          \"id\": 15,\n          \"ownerId\": 14,\n          \"visits\": [\n            {\n              \"date\": \"2026-05-02\",\n              \"description\": \"post-vaccine follow-up\",\n              \"id\": 23,\n              \"petId\": 15,\n              \"petName\": \"Lassie\",\n              \"ownerId\": 14,\n              \"ownerFirstName\": \"Sam\",\n              \"ownerLastName\": \"Carraclough\"\n            },\n            {\n              \"date\": \"2025-11-12\",\n              \"description\": \"rabies vaccine\",\n              \"id\": 5,\n              \"petId\": 15,\n              \"petName\": \"Lassie\",\n              \"ownerId\": 14,\n              \"ownerFirstName\": \"Sam\",\n              \"ownerLastName\": \"Carraclough\"\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"firstName\": \"George\",\n      \"lastName\": \"Darling\",\n      \"address\": \"14 Kensington Gardens\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079372121\",\n      \"id\": 11,\n      \"pets\": [\n        {\n          \"name\": \"Liza\",\n          \"birthDate\": \"2019-06-08\",\n          \"type\": {\n            \"name\": \"cat\",\n            \"id\": 1\n          },\n          \"id\": 14,\n          \"ownerId\": 11,\n          \"visits\": []\n        },\n        {\n          \"name\": \"Nana\",\n          \"birthDate\": \"2018-06-24\",\n          \"type\": {\n            \"name\": \"dog\",\n            \"id\": 2\n          },\n          \"id\": 13,\n          \"ownerId\": 11,\n          \"visits\": []\n        }\n      ]\n    }\n  ],\n  \"pageable\": {\n    \"pageNumber\": 0,\n    \"pageSize\": 10,\n    \"sort\": {\n      \"unsorted\": false,\n      \"sorted\": true,\n      \"empty\": false\n    },\n    \"offset\": 0,\n    \"unpaged\": false,\n    \"paged\": true\n  },\n  \"last\": false,\n  \"totalElements\": 34,\n  \"totalPages\": 4,\n  \"first\": true,\n  \"numberOfElements\": 10,\n  \"size\": 10,\n  \"number\": 0,\n  \"sort\": {\n    \"unsorted\": false,\n    \"sorted\": true,\n    \"empty\": false\n  },\n  \"empty\": false\n}"
+        }
+      ]
+    }
+  }
+}

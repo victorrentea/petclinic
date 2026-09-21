@@ -1,6 +1,7 @@
 import {After, Given, Then, When} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
+import {fetchAllOwners} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin bound directly, like owner-search.feature.glue.ts: the .feature is the
@@ -27,9 +28,10 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
  * against the same database.
  */
 async function fixtureOwnerId(): Promise<number> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const free = owners.filter((o: {pets?: unknown[]}) => !o.pets || o.pets.length === 0);
-  return ((free.length ? free : owners).at(-1)).id;
+  const owners = await fetchAllOwners(API_BASE);
+  const free = owners.filter((o) => !o.pets || o.pets.length === 0);
+  const pool = free.length ? free : owners;
+  return pool[pool.length - 1].id;
 }
 
 const isoToday = (): string => new Date().toISOString().slice(0, 10);

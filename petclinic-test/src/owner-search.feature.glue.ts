@@ -1,6 +1,7 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
+import {fetchAllOwners, OwnerSummary, PageEnvelope} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin, bound directly: the steps do the work themselves, with no DSL layer
@@ -13,8 +14,12 @@ import {PlaywrightWorld} from './support/world';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+// Surname first, exactly as the grid renders it — ordering by last name is illegible with
+// the given name in front. That comma is inside every name now, so the feature's lists of
+// expected owners are separated by `;`: splitting them on `,` would tear each name in two
+// and then compare the halves, silently, against a table that no longer means what it says.
+const fullName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+const namesIn = (cell: string) => cell.split(';').map((n) => n.trim()).filter(Boolean);
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
@@ -25,18 +30,13 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 }
 
 /**
- * Remembers every owner the clinic holds, after checking that the ones the
- * Background names are among them — so a changed seed (Flyway's
- * db/seed/R__seed.sql) fails on the Given instead of looking like a broken search.
+ * Checks that the owners the Background names are among the ones the clinic holds — so a
+ * changed seed (Flyway's db/seed/R__seed.sql) fails on the Given instead of looking like
+ * a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
-  }
-  const names: string[] = data.map(fullName);
+  const names = (await fetchAllOwners(API_BASE)).map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
-  this.allOwnerNames = names;
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
@@ -53,6 +53,25 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+/**
+ * The grid pages, so an empty search shows the first `size` of `totalElements` owners —
+ * never the clinic. The expectation is therefore the API's own first page, asked for with
+ * the same defaults the grid uses, and deliberately not a walk over every page: rebuilding
+ * the whole list here would only be this test re-implementing the endpoint and then
+ * agreeing with itself.
+ */
+Then('the first page of owners is listed', async function (this: PlaywrightWorld) {
+  const {data} = await axios.get<PageEnvelope<OwnerSummary>>(`${API_BASE}/owners`, {timeout: 10_000});
+  const onFirstPage = data?.content;
+  if (!Array.isArray(onFirstPage)) {
+    throw new Error(`GET ${API_BASE}/owners did not answer a page envelope; got: ` +
+      JSON.stringify(data).slice(0, 200));
+  }
+
+  expect(onFirstPage.length,
+    `A page of ${data.size} over ${data.totalElements} owners should hold ` +
+    `${Math.min(data.size, data.totalElements)} of them, but the API returned ` +
+    `${onFirstPage.length}`).toBe(Math.min(data.size, data.totalElements));
+
+  await expectOwnersListed(this, onFirstPage.map(fullName));
 });

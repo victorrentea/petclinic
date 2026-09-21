@@ -130,6 +130,7 @@
       "label-old": "main",
       "source": ["petclinic-frontend/src"],
       "screens": {
+        "Owners": "owners",
         "Book a visit": "pets/11/visits/add",
         "Edit a pet": "pets/11/edit"
       }

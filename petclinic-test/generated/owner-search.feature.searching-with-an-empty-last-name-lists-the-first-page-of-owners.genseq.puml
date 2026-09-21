@@ -1,0 +1,39 @@
+@startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+hide footbox
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #1A4FA0
+title [[src://petclinic-test/src/owner-search.feature:29{Click to open the test} Searching with an empty last name lists the first page of owners]]
+footer @generate_sequence in src/owner-search.feature — generated from real traces of end-to-end test runs, do not edit ❗
+participant Browser
+participant Backend
+participant DB
+Browser -> Backend: List owners, one page at a time\nGET /api/owners
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+activate Backend
+Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+deactivate Backend
+Backend -> DB: [[genseq://1ruk3w0{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://112wt6j{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1v91y5q{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0jndtsl{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://1l8cryh{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+Browser -> Backend: List owners, one page at a time\nGET /api/owners
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+activate Backend
+Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+deactivate Backend
+Backend -> DB: [[genseq://1ruk3w0{Click for the statement behind this call} select pets ⊕]]
+Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://112wt6j{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://1v91y5q{Click for the statement behind this call} select visits ⊕]]
+Backend -> DB: [[genseq://0jndtsl{Click for the statement behind this call} select visits ⊕]]
+Backend --> Browser: [[genseq://1l8cryh{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+@enduml

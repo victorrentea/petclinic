@@ -8,10 +8,12 @@ import {OwnerAddComponent} from './owner-add/owner-add.component';
 import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
 import {PetsModule} from '../pets/pets.module';
+import {DesignSystemModule} from '../design-system/design-system.module';
 
 @NgModule({
   imports: [
     CommonModule,
+    DesignSystemModule,
     FormsModule,
     OwnersRoutingModule,
     PetsModule

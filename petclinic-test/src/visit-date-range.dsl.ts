@@ -1,5 +1,6 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {fetchAllOwners} from './support/api-client';
 
 // The sentences of visit-date-range.spec.ts. Selectors live here so the spec never
 // mentions one — same split as add-visit.dsl.ts.
@@ -37,11 +38,10 @@ export function yearsFromToday(years: number, plusDays = 0): string {
  * A fixture pet landing in that list is a race nobody would enjoy debugging.
  */
 async function anOwnerWithoutPets(): Promise<number> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const free = owners.filter((o: {pets?: unknown[]}) => !o.pets || o.pets.length === 0);
-  const pick = (free.length ? free : owners).at(-1);
-  expect(pick, 'The clinic has no owners at all — is the DB seeded?').toBeTruthy();
-  return pick.id;
+  const owners = await fetchAllOwners(API_BASE);
+  const free = owners.filter((o) => !o.pets || o.pets.length === 0);
+  const pool = free.length ? free : owners;
+  return pool[pool.length - 1].id;
 }
 
 export async function a_pet_born(birthDate: string, ownerId?: number): Promise<FixturePet> {
