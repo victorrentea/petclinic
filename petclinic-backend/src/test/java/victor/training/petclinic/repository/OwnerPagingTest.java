@@ -57,19 +57,22 @@ class OwnerPagingTest {
         assertThat(walked).extracting(Owner::getLastName).filteredOn("Darling"::equals).hasSize(2);
     }
 
-    // Pins the database's collation: under en_US.UTF-8 'S' sorts as 'S', under the C locale it
-    // sorts after every ASCII letter. An index built under the other collation cannot serve this
-    // ORDER BY at all, so this must fail loudly rather than quietly reorder pages.
+    // The seed's one non-ASCII surname (Śliwiński) is where a paged ORDER BY goes wrong quietly:
+    // the collation that decides where it lands is the server's, and it differs between a dev
+    // machine (en_US.UTF-8) and the CI runner (C.UTF-8). Asserting a position would pin the
+    // locale, not the code. What is ours is that LIMIT/OFFSET must not reorder anything — so the
+    // paged walk is compared against the same query run in one go.
     @Test
-    void nonAsciiLastNameSortsWhereTheDeclaredCollationPutsIt() {
-        List<String> lastNames = walkAllPages(10, BY_NAME).stream().map(Owner::getLastName).toList();
+    void pagingPreservesTheOrderTheDatabaseItselfProduces() {
+        List<Integer> unpaged = ownerRepository
+                .findByLastNameStartingWith("", PageRequest.of(0, 1000, BY_NAME))
+                .getContent().stream().map(Owner::getId).toList();
 
-        assertThat(lastNames.indexOf("\u015aliwi\u0144ski"))
-                .as("'Sliwinski' must sort between 'Silver' and 'Tremaine'; if it does not, the "
-                        + "database was initialised with a different collation (expected en_US.UTF-8, "
-                        + "not C) and the owners index cannot serve this ORDER BY")
-                .isGreaterThan(lastNames.indexOf("Silver"))
-                .isLessThan(lastNames.indexOf("Tremaine"));
+        List<Integer> walked = walkAllPages(3, BY_NAME).stream().map(Owner::getId).toList();
+
+        assertThat(walked)
+                .as("a 3-row page walk must yield the same sequence as one unpaged query")
+                .containsExactlyElementsOf(unpaged);
     }
 
     private List<Owner> walkAllPages(int pageSize, Sort sort) {

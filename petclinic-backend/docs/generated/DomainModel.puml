@@ -51,11 +51,6 @@ class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/do
   time : LocalTime
   description : String
 }
-class VisitDateOutOfRangeException [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VisitDateOutOfRangeException.java:15{Click to open in editor}]]
-class VisitDateRange [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/VisitDateRange.java:12{Click to open in editor}]] {
-  earliest : LocalDate
-  latest : LocalDate
-}
 
 Owner "owner" <--> "~* pets" Pet
 Pet "~*" --> "type" PetType

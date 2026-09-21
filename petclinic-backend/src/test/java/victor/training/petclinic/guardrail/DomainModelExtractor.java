@@ -5,6 +5,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
+import jakarta.persistence.Entity;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -86,7 +88,15 @@ class DomainModelExtractor {
         }
     }
 
-    /** Every class in the domain package, alphabetically. */
+    /**
+     * Every persisted concept in the domain package, alphabetically.
+     *
+     * <p>{@code @Entity} is the membership test, not "lives in the package": the package also
+     * holds a value object and an exception ({@code VisitDateRange},
+     * {@code VisitDateOutOfRangeException}), which have no identity, no table and no association
+     * to draw. Boxing them would add noise to the generated diagram and demand a hand-placed box
+     * on the conceptual map for something nobody navigates by.
+     */
     List<Class<?>> domainClasses() {
         JavaClasses classes = new ClassFileImporter()
                 .withImportOption(new ImportOption.DoNotIncludeTests())
@@ -94,6 +104,7 @@ class DomainModelExtractor {
         return classes.stream()
                 .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
                 .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
+                .filter(c -> c.isAnnotatedWith(Entity.class))
                 .<Class<?>>map(JavaClass::reflect)
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .toList();
