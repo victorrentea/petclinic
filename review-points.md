@@ -227,3 +227,46 @@ scores something narrower than the others: how sure I am that hand-writing beat 
 the files stale. Quite sure — stale types break the build for whoever pulls next — and
 `DB.puml` came back byte-identical from the real generator, which is as close to proof as
 this gets. It is not higher because `api-types.ts` got no such check.
+
+
+## Taken over without a new pass — 21 Sep 2026
+
+The 32 commits below landed after the review commit `ce56d912` and were folded into this
+review point by Victor's decision, without re-running the reviewers. The findings and
+the assumptions above still describe the branch as it stood at `ce56d912`; none of them
+was re-read against these commits. What they are:
+
+- 6ef4ae6b Rename the no-vet scenario: a visit need not be set a vet
+- f9f9faa4 Make DTO setters fluent (return this) and chain DTO construction
+- e9079d6f ci: an empty AGENTS.md is not a symlink stub
+- 374cefee ci: an empty AGENTS.md is not a symlink stub
+- 226755c3 Use a raw <select> for the vet on the edit form, on purpose, so the design-system audit has a gap to show
+- f2b2dae7 Rate the assumptions: how sure the author was of each reading
+- 7ea4affd Redraw the sequences without the empty JDBC arrows
+- 0a3541e5 VisitTest goes back to a plain @SpringBootTest, with no server to post to
+- c4b0df32 genseq: drop JDBC spans that carry no statement
+- d0d57219 Send the fake SMS in-process again: keep the test instrumentation out of production code
+- 5434391d genseq: drop JDBC spans that carry no statement
+- b5606c1b Send the fake SMS in-process again: keep the test instrumentation out of production code
+- b0203286 human-review: let the design-system audit start its own two builds
+- bddf3e4f human-review: let the design-system audit start its own two builds
+- e9e23b6a Record the sequence diagrams with the SMS gateway self-call
+- abf1c951 Give VisitTest a server to post the fake SMS to
+- 4aea32fc Send the fake SMS over HTTP, so the trace crosses a real socket
+- fff6bd15 Send the fake SMS over HTTP, so the trace crosses a real socket
+- 3a504b69 Revert "Require one Gherkin scenario through the UI per feature"
+- 2f5947ea Revert "Require one Gherkin scenario through the UI per feature"
+- 619902c3 pre-commit: spotless only on the staged files
+- 2265f333 pre-commit: spotless only on the staged files
+- 6aac04b4 Drop the tests that proved clearing the vet persists, to show an unproven requirement
+- 9ce98ab9 Log the booked visit id and the attending vet
+- f96259dc Require one Gherkin scenario through the UI per feature
+- 71b7cb2e Require one Gherkin scenario through the UI per feature
+- 0bb6f069 test: Gherkin UI scenario for the vet-linking story
+- 21680c35 Record the sequence diagrams of the vet-linking tests
+- 31297ed4 chore(codecity): commit the regenerated city the guardrail asks for
+- 7cad86b1 test(visits): click the vet through the browser, not just past the API
+- 753f724c Let the review run start the stack its film is recorded against
+- d13449ea Let the review run start the stack its film is recorded against
+
+The point this page counts "after the agent finished" from is now `6ef4ae6b`.
