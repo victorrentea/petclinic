@@ -231,8 +231,9 @@ this gets. It is not higher because `api-types.ts` got no such check.
 
 ## Taken over without a new pass — 21 Sep 2026
 
-The 32 commits below landed after the review commit `ce56d912` and were folded into this
-review point by Victor's decision, without re-running the reviewers. The findings and
+The 32 commits below sit in the branch's history after the review commit `ce56d912` —
+13 of the branch's own work, the rest tooling and merges that arrived from `main` — and
+were folded into this review point by Victor's decision, without re-running the reviewers. The findings and
 the assumptions above still describe the branch as it stood at `ce56d912`; none of them
 was re-read against these commits. What they are:
 
