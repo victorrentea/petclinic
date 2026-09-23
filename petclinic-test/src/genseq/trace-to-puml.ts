@@ -252,8 +252,11 @@ function bodySteps(
 
 // The browser is where the payloads are captured, so they sit on the frontend
 // CLIENT span — one level up from the backend SERVER span the arrow is drawn from.
+// A service that records its own request body puts it on its SERVER span, the arrow's
+// own; borrowing from a parent that is not a CLIENT would hand that body to every call
+// the handler makes next (`send-sms` showing the notification it was sent).
 function bodyOf(span: NormSpan, parent: NormSpan | undefined, key: string): string | undefined {
-  return span.attributes[key] ?? parent?.attributes[key];
+  return span.attributes[key] ?? (parent?.kind === 'CLIENT' ? parent.attributes[key] : undefined);
 }
 
 // Only a meaningful label (e.g. an HTTP status) is worth a return arrow;

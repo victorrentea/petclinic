@@ -315,6 +315,31 @@ test('the payloads become markers on the request and the response, not notes', (
   expect(response.steps[0].text).toContain('"id": 42');
 });
 
+// A service called by the backend has no browser to capture its payload, so it records the
+// body on its own SERVER span. That body belongs to the arrow into the service — not to the
+// calls the handler goes on to make, which would otherwise inherit it from their parent.
+test('a body recorded on a SERVER span reveals on its arrow, not on the calls it makes', () => {
+  const span = (spanId: string, parentSpanId: string, name: string, kind: NormSpan['kind'],
+    serviceName: string, attributes: Record<string, string>): NormSpan => ({
+    traceId: 'r', spanId, parentSpanId, name, kind, serviceName,
+    startNano: Number(spanId.slice(1)) * 1e6, attributes,
+  });
+  const spans = [
+    span('r1', '', 'POST /api/owners/1/pets/3/visits', 'SERVER', 'petclinic-backend',
+      {'http.status_code': '201'}),
+    span('r2', 'r1', 'POST', 'CLIENT', 'petclinic-backend', {}),
+    span('r3', 'r2', 'POST /api/notifications/visit-booked', 'SERVER', 'mailer',
+      {'http.response.status_code': '202', 'http.request.body': '{"petName":"Leo"}'}),
+    span('r4', 'r3', 'send-sms', 'INTERNAL', 'mailer', {'genseq.participant': 'SMS gateway'}),
+  ];
+  const {puml, details} = renderDiagram('add-visit.spec.ts', [{title: 'x', traces: [spans]}],
+    {sql: 'statement', httpBodies: true, interactive: true});
+
+  const request = detailOn(lineWith(puml, 'Backend -> mailer:'), details.details);
+  expect(request.steps[0].text).toContain('"petName": "Leo"');
+  expect(lineWith(puml, 'mailer -> "SMS gateway":')).not.toContain('⊕');
+});
+
 // Behind a click a payload costs the picture nothing, so an interactive diagram carries
 // it by default; baked in it is a wall of JSON, so a static one still has to ask.
 // Withholding it by default only meant a reviewer clicked a request arrow and found
