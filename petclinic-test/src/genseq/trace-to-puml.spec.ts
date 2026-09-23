@@ -604,6 +604,33 @@ test('a Java diagram names the annotation a @SpringBootTest actually carries', (
   expect(spec).toContain('footer @generate_sequence');
 });
 
+// ── A second process ──────────────────────────────────────────────────────────────
+// The backend's HTTP client span and the SERVER span it opens in notification-service are
+// told apart by service.name alone: that is what makes the hop an arrow between two
+// lifelines, and the name a bare identifier the deployment guardrail can match.
+test('a call into notification-service is drawn as an arrow from Backend to NotificationService', () => {
+  const spans: NormSpan[] = [
+    {
+      traceId: 's', spanId: 's-server', parentSpanId: '', name: 'POST /api/owners/{ownerId}/pets/{petId}/visits',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6, attributes: {},
+    },
+    {
+      traceId: 's', spanId: 's-client', parentSpanId: 's-server', name: 'POST',
+      kind: 'CLIENT', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6, attributes: {},
+    },
+    {
+      traceId: 's', spanId: 's-notify', parentSpanId: 's-client', name: 'POST /api/notifications/visit-booked',
+      kind: 'SERVER', serviceName: 'notification-service', startNano: 1_200 * 1e6, attributes: {},
+    },
+  ];
+  const puml = renderPuml('src/add-visit.spec.ts', [{
+    title: 'books a visit', traces: [spans],
+  }], STATIC);
+
+  expect(puml).toContain('participant NotificationService');
+  expect(puml).toMatch(/^Backend -> NotificationService: /m);
+});
+
 // ── A module of the backend, drawn as a participant of its own ───────────────────
 // Same mechanism as `Test` above, used for the opposite reason: the Notification module
 // runs *inside* the backend, so nothing in the trace separates it either. It names its

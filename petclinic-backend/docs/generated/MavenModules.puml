@@ -9,10 +9,15 @@ skinparam componentStyle rectangle
 skinparam nodesep 20
 skinparam ranksep 30
 
+component "notification-service (victor.training.agentic)" as notification_service
 component "petclinic-backend (victor.training.agentic)" as petclinic_backend
 component "petclinic-chatbot (victor.training.petclinic)" as petclinic_chatbot
+component "petclinic-commons (victor.training.agentic)" as petclinic_commons
 component "petclinic-database (victor.training.agentic)" as petclinic_database
 component "refactoring-legacy (victor.training.agentic)" as refactoring_legacy
+
+notification_service --> petclinic_commons
+petclinic_backend --> petclinic_commons
 
 
 @enduml

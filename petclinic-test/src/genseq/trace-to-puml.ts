@@ -85,6 +85,7 @@ function participantOf(span: NormSpan): string {
     .some((key) => key in span.attributes) || DB_NAME_RE.test(span.name);
   if (span.kind === 'CLIENT' && isDb) return 'DB';
   if (span.serviceName === 'petclinic-backend') return 'Backend';
+  if (span.serviceName === 'notification-service') return 'NotificationService';
   return span.serviceName || 'unknown';
 }
 
@@ -311,7 +312,7 @@ function qualifiedTitle(title: string, source: string): string {
 // Left to right is the direction a call travels. Browser and Test never appear together:
 // one is a browser suite's lifeline, the other a @SpringBootTest's, and each drives the
 // backend from the same place on the page.
-const PARTICIPANT_ORDER = ['Browser', 'Test', 'Backend', 'DB'];
+const PARTICIPANT_ORDER = ['Browser', 'Test', 'Backend', 'DB', 'NotificationService'];
 
 // A lifeline whose name is not a bare identifier — `Notification module` — has to be
 // quoted, on its own `participant` line and on every arrow that touches it, or PlantUML

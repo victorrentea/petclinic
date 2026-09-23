@@ -156,6 +156,13 @@ jobs:
           sudo apt-get install -y postgresql-client-16
           pg_dump --version
 
+      # petclinic-backend and notification-service both depend on it; no reactor, so install first.
+      - name: Install petclinic-commons
+        run: mvn -B -ntp -f petclinic-commons/pom.xml install
+
+      - name: Test notification-service
+        run: mvn -B -ntp -f notification-service/pom.xml test
+
       # ── Hook parity: pre-commit runs `spotless:apply` + re-stages. Spotless
       #    has no lifecycle binding, so `mvn test` won't catch unformatted Java —
       #    enforce it here as a fail-gate (run `mvn spotless:apply` locally to fix). ─

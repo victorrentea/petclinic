@@ -18,7 +18,7 @@ left to right direction
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container_Boundary("PetClinic.Backend_boundary", "Backend", $tags="") {
     Component(PetClinic.Backend.Security, "Security", $techn="Spring Security", $descr="[security] Spring Security configuration", $tags="", $link="")
-    Component(PetClinic.Backend.Notification, "Notification", $techn="Spring", $descr="[notification] fake SMS notifications to pet owners", $tags="", $link="")
+    Component(PetClinic.Backend.Notification, "Notification", $techn="Spring", $descr="[notification] client of notification-service, which texts pet owners", $tags="", $link="")
     Component(PetClinic.Backend.MCP, "MCP", $techn="Spring AI", $descr="[mcp] Spring AI MCP server (SSE) — tools and resources for pet owners", $tags="", $link="")
     Component(PetClinic.Backend.RESTLayer, "REST Layer", $techn="Spring MVC", $descr="[rest.**] HTTP endpoints, DTOs, error handlers", $tags="", $link="")
     Component(PetClinic.Backend.DomainModel, "Domain Model", $techn="JPA", $descr="[domain] JPA entities", $tags="", $link="")

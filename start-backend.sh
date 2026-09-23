@@ -6,6 +6,7 @@ printf '\033]0;BE\007'  # set terminal/tab title
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$SCRIPT_DIR/petclinic-backend"
+NOTIFICATION_DIR="$SCRIPT_DIR/notification-service"
 
 if [[ ! -d "$BACKEND_DIR" ]]; then
   echo "Backend directory not found: $BACKEND_DIR" >&2
@@ -15,7 +16,7 @@ fi
 # Ahead of the OTel download and `mvn clean`, which would otherwise burn ~12s
 # only for Spring to report "Port 8080 was already in use".
 source "$SCRIPT_DIR/scripts/preflight.sh"
-require_ports_free petclinic-backend 8080
+require_ports_free petclinic-backend 8080 8090:notification-service
 
 # 2.20+ is what can capture bound query parameters (db.query.parameter.<n>);
 # 2.10 has no such flag, so the diagrams could only ever show `?`.
@@ -40,7 +41,6 @@ fi
 OTEL_JVM_ARGS=""
 if [[ -f "$AGENT_JAR" ]]; then
   if (echo > /dev/tcp/localhost/4318) 2>/dev/null; then
-    export OTEL_SERVICE_NAME=petclinic-backend
     export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
     export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
     export OTEL_LOGS_EXPORTER=otlp
@@ -80,6 +80,17 @@ if [[ -n "${JACOCO_E2E:-}" ]]; then
   fi
 fi
 
+# Both apps compile against petclinic-commons, a standalone build: install it first.
+echo "📦 Installing petclinic-commons into ~/.m2..."
+mvn -q -f "$SCRIPT_DIR/petclinic-commons/pom.xml" install
+
+# The backend POSTs to it after every booked visit. A jar run in the background rather than
+# a second `mvn spring-boot:run`, so the trap below stops the JVM itself, not only Maven.
+echo "📨 Starting notification-service on http://localhost:8090/ ..."
+mvn -q -f "$NOTIFICATION_DIR/pom.xml" clean package -DskipTests
+OTEL_SERVICE_NAME=notification-service java $OTEL_JVM_ARGS -jar "$NOTIFICATION_DIR/target/notification-service-1.0.jar" &
+NOTIFICATION_PID=$!
+
 echo "🚀 Starting Petclinic Backend (Spring Boot)..."
 echo "Backend will be available at: http://localhost:8080/"
 if [[ -n "$OTEL_JVM_ARGS" ]]; then
@@ -89,6 +100,8 @@ echo ""
 
 cd "$BACKEND_DIR"
 announce_exit_failures petclinic-backend
+trap '_preflight_on_exit; kill "$NOTIFICATION_PID" 2>/dev/null || true' EXIT
+export OTEL_SERVICE_NAME=petclinic-backend
 JVM_ARGS="$(echo "$OTEL_JVM_ARGS $JACOCO_JVM_ARGS" | xargs)"
 if [[ -n "$JVM_ARGS" ]]; then
   mvn clean spring-boot:run -Dspring-boot.run.jvmArguments="$JVM_ARGS"

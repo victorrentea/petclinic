@@ -8,7 +8,7 @@ footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petc
 participant Test
 participant Backend
 participant DB
-participant "Notification module"
+participant NotificationService
 participant "SMS gateway"
 Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:76{Click to open the line of the test that says this} given an owner with at least one pet exists ↗]]
 activate Test
@@ -98,14 +98,14 @@ deactivate Backend
 deactivate Test
 Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:84{Click to open the line of the test that says this} and a visit is added for the first pet ↗]]
 activate Test
-Test -> Backend: [[genseq://1fn99me{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+Test -> Backend: [[genseq://0pyvr9c{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:183{Click to open OwnerRestController.bookVisit} book-visit ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
 group tx
-Backend -> DB: [[genseq://021w3hh{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://16ndczn{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
@@ -115,10 +115,11 @@ Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} sele
 end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
-Backend -> "Notification module": notify-visit-booked
-activate "Notification module"
-"Notification module" -> "SMS gateway": send-sms
-deactivate "Notification module"
+Backend -> NotificationService: POST /api/notifications/visit-booked
+activate NotificationService
+NotificationService -> "SMS gateway": send-sms
+NotificationService --> Backend: 202
+deactivate NotificationService
 deactivate Backend
 Backend --> Test: 201
 deactivate Backend
@@ -135,7 +136,7 @@ end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://13apewa{Click for the statement behind this call} select visits ⊕]]
-Backend --> Test: [[genseq://04yoqd6{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Test: [[genseq://1yb7xmc{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
 @enduml

@@ -16,7 +16,7 @@ domainModel     = component "Domain Model"      "[domain] JPA entities"         
 repositoryLayer = component "Repository Layer"  "[repository] Spring Data JPA repositories"             "Spring Data"      "pkg:repository"
 mapperLayer     = component "Mapper Layer"      "[mapper] hand-written entity<->DTO mappers"            "Spring"           "pkg:mapper"
 security        = component "Security"          "[security] Spring Security configuration"              "Spring Security"  "pkg:security"
-notification    = component "Notification"     "[notification] fake SMS notifications to pet owners" "Spring"           "pkg:notification"
+notification    = component "Notification"     "[notification] client of notification-service, which texts pet owners" "Spring"           "pkg:notification"
 mcp             = component "MCP"               "[mcp] Spring AI MCP server (SSE) — tools and resources for pet owners" "Spring AI" "pkg:mcp"
 
 restLayer       -> mapperLayer     "uses"
