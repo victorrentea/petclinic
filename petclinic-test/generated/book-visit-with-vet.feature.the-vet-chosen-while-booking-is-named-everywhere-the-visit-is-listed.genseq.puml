@@ -8,20 +8,8 @@ footer @generate_sequence in src/book-visit-with-vet.feature — generated from 
 participant Browser
 participant Backend
 participant DB
-participant "Notification module"
+participant NotificationService
 participant "SMS gateway"
-Browser -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
-activate Backend
-Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
-activate Backend
-group tx
-Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} select owners ⊕]]
-end
-deactivate Backend
-Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
-Backend -> DB: [[genseq://1eq1h2q{Click for the statement behind this call} select visits ⊕]]
-Backend --> Browser: [[genseq://0k9x4kf{Click for this call’s JSON body} 200 ⊕]]
-deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:191{Click to open OwnerRestController.bookVisit} book-visit ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:19{Click to open VetRepository.findByIdWithoutSpecialties} VetRepository.findByIdWithoutSpecialties ↗]]
@@ -31,7 +19,7 @@ deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
 group tx
-Backend -> DB: [[genseq://0wuudg7{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://0orhvct{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
@@ -41,10 +29,11 @@ Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} sele
 end
 deactivate Backend
 Backend -> DB: [[genseq://18567ho{Click for the statement behind this call} select pets ⊕]]
-Backend -> "Notification module": [[src://petclinic-backend/src/main/java/victor/training/petclinic/notification/FakeSmsNotificationSender.java:45{Click to open FakeSmsNotificationSender.visitBooked} notify-visit-booked ↗]]
-activate "Notification module"
-"Notification module" -> "SMS gateway": [[src://petclinic-backend/src/main/java/victor/training/petclinic/notification/FakeSmsNotificationSender.java:47{Click to open FakeSmsNotificationSender.sendSms} send-sms ↗]]
-deactivate "Notification module"
+Backend -> NotificationService: [[genseq://1r6wc83{Click for this call’s JSON body} POST /api/notifications/visit-booked ⊕]]
+activate NotificationService
+NotificationService -> "SMS gateway": [[src://notification-service/src/main/java/victor/training/notification/SmsGateway.java:23{Click to open SmsGateway.send} send-sms ↗]]
+NotificationService --> Backend: 202
+deactivate NotificationService
 deactivate Backend
 Browser -> Backend: listVisits\nGET /api/visits
 activate Backend

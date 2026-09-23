@@ -1,6 +1,32 @@
 {
   "version": 2,
   "details": {
+    "0exss5m": {
+      "title": "SELECT v FROM Vet v WHERE v.id = :id",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=4"
+          }
+        }
+      ]
+    },
+    "0orhvct": {
+      "title": "insert for victor.training.petclinic.domain.Visit",
+      "steps": [
+        {
+          "label": "",
+          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
+          "alternate": {
+            "label": "",
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-06-18', 'Annual check-up 1790201568958', 1, 4, ?)"
+          }
+        }
+      ]
+    },
     "0x8aana": {
       "title": "select owners",
       "steps": [
@@ -27,51 +53,12 @@
         }
       ]
     },
-    "1eq1h2q": {
-      "title": "select visits",
+    "1r6wc83": {
+      "title": "Backend → NotificationService: POST /api/notifications/visit-booked",
       "steps": [
         {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=1"
-          }
-        }
-      ]
-    },
-    "0k9x4kf": {
-      "title": "Backend → Browser: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789766291109\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1789766291106\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": 4,\n          \"vetFirstName\": \"Rafael\",\n          \"vetLastName\": \"Ortega\"\n        }\n      ]\n    }\n  ]\n}"
-        }
-      ]
-    },
-    "0exss5m": {
-      "title": "SELECT v FROM Vet v WHERE v.id = :id",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=4"
-          }
-        }
-      ]
-    },
-    "0wuudg7": {
-      "title": "insert for victor.training.petclinic.domain.Visit",
-      "steps": [
-        {
-          "label": "",
-          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
-          "alternate": {
-            "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-06-18', 'Annual check-up 1789766308253', 1, 4, ?)"
-          }
+          "label": "request body",
+          "text": "{\n  \"ownerPhone\": null,\n  \"petName\": \"Axel\",\n  \"visitDate\": \"2026-06-18\"\n}"
         }
       ]
     },
