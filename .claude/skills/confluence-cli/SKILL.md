@@ -1,14 +1,23 @@
 ---
 name: confluence-cli
 description: Read and write Confluence pages from the shell — get/search pages, create, update, append, comment, label (tag), attach, move, delete — against a corporate Confluence Data Center/Server using a Personal Access Token (or Confluence Cloud with an API token). Use whenever a task needs Confluence AND no Confluence MCP tools are available (no mcp__atlassian__*, no mcp__confluence__*), which is the normal situation when corporate policy disables MCP servers. Also use when explicitly asked to "use the confluence-cli skill".
-allowed-tools: Bash(.claude/skills/confluence-cli/confluence.sh:*), Bash(jq:*)
+allowed-tools: Bash(.claude/skills/confluence-cli/confluence.py:*), Bash(python3 .claude/skills/confluence-cli/confluence.py:*), Bash(python .claude/skills/confluence-cli/confluence.py:*), Bash(py .claude/skills/confluence-cli/confluence.py:*), Bash(jq:*)
 ---
 
 # Confluence from the shell, when MCP servers are disabled
 
-`confluence.sh` is a self-contained `curl` + `jq` client for the Confluence REST API —
-the sibling of [jira-cli](../jira-cli/SKILL.md), same env-file mechanism, same `--json`
-convention, same escape hatch. Needs only bash, curl and jq.
+`confluence.py` is a self-contained client for the Confluence REST API — the sibling
+of [jira-cli](../jira-cli/SKILL.md), same env-file mechanism, same `--json` convention,
+same escape hatch. **Python 3.8+, standard library only**: no curl, no jq, no
+`pip install`, identical on Windows (no WSL), macOS and Linux.
+
+```sh
+python3 .claude/skills/confluence-cli/confluence.py whoami   # macOS / Linux (also runs as ./confluence.py)
+python  .claude/skills/confluence-cli/confluence.py whoami   # Windows: python or py; `python3` there
+                                                             # is often just the Microsoft Store stub
+```
+
+Below, `$C` stands for whichever of those your OS needs.
 
 ## 1. One-time setup
 
@@ -16,7 +25,7 @@ The token lives in `~/.claude/confluence.env` — outside every repo, so the sam
 reusable across all your projects and cannot be committed by accident:
 
 ```sh
-install -m 600 /dev/null ~/.claude/confluence.env
+install -m 600 /dev/null ~/.claude/confluence.env    # Windows: %USERPROFILE%\.claude\confluence.env
 cat > ~/.claude/confluence.env <<'EOF'
 CONFLUENCE_URL=https://confluence.your-company.com
 CONFLUENCE_PAT=<Settings -> Personal Access Tokens -> Create token>
@@ -30,11 +39,13 @@ self-signed certs, default space). Lookup order — first file wins:
 $CONFLUENCE_ENV_FILE -> ./.confluence.env -> ~/.claude/confluence.env -> ~/.confluence.env
 ```
 
+Real environment variables win over the file.
+
 Verify:
 
 ```sh
-.claude/skills/confluence-cli/confluence.sh config    # where creds came from, and which API is in play
-.claude/skills/confluence-cli/confluence.sh whoami
+$C config    # where creds came from, and which API is in play
+$C whoami
 ```
 
 ## 2. Which REST API you are talking to
@@ -51,8 +62,8 @@ is mid-migration and the two products diverge:
 | Auth | PAT, `Authorization: Bearer` | API token, HTTP Basic |
 
 So Cloud is inherently a **v1/v2 hybrid**, and that is not a shortcut in this script —
-it is the state of the API. `confluence.sh` picks the right one per command and
-`confluence.sh config` prints which. Override with `CONFLUENCE_PAGE_API=v1` if you hit
+it is the state of the API. `confluence.py` picks the right one per command and
+`confluence.py config` prints which. Override with `CONFLUENCE_PAGE_API=v1` if you hit
 a v2 gap; asking for v2 against Data Center fails fast rather than 404-ing mysteriously.
 
 Atlassian has been withdrawing Cloud v1 endpoints group by group (the timeline has
@@ -65,8 +76,6 @@ Pages are addressed either by numeric id or by `SPACE:Title`, because humans kno
 titles and ids only ever show up in URLs.
 
 ```sh
-C=.claude/skills/confluence-cli/confluence.sh
-
 $C spaces
 $C get "DOCS:Release Notes"           # title, version, space, parent, labels
 $C get 123456 --body                  # ... plus the storage XHTML
@@ -79,7 +88,8 @@ $C labels 123456
 $C versions 123456
 ```
 
-Add `--json` to any command to get the raw API response instead of the text summary:
+Add `--json` to any command to get the raw API response instead of the text summary
+(`jq` if installed; Git for Windows does not ship it):
 
 ```sh
 $C --json get 123456 | jq -r '.labels[]'
@@ -134,7 +144,7 @@ $C raw POST "/rest/api/content" '{"type":"page", ...}'
 ## 5. Rules for agents
 
 - **Never print or echo the PAT**, and never copy it into a repo file. Read it only
-  through the env-file mechanism. `confluence.sh config` is safe; `cat ~/.claude/confluence.env` is not.
+  through the env-file mechanism. `confluence.py config` is safe; `cat ~/.claude/confluence.env` is not.
 - **Confirm before writing.** A Confluence page is usually team-visible documentation,
   and `update` *replaces* the body — `append` is almost always the safer verb when
   adding to an existing page. Ask first unless the user's request already names the action.
@@ -142,7 +152,7 @@ $C raw POST "/rest/api/content" '{"type":"page", ...}'
   "add a section", use `append`.
 - Prefer `--json | jq` when you need one field; prefer the default text output when you
   need to *read* a page. Do not dump whole storage-format bodies into the transcript.
-- Errors always carry the HTTP status: `confluence.sh: HTTP 403 on PUT .../content/123 - ...`.
+- Errors always carry the HTTP status: `confluence.py: HTTP 403 on PUT .../content/123 - ...`.
   A 401 means the token is wrong or expired, 403 means the token lacks the permission,
   404 on a page that exists usually also means a permissions problem, and **409 means a
   version conflict** — re-read and retry.

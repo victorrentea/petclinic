@@ -735,7 +735,23 @@ def build_parser():
     return parser
 
 
+def utf8_stdio():
+    """Windows pipes default to the ANSI code page (cp1252) and CRLF: a console log
+    with a check mark would crash the print, and every `$(jenkins.py ...)` would end
+    in \\r. Pin UTF-8 and bare \\n on every OS so output is byte-identical everywhere."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace", newline="\n")
+        except (AttributeError, ValueError):
+            pass
+    try:
+        sys.stdin.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
+
 def main(argv=None):
+    utf8_stdio()
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.command:

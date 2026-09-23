@@ -95,6 +95,16 @@ def test_console_by_alias_and_number():
     contains(run("console", "petclinic-build", "success"), "Finished: SUCCESS")
 
 
+def test_console_is_utf8_with_bare_newlines_on_every_os():
+    # Bytes, not text: text mode would fold a Windows \r\n back into \n, and a
+    # cp1252 pipe would have crashed on the check mark before printing anything.
+    raw = subprocess.run(
+        [sys.executable, CLI, "console", "petclinic-build", "7"], capture_output=True, env=ENV
+    ).stdout
+    contains(repr(raw), repr("Deploy ș ț ü ✓\n".encode("utf-8"))[2:-1])
+    assert b"\r" not in raw, "CRLF leaked into the output: %r" % raw
+
+
 def test_build_waits_and_streams():
     out = run("build", "petclinic-build", "-p", "BRANCH=main", "-f")
     contains(out, "BRANCH=main", "#8 SUCCESS")

@@ -1,14 +1,23 @@
 ---
 name: jira-cli
 description: Read and write JIRA issues from the shell — get/search issues, create, update, comment, label (tag), assign, transition, link, attach, log work — against a local or corporate JIRA Server/Data Center using a Personal Access Token (or JIRA Cloud with an API token). Use whenever a task needs JIRA AND no JIRA MCP tools are available (no mcp__atlassian__*, no mcp__jira__*), which is the normal situation when corporate policy disables MCP servers. Also use when explicitly asked to "use the jira-cli skill".
-allowed-tools: Bash(.claude/skills/jira-cli/jira.sh:*), Bash(jq:*)
+allowed-tools: Bash(.claude/skills/jira-cli/jira.py:*), Bash(python3 .claude/skills/jira-cli/jira.py:*), Bash(python .claude/skills/jira-cli/jira.py:*), Bash(py .claude/skills/jira-cli/jira.py:*), Bash(jq:*)
 ---
 
 # JIRA from the shell, when MCP servers are disabled
 
-`jira.sh` is a self-contained `curl` + `jq` client for the JIRA REST API — same
-read/write surface as an Atlassian MCP server, no MCP transport. Needs only bash,
-curl and jq.
+`jira.py` is a self-contained client for the JIRA REST API — same read/write
+surface as an Atlassian MCP server, no MCP transport. **Python 3.8+, standard
+library only**: no curl, no jq, no `pip install`, identical on Windows (no WSL),
+macOS and Linux.
+
+```sh
+python3 .claude/skills/jira-cli/jira.py whoami   # macOS / Linux (also runs as ./jira.py)
+python  .claude/skills/jira-cli/jira.py whoami   # Windows: python or py; `python3` there
+                                                 # is often just the Microsoft Store stub
+```
+
+Below, `$J` stands for whichever of those your OS needs.
 
 ## 1. One-time setup
 
@@ -16,7 +25,7 @@ The token lives in `~/.claude/jira.env` — outside every repo, so the same PAT 
 reusable across all your projects and cannot be committed by accident:
 
 ```sh
-install -m 600 /dev/null ~/.claude/jira.env
+install -m 600 /dev/null ~/.claude/jira.env      # Windows: %USERPROFILE%\.claude\jira.env
 cat > ~/.claude/jira.env <<'EOF'
 JIRA_URL=https://jira.your-company.com
 JIRA_PAT=<Profile -> Personal Access Tokens -> Create token>
@@ -30,20 +39,19 @@ certs, default project). Lookup order — first file wins:
 $JIRA_ENV_FILE  ->  ./.jira.env  ->  ~/.claude/jira.env  ->  ~/.jira.env
 ```
 
-so a single project can override the shared token with a local `./.jira.env`.
+so a single project can override the shared token with a local `./.jira.env`. Real
+environment variables win over the file.
 
 Verify:
 
 ```sh
-.claude/skills/jira-cli/jira.sh config     # where creds came from (never prints the token)
-.claude/skills/jira-cli/jira.sh whoami
+$J config     # where creds came from (never prints the token)
+$J whoami
 ```
 
 ## 2. Reading
 
 ```sh
-J=.claude/skills/jira-cli/jira.sh
-
 $J get PET-42                              # summary, status, assignee, labels, description
 $J get PET-42 --fields summary,status      # narrow the payload
 $J search "project = PET AND status != Done ORDER BY created DESC"
@@ -54,7 +62,8 @@ $J projects | $J issuetypes PET | $J fields "story points"
 ```
 
 Add `--json` to any command to get the raw API response instead of the text
-summary — use it when you need to pipe into `jq`:
+summary — use it when you need to pipe into `jq` (if installed; Git for Windows
+does not ship it):
 
 ```sh
 $J --json get PET-42 | jq -r '.fields.labels[]'
@@ -99,13 +108,13 @@ $J raw POST "/rest/agile/1.0/sprint/12/issue" '{"issues":["PET-42"]}'
 ## 4. Rules for agents
 
 - **Never print or echo the PAT**, and never copy it into a repo file. Read it only
-  through the env-file mechanism. `jira.sh config` is safe; `cat ~/.claude/jira.env` is not.
+  through the env-file mechanism. `jira.py config` is safe; `cat ~/.claude/jira.env` is not.
 - **Confirm before writing.** `create`, `update`, `comment`, `transition`, `delete`
   are visible to the whole team and mostly irreversible — `delete` entirely so. Ask
   first unless the user's request already names the action.
 - Prefer `--json | jq` when you need one field; prefer the default text output when
   you need to *read* an issue. Do not dump whole `--json` payloads into the transcript.
-- Errors always carry the HTTP status: `jira.sh: HTTP 403 on PUT .../issue/PET-42 - ...`.
+- Errors always carry the HTTP status: `jira.py: HTTP 403 on PUT .../issue/PET-42 - ...`.
   A 401 means the PAT is wrong or expired, a 403 means the token lacks the permission,
   a 404 on a key that exists usually also means a permissions problem.
 - JQL goes in single quotes when it contains double quotes: `$J search 'summary ~ "beta"'`.

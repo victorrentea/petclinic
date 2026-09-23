@@ -99,8 +99,10 @@ rag-vector-store.json
 .playwright-cli/
 
 
-# jira-cli skill: project-local PAT override, never commit it
+# jira/confluence/jenkins-cli skills: project-local token overrides, never commit them
 .jira.env
+.confluence.env
+.jenkins.env
 
 # Review guide, built by the human-review skill — regenerate, never commit
 /.human-review/
