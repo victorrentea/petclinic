@@ -1,3 +1,5 @@
+# GENERATED from the Java code by OpenApiExtractorTest — DO NOT EDIT BY HAND.
+# Change the controllers/DTOs instead, then re-run that test to regenerate this file.
 openapi: 3.1.0
 info:
   description: "This is the REST API documentation of the Spring Petclinic backend.\
