@@ -53,6 +53,8 @@ export class VisitsPage {
   }
 
   async getDates(): Promise<string[]> {
+    // The title renders before the visits arrive; counting then reads an empty table.
+    await this.rows.first().waitFor({state: 'visible', timeout: 10000});
     const count = await this.rows.count();
     const out: string[] = [];
     for (let i = 0; i < count; i++) {

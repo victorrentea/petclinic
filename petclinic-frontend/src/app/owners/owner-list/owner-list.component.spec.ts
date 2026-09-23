@@ -9,7 +9,7 @@ import {FormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner} from '../owner';
-import {Observable, of} from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
 import {PartsModule} from '../../parts/parts.module';
@@ -124,6 +124,19 @@ describe('OwnerListComponent', () => {
 
     expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
     expect(getOwnersSpy).not.toHaveBeenCalled();
+  });
+
+  // The page loads every owner on open; a search typed before that answer arrives must
+  // not be overwritten by it when it finally does.
+  it('a search is not overwritten by the initial load answering late', () => {
+    const initialLoad = new Subject<Owner[]>();
+    getOwnersSpy.and.returnValue(initialLoad);
+    fixture.detectChanges();
+
+    component.searchByLastName('Franklin');
+    initialLoad.next([testOwner, {...testOwner, id: 2, lastName: 'Davis'}]);
+
+    expect(component.owners).toEqual([testOwner]);
   });
 
 });
