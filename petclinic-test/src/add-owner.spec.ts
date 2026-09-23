@@ -64,6 +64,9 @@ test('edits an owner from their own page and the change sticks', async ({page}) 
 
   await page.locator('button:has-text("Edit Owner")').click();
   await page.locator('h2:has-text("Owner")').first().waitFor({state: 'visible', timeout: 10_000});
+  // The form renders empty and is filled when the owner arrives; typing before that is
+  // overwritten by the load, and the PUT then sends London back.
+  await expect(page.locator('#city')).toHaveValue('London');
   await page.fill('#city', 'Turin');
   await page.locator('button:has-text("Update Owner")').click();
 
