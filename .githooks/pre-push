@@ -35,13 +35,35 @@ fi
 
 # ── Path gating: skip unless pushed commits touch backend / OpenAPI / schema ─
 needs_check=0
+EMPTY_TREE=$(git hash-object -t tree /dev/null)
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "$ZERO" ] && continue  # branch deletion — nothing to verify
 
   if [ "$remote_sha" = "$ZERO" ]; then
     paths=$(git log --name-only --pretty=format: "$local_sha" --not --remotes="$REMOTE" 2>/dev/null || true)
+    # New branch: the base is the parent of the oldest commit the remote hasn't seen.
+    # `git diff` cannot take `--not --remotes`, so resolve it to a single rev here.
+    oldest=$(git rev-list "$local_sha" --not --remotes="$REMOTE" 2>/dev/null | tail -1)
+    if [ -n "$oldest" ]; then
+      base=$(git rev-parse --verify --quiet "$oldest^" || echo "$EMPTY_TREE")
+    else
+      base="$local_sha"   # nothing new to push on this ref
+    fi
   else
     paths=$(git log --name-only --pretty=format: "$remote_sha..$local_sha" 2>/dev/null || true)
+    base="$remote_sha"
+  fi
+
+  # ── Line length (ungated, fast — covers Java AND TypeScript, so it must run even
+  #    when the backend path gate below says "skip"). Only the lines this push adds. ──
+  if command -v python3 >/dev/null 2>&1; then
+    if ! python3 "$ROOT/scripts/check-line-length.py" "$base" "$local_sha"; then
+      echo "[pre-push] ❌ Line-length rule violated — push blocked."
+      exit 1
+    fi
+  else
+    echo "[pre-push] ⚠️  python3 missing — skipping the line-length check."
   fi
 
   # Guard: after a petclinic-backend/docs/generated/DB.sql change in the pushed range, the committed

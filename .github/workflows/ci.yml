@@ -74,6 +74,23 @@ jobs:
             gitleaks git --redact --no-banner -c .config/gitleaks.toml --log-opts="${base}..HEAD" .
           fi
 
+      # ── Hook parity: pre-push rejects added lines over 119 chars (Java + TS).
+      #    Re-run it here so `git push --no-verify` can't bypass it. Same script,
+      #    same range-scoping as the hook: only the lines this push/PR introduces. ──
+      - name: Line length < 120 chars — backstops the pre-push hook
+        run: |
+          zero='0000000000000000000000000000000000000000'
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+          else
+            base='${{ github.event.before }}'
+          fi
+          if [ -z "$base" ] || [ "$base" = "$zero" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse --verify --quiet HEAD^ || git hash-object -t tree /dev/null)"
+            echo "No usable base ref — checking the tip commit only."
+          fi
+          python3 scripts/check-line-length.py "$base" HEAD
+
       # ── Hook parity: pre-push blocks a DB.sql change whose DB.puml is stale.
       #    Re-run that guard here so `git push --no-verify` can't bypass it, and
       #    verify it the same way the hook does — by REGENERATING the diagram and
