@@ -17,7 +17,9 @@
         "//redraw3": "review page can offer to start over: restore the drawing to the base",
         "//redraw4": "and let the script draw the branch's additions again.",
         "redraw": "python3 petclinic-backend/docs/scripts/conceptual-model-patch.py",
-        "name": "conceptual"
+        "name": "conceptual",
+        "//tested_against": "What a unit test checks this drawing against; the review page says so under it.",
+        "tested_against": "Java Domain Model"
       }
     },
     "sequence": {
