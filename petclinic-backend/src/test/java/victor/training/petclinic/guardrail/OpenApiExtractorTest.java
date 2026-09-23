@@ -21,6 +21,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureEmbeddedDatabase(provider = ZONKY)
 @AutoConfigureMockMvc
 public class OpenApiExtractorTest {
+    private static final String HEADER = """
+            # GENERATED from the Java code by OpenApiExtractorTest — DO NOT EDIT BY HAND.
+            # Change the controllers/DTOs instead, then re-run that test to regenerate this file.
+            """;
 
     @Autowired
     MockMvc mockMvc;
@@ -29,6 +33,6 @@ public class OpenApiExtractorTest {
     void generateOpenApiYaml() throws Exception {
         String contractFromCode = mockMvc.perform(get("/v3/api-docs.yaml"))
                 .andReturn().getResponse().getContentAsString();
-        Files.writeString(Path.of("../openapi.yaml"), contractFromCode, CREATE, TRUNCATE_EXISTING);
+        Files.writeString(Path.of("../openapi.yaml"), HEADER + contractFromCode, CREATE, TRUNCATE_EXISTING);
     }
 }
