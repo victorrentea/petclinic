@@ -36,6 +36,12 @@ services:
         commons: ${PETCLINIC_SRC}/petclinic-commons
     labels:
       ro.victorrentea.petclinic.env: "1"
+    ports:
+      # For the test suite only: no-reset-endpoint.spec.ts asks the BACKEND whether it
+      # serves /__reset, and through nginx that path is the reset sidecar on purpose, so
+      # the frontend's port cannot answer it. Host-picked and loopback-bound like the
+      # frontend's, for the same two reasons. The reset sidecar stays unpublished.
+      - "127.0.0.1::8080"
     environment:
       NOTIFICATIONSERVICE_URL: http://notification:8090
       # application.properties hardcodes localhost:5432 with no ${...} placeholder, but

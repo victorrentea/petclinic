@@ -3,6 +3,7 @@ import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {Router} from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-owner-list',
@@ -15,13 +16,14 @@ export class OwnerListComponent implements OnInit {
   owners: Owner[];
   listOfOwnersWithLastName: Owner[];
   isOwnersDataReceived: boolean = false;
+  private load: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
 
   }
 
   ngOnInit() {
-    this.ownerService.getOwners().pipe(
+    this.load = this.ownerService.getOwners().pipe(
       finalize(() => {
         this.isOwnersDataReceived = true;
       })
@@ -38,35 +40,13 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  searchByLastName(lastName: string)
-  {
-      console.log('inside search by last name starting with ' + (lastName));
-      if (lastName === '')
-      {
-        this.ownerService.getOwners()
-          .subscribe(
-            (owners) => {
-              this.owners = owners;
-            });
-      }
-      if (lastName !== '')
-      {
-        this.ownerService.searchOwners(lastName)
-          .subscribe(
-            (owners) => {
-
-              this.owners = owners;
-              console.log('this.owners ' + this.owners);
-
-            },
-            (error) =>
-            {
-              this.owners = null;
-            }
-          );
-
-      }
+  // Only the latest query may answer: a search sent while the initial load is still in
+  // flight would otherwise be overwritten by the full list when it lands afterwards.
+  searchByLastName(lastName: string) {
+    this.load?.unsubscribe();
+    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
+    this.load = owners$.subscribe(
+      owners => this.owners = owners,
+      () => this.owners = null);
   }
-
-
 }
