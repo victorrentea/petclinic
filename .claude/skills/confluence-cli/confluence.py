@@ -10,6 +10,7 @@ same on Windows (no WSL), macOS and Linux.
     confluence.py [--json] <command> [args]
 """
 import base64
+import http.client
 import json
 import os
 import re
@@ -74,37 +75,66 @@ class Die(Exception):
 # ---------------------------------------------------------------- config ----
 
 
+def _env_value(raw):
+    """A value the way `source` reads it: verbatim inside quotes, otherwise up to an
+    inline ` # comment`. $VAR references are NOT expanded."""
+    raw = raw.strip()
+    if raw[:1] in ("'", '"'):
+        end = raw.find(raw[0], 1)
+        if end > 0:
+            return raw[1:end]
+    return re.split(r"\s+#", raw, 1)[0].strip()
+
+
+def _in_every_home(path):
+    """On Windows Python reads ~ from USERPROFILE, while Git Bash's ~ is $HOME - and
+    corporate setups often point HOME at a network drive. Look in both."""
+    if not path.startswith("~"):
+        return [path]
+    paths = [os.path.expanduser(path)]
+    if os.environ.get("HOME"):
+        paths.append(os.path.join(os.environ["HOME"], path[2:]))
+    return paths
+
+
 def load_env_file():
     """Loads the first env file that exists. Keeping it in the home folder (not in
-    the repo) is what makes the same PAT reusable across projects. Real environment
-    variables win over the file."""
+    the repo) is what makes the same token reusable across projects. A non-empty
+    environment variable wins over the file, so a one-off `CONFLUENCE_PAT=... confluence.py` works.
+    Returns (path or None, names the environment overrode)."""
     candidates = []
     if os.environ.get("CONFLUENCE_ENV_FILE"):
         candidates.append(os.environ["CONFLUENCE_ENV_FILE"])
     candidates.extend(ENV_FILES)
-    for path in candidates:
-        path = os.path.abspath(os.path.expanduser(path))
-        if not os.path.isfile(path):
-            continue
-        with open(path, encoding="utf-8-sig") as fh:
-            for line in fh:
-                line = line.strip()
-                if line.startswith("export "):
-                    line = line[len("export ") :].lstrip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                key, value = line.split("=", 1)
-                value = value.strip()
-                if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
-                    value = value[1:-1]
-                os.environ.setdefault(key.strip(), value)
-        return path
-    return None
+    for candidate in candidates:
+        for path in _in_every_home(candidate):
+            path = os.path.abspath(path)
+            if os.path.isfile(path):
+                return path, _load(path)
+    return None, []
+
+
+def _load(path):
+    overridden = []
+    with open(path, encoding="utf-8-sig") as fh:
+        for line in fh:
+            line = line.strip()
+            if line.startswith("export "):
+                line = line[len("export ") :].lstrip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            if os.environ.get(key):
+                overridden.append(key)
+            else:
+                os.environ[key] = _env_value(value)
+    return overridden
 
 
 class Config:
     def __init__(self):
-        self.env_file = load_env_file()
+        self.env_file, self.overridden = load_env_file()
         env = os.environ
         self.url = (env.get("CONFLUENCE_URL") or "").rstrip("/")
         self.pat = env.get("CONFLUENCE_PAT", "")
@@ -151,10 +181,26 @@ class Config:
 # ------------------------------------------------------------- http core ----
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never follow: urllib would forward the Authorization header to whatever host
+    the redirect names, and quietly turn a POST into a GET."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise Die(
+            "HTTP %s redirect from %s to %s - point CONFLUENCE_URL at the final address"
+            % (code, req.full_url, newurl)
+        )
+
+
+# Git Bash rewrites an argument like /rest/api/... into C:/Program Files/Git/rest/api/...
+# before python.exe ever sees it. Undo that for the REST roots this CLI uses.
+MSYS_MANGLED = re.compile(r"^[A-Za-z]:/.*?(/(?:rest|wiki)/.*)$")
+
+
 class Client:
     def __init__(self, cfg):
         self.cfg = cfg
-        handlers = []
+        handlers = [_NoRedirect()]
         if not cfg.ssl_verify:
             handlers.append(urllib.request.HTTPSHandler(context=ssl._create_unverified_context()))
         self.opener = urllib.request.build_opener(*handlers)
@@ -165,6 +211,9 @@ class Client:
         /wiki/... -> already site-absolute (Cloud)
         /...      -> relative to the Confluence context root (the site on DC, /wiki on Cloud)
         anything else -> relative to the v1 base"""
+        mangled = MSYS_MANGLED.match(path)
+        if mangled:
+            path = mangled.group(1)
         if path.startswith("http://") or path.startswith("https://"):
             return path
         if path.startswith("v2:"):
@@ -181,7 +230,7 @@ class Client:
         raw = ("%s:%s" % (self.cfg.user, self.cfg.api_token)).encode("utf-8")
         return "Basic " + base64.b64encode(raw).decode("ascii")
 
-    def call(self, method, path, body=None, data=None, headers=None):
+    def call(self, method, path, body=None, data=None, headers=None, expect_json=True):
         url = self.url_for(path)
         head = {"Accept": "application/json", "Authorization": self.auth_header()}
         if body is not None:
@@ -200,12 +249,24 @@ class Client:
             ) from None
         except urllib.error.URLError as exc:
             raise Die("cannot reach %s - %s" % (url, exc.reason)) from None
+        except (http.client.HTTPException, OSError) as exc:
+            raise Die("connection to %s failed - %s" % (url, exc or type(exc).__name__)) from None
         if not text.strip():
             return None
         try:
             return json.loads(text)
         except ValueError:
+            if expect_json:
+                # Typically an SSO login page served with a 200 by a corporate proxy.
+                raise Die(
+                    "expected JSON from %s %s, got: %s" % (method, url, _short(text))
+                ) from None
             return text
+
+
+def _short(text, limit=200):
+    text = " ".join(text.split())
+    return text if len(text) <= limit else text[:limit] + "..."
 
 
 def _error_text(payload):
@@ -251,6 +312,8 @@ def out(text=""):
 
 
 def emit(state, payload, render):
+    if payload is None:
+        raise Die("the server answered with an empty body")
     if state.json:
         out(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
@@ -513,7 +576,7 @@ def update_page(
     else:
         current = state.api.call("GET", "content/%s?expand=body.storage,version,space" % pid)
     if title is None:
-        title = current.get("title")
+        title = dig(current, "title")
     if body is None:
         body, rep = alt(dig(current, "body", "storage", "value"), ""), "storage"
     if version is None:
@@ -878,7 +941,7 @@ def cmd_raw(state, args):
     body = text_arg(a.optional(""))
     data = body.encode("utf-8") if body else None
     headers = {"Content-Type": "application/json"} if data else None
-    result = state.api.call(method, path, data=data, headers=headers)
+    result = state.api.call(method, path, data=data, headers=headers, expect_json=False)
     if isinstance(result, str):
         out(result)
     elif result is not None:
@@ -901,6 +964,7 @@ def cmd_config(cfg):
 Real environment variables win over the file.
 
 Currently loaded: %s
+Overridden by the environment: %s
 CONFLUENCE_URL=%s
 Auth: %s
 Flavor: %s   page API: %s
@@ -916,6 +980,7 @@ See confluence.env.example next to this script for the full list of variables.""
         % (
             os.environ.get("CONFLUENCE_ENV_FILE") or "unset",
             cfg.env_file or "<none>",
+            ", ".join(cfg.overridden) or "-",
             cfg.url or "<unset>",
             auth,
             cfg.flavor or "<unset>",
@@ -1001,6 +1066,9 @@ def main(argv=None):
         return 0
     except KeyboardInterrupt:
         return 130
+    except Exception as exc:  # noqa: BLE001 - a one-line error beats a traceback
+        sys.stderr.write("%s: unexpected %s: %s\n" % (PROG, type(exc).__name__, exc))
+        return 1
 
 
 if __name__ == "__main__":

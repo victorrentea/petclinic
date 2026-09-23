@@ -14,6 +14,7 @@ import argparse
 import base64
 import json
 import os
+import re
 import ssl
 import sys
 import time
@@ -33,26 +34,49 @@ class JenkinsError(Exception):
 # ---------------------------------------------------------------- configuration
 
 
+def _env_value(raw):
+    """A value the way `source` reads it: verbatim inside quotes, otherwise up to an
+    inline ` # comment`. $VAR references are NOT expanded."""
+    raw = raw.strip()
+    if raw[:1] in ("'", '"'):
+        end = raw.find(raw[0], 1)
+        if end > 0:
+            return raw[1:end]
+    return re.split(r"\s+#", raw, 1)[0].strip()
+
+
+def _in_every_home(path):
+    """On Windows Python reads ~ from USERPROFILE, while Git Bash's ~ is $HOME - and
+    corporate setups often point HOME at a network drive. Look in both."""
+    if not path.startswith("~"):
+        return [path]
+    paths = [os.path.expanduser(path)]
+    if os.environ.get("HOME"):
+        paths.append(os.path.join(os.environ["HOME"], path[2:]))
+    return paths
+
+
 def load_env_file():
-    """First env file that exists wins; values never override real env vars."""
+    """First env file that exists wins; values never override non-empty env vars."""
     candidates = []
     if os.environ.get("JENKINS_ENV_FILE"):
         candidates.append(os.environ["JENKINS_ENV_FILE"])
     candidates.extend(ENV_FILES)
-    for path in candidates:
-        path = os.path.expanduser(path)
-        if not os.path.isfile(path):
-            continue
-        with open(path, encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                key, value = line.split("=", 1)
-                key = key.strip()
-                value = value.strip().strip("'\"")
-                os.environ.setdefault(key, value)
-        return path
+    for candidate in candidates:
+        for path in _in_every_home(candidate):
+            if not os.path.isfile(path):
+                continue
+            with open(path, encoding="utf-8-sig") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line.startswith("export "):
+                        line = line[len("export ") :].lstrip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, value = line.split("=", 1)
+                    if not os.environ.get(key.strip()):
+                        os.environ[key.strip()] = _env_value(value)
+            return path
     return None
 
 

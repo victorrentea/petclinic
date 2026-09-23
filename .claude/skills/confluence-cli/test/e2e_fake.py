@@ -22,7 +22,7 @@ sys.path.insert(0, HERE)
 
 import fake_confluence  # noqa: E402
 import scenario  # noqa: E402
-from harness import Cli, Report, section  # noqa: E402
+from harness import Cli, Report, hostile_server, section  # noqa: E402
 
 CLI = os.path.join(os.path.dirname(HERE), "confluence.py")
 
@@ -112,6 +112,13 @@ def main():
         r.check("an env file with BOM, CRLF, quotes and 'export' still loads", res.rc == 0, res.all)
 
         # A project-local .confluence.env must win over the one in the home folder.
+        # The shared file in the home folder carries a token the fake rejects, so
+        # only a project-local file that really wins over it can make this pass.
+        os.makedirs(os.path.join(work, ".claude"))
+        write(
+            os.path.join(work, ".claude", "confluence.env"),
+            "CONFLUENCE_URL=%s\nCONFLUENCE_PAT=wrong-token\n" % base,
+        )
         proj = os.path.join(work, "proj")
         os.mkdir(proj)
         write(
@@ -133,6 +140,76 @@ def main():
             out,
             "created ",
         )
+
+        ok_env = os.path.join(work, "ok.env")
+        write(ok_env, "CONFLUENCE_URL=%s\nCONFLUENCE_PAT=%s\n" % (base, fake_confluence.TOKEN))
+        commented = os.path.join(work, "commented.env")
+        write(
+            commented,
+            'CONFLUENCE_URL=%s   # the fake\nCONFLUENCE_PAT="%s" # its token\n'
+            % (base, fake_confluence.TOKEN),
+        )
+        res = c("whoami", env={"CONFLUENCE_ENV_FILE": commented})
+        r.check(
+            "inline # comments in the env file are ignored, as by `source`", res.rc == 0, res.all
+        )
+        res = c("whoami", env={"CONFLUENCE_ENV_FILE": ok_env, "CONFLUENCE_PAT": ""})
+        r.check(
+            "an empty environment variable does not hide the file's value", res.rc == 0, res.all
+        )
+        out = c("config", env={"CONFLUENCE_ENV_FILE": ok_env, "CONFLUENCE_URL": base}).all
+        r.contains("config names what the environment overrode", out, "environment: CONFLUENCE_URL")
+
+        # Git Bash's ~ is $HOME, python.exe's is USERPROFILE; the file may be in either.
+        split_home = os.path.join(work, "split")
+        os.makedirs(os.path.join(split_home, "bash-home", ".claude"))
+        os.makedirs(os.path.join(split_home, "profile"))
+        write(
+            os.path.join(split_home, "bash-home", ".claude", "confluence.env"), open(ok_env).read()
+        )
+        res = c(
+            "whoami",
+            env={
+                "CONFLUENCE_ENV_FILE": None,
+                "HOME": os.path.join(split_home, "bash-home"),
+                "USERPROFILE": os.path.join(split_home, "profile"),
+            },
+            cwd=split_home,
+        )
+        r.check(
+            "~/.claude/confluence.env is found under $HOME even when USERPROFILE differs",
+            res.rc == 0,
+            res.all,
+        )
+
+        # Git Bash turns /rest/... into C:/Program Files/Git/rest/... before Python sees it.
+        res = c(
+            "raw",
+            "GET",
+            "C:/Program Files/Git/rest/api/user/current",
+            env={"CONFLUENCE_ENV_FILE": ok_env},
+        )
+        r.contains("a raw path mangled by Git Bash still reaches the API", res.all, "Victor Rentea")
+
+        hostile = hostile_server(base + "/rest/api/user/current")
+        for kind, needle in (
+            ("html", "expected JSON"),
+            ("redirect", "redirect from"),
+            ("drop", "failed"),
+        ):
+            res = c(
+                "whoami",
+                env={
+                    "CONFLUENCE_ENV_FILE": None,
+                    "CONFLUENCE_URL": hostile + "/" + kind,
+                    "CONFLUENCE_PAT": fake_confluence.TOKEN,
+                },
+            )
+            r.check(
+                "a %s response is a one-line error, not a traceback" % kind,
+                res.rc == 1 and needle in res.err and "Traceback" not in res.err,
+                res.all,
+            )
 
         # Read as bytes: text mode would silently fold \r\n back into \n.
         created = c("create", "-s", "DOCS", "-t", "ș ț", "--text", "x").out.split()

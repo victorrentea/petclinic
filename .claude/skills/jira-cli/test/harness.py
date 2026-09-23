@@ -132,3 +132,38 @@ def read_env_value(path, key):
             if line.startswith(key + "="):
                 return line.split("=", 1)[1].strip().strip("'\"")
     return ""
+
+
+def hostile_server(redirect_to):
+    """A server that misbehaves the ways corporate networks do. Under the returned
+    base URL: /html/... answers 200 with an SSO login page, /redirect/... answers
+    302 to `redirect_to`, /drop/... closes the socket without a word."""
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *_):
+            pass
+
+        def _answer(self):
+            if self.path.startswith("/html/"):
+                body = b"<html><body>Please sign in</body></html>"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            elif self.path.startswith("/redirect/"):
+                self.send_response(302)
+                self.send_header("Location", redirect_to)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+            else:
+                self.close_connection = True
+                self.connection.close()
+
+        do_GET = do_POST = do_PUT = do_DELETE = _answer
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return "http://127.0.0.1:%d" % server.server_address[1]

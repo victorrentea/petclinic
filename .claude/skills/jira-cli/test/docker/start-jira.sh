@@ -56,7 +56,7 @@ Three things still need a human, because they are licence- and UI-gated:
 
   3. Mint a Personal Access Token:
       avatar -> Profile -> Personal Access Tokens -> Create token
-      Then write it down where jira.sh will find it:
+      Then write it down where jira.py will find it:
 
         install -m 600 /dev/null ~/.claude/jira-test.env
         cat > ~/.claude/jira-test.env <<'CREDS'
@@ -66,7 +66,7 @@ Three things still need a human, because they are licence- and UI-gated:
 
 Then run the live suite:
 
-  JIRA_TEST_PROJECT=SAND $HERE/../e2e-live.sh
+  JIRA_TEST_PROJECT=SAND python3 $HERE/../e2e_live.py
 
 Other commands: $(basename "$0") logs | down | destroy
 EOF

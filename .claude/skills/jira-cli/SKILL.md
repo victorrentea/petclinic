@@ -17,7 +17,9 @@ python  .claude/skills/jira-cli/jira.py whoami   # Windows: python or py; `pytho
                                                  # is often just the Microsoft Store stub
 ```
 
-Below, `$J` stands for whichever of those your OS needs.
+Below, `$J` is shorthand in the examples only - always type the full command
+(`python3 .claude/skills/jira-cli/jira.py get PET-42`): the `allowed-tools` permissions
+match that literal prefix, and a `J=...` variable does not word-split in zsh anyway.
 
 ## 1. One-time setup
 
@@ -104,6 +106,10 @@ auth, errors and JSON formatting for you:
 $J raw GET  "issue/PET-42/changelog"
 $J raw POST "/rest/agile/1.0/sprint/12/issue" '{"issues":["PET-42"]}'
 ```
+
+Git Bash on Windows rewrites a leading-slash argument (`/rest/...`) into
+`C:/Program Files/Git/rest/...`; `jira.py` undoes that for `/rest/` and `/wiki/` paths,
+so both spellings work.
 
 ## 4. Rules for agents
 

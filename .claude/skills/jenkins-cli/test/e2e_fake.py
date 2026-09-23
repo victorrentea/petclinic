@@ -8,6 +8,7 @@ No Docker, no network, no Java - runs the same on macOS, Linux and Windows.
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 
@@ -186,6 +187,26 @@ def test_json_output_is_machine_readable():
 
     payload = json.loads(run("--json", "builds", "petclinic-build"))
     assert payload[0]["number"] >= 7, payload
+
+
+def test_env_file_under_home_with_inline_comments():
+    # Git Bash's ~ is $HOME while python.exe's is USERPROFILE; the file may be in either.
+    home = os.path.join(HERE, "split-home")
+    os.makedirs(os.path.join(home, ".claude"), exist_ok=True)
+    try:
+        with open(os.path.join(home, ".claude", "jenkins.env"), "w") as fh:
+            fh.write(
+                'JENKINS_URL=%s   # the fake\nJENKINS_USER_ID="%s" # me\nJENKINS_API_TOKEN=%s\n'
+                % (URL, fake_jenkins.USER, fake_jenkins.TOKEN)
+            )
+        env = {k: v for k, v in ENV.items() if not k.startswith("JENKINS_")}
+        env.update(HOME=home, USERPROFILE=os.path.join(home, "elsewhere"))
+        proc = subprocess.run(
+            [sys.executable, CLI, "who-am-i"], capture_output=True, text=True, env=env, cwd=home
+        )
+        contains(proc.stdout + proc.stderr, "Authenticated as: admin")
+    finally:
+        shutil.rmtree(home)
 
 
 def test_missing_url_is_a_clear_error():

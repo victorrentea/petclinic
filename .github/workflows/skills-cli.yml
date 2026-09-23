@@ -57,8 +57,14 @@ jobs:
           set -euo pipefail
           for s in jira-cli/jira.py confluence-cli/confluence.py jenkins-cli/jenkins.py; do
             python ".claude/skills/$s" --help | head -1
-            py -3 ".claude/skills/$s" --help | head -1
+            py -${{ matrix.python }} ".claude/skills/$s" --help | head -1
           done
+          # A leading-slash path is rewritten by Git Bash before python.exe sees it.
+          python .claude/skills/jira-cli/test/fake_jira.py 0 > fake-port.txt &
+          for _ in $(seq 50); do [[ -s fake-port.txt ]] && break; sleep 0.2; done
+          printf 'JIRA_URL=http://127.0.0.1:%s\nJIRA_PAT=test-pat-12345\n' "$(head -1 fake-port.txt)" > fake.env
+          JIRA_ENV_FILE=fake.env python .claude/skills/jira-cli/jira.py raw GET /rest/api/2/myself | grep -q victor
+          kill %1
           out=$(python .claude/skills/jira-cli/jira.py config | head -1)
           [[ $out != *$'\r'* ]] || { echo "CRLF leaked into a Git Bash pipe"; exit 1; }
           # Informational: whether the shebang alone is enough here.

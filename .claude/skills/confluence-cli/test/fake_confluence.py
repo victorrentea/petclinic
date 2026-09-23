@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """A tiny in-memory stand-in for the Confluence REST API - both v1 and v2.
 
-It exists so the e2e suite can exercise confluence.sh over real HTTP - real curl,
+It exists so the e2e suite can exercise confluence.py over real HTTP - real urllib,
 real status codes, real JSON - without a licence key or a Cloud site.
 
-Serving BOTH APIs from one process is the point: confluence.sh talks v1 to Data
+Serving BOTH APIs from one process is the point: confluence.py talks v1 to Data
 Center and v2 to Cloud, and the same scenario is run twice against this server,
 once per flavor. Anything the v1 path proves, the v2 path has to prove too.
 
 It is deliberately strict about the things that actually break clients:
-  - auth (401 on a bad token)
-  - the version dance on update (409 on a stale or skipped version number)
-  - unknown page ids (404)
-  - a tiny search page size, so a client that forgot to paginate fails
+    - auth (401 on a bad token)
+    - the version dance on update (409 on a stale or skipped version number)
+    - unknown page ids (404)
+    - a tiny search page size, so a client that forgot to paginate fails
 
-Only the endpoints confluence.sh actually calls are implemented. Anything else
+Only the endpoints confluence.py actually calls are implemented. Anything else
 404s loudly rather than pretending to work.
 """
 import json
@@ -26,7 +26,7 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 TOKEN = "test-pat-12345"
 
-# Capped low on purpose: it forces confluence.sh to paginate, which is the part
+# Capped low on purpose: it forces confluence.py to paginate, which is the part
 # of the client most likely to silently truncate results.
 PAGE_CAP = 2
 
@@ -35,9 +35,14 @@ SPACES = [
     {"id": "1002", "key": "SAND", "name": "Sandbox"},
 ]
 
-USER = {"type": "known", "username": "victor", "userKey": "victor-key",
-        "accountId": "acc-victor", "displayName": "Victor Rentea",
-        "email": "victor@example.com"}
+USER = {
+    "type": "known",
+    "username": "victor",
+    "userKey": "victor-key",
+    "accountId": "acc-victor",
+    "displayName": "Victor Rentea",
+    "email": "victor@example.com",
+}
 
 
 class Store:
@@ -124,9 +129,13 @@ def new_page(pid, title, space, parent_id, body):
 
 # ------------------------------------------------------------------- views --
 
+
 def v1_page(p, expand=""):
     out = {
-        "id": p["id"], "type": "page", "status": p["status"], "title": p["title"],
+        "id": p["id"],
+        "type": "page",
+        "status": p["status"],
+        "title": p["title"],
         "space": {"id": p["spaceId"], "key": p["spaceKey"]},
         "version": {"number": p["version"]},
         "ancestors": ([{"id": p["parentId"]}] if p["parentId"] else []),
@@ -135,24 +144,34 @@ def v1_page(p, expand=""):
     if "body" in expand or not expand:
         out["body"] = {"storage": {"value": p["body"], "representation": "storage"}}
     if "metadata.labels" in expand:
-        out["metadata"] = {"labels": {"results": [
-            {"prefix": "global", "name": n} for n in p["labels"]]}}
+        out["metadata"] = {
+            "labels": {"results": [{"prefix": "global", "name": n} for n in p["labels"]]}
+        }
     return out
 
 
 def v2_page(p, body_format=None, include_labels=False):
     out = {
-        "id": p["id"], "status": p["status"], "title": p["title"],
-        "spaceId": p["spaceId"], "parentId": p["parentId"],
-        "version": {"number": p["version"], "createdAt": "2026-08-12T10:00:00.000Z",
-                    "message": p["versions"][-1]["message"]},
+        "id": p["id"],
+        "status": p["status"],
+        "title": p["title"],
+        "spaceId": p["spaceId"],
+        "parentId": p["parentId"],
+        "version": {
+            "number": p["version"],
+            "createdAt": "2026-08-12T10:00:00.000Z",
+            "message": p["versions"][-1]["message"],
+        },
         "_links": {"webui": f"/spaces/{p['spaceKey']}/pages/{p['id']}"},
     }
     if body_format:
         out["body"] = {"storage": {"value": p["body"], "representation": "storage"}}
     if include_labels:
-        out["labels"] = {"results": [{"id": str(i), "name": n, "prefix": "global"}
-                                      for i, n in enumerate(p["labels"])]}
+        out["labels"] = {
+            "results": [
+                {"id": str(i), "name": n, "prefix": "global"} for i, n in enumerate(p["labels"])
+            ]
+        }
     return out
 
 
@@ -212,8 +231,14 @@ class Handler(BaseHTTPRequestHandler):
     def fail(self, code, message):
         # v1 shape and v2 shape at once, so the client's error parser is exercised
         # whichever branch it takes.
-        self.send_json(code, {"statusCode": code, "message": message,
-                              "errors": [{"status": code, "title": message, "detail": message}]})
+        self.send_json(
+            code,
+            {
+                "statusCode": code,
+                "message": message,
+                "errors": [{"status": code, "title": message, "detail": message}],
+            },
+        )
 
     def authed(self):
         auth = self.headers.get("Authorization", "")
@@ -240,11 +265,11 @@ class Handler(BaseHTTPRequestHandler):
         # Cloud serves everything under /wiki; DC serves it at the root. Accept both
         # so one server can answer a server-flavored and a cloud-flavored client.
         if path.startswith("/wiki/"):
-            path = path[len("/wiki"):]
+            path = path[len("/wiki") :]
         if path.startswith("/rest/api/"):
-            return "v1", path[len("/rest/api/"):].strip("/").split("/"), query
+            return "v1", path[len("/rest/api/") :].strip("/").split("/"), query
         if path.startswith("/api/v2/"):
-            return "v2", path[len("/api/v2/"):].strip("/").split("/"), query
+            return "v2", path[len("/api/v2/") :].strip("/").split("/"), query
         return None, [], query
 
     def page_or_404(self, pid, allow_trashed=False):
@@ -280,7 +305,12 @@ class Handler(BaseHTTPRequestHandler):
 
         # Attachments carry a multipart body, so they must claim the socket before
         # read_json() drains it.
-        if api == "v1" and len(parts) == 4 and parts[0] == "content" and parts[2:] == ["child", "attachment"]:
+        if (
+            api == "v1"
+            and len(parts) == 4
+            and parts[0] == "content"
+            and parts[2:] == ["child", "attachment"]
+        ):
             n = int(self.headers.get("Content-Length") or 0)
             raw = self.rfile.read(n) if n else b""  # always drain, even on 404
             page = self.page_or_404(parts[1])
@@ -348,12 +378,14 @@ class Handler(BaseHTTPRequestHandler):
             return self.do_search(q)
         if parts == ["content"]:
             key, title = q.get("spaceKey"), q.get("title")
-            hits = [p for p in STORE.pages.values()
-                    if p["status"] == "current"
-                    and (key is None or p["spaceKey"] == key)
-                    and (title is None or p["title"] == title)]
-            return self.send_json(200, {"results": [v1_page(p) for p in hits],
-                                        "size": len(hits)})
+            hits = [
+                p
+                for p in STORE.pages.values()
+                if p["status"] == "current"
+                and (key is None or p["spaceKey"] == key)
+                and (title is None or p["title"] == title)
+            ]
+            return self.send_json(200, {"results": [v1_page(p) for p in hits], "size": len(hits)})
         if parts and parts[0] == "content" and len(parts) >= 2:
             page = self.page_or_404(parts[1])
             if page is None:
@@ -361,27 +393,58 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) == 2:
                 return self.send_json(200, v1_page(page, q.get("expand", "")))
             if parts[2] == "label":
-                return self.send_json(200, {"results": [
-                    {"prefix": "global", "name": n, "id": str(i)}
-                    for i, n in enumerate(page["labels"])]})
+                return self.send_json(
+                    200,
+                    {
+                        "results": [
+                            {"prefix": "global", "name": n, "id": str(i)}
+                            for i, n in enumerate(page["labels"])
+                        ]
+                    },
+                )
             if parts[2] == "version":
-                return self.send_json(200, {"results": [
-                    {"number": v["number"], "message": v["message"], "when": v["when"],
-                      "by": {"displayName": USER["displayName"]}}
-                    for v in page["versions"]]})
+                return self.send_json(
+                    200,
+                    {
+                        "results": [
+                            {
+                                "number": v["number"],
+                                "message": v["message"],
+                                "when": v["when"],
+                                "by": {"displayName": USER["displayName"]},
+                            }
+                            for v in page["versions"]
+                        ]
+                    },
+                )
             if parts[2] == "child" and len(parts) == 4:
                 if parts[3] == "page":
-                    kids = [p for p in STORE.pages.values()
-                            if p["parentId"] == page["id"] and p["status"] == "current"]
+                    kids = [
+                        p
+                        for p in STORE.pages.values()
+                        if p["parentId"] == page["id"] and p["status"] == "current"
+                    ]
                     return self.send_json(200, {"results": [v1_page(k) for k in kids]})
                 if parts[3] == "comment":
-                    return self.send_json(200, {"results": [
-                        {"id": c["id"],
-                          "body": {"storage": {"value": c["body"], "representation": "storage"}},
-                          "version": {"number": 1},
-                          "history": {"createdBy": {"displayName": USER["displayName"]},
-                                      "createdDate": "2026-08-12T10:00:00.000Z"}}
-                        for c in page["comments"]]})
+                    return self.send_json(
+                        200,
+                        {
+                            "results": [
+                                {
+                                    "id": c["id"],
+                                    "body": {
+                                        "storage": {"value": c["body"], "representation": "storage"}
+                                    },
+                                    "version": {"number": 1},
+                                    "history": {
+                                        "createdBy": {"displayName": USER["displayName"]},
+                                        "createdDate": "2026-08-12T10:00:00.000Z",
+                                    },
+                                }
+                                for c in page["comments"]
+                            ]
+                        },
+                    )
                 if parts[3] == "attachment":
                     return self.send_json(200, {"results": page["attachments"]})
         return self.fail(404, f"unsupported path {self.path}")
@@ -394,7 +457,10 @@ class Handler(BaseHTTPRequestHandler):
                 if page is None:
                     return
                 STORE.comment_seq += 1
-                comment = {"id": f"c{STORE.comment_seq}", "body": body_in(body.get("body"), "v1") or ""}
+                comment = {
+                    "id": f"c{STORE.comment_seq}",
+                    "body": body_in(body.get("body"), "v1") or "",
+                }
                 page["comments"].append(comment)
                 return self.send_json(200, {"id": comment["id"], "type": "comment"})
             return self.create_page(
@@ -402,17 +468,19 @@ class Handler(BaseHTTPRequestHandler):
                 title=body.get("title"),
                 parent_id=((body.get("ancestors") or [{}])[-1] or {}).get("id"),
                 body=body_in(body.get("body"), "v1"),
-                api="v1")
+                api="v1",
+            )
         if len(parts) == 3 and parts[0] == "content" and parts[2] == "label":
             page = self.page_or_404(parts[1])
             if page is None:
                 return
-            for lab in (body if isinstance(body, list) else [body]):
+            for lab in body if isinstance(body, list) else [body]:
                 name = (lab or {}).get("name")
                 if name and name not in page["labels"]:
                     page["labels"].append(name)
-            return self.send_json(200, {"results": [
-                {"prefix": "global", "name": n} for n in page["labels"]]})
+            return self.send_json(
+                200, {"results": [{"prefix": "global", "name": n} for n in page["labels"]]}
+            )
         return self.fail(404, f"unsupported path {self.path}")
 
     # ----------------------------------------------------------------- v2 ---
@@ -426,33 +494,77 @@ class Handler(BaseHTTPRequestHandler):
             if space is None:
                 return self.fail(404, f"No space with id {parts[1]}")
             title = q.get("title")
-            hits = [p for p in STORE.pages.values()
-                    if p["spaceId"] == space["id"] and p["status"] == "current"
-                    and (title is None or p["title"] == title)]
+            hits = [
+                p
+                for p in STORE.pages.values()
+                if p["spaceId"] == space["id"]
+                and p["status"] == "current"
+                and (title is None or p["title"] == title)
+            ]
             return self.send_json(200, {"results": [v2_page(p) for p in hits], "_links": {}})
         if parts and parts[0] == "pages" and len(parts) >= 2:
             page = self.page_or_404(parts[1])
             if page is None:
                 return
             if len(parts) == 2:
-                return self.send_json(200, v2_page(
-                    page, q.get("body-format"), q.get("include-labels") == "true"))
+                return self.send_json(
+                    200, v2_page(page, q.get("body-format"), q.get("include-labels") == "true")
+                )
             if parts[2] == "children":
-                kids = [p for p in STORE.pages.values()
-                        if p["parentId"] == page["id"] and p["status"] == "current"]
-                return self.send_json(200, {"results": [
-                    {"id": k["id"], "title": k["title"], "status": k["status"],
-                      "spaceId": k["spaceId"]} for k in kids], "_links": {}})
+                kids = [
+                    p
+                    for p in STORE.pages.values()
+                    if p["parentId"] == page["id"] and p["status"] == "current"
+                ]
+                return self.send_json(
+                    200,
+                    {
+                        "results": [
+                            {
+                                "id": k["id"],
+                                "title": k["title"],
+                                "status": k["status"],
+                                "spaceId": k["spaceId"],
+                            }
+                            for k in kids
+                        ],
+                        "_links": {},
+                    },
+                )
             if parts[2] == "versions":
-                return self.send_json(200, {"results": [
-                    {"number": v["number"], "message": v["message"],
-                      "createdAt": v["when"], "authorId": USER["accountId"]}
-                    for v in page["versions"]], "_links": {}})
+                return self.send_json(
+                    200,
+                    {
+                        "results": [
+                            {
+                                "number": v["number"],
+                                "message": v["message"],
+                                "createdAt": v["when"],
+                                "authorId": USER["accountId"],
+                            }
+                            for v in page["versions"]
+                        ],
+                        "_links": {},
+                    },
+                )
             if parts[2] == "footer-comments":
-                return self.send_json(200, {"results": [
-                    {"id": c["id"], "pageId": page["id"], "version": {"number": 1},
-                      "body": {"storage": {"value": c["body"], "representation": "storage"}}}
-                    for c in page["comments"]], "_links": {}})
+                return self.send_json(
+                    200,
+                    {
+                        "results": [
+                            {
+                                "id": c["id"],
+                                "pageId": page["id"],
+                                "version": {"number": 1},
+                                "body": {
+                                    "storage": {"value": c["body"], "representation": "storage"}
+                                },
+                            }
+                            for c in page["comments"]
+                        ],
+                        "_links": {},
+                    },
+                )
         return self.fail(404, f"unsupported path {self.path}")
 
     def post_v2(self, parts, body):
@@ -461,9 +573,12 @@ class Handler(BaseHTTPRequestHandler):
             if space is None:
                 return self.fail(404, f"No space with id {body.get('spaceId')}")
             return self.create_page(
-                space_key=space["key"], title=body.get("title"),
+                space_key=space["key"],
+                title=body.get("title"),
                 parent_id=body.get("parentId"),
-                body=body_in(body.get("body"), "v2"), api="v2")
+                body=body_in(body.get("body"), "v2"),
+                api="v2",
+            )
         if parts == ["footer-comments"]:
             page = self.page_or_404(body.get("pageId"))
             if page is None:
@@ -481,15 +596,20 @@ class Handler(BaseHTTPRequestHandler):
             return self.fail(404, f"No space with key '{space_key}'")
         if not title:
             return self.fail(400, "title is required for a published page")
-        if any(p["spaceKey"] == space["key"] and p["title"] == title
-                and p["status"] == "current" for p in STORE.pages.values()):
-            return self.fail(400, f"A page with title '{title}' already exists in space {space['key']}")
+        if any(
+            p["spaceKey"] == space["key"] and p["title"] == title and p["status"] == "current"
+            for p in STORE.pages.values()
+        ):
+            return self.fail(
+                400, f"A page with title '{title}' already exists in space {space['key']}"
+            )
         if parent_id is not None and str(parent_id) not in STORE.pages:
             return self.fail(404, f"No parent content with id {parent_id}")
         with STORE.lock:
             pid = STORE.next_id()
-            STORE.pages[pid] = new_page(pid, title, space,
-                                        str(parent_id) if parent_id else None, body)
+            STORE.pages[pid] = new_page(
+                pid, title, space, str(parent_id) if parent_id else None, body
+            )
         page = STORE.pages[pid]
         return self.send_json(200, v2_page(page, "storage") if api == "v2" else v1_page(page))
 
@@ -500,9 +620,13 @@ class Handler(BaseHTTPRequestHandler):
             return self.fail(400, "version.number is required on update")
         expected = page["version"] + 1
         if int(version) != expected:
-            return self.fail(409, (
-                f"Version must be incremented on update. Current version is "
-                f"{page['version']}, expected {expected} but got {version}."))
+            return self.fail(
+                409,
+                (
+                    f"Version must be incremented on update. Current version is "
+                    f"{page['version']}, expected {expected} but got {version}."
+                ),
+            )
 
         title = body.get("title")
         if not title:
@@ -514,8 +638,9 @@ class Handler(BaseHTTPRequestHandler):
             page["body"] = new_body
         page["version"] = int(version)
         message = (body.get("version") or {}).get("message", "")
-        page["versions"].append({"number": int(version), "message": message,
-                                  "when": "2026-08-12T11:00:00.000Z"})
+        page["versions"].append(
+            {"number": int(version), "message": message, "when": "2026-08-12T11:00:00.000Z"}
+        )
         if api == "v2":
             if "parentId" in body and body["parentId"]:
                 page["parentId"] = str(body["parentId"])
@@ -529,22 +654,32 @@ class Handler(BaseHTTPRequestHandler):
         cql = q.get("cql", "")
         start = int(q.get("start") or 0)
         want = min(int(q.get("limit") or 25), PAGE_CAP)
-        matched = [p for p in STORE.pages.values()
-                    if p["status"] == "current" and cql_match(p, cql)]
+        matched = [
+            p for p in STORE.pages.values() if p["status"] == "current" and cql_match(p, cql)
+        ]
         matched.sort(key=lambda p: int(p["id"]))
-        page = matched[start:start + want]
+        page = matched[start : start + want]
         out = {
-            "results": [{"content": v1_page(p), "title": p["title"],
-                          "resultGlobalContainer": {"title": p["spaceKey"]}}
-                        for p in page],
-            "start": start, "limit": want, "size": len(page), "totalSize": len(matched),
+            "results": [
+                {
+                    "content": v1_page(p),
+                    "title": p["title"],
+                    "resultGlobalContainer": {"title": p["spaceKey"]},
+                }
+                for p in page
+            ],
+            "start": start,
+            "limit": want,
+            "size": len(page),
+            "totalSize": len(matched),
             "_links": {},
         }
         # Hand back a cursor link when more results exist, the way Cloud does, so
         # the client's next-link following is exercised and not just start/limit.
         if start + want < len(matched):
-            out["_links"]["next"] = (f"/rest/api/search?cql={quote(cql)}"
-                                      f"&limit={want}&start={start + want}")
+            out["_links"]["next"] = (
+                f"/rest/api/search?cql={quote(cql)}" f"&limit={want}&start={start + want}"
+            )
         return self.send_json(200, out)
 
     def do_attach(self, page, raw):
@@ -552,8 +687,12 @@ class Handler(BaseHTTPRequestHandler):
             return self.fail(403, "XSRF check failed - X-Atlassian-Token header missing")
         match = re.search(rb'filename="([^"]*)"', raw)
         filename = match.group(1).decode() if match else "unknown"
-        att = {"id": f"att{len(page['attachments']) + 1}", "type": "attachment",
-                "title": filename, "extensions": {"fileSize": len(raw)}}
+        att = {
+            "id": f"att{len(page['attachments']) + 1}",
+            "type": "attachment",
+            "title": filename,
+            "extensions": {"fileSize": len(raw)},
+        }
         page["attachments"].append(att)
         return self.send_json(200, {"results": [att]})
 

@@ -21,7 +21,7 @@ move, search pagination, delete — and is written **once** and run against ever
   stdlib, so it runs the same on Windows, macOS and Linux. The scenario then runs **twice**,
   once as Data Center (PAT + v1) and once as Cloud (Basic + `/wiki` + v2), because a
   green v1 run says nothing about v2. It caps a search page at 2 on purpose, so a client
-  that forgot to paginate fails the suite. 109 assertions.
+  that forgot to paginate fails the suite. 117 assertions.
 - **Live** (`e2e_live.py`): the same scenario against a real instance. It creates ~9
   throwaway pages and deletes them again, so point it at a **sandbox space**.
 

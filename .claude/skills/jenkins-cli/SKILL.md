@@ -16,7 +16,9 @@ python  .claude/skills/jenkins-cli/jenkins.py version   # Windows: python or py;
                                                         # is often just the Microsoft Store stub
 ```
 
-Below, `$J` stands for whichever of those your OS needs.
+Below, `$J` is shorthand in the examples only - always type the full command
+(`python3 .claude/skills/jenkins-cli/jenkins.py job petclinic-build`): the `allowed-tools` permissions
+match that literal prefix, and a `J=...` variable does not word-split in zsh anyway.
 
 ## 1. One-time setup
 
@@ -87,10 +89,13 @@ Anything not wrapped goes through the escape hatch, which still handles auth, th
 CSRF crumb, errors and JSON formatting:
 
 ```sh
-$J raw GET  "/job/petclinic-build/api/json?tree=builds[number,result]"
-$J raw POST "/job/petclinic-build/42/submitDescription" '{"description":"x"}'
+$J raw GET  "job/petclinic-build/api/json?tree=builds[number,result]"
+$J raw POST "job/petclinic-build/42/submitDescription" '{"description":"x"}'
 $J groovy -  <<< 'println Jenkins.instance.numExecutors'
 ```
+
+Paths are relative to the Jenkins root; leave out the leading slash, which Git Bash on
+Windows would otherwise rewrite into `C:/Program Files/Git/...`.
 
 ## 5. Rules for agents
 

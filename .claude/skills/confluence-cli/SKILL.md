@@ -17,7 +17,9 @@ python  .claude/skills/confluence-cli/confluence.py whoami   # Windows: python o
                                                              # is often just the Microsoft Store stub
 ```
 
-Below, `$C` stands for whichever of those your OS needs.
+Below, `$C` is shorthand in the examples only - always type the full command
+(`python3 .claude/skills/confluence-cli/confluence.py spaces`): the `allowed-tools` permissions
+match that literal prefix, and a `J=...` variable does not word-split in zsh anyway.
 
 ## 1. One-time setup
 
@@ -140,6 +142,10 @@ $C raw GET  "content/123456/history"       # v1: relative to /rest/api
 $C raw GET  "v2:pages/123456/versions"     # v2: 'v2:' prefix
 $C raw POST "/rest/api/content" '{"type":"page", ...}'
 ```
+
+Git Bash on Windows rewrites a leading-slash argument (`/rest/...`) into
+`C:/Program Files/Git/rest/...`; `confluence.py` undoes that for `/rest/` and `/wiki/`
+paths, so both spellings work.
 
 ## 5. Rules for agents
 

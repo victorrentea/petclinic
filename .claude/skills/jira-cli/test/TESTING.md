@@ -20,7 +20,7 @@ for real.
   REST v2 API, on a random port and drives the real `jira.py` **as a subprocess** over
   real HTTP — argv parsing, exit codes, env-file lookup, real status codes, real 401s.
   Everything is Python stdlib, so the same suite runs on Windows, macOS and Linux. It caps a search page at 2 results on purpose, so a client
-  that forgot to paginate fails the suite. 52 assertions.
+  that forgot to paginate fails the suite. 60 assertions.
 - **Live** (`e2e_live.py`): same scenario against a real instance. It creates ~5
   throwaway issues and deletes them again, so point it at a **sandbox project**.
 
