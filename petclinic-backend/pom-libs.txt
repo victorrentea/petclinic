@@ -6,6 +6,12 @@
 # Regenerate with: python3 scripts/list-unversioned-deps.py
 # Protected by CODEOWNERS so the elders review any change to this surface.
 
+notification-service:
+  org.springframework.boot:spring-boot-starter-actuator
+  org.springframework.boot:spring-boot-starter-test
+  org.springframework.boot:spring-boot-starter-validation
+  org.springframework.boot:spring-boot-starter-web
+
 petclinic-backend:
   org.flywaydb:flyway-core
   org.flywaydb:flyway-database-postgresql

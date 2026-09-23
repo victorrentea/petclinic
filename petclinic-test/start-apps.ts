@@ -9,11 +9,13 @@ import * as fs from 'fs';
 
 const DB_PORT = 5432;
 const BACKEND_PORT = 8080;
+const NOTIFICATION_PORT = 8090;
 const FRONTEND_PORT = 4200;
 const MAX_RETRIES = 60;
 const RETRY_DELAY = 2000;
 
 let databaseProcess: ChildProcess | null = null;
+let notificationProcess: ChildProcess | null = null;
 let backendProcess: ChildProcess | null = null;
 let frontendProcess: ChildProcess | null = null;
 
@@ -98,6 +100,27 @@ function jacocoJvmArg(): string | null {
   return `-javaagent:${jar}=output=tcpserver,address=127.0.0.1,port=${port}`;
 }
 
+// Installs petclinic-commons on the way: the backend compiles against it too, so this has to
+// run first.
+async function startNotificationService(): Promise<ChildProcess> {
+  return new Promise((resolve, reject) => {
+    console.log('Starting notification-service...');
+
+    const repoRoot = path.join(__dirname, '..');
+    const mvnCmd = process.platform === 'win32' ? 'mvn.cmd' : 'mvn';
+    const notification = spawn(
+      `${mvnCmd} -q -f petclinic-commons/pom.xml install && ${mvnCmd} -f notification-service/pom.xml spring-boot:run`,
+      [], {cwd: repoRoot, stdio: 'inherit', shell: true});
+
+    notification.on('error', (error) => {
+      console.error('Failed to start notification-service:', error);
+      reject(error);
+    });
+
+    setTimeout(() => resolve(notification), 5000);
+  });
+}
+
 async function startBackend(): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
     console.log('Starting backend...');
@@ -172,6 +195,11 @@ async function cleanup() {
     backendProcess = null;
   }
 
+  if (notificationProcess) {
+    notificationProcess.kill('SIGTERM');
+    notificationProcess = null;
+  }
+
   if (databaseProcess) {
     databaseProcess.kill('SIGTERM');
     databaseProcess = null;
@@ -186,6 +214,12 @@ async function main() {
     // Start database (embedded Postgres) first — the backend needs it on boot.
     databaseProcess = await startDatabase();
     await waitForPort(DB_PORT, 'Database');
+
+    notificationProcess = await startNotificationService();
+    await waitForService(
+      `http://127.0.0.1:${NOTIFICATION_PORT}/actuator/health`,
+      'Notification service'
+    );
 
     // Start backend
     backendProcess = await startBackend();

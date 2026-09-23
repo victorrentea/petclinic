@@ -21,11 +21,11 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8090
 
 # /actuator/health is exposed by Spring Boot's defaults and left unauthenticated by
 # petclinic.security.enable=false, so it needs no extra configuration to be probed.
 HEALTHCHECK --interval=5s --timeout=3s --retries=60 --start-period=20s \
-    CMD curl -fsS http://127.0.0.1:8080/actuator/health || exit 1
+    CMD curl -fsS http://127.0.0.1:8090/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

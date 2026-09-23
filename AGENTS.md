@@ -15,6 +15,10 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
+- `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it
+  after every booked visit
+- `petclinic-commons/` - plain jar both Java apps depend on (the notification request).
+  No reactor pom: it is a standalone build, `mvn install`ed before either app compiles
 
 ## Common Commands
 
@@ -22,7 +26,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 Each script is foreground; run them in separate terminals.
 ```sh
 ./start-database.sh        # embedded Postgres on localhost:5432
-./start-backend.sh         # Spring Boot on localhost:8080 (also hosts Spring AI MCP at /mcp)
+./start-backend.sh         # installs petclinic-commons, then BOTH Java apps: notification-service
+                           # on :8090 (background) and the backend on :8080 (also Spring AI MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
@@ -56,9 +61,9 @@ npm run e2e                         # Protractor e2e tests
 2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
 4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-5. Notification (`notification/`) - `NotificationSender` + a fake SMS sender, called after a
-   visit is booked. Takes plain values, never an entity, and reaches no repository — which is
-   what lets it be drawn as its own participant (see below) rather than a layer of the backend
+5. Notification (`notification/`) - `NotificationServiceClient`, called after a visit is booked:
+   an HTTP POST to notification-service, best effort (a failure is logged, the booking stands).
+   Takes plain values, never an entity, and reaches no repository
 
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
@@ -78,18 +83,17 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
 
-### A module can be its own lifeline in the generated sequence diagrams
-A span carrying `genseq.participant="<name>"` is drawn on a lifeline of that name. It exists so
-a `@SpringBootTest`'s own sentences stay off the app's lifeline (`Test`), and
-`notification/FakeSmsNotificationSender` uses it for the opposite reason: to show a call
-*entering* a module that runs in the backend's own process, and leaving it for the (fake) SMS
-gateway. Everything else in a trace — `service.name`, span kind — says "backend" for all three.
+### Lifelines in the generated sequence diagrams
+`service.name` picks the lifeline: `notification-service` is drawn as `NotificationService`, so
+booking a visit shows `Backend -> NotificationService`. That name is a bare identifier on purpose:
+`DeploymentDiagramTest` matches `\w+ -> \w+` and demands the same arrow on
+`Deployment.drawio.png`, where the service has its own box.
 
-A name that is not a bare identifier (`Notification module`) is quoted by the generator, on its
-`participant` line and on every arrow. That also keeps it out of `DeploymentDiagramTest`, which
-matches `\w+ -> \w+` — rightly, because a logical module ships inside the Backend container and
-has no box of its own on a picture of what is deployed. `human-review.json` folds it onto
-`Backend` for the same reason, and marks `SMS gateway` external.
+A span carrying `genseq.participant="<name>"` is drawn on a lifeline of that name instead. It
+keeps a `@SpringBootTest`'s own sentences off the app's lifeline (`Test`), and draws
+notification-service's (fake) `SMS gateway`. A name that is not a bare identifier is quoted by
+the generator and so stays out of `DeploymentDiagramTest`; `human-review.json` marks
+`SMS gateway` external.
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
@@ -190,6 +194,20 @@ Core entities and relationships:
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on every `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
+
+## A feature is not done until one Gherkin scenario drives it through the UI
+
+Every user-facing feature gets at least one `.feature` scenario in `petclinic-test/src/`
+(bound by the `*.feature.glue.ts` beside it) that opens the screens a user opens. It is the
+acceptance test of the story — the one artefact a non-programmer can read.
+
+`petclinic-backend/src/test/resources/features/` does not count: that suite is Cucumber over
+the REST API, so a field the backend stores and no page shows passes all of it. A `*.spec.ts`
+does not count either — it is a second account of the same journey, written for the people
+who write it (`add-visit.spec.ts` and `book-visit-with-vet.feature` are deliberately a pair).
+
+Tag it `@generate_sequence` when the feature crosses the stack, so the story reaches the
+review page with a picture of what its run did.
 
 ## Core Values
 - Write non-trivial code using TDD

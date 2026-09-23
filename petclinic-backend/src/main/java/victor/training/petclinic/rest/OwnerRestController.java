@@ -210,8 +210,8 @@ public class OwnerRestController {
     }
 
     // After the insert, never before: a booking that could not be saved is a text nobody
-    // should have received. The owner is loaded here and not in the module — a notifier that
-    // reaches for a repository is a notifier that needs a database.
+    // should have received. The owner is loaded here, not in notification-service — which
+    // then needs no copy of our database.
     private void notifyOwner(int ownerId, int petId, Visit visit) {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow();
         String petName = owner.getPetById(petId).map(Pet::getName).orElse("your pet");

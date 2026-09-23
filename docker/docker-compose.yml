@@ -32,9 +32,12 @@ services:
     image: petclinic-env-backend:${PETCLINIC_TAG:-worktree}
     build:
       context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/petclinic-backend
+      additional_contexts:
+        commons: ${PETCLINIC_SRC}/petclinic-commons
     labels:
       ro.victorrentea.petclinic.env: "1"
     environment:
+      NOTIFICATIONSERVICE_URL: http://notification:8090
       # application.properties hardcodes localhost:5432 with no ${...} placeholder, but
       # Spring's relaxed binding lets these env vars win without editing the file.
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/petclinic
@@ -43,6 +46,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      notification:
+        condition: service_healthy
+
+  notification:
+    image: petclinic-env-notification:${PETCLINIC_TAG:-worktree}
+    build:
+      context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/notification-service
+      additional_contexts:
+        commons: ${PETCLINIC_SRC}/petclinic-commons
+    labels:
+      ro.victorrentea.petclinic.env: "1"
 
   frontend:
     # Tagged by the source it was built from, not by the instance name: compose would

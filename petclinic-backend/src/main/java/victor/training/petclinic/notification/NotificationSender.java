@@ -3,16 +3,11 @@ package victor.training.petclinic.notification;
 import java.time.LocalDate;
 
 /**
- * The Notification module's whole surface: how the rest of the application reaches a pet owner.
+ * How the rest of the application reaches a pet owner. The texting itself happens in
+ * notification-service, a separate process — see {@link NotificationServiceClient}.
  *
- * <p>An interface rather than the sender itself, so nothing outside the package knows an SMS is
- * what happens next — and so the call can be instrumented as a hop <em>into</em> a module instead
- * of one more method in the caller. See {@link FakeSmsNotificationSender} for how that hop is
- * drawn.
- *
- * <p>Plain values, no entity: a module that takes an {@code Owner} needs the domain model, the
- * repositories and a session still open by the time it runs. What it actually needs is a phone
- * number and something to say.
+ * <p>Plain values, no entity: what crosses the wire is a phone number and something to say, never
+ * an {@code Owner} that needs a session still open by the time it is read.
  */
 public interface NotificationSender {
 

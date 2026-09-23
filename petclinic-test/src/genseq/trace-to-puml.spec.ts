@@ -315,6 +315,31 @@ test('the payloads become markers on the request and the response, not notes', (
   expect(response.steps[0].text).toContain('"id": 42');
 });
 
+// A service called by the backend has no browser to capture its payload, so it records the
+// body on its own SERVER span. That body belongs to the arrow into the service — not to the
+// calls the handler goes on to make, which would otherwise inherit it from their parent.
+test('a body recorded on a SERVER span reveals on its arrow, not on the calls it makes', () => {
+  const span = (spanId: string, parentSpanId: string, name: string, kind: NormSpan['kind'],
+    serviceName: string, attributes: Record<string, string>): NormSpan => ({
+    traceId: 'r', spanId, parentSpanId, name, kind, serviceName,
+    startNano: Number(spanId.slice(1)) * 1e6, attributes,
+  });
+  const spans = [
+    span('r1', '', 'POST /api/owners/1/pets/3/visits', 'SERVER', 'petclinic-backend',
+      {'http.status_code': '201'}),
+    span('r2', 'r1', 'POST', 'CLIENT', 'petclinic-backend', {}),
+    span('r3', 'r2', 'POST /api/notifications/visit-booked', 'SERVER', 'mailer',
+      {'http.response.status_code': '202', 'http.request.body': '{"petName":"Leo"}'}),
+    span('r4', 'r3', 'send-sms', 'INTERNAL', 'mailer', {'genseq.participant': 'SMS gateway'}),
+  ];
+  const {puml, details} = renderDiagram('add-visit.spec.ts', [{title: 'x', traces: [spans]}],
+    {sql: 'statement', httpBodies: true, interactive: true});
+
+  const request = detailOn(lineWith(puml, 'Backend -> mailer:'), details.details);
+  expect(request.steps[0].text).toContain('"petName": "Leo"');
+  expect(lineWith(puml, 'mailer -> "SMS gateway":')).not.toContain('⊕');
+});
+
 // Behind a click a payload costs the picture nothing, so an interactive diagram carries
 // it by default; baked in it is a wall of JSON, so a static one still has to ask.
 // Withholding it by default only meant a reviewer clicked a request arrow and found
@@ -577,6 +602,33 @@ test('a Java diagram names the annotation a @SpringBootTest actually carries', (
 
   const spec = renderPuml('src/add-visit.spec.ts', [{title: 'adds a visit', traces: []}], STATIC);
   expect(spec).toContain('footer @generate_sequence');
+});
+
+// ── A second process ──────────────────────────────────────────────────────────────
+// The backend's HTTP client span and the SERVER span it opens in notification-service are
+// told apart by service.name alone: that is what makes the hop an arrow between two
+// lifelines, and the name a bare identifier the deployment guardrail can match.
+test('a call into notification-service is drawn as an arrow from Backend to NotificationService', () => {
+  const spans: NormSpan[] = [
+    {
+      traceId: 's', spanId: 's-server', parentSpanId: '', name: 'POST /api/owners/{ownerId}/pets/{petId}/visits',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_000 * 1e6, attributes: {},
+    },
+    {
+      traceId: 's', spanId: 's-client', parentSpanId: 's-server', name: 'POST',
+      kind: 'CLIENT', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6, attributes: {},
+    },
+    {
+      traceId: 's', spanId: 's-notify', parentSpanId: 's-client', name: 'POST /api/notifications/visit-booked',
+      kind: 'SERVER', serviceName: 'notification-service', startNano: 1_200 * 1e6, attributes: {},
+    },
+  ];
+  const puml = renderPuml('src/add-visit.spec.ts', [{
+    title: 'books a visit', traces: [spans],
+  }], STATIC);
+
+  expect(puml).toContain('participant NotificationService');
+  expect(puml).toMatch(/^Backend -> NotificationService: /m);
 });
 
 // ── A module of the backend, drawn as a participant of its own ───────────────────
