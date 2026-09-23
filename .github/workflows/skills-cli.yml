@@ -1,0 +1,79 @@
+name: Skill CLIs (jira / confluence / jenkins)
+
+# The three REST clients under .claude/skills/ promise to run unchanged on
+# Windows without WSL, macOS and Linux, on Python 3.8+ with the stdlib only.
+# This is where that promise is kept honest: nobody on the team runs Windows.
+on:
+  push:
+    paths:
+      - '.claude/skills/jira-cli/**'
+      - '.claude/skills/confluence-cli/**'
+      - '.claude/skills/jenkins-cli/**'
+      - '.github/workflows/skills-cli.yml'
+  pull_request:
+    paths:
+      - '.claude/skills/jira-cli/**'
+      - '.claude/skills/confluence-cli/**'
+      - '.claude/skills/jenkins-cli/**'
+      - '.github/workflows/skills-cli.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hermetic:
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04,   python: '3.8' }   # the oldest Python the skills promise
+          - { os: ubuntu-latest,  python: '3.13' }
+          - { os: macos-latest,   python: '3.13' }
+          - { os: windows-latest, python: '3.8' }
+          - { os: windows-latest, python: '3.13' }
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: jira-cli
+        run: python .claude/skills/jira-cli/test/run_tests.py
+      - name: confluence-cli
+        run: python .claude/skills/confluence-cli/test/run_tests.py
+      - name: jenkins-cli
+        run: python .claude/skills/jenkins-cli/test/run_tests.py
+
+      # Claude Code on Windows runs its Bash tool through Git Bash, so exercise the
+      # exact invocations SKILL.md documents there - through a pipe, which is where
+      # a cp1252 stdout or a CRLF would show up.
+      - name: Documented invocations (Git Bash)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for s in jira-cli/jira.py confluence-cli/confluence.py jenkins-cli/jenkins.py; do
+            python ".claude/skills/$s" --help | head -1
+            py -${{ matrix.python }} ".claude/skills/$s" --help | head -1
+          done
+          # A leading-slash path is rewritten by Git Bash before python.exe sees it.
+          python .claude/skills/jira-cli/test/fake_jira.py 0 > fake-port.txt &
+          for _ in $(seq 50); do [[ -s fake-port.txt ]] && break; sleep 0.2; done
+          printf 'JIRA_URL=http://127.0.0.1:%s\nJIRA_PAT=test-pat-12345\n' "$(head -1 fake-port.txt)" > fake.env
+          JIRA_ENV_FILE=fake.env python .claude/skills/jira-cli/jira.py raw GET /rest/api/2/myself | grep -q victor
+          kill %1
+          out=$(python .claude/skills/jira-cli/jira.py config | head -1)
+          [[ $out != *$'\r'* ]] || { echo "CRLF leaked into a Git Bash pipe"; exit 1; }
+          # Informational: whether the shebang alone is enough here.
+          .claude/skills/jira-cli/jira.py --help | head -1 || echo "direct ./jira.py does not run in Git Bash"
+
+      - name: Documented invocations (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          python .claude\skills\jira-cli\jira.py --help | Select-Object -First 1
+          python .claude\skills\confluence-cli\confluence.py --help | Select-Object -First 1
+          python .claude\skills\jenkins-cli\jenkins.py --help | Select-Object -First 1

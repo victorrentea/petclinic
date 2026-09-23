@@ -6,22 +6,23 @@
 ## Running
 
 ```sh
-.claude/skills/confluence-cli/test/run-tests.sh          # hermetic, ~5s, no network
-.claude/skills/confluence-cli/test/run-tests.sh --live   # against a real Confluence
-.claude/skills/confluence-cli/test/run-tests.sh --all
+python3 .claude/skills/confluence-cli/test/run_tests.py          # hermetic, ~5s, no network
+python3 .claude/skills/confluence-cli/test/run_tests.py --live   # against a real Confluence
+python3 .claude/skills/confluence-cli/test/run_tests.py --all
 ```
 
-`scenario.sh` holds the full lifecycle — create, read, update, the version
+`scenario.py` holds the full lifecycle — create, read, update, the version
 conflict, append, all three body formats, labels, comments, attachments, hierarchy,
 move, search pagination, delete — and is written **once** and run against every backend.
 
-- **Hermetic** (`e2e-fake.sh`): boots `fake_confluence.py`, a stdlib stand-in that
-  serves **both v1 and v2**, on a random port and drives `confluence.sh` over real HTTP —
-  real curl, real status codes, real 401s, real 409s. The scenario then runs **twice**,
+- **Hermetic** (`e2e_fake.py`): boots `fake_confluence.py`, a stdlib stand-in that
+  serves **both v1 and v2**, on a random port and drives the real `confluence.py` **as a subprocess** over real
+  HTTP — argv parsing, exit codes, real status codes, real 401s, real 409s. Pure
+  stdlib, so it runs the same on Windows, macOS and Linux. The scenario then runs **twice**,
   once as Data Center (PAT + v1) and once as Cloud (Basic + `/wiki` + v2), because a
   green v1 run says nothing about v2. It caps a search page at 2 on purpose, so a client
-  that forgot to paginate fails the suite. 105 assertions.
-- **Live** (`e2e-live.sh`): the same scenario against a real instance. It creates ~9
+  that forgot to paginate fails the suite. 117 assertions.
+- **Live** (`e2e_live.py`): the same scenario against a real instance. It creates ~9
   throwaway pages and deletes them again, so point it at a **sandbox space**.
 
 ### Getting a real Confluence to point the live suite at
@@ -43,7 +44,7 @@ CONFLUENCE_API_TOKEN=<id.atlassian.com/manage-profile/security/api-tokens>
 EOF
 
 export CONFLUENCE_TEST_SPACE=SAND      # create a throwaway space first
-.claude/skills/confluence-cli/test/run-tests.sh --live
+python3 .claude/skills/confluence-cli/test/run_tests.py --live
 ```
 
 **Self-hosted Confluence is not obtainable for free**, exactly as for Jira: the Docker

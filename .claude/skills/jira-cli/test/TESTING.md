@@ -6,21 +6,22 @@
 ## Running
 
 ```sh
-.claude/skills/jira-cli/test/run-tests.sh          # hermetic, ~5s, no network
-.claude/skills/jira-cli/test/run-tests.sh --live   # against a real JIRA
-.claude/skills/jira-cli/test/run-tests.sh --all
+python3 .claude/skills/jira-cli/test/run_tests.py          # hermetic, ~5s, no network
+python3 .claude/skills/jira-cli/test/run_tests.py --live   # against a real JIRA
+python3 .claude/skills/jira-cli/test/run_tests.py --all
 ```
 
-`scenario.sh` holds the full lifecycle — create, read, update, comment, label,
+`scenario.py` holds the full lifecycle — create, read, update, comment, label,
 assign, transition, worklog, attach, link, paginate, delete — and is written **once**
 and run against both backends, so whatever the fake proves, the live run re-proves
 for real.
 
-- **Hermetic** (`e2e-fake.sh`): boots `fake_jira.py`, a stdlib stand-in for the JIRA
-  REST v2 API, on a random port and drives `jira.sh` over real HTTP — real curl, real
-  status codes, real 401s. It caps a search page at 2 results on purpose, so a client
-  that forgot to paginate fails the suite. 48 assertions.
-- **Live** (`e2e-live.sh`): same scenario against a real instance. It creates ~5
+- **Hermetic** (`e2e_fake.py`): boots `fake_jira.py`, a stdlib stand-in for the JIRA
+  REST v2 API, on a random port and drives the real `jira.py` **as a subprocess** over
+  real HTTP — argv parsing, exit codes, env-file lookup, real status codes, real 401s.
+  Everything is Python stdlib, so the same suite runs on Windows, macOS and Linux. It caps a search page at 2 results on purpose, so a client
+  that forgot to paginate fails the suite. 60 assertions.
+- **Live** (`e2e_live.py`): same scenario against a real instance. It creates ~5
   throwaway issues and deletes them again, so point it at a **sandbox project**.
 
 ## Getting a real JIRA to point the live suite at
@@ -41,7 +42,7 @@ since 2024. So, in practice:
 The fake is what covers the PAT/Bearer path day to day, so a Cloud-only live run is
 not a gap in coverage — the two backends complement each other.
 
-For Cloud, put this in `~/.claude/jira-test.env` and run the live suite as usual:
+For Cloud, put this in `~/.claude/jira-test.env`, set `JIRA_TEST_PROJECT`, and run the live suite as usual:
 
 ```sh
 JIRA_URL=https://<you>.atlassian.net
@@ -52,4 +53,5 @@ JIRA_API_TOKEN=<id.atlassian.com/manage-profile/security/api-tokens>
 `docker/` still holds a working JIRA + Postgres compose file on port 8082 (not
 8080, so it cannot collide with the PetClinic backend) — useful **only if you already
 have a Data Center licence key**. It needs ~4 GB of free Docker disk. Start with
-`start-jira.sh`, tear down with `start-jira.sh down`, or `destroy` to drop the volumes.
+`start-jira.sh` (bash, dev-only), tear down with `start-jira.sh down`, or `destroy` to drop
+the volumes. Without bash: `docker compose -f test/docker/docker-compose.yml up -d`.

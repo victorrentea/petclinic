@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """A tiny in-memory stand-in for the JIRA REST v2 API.
 
-It exists so the e2e suite can exercise jira.sh over real HTTP - real curl, real
+It exists so the e2e suite can exercise jira.py over real HTTP - real urllib, real
 status codes, real JSON - without a licence key or a 4-minute container boot.
 It is deliberately strict about auth and about rejecting unknown issue keys, so
 the tests fail the same way the real server would.
 
-Only the endpoints jira.sh actually calls are implemented. Anything else 404s
+Only the endpoints jira.py actually calls are implemented. Anything else 404s
 loudly rather than pretending to work.
 """
 import json
@@ -17,7 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 TOKEN = "test-pat-12345"
 
-# maxResults is capped low on purpose: it forces jira.sh to paginate, which is
+# maxResults is capped low on purpose: it forces jira.py to paginate, which is
 # the part of the client most likely to silently truncate results.
 PAGE_CAP = 2
 

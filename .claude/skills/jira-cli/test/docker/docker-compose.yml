@@ -1,4 +1,4 @@
-# A real JIRA to test jira.sh against, from Atlassian's official image.
+# A real JIRA to test jira.py against, from Atlassian's official image.
 #
 # ONLY USABLE IF YOU ALREADY HOLD A DATA CENTER LICENCE KEY.
 # The image is free to pull, but the product is not: since 30 March 2026 Atlassian

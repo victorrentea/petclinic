@@ -55,7 +55,9 @@ class State:
                 "disabled": False,
                 "config": CONFIG_XML,
                 "description": "builds the backend",
-                "log": {7: "Started by user admin\nBUILD SUCCESS\nFinished: SUCCESS\n"},
+                "log": {
+                    7: "Started by user admin\nDeploy ș ț ü ✓\nBUILD SUCCESS\nFinished: SUCCESS\n"
+                },
             },
             "release": {
                 "builds": [],

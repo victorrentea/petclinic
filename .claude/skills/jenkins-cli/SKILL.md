@@ -1,7 +1,7 @@
 ---
 name: jenkins-cli
 description: Drive Jenkins from the shell — list jobs, trigger builds with parameters and wait for the result, stream console output, manage job config.xml, queue, agents, plugins, run Groovy on the controller. A stdlib-only Python client (Windows/macOS/Linux) over the Jenkins REST API. Use whenever a task needs Jenkins AND no Jenkins MCP tools are available (no mcp__jenkins__*), which is the normal situation on corporate controllers. Also use when explicitly asked to "use the jenkins-cli skill".
-allowed-tools: Bash(.claude/skills/jenkins-cli/jenkins.py:*), Bash(python3 .claude/skills/jenkins-cli/jenkins.py:*), Bash(jq:*)
+allowed-tools: Bash(.claude/skills/jenkins-cli/jenkins.py:*), Bash(python3 .claude/skills/jenkins-cli/jenkins.py:*), Bash(python .claude/skills/jenkins-cli/jenkins.py:*), Bash(py .claude/skills/jenkins-cli/jenkins.py:*), Bash(jq:*)
 ---
 
 # Jenkins from the shell, without the jar
@@ -11,15 +11,21 @@ REST API. **Python 3.8+, standard library only**: no Java, no downloaded jar, no
 SSH key, no `pip install`, identical on Windows, macOS and Linux.
 
 ```sh
-J=".claude/skills/jenkins-cli/jenkins.py"    # or: python3 .claude/.../jenkins.py
+python3 .claude/skills/jenkins-cli/jenkins.py version   # macOS / Linux (also runs as ./jenkins.py)
+python  .claude/skills/jenkins-cli/jenkins.py version   # Windows: python or py; `python3` there
+                                                        # is often just the Microsoft Store stub
 ```
+
+Below, `$J` is shorthand in the examples only - always type the full command
+(`python3 .claude/skills/jenkins-cli/jenkins.py job petclinic-build`): the `allowed-tools` permissions
+match that literal prefix, and a `J=...` variable does not word-split in zsh anyway.
 
 ## 1. One-time setup
 
 The token lives in `~/.claude/jenkins.env`, outside every repo:
 
 ```sh
-install -m 600 /dev/null ~/.claude/jenkins.env
+install -m 600 /dev/null ~/.claude/jenkins.env    # Windows: %USERPROFILE%\.claude\jenkins.env
 cat > ~/.claude/jenkins.env <<'ENV'
 JENKINS_URL=https://jenkins.your-company.com
 JENKINS_USER_ID=victor
@@ -83,10 +89,13 @@ Anything not wrapped goes through the escape hatch, which still handles auth, th
 CSRF crumb, errors and JSON formatting:
 
 ```sh
-$J raw GET  "/job/petclinic-build/api/json?tree=builds[number,result]"
-$J raw POST "/job/petclinic-build/42/submitDescription" '{"description":"x"}'
+$J raw GET  "job/petclinic-build/api/json?tree=builds[number,result]"
+$J raw POST "job/petclinic-build/42/submitDescription" '{"description":"x"}'
 $J groovy -  <<< 'println Jenkins.instance.numExecutors'
 ```
+
+Paths are relative to the Jenkins root; leave out the leading slash, which Git Bash on
+Windows would otherwise rewrite into `C:/Program Files/Git/...`.
 
 ## 5. Rules for agents
 
@@ -98,7 +107,7 @@ $J groovy -  <<< 'println Jenkins.instance.numExecutors'
   `restart`/`shutdown` kill running builds; prefer the `safe-` variants.
 - `groovy` runs arbitrary code as the controller. Treat it as a last resort, show
   the script before running it, and never pipe in something you didn't write.
-- Prefer `--json | jq` when you need one field; prefer the default text tables when
+- Prefer `--json | jq` (if installed; Git for Windows does not ship it) when you need one field; prefer the default text tables when
   you need to *read*. Don't dump whole `--json` payloads into the transcript, and
   use `console -n 200` instead of tailing a 50k-line log into context.
 - Errors always carry the HTTP status: `jenkins.py: HTTP 403 on POST .../build - ...`.
