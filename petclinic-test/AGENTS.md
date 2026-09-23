@@ -2,6 +2,9 @@
 
 - Run all commands from this directory (`petclinic-test/`).
 - Backend: `localhost:8080`, frontend: `localhost:4200` — both must be up before `npm test`.
+  Other checkouts of this repo may own those ports: `./test-on-own-stack.sh npm test` runs
+  against HEAD's own containers instead (what `/human-review` does).
+- `@wip` scenarios state a rule the code does not enforce yet; `cucumber.js` skips them.
 - `npm run test:with-apps` auto-starts both apps, but is experimental; prefer starting apps manually.
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`

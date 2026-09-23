@@ -73,8 +73,12 @@
       "//10": "step [3]) — the four options stay in its COLOR dropdown marked unavailable.",
       "//11": "Minutes of Maven and a second Playwright run per review, for two colours",
       "//12": "nothing draws any more. The committed coverage-baseline.tsv went with them.",
+      "//13": "test-on-own-stack.sh: the suite runs against HEAD's own containers (the same",
+      "//14": "petclinic-<shortsha> instance video.app uses), never against :4200/:8080 — on",
+      "//15": "23 Sep 2026 those belonged to another checkout and three tests failed against",
+      "//16": "a backend from a different branch.",
       "tests": [
-        "cd petclinic-test && PW_TRACE=on npm test"
+        "cd petclinic-test && PW_TRACE=on ./test-on-own-stack.sh npm test"
       ],
       "out": "petclinic-backend/docs/generated/codecity",
       "title": "Code City"
@@ -89,9 +93,10 @@
       "//7": "The .feature scenarios run under cucumber-js, which writes no Playwright",
       "//8": "report: src/support/world.ts records one zip + sidecar per scenario into",
       "//9": "`cucumber` when PW_TRACE=on, and the command below is that run. It needs",
-      "//10": "the stack up on :4200 (SKIP_SERVER_START), like the sequence step does.",
+      "//10": "a running stack (SKIP_SERVER_START); test-on-own-stack.sh gives it the same",
+      "//11": "per-commit instance city.tests just used, not whatever holds :4200.",
       "commands": [
-        "cd petclinic-test && PW_TRACE=on npm run test:cucumber"
+        "cd petclinic-test && PW_TRACE=on ./test-on-own-stack.sh npm run test:cucumber"
       ],
       "report": "petclinic-test/test-results/playwright-report",
       "cucumber": "petclinic-test/test-results/cucumber-traces",
