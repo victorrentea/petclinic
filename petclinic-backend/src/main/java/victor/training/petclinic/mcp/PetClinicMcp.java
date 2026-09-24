@@ -1,5 +1,6 @@
 package victor.training.petclinic.mcp;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,11 +38,14 @@ public class PetClinicMcp {
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
+    private final Clock clock;
 
-    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository, VisitRepository visitRepository) {
+    public PetClinicMcp(OwnerRepository ownerRepository, PetRepository petRepository,
+            VisitRepository visitRepository, Clock clock) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
+        this.clock = clock;
     }
 
     @McpTool(
@@ -67,6 +71,7 @@ public class PetClinicMcp {
             throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
         }
         requireFutureDate(visitDate);
+        pet.requireVisitDateInRange(visitDate, LocalDate.now(clock));
         if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
         }

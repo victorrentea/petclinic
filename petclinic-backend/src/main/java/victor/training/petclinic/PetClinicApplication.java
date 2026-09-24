@@ -9,6 +9,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
+import java.time.Clock;
+
 @SpringBootApplication
 @EnableCaching // backs the cached @GetMapping("/api/specialties/feed") so polling clients don't hit the DB
 public class PetClinicApplication {
@@ -20,6 +22,11 @@ public class PetClinicApplication {
     @EventListener
     void started(WebServerInitializedEvent event) {
         System.out.println("✅ started petclinic-backend on port " + event.getWebServer().getPort());
+    }
+
+    @Bean
+    Clock clock() {
+        return Clock.systemDefaultZone();
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package victor.training.petclinic.mcp;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -77,7 +78,7 @@ class CreateVisitShould {
 
     @BeforeEach
     final void before() {
-        petClinicMcp = new PetClinicMcp(ownerRepository, petRepository, visitRepository);
+        petClinicMcp = new PetClinicMcp(ownerRepository, petRepository, visitRepository, Clock.systemDefaultZone());
         anOwnerWithId(OWNER_ID).addPet(rex);
         rex.setId(PET_ID);
         authenticateAs(OWNER_ID);

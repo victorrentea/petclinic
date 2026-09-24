@@ -88,6 +88,15 @@ class CreateVisitToolTest {
     }
 
     @Test
+    void visit_more_than_a_year_ahead_is_rejected() {
+        LocalDate tooFar = LocalDate.now().plusYears(1).plusDays(1);
+
+        assertThatThrownBy(() -> petClinicMcp.createVisit(petId, tooFar, LocalTime.of(10, 30), "Checkup"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("more than one year ahead");
+    }
+
+    @Test
     void pet_of_another_owner_is_rejected() {
         Pet otherPet = new Pet();
         otherPet.setName("Bella");
