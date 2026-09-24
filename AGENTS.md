@@ -183,15 +183,6 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
-## Java Code Style
-- Keep line length < 120 chars
-- Keep methods under 30 lines
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on every `@RequestBody`
-- Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
-
 ## A feature is not done until one Gherkin scenario drives it through the UI
 
 Every user-facing feature gets at least one `.feature` scenario in `petclinic-test/src/`
