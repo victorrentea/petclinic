@@ -1,0 +1,115 @@
+{
+  "version": 2,
+  "details": {
+    "06lhb5c": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "0rcs8yy": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "alternate": {
+            "label": "",
+            "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          }
+        }
+      ]
+    },
+    "1ruk3w0": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id = any (?)"
+        }
+      ]
+    },
+    "1fcz13a": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"id\": 31,\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancedfgfhhxx\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"Turin\",\n      \"telephone\": \"6085551023\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 29,\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancedwzhelwf\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"London\",\n      \"telephone\": \"6085551023\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 30,\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptancefhhqwkur\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"Turin\",\n      \"telephone\": \"6085551023\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 32,\n      \"firstName\": \"Ada\",\n      \"lastName\": \"Acceptanceyrngyhgv\",\n      \"address\": \"110 Analytical Engine Way\",\n      \"city\": \"London\",\n      \"telephone\": \"6085551023\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 9,\n      \"firstName\": \"Henry\",\n      \"lastName\": \"Baskerville\",\n      \"address\": \"Baskerville Hall\",\n      \"city\": \"Dartmoor\",\n      \"telephone\": \"0441626832093\",\n      \"petNames\": [\n        \"Baskerville\"\n      ]\n    },\n    {\n      \"id\": 12,\n      \"firstName\": \"James\",\n      \"lastName\": \"Bond\",\n      \"address\": \"30 Wellington Square\",\n      \"city\": \"London\",\n      \"telephone\": \"0442073527070\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 14,\n      \"firstName\": \"Sam\",\n      \"lastName\": \"Carraclough\",\n      \"address\": \"Greenall Bridge\",\n      \"city\": \"Yorkshire\",\n      \"telephone\": \"0441943876543\",\n      \"petNames\": [\n        \"Lassie\"\n      ]\n    },\n    {\n      \"id\": 11,\n      \"firstName\": \"George\",\n      \"lastName\": \"Darling\",\n      \"address\": \"14 Kensington Gardens\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079372121\",\n      \"petNames\": [\n        \"Liza\",\n        \"Nana\"\n      ]\n    },\n    {\n      \"id\": 19,\n      \"firstName\": \"Wendy\",\n      \"lastName\": \"Darling\",\n      \"address\": \"14 Kensington Gardens\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079372122\",\n      \"petNames\": [\n        \"Toby\"\n      ]\n    },\n    {\n      \"id\": 27,\n      \"firstName\": \"Charles\",\n      \"lastName\": \"Dickens\",\n      \"address\": \"Gad's Hill Place\",\n      \"city\": \"Higham\",\n      \"telephone\": \"0441634406030\",\n      \"petNames\": [\n        \"Grip\"\n      ]\n    }\n  ],\n  \"totalElements\": 32,\n  \"totalPages\": 4,\n  \"number\": 0,\n  \"size\": 10\n}"
+        }
+      ]
+    },
+    "07orp0q": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET ? rows\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET 10 rows\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "0n0asi9": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"id\": 10,\n      \"firstName\": \"John\",\n      \"lastName\": \"Dolittle\",\n      \"address\": \"Oxenthorpe Road\",\n      \"city\": \"Puddleby\",\n      \"telephone\": \"0441803712345\",\n      \"petNames\": [\n        \"Polynesia\"\n      ]\n    },\n    {\n      \"id\": 17,\n      \"firstName\": \"Argus\",\n      \"lastName\": \"Filch\",\n      \"address\": \"Hogwarts Castle\",\n      \"city\": \"Inverness\",\n      \"telephone\": \"0441463245678\",\n      \"petNames\": [\n        \"Mrs Norris\"\n      ]\n    },\n    {\n      \"id\": 25,\n      \"firstName\": \"Mister\",\n      \"lastName\": \"Geppetto\",\n      \"address\": \"Via dei Tessitori 7\",\n      \"city\": \"Florence\",\n      \"telephone\": \"0039055290383\",\n      \"petNames\": [\n        \"Figaro\"\n      ]\n    },\n    {\n      \"id\": 21,\n      \"firstName\": \"Hermione\",\n      \"lastName\": \"Granger\",\n      \"address\": \"Gryffindor Tower\",\n      \"city\": \"Hogsmeade\",\n      \"telephone\": \"0441463555112\",\n      \"petNames\": [\n        \"Crookshanks\"\n      ]\n    },\n    {\n      \"id\": 20,\n      \"firstName\": \"Rubeus\",\n      \"lastName\": \"Hagrid\",\n      \"address\": \"Gamekeepers Hut\",\n      \"city\": \"Hogsmeade\",\n      \"telephone\": \"0441463555111\",\n      \"petNames\": [\n        \"Norbert\"\n      ]\n    },\n    {\n      \"id\": 28,\n      \"firstName\": \"Sherlock\",\n      \"lastName\": \"Holmes\",\n      \"address\": \"221B Baker Street\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079351269\",\n      \"petNames\": [\n        \"Toby of Lambeth\"\n      ]\n    },\n    {\n      \"id\": 8,\n      \"firstName\": \"Alice\",\n      \"lastName\": \"Liddell\",\n      \"address\": \"Christ Church\",\n      \"city\": \"Oxford\",\n      \"telephone\": \"0441865276150\",\n      \"petNames\": [\n        \"Cheshire\",\n        \"Dinah\"\n      ]\n    },\n    {\n      \"id\": 1,\n      \"firstName\": \"Kevin\",\n      \"lastName\": \"McCallister\",\n      \"address\": \"671 Lincoln Boulevard\",\n      \"city\": \"Winnetka\",\n      \"telephone\": null,\n      \"petNames\": [\n        \"Axel\"\n      ]\n    },\n    {\n      \"id\": 13,\n      \"firstName\": \"Hercule\",\n      \"lastName\": \"Poirot\",\n      \"address\": \"Whitehaven Mansions\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079241221\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 15,\n      \"firstName\": \"Beatrix\",\n      \"lastName\": \"Potter\",\n      \"address\": \"Hill Top Farm\",\n      \"city\": \"Near Sawrey\",\n      \"telephone\": \"0441539436269\",\n      \"petNames\": [\n        \"Mittens\",\n        \"Pickles\"\n      ]\n    }\n  ],\n  \"totalElements\": 32,\n  \"totalPages\": 4,\n  \"number\": 1,\n  \"size\": 10\n}"
+        }
+      ]
+    },
+    "0h900jp": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET ? rows\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET 20 rows\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "0266xho": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"id\": 2,\n      \"firstName\": \"Harry\",\n      \"lastName\": \"Potter\",\n      \"address\": \"4 Privet Drive\",\n      \"city\": \"Little Whinging\",\n      \"telephone\": \"0119084455\",\n      \"petNames\": [\n        \"Hedwig\"\n      ]\n    },\n    {\n      \"id\": 26,\n      \"firstName\": \"Alonso\",\n      \"lastName\": \"Quixano\",\n      \"address\": \"Campo de Montiel\",\n      \"city\": \"La Mancha\",\n      \"telephone\": \"0034926215566\",\n      \"petNames\": [\n        \"Rocinante\"\n      ]\n    },\n    {\n      \"id\": 6,\n      \"firstName\": \"Roger\",\n      \"lastName\": \"Radcliff\",\n      \"address\": \"27 Outer Circle\",\n      \"city\": \"London\",\n      \"telephone\": \"0442074860707\",\n      \"petNames\": [\n        \"Perdita\",\n        \"Pongo\"\n      ]\n    },\n    {\n      \"id\": 23,\n      \"firstName\": \"Tintin\",\n      \"lastName\": \"Reporter\",\n      \"address\": \"26 Rue du Labrador\",\n      \"city\": \"Brussels\",\n      \"telephone\": \"0032225112233\",\n      \"petNames\": [\n        \"Snowy\"\n      ]\n    },\n    {\n      \"id\": 22,\n      \"firstName\": \"Tom\",\n      \"lastName\": \"Riddle\",\n      \"address\": \"Malfoy Manor\",\n      \"city\": \"Wiltshire\",\n      \"telephone\": \"0119844321\",\n      \"petNames\": [\n        \"Nagini\"\n      ]\n    },\n    {\n      \"id\": 7,\n      \"firstName\": \"Newt\",\n      \"lastName\": \"Scamander\",\n      \"address\": \"Diagon Alley\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079460001\",\n      \"petNames\": [\n        \"Pickett\"\n      ]\n    },\n    {\n      \"id\": 3,\n      \"firstName\": \"Erwin\",\n      \"lastName\": \"Schroedinger\",\n      \"address\": \"Boltzmanngasse 5\",\n      \"city\": \"Vienna\",\n      \"telephone\": \"0131914920\",\n      \"petNames\": [\n        \"Milton\"\n      ]\n    },\n    {\n      \"id\": 16,\n      \"firstName\": \"Long\",\n      \"lastName\": \"Silver\",\n      \"address\": \"Admiral Benbow Inn\",\n      \"city\": \"Bristol\",\n      \"telephone\": \"0441179293000\",\n      \"petNames\": [\n        \"Captain Flint\"\n      ]\n    },\n    {\n      \"id\": 4,\n      \"firstName\": \"Salazar\",\n      \"lastName\": \"Śliwiński\",\n      \"address\": \"Hogwarts Dungeons\",\n      \"city\": \"Hogsmeade\",\n      \"telephone\": \"0441463555113\",\n      \"petNames\": [\n        \"Basilisk\"\n      ]\n    },\n    {\n      \"id\": 24,\n      \"firstName\": \"Lady\",\n      \"lastName\": \"Tremaine\",\n      \"address\": \"Chateau Tremaine\",\n      \"city\": \"Ile-de-France\",\n      \"telephone\": \"0146203030\",\n      \"petNames\": [\n        \"Jaq\",\n        \"Lucifer\"\n      ]\n    }\n  ],\n  \"totalElements\": 32,\n  \"totalPages\": 4,\n  \"number\": 2,\n  \"size\": 10\n}"
+        }
+      ]
+    },
+    "0z9d91o": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET ? rows\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET 30 rows\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "034i3ll": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"id\": 5,\n      \"firstName\": \"Ronald\",\n      \"lastName\": \"Weasley\",\n      \"address\": \"The Burrow\",\n      \"city\": \"Ottery St Catchpole\",\n      \"telephone\": \"0119544321\",\n      \"petNames\": [\n        \"Scabbers\"\n      ]\n    },\n    {\n      \"id\": 18,\n      \"firstName\": \"Wallace\",\n      \"lastName\": \"Wensleydale\",\n      \"address\": \"62 West Wallaby Street\",\n      \"city\": \"Wigan\",\n      \"telephone\": \"0441942244466\",\n      \"petNames\": [\n        \"Gromit\",\n        \"Hutch\"\n      ]\n    }\n  ],\n  \"totalElements\": 32,\n  \"totalPages\": 4,\n  \"number\": 3,\n  \"size\": 10\n}"
+        }
+      ]
+    }
+  }
+}

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Owner } from './owner';
+import { Owner, OwnerPage } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { nonDefaultParams, OwnerQuery } from './owner-query';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -19,10 +20,9 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
-    return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+  /** Errors propagate: the grid tells a failed load apart from an empty result. */
+  listOwners(query: OwnerQuery): Observable<OwnerPage> {
+    return this.http.get<OwnerPage>(this.entityUrl, {params: nonDefaultParams(query)});
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +48,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

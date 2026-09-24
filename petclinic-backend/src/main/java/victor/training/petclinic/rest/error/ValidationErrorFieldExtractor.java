@@ -17,7 +17,7 @@ public final class ValidationErrorFieldExtractor {
             return result;
         for (FieldError fe : bindingResult.getFieldErrors()) {
             String field = humanizePath(fe.getField());
-            String message = fe.getDefaultMessage() == null ? "" : fe.getDefaultMessage().trim();
+            String message = messageOf(fe);
             Object rejected = fe.getRejectedValue();
             String val = rejected == null ? "null" : rejected.toString();
 
@@ -35,6 +35,14 @@ public final class ValidationErrorFieldExtractor {
             result.add(combined + " (value: " + val + ")");
         }
         return result;
+    }
+
+    // A binding failure's default message is the converter's, naming Java types: not for the client.
+    private static String messageOf(FieldError fe) {
+        if (fe.isBindingFailure()) {
+            return "is not an allowed value";
+        }
+        return fe.getDefaultMessage() == null ? "" : fe.getDefaultMessage().trim();
     }
 
     private static String humanizePath(String path) {

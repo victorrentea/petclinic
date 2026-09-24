@@ -129,7 +129,6 @@ class MapperTest {
         assertThat(petMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(petTypeMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(visitMapper.toVisitsDto(null)).isEmpty();
-        assertThat(ownerMapper.toOwnerDtoCollection(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialtyDtos(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialty((List<SpecialtyDto>) null)).isEmpty();
         assertThat(vetMapper.toVetDtos(null)).isEmpty();
@@ -147,7 +146,23 @@ class MapperTest {
         assertThat(dto.getFirstName()).isEqualTo("Sherlock");
         assertThat(dto.getCity()).isEqualTo("London");
         assertThat(dto.getPets()).extracting(PetDto::getName).containsExactly("Leo");
-        assertThat(ownerMapper.toOwnerDtoCollection(List.of(owner))).hasSize(1);
+    }
+
+    @Test
+    void ownerToRow_carries_only_its_pet_names_alphabetically() {
+        Owner owner = anOwner();
+        owner.setId(7);
+        Pet rex = aPet();
+        rex.setName("Rex");
+        owner.addPet(rex);
+        owner.addPet(aPet());
+
+        var row = ownerMapper.toOwnerRowDto(owner);
+
+        assertThat(row.id()).isEqualTo(7);
+        assertThat(row.lastName()).isEqualTo("Holmes");
+        assertThat(row.telephone()).isEqualTo("1234567890");
+        assertThat(row.petNames()).containsExactly("Leo", "Rex");
     }
 
     @Test

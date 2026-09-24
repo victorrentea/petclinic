@@ -84,6 +84,17 @@ class ValidationErrorFieldExtractorTest {
         assertThat(errors).containsExactly("Value must not be null (value: 42)");
     }
 
+    @Test
+    void extract_bindingFailure_hidesTheConverterMessage() {
+        FieldError fe = new FieldError("request", "sort", "telephone", true, null, null,
+                "Failed to convert value of type 'java.lang.String' to required type '...SortKey'");
+        BindingResult br = mock(BindingResult.class);
+        when(br.getFieldErrors()).thenReturn(List.of(fe));
+
+        assertThat(ValidationErrorFieldExtractor.extract(br))
+                .containsExactly("Sort is not an allowed value (value: telephone)");
+    }
+
     private List<String> extractWith(String field, String message, Object rejectedValue) {
         FieldError fe = mock(FieldError.class);
         when(fe.getField()).thenReturn(field);

@@ -2,57 +2,89 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
+    <form method="get" class="form-horizontal" id="search-owner-form" (ngSubmit)="search()">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
+          <label class="col-sm-2 control-label" for="lastName">Last name </label>
           <div class="col-sm-10">
             <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
+              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName"/> <span class="help-inline"></span>
           </div>
         </div>
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
+          <button type="submit" class="btn btn-default">Find Owner</button>
         </div>
       </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="loadFailed" id="ownersError" class="alert alert-danger" role="alert">
+      The owners could not be loaded. Please try again.
+    </div>
+    <div *ngIf="isEmpty" id="noOwners">No owners with LastName starting with "{{ query.lastName }}"</div>
+
+    <div class="table-responsive" id="ownersTable" [attr.aria-busy]="loading">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th class="col-name" [attr.aria-sort]="ariaSort('name')">
+            <button type="button" class="sort-button sort-name" (click)="sortBy('name')">
+              Name
+              <span class="glyphicon" aria-hidden="true" [ngClass]="sortIcon('name')"></span>
+            </button>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th class="col-city" [attr.aria-sort]="ariaSort('city')">
+            <button type="button" class="sort-button sort-city" (click)="sortBy('city')">
+              City
+              <span class="glyphicon" aria-hidden="true" [ngClass]="sortIcon('city')"></span>
+            </button>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
 
-        <tbody>
+        <tbody *ngIf="loading">
+        <tr *ngFor="let row of placeholderRows" class="owner-row-placeholder">
+          <td colspan="5">&nbsp;</td>
+        </tr>
+        </tbody>
+        <tbody *ngIf="!loading">
         <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
-          <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+          <td class="ownerPets">{{ owner.petNames.join(', ') }}</td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+    </div>
+
+    <div class="owners-controls">
+      <span id="ownersCount">{{ page?.totalElements ?? 0 }} {{ page?.totalElements === 1 ? 'owner' : 'owners' }}</span>
+      <div class="owners-page-size">
+        <label for="pageSize">Owners per page</label>
+        <app-combo inputId="pageSize" [options]="pageSizes" [ngModel]="query.size"
+                    (ngModelChange)="changePageSize($event)"></app-combo>
       </div>
+      <div class="owners-pagination">
+        <button type="button" id="prevPage" class="btn btn-default" aria-label="Previous page"
+                [disabled]="loading || isFirstPage" (click)="previousPage()">
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+        </button>
+        <span id="pageInfo">Page {{ query.page + 1 }} of {{ totalPagesShown }}</span>
+        <button type="button" id="nextPage" class="btn btn-default" aria-label="Next page"
+                [disabled]="loading || isLastPage" (click)="nextPage()">
+          <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>

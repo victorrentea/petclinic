@@ -1,12 +1,13 @@
 package victor.training.petclinic.mapper;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import victor.training.petclinic.domain.Owner;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
-
-import java.util.ArrayList;
-import java.util.List;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto;
 
 @Component
 public class OwnerMapper {
@@ -37,14 +38,23 @@ public class OwnerMapper {
         return owner;
     }
 
-    public List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection) {
-        if (ownerCollection == null) {
-            return List.of();
-        }
-        List<OwnerDto> dtos = new ArrayList<>(ownerCollection.size());
-        for (Owner owner : ownerCollection) {
-            dtos.add(toOwnerDto(owner));
-        }
-        return dtos;
+    public OwnerPageDto toOwnerPageDto(Page<Owner> page) {
+        return new OwnerPageDto(
+                page.map(this::toOwnerRowDto).getContent(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber(),
+                page.getSize());
+    }
+
+    public OwnerRowDto toOwnerRowDto(Owner owner) {
+        return new OwnerRowDto(
+                owner.getId(),
+                owner.getFirstName(),
+                owner.getLastName(),
+                owner.getAddress(),
+                owner.getCity(),
+                owner.getTelephone(),
+                owner.getPets().stream().map(Pet::getName).toList());
     }
 }

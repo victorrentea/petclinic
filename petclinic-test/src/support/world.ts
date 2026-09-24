@@ -37,8 +37,10 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
+  // Set by the owner-search scenarios: every owner the API knows, named as the grid
+  // names them ("Potter, Harry") — and every name the grid showed while paging.
   allOwnerNames?: string[];
+  listedOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;

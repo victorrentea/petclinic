@@ -74,12 +74,11 @@ class AddVisitApiTest {
     @Order(1)
     void addsAVisitToAnExistingPet() throws Exception {
         given("an owner with at least one pet exists");
-        JsonNode owner = anOwnerWithAPet();
-        int ownerId = owner.path("id").asInt();
-        int petId = owner.path("pets").get(0).path("id").asInt();
+        int ownerId = anOwnerWithAPet().path("id").asInt();
 
         when("the owner detail page is opened");
-        call(mockMvc, get("/api/owners/{ownerId}", ownerId)).andExpect(status().isOk());
+        JsonNode owner = json(call(mockMvc, get("/api/owners/{ownerId}", ownerId)).andExpect(status().isOk()));
+        int petId = owner.path("pets").get(0).path("id").asInt();
 
         and("a visit is added for the first pet");
         String description = "Annual check-up " + System.currentTimeMillis();
@@ -102,12 +101,12 @@ class AddVisitApiTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
+        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk())).path("content");
         return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
+                .filter(o -> !o.path("petNames").isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did db/seed/R__seed.sql change?"));
+                        "No owner with a pet on the first page of the seed — did db/seed/R__seed.sql change?"));
     }
 
     /** The one visit this scenario booked — never `visits[0]`, whose position the seed data owns. */

@@ -1,249 +1,59 @@
 {
   "version": 2,
   "details": {
-    "1aoufu2": {
+    "06lhb5c": {
       "title": "OwnerRepository.findByLastNameStartingWith",
       "steps": [
         {
           "label": "",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only",
           "alternate": {
             "label": "",
-            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST 10 rows only"
           }
         }
       ]
     },
-    "18567ho": {
+    "0rcs8yy": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "alternate": {
+            "label": "",
+            "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          }
+        }
+      ]
+    },
+    "1ruk3w0": {
       "title": "select pets",
       "steps": [
         {
           "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=1"
-          }
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id = any (?)"
         }
       ]
     },
-    "13apewa": {
-      "title": "select visits",
+    "1v3llbq": {
+      "title": "Backend → Test: 200",
       "steps": [
         {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=1"
-          }
+          "label": "response body",
+          "text": "{\n  \"content\": [\n    {\n      \"id\": 9,\n      \"firstName\": \"Henry\",\n      \"lastName\": \"Baskerville\",\n      \"address\": \"Baskerville Hall\",\n      \"city\": \"Dartmoor\",\n      \"telephone\": \"0441626832093\",\n      \"petNames\": [\n        \"Baskerville\"\n      ]\n    },\n    {\n      \"id\": 12,\n      \"firstName\": \"James\",\n      \"lastName\": \"Bond\",\n      \"address\": \"30 Wellington Square\",\n      \"city\": \"London\",\n      \"telephone\": \"0442073527070\",\n      \"petNames\": []\n    },\n    {\n      \"id\": 14,\n      \"firstName\": \"Sam\",\n      \"lastName\": \"Carraclough\",\n      \"address\": \"Greenall Bridge\",\n      \"city\": \"Yorkshire\",\n      \"telephone\": \"0441943876543\",\n      \"petNames\": [\n        \"Lassie\"\n      ]\n    },\n    {\n      \"id\": 11,\n      \"firstName\": \"George\",\n      \"lastName\": \"Darling\",\n      \"address\": \"14 Kensington Gardens\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079372121\",\n      \"petNames\": [\n        \"Liza\",\n        \"Nana\"\n      ]\n    },\n    {\n      \"id\": 19,\n      \"firstName\": \"Wendy\",\n      \"lastName\": \"Darling\",\n      \"address\": \"14 Kensington Gardens\",\n      \"city\": \"London\",\n      \"telephone\": \"0442079372122\",\n      \"petNames\": [\n        \"Toby\"\n      ]\n    },\n    {\n      \"id\": 27,\n      \"firstName\": \"Charles\",\n      \"lastName\": \"Dickens\",\n      \"address\": \"Gad's Hill Place\",\n      \"city\": \"Higham\",\n      \"telephone\": \"0441634406030\",\n      \"petNames\": [\n        \"Grip\"\n      ]\n    },\n    {\n      \"id\": 10,\n      \"firstName\": \"John\",\n      \"lastName\": \"Dolittle\",\n      \"address\": \"Oxenthorpe Road\",\n      \"city\": \"Puddleby\",\n      \"telephone\": \"0441803712345\",\n      \"petNames\": [\n        \"Polynesia\"\n      ]\n    },\n    {\n      \"id\": 17,\n      \"firstName\": \"Argus\",\n      \"lastName\": \"Filch\",\n      \"address\": \"Hogwarts Castle\",\n      \"city\": \"Inverness\",\n      \"telephone\": \"0441463245678\",\n      \"petNames\": [\n        \"Mrs Norris\"\n      ]\n    },\n    {\n      \"id\": 25,\n      \"firstName\": \"Mister\",\n      \"lastName\": \"Geppetto\",\n      \"address\": \"Via dei Tessitori 7\",\n      \"city\": \"Florence\",\n      \"telephone\": \"0039055290383\",\n      \"petNames\": [\n        \"Figaro\"\n      ]\n    },\n    {\n      \"id\": 21,\n      \"firstName\": \"Hermione\",\n      \"lastName\": \"Granger\",\n      \"address\": \"Gryffindor Tower\",\n      \"city\": \"Hogsmeade\",\n      \"telephone\": \"0441463555112\",\n      \"petNames\": [\n        \"Crookshanks\"\n      ]\n    }\n  ],\n  \"totalElements\": 28,\n  \"totalPages\": 3,\n  \"number\": 0,\n  \"size\": 10\n}"
         }
       ]
     },
-    "1hjadar": {
-      "title": "select pets",
+    "083xusu": {
+      "title": "select owners",
       "steps": [
         {
           "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=2"
-          }
-        }
-      ]
-    },
-    "1cdku0l": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=2"
-          }
-        }
-      ]
-    },
-    "1ywvbwm": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=3"
-          }
-        }
-      ]
-    },
-    "0d1jj9s": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=3"
-          }
-        }
-      ]
-    },
-    "0zrdtil": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=4"
-          }
-        }
-      ]
-    },
-    "1chbokm": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=25"
-          }
-        }
-      ]
-    },
-    "1e02kqw": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=5"
-          }
-        }
-      ]
-    },
-    "1vijc0e": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=5"
-          }
-        }
-      ]
-    },
-    "1afgvsf": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=6"
-          }
-        }
-      ]
-    },
-    "1g0ncac": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=7"
-          }
-        }
-      ]
-    },
-    "1dje28p": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=6"
-          }
-        }
-      ]
-    },
-    "05qnn6q": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=7"
-          }
-        }
-      ]
-    },
-    "0ko7c1b": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=8"
-          }
-        }
-      ]
-    },
-    "04yaot5": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=8"
-          }
-        }
-      ]
-    },
-    "0g653ka": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=10"
-          }
-        }
-      ]
-    },
-    "17b1f4y": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=9"
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=9"
           }
         }
       ]
@@ -274,558 +84,29 @@
         }
       ]
     },
-    "0qutb9k": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=10"
-          }
-        }
-      ]
-    },
-    "005pv1s": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=12"
-          }
-        }
-      ]
-    },
-    "0ow5hm5": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=11"
-          }
-        }
-      ]
-    },
-    "1v91y5q": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=14"
-          }
-        }
-      ]
-    },
-    "0jndtsl": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=13"
-          }
-        }
-      ]
-    },
-    "1twjd9e": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=12"
-          }
-        }
-      ]
-    },
-    "179pa5r": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=13"
-          }
-        }
-      ]
-    },
-    "0spdoa4": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=14"
-          }
-        }
-      ]
-    },
-    "112wt6j": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=15"
-          }
-        }
-      ]
-    },
-    "1rv9amp": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=15"
-          }
-        }
-      ]
-    },
-    "0s7bw5w": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=16"
-          }
-        }
-      ]
-    },
-    "0q2g6ih": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=17"
-          }
-        }
-      ]
-    },
-    "1vr3q9y": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=16"
-          }
-        }
-      ]
-    },
-    "07widtu": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=18"
-          }
-        }
-      ]
-    },
-    "11eqpar": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=17"
-          }
-        }
-      ]
-    },
-    "1vvzxvz": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=19"
-          }
-        }
-      ]
-    },
-    "0zn1he8": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=18"
-          }
-        }
-      ]
-    },
-    "0nzx8gf": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=20"
-          }
-        }
-      ]
-    },
-    "1hnj4n6": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=21"
-          }
-        }
-      ]
-    },
-    "1yz2s51": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=19"
-          }
-        }
-      ]
-    },
-    "106x3nx": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=22"
-          }
-        }
-      ]
-    },
-    "1ui76yh": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=20"
-          }
-        }
-      ]
-    },
-    "125n4x4": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=23"
-          }
-        }
-      ]
-    },
-    "1wn2wlw": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=21"
-          }
-        }
-      ]
-    },
-    "0p5qgoj": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=24"
-          }
-        }
-      ]
-    },
-    "06hjrnf": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=22"
-          }
-        }
-      ]
-    },
-    "11orrff": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=4"
-          }
-        }
-      ]
-    },
-    "10nowmm": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=23"
-          }
-        }
-      ]
-    },
-    "1s8lcdt": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=26"
-          }
-        }
-      ]
-    },
-    "1o34u8l": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=24"
-          }
-        }
-      ]
-    },
-    "1xe5lsn": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=28"
-          }
-        }
-      ]
-    },
-    "18kphn0": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=27"
-          }
-        }
-      ]
-    },
-    "14lgvhs": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=25"
-          }
-        }
-      ]
-    },
-    "1dn4wsq": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=29"
-          }
-        }
-      ]
-    },
-    "0ccg4wn": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=26"
-          }
-        }
-      ]
-    },
-    "1w0jtro": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=30"
-          }
-        }
-      ]
-    },
-    "1klw40a": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
-          }
-        }
-      ]
-    },
-    "1tjajq1": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=31"
-          }
-        }
-      ]
-    },
-    "1m8kh81": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=28"
-          }
-        }
-      ]
-    },
-    "0chbrim": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=32"
-          }
-        }
-      ]
-    },
-    "12ikf8i": {
+    "1stx6sq": {
       "title": "Backend → Test: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "[{\"firstName\":\"Kevin\",\"lastName\":\"McCallister\",\"address\":\"671 Lincoln Boulevard\",\"city\":\"Winnetka\",\"telephone\":null,\"id\":1,\"pets\":[{\"name\":\"Axel\",\"birthDate\":\"2018-12-24\",\"type\":{\"name\":\"hamster\",\"id\":6},\"id\":1,\"ownerId\":1,\"visits\":[]}]},{\"firstName\":\"Harry\",\"lastName\":\"Potter\",\"address\":\"4 Privet Drive\",\"city\":\"Little Whinging\",\"telephone\":\"0119084455\",\"id\":2,\"pets\":[{\"name\":\"Hedwig\",\"birthDate\":\"2018-08-06\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":2,\"ownerId\":2,\"visits\":[]}]},{\"firstName\":\"Erwin\",\"lastName\":\"Schroedinger\",\"address\":\"Boltzmanngasse 5\",\"city\":\"Vienna\",\"telephone\":\"0131914920\",\"id\":3,\"pets\":[{\"name\":\"Milton\",\"birthDate\":\"2020-09-07\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":3,\"ownerId\":3,\"visits\":[{\"date\":\"2026-05-03\",\"description\":\"annual general checkup\",\"id\":25,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"2025-08-21\",\"description\":\"wave function collapsed during auscultation; patient definitively purring\",\"id\":27,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"2025-06-12\",\"description\":\"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\"id\":26,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"}]}]},{\"firstName\":\"Salazar\",\"lastName\":\"Śliwiński\",\"address\":\"Hogwarts Dungeons\",\"city\":\"Hogsmeade\",\"telephone\":\"0441463555113\",\"id\":4,\"pets\":[{\"name\":\"Basilisk\",\"birthDate\":\"2022-10-05\",\"type\":{\"name\":\"snake\",\"id\":4},\"id\":25,\"ownerId\":4,\"visits\":[{\"date\":\"2026-02-14\",\"description\":\"habitat check\",\"id\":15,\"petId\":25,\"petName\":\"Basilisk\",\"ownerId\":4,\"ownerFirstName\":\"Salazar\",\"ownerLastName\":\"Śliwiński\"}]}]},{\"firstName\":\"Ronald\",\"lastName\":\"Weasley\",\"address\":\"The Burrow\",\"city\":\"Ottery St Catchpole\",\"telephone\":\"0119544321\",\"id\":5,\"pets\":[{\"name\":\"Scabbers\",\"birthDate\":\"2019-08-06\",\"type\":{\"name\":\"hamster\",\"id\":6},\"id\":5,\"ownerId\":5,\"visits\":[]}]},{\"firstName\":\"Roger\",\"lastName\":\"Radcliff\",\"address\":\"27 Outer Circle\",\"city\":\"London\",\"telephone\":\"0442074860707\",\"id\":6,\"pets\":[{\"name\":\"Perdita\",\"birthDate\":\"2018-03-07\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":7,\"ownerId\":6,\"visits\":[]},{\"name\":\"Pongo\",\"birthDate\":\"2018-04-17\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":6,\"ownerId\":6,\"visits\":[]}]},{\"firstName\":\"Newt\",\"lastName\":\"Scamander\",\"address\":\"Diagon Alley\",\"city\":\"London\",\"telephone\":\"0442079460001\",\"id\":7,\"pets\":[{\"name\":\"Pickett\",\"birthDate\":\"2020-11-30\",\"type\":{\"name\":\"lizard\",\"id\":3},\"id\":8,\"ownerId\":7,\"visits\":[]}]},{\"firstName\":\"Alice\",\"lastName\":\"Liddell\",\"address\":\"Christ Church\",\"city\":\"Oxford\",\"telephone\":\"0441865276150\",\"id\":8,\"pets\":[{\"name\":\"Cheshire\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":10,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":2,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2023-06-04\",\"description\":\"neutered\",\"id\":3,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]},{\"name\":\"Dinah\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":9,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":1,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2022-09-04\",\"description\":\"spayed\",\"id\":4,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]}]},{\"firstName\":\"Henry\",\"lastName\":\"Baskerville\",\"address\":\"Baskerville Hall\",\"city\":\"Dartmoor\",\"telephone\":\"0441626832093\",\"id\":9,\"pets\":[{\"name\":\"Baskerville\",\"birthDate\":\"2017-02-24\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":11,\"ownerId\":9,\"visits\":[]}]},{\"firstName\":\"John\",\"lastName\":\"Dolittle\",\"address\":\"Oxenthorpe Road\",\"city\":\"Puddleby\",\"telephone\":\"0441803712345\",\"id\":10,\"pets\":[{\"name\":\"Polynesia\",\"birthDate\":\"2016-03-09\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":12,\"ownerId\":10,\"visits\":[]}]},{\"firstName\":\"Geor…"
+          "text": "{\n  \"firstName\": \"Henry\",\n  \"lastName\": \"Baskerville\",\n  \"address\": \"Baskerville Hall\",\n  \"city\": \"Dartmoor\",\n  \"telephone\": \"0441626832093\",\n  \"id\": 9,\n  \"pets\": [\n    {\n      \"name\": \"Baskerville\",\n      \"birthDate\": \"2017-02-24\",\n      \"type\": {\n        \"name\": \"dog\",\n        \"id\": 2\n      },\n      \"id\": 11,\n      \"ownerId\": 9,\n      \"visits\": []\n    }\n  ]\n}"
         }
       ]
     },
-    "0x8aana": {
-      "title": "select owners",
+    "1cofzyh": {
+      "title": "select pets",
       "steps": [
         {
           "label": "",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
+          "text": "SELECT p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=1"
+            "text": "SELECT p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.id=11"
           }
         }
       ]
     },
-    "006sbbb": {
-      "title": "Backend → Test: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": []\n    }\n  ]\n}"
-        }
-      ]
-    },
-    "16ndczn": {
+    "0ruehbs": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -833,26 +114,35 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1790145177353', 1, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1790260830434', 11, ?)"
           }
         }
       ]
     },
-    "0pyvr9c": {
+    "1vg8wuz": {
+      "title": "Backend → NotificationService: POST /api/notifications/visit-booked",
+      "steps": [
+        {
+          "label": "request body",
+          "text": "{\n  \"ownerPhone\": \"0441626832093\",\n  \"petName\": \"Baskerville\",\n  \"visitDate\": \"2026-05-12\"\n}"
+        }
+      ]
+    },
+    "1lnh6qs": {
       "title": "Test → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
       "steps": [
         {
           "label": "request body",
-          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1790145177353\"\n}"
+          "text": "{\n  \"description\": \"Annual check-up 1790260830434\",\n  \"date\": \"2026-05-12\"\n}"
         }
       ]
     },
-    "1yb7xmc": {
+    "0d3lvj2": {
       "title": "Backend → Test: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790145177353\",\n          \"id\": 28,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Henry\",\n  \"lastName\": \"Baskerville\",\n  \"address\": \"Baskerville Hall\",\n  \"city\": \"Dartmoor\",\n  \"telephone\": \"0441626832093\",\n  \"id\": 9,\n  \"pets\": [\n    {\n      \"name\": \"Baskerville\",\n      \"birthDate\": \"2017-02-24\",\n      \"type\": {\n        \"name\": \"dog\",\n        \"id\": 2\n      },\n      \"id\": 11,\n      \"ownerId\": 9,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790260830434\",\n          \"id\": 28,\n          \"petId\": 11,\n          \"petName\": \"Baskerville\",\n          \"ownerId\": 9,\n          \"ownerFirstName\": \"Henry\",\n          \"ownerLastName\": \"Baskerville\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }

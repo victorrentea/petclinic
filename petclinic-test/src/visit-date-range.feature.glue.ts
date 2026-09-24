@@ -1,6 +1,7 @@
 import {After, Given, Then, When} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
+import {ApiClient} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
@@ -12,10 +13,10 @@ Given('today is {word}', async function (this: PlaywrightWorld, isoDate: string)
   await this.page.clock.setFixedTime(new Date(`${isoDate}T12:00:00`));
 });
 
-// On the last owner, named to sort last: add-visit.spec.ts books on the first owner's first pet.
+// On the owner sorting last by name, pet named to sort last: add-visit.spec.ts books on
+// the first owner's first pet.
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners[owners.length - 1];
+  const {content: [owner]} = await new ApiClient().fetchOwnerPage({direction: 'desc', size: 5});
   const {data: petTypes} = await axios.get(`${API_BASE}/pettypes`, {timeout: 10_000});
   const response = await axios.post(`${API_BASE}/owners/${owner.id}/pets`,
     {name: `Zz Born ${birthDate}`, birthDate, type: petTypes[0]}, {timeout: 10_000});

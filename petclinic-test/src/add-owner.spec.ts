@@ -1,4 +1,5 @@
-import {test, expect, Page} from './support/trace-fixture';
+import type {Page} from '@playwright/test';
+import {test, expect} from './support/trace-fixture';
 
 // The owner flows that only a browser can walk, and until now none of them did:
 // every other acceptance test READS owners — the list, a detail page, the visit form
@@ -30,8 +31,9 @@ async function addOwnerThroughTheForm(page: Page, lastName: string): Promise<voi
   await page.locator('button:has-text("Add Owner")').click();
 
   // The form navigates back to the list once the POST returns, so this is also the
-  // assertion that the write succeeded rather than the error branch running.
-  await expect(page).toHaveURL(/\/owners$/);
+  // assertion that the write succeeded rather than the error branch running. The list
+  // keeps its filter/page/sort in the query string, hence the optional tail.
+  await expect(page).toHaveURL(/\/owners(\?.*)?$/);
 }
 
 /** Finds the owner just created and opens their page — which is `getOwner` by id. */
@@ -53,7 +55,7 @@ test('adds an owner from the New Owner form and finds them by last name', async 
   await page.locator('button:has-text("Find Owner")').click();
   const rows = page.locator('td.ownerFullName');
   await expect(rows).toHaveCount(1);
-  await expect(rows.first()).toContainText(`Ada ${lastName}`);
+  await expect(rows.first()).toContainText(`${lastName}, Ada`);
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {

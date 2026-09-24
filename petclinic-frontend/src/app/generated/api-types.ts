@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, filtered and sorted */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,40 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, with the totals of the whole filtered list. */
+    OwnerPageDto: {
+      content: components["schemas"]["OwnerRowDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based number of this page.
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description The requested page size.
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description Owners matching the filter, on all pages.
+       */
+      totalElements: number;
+      /** Format: int32 */
+      totalPages: number;
+    };
+    /** @description One owner as a row of the owners grid: no pet details, no visits. */
+    OwnerRowDto: {
+      address: string;
+      city: string;
+      firstName: string;
+      /** Format: int32 */
+      id: number;
+      lastName: string;
+      /** @description The names of the owner's pets, alphabetically. */
+      petNames: string[];
+      /** @description Null when the owner has no phone. */
+      telephone?: string;
     };
     PetDto: {
       /**
@@ -553,18 +587,25 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, filtered and sorted */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive last-name prefix; empty lists every owner. */
         lastName?: string;
+        /** @description Zero-based page number. */
+        page?: number;
+        /** @description Owners per page. */
+        size?: 5 | 10 | 20;
+        sort?: "name" | "city";
+        direction?: "asc" | "desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */
