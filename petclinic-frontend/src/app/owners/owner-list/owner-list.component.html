@@ -25,7 +25,14 @@
     <div *ngIf="isEmpty" id="noOwners">No owners with LastName starting with "{{ query.lastName }}"</div>
 
     <div class="table-responsive" id="ownersTable" [attr.aria-busy]="loading">
-      <table class="table table-striped">
+      <table class="table table-striped owners-grid">
+        <colgroup>
+          <col class="col-name-width">
+          <col class="col-address-width">
+          <col class="col-city-width">
+          <col class="col-telephone-width">
+          <col class="col-pets-width">
+        </colgroup>
         <thead>
         <tr>
           <th class="col-name" [attr.aria-sort]="ariaSort('name')">
@@ -64,7 +71,10 @@
     </div>
 
     <div class="owners-controls">
-      <span id="ownersCount">{{ page?.totalElements ?? 0 }} {{ page?.totalElements === 1 ? 'owner' : 'owners' }}</span>
+      <div class="owners-summary">
+        <button type="button" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <span id="ownersCount">{{ page?.totalElements ?? 0 }} {{ page?.totalElements === 1 ? 'owner' : 'owners' }}</span>
+      </div>
       <div class="owners-page-size">
         <label for="pageSize">Owners per page</label>
         <app-combo inputId="pageSize" [options]="pageSizes" [ngModel]="query.size"
@@ -81,10 +91,6 @@
           <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
         </button>
       </div>
-    </div>
-
-    <div>
-      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>

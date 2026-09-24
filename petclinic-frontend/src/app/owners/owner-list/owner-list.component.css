@@ -103,3 +103,20 @@ display:none;
   margin: 0;
   font-weight: normal;
 }
+
+/* Fixed layout: columns keep their width whatever the page or sort shows. */
+.owners-grid {
+  table-layout: fixed;
+}
+
+.col-name-width { width: 22%; }
+.col-address-width { width: 25%; }
+.col-city-width { width: 17%; }
+.col-telephone-width { width: 16%; }
+.col-pets-width { width: 20%; }
+
+.owners-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
