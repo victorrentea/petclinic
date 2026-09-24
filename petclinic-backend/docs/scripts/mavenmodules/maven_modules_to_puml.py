@@ -51,7 +51,9 @@ DEFAULT_OUT = REPO_ROOT / "petclinic-backend" / "docs" / "generated" / "MavenMod
 
 # Same spirit as scripts/list-unversioned-deps.py's PRUNE_DIRS: build output,
 # vendored/cloned tool checkouts, and VCS internals never hold a *source* pom.
-PRUNE_DIRS = {"target", "node_modules", ".git", ".claude", ".worktrees", ".tools", ".idea", ".codegraph"}
+PRUNE_DIRS = {
+    "target", "node_modules", ".git", ".claude", ".worktrees", ".tools", ".idea", ".codegraph",
+}
 
 POM_NS = "http://maven.apache.org/POM/4.0.0"
 
@@ -148,7 +150,8 @@ def dependency_tree_edges(project: Project, all_projects: list[Project], mvn_cmd
     return edges
 
 
-def render_puml(projects: list[Project], edges: list[tuple[str, str]], skipped_dirs: list[str]) -> str:
+def render_puml(projects: list[Project], edges: list[tuple[str, str]],
+                skipped_dirs: list[str]) -> str:
     # Deliberately NOT PlantUML's `[Name]` bracket shorthand (which packages.puml uses):
     # that form forces the wiring identifier to be the display text verbatim, and
     # puml_diff.py's structural differ, when an element is removed entirely, re-emits it
@@ -156,14 +159,15 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]], skipped_d
     # identifier. Maven artifactIds conventionally contain hyphens (petclinic-backend,
     # refactoring-legacy, ...), which are not legal there, so a bracket-form removal
     # diff fails to render ("Error line N", confirmed empirically against this file).
-    # `component "artifactId (groupId)" as safe_alias` sidesteps it: the quoted text
+    # `component "artifactId" as safe_alias` sidesteps it: the quoted text
     # can be anything, and the differ never needs to turn it into an identifier.
     alias_by_artifact = {p.artifact_id: p.alias for p in projects}
     lines = [
         "@startuml",
         "",
         "title Maven Module Graph",
-        "caption Diagram generated from `mvn dependency:tree -Dincludes=<this repo's own groupId:artifactId>`",
+        "caption Diagram generated from `mvn dependency:tree "
+        "-Dincludes=<this repo's own groupId:artifactId>`",
         "footer */pom.xml -> petclinic-backend/docs/scripts/mavenmodules/gen-maven-modules.sh "
         "-> petclinic-backend/docs/generated/MavenModules.puml",
         "",
@@ -173,8 +177,15 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]], skipped_d
         "skinparam ranksep 30",
         "",
     ]
+    # The groupId only where it tells modules apart. Printed on every box it was the same
+    # `(victor.training.agentic)` five times over — a line of noise per module. The one
+    # most modules share is dropped; a module outside it keeps its groupId, because that
+    # is exactly the box a reader needs to notice.
+    groups = [p.group_id for p in projects]
+    common = max(set(groups), key=groups.count) if groups else None
     for p in projects:
-        lines.append(f'component "{p.artifact_id} ({p.group_id})" as {p.alias}')
+        label = p.artifact_id if p.group_id == common else f"{p.artifact_id} ({p.group_id})"
+        lines.append(f'component "{label}" as {p.alias}')
     lines.append("")
     for source, target in edges:
         lines.append(f"{alias_by_artifact[source]} --> {alias_by_artifact[target]}")
@@ -190,7 +201,8 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]], skipped_d
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default=str(DEFAULT_OUT))
     ap.add_argument("--mvn-cmd", default="mvn")
     args = ap.parse_args(argv)
