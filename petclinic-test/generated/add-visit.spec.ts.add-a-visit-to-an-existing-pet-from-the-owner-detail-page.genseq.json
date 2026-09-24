@@ -40,12 +40,12 @@
         }
       ]
     },
-    "0tvg3tn": {
+    "0zlmcgq": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": []\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259449759\",\n          \"id\": 36,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259434690\",\n          \"id\": 35,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790243447479\",\n          \"id\": 34,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     },
@@ -62,16 +62,25 @@
         }
       ]
     },
-    "0ts0dcp": {
+    "1g5s560": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"name\": \"Axel\",\n  \"birthDate\": \"2018-12-24\",\n  \"type\": {\n    \"name\": \"hamster\",\n    \"id\": 6\n  },\n  \"id\": 1,\n  \"ownerId\": 1,\n  \"visits\": []\n}"
+          "text": "{\n  \"name\": \"Axel\",\n  \"birthDate\": \"2018-12-24\",\n  \"type\": {\n    \"name\": \"hamster\",\n    \"id\": 6\n  },\n  \"id\": 1,\n  \"ownerId\": 1,\n  \"visits\": [\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1790243447479\",\n      \"id\": 34,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\"\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1790259434690\",\n      \"id\": 35,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\"\n    },\n    {\n      \"date\": \"2026-05-12\",\n      \"description\": \"Annual check-up 1790259449759\",\n      \"id\": 36,\n      \"petId\": 1,\n      \"petName\": \"Axel\",\n      \"ownerId\": 1,\n      \"ownerFirstName\": \"Kevin\",\n      \"ownerLastName\": \"McCallister\"\n    }\n  ]\n}"
         }
       ]
     },
-    "1l94tlh": {
+    "0bdfw9y": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259449759\",\n          \"id\": 36,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790243447479\",\n          \"id\": 34,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259434690\",\n          \"id\": 35,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        }\n      ]\n    }\n  ]\n}"
+        }
+      ]
+    },
+    "083xbf9": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -79,7 +88,7 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES (?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1790243447479', 1, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time)\nVALUES ('2026-05-12', 'Annual check-up 1790259469931', 1, ?)"
           }
         }
       ]
@@ -93,21 +102,21 @@
         }
       ]
     },
-    "18cxneq": {
+    "1ydyhfb": {
       "title": "Browser → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
       "steps": [
         {
           "label": "request body",
-          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1790243447479\",\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": []\n  }\n}"
+          "text": "{\n  \"description\": \"Annual check-up 1790259469931\",\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": [\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1790243447479\",\n        \"id\": 34,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\"\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1790259434690\",\n        \"id\": 35,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\"\n      },\n      {\n        \"date\": \"2026-05-12\",\n        \"description\": \"Annual check-up 1790259449759\",\n        \"id\": 36,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\"\n      }\n    ]\n  },\n  \"date\": \"2026-05-12\"\n}"
         }
       ]
     },
-    "1qkaehv": {
+    "0vwawi1": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790243447479\",\n          \"id\": 34,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": null,\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259434690\",\n          \"id\": 35,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259469931\",\n          \"id\": 37,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790243447479\",\n          \"id\": 34,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        },\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1790259449759\",\n          \"id\": 36,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\"\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }

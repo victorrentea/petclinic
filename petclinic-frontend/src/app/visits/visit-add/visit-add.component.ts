@@ -23,7 +23,6 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
-  readonly maxVisitDate = moment().add(1, 'year').format('YYYY-MM-DD');
 
   constructor(private visitService: VisitService,
               private petService: PetService,
