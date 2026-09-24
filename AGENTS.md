@@ -25,6 +25,7 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `docker/` - disposable full-stack containers per git ref, `./start-docker.sh`
 - `refactoring-legacy/` - standalone OpenRewrite recipes run against the backend from the CLI
 - `user-manual/` - end-user manual with screenshots
+- `openspec/` - OpenSpec change proposals (`changes/`) and living specs (`specs/`), driven by `/opsx:*`
 - `scripts/` - repo checks run by the git hooks and CI (`check-agents-md.sh`, `preflight.sh`, ...)
 
 ## Common Commands
