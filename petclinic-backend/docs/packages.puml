@@ -7,42 +7,39 @@ footer petclinic-backend/docs/packages.puml
 skinparam shadowing false
 skinparam componentStyle rectangle
 skinparam nodesep 20
+' the box label is the package pattern itself, which ArchUnit reads from the stereotype;
+' the stereotype is hidden so the pattern is not printed twice
+hide stereotype
 skinparam ranksep 30
 <style>
 component {
   BackGroundColor #ECEFF1
   LineColor #546E7A
-  FontStyle bold
-  ' only the component name is bold; the package pattern above it stays plain
-  ' (never write a stereotype in a comment — PackagesArchTest greps the raw file)
-  stereotype {
-    FontStyle plain
-  }
 }
 arrow {
   LineColor #78909C
 }
 </style>
 
-[REST] <<..rest>>
-[MCP] <<..mcp>>
-[REST Error] <<..rest.error>>
-[Security] <<..security>>
-[Mapper] <<..mapper>>
-[Repository] <<..repository>>
-[Notification] <<..notification>>
-[DTO] <<..rest.dto>>
-[Domain] <<..domain>>
+[..rest] <<..rest>>
+[..mcp] <<..mcp>>
+[..rest.error] <<..rest.error>>
+[..security] <<..security>>
+[..mapper] <<..mapper>>
+[..repository] <<..repository>>
+[..notification] <<..notification>>
+[..rest.dto] <<..rest.dto>>
+[..domain] <<..domain>>
 
-[Repository] --> [Domain]
-[Mapper] --> [Domain]
-[Mapper] --> [DTO]
-[REST] --> [Domain]
-[REST] --> [Repository]
-[REST] --> [Mapper]
-[REST] --> [DTO]
-[REST] --> [Notification]
-[MCP] --> [Domain]
-[MCP] --> [Repository]
+[..repository] --> [..domain]
+[..mapper] --> [..domain]
+[..mapper] --> [..rest.dto]
+[..rest] --> [..domain]
+[..rest] --> [..repository]
+[..rest] --> [..mapper]
+[..rest] --> [..rest.dto]
+[..rest] --> [..notification]
+[..mcp] --> [..domain]
+[..mcp] --> [..repository]
 
 @enduml

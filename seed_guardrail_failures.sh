@@ -134,8 +134,8 @@ plant_tier1() {
 
   # Deleting an allowed edge (not adding a phantom one): ArchUnit fails on a code
   # dependency the diagram does not permit, which is the direction that actually blocks.
-  seed packages-puml "PackagesArchTest — REST→Mapper dep no longer allowed by the diagram" -- \
-    del petclinic-backend/docs/packages.puml '^\[REST\] --> \[Mapper\]$'
+  seed packages-puml "PackagesArchTest — ..rest→..mapper dep no longer allowed by the diagram" -- \
+    del petclinic-backend/docs/packages.puml '^\[\.\.rest\] --> \[\.\.mapper\]$'
 
   seed c3-dsl "C3ArchTest — restLayer→mapperLayer edge missing from the C4 model" -- \
     del petclinic-backend/docs/c4model.c3.dsl '^restLayer +-> mapperLayer'
