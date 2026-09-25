@@ -1,6 +1,6 @@
 ---
-paths:
-  - "**/pom.xml"
+# Harness auto-injects its body before any file of this type is accessed.
+paths: ["**/pom.xml"]
 ---
 
 # Maven versions: let the parent resolve them
