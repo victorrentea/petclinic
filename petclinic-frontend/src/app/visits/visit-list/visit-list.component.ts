@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Visit} from '../visit';
+import {vetLabel, Visit} from '../visit';
 import {VisitService} from '../visit.service';
 import {Router} from '@angular/router';
 
@@ -14,6 +14,7 @@ export class VisitListComponent implements OnInit {
   responseStatus: number;
   noVisits = false;
   errorMessage: string;
+  readonly vetLabel = vetLabel;
 
   constructor(private router: Router, private visitService: VisitService) {
     this.visits = [];

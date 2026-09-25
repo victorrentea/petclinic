@@ -111,30 +111,32 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
   ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
 
-INSERT INTO visits (pet_id, visit_date, description) VALUES
-  (15, DATE '2025-11-12', 'rabies vaccine'),
-  (16, DATE '2025-12-03', 'annual checkup'),
-  (17, DATE '2026-01-15', 'internal deworming'),
-  (18, DATE '2026-02-20', 'beak and nail trim'),
-  (19, DATE '2026-03-05', 'trivalent vaccine'),
-  (20, DATE '2026-03-18', 'hind leg surgery'),
-  (21, DATE '2026-04-02', 'general checkup'),
-  (22, DATE '2026-04-10', 'spay/neuter'),
-  (23, DATE '2025-10-22', 'skin and scale check'),
-  (24, DATE '2025-11-30', 'trivalent vaccine'),
-  (25, DATE '2026-02-14', 'habitat check'),
-  (26, DATE '2026-03-22', 'allergy treatment'),
-  (27, DATE '2026-04-15', 'checkup'),
-  (28, DATE '2026-04-20', 'dental exam'),
-  (29, DATE '2026-04-25', 'rabies vaccine'),
-  (30, DATE '2026-04-28', 'horseshoeing'),
-  (31, DATE '2026-05-01', 'plumage check'),
-  (32, DATE '2026-05-02', 'wound on front paw'),
-  (15, DATE '2026-05-02', 'post-vaccine follow-up'),
-  (20, DATE '2026-05-03', 'surgical suture removal'),
-  (3,  DATE '2026-05-03', 'annual general checkup'),  -- Milton (Schroedinger's cat)
-  (3,  DATE '2025-06-12', 'patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation'),
-  (3,  DATE '2025-08-21', 'wave function collapsed during auscultation; patient definitively purring');
+-- vet_id is deliberately NULL on some rows: an appointment is routinely booked before anyone
+-- knows who will take it, and the screens have to read that as "no vet" rather than as a fault.
+INSERT INTO visits (pet_id, visit_date, description, vet_id) VALUES
+  (15, DATE '2025-11-12', 'rabies vaccine',        1),
+  (16, DATE '2025-12-03', 'annual checkup',        1),
+  (17, DATE '2026-01-15', 'internal deworming',    NULL),
+  (18, DATE '2026-02-20', 'beak and nail trim',    6),
+  (19, DATE '2026-03-05', 'trivalent vaccine',     1),
+  (20, DATE '2026-03-18', 'hind leg surgery',      4),
+  (21, DATE '2026-04-02', 'general checkup',       6),
+  (22, DATE '2026-04-10', 'spay/neuter',           4),
+  (23, DATE '2025-10-22', 'skin and scale check',  NULL),
+  (24, DATE '2025-11-30', 'trivalent vaccine',     1),
+  (25, DATE '2026-02-14', 'habitat check',         6),
+  (26, DATE '2026-03-22', 'allergy treatment',     3),
+  (27, DATE '2026-04-15', 'checkup',               NULL),
+  (28, DATE '2026-04-20', 'dental exam',           3),
+  (29, DATE '2026-04-25', 'rabies vaccine',        1),
+  (30, DATE '2026-04-28', 'horseshoeing',          5),
+  (31, DATE '2026-05-01', 'plumage check',         6),
+  (32, DATE '2026-05-02', 'wound on front paw',    4),
+  (15, DATE '2026-05-02', 'post-vaccine follow-up', 1),
+  (20, DATE '2026-05-03', 'surgical suture removal', 4),
+  (3,  DATE '2026-05-03', 'annual general checkup', NULL),  -- Milton (Schroedinger's cat)
+  (3,  DATE '2025-06-12', 'patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation', 2),
+  (3,  DATE '2025-08-21', 'wave function collapsed during auscultation; patient definitively purring', 2);
 
 INSERT INTO users (username, password, enabled) VALUES
   ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);

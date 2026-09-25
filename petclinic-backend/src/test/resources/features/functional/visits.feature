@@ -13,3 +13,10 @@ Feature: Visits
     When I update that visit's description to "annual checkup"
     Then the response status is 200
     And the visit's description is "annual checkup"
+
+  Scenario: Renaming a visit leaves the vet who attended it alone
+    Given a vet "Helen Leary" exists
+    And a visit for "Samantha" on "2026-04-01" described as "checkup" attended by vet "Leary"
+    When I update that visit's description to "annual checkup"
+    Then the response status is 200
+    And the visit is still attended by vet "Leary"

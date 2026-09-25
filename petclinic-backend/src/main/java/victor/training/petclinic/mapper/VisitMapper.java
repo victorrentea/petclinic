@@ -3,6 +3,7 @@ package victor.training.petclinic.mapper;
 import org.springframework.stereotype.Component;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -32,6 +33,7 @@ public class VisitMapper {
     public VisitDto toVisitDto(Visit visit) {
         Pet pet = visit.getPet();
         Owner owner = pet == null ? null : pet.getOwner();
+        Vet vet = visit.getVet();
         VisitDto visitDto = new VisitDto()
                 .setDate(visit.getDate())
                 .setDescription(visit.getDescription())
@@ -44,6 +46,12 @@ public class VisitMapper {
             visitDto.setOwnerId(owner.getId())
                     .setOwnerFirstName(owner.getFirstName())
                     .setOwnerLastName(owner.getLastName());
+        }
+        // Left null when nobody is assigned: the visit has no vet, which is not an error.
+        if (vet != null) {
+            visitDto.setVetId(vet.getId())
+                    .setVetFirstName(vet.getFirstName())
+                    .setVetLastName(vet.getLastName());
         }
         return visitDto;
     }

@@ -16,6 +16,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -40,6 +42,17 @@ class VisitServiceStub {
   }
 }
 
+const availableVets: Vet[] = [
+  {id: 1, firstName: 'James', lastName: 'Carter', specialties: []},
+  {id: 2, firstName: 'Helen', lastName: 'Leary', specialties: []},
+];
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of(availableVets);
+  }
+}
+
 describe('VisitAddComponent', () => {
   let component: VisitAddComponent;
   let fixture: ComponentFixture<VisitAddComponent>;
@@ -57,6 +70,7 @@ describe('VisitAddComponent', () => {
         {provide: PetService, useClass: PetServiceStub},
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -114,5 +128,23 @@ describe('VisitAddComponent', () => {
     component.currentOwner = visitOwner;
     component.gotoOwnerDetail();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('should offer every vet by full name, to pick from or to leave alone', () => {
+    expect(component.vetOptions).toEqual([
+      {id: 1, name: 'James Carter'},
+      {id: 2, name: 'Helen Leary'},
+    ]);
+  });
+
+  it('should submit the picked vet with the visit', () => {
+    component.currentOwner = visitOwner;
+    component.currentPet = testPet;
+    spyOn(visitService, 'addVisit').and.callThrough();
+    const visit: any = {id: null, date: '2023-05-01', description: 'checkup', vetId: 2, pet: testPet};
+
+    component.onSubmit(visit);
+
+    expect(visitService.addVisit).toHaveBeenCalledWith(jasmine.objectContaining({vetId: 2}));
   });
 });

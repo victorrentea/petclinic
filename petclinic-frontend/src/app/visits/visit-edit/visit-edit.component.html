@@ -47,6 +47,21 @@
             <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 characters long</span>           <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 charaters long</span>
         </div>
         </div>
+        <div class="form-group">
+          <label for="vet" class="col-sm-2 control-label">Vet</label>
+          <div class="col-sm-10">
+            <!-- PLANTED MISTAKE (design-system audit demo): this field used to be the
+                design-system <app-combo>. It is a bare native <select> on purpose, so the
+                UX tab of the review has exactly one real gap to show. Behaviour is
+                unchanged - picking "-- none --" still sends vetId: null, which is what
+                unassigns the vet - only the component is wrong. "Book a visit" keeps the
+                combo, so the two screens can be compared side by side. -->
+            <select id="vet" name="vetId" class="form-control" [(ngModel)]="visit.vetId">
+              <option [ngValue]="null">-- none --</option>
+              <option *ngFor="let vetOption of vetOptions" [ngValue]="vetOption.id">{{ vetOption.name }}</option>
+            </select>
+          </div>
+        </div>
 
       </div>
       <div class="form-group">

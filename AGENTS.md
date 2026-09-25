@@ -180,6 +180,9 @@ REST Contract:
 Core entities and relationships:
 - **Owner** 1→N **Pet** N→1 **PetType**
 - **Pet** 1→N **Visit**
+- **Visit** N→1 **Vet**, *optional*: a visit booked before anyone is assigned has no vet, and
+  neither has any row older than `V4__visit_vet.sql`. The FK is `ON DELETE SET NULL`, so retiring
+  a vet is never blocked by their history — their past visits fall back to the "no vet" case
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 

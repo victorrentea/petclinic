@@ -11,6 +11,7 @@ import {PetsRoutingModule} from '../pets/pets-routing.module';
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import {DesignSystemModule} from '../design-system/design-system.module';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -26,6 +27,7 @@ export const MY_DATE_FORMATS = {
 
 @NgModule({
   imports: [
+    DesignSystemModule,
     CommonModule,
     FormsModule,
     MatDatepickerModule,

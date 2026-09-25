@@ -1,0 +1,175 @@
+{
+  "version": 2,
+  "details": {
+    "0exss5m": {
+      "title": "SELECT v FROM Vet v WHERE v.id = :id",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.id, v1_0.first_name, v1_0.last_name\nFROM vets v1_0\nWHERE v1_0.id=4"
+          }
+        }
+      ]
+    },
+    "0orhvct": {
+      "title": "insert for victor.training.petclinic.domain.Visit",
+      "steps": [
+        {
+          "label": "",
+          "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
+          "alternate": {
+            "label": "",
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-06-18', 'Annual check-up 1790201568958', 1, 4, ?)"
+          }
+        }
+      ]
+    },
+    "0x8aana": {
+      "title": "select owners",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.id=1"
+          }
+        }
+      ]
+    },
+    "18567ho": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=1"
+          }
+        }
+      ]
+    },
+    "1r6wc83": {
+      "title": "Backend → NotificationService: POST /api/notifications/visit-booked",
+      "steps": [
+        {
+          "label": "request body",
+          "text": "{\n  \"ownerPhone\": null,\n  \"petName\": \"Axel\",\n  \"visitDate\": \"2026-06-18\"\n}"
+        }
+      ]
+    },
+    "1706k1o": {
+      "title": "SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner LEFT JOIN …",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.id, v1_0.visit_date, v1_0.description, p1_0.id, p1_0.birth_date, p1_0.name, o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone, p1_0.type_id, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nJOIN pets p1_0\nON p1_0.id=v1_0.pet_id\nJOIN owners o1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id"
+        }
+      ]
+    },
+    "0xm9qzg": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=1"
+          }
+        }
+      ]
+    },
+    "070fg5f": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=2"
+          }
+        }
+      ]
+    },
+    "1heb9yw": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=5"
+          }
+        }
+      ]
+    },
+    "0cvbten": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=6"
+          }
+        }
+      ]
+    },
+    "0g8ptx2": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=3"
+          }
+        }
+      ]
+    },
+    "0i1m34t": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=4"
+          }
+        }
+      ]
+    },
+    "094wceq": {
+      "title": "VisitRepository.findAllWithPetAndOwner",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT pt1_0.id, pt1_0.name\nFROM types pt1_0\nWHERE pt1_0.id=7"
+          }
+        }
+      ]
+    },
+    "185icml": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "[\n  {\n    \"date\": \"2024-03-04\",\n    \"description\": \"rabies shot\",\n    \"id\": 1,\n    \"petId\": 9,\n    \"petName\": \"Dinah\",\n    \"ownerId\": 8,\n    \"ownerFirstName\": \"Alice\",\n    \"ownerLastName\": \"Liddell\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2024-03-04\",\n    \"description\": \"rabies shot\",\n    \"id\": 2,\n    \"petId\": 10,\n    \"petName\": \"Cheshire\",\n    \"ownerId\": 8,\n    \"ownerFirstName\": \"Alice\",\n    \"ownerLastName\": \"Liddell\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2023-06-04\",\n    \"description\": \"neutered\",\n    \"id\": 3,\n    \"petId\": 10,\n    \"petName\": \"Cheshire\",\n    \"ownerId\": 8,\n    \"ownerFirstName\": \"Alice\",\n    \"ownerLastName\": \"Liddell\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2022-09-04\",\n    \"description\": \"spayed\",\n    \"id\": 4,\n    \"petId\": 9,\n    \"petName\": \"Dinah\",\n    \"ownerId\": 8,\n    \"ownerFirstName\": \"Alice\",\n    \"ownerLastName\": \"Liddell\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2025-11-12\",\n    \"description\": \"rabies vaccine\",\n    \"id\": 5,\n    \"petId\": 15,\n    \"petName\": \"Lassie\",\n    \"ownerId\": 14,\n    \"ownerFirstName\": \"Sam\",\n    \"ownerLastName\": \"Carraclough\",\n    \"vetId\": 1,\n    \"vetFirstName\": \"James\",\n    \"vetLastName\": \"Carter\"\n  },\n  {\n    \"date\": \"2025-12-03\",\n    \"description\": \"annual checkup\",\n    \"id\": 6,\n    \"petId\": 16,\n    \"petName\": \"Mittens\",\n    \"ownerId\": 15,\n    \"ownerFirstName\": \"Beatrix\",\n    \"ownerLastName\": \"Potter\",\n    \"vetId\": 1,\n    \"vetFirstName\": \"James\",\n    \"vetLastName\": \"Carter\"\n  },\n  {\n    \"date\": \"2026-01-15\",\n    \"description\": \"internal deworming\",\n    \"id\": 7,\n    \"petId\": 17,\n    \"petName\": \"Pickles\",\n    \"ownerId\": 15,\n    \"ownerFirstName\": \"Beatrix\",\n    \"ownerLastName\": \"Potter\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2026-02-20\",\n    \"description\": \"beak and nail trim\",\n    \"id\": 8,\n    \"petId\": 18,\n    \"petName\": \"Captain Flint\",\n    \"ownerId\": 16,\n    \"ownerFirstName\": \"Long\",\n    \"ownerLastName\": \"Silver\",\n    \"vetId\": 6,\n    \"vetFirstName\": \"Sharon\",\n    \"vetLastName\": \"Jenkins\"\n  },\n  {\n    \"date\": \"2026-03-05\",\n    \"description\": \"trivalent vaccine\",\n    \"id\": 9,\n    \"petId\": 19,\n    \"petName\": \"Mrs Norris\",\n    \"ownerId\": 17,\n    \"ownerFirstName\": \"Argus\",\n    \"ownerLastName\": \"Filch\",\n    \"vetId\": 1,\n    \"vetFirstName\": \"James\",\n    \"vetLastName\": \"Carter\"\n  },\n  {\n    \"date\": \"2026-03-18\",\n    \"description\": \"hind leg surgery\",\n    \"id\": 10,\n    \"petId\": 20,\n    \"petName\": \"Gromit\",\n    \"ownerId\": 18,\n    \"ownerFirstName\": \"Wallace\",\n    \"ownerLastName\": \"Wensleydale\",\n    \"vetId\": 4,\n    \"vetFirstName\": \"Rafael\",\n    \"vetLastName\": \"Ortega\"\n  },\n  {\n    \"date\": \"2026-04-02\",\n    \"description\": \"general checkup\",\n    \"id\": 11,\n    \"petId\": 21,\n    \"petName\": \"Hutch\",\n    \"ownerId\": 18,\n    \"ownerFirstName\": \"Wallace\",\n    \"ownerLastName\": \"Wensleydale\",\n    \"vetId\": 6,\n    \"vetFirstName\": \"Sharon\",\n    \"vetLastName\": \"Jenkins\"\n  },\n  {\n    \"date\": \"2026-04-10\",\n    \"description\": \"spay/neuter\",\n    \"id\": 12,\n    \"petId\": 22,\n    \"petName\": \"Toby\",\n    \"ownerId\": 19,\n    \"ownerFirstName\": \"Wendy\",\n    \"ownerLastName\": \"Darling\",\n    \"vetId\": 4,\n    \"vetFirstName\": \"Rafael\",\n    \"vetLastName\": \"Ortega\"\n  },\n  {\n    \"date\": \"2025-10-22\",\n    \"description\": \"skin and scale check\",\n    \"id\": 13,\n    \"petId\": 23,\n    \"petName\": \"Norbert\",\n    \"ownerId\": 20,\n    \"ownerFirstName\": \"Rubeus\",\n    \"ownerLastName\": \"Hagrid\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2025-11-30\",\n    \"description\": \"trivalent vaccine\",\n    \"id\": 14,\n    \"petId\": 24,\n    \"petName\": \"Crookshanks\",\n    \"ownerId\": 21,\n    \"ownerFirstName\": \"Hermione\",\n    \"ownerLastName\": \"Granger\",\n    \"vetId\": 1,\n    \"vetFirstName\": \"James\",\n    \"vetLastName\": \"Carter\"\n  },\n  {\n    \"date\": \"2026-02-14\",\n    \"description\": \"habitat check\",\n    \"id\": 15,\n    \"petId\": 25,\n    \"petName\": \"Basilisk\",\n    \"ownerId\": 4,\n    \"ownerFirstName\": \"Salazar\",\n    \"ownerLastName\": \"Śliwiński\",\n    \"vetId\": 6,\n    \"vetFirstName\": \"Sharon\",\n    \"vetLastName\": \"Jenkins\"\n  },\n  {\n    \"date\": \"2026-03-22\",\n    \"description\": \"allergy treatment\",\n    \"id\": 16,\n    \"petId\": 26,\n    \"petName\": \"Snowy\",\n    \"ownerId\": 23,\n    \"ownerFirstName\": \"Tintin\",\n    \"ownerLastName\": \"Reporter\",\n    \"vetId\": 3,\n    \"vetFirstName\": \"Linda\",\n    \"vetLastName\": \"Douglas\"\n  },\n  {\n    \"date\": \"2026-04-15\",\n    \"description\": \"checkup\",\n    \"id\": 17,\n    \"petId\": 27,\n    \"petName\": \"Lucifer\",\n    \"ownerId\": 24,\n    \"ownerFirstName\": \"Lady\",\n    \"ownerLastName\": \"Tremaine\",\n    \"vetId\": null,\n    \"vetFirstName\": null,\n    \"vetLastName\": null\n  },\n  {\n    \"date\": \"2026-04-20\",\n    \"description\": \"dental exam\",\n    \"id\": 18,\n    \"petId\": 28,\n    \"petName\": \"Jaq\",\n    \"ownerId\": 24,\n    \"ownerFirstName\": \"Lady\",\n    \"ownerLastName\": \"Tremaine\",\n    \"vetId\": 3,\n    \"vetFirstName\": \"Linda\",\n    \"vetLastName\": \"Douglas\"\n  },\n  {\n    \"date\": \"2026-04-25\",\n    \"description\": \"rabies vaccine\",\n    \"id\": 19,\n    \"petId\": 29,\n    \"petName\": \"Figaro\",\n    \"ownerId\": 25,\n    \"ownerFirstName\": \"Mister\",\n    \"ownerLastName\": \"Geppetto\",\n    \"vetId\": 1,\n    \"vetFirstName\": \"James\"\n  }\n]\n… clipped by the browser at its 4 KB cap"
+        }
+      ]
+    }
+  }
+}
