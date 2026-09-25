@@ -110,14 +110,18 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
 });
 
 After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: ITestCaseHookParameter) {
-  const line = gherkinDocument.feature?.children
+  const outline = gherkinDocument.feature?.children
     .map(c => c.scenario)
-    .find(sc => sc && pickle.astNodeIds.includes(sc.id))?.location.line ?? null;
+    .find(sc => sc && pickle.astNodeIds.includes(sc.id));
+  const line = outline?.location.line ?? null;
+  // A Scenario Outline is one scenario line and one pickle per Examples row, usually all
+  // under the same name: the row's own line is what tells them apart.
+  const row = outline?.examples.flatMap(e => e.tableBody)
+    .find(r => pickle.astNodeIds.includes(r.id))?.location.line;
   const file = path.relative(path.join(__dirname, '..', '..'), pickle.uri);
   await stopTestCoverage(this.page, {
     suite: 'cucumber',
-    // A Scenario Outline is one line and several pickles: the name tells them apart.
-    id: `${file}:${line}` + (pickle.astNodeIds.length > 1 ? ` ${pickle.name}` : ''),
+    id: `${file}:${row ?? line}`,
     title: pickle.name,
     file,
     line,
