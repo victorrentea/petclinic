@@ -1,6 +1,7 @@
 import * as path from 'path';
 import {forgetWindowsOf} from './trace-window-store';
 import {PLAYWRIGHT_SOURCES} from '../genseq/generate';
+import {startCoverageRun} from './coverage';
 
 // Forget the windows of the tests this runner owns (*.spec.ts), so global-teardown
 // regenerates their diagrams from this run alone. The Cucumber suite's windows stay
@@ -11,4 +12,6 @@ export default async function globalSetup(): Promise<void> {
     path.join(__dirname, '..', '..', 'test-results', 'trace-windows'),
     PLAYWRIGHT_SOURCES,
   );
+  // Per-test coverage for /human-review (support/coverage.ts): a clean folder per run.
+  startCoverageRun('playwright');
 }

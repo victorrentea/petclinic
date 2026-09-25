@@ -16,7 +16,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // One worker under COVERAGE_DIR as well: per-test coverage dumps the backend's one global
+  // set of counters after each test, and two tests running at once would share a dump
+  // (src/support/coverage.ts).
+  workers: process.env.CI || process.env.COVERAGE_DIR ? 1 : undefined,
   reporter: [
     ['html', {outputFolder: 'test-results/playwright-report'}],
     ['list'],

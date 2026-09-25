@@ -9,6 +9,7 @@ import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
+import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
 
 setDefaultTimeout(60_000);
 
@@ -75,6 +76,8 @@ setWorldConstructor(PlaywrightWorld);
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
   forgetWindowsOf(WINDOWS_DIR, CUCUMBER_SOURCES);
+  // Per-test coverage for /human-review (support/coverage.ts): a clean folder per run.
+  startCoverageRun('cucumber');
   // A clean slate per run, like the report the Playwright suite rewrites: a recording
   // of a scenario that no longer exists must not outlive the run that made it.
   if (TRACE_ON) {
@@ -92,6 +95,7 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
     this.recordingStartMs = Date.now();
   }
   this.page = await this.context.newPage();
+  await startTestCoverage(this.page);
 
   if (shouldGenerateSequence(pickle.tags)) {
     this.traceTitle = pickle.name;
@@ -106,6 +110,19 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
 });
 
 After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: ITestCaseHookParameter) {
+  const line = gherkinDocument.feature?.children
+    .map(c => c.scenario)
+    .find(sc => sc && pickle.astNodeIds.includes(sc.id))?.location.line ?? null;
+  const file = path.relative(path.join(__dirname, '..', '..'), pickle.uri);
+  await stopTestCoverage(this.page, {
+    suite: 'cucumber',
+    // A Scenario Outline is one line and several pickles: the name tells them apart.
+    id: `${file}:${line}` + (pickle.astNodeIds.length > 1 ? ` ${pickle.name}` : ''),
+    title: pickle.name,
+    file,
+    line,
+    status: (result?.status ?? 'unknown').toLowerCase(),
+  });
   if (this.recordingZip) {
     await this.context?.tracing.stop({path: this.recordingZip});
     const scenario = gherkinDocument.feature?.children

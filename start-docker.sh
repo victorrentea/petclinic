@@ -5,14 +5,18 @@
 # frontend is published, and the host picks the port, so instances never collide — and
 # neither does an instance with the plain ./start-*.sh stack on :4200 and :5432.
 #
-#   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh]
+#   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh] [--jacoco]
 #   ./start-docker.sh url   [name]        # the URL again
 #   ./start-docker.sh reset [name]        # database back to the seed
 #   ./start-docker.sh ls
 #   ./start-docker.sh down  [name|--all]
 #
 # --ref builds a pinned commit from a git archive, so the working tree is never touched.
-# --fresh rebuilds and drops the instance's volumes. With more than one instance up, every
+# --fresh rebuilds and drops the instance's volumes. --jacoco runs the backend under
+# JaCoCo's agent in tcpserver mode, its port 6300 published to a host-picked loopback port
+# (`docker port <name>-backend-1 6300`) — what per-test coverage dumps and resets between
+# tests (petclinic-test/src/support/coverage.ts); on an instance already up without it,
+# only the backend is re-created. With more than one instance up, every
 # command needs the name: none of them will guess which one you meant.
 #
 # Instances reap themselves after 2 idle hours (--ttl to change).
@@ -91,20 +95,37 @@ resolve() {
     echo "$all"
 }
 
+# EXTRA_COMPOSE: an overlay on top of the base file, for `up --jacoco`. Every other command
+# works on the project by name and needs none.
+EXTRA_COMPOSE=()
 compose() { COMPOSE_PROJECT_NAME="$1" PETCLINIC_SRC="${2:-$REPO}" IDLE_TTL="${IDLE_TTL:-7200}" \
             PETCLINIC_TAG="${PETCLINIC_TAG:-worktree}" \
-            docker compose -f "$COMPOSE_FILE" "${@:3}"; }
+            docker compose -f "$COMPOSE_FILE" "${EXTRA_COMPOSE[@]+"${EXTRA_COMPOSE[@]}"}" "${@:3}"; }
+
+# The JaCoCo agent jar, off the local Maven repository — the same version the backend's pom
+# measures unit tests with, fetched once if this machine never ran that build.
+jacoco_agent() {
+    local v jar
+    v="$(grep -A1 '<artifactId>jacoco-maven-plugin</artifactId>' "$REPO/petclinic-backend/pom.xml" \
+        | sed -n 's#.*<version>\(.*\)</version>.*#\1#p' | head -1)"
+    v="${v:-0.8.13}"
+    jar="$HOME/.m2/repository/org/jacoco/org.jacoco.agent/$v/org.jacoco.agent-$v-runtime.jar"
+    [ -f "$jar" ] || mvn -q dependency:get -Dartifact="org.jacoco:org.jacoco.agent:$v:jar:runtime" >&2 \
+        || die "cannot fetch the JaCoCo agent $v"
+    echo "$jar"
+}
 
 port_of() { compose "$1" "" port frontend 4200 2>/dev/null | tail -1 | sed 's/.*://' || true; }
 
 cmd_up() {
-    local ref="" name="" fresh=""
+    local ref="" name="" fresh="" jacoco=""
     while [ $# -gt 0 ]; do
         case "$1" in
             --ref)   ref="${2:?--ref needs a commit}";   shift 2 ;;
             --name)  name="${2:?--name needs a name}";    shift 2 ;;
             --ttl)   IDLE_TTL="${2:?--ttl needs seconds}"; shift 2 ;;
             --fresh) fresh=1;    shift ;;
+            --jacoco) jacoco=1;  shift ;;
             *) die "unknown option: $1" ;;
         esac
     done
@@ -139,12 +160,20 @@ cmd_up() {
         die "$name is an existing compose project this tool did not create — pick another --name"
     fi
 
+    if [ -n "$jacoco" ]; then
+        export JACOCO_AGENT_JAR; JACOCO_AGENT_JAR="$(jacoco_agent)"
+        EXTRA_COMPOSE=(-f "$REPO/docker/docker-compose.jacoco.yml")
+    fi
+
     if [ -n "$fresh" ]; then
         # Volumes too, or --fresh would keep the old database and the old activity log,
         # and the seed snapshot taken on the first boot would never be retaken.
         compose "$name" "$src" down -v >/dev/null 2>&1 || true
-    elif [ -n "$(docker ps -q --filter "$MINE" --filter "label=$PROJECT_LABEL=$name")" ]; then
-        # Already up: hand back the same instance instead of building a second one.
+    elif [ -n "$(docker ps -q --filter "$MINE" --filter "label=$PROJECT_LABEL=$name")" ] \
+        && { [ -z "$jacoco" ] || docker port "$name-backend-1" 6300 >/dev/null 2>&1; }; then
+        # Already up: hand back the same instance instead of building a second one. With
+        # --jacoco, only if its backend already carries the agent; otherwise the `up` below
+        # re-creates the backend alone, since nothing else in the overlay differs.
         echo "↻ $name is already up"
         cmd_url "$name"; return
     fi
