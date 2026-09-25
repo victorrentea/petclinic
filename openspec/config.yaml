@@ -9,6 +9,17 @@ schema: spec-driven
 #     We use conventional commits
 #     Domain: e-commerce platform
 
+rules:
+  proposal:
+    - >-
+      When the change touches the user interface, show the new screen as a picture, never as
+      ASCII art. Snapshot the current page with `node scripts/ui-mockup.cjs capture <route>
+      openspec/changes/<change>/mockup/<screen>.html` (frontend on :4200), edit that HTML into
+      the proposed screen with the app's own styles and design-system widgets, then
+      `node scripts/ui-mockup.cjs shot <screen>.html <screen>.png`. Embed the PNG in
+      proposal.md under "What Changes", linking the HTML next to it. Use the smallest data
+      that still shows the change. Open the PNG to check it before presenting the proposal.
+
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
