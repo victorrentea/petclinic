@@ -19,6 +19,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
   after every booked visit
 - `petclinic-commons/` - plain jar both Java apps depend on (the notification request).
   No reactor pom: it is a standalone build, `mvn install`ed before either app compiles
+- `openspec/` - OpenSpec proposals (`changes/`) and living specs (`specs/`); plan a change with
+  `/opsx:propose` before writing code
 
 ## Common Commands
 
@@ -175,6 +177,10 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+
+## Volumetry
+- We'll have 100k owners
+- Our users are bankers with patience ⇒ SLA < 10 s/req by default
 
 ## Java Code Style
 - Keep line length < 120 chars
