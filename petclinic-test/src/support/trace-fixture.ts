@@ -3,6 +3,7 @@ import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../genseq/sequence-tag';
+import {startTestCoverage, stopTestCoverage} from './coverage';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
@@ -18,8 +19,20 @@ const POST_PAD_MS = 5_000;
 
 export const test = base.extend({
   page: async ({page}, use, testInfo) => {
+    // Per-test coverage for /human-review (support/coverage.ts). Inert without
+    // COVERAGE_DIR; around the body so a traced test and an untraced one are measured alike.
+    await startTestCoverage(page);
+    const harvest = () => stopTestCoverage(page, {
+      suite: 'playwright',
+      id: `${path.relative(path.join(__dirname, '..', '..'), testInfo.file)}:${testInfo.line}`,
+      title: testInfo.titlePath.slice(1).join(' > '),
+      file: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
+      line: testInfo.line,
+      status: testInfo.status ?? 'unknown',
+    });
     if (!shouldGenerateSequence(testInfo.tags)) {
       await use(page);
+      await harvest();
       return;
     }
     // Stamp every browser span with the test name so Tempo can find this run
@@ -32,6 +45,7 @@ export const test = base.extend({
 
     const startMs = Date.now() - PRE_PAD_MS;
     await use(page);
+    await harvest();
     await flushBrowserSpans(page);
     appendWindow(WINDOWS_DIR, {
       title: testInfo.title,

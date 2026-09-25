@@ -25,13 +25,32 @@ REPO="$(cd "$HERE/.." && pwd)"
 
 sha="$(git -C "$REPO" rev-parse --short HEAD)"
 name="petclinic-$sha"
-"$REPO/start-docker.sh" up --ref "$sha" --ttl 1800 >&2
+# COVERAGE_DIR asks for per-test coverage (src/support/coverage.ts), which needs JaCoCo's
+# agent inside the backend container: --jacoco adds it, and re-creates the backend of an
+# instance that is already up without one.
+jacoco=()
+[ -n "${COVERAGE_DIR:-}" ] && jacoco=(--jacoco)
+"$REPO/start-docker.sh" up --ref "$sha" --ttl 1800 "${jacoco[@]+"${jacoco[@]}"}" >&2
 
 # 127.0.0.1 rather than the "localhost" start-docker.sh prints: Node resolves localhost to
 # ::1 first, and the ports are bound to IPv4 loopback only (see playwright.config.ts).
 front="$("$REPO/start-docker.sh" url "$name" | sed 's#//localhost:#//127.0.0.1:#')"
 back="$(docker port "$name-backend-1" 8080 2>/dev/null | head -1 | sed 's/.*://')"
 [ -n "$back" ] || { echo "❌ $name publishes no backend port — rebuild it: $REPO/start-docker.sh up --ref $sha --fresh" >&2; exit 1; }
+
+if [ -n "${COVERAGE_DIR:-}" ]; then
+    mkdir -p "$COVERAGE_DIR"
+    COVERAGE_DIR="$(cd "$COVERAGE_DIR" && pwd)"      # the suites run from $HERE, below
+    agent="$(docker port "$name-backend-1" 6300 2>/dev/null | head -1 | sed 's/.*://')"
+    [ -n "$agent" ] || { echo "❌ $name has no JaCoCo agent port — $REPO/start-docker.sh up --ref $sha --jacoco" >&2; exit 1; }
+    export COVERAGE_DIR JACOCO_ADDRESS="127.0.0.1:$agent"
+    export COVERAGE_COMMIT="$(git -C "$REPO" rev-parse HEAD)"
+    # The classes the agent measured, exactly as the container runs them: JaCoCo matches
+    # execution data to classes by a checksum of their bytes, and a local build of the same
+    # commit is not guaranteed to be the same bytes.
+    docker cp -q "$name-backend-1:/app/app.jar" "$COVERAGE_DIR/backend-app.jar"
+    echo "📏 per-test coverage → $COVERAGE_DIR (JaCoCo agent on $JACOCO_ADDRESS)" >&2
+fi
 
 export SKIP_SERVER_START=1
 export BASE_URL="$front"

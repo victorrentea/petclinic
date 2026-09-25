@@ -1,0 +1,18 @@
+# Overlay for `start-docker.sh up --jacoco`: the backend under JaCoCo's agent, for per-test
+# coverage of a browser run (petclinic-test/src/support/coverage.ts).
+#
+# tcpserver mode, so the suite can dump and reset the counters between two tests over a
+# socket instead of reading one .exec at shutdown — one test's lines, not the whole run's.
+# The port is published like the others: host-picked, loopback only (the agent answers
+# anyone who connects, and hands out what the backend has executed).
+# `includes` keeps the agent off Spring and Hibernate, which is most of what a JVM loads.
+
+services:
+  backend:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/jacoco/jacocoagent.jar=output=tcpserver,address=*,port=6300,includes=victor.training.*
+    ports:
+      - "127.0.0.1::6300"
+    volumes:
+      - ${JACOCO_AGENT_JAR:?run through ../start-docker.sh up --jacoco}:/jacoco/jacocoagent.jar:ro
