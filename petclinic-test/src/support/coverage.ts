@@ -46,8 +46,17 @@ export async function startTestCoverage(page: Page): Promise<void> {
   // What ran before this test — the previous test's teardown, a Before hook, the boot —
   // is thrown away rather than charged to the test about to start.
   await jacocoDump(true).catch(() => undefined);
-  await page.coverage.startJSCoverage({resetOnNavigation: false});
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Profiler.enable');
+  await cdp.send('Profiler.startPreciseCoverage', {callCount: true, detailed: true});
+  sessions.set(page, cdp);
 }
+
+// A CDP session of our own rather than `page.coverage`: that API hands back every script's
+// full source with the counts, and with `trace: 'on'` Playwright records the call's result
+// into the trace — megabytes of bundle per test, which pushed every test past its timeout.
+// The sources are fetched once per script instead (saveScript), straight from the server.
+const sessions = new WeakMap<Page, import('@playwright/test').CDPSession>();
 
 export interface TestMeta {
   suite: string;        // 'playwright' | 'cucumber'
@@ -67,9 +76,14 @@ export async function stopTestCoverage(page: Page | undefined, meta: TestMeta): 
   try {
     // The app's own scripts only: BASE_URL's origin, which is where the stack serves them.
     const origin = new URL(process.env.BASE_URL || page.url()).origin;
-    const entries = (await page.coverage.stopJSCoverage())
+    const cdp = sessions.get(page);
+    if (!cdp) return;
+    const taken = await cdp.send('Profiler.takePreciseCoverage');
+    await cdp.send('Profiler.stopPreciseCoverage');
+    await cdp.detach().catch(() => undefined);
+    const entries = taken.result
       .filter(e => e.url.startsWith(origin + '/') && /\.m?js(\?|$)/.test(e.url));
-    for (const e of entries) await saveScript(dir, e.url, e.source);
+    for (const e of entries) await saveScript(dir, e.url);
     fs.writeFileSync(path.join(dir, slug + '.json'), JSON.stringify({
       ...meta,
       v8: entries.map(e => ({url: e.url, functions: e.functions})),
@@ -91,10 +105,18 @@ const saved = new Set<string>();
 // ran differs. The map is asked of the server that served the script — the Docker build
 // emits hidden maps (angular.json, docker configuration), referenced by nothing, so the
 // browser never loads them and a reader of the app never sees them.
-async function saveScript(dir: string, url: string, source: string | undefined): Promise<void> {
-  if (saved.has(url) || !source) return;
+async function saveScript(dir: string, url: string): Promise<void> {
+  if (saved.has(url)) return;
   saved.add(url);
   const name = Buffer.from(url).toString('base64url').slice(-80);
+  let source = '';
+  try {
+    const r = await fetch(url);
+    if (r.ok) source = await r.text();
+  } catch {
+    source = '';
+  }
+  if (!source) return;
   let map: unknown = null;
   try {
     const r = await fetch(url.replace(/\?.*$/, '') + '.map');
