@@ -70,6 +70,15 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.badRequest().body(pd);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(IllegalArgumentException e,
+            HttpServletRequest request) {
+        log.warn("Bad request: {}", e.getMessage());
+        ProblemDetail pd = buildProblemDetail("Bad Request", e.getMessage(), HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

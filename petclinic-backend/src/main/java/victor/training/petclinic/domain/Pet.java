@@ -84,6 +84,21 @@ public class Pet {
         this.birthDate = birthDate;
     }
 
+    public void requireVisitDateInRange(LocalDate visitDate, LocalDate today) {
+        if (visitDate == null) {
+            return;
+        }
+        if (birthDate != null && visitDate.isBefore(birthDate)) {
+            throw new IllegalArgumentException(
+                    "Visit date " + visitDate + " is before the pet's birth date " + birthDate);
+        }
+        LocalDate latestVisitDate = today.plusYears(1);
+        if (visitDate.isAfter(latestVisitDate)) {
+            throw new IllegalArgumentException(
+                    "Visit date " + visitDate + " is more than one year ahead (latest: " + latestVisitDate + ")");
+        }
+    }
+
     public PetType getType() {
         return type;
     }

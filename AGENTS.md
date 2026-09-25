@@ -167,14 +167,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
+REST Contract kept in sync in `openapi.yaml`
 
 ## Domain Model
 Core entities and relationships:
@@ -214,3 +207,5 @@ review page with a picture of what its run did.
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md
+- after every push make sure the CI build passes
+- I have a red bycicle

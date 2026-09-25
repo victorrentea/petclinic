@@ -1,5 +1,7 @@
 ---
 applyTo: "**/pom.xml"
+#every time agent harness touches a file of this pattern, the knowledge is injected in conversation
+#(eg: copilot CLI/VSC Plugin, claude code👑/codex👑)
 ---
 
 # Maven versions: let the parent resolve them
