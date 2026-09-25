@@ -39,14 +39,12 @@ INSERT INTO types (name) VALUES
   ('cat'), ('dog'), ('lizard'), ('snake'), ('bird'), ('hamster'), ('horse');
 
 -- Owners and pets drawn from European literature, film, and science.
--- Kevin McCallister (owner 1 = sub 1 in the demo JWT) deliberately has NO phone: the chatbot's
--- create_visit tool then ELICITS one on the first booking and only CONFIRMS it on later ones.
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
-  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         NULL),
+  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '0018474461990'),
   ('Harry',     'Potter',       '4 Privet Drive',            'Little Whinging',  '0119084455'),
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
-  ('Ștefan',    'Śliwiński',    'Mariahilfer Straße 12',     'Vienna',           '0441463555113'),
-  ('Ronald',    'Weasley',      'The Burrow',                'Ottery St Catchpole','0119544321'),
+  ('Ștefan',    'Mureșan',      'Mariahilfer Straße 12',     'Vienna',           '0043152634418'),
+  ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '0048124221357'),
   ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '0442074860707'),
   ('Newt',      'Scamander',    'Diagon Alley',              'London',           '0442079460001'),
   ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '0441865276150'),
@@ -78,7 +76,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Hedwig',          DATE '2018-08-06', 5, 2),  -- Harry's snowy owl
   ('Milton',          DATE '2020-09-07', 1, 3),  -- Schroedinger's cat
   ('Nagini',          DATE '2017-01-20', 4, 22), -- Voldemort's snake
-  ('Scabbers',        DATE '2019-08-06', 6, 5),  -- Ron Weasley's rat
+  ('Reksio',          DATE '2019-08-06', 2, 5),  -- Polish cartoon dog
   ('Pongo',           DATE '2018-04-17', 2, 6),  -- 101 Dalmatians
   ('Perdita',         DATE '2018-03-07', 2, 6),
   ('Pickett',         DATE '2020-11-30', 3, 7),  -- Scamander's bowtruckle
