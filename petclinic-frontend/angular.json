@@ -65,7 +65,7 @@
             },
             "docker": {
               "optimization": true,
-              "sourceMap": false,
+              "sourceMap": {"scripts": true, "styles": false, "hidden": true, "vendor": false},
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,

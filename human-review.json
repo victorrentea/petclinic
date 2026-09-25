@@ -77,8 +77,11 @@
       "//14": "petclinic-<shortsha> instance video.app uses), never against :4200/:8080 — on",
       "//15": "23 Sep 2026 those belonged to another checkout and three tests failed against",
       "//16": "a backend from a different branch.",
+      "//17": "COVERAGE_DIR: the same run also measures, per test, which lines each test",
+      "//18": "executes on both sides — Chromium's JS coverage and a JaCoCo dump of the backend",
+      "//19": "(test-on-own-stack.sh starts it with --jacoco). `testcov` below harvests it.",
       "tests": [
-        "cd petclinic-test && PW_TRACE=on ./test-on-own-stack.sh npm test"
+        "cd petclinic-test && PW_TRACE=on COVERAGE_DIR=../.human-review/coverage ./test-on-own-stack.sh npm test"
       ],
       "out": "petclinic-backend/docs/generated/codecity",
       "title": "Code City"
@@ -96,12 +99,52 @@
       "//10": "a running stack (SKIP_SERVER_START); test-on-own-stack.sh gives it the same",
       "//11": "per-commit instance city.tests just used, not whatever holds :4200.",
       "commands": [
-        "cd petclinic-test && PW_TRACE=on ./test-on-own-stack.sh npm run test:cucumber"
+        "cd petclinic-test && PW_TRACE=on COVERAGE_DIR=../.human-review/coverage ./test-on-own-stack.sh npm run test:cucumber"
       ],
       "report": "petclinic-test/test-results/playwright-report",
       "cucumber": "petclinic-test/test-results/cucumber-traces",
       "projectDir": "petclinic-test",
       "limit": 16
+    },
+    "testcov": {
+      "//": "Which tests execute which changed lines, measured per test — the right-hand",
+      "//2": "column of the Tests tab. `sources`/`exclude` say what counts as production code;",
+      "//3": "a changed line outside them (a test, a generated file, a doc) is not counted.",
+      "//4": "`junit`: {junit} expands to the skill's JUnit Platform listener on the test",
+      "//5": "classpath; the pom's own jacoco:prepare-agent does the measuring. The backend",
+      "//6": "suite (JUnit and Cucumber together) runs on a throwaway Postgres, never on the",
+      "//7": ":5432 every checkout shares (test-on-own-db.sh says why).",
+      "//8": "`karma`: {karma} expands to the skill's karma config, which loads karma.conf.js.",
+      "//9": "`e2e`: nothing is run — the browser suites already ran for the traces with",
+      "//10": "COVERAGE_DIR (city.tests, traces.commands); this reads what they left there.",
+      "sources": ["petclinic-backend/src/main/**", "petclinic-frontend/src/app/**"],
+      "exclude": ["**/*.spec.ts", "**/generated/**"],
+      "junit": [
+        {
+          "label": "Backend",
+          "cwd": "petclinic-backend",
+          "command": "./test-on-own-db.sh mvn -o test -Dmaven.test.failure.ignore=true {junit}",
+          "classes": ["petclinic-backend/target/classes"],
+          "include": ["victor/training/"]
+        }
+      ],
+      "karma": [
+        {
+          "label": "Frontend Karma",
+          "cwd": "petclinic-frontend",
+          "config": "karma.conf.js",
+          "command": "npx ng test --watch=false --code-coverage --browsers=ChromeHeadless {karma}"
+        }
+      ],
+      "e2e": {
+        "dir": ".human-review/coverage",
+        "project": "petclinic-test",
+        "frontend": "petclinic-frontend",
+        "backend": "petclinic-backend",
+        "jar": "backend-app.jar",
+        "include": ["victor/training/"],
+        "suites": {"playwright": "E2E Playwright", "cucumber": "E2E Cucumber"}
+      }
     },
     "video": {
       "//": "`app` is how the run gets the application the film is recorded against, and",
