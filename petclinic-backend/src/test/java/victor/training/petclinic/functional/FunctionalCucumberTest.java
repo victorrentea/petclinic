@@ -13,5 +13,5 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @SelectClasspathResource("features/functional")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "victor.training.petclinic.functional")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
-public class FunctionalCucumberSuite {
+public class FunctionalCucumberTest {
 }
