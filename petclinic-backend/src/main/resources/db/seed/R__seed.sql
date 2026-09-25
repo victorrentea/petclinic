@@ -74,9 +74,9 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Hedwig',          DATE '2018-08-06', 5, 2),  -- Harry's snowy owl
   ('Milton',          DATE '2020-09-07', 1, 3),  -- Schroedinger's cat
   ('Nagini',          DATE '2017-01-20', 4, 20), -- Voldemort's snake
-  ('Reksio',          DATE '2019-08-06', 2, 5),  -- Polish cartoon dog
-  ('Pongo',           DATE '2018-04-17', 2, 6),  -- 101 Dalmatians
-  ('Perdita',         DATE '2018-03-07', 2, 6),
+  ('Reksio',          DATE '2019-08-06', 2, 6),  -- Polish cartoon dog
+  ('Pongo',           DATE '2018-04-17', 2, 5),  -- 101 Dalmatians
+  ('Perdita',         DATE '2018-03-07', 2, 5),
   ('Pickett',         DATE '2020-11-30', 3, 7),  -- Scamander's bowtruckle
   ('Dinah',           DATE '2019-09-04', 1, 8),  -- Alice's cats
   ('Cheshire',        DATE '2019-09-04', 1, 8),

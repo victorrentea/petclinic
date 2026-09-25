@@ -17,7 +17,7 @@
     },
 
     "postgres-db": {
-      "//": "In case MCPs are disabled, tell agent to use .claude/skills/db-cli/db-cli.sh (same server, over the CLI)",
+      "//": "In case MCPs are disabled, tell agent to use .claude/skills/db-cli/db-cli.py (same server, over the CLI)",
       "command": "npx",
       "args": [
         "-y",
