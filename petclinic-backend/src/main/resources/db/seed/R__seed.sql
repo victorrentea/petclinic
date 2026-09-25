@@ -39,22 +39,18 @@ INSERT INTO types (name) VALUES
   ('cat'), ('dog'), ('lizard'), ('snake'), ('bird'), ('hamster'), ('horse');
 
 -- Owners and pets drawn from European literature, film, and science.
--- Kevin McCallister (owner 1 = sub 1 in the demo JWT) deliberately has NO phone: the chatbot's
--- create_visit tool then ELICITS one on the first booking and only CONFIRMS it on later ones.
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
-  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         NULL),
+  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '0018474461990'),
   ('Harry',     'Potter',       '4 Privet Drive',            'Little Whinging',  '0119084455'),
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
-  ('Salazar',   'Śliwiński',    'Hogwarts Dungeons',         'Hogsmeade',        '0441463555113'),
-  ('Ronald',    'Weasley',      'The Burrow',                'Ottery St Catchpole','0119544321'),
+  ('Ștefan',    'Mureșan',      'Mariahilfer Straße 12',     'Vienna',           '0043152634418'),
+  ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '0048124221357'),
   ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '0442074860707'),
   ('Newt',      'Scamander',    'Diagon Alley',              'London',           '0442079460001'),
   ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '0441865276150'),
   ('Henry',     'Baskerville',  'Baskerville Hall',          'Dartmoor',         '0441626832093'),
   ('John',      'Dolittle',     'Oxenthorpe Road',           'Puddleby',         '0441803712345'),
-  ('George',    'Darling',      '14 Kensington Gardens',     'London',           '0442079372121'),
-  ('James',     'Bond',         '30 Wellington Square',      'London',           '0442073527070'),
-  ('Hercule',   'Poirot',       'Whitehaven Mansions',       'London',           '0442079241221');
+  ('George',    'Darling',      '14 Kensington Gardens',     'London',           '0442079372121');
 
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Sam',       'Carraclough',  'Greenall Bridge',           'Yorkshire',        '0441943876543'),
@@ -77,8 +73,8 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Axel',            DATE '2018-12-24', 6, 1),  -- Buzz McCallister's tarantula (hamster stand-in)
   ('Hedwig',          DATE '2018-08-06', 5, 2),  -- Harry's snowy owl
   ('Milton',          DATE '2020-09-07', 1, 3),  -- Schroedinger's cat
-  ('Nagini',          DATE '2017-01-20', 4, 22), -- Voldemort's snake
-  ('Scabbers',        DATE '2019-08-06', 6, 5),  -- Ron Weasley's rat
+  ('Nagini',          DATE '2017-01-20', 4, 20), -- Voldemort's snake
+  ('Reksio',          DATE '2019-08-06', 2, 5),  -- Polish cartoon dog
   ('Pongo',           DATE '2018-04-17', 2, 6),  -- 101 Dalmatians
   ('Perdita',         DATE '2018-03-07', 2, 6),
   ('Pickett',         DATE '2020-11-30', 3, 7),  -- Scamander's bowtruckle
@@ -96,24 +92,24 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
   (9,  DATE '2022-09-04', 'spayed');
 
 INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
-  ('Lassie',          DATE '2020-05-12', 2, 14),  -- Lassie Come-Home, Yorkshire
-  ('Mittens',         DATE '2019-08-03', 1, 15),  -- Beatrix Potter's tales
-  ('Pickles',         DATE '2021-02-18', 2, 15),
-  ('Captain Flint',   DATE '2022-06-25', 5, 16),  -- Long John Silver's parrot
-  ('Mrs Norris',      DATE '2018-11-10', 1, 17),  -- Filch's cat
-  ('Gromit',          DATE '2017-04-07', 2, 18),  -- Wallace & Gromit
-  ('Hutch',           DATE '2023-01-30', 6, 18),
-  ('Toby',            DATE '2020-09-14', 2, 19),  -- Wendy's neighbourhood dog
-  ('Norbert',         DATE '2021-07-22', 3, 20),  -- Hagrid's Norwegian Ridgeback
-  ('Crookshanks',     DATE '2019-03-15', 1, 21),  -- Hermione's half-Kneazle
-  ('Basilisk',        DATE '2022-10-05', 4, 4),   -- Salazar's basilisk
-  ('Snowy',           DATE '2018-06-20', 2, 23),  -- Tintin's Milou
-  ('Lucifer',         DATE '2021-12-01', 1, 24),  -- Lady Tremaine's cat
-  ('Jaq',             DATE '2024-02-11', 6, 24),  -- Cinderella's mouse friend
-  ('Figaro',          DATE '2019-09-09', 1, 25),  -- Geppetto's cat
-  ('Rocinante',       DATE '2015-05-05', 7, 26),  -- Don Quixote's horse
-  ('Grip',            DATE '2023-08-19', 5, 27),  -- Dickens's raven
-  ('Toby of Lambeth', DATE '2020-11-27', 2, 28);  -- Sherlock Holmes's bloodhound
+  ('Lassie',          DATE '2020-05-12', 2, 12),  -- Lassie Come-Home, Yorkshire
+  ('Mittens',         DATE '2019-08-03', 1, 13),  -- Beatrix Potter's tales
+  ('Pickles',         DATE '2021-02-18', 2, 13),
+  ('Captain Flint',   DATE '2022-06-25', 5, 14),  -- Long John Silver's parrot
+  ('Mrs Norris',      DATE '2018-11-10', 1, 15),  -- Filch's cat
+  ('Gromit',          DATE '2017-04-07', 2, 16),  -- Wallace & Gromit
+  ('Hutch',           DATE '2023-01-30', 6, 16),
+  ('Toby',            DATE '2020-09-14', 2, 17),  -- Wendy's neighbourhood dog
+  ('Norbert',         DATE '2021-07-22', 3, 18),  -- Hagrid's Norwegian Ridgeback
+  ('Crookshanks',     DATE '2019-03-15', 1, 19),  -- Hermione's half-Kneazle
+  ('Basilisk',        DATE '2022-10-05', 4, 4),   -- Ștefan's basilisk
+  ('Snowy',           DATE '2018-06-20', 2, 21),  -- Tintin's Milou
+  ('Lucifer',         DATE '2021-12-01', 1, 22),  -- Lady Tremaine's cat
+  ('Jaq',             DATE '2024-02-11', 6, 22),  -- Cinderella's mouse friend
+  ('Figaro',          DATE '2019-09-09', 1, 23),  -- Geppetto's cat
+  ('Rocinante',       DATE '2015-05-05', 7, 24),  -- Don Quixote's horse
+  ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
+  ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
 
 -- vet_id is deliberately NULL on some rows: an appointment is routinely booked before anyone
 -- knows who will take it, and the screens have to read that as "no vet" rather than as a fault.
