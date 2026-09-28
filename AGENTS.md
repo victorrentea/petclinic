@@ -72,6 +72,8 @@ design system has no multi-select yet.
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
 - Expect ~100k owners by Sep 2027: page, sort and filter them in the DB, on indexed columns.
+- Query the dev DB unasked (`db-cli` skill) before any decision that hinges on the data —
+  grids, sortable/filterable columns, queries, schema. Never judge a column from its type alone.
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
