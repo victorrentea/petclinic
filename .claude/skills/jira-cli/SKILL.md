@@ -53,8 +53,7 @@ $J whoami
 
 ## 2. Reading
 
-```sh
-$J get PET-42                              # summary, status, assignee, labels, description
+```s get PET-42                              # summary, status, assignee, labels, description
 $J get PET-42 --fields summary,status      # narrow the payload
 $J search "project = PET AND status != Done ORDER BY created DESC"
 $J search "assignee = currentUser()" -n 200   # auto-paginates; -n is a hard limit
