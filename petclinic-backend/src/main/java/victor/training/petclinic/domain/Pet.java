@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
@@ -47,6 +48,10 @@ public class Pet {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    // Owner.pets batches at the page level (task's @BatchSize(20)); this batches one level
+    // deeper, so a page of owners whose pets have visits still costs one extra query total
+    // instead of one per pet — the mapper visits every pet's visits to build the OwnerDto tree.
+    @BatchSize(size = 20)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
     private Set<Visit> visits = new HashSet<>();
 

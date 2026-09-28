@@ -197,6 +197,39 @@ paths:
         schema:
           type: string
           default: ""
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: name
+          enum:
+          - name
+          - city
+      - in: query
+        name: dir
+        required: false
+        schema:
+          type: string
+          default: asc
+          enum:
+          - asc
+          - desc
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - description: "Rows per page: 5, 10 or 20"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
       responses:
         "200":
           content:
@@ -205,32 +238,32 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
+                    totalElements: 2
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1686,6 +1719,21 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          description: Owners on this page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
+          description: "Number of owners matching the filter, across every page."
+      required:
+      - content
+      - totalElements
     PetDto:
       type: object
       properties:

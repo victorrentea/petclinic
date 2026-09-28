@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -69,6 +70,19 @@ public class ExceptionControllerAdvice {
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    // A query param that doesn't bind to its target type, e.g. ?sort=telephone or ?dir=up:
+    // Spring rejects it before the handler method even runs, so it never reaches the
+    // ConstraintViolationException/ValidationException handlers above.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String detail = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
+        log.warn("Validation failed: {}", detail);
+        return ResponseEntity.badRequest()
+                .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
     }
 
     // A rule checked in code rather than by an annotation, e.g. Pet.checkVisitDate
