@@ -13,12 +13,14 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!ownerWithPet) {
+  // /api/owners is paginated now (max 20/page); /api/pets is not, so it's the
+  // one place left that still lists everything in one call.
+  const {data: pets} = await axios.get(`${API_BASE}/pets`, {timeout: 10_000});
+  const pet = pets.find((p: any) => p.ownerId != null);
+  if (!pet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  return {ownerId: pet.ownerId, petId: pet.id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

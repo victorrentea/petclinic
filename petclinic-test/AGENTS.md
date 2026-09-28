@@ -22,6 +22,9 @@
   change the test and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its
   diagram; the generator sweeps the old one. The path back to the test is *inside* the picture
   (the `src://` handle on its title), not in the file's location.
+- ⚠️ **The owners grid's paginator label follows the URL before the rows arrive**, so "6 – 10"
+  can sit on top of page 1's rows. Wait for `#ownersTable[aria-busy="false"]` before reading
+  them (`owners-grid.feature.glue.ts`).
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.

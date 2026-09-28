@@ -15,13 +15,13 @@ Given('today is {word}', async function (this: PlaywrightWorld, isoDate: string)
 
 /** Found in the seed (Flyway's db/seed/R__seed.sql), so a changed seed fails here, not in a Then. */
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
-  if (!owner) {
+  // /api/owners is paginated now (max 20/page); /api/pets still lists everything in one call.
+  const {data: pets} = await axios.get(`${API_BASE}/pets`, {timeout: 10_000});
+  const pet = pets.find((p: any) => p.birthDate === birthDate);
+  if (!pet) {
     throw new Error(`No seeded pet born on ${birthDate} — did db/seed/R__seed.sql change?`);
   }
-  const pet = owner.pets.find((p: any) => p.birthDate === birthDate);
-  this.ownerId = owner.id;
+  this.ownerId = pet.ownerId;
   this.petId = pet.id;
   this.petName = pet.name;
 });

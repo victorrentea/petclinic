@@ -23,7 +23,7 @@ Feature: Search owners by last name
       | Zzzz   |                              |
 
   @generate_sequence
-  Scenario: Searching with an empty last name lists every owner
+  Scenario: Searching with an empty last name counts every owner
     When I open the owners page
     And I search owners for ""
-    Then every owner in the clinic is listed
+    Then the owners list counts every owner in the clinic
