@@ -116,6 +116,8 @@ The artifact types and their purpose depend on the schema. The `instruction` fie
 
 If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly.
 
+- **UI changes: sketch it in `proposal.md`.** When a change adds or reshapes anything on screen, put a small ASCII-art mockup of it (in a fenced code block, under What Changes) — the proposal's readers are visual, non-technical stakeholders. Keep it rough: the widgets and their states, not pixels.
+
 **Guardrails**
 - Create ONE artifact per invocation
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)

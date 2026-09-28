@@ -160,6 +160,7 @@ After completing all artifacts, summarize:
 - If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
+- **UI changes: sketch it in `proposal.md`.** When a change adds or reshapes anything on screen, put a small ASCII-art mockup of it (in a fenced code block, under What Changes) — the proposal's readers are visual, non-technical stakeholders. Keep it rough: the widgets and their states, not pixels.
 - Use `template` as the structure for your output file - fill in its sections
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
