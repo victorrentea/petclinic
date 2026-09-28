@@ -29,6 +29,7 @@ export class OwnerListComponent implements OnInit {
   owners: Owner[];
   totalElements = 0;
   isOwnersDataReceived = false;
+  loading = false;
 
   constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
   }
@@ -44,6 +45,7 @@ export class OwnerListComponent implements OnInit {
         this.dir = (params.get('dir') as SortDir) || DEFAULT_DIR;
         this.page = Number(params.get('page')) || 0;
         this.size = Number(params.get('size')) || DEFAULT_SIZE;
+        this.loading = true;
         return this.ownerService.getOwners({
           lastName: this.lastName,
           sort: this.sort,
@@ -57,10 +59,12 @@ export class OwnerListComponent implements OnInit {
         this.owners = ownerPage.content;
         this.totalElements = ownerPage.totalElements;
         this.isOwnersDataReceived = true;
+        this.loading = false;
       },
       error => {
         this.errorMessage = error as any;
         this.isOwnersDataReceived = true;
+        this.loading = false;
       });
   }
 

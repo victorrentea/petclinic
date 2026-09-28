@@ -23,7 +23,7 @@
     </form>
 
     <div *ngIf="isOwnersDataReceived && totalElements === 0">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable" *ngIf="owners?.length > 0">
+    <div class="table-responsive" id="ownersTable" *ngIf="owners?.length > 0" [attr.aria-busy]="loading">
       <table class="table table-striped" matSort [matSortActive]="sort" [matSortDirection]="dir"
               matSortDisableClear (matSortChange)="onSortChange($event)">
         <thead>
