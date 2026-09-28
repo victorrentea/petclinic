@@ -1,5 +1,5 @@
 import {
-  After, AfterAll, Before, BeforeAll, ITestCaseHookParameter,
+  After, AfterAll, AfterStep, Before, BeforeAll, BeforeStep, ITestCaseHookParameter, ITestStepHookParameter,
   setDefaultTimeout, setWorldConstructor, World, IWorldOptions,
 } from '@cucumber/cucumber';
 import {Browser, BrowserContext, chromium, Page} from '@playwright/test';
@@ -10,6 +10,7 @@ import {flushBrowserSpans} from './otel-flush';
 import {shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
+import {keepCaptionAcrossLoads, showCaption} from './captions';
 
 setDefaultTimeout(60_000);
 
@@ -25,6 +26,13 @@ const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-wind
 const TRACES_DIR = path.join(__dirname, '..', '..', 'test-results', 'cucumber-traces');
 const TRACE_ON = process.env.PW_TRACE === 'on';
 
+// A video per scenario, subtitled with its Gherkin steps (support/captions.ts), slowed
+// down so a room can follow it: `PW_VIDEO=on npm run test:cucumber`. Same switch name
+// as playwright.config.ts; PW_SLOWMO overrides the pace (ms per browser action).
+const VIDEOS_DIR = path.join(__dirname, '..', '..', 'test-results', 'cucumber-videos');
+const VIDEO_ON = process.env.PW_VIDEO === 'on';
+const VIDEO_SIZE = {width: 1280, height: 800};
+
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range — mirrors the Playwright
 // trace fixture.
@@ -37,6 +45,7 @@ export class PlaywrightWorld extends World {
   page!: Page;
   ownerId?: number;
   petId?: number;
+  petName?: string;
   visitDescription?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
@@ -48,6 +57,8 @@ export class PlaywrightWorld extends World {
   // Set for every scenario when PW_TRACE=on: where its recording lands, and when it began.
   recordingZip?: string;
   recordingStartMs?: number;
+  // Set when PW_VIDEO=on: the subtitle currently on screen.
+  caption?: string;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -83,14 +94,23 @@ BeforeAll(function () {
 });
 
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {
-  this.browser = await chromium.launch({headless: !process.env.HEADED});
-  this.context = await this.browser.newContext({baseURL: process.env.BASE_URL || 'http://localhost:4200'});
+  this.browser = await chromium.launch({
+    headless: !process.env.HEADED,
+    slowMo: VIDEO_ON ? Number(process.env.PW_SLOWMO ?? 400) : undefined,
+  });
+  this.context = await this.browser.newContext({
+    baseURL: process.env.BASE_URL || 'http://localhost:4200',
+    ...(VIDEO_ON && {viewport: VIDEO_SIZE, recordVideo: {dir: VIDEOS_DIR, size: VIDEO_SIZE}}),
+  });
   if (TRACE_ON) {
     await this.context.tracing.start({screenshots: true, snapshots: true, sources: true, title: pickle.name});
     this.recordingZip = path.join(TRACES_DIR, recordingSlug(pickle.uri, pickle.name) + '.zip');
     this.recordingStartMs = Date.now();
   }
   this.page = await this.context.newPage();
+  if (VIDEO_ON) {
+    keepCaptionAcrossLoads(this.page, () => this.caption);
+  }
   await startTestCoverage(this.page);
 
   if (shouldGenerateSequence(pickle.tags)) {
@@ -149,8 +169,31 @@ After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: 
       endMs: Date.now() + POST_PAD_MS,
     });
   }
+  const video = this.page?.video();
   await this.context?.close();
+  if (video) {
+    await video.saveAs(path.join(VIDEOS_DIR, recordingSlug(pickle.uri, pickle.name) + '.webm'));
+    await video.delete();
+  }
   await this.browser?.close();
+});
+
+BeforeStep(async function (this: PlaywrightWorld, {pickleStep}: ITestStepHookParameter) {
+  if (!VIDEO_ON) return;
+  const keywords: Record<string, string> = {Context: 'Given', Action: 'When', Outcome: 'Then'};
+  const keyword = keywords[pickleStep.type ?? ''] ?? '';
+  this.caption = `${keyword} ${pickleStep.text}`.trim();
+  await showCaption(this.page, this.caption);
+  await this.page.waitForTimeout(1_200); // time to read it before the step acts
+});
+
+AfterStep(async function (this: PlaywrightWorld, {result}: ITestStepHookParameter) {
+  if (!VIDEO_ON) return;
+  const failed = result.status !== 'PASSED';
+  const verdict = failed ? `❌ FAILED: ${this.caption}` : `✅ ${this.caption}`;
+  await showCaption(this.page, verdict, failed ? 'fail' : 'pass');
+  this.caption = undefined;
+  await this.page.waitForTimeout(failed ? 3_500 : 900);
 });
 
 // One file per scenario, named so a human can find it and short enough for any disk:
