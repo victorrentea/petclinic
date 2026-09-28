@@ -1,9 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
+import {switchMap} from 'rxjs/operators';
+import {Sort} from '@angular/material/sort';
+import {PageEvent} from '@angular/material/paginator';
+
+type OwnerSort = 'name' | 'city';
+type SortDir = 'asc' | 'desc';
+
+const DEFAULT_SORT: OwnerSort = 'name';
+const DEFAULT_DIR: SortDir = 'asc';
+const DEFAULT_SIZE = 10;
 
 @Component({
   selector: 'app-owner-list',
@@ -12,24 +20,48 @@ import {Subscription} from 'rxjs';
 })
 export class OwnerListComponent implements OnInit {
   errorMessage: string;
-  lastName: string;
+  lastName = '';
+  sort: OwnerSort = DEFAULT_SORT;
+  dir: SortDir = DEFAULT_DIR;
+  page = 0;
+  size = DEFAULT_SIZE;
+
   owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+  totalElements = 0;
+  isOwnersDataReceived = false;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
+  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
   }
 
+  // The grid's state lives in the URL, so every navigation (search, sort, page, size)
+  // re-enters here through queryParamMap; switchMap cancels a still-in-flight request
+  // when a newer navigation lands, instead of the old manual load.unsubscribe().
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
+    this.route.queryParamMap.pipe(
+      switchMap(params => {
+        this.lastName = params.get('lastName') || '';
+        this.sort = (params.get('sort') as OwnerSort) || DEFAULT_SORT;
+        this.dir = (params.get('dir') as SortDir) || DEFAULT_DIR;
+        this.page = Number(params.get('page')) || 0;
+        this.size = Number(params.get('size')) || DEFAULT_SIZE;
+        return this.ownerService.getOwners({
+          lastName: this.lastName,
+          sort: this.sort,
+          dir: this.dir,
+          page: this.page,
+          size: this.size
+        });
       })
     ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+      ownerPage => {
+        this.owners = ownerPage.content;
+        this.totalElements = ownerPage.totalElements;
+        this.isOwnersDataReceived = true;
+      },
+      error => {
+        this.errorMessage = error as any;
+        this.isOwnersDataReceived = true;
+      });
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +72,30 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  search() {
+    this.navigate({lastName: this.lastName, sort: this.sort, dir: this.dir, size: this.size, page: 0});
+  }
+
+  onSortChange(sortState: Sort) {
+    const newDir: SortDir = sortState.direction === 'desc' ? 'desc' : 'asc';
+    this.navigate({lastName: this.lastName, sort: sortState.active as OwnerSort, dir: newDir, size: this.size, page: 0});
+  }
+
+  onPageChange(event: PageEvent) {
+    const page = event.pageSize !== this.size ? 0 : event.pageIndex;
+    this.navigate({lastName: this.lastName, sort: this.sort, dir: this.dir, size: event.pageSize, page});
+  }
+
+  private navigate(query: {lastName: string; sort: OwnerSort; dir: SortDir; page: number; size: number}) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        lastName: query.lastName || null,
+        sort: query.sort,
+        dir: query.dir,
+        page: query.page,
+        size: query.size
+      }
+    });
   }
 }

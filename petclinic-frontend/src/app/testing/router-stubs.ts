@@ -2,8 +2,8 @@
 export {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router';
 
 import {Component, Directive, HostListener, Injectable, Input} from '@angular/core';
-import {NavigationExtras} from '@angular/router';
-// Only implements params and part of snapshot.params
+import {convertToParamMap, NavigationExtras, ParamMap} from '@angular/router';
+// Only implements params, queryParamMap and part of snapshot.params
 import {BehaviorSubject} from 'rxjs';
 
 @Directive({
@@ -53,5 +53,20 @@ export class ActivatedRouteStub {
   get snapshot() {
     this.testParams = {id: 1};
     return {params: this.testParams};
+  }
+
+  // ActivatedRoute.queryParamMap is Observable
+  private queryParamsSubject = new BehaviorSubject<ParamMap>(convertToParamMap({}));
+  queryParamMap = this.queryParamsSubject.asObservable();
+
+  // tslint:disable-next-line:variable-name
+  private _testQueryParams: {};
+  get testQueryParams() {
+    return this._testQueryParams;
+  }
+
+  set testQueryParams(params: {}) {
+    this._testQueryParams = params;
+    this.queryParamsSubject.next(convertToParamMap(params));
   }
 }
