@@ -82,7 +82,8 @@ export class OwnerListComponent implements OnInit {
 
   onSortChange(sortState: Sort) {
     const newDir: SortDir = sortState.direction === 'desc' ? 'desc' : 'asc';
-    this.navigate({lastName: this.lastName, sort: sortState.active as OwnerSort, dir: newDir, size: this.size, page: 0});
+    const sort = sortState.active as OwnerSort;
+    this.navigate({lastName: this.lastName, sort, dir: newDir, size: this.size, page: 0});
   }
 
   onPageChange(event: PageEvent) {

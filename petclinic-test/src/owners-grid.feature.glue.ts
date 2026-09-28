@@ -53,9 +53,10 @@ Then('owners {int} to {int} are listed', async function (this: PlaywrightWorld, 
   await expectRows(this, from, to);
 });
 
-Then('owners {int} to {int} are listed, in city order', async function (this: PlaywrightWorld, from: number, to: number) {
-  expectSorted(await expectRows(this, from, to), false);
-});
+Then('owners {int} to {int} are listed, in city order',
+  async function (this: PlaywrightWorld, from: number, to: number) {
+    expectSorted(await expectRows(this, from, to), false);
+  });
 
 Then('owners {int} to {int} are listed, in reverse city order',
   async function (this: PlaywrightWorld, from: number, to: number) {
@@ -68,6 +69,8 @@ Then('owners {int} to {int} are listed, in city order, after the previous page',
     expectSorted([...previous, ...await expectRows(this, from, to)], false);
   });
 
-Then('the owners are sorted by {word} {word}', async function (this: PlaywrightWorld, column: string, direction: string) {
-  await expect(this.page.locator('#ownersTable th', {hasText: column})).toHaveAttribute('aria-sort', direction);
-});
+Then('the owners are sorted by {word} {word}',
+  async function (this: PlaywrightWorld, column: string, direction: string) {
+    const header = this.page.locator('#ownersTable th', {hasText: column});
+    await expect(header).toHaveAttribute('aria-sort', direction);
+  });
