@@ -1,8 +1,6 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -63,8 +61,6 @@ public class OwnerRestController {
 
     private final NotificationSender notificationSender;
 
-    private final Clock clock;
-
     public OwnerRestController(
             OwnerRepository ownerRepository,
             PetRepository petRepository,
@@ -73,8 +69,7 @@ public class OwnerRestController {
             OwnerMapper ownerMapper,
             PetMapper petMapper,
             VisitMapper visitMapper,
-            NotificationSender notificationSender,
-            Clock clock) {
+            NotificationSender notificationSender) {
         this.ownerRepository = ownerRepository;
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
@@ -83,7 +78,6 @@ public class OwnerRestController {
         this.petMapper = petMapper;
         this.visitMapper = visitMapper;
         this.notificationSender = notificationSender;
-        this.clock = clock;
     }
 
     @Operation(operationId = "listOwners", summary = "List owners")
@@ -171,7 +165,7 @@ public class OwnerRestController {
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
-            @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
+            @RequestBody VisitFieldsDto visitFieldsDto) {
         int visitId = bookVisit(ownerId, petId, visitFieldsDto);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
@@ -187,19 +181,22 @@ public class OwnerRestController {
     // no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
-        Pet pet = petRepository.findById(petId)
-                .filter(p -> p.getOwner().getId().equals(ownerId))
-                .orElseThrow();
-        Owner owner = pet.getOwner();
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        pet.checkVisitDate(visit.getDate(), LocalDate.now(clock));
+        Pet pet = new Pet();
+        pet.setId(petId);
         visit.setPet(pet);
         visitRepository.save(visit);
-        // After the insert, never before: a booking that could not be saved is a text nobody
-        // should have received. The owner is loaded here, not in notification-service — which
-        // then needs no copy of our database.
-        notificationSender.visitBooked(owner.getTelephone(), pet.getName(), visit.getDate());
+        notifyOwner(ownerId, petId, visit);
         return visit.getId();
+    }
+
+    // After the insert, never before: a booking that could not be saved is a text nobody
+    // should have received. The owner is loaded here, not in notification-service — which
+    // then needs no copy of our database.
+    private void notifyOwner(int ownerId, int petId, Visit visit) {
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow();
+        String petName = owner.getPetById(petId).map(Pet::getName).orElse("your pet");
+        notificationSender.visitBooked(owner.getTelephone(), petName, visit.getDate());
     }
 
     @Operation(operationId = "getOwnersPet", summary = "Get a pet belonging to an owner")

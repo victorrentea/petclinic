@@ -1,7 +1,6 @@
 package victor.training.petclinic;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import java.time.Clock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,11 +20,6 @@ public class PetClinicApplication {
     @EventListener
     void started(WebServerInitializedEvent event) {
         System.out.println("✅ started petclinic-backend on port " + event.getWebServer().getPort());
-    }
-
-    @Bean
-    Clock clock() {
-        return Clock.systemDefaultZone();
     }
 
     @Bean
