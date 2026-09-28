@@ -71,6 +71,10 @@ design system has no multi-select yet.
   resolved migrations sharing one description, so two can never both apply.
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
+- **Size owner features for ~100k owners, not the 28 seeded.** The business aims for ~100.000
+  owners by Sep 2027 (stated Sep 2026). Owner listing, search and grids page, sort and filter
+  in Postgres (`Pageable`/`Sort`), never in the browser or the JVM; a sortable or filterable
+  column needs an index. At 28 rows a client-side design looks fine — and collapses at 100k.
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
