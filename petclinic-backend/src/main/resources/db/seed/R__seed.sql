@@ -109,7 +109,8 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Figaro',          DATE '2019-09-09', 1, 23),  -- Geppetto's cat
   ('Rocinante',       DATE '2015-05-05', 7, 24),  -- Don Quixote's horse
   ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
-  ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
+  ('Toby of Lambeth', DATE '2020-11-27', 2, 26),  -- Sherlock Holmes's bloodhound
+  ('Bull''s-eye',     DATE '2020-03-01', 2, 25);  -- Bill Sikes's dog; visit-date-range.feature books around this birthday
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
   (15, DATE '2025-11-12', 'rabies vaccine'),
