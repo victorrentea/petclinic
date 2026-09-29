@@ -8,6 +8,12 @@ RUN apk add --no-cache postgresql16-client python3
 
 COPY reset-server.py /reset-server.py
 
+# The fixtures live next to the seed, in petclinic-backend's db/fixtures, and reach this
+# image as a second build context (`additional_contexts` in docker-compose.yml). Copied,
+# not bind-mounted: `start-docker.sh up --ref` builds from a temporary export it deletes on
+# exit, so a mount would leave every pinned instance with an empty folder.
+COPY --from=fixtures . /fixtures/
+
 # Docker copies ownership from the image's directory when it first populates an empty
 # named volume. Without this, /seed arrives root-owned and the unprivileged process
 # cannot write the dump into it.

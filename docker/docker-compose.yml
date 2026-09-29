@@ -93,6 +93,10 @@ services:
     image: petclinic-env-reset:${PETCLINIC_TAG:-worktree}
     build:
       context: ${PETCLINIC_SRC:?run through ../start-docker.sh}/docker/reset
+      # The named datasets the reset can restore on top of the seed, one button each on
+      # the review page. See the Dockerfile for why they are copied in, not mounted.
+      additional_contexts:
+        fixtures: ${PETCLINIC_SRC}/petclinic-backend/src/main/resources/db/fixtures
     labels:
       ro.victorrentea.petclinic.env: "1"
     environment:
