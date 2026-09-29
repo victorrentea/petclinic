@@ -90,19 +90,6 @@ an internal error — and the `ProblemDetail` echoes the exception's own message
 the caller. Worth its own ticket. `ownerAdmin_cannotAddAVet` therefore asserts the write
 is refused rather than pinning the status code, so fixing this will not fail it.
 
-### The generated sequence diagram for booking with a vet is orphaned
-- file: petclinic-test/generated/add-visit.spec.ts.add-a-visit-attended-by-a-vet.genseq.puml:59
-- source: me, reading the repo before starting
-- severity: low
-- why: regenerating it needs the whole stack traced — browser, backend, Tempo — and the
-  frontend's dependencies are not installable here.
-
-This file predates my commit (it arrived with `0d534233` and survived the revert of the
-earlier attempt at #37). It deep-links to `add-visit.spec.ts:52` and
-`OwnerRestController.bookVisit:193`, neither of which exists, and describes a
-`VetRepository.getByIdOrNull` I deliberately did not build. It is stale either way; my
-change does not make it staler, and I did not add the e2e test it claims to picture.
-
 ### OwnerRestController's constructor is now nine parameters
 - file: petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:67
 - source: me, anticipating SonarCloud java:S107 (this repo lowers the cap to 5)
