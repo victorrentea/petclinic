@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Put the demo database back to the state Flyway left it in.
+"""Put the demo database back to the state Flyway left it in — or to a named fixture.
 
 This is deliberately *not* part of the backend, and that is the whole design. A reset
 endpoint that ships inside the application is one misconfigured profile away from being
@@ -14,15 +14,28 @@ TRUNCATE, not DROP SCHEMA: truncating leaves relation OIDs alone, so the backend
 connections keep their cached prepared-statement plans and the app does not need bouncing.
 Dropping the schema invalidates those plans and poisons every pooled connection until
 Hikari retires it, up to half an hour later.
+
+A fixture is a *.sql file baked into /fixtures from petclinic-backend's db/fixtures, next to
+the seed it builds on. It is a delta: POST /<name> truncates, restores the seed, and runs
+<name>.sql on top, in one transaction — so a fixture that fails leaves the database exactly
+as it was, not half-emptied. GET / lists them, and the review page draws one button each.
 """
 import http.server
 import json
 import os
+import re
 import subprocess
 import sys
 import threading
 
 SEED = "/seed/seed-data.sql"
+FIXTURES = "/fixtures"
+# On the seed volume, so the page can still say which state it last reset to after this
+# container restarts. "Last reset to", not "is in": a reviewer may have typed since.
+CURRENT = "/seed/current"
+# The name in the URL only ever selects among the files listed; it is never joined into a
+# path unchecked. The pattern keeps even the listing free of names a URL cannot carry.
+NAME = re.compile(r"[a-z0-9][a-z0-9-]*")
 PSQL = ["psql", "-v", "ON_ERROR_STOP=1", "-q"]
 
 # Every table in public, whatever the schema happens to be by then — a hand-kept list
@@ -31,12 +44,12 @@ TRUNCATE = """
 DO $$
 DECLARE stmt text;
 BEGIN
-  SELECT 'TRUNCATE TABLE '
-      || string_agg(format('%I.%I', schemaname, tablename), ', ')
-      || ' RESTART IDENTITY CASCADE'
-  INTO stmt
-  FROM pg_tables WHERE schemaname = 'public';
-  IF stmt IS NOT NULL THEN EXECUTE stmt; END IF;
+    SELECT 'TRUNCATE TABLE '
+        || string_agg(format('%I.%I', schemaname, tablename), ', ')
+        || ' RESTART IDENTITY CASCADE'
+    INTO stmt
+    FROM pg_tables WHERE schemaname = 'public';
+    IF stmt IS NOT NULL THEN EXECUTE stmt; END IF;
 END $$;
 """
 
@@ -66,12 +79,35 @@ def capture_seed():
     os.replace(part, SEED)
 
 
-def do_reset():
+def fixtures():
+    try:
+        names = os.listdir(FIXTURES)
+    except FileNotFoundError:
+        return []
+    return sorted(n[:-4] for n in names if n.endswith(".sql") and NAME.fullmatch(n[:-4]))
+
+
+def current():
+    try:
+        with open(CURRENT) as f:
+            return f.read().strip() or "seed"
+    except FileNotFoundError:
+        return "seed"
+
+
+def do_reset(fixture=None):
+    args = PSQL + ["--single-transaction", "-c", TRUNCATE, "-f", SEED]
+    if fixture:
+        # pg_dump's output empties search_path for the rest of the session, and the fixture
+        # names its tables unqualified, as any hand-written SQL would.
+        args += ["-c", "SET search_path TO DEFAULT",
+                "-f", os.path.join(FIXTURES, fixture + ".sql")]
     with _lock:
-        for args in (PSQL + ["-c", TRUNCATE], PSQL + ["-f", SEED]):
-            r = _run(args)
-            if r.returncode != 0:
-                raise RuntimeError(r.stderr.strip())
+        r = _run(args)
+        if r.returncode != 0:
+            raise RuntimeError(r.stderr.strip())
+        with open(CURRENT, "w") as f:
+            f.write(fixture or "seed")
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -86,14 +122,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
+        name = self.path.split("?")[0].strip("/")
+        if name and name not in fixtures():
+            self._send(404, {"ok": False, "error": "no such fixture: " + name,
+                    "fixtures": fixtures()})
+            return
         try:
-            do_reset()
-            self._send(200, {"ok": True})
+            do_reset(name or None)
+            self._send(200, {"ok": True, "current": name or "seed"})
         except Exception as e:            # noqa: BLE001 - the message is the whole point
             self._send(500, {"ok": False, "error": str(e)})
 
     def do_GET(self):
-        self._send(200, {"ok": True, "seeded": os.path.exists(SEED)})
+        self._send(200, {"ok": True, "seeded": os.path.exists(SEED),
+                "fixtures": fixtures(), "current": current()})
 
     def log_message(self, fmt, *args):
         sys.stderr.write("reset: " + fmt % args + "\n")
