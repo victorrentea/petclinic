@@ -207,28 +207,6 @@ narrows that to "today that means the owner's page and the all-visits screen". I
 narrowing as the operative one, but `list_visits` does show an owner their visits with
 details, so a reader who weights the opening line will say I left a screen out.
 
-### Two generated files were written by hand because their generators cannot run here
-- file: petclinic-frontend/src/app/generated/api-types.ts:346
-- alternative: leave them stale and let CI's regenerate-and-auto-commit fix them
-- confidence: 0.85
-- why: stale TS types mean `visit.vetId` does not compile, so the working tree would not
-  build for anyone who pulled it.
-
-`npm ci` and `pip install` are both blocked in this environment, so
-`npm run generate:api` could not run. `api-types.ts` was written to match
-`openapi-typescript`'s output exactly. `DB.puml` was too — and that one is verified: the
-pre-commit hook bootstrapped its own venv, regenerated the file, and staged a result
-byte-identical to what I had written. The frontend's Karma suite and `ng build` could not
-be run at all for the same reason; the backend suite, Spotless and every guardrail test
-are green.
-
-This entry is a confession about the environment, not a reading of #37, so its number
-scores something narrower than the others: how sure I am that hand-writing beat leaving
-the files stale. Quite sure — stale types break the build for whoever pulls next — and
-`DB.puml` came back byte-identical from the real generator, which is as close to proof as
-this gets. It is not higher because `api-types.ts` got no such check.
-
-
 ## Taken over without a new pass — 21 Sep 2026
 
 The 32 commits below sit in the branch's history after the review commit `ce56d912` —
