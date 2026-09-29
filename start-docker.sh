@@ -144,6 +144,13 @@ cmd_up() {
         git -C "$REPO" archive "$sha" | tar -x -C "$src"
         [ -f "$src/petclinic-frontend/nginx.conf" ] \
             || die "commit $sha predates the container setup — it has no petclinic-frontend/nginx.conf"
+        # That commit's compose file, not today's: the services it declares are the ones its
+        # source tree has. Today's file wanted a notification-service that a commit from
+        # before it did not ship, and every pinned build died on a missing build context.
+        # `url` and `down` keep using today's: they only ever name services both have.
+        if [ -f "$src/docker/docker-compose.yml" ]; then
+            COMPOSE_FILE="$src/docker/docker-compose.yml"
+        fi
     fi
     : "${name:=petclinic-${sha:-worktree}}"
     # What the images are tagged with, so instances of the same commit share them.
