@@ -177,15 +177,11 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]],
         "skinparam ranksep 30",
         "",
     ]
-    # The groupId only where it tells modules apart. Printed on every box it was the same
-    # `(victor.training.agentic)` five times over — a line of noise per module. The one
-    # most modules share is dropped; a module outside it keeps its groupId, because that
-    # is exactly the box a reader needs to notice.
-    groups = [p.group_id for p in projects]
-    common = max(set(groups), key=groups.count) if groups else None
+    # The artifactId alone: every module here is this repo's own, so a groupId on the box
+    # says nothing about the graph — it only made the one module with a different groupId
+    # look special.
     for p in projects:
-        label = p.artifact_id if p.group_id == common else f"{p.artifact_id} ({p.group_id})"
-        lines.append(f'component "{label}" as {p.alias}')
+        lines.append(f'component "{p.artifact_id}" as {p.alias}')
     lines.append("")
     for source, target in edges:
         lines.append(f"{alias_by_artifact[source]} --> {alias_by_artifact[target]}")
