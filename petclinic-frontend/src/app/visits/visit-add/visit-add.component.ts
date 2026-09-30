@@ -3,6 +3,7 @@ import {Visit} from '../visit';
 import {VisitService} from '../visit.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PetService} from '../../pets/pet.service';
+import {VisitDateRange} from '../visit-date-range';
 import {Pet} from '../../pets/pet';
 import {PetType} from '../../pettypes/pettype';
 import {Owner} from '../../owners/owner';
@@ -23,6 +24,7 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
+  dateRange = new VisitDateRange();
 
   constructor(private visitService: VisitService,
               private petService: PetService,
@@ -42,6 +44,7 @@ export class VisitAddComponent implements OnInit {
     this.petService.getPetById(petId).subscribe(
       pet => {
         this.currentPet = pet;
+        this.dateRange.forPetBornOn(pet.birthDate);
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
