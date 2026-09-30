@@ -55,7 +55,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     base="$remote_sha"
   fi
 
-  # ── Line length (ungated, fast — covers Java AND TypeScript, so it must run even
+  # ── Line length < 120 chars (ungated, fast — covers Java AND TypeScript, so it must run even
   #    when the backend path gate below says "skip"). Only the lines this push adds. ──
   if command -v python3 >/dev/null 2>&1; then
     if ! python3 "$ROOT/scripts/check-line-length.py" "$base" "$local_sha"; then
