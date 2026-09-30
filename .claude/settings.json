@@ -68,6 +68,16 @@
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/watch-ci-after-push.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "//": "when java-code-style loads, append one more rule to it",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/java-code-style-extra-rule.sh\""
+          }
+        ]
       }
     ]
   },

@@ -31,7 +31,9 @@ public class VetRestController {
 
     private final VetMapper vetMapper;
     private final SpecialtyMapper specialtyMapper;
+
     private final VetRepository vetRepository;
+
     private final SpecialtyRepository specialtyRepository;
 
     public VetRestController(
