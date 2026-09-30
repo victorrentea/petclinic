@@ -83,6 +83,7 @@ design system has no multi-select yet.
   resolved migrations sharing one description, so two can never both apply.
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
+- The client plans ~50k owners by Sep 2027: page, sort and filter them in the DB, on indexed columns.
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
