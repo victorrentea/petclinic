@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Owners grid mockup</title>
+<link rel="stylesheet" href="../../../../petclinic-frontend/src/assets/css/petclinic.css">
+<style>
+.navbar a.navbar-brand.brand-emoji {
+  background: none !important;
+  width: auto !important;
+  height: 70px !important;
+  margin: 0 !important;
+  padding: 0 1rem !important;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.navbar a.navbar-brand.brand-emoji span {
+  background: none !important;
+  text-indent: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  opacity: 1 !important;
+  font-size: 64px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.content-wrapper {
+  min-height: calc(100% - 8rem);
+}
+  th.sortable { cursor: pointer; white-space: nowrap; }
+  .arrow { display: inline-block; margin-left: 6px; font-size: 11px; }
+  .arrow.idle { opacity: .35; }
+  .paginator { display: flex; justify-content: flex-end; align-items: center; gap: 28px;
+    font-family: Roboto, "Helvetica Neue", sans-serif; font-size: 13px; color: rgba(0,0,0,.6);
+    padding: 10px 8px; border-top: 1px solid #ddd; }
+  .paginator select { border: none; border-bottom: 1px solid rgba(0,0,0,.4); background: none;
+    font-size: 13px; padding: 2px 18px 2px 2px; }
+  .paginator .nav-btn { font-size: 20px; color: rgba(0,0,0,.54); padding: 0 6px; }
+  .paginator .nav-btn.off { color: rgba(0,0,0,.2); }
+</style>
+</head>
+<body>
+<div class="container-fluid main-wrapper">
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header"><a class="navbar-brand brand-emoji" href="#"><span>🐶</span></a></div>
+      <ul class="nav navbar-nav">
+        <li><a><span class="glyphicon glyphicon-home"></span><span> Home</span></a></li>
+        <li><a class="active"><span class="glyphicon glyphicon-user"></span><span> Owners</span></a></li>
+        <li class="dropdown"><a class="dropdown-toggle"><span class="glyphicon glyphicon-education"></span> Veterinarians<span class="caret"></span></a></li>
+        <li><a><span class="glyphicon glyphicon-calendar"></span><span> Visits</span></a></li>
+        <li><a><span class="glyphicon glyphicon-heart"></span><span> Pet Types</span></a></li>
+        <li><a><span class="glyphicon glyphicon-th-list"></span><span> Specialties</span></a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
+<div class="content-wrapper">
+<div class="container-fluid"><div class="container xd-container">
+  <h2>Owners</h2>
+  <form class="form-horizontal">
+    <div class="form-group"><label class="col-sm-2 control-label">Last name </label>
+      <div class="col-sm-10"><input class="form-control" size="30"></div></div>
+    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
+      <button type="button" class="btn btn-default">Find Owner</button></div></div>
+  </form>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead><tr>
+        <th class="sortable">Name <span class="arrow">▲</span></th>
+        <th>Address</th>
+        <th class="sortable">City <span class="arrow idle">▲▼</span></th>
+        <th>Telephone</th>
+        <th>Pets</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><a>Baskerville, Henry</a></td><td>Baskerville Hall</td><td>Dartmoor</td><td>0441626832093</td><td>Baskerville</td></tr>
+        <tr><td><a>Carraclough, Sam</a></td><td>Greenall Bridge</td><td>Yorkshire</td><td>0441943876543</td><td>Lassie</td></tr>
+        <tr><td><a>Darling, George</a></td><td>14 Kensington Gardens</td><td>London</td><td>0442079372121</td><td>Liza<br>Nana</td></tr>
+        <tr><td><a>Darling, Wendy</a></td><td>14 Kensington Gardens</td><td>London</td><td>0442079372122</td><td>Toby</td></tr>
+        <tr><td><a>Dickens, Charles</a></td><td>Gad's Hill Place</td><td>Higham</td><td>0441634406030</td><td>Grip</td></tr>
+        <tr><td><a>Dolittle, John</a></td><td>Oxenthorpe Road</td><td>Puddleby</td><td>0441803712345</td><td>Polynesia</td></tr>
+        <tr><td><a>Filch, Argus</a></td><td>Hogwarts Castle</td><td>Inverness</td><td>0441463245678</td><td>Mrs Norris</td></tr>
+        <tr><td><a>Geppetto, Mister</a></td><td>Via dei Tessitori 7</td><td>Florence</td><td>0039055290383</td><td>Figaro</td></tr>
+        <tr><td><a>Granger, Hermione</a></td><td>Gryffindor Tower</td><td>Hogsmeade</td><td>0441463555112</td><td>Crookshanks</td></tr>
+        <tr><td><a>Hagrid, Rubeus</a></td><td>Gamekeepers Hut</td><td>Hogsmeade</td><td>0441463555111</td><td>Norbert</td></tr>
+      </tbody>
+    </table>
+    <div class="paginator">
+      <span>Rows per page: <select><option>5</option><option selected>10</option><option>20</option></select></span>
+      <span>1 – 10 of 26</span>
+      <span><span class="nav-btn off">|‹</span><span class="nav-btn off">‹</span><span class="nav-btn">›</span><span class="nav-btn">›|</span></span>
+    </div>
+  </div>
+  <div><button class="btn btn-default">Add Owner</button></div>
+</div></div>
+</div>
+</body>
+</html>
