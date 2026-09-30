@@ -86,6 +86,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Liza',            DATE '2019-06-08', 1, 11);
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
+  (1,  DATE '2025-12-27', 'ate the Christmas tinsel; kept under observation'),  -- Axel
   (9,  DATE '2024-03-04', 'rabies shot'),   -- Dinah
   (10, DATE '2024-03-04', 'rabies shot'),   -- Cheshire
   (10, DATE '2023-06-04', 'neutered'),
