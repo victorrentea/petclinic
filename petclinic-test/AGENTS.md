@@ -7,10 +7,6 @@
 - `@wip` scenarios state a rule the code does not enforce yet; `cucumber.js` skips them.
 - `npm run test:with-apps` auto-starts both apps, but is experimental; prefer starting apps manually.
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
-- `PW_VIDEO=on npm run test:cucumber` films each scenario into `test-results/cucumber-videos/`,
-  slowed down (`PW_SLOWMO`, default 400ms) and subtitled with its Gherkin steps plus a ✅/❌
-  verdict — a caption bar drawn *in the page* (`src/support/captions.ts`), because Homebrew's
-  ffmpeg has no drawtext/subtitles filter to burn one in afterwards.
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
   `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
