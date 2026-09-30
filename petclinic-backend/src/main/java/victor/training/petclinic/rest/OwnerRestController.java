@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -182,8 +183,8 @@ public class OwnerRestController {
     @WithSpan("book-visit")
     private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        pet.checkVisitDate(visit.getDate(), LocalDate.now());
         visit.setPet(pet);
         visitRepository.save(visit);
         notifyOwner(ownerId, petId, visit);
