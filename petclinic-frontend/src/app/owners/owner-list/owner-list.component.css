@@ -77,3 +77,61 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Every sortable column shows its arrow: grey until it is the active sort, then bright white.
+    !important beats Material's inline animation styles, which hide a resting arrow (opacity 0)
+    25% below its place and slide it in on hover - visible, that slide is a jumping arrow. */
+:host ::ng-deep th[mat-sort-header] .mat-sort-header-arrow {
+  color: #9e9e9e;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+:host ::ng-deep th[mat-sort-header] .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #fff;
+}
+
+/* Fixed column widths, so paging or sorting never shifts a column. One pet per line; the
+    other cells centre on them. Overflow ends in "…", the full text is in the title. */
+#ownersTable table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable .table > tbody > tr > td {
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#ownersTable .ownerPets div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.col-name { width: 22%; }
+.col-address { width: 24%; }
+.col-city { width: 15%; }
+.col-telephone { width: 16%; }
+.col-pets { width: 23%; }
+
+/* Add Owner sits at the left end of the paginator's bar, on the paginator's background. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 16px;
+  background: var(--mat-paginator-container-background-color, #fff);
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+}
+
+/* The last-name input and Find Owner share one line, a gap apart. */
+.owner-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
