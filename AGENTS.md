@@ -1,13 +1,12 @@
 # Project Memory
-Coding agents auto-load this file in any new conversation in this folder.
-It's the most important file on this Git repo.
-Add to rules here to prevent AI fail/slop.
-Review carefully its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
+New conversations with Coding agents auto-load this file in any new conversation in this folder.
+Add to rules here to prevent repeating AI fail/slop.
+Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
 GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
-Warning: git-pushed symlinks don't work reliably when cloned on Windows not having WSL.
+Warning: git-pushed symlinks don't work reliably when cloned on Windows not having WSL. 
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -15,10 +14,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
-- `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it
-  after every booked visit
-- `petclinic-commons/` - plain jar both Java apps depend on (the notification request).
-  No reactor pom: it is a standalone build, `mvn install`ed before either app compiles
+- `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
+- `petclinic-commons/` - jar both Java apps depend on. standalone build, `mvn install`ed before either app compiles
 
 ## Common Commands
 
@@ -26,13 +23,12 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 Each script is foreground; run them in separate terminals.
 ```sh
 ./start-database.sh        # embedded Postgres on localhost:5432
-./start-backend.sh         # installs petclinic-commons, then BOTH Java apps: notification-service
-                           # on :8090 (background) and the backend on :8080 (also Spring AI MCP at /mcp)
+./start-backend.sh         # installs notification-service on :8090 and backend on :8080 (also MCP at /mcp)
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
 Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeout. A port held
-by an orphan is reported in under a second, before anything is built or wiped — the script
+by an orphan is reported in < 1s, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
 
 ### Backend (petclinic-backend/)
@@ -82,18 +78,6 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
-
-### Lifelines in the generated sequence diagrams
-`service.name` picks the lifeline: `notification-service` is drawn as `NotificationService`, so
-booking a visit shows `Backend -> NotificationService`. That name is a bare identifier on purpose:
-`DeploymentDiagramTest` matches `\w+ -> \w+` and demands the same arrow on
-`Deployment.drawio.png`, where the service has its own box.
-
-A span carrying `genseq.participant="<name>"` is drawn on a lifeline of that name instead. It
-keeps a `@SpringBootTest`'s own sentences off the app's lifeline (`Test`), and draws
-notification-service's (fake) `SMS gateway`. A name that is not a bare identifier is quoted by
-the generator and so stays out of `DeploymentDiagramTest`; `human-review.json` marks
-`SMS gateway` external.
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
@@ -191,20 +175,6 @@ Core entities and relationships:
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on every `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
-
-## A feature is not done until one Gherkin scenario drives it through the UI
-
-Every user-facing feature gets at least one `.feature` scenario in `petclinic-test/src/`
-(bound by the `*.feature.glue.ts` beside it) that opens the screens a user opens. It is the
-acceptance test of the story — the one artefact a non-programmer can read.
-
-`petclinic-backend/src/test/resources/features/` does not count: that suite is Cucumber over
-the REST API, so a field the backend stores and no page shows passes all of it. A `*.spec.ts`
-does not count either — it is a second account of the same journey, written for the people
-who write it (`add-visit.spec.ts` and `book-visit-with-vet.feature` are deliberately a pair).
-
-Tag it `@generate_sequence` when the feature crosses the stack, so the story reaches the
-review page with a picture of what its run did.
 
 ## Core Values
 - Write non-trivial code using TDD
