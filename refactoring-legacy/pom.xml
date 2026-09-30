@@ -81,6 +81,21 @@
             <version>3.0.0</version>
         </dependency>
 
+        <!-- Spring Security 6 still has both the old chained DSL and the new lambda DSL, so the
+            template compiles against both sides (provided: templates only). -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>6.4.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- RewriteTest harness: before/after fixtures with full type attribution. -->
         <dependency>
             <groupId>org.openrewrite</groupId>

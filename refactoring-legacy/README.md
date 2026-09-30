@@ -4,12 +4,13 @@ A **self-contained** [OpenRewrite](https://docs.openrewrite.org/) module. It doe
 backend build in any way — `petclinic-backend/pom.xml` has no OpenRewrite config. You run the recipes
 against the backend from the command line, passing this module as a recipe artifact (see below).
 
-It ships two recipes, deliberately of the two different kinds:
+It ships three recipes, of the two different kinds:
 
 | Recipe | Kind | What it does |
 |---|---|---|
 | `InlineSingleUseLocalVariable` | **Imperative** (`Recipe` + visitor) | Inlines a local variable used exactly once |
 | `ListGetFirst` → `ListGetFirstRecipe` | **Refaster template** (before/after) | Rewrites `list.get(0)` to `list.getFirst()` |
+| `CsrfDisableLambdaDsl` → `CsrfDisableLambdaDslRecipe` | **Refaster template** (before/after) | Spring Security 7 upgrade: `http.csrf().disable()` → `http.csrf(AbstractHttpConfigurer::disable)` |
 
 ## Why two kinds — and why the inline one can't be Refaster
 

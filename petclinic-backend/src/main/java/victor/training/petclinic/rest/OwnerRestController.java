@@ -3,17 +3,21 @@ package victor.training.petclinic.rest;
 import java.net.URI;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.notification.NotificationSender;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
@@ -47,11 +51,13 @@ import jakarta.transaction.Transactional;
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Logger log = LoggerFactory.getLogger(OwnerRestController.class);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
     private final PetTypeRepository petTypeRepository;
+    private final VetRepository vetRepository;
 
     private final OwnerMapper ownerMapper;
 
@@ -66,6 +72,7 @@ public class OwnerRestController {
             PetRepository petRepository,
             VisitRepository visitRepository,
             PetTypeRepository petTypeRepository,
+            VetRepository vetRepository,
             OwnerMapper ownerMapper,
             PetMapper petMapper,
             VisitMapper visitMapper,
@@ -74,6 +81,7 @@ public class OwnerRestController {
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
         this.petTypeRepository = petTypeRepository;
+        this.vetRepository = vetRepository;
         this.ownerMapper = ownerMapper;
         this.petMapper = petMapper;
         this.visitMapper = visitMapper;
@@ -185,9 +193,20 @@ public class OwnerRestController {
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
+        Vet vet = attendingVet(visitFieldsDto.getVetId());
+        visit.setVet(vet);
         visitRepository.save(visit);
+        log.info("Booked visit {} for pet {}", visit.getId(), petId);
+        if (vet != null) {
+            log.debug("Attending vet: {}", vet.getLastName());
+        }
         notifyOwner(ownerId, petId, visit);
         return visit.getId();
+    }
+
+    /** No id, no vet — that is a normal booking. An id naming nobody is a 404, not a silent none. */
+    private Vet attendingVet(Integer vetId) {
+        return vetId == null ? null : vetRepository.findByIdWithoutSpecialties(vetId).orElseThrow();
     }
 
     // After the insert, never before: a booking that could not be saved is a text nobody

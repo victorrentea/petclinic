@@ -27,6 +27,11 @@ public class Visit {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    /** The vet who attended the consultation; null while nobody has been assigned. */
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    private Vet vet;
+
     public Integer getId() {
         return id;
     }
@@ -65,5 +70,13 @@ public class Visit {
 
     public void setPet(Pet pet) {
         this.pet = pet;
+    }
+
+    public Vet getVet() {
+        return vet;
+    }
+
+    public void setVet(Vet vet) {
+        this.vet = vet;
     }
 }

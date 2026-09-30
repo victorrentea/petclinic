@@ -41,6 +41,16 @@ public class VisitDto {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Last name of the owner (server-populated).")
     private @Nullable String ownerLastName;
 
+    @Min(0)
+    @Schema(example = "1", description = "The ID of the vet attending the visit; absent when none is assigned.")
+    private @Nullable Integer vetId;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "First name of the vet (server-populated).")
+    private @Nullable String vetFirstName;
+
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "Last name of the vet (server-populated).")
+    private @Nullable String vetLastName;
+
     public LocalDate getDate() {
         return date;
     }
@@ -110,6 +120,33 @@ public class VisitDto {
 
     public VisitDto setOwnerLastName(String ownerLastName) {
         this.ownerLastName = ownerLastName;
+        return this;
+    }
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public VisitDto setVetId(Integer vetId) {
+        this.vetId = vetId;
+        return this;
+    }
+
+    public String getVetFirstName() {
+        return vetFirstName;
+    }
+
+    public VisitDto setVetFirstName(String vetFirstName) {
+        this.vetFirstName = vetFirstName;
+        return this;
+    }
+
+    public String getVetLastName() {
+        return vetLastName;
+    }
+
+    public VisitDto setVetLastName(String vetLastName) {
+        this.vetLastName = vetLastName;
         return this;
     }
 }

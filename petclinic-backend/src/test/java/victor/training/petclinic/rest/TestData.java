@@ -3,6 +3,7 @@ package victor.training.petclinic.rest;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.PetType;
+import victor.training.petclinic.domain.Vet;
 
 public class TestData {
     public static Owner anOwner() {
@@ -20,6 +21,13 @@ public class TestData {
         pet.setName("Leo");
         pet.setBirthDate(PetTest.BIRTH_DATE);
         return pet;
+    }
+
+    public static Vet aVet(String firstName, String lastName) {
+        Vet vet = new Vet();
+        vet.setFirstName(firstName);
+        vet.setLastName(lastName);
+        return vet;
     }
 
     public static PetType aPetType(String name) {
