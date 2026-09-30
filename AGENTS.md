@@ -41,23 +41,6 @@ Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeou
 by an orphan is reported in under a second, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run e2e                         # Protractor e2e tests
-```
-
 ## Architecture
 
 ### Backend Architecture
@@ -108,55 +91,6 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
-### /human-review is a plugin, and nothing of it lives in this repo
-
-It is installed, not vendored:
-
-```
-/plugin marketplace add victorrentea/human-review
-/plugin install human-review@human-review
-```
-
-Everything petclinic-specific about it is **`human-review.json`** at the root — the traced
-test run, the Code City generator, the complexity extractor, the screens the design-system
-audit visits. The skill itself knows nothing about this project, and a step this file does
-not describe is skipped and named on the built page. That is the only file to touch when a
-command here changes.
-
-**Tooling changes go to `main` first.** Any change to the guardrails, the anti-drift checks or the `/human-review` wiring (`human-review.json`, `scripts/`, genseq, Code City, traces) made while working on a downstream PR branch is committed on `main`, pushed, and then merged into that branch (e.g. `test-pr`) — never left living only on the PR.
-
-`scripts/ensure-human-review.sh` resolves it for the script that borrows its PlantUML
-differs (`petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh`): `$CLAUDE_PLUGIN_ROOT`,
-then the installed plugin, then the marketplace's own clone, then a local checkout symlinked
-into `.claude/skills/`, and finally a clone into a gitignored `petclinic-backend/.tools/` on
-a runner. Never vendor a second copy — a private fork of the review pipeline drifts in
-silence.
-
-The installed plugin's path carries the installed commit
-(`~/.claude/plugins/cache/human-review/human-review/<sha>/`), so that script asks the CLI's
-own `installed_plugins.json` which one it installed rather than naming a directory that
-changes on every update — or guessing. An update leaves the previous sha's directory in
-place with an identical mtime, so "the newest one" tie-breaks alphabetically and hands back
-the superseded skill; that happened, and `ensure-human-review-test.sh` now pins it.
-
-⚠️ **There is no symlink here any more, and putting one back in git is a mistake with a
-history.** `.claude/skills/human-review` was committed for a while as mode 120000 pointing
-at `/Users/<someone>/workspace/…`, so every clone of this public repo carried a link that
-resolved for exactly one person on one laptop. `scripts/check-agents-md.sh` no longer
-allowlists it. Developing the skill against this repo does not need one either — install the
-plugin from a local marketplace, or point `$HUMAN_REVIEW_HOME` at your checkout.
-
-**Run the review passes before you ask for the guide.** `/human-review` no longer invokes
-`/code-review` or `/simplify` — it writes up the passes that already ran in the
-conversation, and stops with an explanation if it finds none. So the order is: finish the
-work, run whichever passes you trust, *then* `/human-review`.
-
-**The review guide is built by hand, not by CI.** It deep-links into a working tree and
-drives a whole local stack — a browser, a database, Tempo, PlantUML, a Maven build — so
-there is no online version and no PR automation for it. Run `/human-review` when you want
-one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
-which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
-
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
@@ -173,14 +107,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
-- Pets: `/api/pets`, `/api/pets/{id}`
-- Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
-- PetTypes: `/api/pettypes`
-- Specialties: `/api/specialties`
-- Users: `/api/users`
+REST Contract is kept up to date in `openapi.yaml` file.
 
 ## Domain Model
 Core entities and relationships:
