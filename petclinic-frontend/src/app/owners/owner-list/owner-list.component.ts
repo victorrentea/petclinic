@@ -92,7 +92,8 @@ export class OwnerListComponent implements OnInit {
   }
 
   private navigate(query: {lastName: string; sort: OwnerSort; dir: SortDir; page: number; size: number}) {
-    this.router.navigate([], {
+    // The grid reacts to queryParamMap, not to this promise.
+    void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
         lastName: query.lastName || null,
