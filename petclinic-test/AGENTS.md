@@ -21,6 +21,13 @@
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.
+- **Playwright Test Agents** (`playwright-test-planner` → `-generator` → `-healer` in
+  `../.claude/agents/`, backed by the `playwright-test` MCP in `../.mcp.json`): the planner
+  saves plans to `specs/`, the generator writes one `*.spec.ts` per scenario into `src/` (tell
+  it `src/…`, its examples say `tests/`), and both start from `src/seed.spec.ts`. The agent
+  files are Playwright's, not ours: `npx playwright init-agents --loop=claude` here overwrites
+  them on an upgrade, so project rules go in this file, never in them. The rule above binds
+  them too: planners love "add an owner" scenarios.
 - A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
   `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
   `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement

@@ -16,6 +16,15 @@
       ]
     },
 
+    "playwright-test": {
+      "//": "Backs the Playwright Test Agents in .claude/agents/playwright-test-*.md. Playwright is only installed in petclinic-test/",
+      "command": "npm",
+      "args": [
+        "exec", "--prefix", "petclinic-test", "--",
+        "playwright", "run-test-mcp-server", "-c", "petclinic-test"
+      ]
+    },
+
     "postgres-db": {
       "//": "In case MCPs are disabled, tell agent to use .claude/skills/db-cli/db-cli.py (same server, over the CLI)",
       "command": "npx",
