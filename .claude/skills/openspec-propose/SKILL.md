@@ -156,6 +156,7 @@ After completing all artifacts, summarize:
 
 **Artifact Creation Guidelines**
 
+- **`proposal.md` is read by the product owner and the tester over coffee, not by engineers.** Plain language about what users see and do: no endpoints, JSON, DTOs, SQL, indexes, frameworks, class or file names. Every technical detail goes in `design.md`
 - Follow the `instruction` field from `openspec instructions` for each artifact type - it is the authoritative guidance, even for familiar artifact names
 - If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly
 - The schema defines what each artifact should contain - follow it

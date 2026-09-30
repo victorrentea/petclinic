@@ -116,6 +116,8 @@ The artifact types and their purpose depend on the schema. The `instruction` fie
 
 If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly.
 
+**`proposal.md` is read by the product owner and the tester over coffee, not by engineers.** Plain language about what users see and do: no endpoints, JSON, DTOs, SQL, indexes, frameworks, class or file names. Every technical detail goes in `design.md`.
+
 **Guardrails**
 - Create ONE artifact per invocation
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)

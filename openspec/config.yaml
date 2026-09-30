@@ -18,6 +18,10 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Read by the product owner and the tester over coffee. No endpoints, JSON, DTOs, SQL, indexes, framework, class or file names; say what users see and do. Everything technical goes in design.md
+    - A change to a screen shows it as a realistic mockup image (an HTML page styled with the app's own CSS, screenshotted into the change's mockup/ folder), never ASCII art
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
