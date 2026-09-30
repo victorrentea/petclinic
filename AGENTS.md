@@ -1,12 +1,11 @@
 # Project Memory
-New conversations with Coding agents auto-load this file in any new conversation in this folder.
+New conversations in this folder auto-load this file.
 Add to rules here to prevent repeating AI fail/slop.
 Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
 GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
-Warning: git-pushed symlinks don't work reliably when cloned on Windows not having WSL. 
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -23,7 +22,7 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 Each script is foreground; run them in separate terminals.
 ```sh
 ./start-database.sh        # embedded Postgres on localhost:5432
-./start-backend.sh         # installs notification-service on :8090 and backend on :8080 (also MCP at /mcp)
+./start-backend.sh         # starts notification-service on :8090 and backend on :8080 (also MCP at /mcp) after installing commons
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
