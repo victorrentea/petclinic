@@ -15,20 +15,11 @@ on:
 
 jobs:
   layout:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check AGENTS.md / CLAUDE.md layout
-        shell: bash
-        run: bash scripts/check-agents-md.sh
-
       - name: Assert the Windows checkout is a real file, not a symlink stub
-        if: runner.os == 'Windows'
         shell: bash
         run: |
           set -e

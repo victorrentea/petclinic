@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Regenerate petclinic-backend/docs/generated/MavenModules.puml — the Maven module
 # dependency graph — as a PLAIN SNAPSHOT of the current graph, no diff highlighting.
-# Comparing a snapshot against a previous one (e.g. at review time) is the puml-diff
-# tool's job (docs/scripts/puml-diff/puml-diff-vs-git.sh).
+# Comparing a snapshot against a previous one (e.g. at review time) is the
+# /human-review plugin's job.
 #
 # The graph itself comes from `mvn dependency:tree` run per project, restricted to
 # this repo's own groupId:artifactId pairs — see maven_modules_to_puml.py's docstring

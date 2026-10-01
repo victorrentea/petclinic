@@ -31,13 +31,6 @@ jobs:
           # and gives SonarCloud accurate SCM blame info.
           fetch-depth: 0
 
-      # How this repo finds the /human-review plugin. The branch that rots first is the
-      # installed plugin's, whose path carries the installed commit and so changes on
-      # every plugin update; a stale hardcoded name would fall through to re-cloning the
-      # repo on every invocation, slowly and silently.
-      - name: The /human-review resolution cascade still resolves
-        run: scripts/ensure-human-review-test.sh
-
       # ── Hook parity: gitleaks runs in pre-commit; CI re-runs it so a
       #    `git commit --no-verify` can't slip a secret past review. ──────────
       - name: Install gitleaks

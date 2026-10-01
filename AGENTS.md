@@ -102,26 +102,11 @@ command here changes.
 
 **Tooling changes go to `main` first.** Any change to the guardrails, the anti-drift checks or the `/human-review` wiring (`human-review.json`, `scripts/`, genseq, Code City, traces) made while working on a downstream PR branch is committed on `main`, pushed, and then merged into that branch (e.g. `test-pr`) — never left living only on the PR.
 
-`scripts/ensure-human-review.sh` resolves it for the script that borrows its PlantUML
-differs (`petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh`): `$CLAUDE_PLUGIN_ROOT`,
-then the installed plugin, then the marketplace's own clone, then a local checkout symlinked
-into `.claude/skills/`, and finally a clone into a gitignored `petclinic-backend/.tools/` on
-a runner. Never vendor a second copy — a private fork of the review pipeline drifts in
-silence.
-
-The installed plugin's path carries the installed commit
-(`~/.claude/plugins/cache/human-review/human-review/<sha>/`), so that script asks the CLI's
-own `installed_plugins.json` which one it installed rather than naming a directory that
-changes on every update — or guessing. An update leaves the previous sha's directory in
-place with an identical mtime, so "the newest one" tie-breaks alphabetically and hands back
-the superseded skill; that happened, and `ensure-human-review-test.sh` now pins it.
-
 ⚠️ **There is no symlink here any more, and putting one back in git is a mistake with a
 history.** `.claude/skills/human-review` was committed for a while as mode 120000 pointing
 at `/Users/<someone>/workspace/…`, so every clone of this public repo carried a link that
-resolved for exactly one person on one laptop. `scripts/check-agents-md.sh` no longer
-allowlists it. Developing the skill against this repo does not need one either — install the
-plugin from a local marketplace, or point `$HUMAN_REVIEW_HOME` at your checkout.
+resolved for exactly one person on one laptop. Developing the skill against this repo does
+not need one either — install the plugin from a local marketplace.
 
 **Run the review passes before you ask for the guide.** `/human-review` no longer invokes
 `/code-review` or `/simplify` — it writes up the passes that already ran in the
