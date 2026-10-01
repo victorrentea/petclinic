@@ -39,11 +39,6 @@ compose files — and report drift. Here, `Deployment.drawio.png` has no chatbot
 `DeploymentDiagramTest` compares the drawing with traces both ways, but only the traces of
 the browser suites, and the chatbot runs no OTel agent — so it can never notice that gap.
 
-Same with `ConceptualModel.drawio.png`: `ConceptualModelDiagramTest` checks it against
-`DomainModelExtractor`, which reads fields by plain reflection and so takes the
-unidirectional `@ManyToMany` Vet→Specialty for one-to-many. The map shows no `*` at the Vet
-end, and the test agrees with it.
-
 ## Guardrail code
 
 `petclinic-backend/src/test/java/victor/training/petclinic/guardrail/DrawioDiagram.java`
