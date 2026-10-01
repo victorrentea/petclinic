@@ -27,16 +27,22 @@ Diagrams in this repo: `petclinic-backend/docs/Deployment.drawio.png`,
 - Custom properties: draw.io wraps the cell in `<object>`/`<UserObject>` and **moves `id` and
   `label` onto the wrapper**; the inner `<mxCell>` has no id. The script merges them.
 - Multi-page files print one block per page.
-- Vertices labelled `*`, `1`, … parented to an edge are that edge's multiplicity labels.
+- Labels parented to an edge (`*`, `1`, …) are its multiplicities: printed on the edge, at
+  the end they sit at (`Owner --> Pet [*]` = many pets per owner), not as vertices.
 
 ## A diagram is a claim, not evidence
 
 The picture shows what someone drew. Before answering "only X calls Y", grep the code for
 the other side — base URLs, ports, `RestClient`/`WebClient`, MCP clients, `.mcp.json`,
-compose files — and report drift. Here, `Deployment.drawio.png` shows only
-Frontend → Backend, while `petclinic-chatbot` also calls the backend (REST
-`/api/specialties/feed` and MCP `/mcp`). `DeploymentDiagramTest` only checks that
-`traced="yes"` edges appear in real traces, never that real callers appear in the drawing.
+compose files — and report drift. Here, `Deployment.drawio.png` has no chatbot, while
+`petclinic-chatbot` calls the backend (MCP `/mcp`, and polls `/api/specialties/feed`).
+`DeploymentDiagramTest` compares the drawing with traces both ways, but only the traces of
+the browser suites, and the chatbot runs no OTel agent — so it can never notice that gap.
+
+Same with `ConceptualModel.drawio.png`: `ConceptualModelDiagramTest` checks it against
+`DomainModelExtractor`, which reads fields by plain reflection and so takes the
+unidirectional `@ManyToMany` Vet→Specialty for one-to-many. The map shows no `*` at the Vet
+end, and the test agrees with it.
 
 ## Guardrail code
 
