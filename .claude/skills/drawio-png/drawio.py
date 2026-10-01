@@ -107,10 +107,28 @@ def cells_of(diagram: ET.Element) -> list:
             "id": cell_id, "label": plain(label), "attrs": extra,
             "vertex": cell.get("vertex") == "1", "edge": cell.get("edge") == "1",
             "source": cell.get("source"), "target": cell.get("target"),
-            "parent": cell.get("parent"),
+            "parent": cell.get("parent"), "x": edge_position(cell),
         }
         for cell_id, label, extra, cell in entries
         if cell is not None and (cell.get("vertex") == "1" or cell.get("edge") == "1")]
+
+
+def edge_position(cell: ET.Element):
+    """Where a label sits along its edge: -1 at the source, 0 mid-way, 1 at the target."""
+    geometry = cell.find("mxGeometry")
+    if geometry is None or geometry.get("relative") != "1":
+        return None
+    return float(geometry.get("x", 0))
+
+
+def end_labels(edge_id: str, cells: list) -> dict:
+    """Labels a vertex hangs on an edge (multiplicities, mostly), keyed by the end they sit at."""
+    ends = {}
+    for c in cells:
+        if c["vertex"] and c["parent"] == edge_id and c["label"] and c["x"] is not None:
+            end = "source" if c["x"] < -0.3 else "target" if c["x"] > 0.3 else "middle"
+            ends[end] = c["label"]
+    return ends
 
 
 def graph(root: ET.Element) -> list:
@@ -118,16 +136,17 @@ def graph(root: ET.Element) -> list:
     for diagram in root.iter("diagram"):
         cells = cells_of(diagram)
         by_id = {c["id"]: c for c in cells}
+        on_edge = lambda c: c["parent"] in by_id and by_id[c["parent"]]["edge"]
         name = lambda cid: (by_id[cid]["label"] or cid) if cid in by_id else f"<{cid}>"
         pages.append({
             "page": diagram.get("name"),
             "vertices": [
                 {k: c[k] for k in ("id", "label", "attrs", "parent")}
-                for c in cells if c["vertex"]
+                for c in cells if c["vertex"] and not on_edge(c)
             ],
             "edges": [
                 {"id": c["id"], "label": c["label"], "attrs": c["attrs"], "from": name(c["source"]),
-                    "to": name(c["target"])}
+                    "to": name(c["target"]), "ends": end_labels(c["id"], cells)}
                 for c in cells if c["edge"]
             ],
         })
@@ -145,7 +164,11 @@ def print_graph(pages: list) -> None:
         for e in page["edges"]:
             label = f" [{e['label']}]" if e["label"] else ""
             attrs = f"  {e['attrs']}" if e["attrs"] else ""
-            print(f"{e['from']} --{label}--> {e['to']}{attrs}")
+            ends = e["ends"]
+            src = f"[{ends['source']}] " if "source" in ends else ""
+            tgt = f" [{ends['target']}]" if "target" in ends else ""
+            mid = f" ({ends['middle']})" if "middle" in ends else ""
+            print(f"{src}{e['from']} --{label}--> {e['to']}{tgt}{mid}{attrs}")
 
 
 def main() -> None:
