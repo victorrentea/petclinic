@@ -8,8 +8,6 @@
 
 services:
   db:
-    # 16, not because the app asks for it but because V10__index_owners.sql declares
-    # COLLATE "unicode" — an ICU collation that older Postgres cannot create.
     image: postgres:16
     labels:
       ro.victorrentea.petclinic.env: "1"
