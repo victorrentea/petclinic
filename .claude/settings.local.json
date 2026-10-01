@@ -1,0 +1,9 @@
+{
+  "disabledMcpjsonServers": [
+    "context7",
+    "playwright",
+    "postgres-db",
+    "grafana"
+  ],
+  "autoMemoryEnabled": false
+}

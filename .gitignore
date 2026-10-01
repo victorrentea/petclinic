@@ -83,7 +83,6 @@ petclinic-backend/docs/generated/bug-heatmap/
 __pycache__/
 .playwright-mcp/
 /petclinic-database/.bootstrapped
-.claude/settings.local.json
 
 # Chatbot on-disk RAG embedding cache (avoids re-embedding on restart) — match anywhere it lands
 rag-vector-store.json
