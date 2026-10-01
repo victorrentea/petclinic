@@ -9,7 +9,6 @@ import {Owner} from '../../owners/owner';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
-import {earliestVisitDate, latestVisitDate} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-add',
@@ -24,9 +23,6 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
-  // Assigned once, not getters: a fresh moment on every change detection re-runs the validators.
-  minDate: moment.Moment;
-  maxDate = latestVisitDate();
 
   constructor(private visitService: VisitService,
               private petService: PetService,
@@ -46,7 +42,6 @@ export class VisitAddComponent implements OnInit {
     this.petService.getPetById(petId).subscribe(
       pet => {
         this.currentPet = pet;
-        this.minDate = earliestVisitDate(pet.birthDate);
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
