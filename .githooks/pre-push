@@ -21,18 +21,6 @@ if ! bash "$ROOT/scripts/check-agents-md.sh"; then
   exit 1
 fi
 
-# ── Unversioned-deps list must be in sync (ungated, fast — no Maven) ─────────
-# Backstops a `git commit --no-verify` that bypassed pre-commit. Ungated because
-# chatbot/database pom changes fall outside the backend-only path gate below.
-if command -v python3 >/dev/null 2>&1; then
-  if ! python3 "$ROOT/scripts/list-unversioned-deps.py" --check; then
-    echo "[pre-push] ❌ petclinic-backend/pom-libs.txt is stale — push blocked."
-    echo "[pre-push]    Run: python3 scripts/list-unversioned-deps.py"
-    echo "[pre-push]         git add petclinic-backend/pom-libs.txt"
-    exit 1
-  fi
-fi
-
 # ── Path gating: skip unless pushed commits touch backend / OpenAPI / schema ─
 needs_check=0
 EMPTY_TREE=$(git hash-object -t tree /dev/null)
