@@ -34,10 +34,10 @@ Diagrams in this repo: `petclinic-backend/docs/Deployment.drawio.png`,
 
 The picture shows what someone drew. Before answering "only X calls Y", grep the code for
 the other side — base URLs, ports, `RestClient`/`WebClient`, MCP clients, `.mcp.json`,
-compose files — and report drift. Here, `Deployment.drawio.png` has no chatbot, while
-`petclinic-chatbot` calls the backend (MCP `/mcp`, and polls `/api/specialties/feed`).
-`DeploymentDiagramTest` compares the drawing with traces both ways, but only the traces of
-the browser suites, and the chatbot runs no OTel agent — so it can never notice that gap.
+compose files — and report drift. `DeploymentDiagramTest` compares the drawing with traces
+both ways, but only the traces of the browser suites: an edge marked `traced="no"` — the
+chatbot's, which runs no OTel agent — is checked by nothing. It once vanished from the
+picture for a month (`a57d5e18`) with every test green.
 
 ## Guardrail code
 
