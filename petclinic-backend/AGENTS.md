@@ -18,3 +18,4 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
+
