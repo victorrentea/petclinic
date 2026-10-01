@@ -10,7 +10,9 @@
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
-      "Edit(./openapi.yaml)"
+      "Edit(./openapi.yaml)",
+      "Edit(./petclinic-frontend/src/app/generated/api-types.ts)",
+      "Edit(./petclinic-backend/docs/generated/**)"
     ],
     "ask": [
       "Edit(.claude/settings.json)"

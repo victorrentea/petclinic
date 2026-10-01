@@ -67,7 +67,8 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 **Key Patterns:**
 - DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
+  editing it by hand is denied in `.claude/settings.json` — regenerate it instead.
+  Same deny on `petclinic-frontend/src/app/generated/api-types.ts` and `petclinic-backend/docs/generated/**`
 - Constructor injection, global exception handling via `@RestControllerAdvice`
 
 ## Additional Knowledge
