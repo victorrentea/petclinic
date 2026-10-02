@@ -1,11 +1,11 @@
 {
   "schema": "review-cost/1",
   "harness": "copilot-cli",
-  "recordedAt": "2026-10-02T20:14:09+00:00",
+  "recordedAt": "2026-10-02T20:23:15+00:00",
   "base": "4f38a4ecc02bc6df46a0595c0d5ab8cedd824653",
   "implementation": "12f868550799698089213ef87fa9188de952f614",
   "rounds": [
-    "2026-10-02T20:14:09+00:00"
+    "2026-10-02T20:23:15+00:00"
   ],
   "aicUsd": 0.01,
   "components": [
@@ -144,7 +144,7 @@
       "source": "recorded",
       "window": [
         "2026-10-02T19:49:08+00:00",
-        "2026-10-02T20:14:09+00:00"
+        "2026-10-02T20:23:15+00:00"
       ],
       "harnesses": [
         "copilot-cli"
@@ -156,22 +156,22 @@
           "what": "deciding and fixing",
           "window": [
             "2026-10-02T19:51:43+00:00",
-            "2026-10-02T20:14:00+00:00"
+            "2026-10-02T20:23:15+00:00"
           ],
-          "tokens": 3165188,
+          "tokens": 6180099,
           "models": {
-            "claude-sonnet-5": 3165188
+            "claude-sonnet-5": 6180099
           },
           "usd": null,
-          "aic": 118.08,
-          "calls": 36,
-          "modelSeconds": 268.9
+          "aic": 192.72,
+          "calls": 61,
+          "modelSeconds": 392.2
         }
       ],
-      "tokens": 3165188,
+      "tokens": 6180099,
       "usd": null,
-      "aic": 118.08,
-      "modelSeconds": 268.9
+      "aic": 192.72,
+      "modelSeconds": 392.2
     }
   ]
 }

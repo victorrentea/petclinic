@@ -16,7 +16,7 @@ export interface OwnerListQuery {
 }
 
 export const PAGE_SIZES: PageSize[] = [5, 10, 20];
-const SORTS: OwnerSort[] = ['name,asc', 'name,desc', 'city,asc', 'city,desc'];
+const SORTS: Set<OwnerSort> = new Set(['name,asc', 'name,desc', 'city,asc', 'city,desc']);
 const DEFAULT_QUERY: OwnerListQuery = {lastName: '', page: 1, size: 10, sort: 'name,asc'};
 
 @Component({
@@ -138,7 +138,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(query: OwnerListQuery) {
-    this.router.navigate([], {relativeTo: this.route, queryParams: toUrlParams(query), replaceUrl: true});
+    // Routing failures surface through Angular's error handler; nothing useful to do with the promise here.
+    void this.router.navigate([], {relativeTo: this.route, queryParams: toUrlParams(query), replaceUrl: true});
   }
 }
 
@@ -150,7 +151,7 @@ function parseQuery(params: ParamMap): OwnerListQuery {
     lastName: params.get('lastName') ?? DEFAULT_QUERY.lastName,
     page: Number.isInteger(page) && page >= 1 ? page : DEFAULT_QUERY.page,
     size: PAGE_SIZES.includes(size) ? size : DEFAULT_QUERY.size,
-    sort: SORTS.includes(sort) ? sort : DEFAULT_QUERY.sort
+    sort: SORTS.has(sort) ? sort : DEFAULT_QUERY.sort
   };
 }
 

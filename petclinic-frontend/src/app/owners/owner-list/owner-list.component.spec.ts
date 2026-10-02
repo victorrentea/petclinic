@@ -89,7 +89,7 @@ describe('OwnerListComponent', () => {
 
     it('asks the API for the first page of 10 sorted by name', () => {
       expect(lastApiQuery()).toEqual({lastName: '', page: 0, size: 10, sort: 'name,asc'});
-      expect(names().length).toBe(10);
+      expect(names()).toHaveSize(10);
       expect(names()[0]).toBe('Owner1 Franklin');
     });
 
@@ -285,7 +285,7 @@ describe('OwnerListComponent', () => {
       await click('#search-owner-form button[type="submit"]');
 
       expect(query('[role="alert"]')).toBeNull();
-      expect(names().length).toBe(3);
+      expect(names()).toHaveSize(3);
     });
   });
 
