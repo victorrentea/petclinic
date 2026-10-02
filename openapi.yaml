@@ -205,16 +205,14 @@ paths:
           type: integer
           format: int32
           default: 0
-      - in: query
+      - description: "one of 5, 10 or 20"
+        in: query
         name: size
         required: false
         schema:
           type: integer
+          format: int32
           default: 10
-          enum:
-          - "5"
-          - "10"
-          - "20"
       - in: query
         name: sort
         required: false

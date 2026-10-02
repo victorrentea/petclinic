@@ -571,7 +571,8 @@ export interface operations {
         lastName?: string;
         /** @description 0-based */
         page?: number;
-        size?: 5 | 10 | 20;
+        /** @description one of 5, 10 or 20 */
+        size?: number;
         sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
