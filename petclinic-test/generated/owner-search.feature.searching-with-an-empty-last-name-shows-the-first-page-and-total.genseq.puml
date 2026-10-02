@@ -17,7 +17,7 @@ Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} Owne
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:25{Click to open OwnerRepository.findByIdInFetchingPetsAndVisits} OwnerRepository.findByIdInFetchingPetsAndVisits ↗]]
 activate Backend
-Backend -> DB: [[genseq://0hui4n0{Click for the statement behind this call} SELECT DISTINCT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH … ⊕]]
+Backend -> DB: [[genseq://0p7jb4s{Click for the statement behind this call} SELECT ⊕]]
 deactivate Backend
 Backend --> Browser: [[genseq://1z0itvq{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
@@ -30,7 +30,7 @@ Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} Owne
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:25{Click to open OwnerRepository.findByIdInFetchingPetsAndVisits} OwnerRepository.findByIdInFetchingPetsAndVisits ↗]]
 activate Backend
-Backend -> DB: [[genseq://0hui4n0{Click for the statement behind this call} SELECT DISTINCT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH … ⊕]]
+Backend -> DB: [[genseq://0p7jb4s{Click for the statement behind this call} SELECT ⊕]]
 deactivate Backend
 Backend --> Browser: [[genseq://1z0itvq{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend

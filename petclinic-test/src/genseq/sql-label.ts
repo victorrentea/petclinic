@@ -132,8 +132,22 @@ export function splitOrigin(sql: string): {origin?: string; statement: string} {
   return origin ? {origin, statement: rest} : {statement: rest};
 }
 
+// An `@Query` method's comment is not an account of the statement, it is the whole HQL —
+// and an arrow labelled with forty words of it, clipped mid-JOIN, says less than its verb.
+// The repository method that ran it is already the self-hop right above the arrow, and
+// the query is one click away, so the verb is all the arrow has left to say. Only real
+// HQL shapes match: Hibernate's own `insert for com.example.Visit` is not `insert into`.
+const HQL_VERBS: Array<[RegExp, string]> = [
+  [/^(?:select|from|with)\s/i, 'SELECT'],
+  [/^insert\s+into\s/i, 'INSERT'],
+  [/^update\s+[\w.$]+(?:\s+\w+)?\s+set\s/i, 'UPDATE'],
+  [/^delete\s+from\s/i, 'DELETE'],
+];
+
 /** Hibernate's account of a statement, on one line, short enough to label an arrow. */
 export function formatOriginLabel(origin: string): string {
+  const hql = HQL_VERBS.find(([shape]) => shape.test(origin.trim()));
+  if (hql) return hql[1];
   const words = origin.split(' ');
   if (words.length <= MAX_ORIGIN_WORDS) return origin;
   return [...words.slice(0, MAX_ORIGIN_WORDS), ELLIPSIS].join(' ');

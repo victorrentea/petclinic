@@ -150,6 +150,15 @@ test('the comment never reaches the folded statement', () => {
   expect(lines[0]).toBe('INSERT INTO visits (id)');
 });
 
+test('an @Query origin is the HQL itself, so the arrow says only its verb', () => {
+  const hql = 'SELECT DISTINCT o FROM Owner o LEFT JOIN FETCH o.pets p WHERE o.id IN :ids';
+  expect(formatOriginLabel(hql)).toBe('SELECT');
+  expect(formatOriginLabel('from Owner o where o.lastName like :name')).toBe('SELECT');
+  expect(formatOriginLabel('update Owner o set o.city = :city')).toBe('UPDATE');
+  expect(formatOriginLabel('delete from Visit v where v.date < :d')).toBe('DELETE');
+  expect(formatOriginLabel('insert for com.example.Visit')).toBe('insert for com.example.Visit');
+});
+
 test('an arrow-length origin is left alone, a runaway one is clipped', () => {
   const short = 'load com.example.Owner.pets';
   expect(formatOriginLabel(short)).toBe(short);

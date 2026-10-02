@@ -27,8 +27,8 @@
         }
       ]
     },
-    "0hui4n0": {
-      "title": "SELECT DISTINCT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH …",
+    "0p7jb4s": {
+      "title": "SELECT",
       "steps": [
         {
           "label": "",
