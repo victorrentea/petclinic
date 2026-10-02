@@ -29,6 +29,17 @@ display:none;
 
 .owner-search-input {
   flex: 1;
+  min-width: 0;
+}
+
+.owner-search-fields {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.owner-search-fields .btn {
+  flex-shrink: 0;
 }
 
 .owners-controls {
@@ -37,12 +48,54 @@ display:none;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+  padding: 0 8px;
+  background: white;
+}
+
+.owners-controls > .btn {
+  flex-shrink: 0;
 }
 
 .owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+:host ::ng-deep .owners-pagination .mat-mdc-paginator-container {
+  column-gap: clamp(16px, 10vw, 112px);
+}
+
+#ownersTable table {
+  min-width: 650px;
+  table-layout: fixed;
+}
+
+#ownersTable th:nth-child(1) {
+  width: 22%;
+}
+
+#ownersTable th:nth-child(2) {
+  width: 25%;
+}
+
+#ownersTable th:nth-child(3) {
+  width: 15%;
+}
+
+#ownersTable th:nth-child(4) {
+  width: 22%;
+}
+
+#ownersTable th:nth-child(5) {
+  width: 16%;
+}
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+#ownersTable table[aria-busy="true"] tbody {
+  opacity: 0.5;
 }
 
 .owners-page-size {
@@ -75,5 +128,26 @@ display:none;
   .owners-controls {
     flex-direction: column;
     align-items: flex-start;
+    padding: 8px;
+  }
+
+  .owner-search-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .owners-pagination {
+    width: 100%;
+  }
+
+  :host ::ng-deep .owners-pagination .mat-mdc-paginator-container {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    padding: 0;
+  }
+
+  :host ::ng-deep .owners-pagination .mat-mdc-paginator-range-label {
+    margin: 0 8px 0 0;
   }
 }

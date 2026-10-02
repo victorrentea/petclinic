@@ -55,6 +55,90 @@ B) Manual: Run in separate terminals:
 - App UI: http://localhost:4200 
 - Backend Swagger: http://localhost:8080/swagger-ui.html
 
+## Browsing owners
+
+The Owners screen displays names as **Last name, First name** and starts with 10 rows,
+sorted by last name, first name, then owner ID.
+Choose 5, 10, or 20 rows per page and use the first/previous/next/last buttons in the
+bottom bar, alongside Add Owner; the range indicator shows the current rows and total matches. Name and City
+headers toggle ascending/descending order, including with the keyboard. Address,
+Telephone, and Pets are not sortable. Sorting keeps the scroll position and column
+widths stable; existing rows stay visible, dimmed, until their replacement arrives.
+On small screens, scroll the table horizontally;
+the paginator remains below it.
+
+Submit the Last name form with **Find Owner**, beside the input, or Enter to apply a case-sensitive,
+literal prefix search. Submitting a search, changing size, or changing sort returns to
+the first page. Searches keep the chosen sort; paging and sorting keep the last
+submitted prefix, not unfinished edits in the search box.
+
+The address bar stores the applied `page`, `size`, `sort`, and `lastName` settings.
+Refresh the page, copy its URL to another user, or use Back/Forward to restore the
+same view. For example,
+[this shared view](http://localhost:4200/petclinic/owners?page=1&size=5&sort=city,desc&lastName=)
+opens the second page of five owners, sorted by City descending. A submitted search
+adds its encoded prefix to `lastName`; draft text is never shared until submission.
+Opening a link still requires the same application access as browsing normally.
+
+Missing URL settings use the defaults. Invalid or repeated owner-list settings
+reset **all** settings to defaults, show a visible warning, and replace the invalid
+address without adding a broken history entry. This browser behavior does not
+change the API: malformed API requests still return HTTP 400.
+
+Only the latest request can update the screen. A successful search with zero matches
+shows a no-owners message and hides pagination; a failed request shows an explicit
+error instead. An empty page with a nonzero total still permits navigation back.
+Owner-name links, Add Owner, owner editing, pets, and visit booking remain unchanged.
+
+### Owner list API
+
+`GET /api/owners` now returns an object containing **only** `content` (existing owner
+DTOs, including pets, types, and visits) and `totalElements` (all matching owners).
+It no longer returns a top-level array. Authentication and owner-detail/CRUD contracts
+are unchanged. See the generated [OpenAPI contract](openapi.yaml) for DTO definitions.
+
+For example, `GET /api/owners?lastName=Pot&page=0&size=5&sort=city,desc` returns:
+
+```json
+{
+  "content": [],
+  "totalElements": 0
+}
+```
+
+The example represents a dataset with no matching owners. With matches, `content`
+contains up to five owner DTOs, ordered by city, last name, first name, and ID descending.
+
+- Omitted parameters default to `lastName=`, `page=0`, `size=10`, `sort=name,asc`.
+- `page` is a nonnegative zero-based integer; `size` is only 5, 10, or 20.
+- `sort` is exactly `name,asc`, `name,desc`, `city,asc`, or `city,desc`.
+  Direction applies to every field in the corresponding ordering chain.
+- Unsupported or malformed paging/sort inputs return HTTP 400. Entity-property sort
+  keys such as `lastName,asc` are not accepted.
+- Prefix matching is case-sensitive; `%` and `_` are literal characters. URL-encode
+  prefixes when constructing requests.
+- A page beyond the last match returns empty `content` and the actual matching total.
+  Consumers needing every owner must traverse pages rather than assuming the first
+  response contains the whole dataset.
+
+### Coordinated release and rollback
+
+Ship backend, frontend, regenerated API types, and migrated list consumers in **one PR
+and one coordinated deploy**. Do not serve the old array-expecting frontend against the
+new backend or the new frontend against the old backend. Apply the additive
+`V4__owner_list_indexes.sql` migration before routing traffic to the paired new versions.
+For separate deployments, keep traffic on the old pair (or pause traffic) until both
+new versions are ready, then switch them together.
+
+If rollback is necessary, restore **both application versions together**, including
+the matching frontend assets, before resuming traffic. The extra prefix/Name/City
+indexes are compatible with the old application and may remain. Never edit or remove
+an already-applied Flyway migration, and do not roll back by resetting the database.
+
+Small-fixture tests verify database pagination and a bounded query count. Response
+times on 100,000 owners and concurrent-load/latency-proxy measurements are **unverified
+and deferred for budget**; this change does not claim large-scale performance results.
+
 ## Prompts to try
 
 Tell an agent running in this repo:

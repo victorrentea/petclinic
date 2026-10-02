@@ -11,6 +11,7 @@ import {shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
 import {keepCaptionAcrossLoads, showCaption} from './captions';
+import {OwnerFixture} from './owner-fixtures';
 
 setDefaultTimeout(60_000);
 
@@ -47,8 +48,7 @@ export class PlaywrightWorld extends World {
   petId?: number;
   petName?: string;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
+  fixtureOwners?: OwnerFixture[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -64,11 +64,11 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
+  requireFixtureOwners(): OwnerFixture[] {
+    if (!this.fixtureOwners) {
       throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
-    return this.allOwnerNames;
+    return this.fixtureOwners;
   }
 }
 

@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List a page of owners
+     * @description Case-sensitive last-name prefix search, sorted by Name or City.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,11 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    OwnerPageDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      /** Format: int64 */
+      totalElements?: number;
     };
     PetDto: {
       /**
@@ -553,21 +561,29 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List a page of owners
+   * @description Case-sensitive last-name prefix search, sorted by Name or City.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page; the offset must fit a 32-bit integer */
+        page?: number;
+        /** @description Rows per page: 5, 10, or 20 */
+        size?: number;
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Invalid page, size, or sort */
       400: {
         content: {
           "*/*": components["schemas"]["ProblemDetail"];

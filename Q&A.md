@@ -1,6 +1,6 @@
 # Issue #25 — Paginate & sort the Owners grid: design Q&A
 
-Q1–Q4 were answered by Victor. Q5 onward are **recommended answers adopted by assumption**: challenge any of them before implementation.
+Q1–Q4 and the updated Q11 were answered by Victor. The other answers from Q5 onward are **recommended answers adopted by assumption**: challenge any of them before implementation.
 
 ## Facts gathered
 
@@ -71,8 +71,11 @@ Yes. At 100k rows with the prefix index it's cheap, and the paginator needs it t
 - Keep the Bootstrap table styling.
 - Add the paginator to `design-system/` only if a second grid needs it.
 
-### Q11. Should page and sort live in the URL (deep link / back button)? *(assumed)*
-**No.** This is out of scope for #25, so open a follow-up issue if wanted.
+### Q11. Should page and sort live in the URL (deep link / back button)?
+**Yes, confirmed by Victor on 2026-10-02**, superseding the original out-of-scope assumption.
+Keep `page`, `size`, `sort`, and the submitted `lastName` prefix in the URL. Refresh,
+shared links, and Back/Forward restore the same view. Invalid or repeated settings
+reset all settings to defaults with a visible explanation and replace the invalid URL.
 
 ### Q12. Empty state? *(assumed)*
 Show "No owners with last name starting with …" when `totalElements == 0`, and hide the paginator.

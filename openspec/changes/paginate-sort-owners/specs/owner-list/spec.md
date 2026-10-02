@@ -92,7 +92,25 @@ The grid SHALL display a page of owners, offer page sizes 5/10/20, indicate the 
 - **THEN** exactly one list request retrieves that page with the applied filter, size, and sort
 
 ### Requirement: Grid state transitions
-A submitted search, page-size change, or sort change SHALL reset the page index to 0. Search SHALL preserve the active sort. Page and sort navigation SHALL use the submitted filter, not unsubmitted input edits. Page state SHALL remain local to the screen rather than being added to the URL.
+A submitted search, page-size change, or sort change SHALL reset the page index to 0. Search SHALL preserve the active sort. Page and sort navigation SHALL use the submitted filter, not unsubmitted input edits. The URL query parameters `page`, `size`, `sort`, and `lastName` SHALL represent the applied state. Refreshing, opening a shared URL, and browser Back/Forward SHALL restore that state without duplicate list requests.
+
+#### Scenario: Refresh or share a page
+- **WHEN** a user refreshes or another user opens the owners URL
+- **THEN** the page, page size, sort key/direction, and submitted prefix are restored
+- **AND** exactly one request loads the matching page and the controls show the restored settings
+
+#### Scenario: Invalid URL settings
+- **WHEN** known query parameters are malformed, repeated, or unsupported
+- **THEN** all owner-list settings revert to the API defaults
+- **AND** a visible notice explains the reset, the URL is replaced with the default settings, and one default-page request is made
+
+#### Scenario: Unsubmitted text is not shared
+- **WHEN** a user edits the search input without submitting
+- **THEN** the URL keeps the last submitted prefix
+
+#### Scenario: Browser history
+- **WHEN** a user navigates Back or Forward between owner-list states
+- **THEN** the grid and submitted search input restore the corresponding URL state
 
 #### Scenario: Search after navigation
 - **WHEN** a user is on a later page with City descending selected and submits a new prefix

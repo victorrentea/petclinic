@@ -4,12 +4,25 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
 import victor.training.petclinic.domain.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
     List<Owner> findByLastNameStartingWith(String lastName);
+
+    Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+    @Query("""
+            SELECT DISTINCT o FROM Owner o
+            LEFT JOIN FETCH o.pets p
+            LEFT JOIN FETCH p.visits
+            LEFT JOIN FETCH p.type
+            WHERE o.id IN :ids
+            """)
+    List<Owner> findByIdInFetchingPetsAndVisits(List<Integer> ids);
 
     Optional<Owner> findById(int id);
 

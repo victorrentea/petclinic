@@ -12,6 +12,7 @@ The Owners screen shows every matching owner at once. With around 100,000 owners
 - Keep the existing last-name search: match the beginning of a last name, with uppercase and lowercase treated differently.
 - Return to the first page when the search, sorting, or page size changes. Keep the selected sorting when searching.
 - Always show the results for the user's latest search or chosen page.
+- Preserve the applied page, page size, sorting, and search in the URL so refresh, shared links, and browser history restore the same view.
 - Clearly distinguish no matching owners from a loading failure.
 - Keep owner details, pets, visit booking, and Add Owner available as before.
 
@@ -85,6 +86,6 @@ None.
 - **BREAKING**: Other software that reads the full owners list must be updated to read it a page at a time. Release those updates together with the screen changes.
 - Sorting is limited to Name and City, narrowing the original "any column" request in #25. Record this decision and correct the earlier claim that the work was already complete.
 - Owner details, editing, visit booking, and chatbot behavior are unchanged.
-- Out of scope: sorting by Address, Telephone, or Pets; changing how search matches names; remembering page settings in shared links; and unrelated diagram corrections.
+- Out of scope: sorting by Address, Telephone, or Pets; changing how search matches names; and unrelated diagram corrections.
 - Testing response times with 100,000 owners or many simultaneous users is deferred until budget is available. This change does not claim to prove performance at that scale.
-- Basis: [design Q&A](https://github.com/victorrentea/petclinic/blob/db27oct/Q%26A.md). Q1-Q4 are confirmed decisions; Q5-Q15 remain working assumptions for review before implementation.
+- Basis: [design Q&A](https://github.com/victorrentea/petclinic/blob/db27oct/Q%26A.md). Q1-Q4 and the updated Q11 are confirmed decisions; the other Q5-Q15 answers remain working assumptions for review before implementation.

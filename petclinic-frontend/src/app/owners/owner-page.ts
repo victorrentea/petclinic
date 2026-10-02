@@ -1,9 +1,10 @@
 import { Owner } from './owner';
+import { components } from '../generated/api-types';
 
-export interface OwnerPage {
+export type OwnerPage = Omit<Required<components['schemas']['OwnerPageDto']>, 'content'> & {
   content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+};
+
+export type OwnerSortKey = 'name' | 'city';
+export type OwnerSortDirection = 'asc' | 'desc';
+export type OwnerSort = `${OwnerSortKey},${OwnerSortDirection}`;

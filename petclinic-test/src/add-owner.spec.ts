@@ -1,4 +1,5 @@
-import {test, expect, Page} from './support/trace-fixture';
+import {test, expect} from './support/trace-fixture';
+import {Page} from '@playwright/test';
 
 // The owner flows that only a browser can walk, and until now none of them did:
 // every other acceptance test READS owners — the list, a detail page, the visit form
@@ -53,7 +54,7 @@ test('adds an owner from the New Owner form and finds them by last name', async 
   await page.locator('button:has-text("Find Owner")').click();
   const rows = page.locator('td.ownerFullName');
   await expect(rows).toHaveCount(1);
-  await expect(rows.first()).toContainText(`Ada ${lastName}`);
+  await expect(rows.first()).toContainText(`${lastName}, Ada`);
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {

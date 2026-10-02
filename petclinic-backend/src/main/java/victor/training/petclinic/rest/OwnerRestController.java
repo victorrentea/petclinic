@@ -4,7 +4,12 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -19,6 +24,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -38,7 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,15 +92,42 @@ public class OwnerRestController {
         this.clock = clock;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List a page of owners",
+            description = "Case-sensitive last-name prefix search, sorted by Name or City.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @ApiResponse(responseCode = "400", description = "Invalid page, size, or sort")
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page; the offset must fit a 32-bit integer",
+                    schema = @Schema(type = "integer", minimum = "0", defaultValue = "0")) @RequestParam(name = "page",
+                            required = false) String page,
+            @Parameter(description = "Rows per page: 5, 10, or 20",
+                    schema = @Schema(type = "integer", defaultValue = "10")) @RequestParam(name = "size",
+                            required = false) String size,
+            @Parameter(schema = @Schema(allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"},
+                    defaultValue = "name,asc")) @RequestParam(name = "sort", required = false) String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(
+                lastName, OwnerListParameters.pageRequest(page, size, sort));
+        if (owners.isEmpty()) {
+            return new OwnerPageDto(List.of(), owners.getTotalElements());
+        }
+        List<Integer> ids = owners.stream().map(Owner::getId).toList();
+        Map<Integer, Owner> fetched = ownerRepository.findByIdInFetchingPetsAndVisits(ids).stream()
+                .collect(toMap(Owner::getId, identity()));
+        List<OwnerDto> content = ids.stream().map(id -> ownerMapper.toOwnerDto(selectedOwner(fetched, id))).toList();
+        return new OwnerPageDto(content, owners.getTotalElements());
+    }
+
+    private Owner selectedOwner(Map<Integer, Owner> owners, int id) {
+        Owner owner = owners.get(id);
+        if (owner == null) {
+            throw new IllegalStateException("Selected owner " + id + " disappeared while loading its page");
+        }
+        return owner;
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

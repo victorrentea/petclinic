@@ -189,6 +189,7 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "Case-sensitive last-name prefix search, sorted by Name or City."
       operationId: listOwners
       parameters:
       - in: query
@@ -197,6 +198,31 @@ paths:
         schema:
           type: string
           default: ""
+      - description: Zero-based page; the offset must fit a 32-bit integer
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - description: "Rows per page: 5, 10, or 20"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          default: 10
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          enum:
+          - "name,asc"
+          - "name,desc"
+          - "city,asc"
+          - "city,desc"
       responses:
         "200":
           content:
@@ -205,39 +231,39 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    totalElements: 2
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-          description: Bad Request
+          description: "Invalid page, size, or sort"
         "404":
           content:
             '*/*':
@@ -250,7 +276,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: List a page of owners
       tags:
       - owner-rest-controller
     post:
@@ -1686,6 +1712,16 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
     PetDto:
       type: object
       properties:

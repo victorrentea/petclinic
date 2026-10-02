@@ -15,7 +15,7 @@ Read-only inspection of `db27oct` found:
 - Migrations V1-V3 exist. V1 gives owners only a primary-key index and already indexes `pets.owner_id` and `visits.pet_id`; no existing owner prefix or sort index was found in the migration chain.
 - Cucumber's empty-search scenario and glue currently assume one response lists every owner. `AddVisitApiTest` also searches the list response to discover fixture owners.
 
-Q1-Q4 in the source Q&A are explicit decisions. Q5-Q15 remain adopted assumptions for review, not newly confirmed business decisions. Reported live collation and dataset statistics come from that document; this planning run inspected migration files, not a live database.
+Q1-Q4 and the updated Q11 in the source Q&A are explicit decisions. The other Q5-Q15 answers remain adopted assumptions for review, not newly confirmed business decisions. Reported live collation and dataset statistics come from that document; this planning run inspected migration files, not a live database.
 
 ## Goals / Non-Goals
 
@@ -69,11 +69,15 @@ Use `HttpParams` in the service, returning the exact page type for initial and f
 
 Keep separate draft and submitted prefixes. Centralize initial load, submitted search, pagination, size changes, and sorting in one method carrying submitted prefix, page index, size, key, and direction. Each UI action updates state and starts exactly one request. Use one form submit handler rather than competing click/submit paths.
 
+Following Victor's scope update on 2026-10-02, use `ActivatedRoute.queryParamMap` as the applied-state source of truth. UI actions navigate with `page`, `size`, `sort`, and submitted `lastName`; the route subscription restores controls and loads once. Preserve unsubmitted draft text when only paging/sorting changes. Back/Forward and direct links use the same subscription. Resubmitting identical settings reloads once without adding a duplicate history entry.
+
+Validate known URL parameters against the API rules, including duplicates and representable offsets. On invalid settings, reset all settings to defaults, display an explicit notice, and replace the invalid history entry with the canonical default URL. Suppress a duplicate request when that replacement emits the already-loaded state. Cancel both route and HTTP subscriptions on destruction.
+
 Cancel the previous subscription before setting the new request's loading state; use a request identity guard for success, error, and completion if cancellation alone cannot protect all callbacks. Unsubscribe on destruction. Do not let an earlier `finalize` mark a newer request as complete.
 
 Render rows from `content` and length from `totalElements`. Show the no-results message only after a successful zero-total result, using the submitted prefix; keep errors separate and explicitly visible. A nonzero-total empty page must leave navigation available rather than showing no matches. Preserve Add Owner access and existing owner links across loading/empty/error layouts.
 
-**Alternatives:** client-side slicing still downloads all owners; rebuilding as a Material table is unnecessary; URL state and a shared pagination abstraction are outside this change.
+**Alternatives:** client-side slicing still downloads all owners; rebuilding as a Material table is unnecessary; local-only state cannot support refresh or shared links. A shared pagination abstraction remains outside this change.
 
 ### 5. Migrate consumers according to their actual usage
 
