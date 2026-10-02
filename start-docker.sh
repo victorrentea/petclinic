@@ -5,8 +5,9 @@
 # frontend is published, and the host picks the port, so instances never collide — and
 # neither does an instance with the plain ./start-*.sh stack on :4200 and :5432.
 #
-#   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh] [--jacoco]
+#   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh] [--jacoco] [--otel]
 #   ./start-docker.sh url   [name]        # the URL again
+#   ./start-docker.sh ports [name]        # every published endpoint, as KEY=value lines
 #   ./start-docker.sh reset [name]        # database back to the seed
 #   ./start-docker.sh ls
 #   ./start-docker.sh down  [name|--all]
@@ -16,8 +17,13 @@
 # JaCoCo's agent in tcpserver mode, its port 6300 published to a host-picked loopback port
 # (`docker port <name>-backend-1 6300`) — what per-test coverage dumps and resets between
 # tests (petclinic-test/src/support/coverage.ts); on an instance already up without it,
-# only the backend is re-created. With more than one instance up, every
-# command needs the name: none of them will guess which one you meant.
+# only the backend is re-created. --otel adds the instance's own Grafana LGTM (Tempo behind
+# an OTLP collector) and starts both JVMs under the OpenTelemetry agent exporting to it, so a
+# traced run never lands in another branch's Tempo; Grafana and OTLP get host-picked loopback
+# ports too. `ports` prints them under the names the test tooling reads, for
+# `env $(./start-docker.sh ports N) ./petclinic-test/run-tests-with-tracing.sh`.
+# With more than one instance up, every command needs the name: none of them will guess
+# which one you meant.
 #
 # Instances reap themselves after 2 idle hours (--ttl to change).
 set -euo pipefail
@@ -95,8 +101,9 @@ resolve() {
     echo "$all"
 }
 
-# EXTRA_COMPOSE: an overlay on top of the base file, for `up --jacoco`. Every other command
-# works on the project by name and needs none.
+# EXTRA_COMPOSE: the overlays on top of the base file, for `up --jacoco` / `--otel`. Every
+# other command works on the project by name and needs none — `down` sweeps the overlays'
+# extra services as orphans.
 EXTRA_COMPOSE=()
 compose() { COMPOSE_PROJECT_NAME="$1" PETCLINIC_SRC="${2:-$REPO}" IDLE_TTL="${IDLE_TTL:-7200}" \
             PETCLINIC_TAG="${PETCLINIC_TAG:-worktree}" \
@@ -115,10 +122,30 @@ jacoco_agent() {
     echo "$jar"
 }
 
+# The OpenTelemetry Java agent, the very jar ./start-backend.sh and the pom's genseq profile
+# attach: the version is read off that profile, and the file is shared with both.
+otel_agent() {
+    local v jar
+    v="$(sed -n 's#.*<otel.agent.version>\(.*\)</otel.agent.version>.*#\1#p' \
+        "$REPO/petclinic-backend/pom.xml" | head -1)"
+    v="${v:-2.20.1}"
+    jar="$REPO/petclinic-backend/.tools/opentelemetry-javaagent-$v.jar"
+    if [ ! -f "$jar" ]; then
+        local url="https://github.com/open-telemetry/opentelemetry-java-instrumentation"
+        url="$url/releases/download/v$v/opentelemetry-javaagent.jar"
+        mkdir -p "$(dirname "$jar")"
+        curl -fsSL -o "$jar" "$url" >&2 || { rm -f "$jar"; die "cannot fetch the OpenTelemetry agent $v"; }
+    fi
+    echo "$jar"
+}
+
 port_of() { compose "$1" "" port frontend 4200 2>/dev/null | tail -1 | sed 's/.*://' || true; }
+# A port published by one of the instance's containers, overlay services included (compose
+# would only answer for the services of the files it is given).
+published() { docker port "$1-$2-1" "$3" 2>/dev/null | head -1 | sed 's/.*://' || true; }
 
 cmd_up() {
-    local ref="" name="" fresh="" jacoco=""
+    local ref="" name="" fresh="" jacoco="" otel=""
     while [ $# -gt 0 ]; do
         case "$1" in
             --ref)   ref="${2:?--ref needs a commit}";   shift 2 ;;
@@ -126,6 +153,7 @@ cmd_up() {
             --ttl)   IDLE_TTL="${2:?--ttl needs seconds}"; shift 2 ;;
             --fresh) fresh=1;    shift ;;
             --jacoco) jacoco=1;  shift ;;
+            --otel)  otel=1;     shift ;;
             *) die "unknown option: $1" ;;
         esac
     done
@@ -169,7 +197,11 @@ cmd_up() {
 
     if [ -n "$jacoco" ]; then
         export JACOCO_AGENT_JAR; JACOCO_AGENT_JAR="$(jacoco_agent)"
-        EXTRA_COMPOSE=(-f "$REPO/docker/docker-compose.jacoco.yml")
+        EXTRA_COMPOSE+=(-f "$REPO/docker/docker-compose.jacoco.yml")
+    fi
+    if [ -n "$otel" ]; then
+        export OTEL_AGENT_JAR; OTEL_AGENT_JAR="$(otel_agent)"
+        EXTRA_COMPOSE+=(-f "$REPO/docker/docker-compose.otel.yml")
     fi
 
     if [ -n "$fresh" ]; then
@@ -177,10 +209,11 @@ cmd_up() {
         # and the seed snapshot taken on the first boot would never be retaken.
         compose "$name" "$src" down -v >/dev/null 2>&1 || true
     elif [ -n "$(docker ps -q --filter "$MINE" --filter "label=$PROJECT_LABEL=$name")" ] \
-        && { [ -z "$jacoco" ] || docker port "$name-backend-1" 6300 >/dev/null 2>&1; }; then
+        && { [ -z "$jacoco" ] || [ -n "$(published "$name" backend 6300)" ]; } \
+        && { [ -z "$otel" ] || [ -n "$(published "$name" lgtm 3000)" ]; }; then
         # Already up: hand back the same instance instead of building a second one. With
-        # --jacoco, only if its backend already carries the agent; otherwise the `up` below
-        # re-creates the backend alone, since nothing else in the overlay differs.
+        # --jacoco / --otel, only if it already carries what they add; otherwise the `up`
+        # below adds it, re-creating only the services the overlay changes.
         echo "↻ $name is already up"
         cmd_url "$name"; return
     fi
@@ -192,6 +225,10 @@ cmd_up() {
     [ -n "$p" ] || die "the stack came up but no host port was published"
     echo ""
     echo "✅ $name ready — reaps itself after $((IDLE_TTL/60)) idle minutes"
+    # Before the app's own URL, never after: a caller scrapes the LAST URL printed as the
+    # app (human-review's app blocks do).
+    [ -n "$otel" ] && printf '   Grafana  http://localhost:%s  (admin/admin)\n' \
+        "$(published "$name" lgtm 3000)"
     printf '   http://localhost:%s\n' "$p"
     command -v pbcopy >/dev/null && printf 'http://localhost:%s' "$p" | pbcopy \
         && echo "   (copied to the clipboard)"
@@ -202,6 +239,30 @@ cmd_url() {
     local p; p="$(port_of "$name")"
     [ -n "$p" ] || die "$name is not running"
     printf 'http://localhost:%s\n' "$p"
+}
+
+# Machine-readable: one KEY=value per published endpoint, named after the variables the test
+# tooling already reads, so `env $(./start-docker.sh ports N) <cmd>` points any of it at this
+# instance. 127.0.0.1, not localhost: Node resolves localhost to ::1 first, and every port is
+# bound to IPv4 loopback only. Lines for --jacoco / --otel appear only on an instance up with
+# them, so a caller can tell which it got.
+cmd_ports() {
+    local name; name="$(resolve "${1:-}")"
+    local p; p="$(port_of "$name")"
+    [ -n "$p" ] || die "$name is not running"
+    local back jacoco grafana otlp
+    back="$(published "$name" backend 8080)"
+    jacoco="$(published "$name" backend 6300)"
+    grafana="$(published "$name" lgtm 3000)"
+    otlp="$(published "$name" lgtm 4318)"
+    echo "PETCLINIC_INSTANCE=$name"
+    echo "BASE_URL=http://127.0.0.1:$p"
+    echo "API_BASE_URL=http://127.0.0.1:$p/api"
+    [ -n "$back" ]    && echo "BACKEND_URL=http://127.0.0.1:$back"
+    [ -n "$jacoco" ]  && echo "JACOCO_ADDRESS=127.0.0.1:$jacoco"
+    [ -n "$grafana" ] && echo "GRAFANA_URL=http://127.0.0.1:$grafana"
+    [ -n "$otlp" ]    && echo "OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:$otlp"
+    return 0
 }
 
 # Same starting point every time, so repeated deep links cannot pile up duplicate rows or
@@ -230,10 +291,12 @@ cmd_ls() {
 cmd_down() {
     local p
     if [ "${1:-}" = "--all" ]; then
-        for p in $(instances); do compose "$p" "" down -v >/dev/null 2>&1 || true; echo "🛑 $p"; done
+        for p in $(instances); do
+            compose "$p" "" down -v --remove-orphans >/dev/null 2>&1 || true; echo "🛑 $p"
+        done
     else
         p="$(resolve "${1:-}")"
-        compose "$p" "" down -v; echo "🛑 $p"
+        compose "$p" "" down -v --remove-orphans; echo "🛑 $p"
     fi
     gc
 }
@@ -241,9 +304,10 @@ cmd_down() {
 case "${1:-up}" in
     up)    shift || true; cmd_up "$@" ;;
     url)   shift || true; cmd_url "$@" ;;
+    ports) shift || true; cmd_ports "$@" ;;
     reset) shift || true; cmd_reset "$@" ;;
     ls)    cmd_ls ;;
     down)  shift || true; cmd_down "$@" ;;
-    -h|--help|help) sed -n '2,18p' "${BASH_SOURCE[0]}" | sed -e 's/^#//' -e 's/^ //' ;;
-    *) die "unknown command: $1  (up | url | reset | ls | down)" ;;
+    -h|--help|help) sed -n '2,28p' "${BASH_SOURCE[0]}" | sed -e 's/^#//' -e 's/^ //' ;;
+    *) die "unknown command: $1  (up | url | ports | reset | ls | down)" ;;
 esac
