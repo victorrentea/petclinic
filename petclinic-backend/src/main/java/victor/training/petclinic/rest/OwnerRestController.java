@@ -90,8 +90,9 @@ public class OwnerRestController {
     public OwnerPageDto listOwners(
             @RequestParam(name = "lastName", defaultValue = "") String lastName,
             @Parameter(description = "0-based") @RequestParam(name = "page", defaultValue = "0") int page,
-            @Parameter(schema = @Schema(type = "integer", allowableValues = {"5", "10", "20"},
-                    defaultValue = "10")) @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(description = "Page size: 5, 10, or 20",
+                    schema = @Schema(type = "integer", defaultValue = "10")) @RequestParam(name = "size",
+                            defaultValue = "10") int size,
             @Parameter(schema = @Schema(allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"},
                     defaultValue = "name,asc")) @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
         Page<Owner> owners = ownerRepository.findByLastNameStartingWith(

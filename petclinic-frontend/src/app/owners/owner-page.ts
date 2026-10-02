@@ -11,7 +11,7 @@ export interface OwnerPage {
 
 type ListOwnersQuery = Required<NonNullable<operations['listOwners']['parameters']['query']>>;
 export type OwnerSort = ListOwnersQuery['sort'];
-export type PageSize = ListOwnersQuery['size'];
+export type PageSize = 5 | 10 | 20;
 
 /** As the API takes it: `page` is 0-based. */
 export interface OwnerPageQuery {

@@ -75,8 +75,8 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
-        String detail = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
-        log.warn(detail);
+        String detail = "Invalid value for parameter '" + ex.getName() + "'";
+        log.warn("Invalid request parameter type: {}", ex.getName());
         return ResponseEntity.badRequest()
                 .body(buildProblemDetail("Bad Request", detail, HttpStatus.BAD_REQUEST, request));
     }
