@@ -11,6 +11,43 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface OwnerDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  city: string;
+  pets: {id: number; name: string; birthDate: string}[];
+}
+
+export interface OwnerPage {
+  content: OwnerDto[];
+  totalElements: number;
+}
+
+/**
+ * Every owner, walked page by page in Name order — GET /api/owners answers one page at a
+ * time (#25). Fails on a duplicate or a missing owner, so a broken paging shows up here
+ * instead of as an owner some scenario cannot find.
+ */
+export async function fetchAllOwners(apiBase: string): Promise<OwnerDto[]> {
+  const owners: OwnerDto[] = [];
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get<OwnerPage>(`${apiBase}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    if (!Array.isArray(data?.content)) {
+      throw new Error('GET /owners did not answer with a page — is the backend from before #25?');
+    }
+    owners.push(...data.content);
+    if (data.content.length === 0 || owners.length >= data.totalElements) {
+      const ids = new Set(owners.map((o) => o.id));
+      if (ids.size !== owners.length || owners.length !== data.totalElements) {
+        throw new Error(
+          `Paging returned ${ids.size} distinct of ${owners.length} owners, total ${data.totalElements}`);
+      }
+      return owners;
+    }
+  }
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 

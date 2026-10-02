@@ -18,4 +18,6 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
-
+- `GET /api/owners` is paged: it returns `{content, totalElements}`, `size` is 5/10/20 and `sort` takes business keys
+  (`name|city`,`asc|desc`), never entity fields. Pets and visits load in a second query by the page's IDs —
+  a fetch join under a LIMIT would page in memory

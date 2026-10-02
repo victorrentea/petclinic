@@ -64,5 +64,5 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 - **Test coverage floor** — JaCoCo per-package thresholds for `rest/`, `mapper/`, `repository/`. (SonarCloud's quality gate already enforces coverage on *new* code.)
 - **Endpoint / capability allow-list** — ArchUnit forbidding `@RequestMapping` outside `rest/` and `Runtime.exec` / `System.getenv` outside an allow-list.
 - **Logging / observability invariants** — every REST method logs entry+exit; no log line carries PII.
-- **Performance / N+1 drift** — SQL-statement-count smoke tests on hot endpoints.
+- **Performance / N+1 drift** — SQL-statement-count smoke tests on hot endpoints. One exists so far: `OwnerListTest` caps a cold `GET /api/owners` page at 3 SELECTs, counted by `tools/SelectRecorder` (a Hibernate `StatementInspector`); other endpoints are unguarded.
 - **Spring `@ConfigurationProperties` / `@Value` strict mode** — no off-the-shelf build-time check; ad-hoc rules are fragile.

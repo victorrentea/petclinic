@@ -1,35 +1,51 @@
-import {Component, OnInit} from '@angular/core';
-import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { OwnerService } from '../owner.service';
+import { Owner } from '../owner';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
+import { OwnerPage, OwnerSort } from '../owner-page';
+
+type OwnerSortKey = 'name' | 'city';
+type OwnerSortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizeOptions = [5, 10, 20];
+
+  lastNameDraft = '';
+  submittedLastName = '';
+  pageIndex = 0;
+  pageSize = 10;
+  sortKey: OwnerSortKey = 'name';
+  sortDirection: OwnerSortDirection = 'asc';
+
+  owners: Owner[] = [];
+  totalElements = 0;
+  answeredLastName: string | null = null;
+  loading = false;
+  errorMessage: string | null = null;
+
+  private request?: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
+  }
 
+  get noMatches(): boolean {
+    return !this.loading && !this.errorMessage && this.answeredLastName !== null && this.totalElements === 0;
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.load();
+  }
+
+  ngOnDestroy() {
+    this.request?.unsubscribe();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +56,54 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  search() {
+    this.submittedLastName = this.lastNameDraft ?? '';
+    this.pageIndex = 0;
+    this.load();
+  }
+
+  onPage(event: PageEvent) {
+    const sizeChanged = event.pageSize !== this.pageSize;
+    this.pageSize = event.pageSize;
+    this.pageIndex = sizeChanged ? 0 : event.pageIndex;
+    this.load();
+  }
+
+  onSort(sort: Sort) {
+    this.sortKey = sort.active as OwnerSortKey;
+    this.sortDirection = sort.direction || 'asc';
+    this.pageIndex = 0;
+    this.load();
+  }
+
+  // Unsubscribing first means an older request can no longer touch rows, total, loading or error
+  private load() {
+    this.request?.unsubscribe();
+    this.loading = true;
+    const lastName = this.submittedLastName;
+    this.request = this.ownerService.getOwners({
+      lastName,
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: `${this.sortKey},${this.sortDirection}` as OwnerSort,
+    }).subscribe({
+      next: (page) => this.showPage(page, lastName),
+      error: (error) => this.showError(error),
+    });
+  }
+
+  private showPage(page: OwnerPage, lastName: string) {
+    this.owners = page.content;
+    this.totalElements = page.totalElements;
+    this.answeredLastName = lastName;
+    this.errorMessage = null;
+    this.loading = false;
+  }
+
+  private showError(error: unknown) {
+    this.owners = [];
+    this.totalElements = 0;
+    this.errorMessage = String(error instanceof Error ? error.message : error);
+    this.loading = false;
   }
 }
