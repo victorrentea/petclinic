@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
+import { OwnerListQuery, OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { catchError, map } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
 @Injectable()
@@ -19,10 +20,19 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  listOwners(query: OwnerListQuery = {}): Observable<OwnerPage> {
+    let params = new HttpParams();
+    for (const [name, value] of Object.entries(query)) {
+      if (value !== undefined && value !== '') {
+        params = params.set(name, String(value));
+      }
+    }
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(
+        catchError(this.handlerError<OwnerPage>('listOwners')),
+        map(requirePage)
+      );
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -49,14 +59,12 @@ export class OwnerService {
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
+}
 
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
+// A backend from before paging answers a bare array: fail loudly rather than show "no owners"
+function requirePage(body: OwnerPage): OwnerPage {
+  if (!Array.isArray(body?.content) || typeof body.totalElements !== 'number') {
+    throw new Error('GET /api/owners did not answer a page of owners');
   }
+  return body;
 }

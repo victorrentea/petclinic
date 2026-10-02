@@ -27,6 +27,7 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 | `DB.puml` ER diagram | DB schema review legibility | A sqlglot-based pre-commit generator (`petclinic-backend/docs/scripts/db/`) renders `docs/generated/DB.puml` from `petclinic-backend/docs/generated/DB.sql`, highlighting **this commit's** schema delta in red, and auto-stages it. pre-push blocks a `petclinic-backend/docs/generated/DB.sql` change whose pushed range lacks a regenerated diagram (catches `--no-verify`); **CI re-runs that same DB.sql↔DB.puml guard** so `git push --no-verify` can't bypass it |
 | TS ↔ OpenAPI sync | Stale generated frontend types | `npm run generate:api` regenerates `api-types.ts` from `openapi.yaml` in pre-commit + CI; auto-staged / auto-committed on drift |
 | `McpHttpSecurityTest`, `McpTomcatCustomizerTest` | MCP endpoint security | Assert the `/mcp` endpoint's authentication and Tomcat customization hold |
+| `OwnerListQueryTest` | N+1 and in-memory paging on the owners list | Hibernate statistics on a cold persistence context, caches off: a full page of `GET /api/owners` must take ≤ 3 SELECTs and hydrate only that page's owners; `fail_on_pagination_over_collection_fetch` turns paging a collection fetch into an error instead of a log warning |
 
 ### Code quality
 
@@ -64,5 +65,5 @@ Automated checks against accidental drift, run **locally** in `.githooks/pre-com
 - **Test coverage floor** — JaCoCo per-package thresholds for `rest/`, `mapper/`, `repository/`. (SonarCloud's quality gate already enforces coverage on *new* code.)
 - **Endpoint / capability allow-list** — ArchUnit forbidding `@RequestMapping` outside `rest/` and `Runtime.exec` / `System.getenv` outside an allow-list.
 - **Logging / observability invariants** — every REST method logs entry+exit; no log line carries PII.
-- **Performance / N+1 drift** — SQL-statement-count smoke tests on hot endpoints.
+- **Performance / N+1 drift** — SQL-statement-count smoke tests on the other hot endpoints (the owners list has one, `OwnerListQueryTest`).
 - **Spring `@ConfigurationProperties` / `@Value` strict mode** — no off-the-shelf build-time check; ad-hoc rules are fragile.

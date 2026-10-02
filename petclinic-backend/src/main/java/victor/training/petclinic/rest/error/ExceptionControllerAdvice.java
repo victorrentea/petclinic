@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -78,6 +79,16 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
+    }
+
+    // A query or path parameter that does not convert to its declared type, e.g. ?page=abc
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String detail = "Parameter '" + ex.getName() + "' has an invalid value: " + ex.getValue();
+        log.warn("Validation failed: {}", detail);
+        return ResponseEntity.badRequest()
+                .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
     }
 
     @ExceptionHandler(Exception.class)

@@ -11,6 +11,18 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface OwnerDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  pets: {id: number; name: string; birthDate: string}[];
+}
+
+export interface OwnerPage {
+  content: OwnerDto[];
+  totalElements: number;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -26,6 +38,26 @@ export class ApiClient {
   async fetchVisits(): Promise<VisitDto[]> {
     const response = await this.client.get<VisitDto[]>('/visits');
     return response.data;
+  }
+
+  async fetchOwnerPage(params: {lastName?: string; page?: number; size?: number; sort?: string}): Promise<OwnerPage> {
+    const {data} = await this.client.get<OwnerPage>('/owners', {params});
+    if (!Array.isArray(data?.content)) {
+      throw new Error(`GET /api/owners did not answer a page: ${JSON.stringify(data).slice(0, 200)}`);
+    }
+    return data;
+  }
+
+  /** Every owner, walked page by page in Name order: GET /api/owners answers one page at a time. */
+  async fetchEveryOwner(): Promise<OwnerDto[]> {
+    const owners: OwnerDto[] = [];
+    for (let page = 0; ; page++) {
+      const answer = await this.fetchOwnerPage({page, size: 20});
+      owners.push(...answer.content);
+      if (answer.content.length === 0 || owners.length >= answer.totalElements) {
+        return owners;
+      }
+    }
   }
 
   static sortedByDate<T extends {date: string}>(rows: T[]): T[] {
