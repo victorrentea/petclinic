@@ -72,6 +72,20 @@ They are generated artifacts and say so on their first lines; edit the test, not
 backend only attaches the OpenTelemetry Java agent if `:4318` is already listening. Both
 scripts now say so out loud if the order was wrong, instead of silently producing no diagrams.
 
+**Or skip the host stack entirely** — an isolated instance carries its own Tempo, on ports the
+host picks, from a freshly seeded database (what `/human-review` does, `human-review.json`
+`steps.sequence.app`):
+
+```sh
+../start-docker.sh up --name petclinic-traced --otel --fresh
+env $(../start-docker.sh ports petclinic-traced) ./run-tests-with-tracing.sh
+../start-docker.sh down petclinic-traced
+```
+
+`ports` prints `BASE_URL`, `API_BASE_URL`, `BACKEND_URL`, `GRAFANA_URL` and
+`OTEL_EXPORTER_OTLP_ENDPOINT` — the names this script, both suites, `generate.ts` and the
+backend's `mvn -Pgenseq` read; unset, each falls back to the dev stack's fixed port.
+
 ### How much detail a diagram shows
 
 Capture and rendering are deliberately separate: the traces always carry everything — the SQL
