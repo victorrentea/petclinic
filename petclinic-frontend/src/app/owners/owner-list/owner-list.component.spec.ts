@@ -268,7 +268,7 @@ describe('OwnerListComponent', () => {
 
       fixture.destroy();
 
-      expect(pending.observers.length).toBe(0);
+      expect(pending.observers).toHaveSize(0);
     });
   });
 
@@ -299,6 +299,27 @@ describe('OwnerListComponent', () => {
       expect(text('#ownersError')).toContain('server returned code 500');
       expect(exists('#noOwners')).toBeFalse();
       expect(text('#addOwner')).toBe('Add Owner');
+    });
+
+    it('a failed page keeps the paginator, so the page can be retried', () => {
+      startWith(of(pageOf([testOwner], 26)));
+      getOwnersSpy.and.returnValue(throwError('server returned code 503'));
+      goToPage(2);
+      getOwnersSpy.and.returnValue(of(pageOf([davis], 26)));
+
+      fixture.debugElement.query(By.css('.mat-mdc-paginator-navigation-previous')).nativeElement.click();
+      fixture.detectChanges();
+
+      expect(lastQuery().page).toBe(1);
+      expect(exists('#ownersError')).toBeFalse();
+      expect(text('.ownerFullName')).toBe('Betty Davis');
+    });
+
+    it('shows no paginator before the first answer', () => {
+      startWith(new Subject<OwnerPage>());
+      fixture.detectChanges();
+
+      expect(exists('mat-paginator')).toBeFalse();
     });
 
     it('a successful answer after a failure clears the error', () => {

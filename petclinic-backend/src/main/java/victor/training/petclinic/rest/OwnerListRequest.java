@@ -29,21 +29,22 @@ final class OwnerListRequest {
         return PageRequest.of(page, size, toSort(sort));
     }
 
+    // Never echo the raw string: it lands in the log and the response body
     // The direction applies to every tie-breaker, so the two ordering indexes serve both directions
     private static Sort toSort(String sort) {
         String[] keyAndDirection = sort.split(",", -1);
         if (keyAndDirection.length != 2) {
-            throw new ValidationException("sort must be <name|city>,<asc|desc>, was " + sort);
+            throw new ValidationException("sort must be <name|city>,<asc|desc>");
         }
         Direction direction = switch (keyAndDirection[1]) {
             case "asc" -> Direction.ASC;
             case "desc" -> Direction.DESC;
-            default -> throw new ValidationException("sort direction must be asc or desc, was " + sort);
+            default -> throw new ValidationException("sort direction must be asc or desc");
         };
         return switch (keyAndDirection[0]) {
             case "name" -> Sort.by(direction, "lastName", "firstName", "id");
             case "city" -> Sort.by(direction, "city", "lastName", "firstName", "id");
-            default -> throw new ValidationException("sort key must be name or city, was " + sort);
+            default -> throw new ValidationException("sort key must be name or city");
         };
     }
 }

@@ -26,7 +26,7 @@
     </div>
     <div id="noOwners" *ngIf="noMatches">No owners with LastName starting with "{{ answeredLastName }}"</div>
 
-    <ng-container *ngIf="!errorMessage && !noMatches">
+    <ng-container *ngIf="!noMatches">
       <div class="table-responsive" id="ownersTable" [attr.aria-busy]="loading">
         <table class="table table-striped"
           matSort [matSortActive]="sortKey" [matSortDirection]="sortDirection" matSortDisableClear
@@ -57,7 +57,7 @@
           </tbody>
         </table>
       </div>
-      <mat-paginator class="owners-paginator"
+      <mat-paginator class="owners-paginator" *ngIf="answeredLastName !== null"
         [length]="totalElements" [pageIndex]="pageIndex" [pageSize]="pageSize"
         [pageSizeOptions]="pageSizeOptions" [showFirstLastButtons]="true"
         (page)="onPage($event)" aria-label="Owners pages">

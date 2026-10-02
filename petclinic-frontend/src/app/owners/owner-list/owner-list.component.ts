@@ -33,7 +33,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   private request?: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   get noMatches(): boolean {
@@ -100,9 +100,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
+  // The total is kept, so the paginator stays to retry the page that failed
   private showError(error: unknown) {
     this.owners = [];
-    this.totalElements = 0;
     this.errorMessage = String(error instanceof Error ? error.message : error);
     this.loading = false;
   }

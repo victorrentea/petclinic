@@ -118,6 +118,13 @@ public class OwnerTest {
     }
 
     @Test
+    void getById_malformedId_isBadRequest() throws Exception {
+        mockMvc.perform(get("/api/owners/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("ownerId has an invalid value"));
+    }
+
+    @Test
     void count_returnsOwnerCount() throws Exception {
         long before = ownerRepository.count();
 

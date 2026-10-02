@@ -1,0 +1,125 @@
+{
+  "schema": "review-cost/1",
+  "harness": "claude-code",
+  "recordedAt": "2026-10-02T21:55:10+00:00",
+  "base": "b12c9bdb53b66c0f86b25bc07c2f4b55a76f9e04",
+  "implementation": "3c2409a692ee72b65e139ae8db10f11415cf0c72",
+  "rounds": [
+    "2026-10-02T21:55:10+00:00"
+  ],
+  "aicUsd": 0.01,
+  "components": [
+    {
+      "key": "implementation",
+      "label": "implementation",
+      "measured": true,
+      "reason": null,
+      "source": "recorded",
+      "window": [
+        "2026-10-02T07:51:00+00:00",
+        "2026-10-02T21:49:19+00:00"
+      ],
+      "harnesses": [
+        "claude-code"
+      ],
+      "entries": [
+        {
+          "harness": "claude-code",
+          "session": "65ffb2df-f8d2-422b-9b25-d903ef7400e9",
+          "what": "edited the change set",
+          "window": [
+            "2026-10-02T21:17:35+00:00",
+            "2026-10-02T21:49:19+00:00"
+          ],
+          "tokens": 23538595,
+          "models": {
+            "Opus 5": 23538595
+          },
+          "usd": 15.7398,
+          "aic": null,
+          "calls": 109,
+          "modelSeconds": 786.6
+        }
+      ],
+      "tokens": 23538595,
+      "usd": 15.7398,
+      "aic": null,
+      "modelSeconds": 786.6
+    },
+    {
+      "key": "review",
+      "label": "review",
+      "measured": true,
+      "reason": null,
+      "source": "recorded",
+      "window": [
+        "2026-10-02T21:49:19+00:00",
+        "2026-10-02T21:50:37+00:00"
+      ],
+      "harnesses": [
+        "claude-code"
+      ],
+      "entries": [
+        {
+          "harness": "claude-code",
+          "session": "65ffb2df-f8d2-422b-9b25-d903ef7400e9",
+          "what": "the reviewers and their brief",
+          "window": [
+            "2026-10-02T21:49:19+00:00",
+            "2026-10-02T21:50:37+00:00"
+          ],
+          "tokens": 4353977,
+          "models": {
+            "Opus 5": 3479076,
+            "Sonnet 5": 874901
+          },
+          "usd": 3.3928,
+          "aic": null,
+          "calls": 29,
+          "modelSeconds": 75.0
+        }
+      ],
+      "tokens": 4353977,
+      "usd": 3.3928,
+      "aic": null,
+      "modelSeconds": 75.0
+    },
+    {
+      "key": "autofix",
+      "label": "auto-fixes",
+      "measured": true,
+      "reason": null,
+      "source": "recorded",
+      "window": [
+        "2026-10-02T21:50:37+00:00",
+        "2026-10-02T21:55:10+00:00"
+      ],
+      "harnesses": [
+        "claude-code"
+      ],
+      "entries": [
+        {
+          "harness": "claude-code",
+          "session": "65ffb2df-f8d2-422b-9b25-d903ef7400e9",
+          "what": "deciding and fixing",
+          "window": [
+            "2026-10-02T21:50:37+00:00",
+            "2026-10-02T21:55:10+00:00"
+          ],
+          "tokens": 7183833,
+          "models": {
+            "Opus 5": 7183833
+          },
+          "usd": 4.3287,
+          "aic": null,
+          "calls": 21,
+          "modelSeconds": 163.6
+        }
+      ],
+      "tokens": 7183833,
+      "usd": 4.3287,
+      "aic": null,
+      "modelSeconds": 163.6
+    }
+  ]
+}

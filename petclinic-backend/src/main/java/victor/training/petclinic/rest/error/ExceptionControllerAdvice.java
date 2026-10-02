@@ -35,6 +35,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestControllerAdvice(basePackages = "victor.training.petclinic.rest")
 public class ExceptionControllerAdvice {
     private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+    private static final String VALIDATION_ERROR = "Validation Error";
+    private static final String VALIDATION_FAILED_LOG = "Validation failed: {}";
 
     private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
             HttpServletRequest request) {
@@ -51,8 +53,8 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException ex,
             HttpServletRequest request) {
         List<String> errors = ValidationErrorExtractor.extract(ex);
-        log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
+        log.warn(VALIDATION_FAILED_LOG, errors);
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR,
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
@@ -65,8 +67,8 @@ public class ExceptionControllerAdvice {
         BindingResult bindingResult = ex.getBindingResult();
         // reuse ValidationErrorExtractor style: build list of readable messages
         List<String> errors = ValidationErrorFieldExtractor.extract(bindingResult);
-        log.warn("Validation failed: {}", errors);
-        ProblemDetail pd = buildProblemDetail("Validation Error",
+        log.warn(VALIDATION_FAILED_LOG, errors);
+        ProblemDetail pd = buildProblemDetail(VALIDATION_ERROR,
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
@@ -76,19 +78,20 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ProblemDetail> handleValidationException(ValidationException ex,
             HttpServletRequest request) {
-        log.warn("Validation failed: {}", ex.getMessage());
+        log.warn(VALIDATION_FAILED_LOG, ex.getMessage());
         return ResponseEntity.badRequest()
-                .body(buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
+                .body(buildProblemDetail(VALIDATION_ERROR, ex.getMessage(), HttpStatus.BAD_REQUEST, request));
     }
 
     // e.g. ?page=abc
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
-        String detail = "'" + ex.getValue() + "' is not a valid value for " + ex.getName();
-        log.warn("Validation failed: {}", detail);
+        // The rejected value is not echoed: it is attacker-chosen text headed for the log
+        String detail = ex.getName() + " has an invalid value";
+        log.warn(VALIDATION_FAILED_LOG, detail);
         return ResponseEntity.badRequest()
-                .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
+                .body(buildProblemDetail(VALIDATION_ERROR, detail, HttpStatus.BAD_REQUEST, request));
     }
 
     @ExceptionHandler(Exception.class)

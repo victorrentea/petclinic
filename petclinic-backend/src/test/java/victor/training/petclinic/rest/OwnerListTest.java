@@ -2,6 +2,9 @@ package victor.training.petclinic.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
@@ -103,7 +106,17 @@ class OwnerListTest {
     @ValueSource(strings = {"lastName,asc", "telephone,asc", "name", "name,up", "name,asc,city,desc", "NAME,asc",
             ",asc", "name,ASC"})
     void unsupportedSort_isBadRequest(String sort) throws Exception {
-        mockMvc.perform(get("/api/owners").param("sort", sort)).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/owners").param("sort", sort))
+                .andExpect(status().isBadRequest());
+    }
+
+    // Attacker-chosen text must reach neither the log nor the response
+    @ParameterizedTest
+    @ValueSource(strings = {"page", "size", "sort"})
+    void rejectedValueIsNotEchoed(String param) throws Exception {
+        mockMvc.perform(get("/api/owners").param(param, "1\nFORGED log line"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(not(containsString("FORGED"))));
     }
 
     // ---------- filtering ----------

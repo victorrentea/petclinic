@@ -72,7 +72,7 @@ export class OwnerService {
 // An array means a backend from before paging (#25): fail loudly rather than show nothing
 function requirePage(body: OwnerPage): OwnerPage {
   if (!Array.isArray(body?.content) || typeof body.totalElements !== 'number') {
-    throw new Error('The owners list did not answer with a page');
+    throw new TypeError('The owners list did not answer with a page');
   }
   return body;
 }

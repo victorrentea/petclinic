@@ -48,6 +48,22 @@ export async function fetchAllOwners(apiBase: string): Promise<OwnerDto[]> {
   }
 }
 
+/**
+ * The first owner, in Name order, that `matches` — paging only as far as needed. Lenient where
+ * fetchAllOwners is strict: Playwright specs run in parallel with add-owner.spec.ts, whose new
+ * owners shift the pages of a walk in flight.
+ */
+export async function findOwner(
+  apiBase: string, matches: (owner: OwnerDto) => boolean): Promise<OwnerDto | undefined> {
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get<OwnerPage>(`${apiBase}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    const found = data.content.find(matches);
+    if (found || data.content.length === 0) {
+      return found;
+    }
+  }
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
