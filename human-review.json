@@ -185,6 +185,7 @@
       "app": {
         "up": "./start-docker.sh up --ref {sha} --ttl 1800",
         "url": "./start-docker.sh url petclinic-{shortsha}",
+        "reset": "/__reset",
         "down": "./start-docker.sh down petclinic-{shortsha}"
       }
     },
