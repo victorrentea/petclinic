@@ -23,6 +23,28 @@
       }
     },
     "sequence": {
+      "//": "The traced suites run against a stack of their own, never the host's: `up`",
+      "//2": "builds the commit under review WITH its own Grafana LGTM (--otel), so the",
+      "//3": "backend's and the browser's spans land in a Tempo nobody else exports to, and",
+      "//4": "two branches traced at once cannot draw each other's calls. --fresh drops the",
+      "//5": "instance's volumes, so every run starts from the seed: a diagram drawn on",
+      "//6": "yesterday's leftover rows shows queries the code does not make on a clean DB.",
+      "//7": "Its own name (-otel), not video's petclinic-{shortsha}: that one is shared and",
+      "//8": "reused across steps, and has no trace store. `vars` prints every host-picked",
+      "//9": "address as NAME=value — GRAFANA_URL, OTEL_EXPORTER_OTLP_ENDPOINT, BACKEND_URL,",
+      "//10": "BASE_URL, API_BASE_URL — which the step exports to all three commands: the",
+      "//11": "browser suites and generate.ts read them, the genseq profile's JVM inherits",
+      "//12": "OTEL_EXPORTER_OTLP_ENDPOINT. `requires` is probed after `up`, with those names",
+      "//13": "expanded: a stack that came up without the store is a skip saying so.",
+      "app": {
+        "up": "./start-docker.sh up --ref {sha} --name petclinic-{shortsha}-otel --otel --fresh --ttl 1800",
+        "vars": "./start-docker.sh ports petclinic-{shortsha}-otel",
+        "down": "./start-docker.sh down petclinic-{shortsha}-otel"
+      },
+      "requires": [
+        {"url": "{GRAFANA_URL}/api/health", "what": "Grafana"},
+        {"url": "{OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces", "what": "OTLP collector"}
+      ],
       "commands": [
         "cd petclinic-test && ./run-tests-with-tracing.sh",
         "cd petclinic-backend && mvn -o -Pgenseq test -Dgroups=genseq",
