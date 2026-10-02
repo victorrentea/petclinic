@@ -323,7 +323,11 @@
                                 agent's premain has already read its configuration. -->
                             <environmentVariables>
                                 <OTEL_SERVICE_NAME>petclinic-backend</OTEL_SERVICE_NAME>
-                                <OTEL_EXPORTER_OTLP_ENDPOINT>http://localhost:4318</OTEL_EXPORTER_OTLP_ENDPOINT>
+                                <!-- No OTEL_EXPORTER_OTLP_ENDPOINT on purpose: the forked JVM
+                                    inherits Maven's environment, so a caller's value (what
+                                    `start-docker.sh ports` prints for a traced instance) gets
+                                    through, and without one the agent's own default is
+                                    http://localhost:4318, the ./start-grafana.sh collector. -->
                                 <OTEL_EXPORTER_OTLP_PROTOCOL>http/protobuf</OTEL_EXPORTER_OTLP_PROTOCOL>
                                 <OTEL_TRACES_EXPORTER>otlp</OTEL_TRACES_EXPORTER>
                                 <OTEL_METRICS_EXPORTER>none</OTEL_METRICS_EXPORTER>
