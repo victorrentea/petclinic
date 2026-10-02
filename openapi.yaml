@@ -210,7 +210,6 @@ paths:
         required: false
         schema:
           type: integer
-          default: 10
           enum:
           - "5"
           - "10"

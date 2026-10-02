@@ -75,7 +75,9 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
-        String detail = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
+        // Strip CR/LF from the attacker-controlled value so it can't forge log lines or split the response.
+        String sanitizedValue = String.valueOf(ex.getValue()).replaceAll("[\\r\\n]", "");
+        String detail = "Invalid value '" + sanitizedValue + "' for parameter '" + ex.getName() + "'";
         log.warn(detail);
         return ResponseEntity.badRequest()
                 .body(buildProblemDetail("Bad Request", detail, HttpStatus.BAD_REQUEST, request));
