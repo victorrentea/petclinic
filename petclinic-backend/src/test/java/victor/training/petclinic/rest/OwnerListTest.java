@@ -112,6 +112,18 @@ class OwnerListTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"page", "sort"})
+    void rejectedValue_isNotEchoedBack(String parameter) throws Exception {
+        String forged = "x\n2026-10-03 ERROR <script>forged</script>";
+
+        String body = mockMvc.perform(get("/api/owners").param(parameter, forged))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).doesNotContain("forged");
+    }
+
     @Test
     void repeatedSortParameter_isBadRequest() throws Exception {
         mockMvc.perform(get("/api/owners").param("sort", "name,asc").param("sort", "city,desc"))

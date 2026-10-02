@@ -198,7 +198,7 @@ describe('OwnerListComponent', () => {
       answer(2, pageOf(6, 26));
       answer(1, pageOf(10, 99));
 
-      expect(component.owners.length).toBe(6);
+      expect(component.owners).toHaveSize(6);
       expect(component.totalElements).toBe(26);
     });
 
@@ -230,7 +230,7 @@ describe('OwnerListComponent', () => {
 
       fixture.destroy();
 
-      expect(responses[0].observers.length).toBe(0);
+      expect(responses[0].observers).toHaveSize(0);
     });
   });
 
@@ -264,6 +264,17 @@ describe('OwnerListComponent', () => {
 
       expect(query('.alert-danger').nativeElement.textContent).toContain('server returned code 500');
       expect(text()).not.toContain('No owners with LastName');
+    });
+
+    it('a failed page hides the rows of the previous one, which no longer match the request', () => {
+      openOnFirstPage();
+      component.onPage({pageIndex: 1, previousPageIndex: 0, pageSize: 10, length: 26});
+      responses[1].error('server returned code 500');
+      fixture.detectChanges();
+
+      expect(query('#ownersTable')).toBeNull();
+      expect(query('mat-paginator')).toBeNull();
+      expect(query('.alert-danger')).not.toBeNull();
     });
 
     it('Add Owner stays available while loading, when empty and after a failure', () => {

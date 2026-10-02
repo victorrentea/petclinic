@@ -116,23 +116,27 @@ class OwnerListQueryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {5, 20})
-    void coldFullPage_takesAtMostThreeSelects(int size) throws Exception {
+    @CsvSource({
+            "5, 1, name,asc, 5",
+            "20, 0, city,desc, 20",
+            "20, 1, city,asc, 5"}) // the last page, partly full
+    void coldPage_takesAtMostThreeSelects(int size, int page, String key, String direction, int expected)
+            throws Exception {
         for (int i = 0; i < 25; i++) {
-            persistOwner("Ann", "Qbudget" + (char) ('a' + i), "Avon", 2, 2);
+            persistOwner("Ann", "Qbudget" + (char) ('a' + i), i % 2 == 0 ? "Avon" : "Bath", 2, 2);
         }
         coldPersistenceContext();
 
-        JsonNode body = getJson("/api/owners?lastName=Qbudget&size=" + size + "&page=" + (size == 5 ? 1 : 0));
+        String sort = "&sort=" + key + "," + direction;
+        JsonNode body = getJson("/api/owners?lastName=Qbudget&size=" + size + "&page=" + page + sort);
 
-        assertThat(body.path("content")).hasSize(size);
+        assertThat(body.path("content")).hasSize(expected);
         assertThat(body.path("totalElements").asLong()).isEqualTo(25);
-        assertThat(rows(body).getFirst().id()).isPositive();
         assertThat(body.path("content").get(0).path("pets").get(1).path("visits")).hasSize(2);
         assertThat(statistics().getPrepareStatementCount()).isLessThanOrEqualTo(3);
         assertThat(statistics().getEntityStatistics(Owner.class.getName()).getLoadCount())
                 .as("owners hydrated: the database must apply LIMIT/OFFSET, not Java")
-                .isEqualTo(size);
+                .isEqualTo(expected);
     }
 
     @ParameterizedTest

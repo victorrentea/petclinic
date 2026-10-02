@@ -41,7 +41,8 @@ final class OwnerListPaging {
         }
         Sort order = SORTS.get(sort);
         if (order == null) {
-            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc, was " + sort);
+            // The raw value is not echoed: it would reach the log and the response unescaped
+            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc");
         }
         return PageRequest.of(page, size, order);
     }

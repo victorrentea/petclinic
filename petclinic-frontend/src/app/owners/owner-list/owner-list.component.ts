@@ -33,7 +33,12 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   private request?: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
+  }
+
+  // After a failure the last rows no longer match the requested page, filter or sort
+  get showGrid(): boolean {
+    return this.totalElements > 0 && !this.errorMessage;
   }
 
   ngOnInit() {

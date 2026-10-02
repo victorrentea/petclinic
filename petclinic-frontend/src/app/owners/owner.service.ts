@@ -64,7 +64,7 @@ export class OwnerService {
 // A backend from before paging answers a bare array: fail loudly rather than show "no owners"
 function requirePage(body: OwnerPage): OwnerPage {
   if (!Array.isArray(body?.content) || typeof body.totalElements !== 'number') {
-    throw new Error('GET /api/owners did not answer a page of owners');
+    throw new TypeError('GET /api/owners did not answer a page of owners');
   }
   return body;
 }
