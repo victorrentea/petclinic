@@ -25,18 +25,18 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 }
 
 /**
- * Remembers every owner the clinic holds, after checking that the ones the
- * Background names are among them — so a changed seed (Flyway's
- * db/seed/R__seed.sql) fails on the Given instead of looking like a broken search.
+ * Checks that the owners the Background names exist — so a changed seed (Flyway's
+ * db/seed/R__seed.sql) fails on the Given instead of looking like a broken search —
+ * and remembers the first page the grid opens on (the API's defaults are the grid's).
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
+  for (const [name] of owners.raw()) {
+    const lastName = name.trim().split(' ').pop();
+    const {data} = await axios.get(`${API_BASE}/owners`, {params: {lastName}, timeout: 10_000});
+    expect(data.content.map(fullName)).toContain(name.trim());
   }
-  const names: string[] = data.map(fullName);
-  expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
-  this.allOwnerNames = names;
+  const {data: firstPage} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  this.firstPageOwnerNames = firstPage.content.map(fullName);
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
@@ -53,6 +53,6 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+Then('the first page of owners is listed', async function (this: PlaywrightWorld) {
+  await expectOwnersListed(this, this.requireFirstPageOwnerNames());
 });

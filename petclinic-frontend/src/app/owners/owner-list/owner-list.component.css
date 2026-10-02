@@ -55,6 +55,17 @@ display:none;
   width: auto;
 }
 
+.owners-range {
+  margin: 0;
+}
+
+.owners-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: bold;
+}
+
 @media (max-width: 576px) {
   #nameGroup {
     flex-direction: column;

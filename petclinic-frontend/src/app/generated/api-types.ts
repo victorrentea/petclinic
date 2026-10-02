@@ -170,6 +170,17 @@ export interface components {
        */
       telephone: string;
     };
+    OwnerPageDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      /** Format: int32 */
+      number?: number;
+      /** Format: int32 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -558,13 +569,17 @@ export interface operations {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description 0-based */
+        page?: number;
+        size?: 5 | 10 | 20;
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

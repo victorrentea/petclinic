@@ -22,21 +22,33 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="loadFailed" class="alert alert-danger" role="alert">Could not load owners. Please try again.</div>
+    <ng-container *ngIf="ownerPage?.totalElements === 0">
+      <div *ngIf="query.lastName" class="owners-empty">No owners with last name starting with "{{ query.lastName }}".</div>
+      <div *ngIf="!query.lastName" class="owners-empty">No owners yet.</div>
+    </ng-container>
+    <div class="table-responsive" id="ownersTable" *ngIf="ownerPage?.totalElements">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
+          <th [attr.aria-sort]="ariaSort('name')">
+            <button type="button" class="owners-sort" (click)="sortBy('name')">Name
+              <span *ngIf="ariaSort('name')" aria-hidden="true">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            </button>
+          </th>
           <th>Address</th>
-          <th>City</th>
+          <th [attr.aria-sort]="ariaSort('city')">
+            <button type="button" class="owners-sort" (click)="sortBy('city')">City
+              <span *ngIf="ariaSort('city')" aria-hidden="true">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            </button>
+          </th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr *ngFor="let owner of owners">
+        <tr *ngFor="let owner of ownerPage.content">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
           <td>{{ owner.address }}</td>
@@ -50,9 +62,30 @@
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <div class="owners-controls">
+        <p class="owners-range" aria-live="polite">
+          Showing {{ firstRowNumber }}–{{ lastRowNumber }} of {{ ownerPage.totalElements }} owners
+        </p>
+        <div class="owners-page-size">
+          <label for="ownersPageSize">Rows per page</label>
+          <app-combo inputId="ownersPageSize" [options]="pageSizes"
+            [ngModel]="query.size" (ngModelChange)="changePageSize($event)"></app-combo>
+        </div>
+        <nav class="owners-pagination" aria-label="Owners pagination">
+          <button type="button" class="btn btn-default" aria-label="First page"
+            [disabled]="query.page <= 1" (click)="goToPage(1)">«</button>
+          <button type="button" class="btn btn-default" aria-label="Previous page"
+            [disabled]="query.page <= 1" (click)="goToPage(query.page - 1)">‹</button>
+          <span class="owners-page-number">Page {{ query.page }} of {{ lastPage }}</span>
+          <button type="button" class="btn btn-default" aria-label="Next page"
+            [disabled]="query.page >= lastPage" (click)="goToPage(query.page + 1)">›</button>
+          <button type="button" class="btn btn-default" aria-label="Last page"
+            [disabled]="query.page >= lastPage" (click)="goToPage(lastPage)">»</button>
+        </nav>
       </div>
+    </div>
+    <div>
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>
 </div>

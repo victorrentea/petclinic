@@ -1,8 +1,8 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +17,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,7 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -83,12 +84,20 @@ public class OwnerRestController {
     @Operation(operationId = "listOwners", summary = "List owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "0-based") @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(schema = @Schema(type = "integer", allowableValues = {"5", "10", "20"},
+                    defaultValue = "10")) @RequestParam(name = "size", defaultValue = "10") int size,
+            @Parameter(schema = @Schema(allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"},
+                    defaultValue = "name,asc")) @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(
+                lastName, OwnerPaging.pageable(page, size, sort));
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners.getContent()),
+                owners.getTotalElements(), owners.getTotalPages(), owners.getNumber(), owners.getSize());
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
