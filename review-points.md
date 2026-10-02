@@ -17,6 +17,12 @@ fixed-in: HEAD
 - severity: high
 - fixed-in: HEAD
 
+### `router.navigate` promise left unhandled, floating-promise bug
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:141
+- source: CI
+- severity: high
+- fixed-in: HEAD
+
 ## Ignored
 
 ### Owner list `page` has no upper bound, enabling large-offset DB scans
