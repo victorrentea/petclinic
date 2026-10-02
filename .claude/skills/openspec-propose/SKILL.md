@@ -156,6 +156,7 @@ After completing all artifacts, summarize:
 
 **Artifact Creation Guidelines**
 
+- Write `proposal.md` for a non-technical product owner who does not know what JSON is: explain the problem, user-visible changes, scope, and business impact in plain language. Keep required headings and capability identifiers, but put API shapes, code/file names, database details, frameworks, and commands in design/tasks instead. Explain breaking changes as who must adapt and how rollout affects them. Before saving, check that the proposal can be understood without developer knowledge.
 - Follow the `instruction` field from `openspec instructions` for each artifact type - it is the authoritative guidance, even for familiar artifact names
 - If the `instruction` field directs you to use a specific skill or command to create the artifact, invoke it instead of writing the artifact directly
 - The schema defines what each artifact should contain - follow it

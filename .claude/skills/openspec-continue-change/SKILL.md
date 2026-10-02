@@ -82,6 +82,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
      - `dependencies`: Completed artifacts to read for context (entries with `skipped: true` have no files - do not look for them)
      - `skipped`/`warning`: present when the change declares skip_specs and this artifact must NOT be created - pick another artifact
    - **Create the artifact file**:
+     - When creating or revising `proposal.md`, write for a non-technical product owner who does not know what JSON is: explain the problem, user-visible changes, scope, and business impact in plain language. Keep required headings and capability identifiers; leave API shapes, code/file names, database details, frameworks, and commands to design/tasks. Explain breaking changes as who must adapt and how rollout affects them. Check that no developer knowledge is needed to understand the proposal.
      - Read any completed dependency files for context - always re-read them from disk, even if you saw them earlier in the conversation (the user may have edited them)
      - If the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
      - Otherwise use `template` as the structure - fill in its sections
