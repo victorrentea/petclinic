@@ -117,6 +117,15 @@ class OwnerListTest {
     }
 
     @Test
+    void invalidParameter_isNotEchoedInTheErrorBody() throws Exception {
+        String body = mockMvc.perform(get("/api/owners").param("sort", "FORGED-LOG-LINE"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).doesNotContain("FORGED-LOG-LINE");
+    }
+
+    @Test
     void prefixIsCaseSensitiveAndAnchoredAtLastNameStart() throws Exception {
         assertThat(lastNames("/api/owners?lastName=Pot")).containsExactly("Potter", "Potter");
         assertThat(lastNames("/api/owners?lastName=otter")).isEmpty();

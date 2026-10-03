@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -72,9 +73,9 @@ class OwnerListQueryBudgetTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {5, 20})
-    void fullPage_takesAtMostThreeSelects_includingSerialization(int size) throws Exception {
-        JsonNode body = getJson("/api/owners?lastName=Qbudget&page=1&size=" + size);
+    @CsvSource({"5, 'name,asc'", "20, 'name,asc'", "5, 'city,desc'", "20, 'name,desc'"})
+    void fullPage_takesAtMostThreeSelects_includingSerialization(int size, String sort) throws Exception {
+        JsonNode body = getJson("/api/owners?lastName=Qbudget&page=1&size=" + size + "&sort=" + sort);
 
         assertThat(body.get("content")).hasSize(size);
         assertThat(body.get("totalElements").asLong()).isEqualTo(OWNERS);

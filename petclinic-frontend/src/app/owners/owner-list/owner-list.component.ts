@@ -21,9 +21,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   loaded = false;
   loading = false;
   errorMessage: string = null;
+  private loadedQuery: OwnerPageQuery = null;
   private request: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   get sortActive(): string {
@@ -74,12 +75,14 @@ export class OwnerListComponent implements OnInit, OnDestroy {
       next: page => {
         this.owners = page.content;
         this.totalElements = page.totalElements;
+        this.loadedQuery = this.query;
         this.loaded = true;
         this.loading = false;
       },
+      // The last page that did load stays on screen, and the controls go back to describing it,
+      // so the user can retry the same click instead of facing a grid that vanished
       error: error => {
-        this.owners = [];
-        this.loaded = false;
+        this.query = this.loadedQuery ?? this.query;
         this.loading = false;
         this.errorMessage = String(error?.message ?? error);
       }

@@ -197,7 +197,7 @@ describe('OwnerListComponent', () => {
 
       expect(component.owners).toEqual([george]);
       expect(component.totalElements).toBe(1);
-      expect(initialLoad.observers.length).toBe(0);
+      expect(initialLoad.observers).toHaveSize(0);
     });
 
     it('a late error or completion of an older request leaves the newer one untouched', () => {
@@ -224,7 +224,39 @@ describe('OwnerListComponent', () => {
 
       fixture.destroy();
 
-      expect(pending.observers.length).toBe(0);
+      expect(pending.observers).toHaveSize(0);
+    });
+  });
+
+  describe('a failed navigation', () => {
+    it('keeps the last loaded page on screen and the controls on it, so the click can be retried', () => {
+      const nextPage = new Subject<OwnerPage>();
+      render();
+      getOwnerPageSpy.and.returnValue(nextPage);
+
+      (fixture.nativeElement.querySelector('.mat-mdc-paginator-navigation-next') as HTMLButtonElement).click();
+      render();
+      nextPage.error('server returned code 503');
+      const el = render();
+
+      expect(el.querySelector('#owners-error').textContent).toContain('server returned code 503');
+      expect(Array.from(el.querySelectorAll('.ownerFullName')).map(td => td.textContent.trim()))
+        .toEqual(['George Franklin', 'Betty Davis']);
+      expect(component.query.page).toBe(0);
+      expect(paginator().pageIndex).toBe(0);
+      expect(el.querySelector('.mat-mdc-paginator-navigation-next')).toBeTruthy();
+    });
+
+    it('after a successful empty search, does not repeat "no owners" beside the error', () => {
+      getOwnerPageSpy.and.returnValue(of(page([], 0)));
+      render();
+      getOwnerPageSpy.and.returnValue(throwError('server returned code 500'));
+
+      submitSearch('Zz');
+      const el = render();
+
+      expect(el.querySelector('#owners-error')).toBeTruthy();
+      expect(el.querySelector('#no-owners')).toBeNull();
     });
   });
 

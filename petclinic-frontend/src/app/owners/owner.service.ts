@@ -10,7 +10,7 @@ import { DEFAULT_OWNER_PAGE_QUERY, OwnerPage, OwnerPageQuery } from './owner-pag
 // A backend still answering with the old bare array must surface as an error, not as an empty grid
 function requireOwnerPage(response: OwnerPage): OwnerPage {
   if (!Array.isArray(response?.content) || typeof response.totalElements !== 'number') {
-    throw new Error('Unexpected owner list response: expected {content, totalElements}');
+    throw new TypeError('Unexpected owner list response: expected {content, totalElements}');
   }
   return response;
 }
