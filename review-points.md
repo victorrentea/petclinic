@@ -163,7 +163,7 @@ anchors: review-commit
 - why: Spring's defaultValue also covers an empty string, and the spec defines only the omitted case. Pulling it down: the spec says malformed input is a 400, and `size=` could be read as malformed.
 
 ### A type mismatch is a 400 on every endpoint, not only the list
-- file: petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ExceptionControllerAdvice.java:88
+- file: petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ExceptionControllerAdvice.java:85
 - alternative: scope the 400 to listOwners, leave /api/owners/abc a 500
 - confidence: 0.7
 - why: a 500 for bad client input is wrong everywhere, and the advice is global by design. Pulling it down: the spec promises the detail and CRUD contracts unchanged, and /api/owners/abc moved from 500 to 400.
