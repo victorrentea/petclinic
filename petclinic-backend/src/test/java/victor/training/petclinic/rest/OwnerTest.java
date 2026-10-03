@@ -28,12 +28,12 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -127,12 +127,11 @@ public class OwnerTest {
     }
 
     @Test
-    void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+    void getAll_firstPageCountsEveryOwner() throws Exception {
+        OwnerPageDto page = searchPage("/api/owners");
 
-        assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-                .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+        assertThat(page.content()).hasSize(10);
+        assertThat(page.totalElements()).isEqualTo(ownerRepository.count());
     }
 
     @Test
@@ -149,6 +148,10 @@ public class OwnerTest {
     }
 
     private List<OwnerDto> search(String uriTemplate) throws Exception {
+        return searchPage(uriTemplate).content();
+    }
+
+    private OwnerPageDto searchPage(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,8 +159,7 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageDto.class);
     }
 
     @Test

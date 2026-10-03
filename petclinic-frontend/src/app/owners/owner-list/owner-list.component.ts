@@ -1,35 +1,48 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {Subscription} from 'rxjs';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort} from '@angular/material/sort';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {OwnerPageQuery} from '../owner-page';
+
+type OwnerSortKey = 'name' | 'city';
+type OwnerSortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizeOptions = [5, 10, 20];
+  lastName = '';
+  submittedLastName = '';
+  pageIndex = 0;
+  pageSize = 10;
+  sortKey: OwnerSortKey = 'name';
+  sortDirection: OwnerSortDirection = 'asc';
+  owners: Owner[] = [];
+  totalElements = 0;
+  loading = false;
+  errorMessage: string | null = null;
+  private loaded = false;
+  private pageRequest?: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
+  }
 
+  get noMatches(): boolean {
+    return this.loaded && this.totalElements === 0;
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.loadPage();
+  }
+
+  ngOnDestroy() {
+    this.pageRequest?.unsubscribe();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +53,53 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  search() {
+    this.submittedLastName = this.lastName ?? '';
+    this.pageIndex = 0;
+    this.loadPage();
+  }
+
+  onPage(event: PageEvent) {
+    this.pageIndex = event.pageSize === this.pageSize ? event.pageIndex : 0;
+    this.pageSize = event.pageSize;
+    this.loadPage();
+  }
+
+  onSort(sort: Sort) {
+    this.sortKey = sort.active as OwnerSortKey;
+    this.sortDirection = sort.direction === 'desc' ? 'desc' : 'asc';
+    this.pageIndex = 0;
+    this.loadPage();
+  }
+
+  // Only the latest request may answer: unsubscribing the previous one silences
+  // its late page, error and completion alike.
+  private loadPage() {
+    this.pageRequest?.unsubscribe();
+    this.loading = true;
+    this.errorMessage = null;
+    this.pageRequest = this.ownerService.getOwners(this.pageQuery()).subscribe({
+      next: page => {
+        this.owners = page.content;
+        this.totalElements = page.totalElements;
+        this.loaded = true;
+        this.loading = false;
+      },
+      error: message => {
+        this.owners = [];
+        this.loaded = false;
+        this.errorMessage = String(message);
+        this.loading = false;
+      }
+    });
+  }
+
+  private pageQuery(): OwnerPageQuery {
+    return {
+      lastName: this.submittedLastName,
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: `${this.sortKey},${this.sortDirection}`
+    };
   }
 }
