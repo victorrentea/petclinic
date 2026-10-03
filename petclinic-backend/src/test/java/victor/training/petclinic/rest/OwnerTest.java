@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -28,12 +29,12 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -148,16 +149,22 @@ public class OwnerTest {
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
+    /** Every page of the result, so a fixture owner is found wherever the sort puts it. */
     private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        List<OwnerDto> owners = new ArrayList<>();
+        for (int page = 0;; page++) {
+            String responseJson = mockMvc.perform(get(uriTemplate).param("page", "" + page).param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json"))
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+            OwnerPageDto ownerPage = mapper.readValue(responseJson, OwnerPageDto.class);
+            owners.addAll(ownerPage.content());
+            if (ownerPage.content().isEmpty() || owners.size() >= ownerPage.totalElements()) {
+                return owners;
+            }
+        }
     }
 
     @Test
