@@ -1,52 +1,69 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Sort} from '@angular/material/sort';
+import {PageEvent} from '@angular/material/paginator';
+import {Subscription} from 'rxjs';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {DEFAULT_OWNER_PAGE_QUERY, OWNER_PAGE_SIZES, OwnerPageQuery, OwnerSortKey} from '../owner-page';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizes = OWNER_PAGE_SIZES;
+  // What is typed in the search box; only search() turns it into the query's lastName
+  draftLastName = '';
+  query: OwnerPageQuery = DEFAULT_OWNER_PAGE_QUERY;
+  owners: Owner[] = [];
+  totalElements = 0;
+  loaded = false;
+  loading = false;
+  errorMessage: string | null = null;
+  private request?: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
+  constructor(private ownerService: OwnerService) {
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.loadPage(this.query);
   }
 
-  onSelect(owner: Owner) {
-    this.router.navigate(['/owners', owner.id]);
+  ngOnDestroy() {
+    this.request?.unsubscribe();
   }
 
-  addOwner() {
-    this.router.navigate(['/owners/add']);
+  search() {
+    this.loadPage({...this.query, lastName: this.draftLastName, page: 0});
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  onPage(event: PageEvent) {
+    const sizeChanged = event.pageSize !== this.query.size;
+    this.loadPage({...this.query, size: event.pageSize, page: sizeChanged ? 0 : event.pageIndex});
+  }
+
+  onSort(sort: Sort) {
+    this.loadPage({...this.query, sort: sort.active as OwnerSortKey, direction: sort.direction || 'asc', page: 0});
+  }
+
+  // The only place a request starts: cancelling the previous one first means no answer,
+  // failure or completion of an older query can ever reach the screen.
+  private loadPage(query: OwnerPageQuery) {
+    this.request?.unsubscribe();
+    this.query = query;
+    this.loading = true;
+    this.request = this.ownerService.getOwnerPage(query).subscribe(
+      page => {
+        this.owners = page.content;
+        this.totalElements = page.totalElements;
+        this.errorMessage = null;
+        this.loaded = true;
+        this.loading = false;
+      },
+      error => {
+        this.errorMessage = String(error);
+        this.loading = false;
+      });
   }
 }

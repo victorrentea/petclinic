@@ -4,7 +4,17 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -19,6 +29,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -38,17 +49,23 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    private static final Set<Integer> PAGE_SIZES = new TreeSet<>(List.of(5, 10, 20));
+    private static final Map<String, List<String>> SORT_CHAINS = Map.of(
+            "name", List.of("lastName", "firstName", "id"),
+            "city", List.of("city", "lastName", "firstName", "id"));
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -86,15 +103,69 @@ public class OwnerRestController {
         this.clock = clock;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @ApiResponse(responseCode = "400", description = "Invalid page, size or sort",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @Parameter(description = "Case-sensitive prefix of the last name; empty matches every owner") @RequestParam(
+                    name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page index",
+                    schema = @Schema(type = "integer", format = "int32", minimum = "0",
+                            defaultValue = "0")) @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Owners per page: 5, 10 or 20", schema = @Schema(type = "integer",
+                    format = "int32", minimum = "5", maximum = "20", defaultValue = "10")) @RequestParam(name = "size",
+                            defaultValue = "10") int size,
+            @Parameter(description = "name orders by last name, first name, id; city by city, then as name",
+                    schema = @Schema(type = "string", defaultValue = "name,asc",
+                            allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"})) @RequestParam(
+                                    name = "sort", defaultValue = "name,asc") String sort) {
+        Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName, pageRequest(page, size, sort));
+        List<Owner> owners = withPetsAndVisits(ownerPage.getContent());
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners), ownerPage.getTotalElements());
+    }
+
+    private static PageRequest pageRequest(int page, int size, String sort) {
+        if (page < 0) {
+            throw new ValidationException("page must be 0 or more, but was " + page);
+        }
+        if (!PAGE_SIZES.contains(size)) {
+            throw new ValidationException("size must be one of " + PAGE_SIZES + ", but was " + size);
+        }
+        if ((long) page * size > Integer.MAX_VALUE) {
+            throw new ValidationException("page " + page + " is too far to reach with size " + size);
+        }
+        return PageRequest.of(page, size, toSort(sort));
+    }
+
+    // Business keys, never entity properties, so the wire contract does not leak the JPA model
+    private static Sort toSort(String sort) {
+        String[] keyAndDirection = sort.split(",", -1);
+        List<String> chain = keyAndDirection.length == 2 ? SORT_CHAINS.get(keyAndDirection[0]) : null;
+        if (chain == null || !List.of("asc", "desc").contains(keyAndDirection[1])) {
+            throw new ValidationException(
+                    "sort must be one of name,asc name,desc city,asc city,desc, but was " + sort);
+        }
+        return Sort.by(Sort.Direction.fromString(keyAndDirection[1]), chain.toArray(String[]::new));
+    }
+
+    // A separate query because paging a collection fetch would page pet/visit rows, not owners
+    private List<Owner> withPetsAndVisits(List<Owner> pageOwners) {
+        if (pageOwners.isEmpty()) {
+            return List.of();
+        }
+        List<Integer> ids = pageOwners.stream().map(Owner::getId).toList();
+        Map<Integer, Owner> fetchedById = ownerRepository.findAllByIdFetchingPetsAndVisits(ids).stream()
+                .collect(Collectors.toMap(Owner::getId, Function.identity()));
+        return ids.stream()
+                .map(id -> Optional.ofNullable(fetchedById.get(id))
+                        .orElseThrow(() -> new IllegalStateException("Owner " + id + " vanished while listing")))
+                .toList();
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

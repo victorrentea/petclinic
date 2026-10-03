@@ -1,47 +1,21 @@
-/* tslint:disable:no-unused-variable */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
-
-import {OwnerListComponent} from './owner-list.component';
-import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import { OwnerService } from '../owner.service';
-import {Owner} from '../owner';
-import {Observable, of, Subject} from 'rxjs';
-import {RouterTestingModule} from '@angular/router/testing';
-import {CommonModule} from '@angular/common';
-import {PartsModule} from '../../parts/parts.module';
-import {ActivatedRouteStub} from '../../testing/router-stubs';
-import {OwnerDetailComponent} from '../owner-detail/owner-detail.component';
-import {OwnersModule} from '../owners.module';
-import {DummyComponent} from '../../testing/dummy.component';
-import {OwnerAddComponent} from '../owner-add/owner-add.component';
-import {OwnerEditComponent} from '../owner-edit/owner-edit.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { MatPaginator } from '@angular/material/paginator';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import Spy = jasmine.Spy;
 
-
-class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    return of();
-  }
-}
+import { OwnerListComponent } from './owner-list.component';
+import { OwnerService } from '../owner.service';
+import { OwnersModule } from '../owners.module';
+import { Owner } from '../owner';
+import { DEFAULT_OWNER_PAGE_QUERY, OwnerPage, OwnerPageQuery } from '../owner-page';
 
 describe('OwnerListComponent', () => {
-
-  let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
-  let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
-  let de: DebugElement;
-  let el: HTMLElement;
-
+  let component: OwnerListComponent;
+  let getOwnerPage: Spy<(query?: OwnerPageQuery) => Observable<OwnerPage>>;
 
   const testOwner: Owner = {
     id: 1,
@@ -52,91 +26,248 @@ describe('OwnerListComponent', () => {
     telephone: '6085551023',
     pets: []
   };
-  let testOwners: Owner[];
+  const tenOwners: Owner[] = Array.from({length: 10}, (_, i) => ({...testOwner, id: i + 1}));
+  const page = (content: Owner[], totalElements: number): OwnerPage => ({content, totalElements});
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DummyComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
-        RouterTestingModule.withRoutes(
-          [{path: 'owners', component: OwnerListComponent},
-            {path: 'owners/add', component: OwnerAddComponent},
-            {path: 'owners/:id', component: OwnerDetailComponent},
-            {path: 'owners/:id/edit', component: OwnerEditComponent}
-          ])],
-      providers: [
-        {provide: OwnerService, useValue: ownerService},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-      ]
-    })
-      .compileComponents();
-  }));
-
-  beforeEach(() => {
-    testOwners = [testOwner];
-
+  beforeEach(async () => {
+    getOwnerPage = jasmine.createSpy('getOwnerPage').and.returnValue(of(page(tenOwners, 26)));
+    await TestBed.configureTestingModule({
+      imports: [OwnersModule, NoopAnimationsModule, RouterTestingModule],
+      providers: [{provide: OwnerService, useValue: {getOwnerPage}}]
+    }).compileComponents();
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
-    ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
-
   });
 
-  it('should create OwnerListComponent', () => {
-    expect(component).toBeTruthy();
-  });
+  const query = (overrides: Partial<OwnerPageQuery>): OwnerPageQuery => ({...DEFAULT_OWNER_PAGE_QUERY, ...overrides});
+  const element = (css: string): HTMLElement | null => fixture.nativeElement.querySelector(css);
+  const text = (css: string): string => element(css)?.textContent?.trim() ?? '';
+  const render = () => fixture.detectChanges();
+  const openAndForgetCalls = () => {
+    render();
+    getOwnerPage.calls.reset();
+  };
 
-  it('should call ngOnInit() method', () => {
-    fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
-  });
+  describe('requests', () => {
+    it('opens on the first page of 10 by name ascending', () => {
+      render();
 
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
-    fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
-      de = fixture.debugElement.query(By.css('.ownerFullName'));
-      el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(DEFAULT_OWNER_PAGE_QUERY);
     });
-  }));
 
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+    it('a submitted search asks for page 0 with the new prefix, keeping the sort', () => {
+      render();
+      component.onSort({active: 'city', direction: 'desc'});
+      component.onPage({pageIndex: 2, pageSize: 10, length: 26});
+      getOwnerPage.calls.reset();
 
-    component.searchByLastName('');
+      component.draftLastName = 'Fr';
+      component.search();
 
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({lastName: 'Fr', sort: 'city', direction: 'desc'}));
+    });
+
+    it('page navigation keeps the submitted prefix, not the unsubmitted input', () => {
+      render();
+      component.draftLastName = 'Fr';
+      component.search();
+      component.draftLastName = 'Zz';
+      getOwnerPage.calls.reset();
+
+      component.onPage({pageIndex: 1, pageSize: 10, length: 26});
+
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({lastName: 'Fr', page: 1}));
+    });
+
+    it('changing the page size goes back to page 0', () => {
+      render();
+      component.onPage({pageIndex: 2, pageSize: 10, length: 26});
+      getOwnerPage.calls.reset();
+
+      component.onPage({pageIndex: 1, pageSize: 20, length: 26, previousPageIndex: 2});
+
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({size: 20}));
+    });
+
+    it('changing the sort goes back to page 0', () => {
+      render();
+      component.onPage({pageIndex: 2, pageSize: 10, length: 26});
+      getOwnerPage.calls.reset();
+
+      component.onSort({active: 'name', direction: 'desc'});
+
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({direction: 'desc'}));
+    });
+
+    it('one click on Find Owner sends exactly one request', () => {
+      openAndForgetCalls();
+
+      (element('#search-owner-form button[type=submit]') as HTMLButtonElement).click();
+
+      expect(getOwnerPage).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
+  describe('latest request wins', () => {
+    it('an earlier answer arriving late does not overwrite the latest page', () => {
+      const initialLoad = new Subject<OwnerPage>();
+      getOwnerPage.and.returnValues(initialLoad, of(page([testOwner], 1)));
+      render();
 
-    component.searchByLastName('Fr');
+      component.draftLastName = 'Franklin';
+      component.search();
+      initialLoad.next(page(tenOwners, 26));
 
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
+      expect(component.owners).toEqual([testOwner]);
+      expect(component.totalElements).toBe(1);
+      expect(component.loading).toBeFalse();
+    });
+
+    it('an earlier failure or completion does not touch the pending latest request', () => {
+      const initialLoad = new Subject<OwnerPage>();
+      const latest = new Subject<OwnerPage>();
+      getOwnerPage.and.returnValues(initialLoad, latest);
+      render();
+      component.search();
+
+      initialLoad.error('server returned code 500');
+      expect(component.errorMessage).toBeNull();
+      expect(component.loading).toBeTrue();
+
+      latest.next(page([testOwner], 1));
+      latest.complete();
+      expect(component.loading).toBeFalse();
+      expect(component.owners).toEqual([testOwner]);
+    });
+
+    it('an earlier completion does not end the latest loading', () => {
+      const initialLoad = new Subject<OwnerPage>();
+      getOwnerPage.and.returnValues(initialLoad, new Subject<OwnerPage>());
+      render();
+      component.search();
+
+      initialLoad.complete();
+
+      expect(component.loading).toBeTrue();
+    });
+
+    it('leaving the screen cancels the outstanding request', () => {
+      const pending = new Subject<OwnerPage>();
+      getOwnerPage.and.returnValue(pending);
+      render();
+
+      fixture.destroy();
+
+      expect(pending.observers.length).toBe(0);
+    });
   });
 
-  // The page loads every owner on open; a search typed before that answer arrives must
-  // not be overwritten by it when it finally does.
-  it('a search is not overwritten by the initial load answering late', () => {
-    const initialLoad = new Subject<Owner[]>();
-    getOwnersSpy.and.returnValue(initialLoad);
-    fixture.detectChanges();
+  describe('empty results and failures', () => {
+    it('a zero total shows the no-owners message for the submitted prefix and hides the paginator', () => {
+      openAndForgetCalls();
+      getOwnerPage.and.returnValue(of(page([], 0)));
+      component.draftLastName = 'Zz';
+      component.search();
+      component.draftLastName = 'Yy';
+      render();
 
-    component.searchByLastName('Franklin');
-    initialLoad.next([testOwner, {...testOwner, id: 2, lastName: 'Davis'}]);
+      expect(text('#noOwners')).toBe('No owners with LastName starting with "Zz"');
+      expect(element('mat-paginator')).toBeNull();
+      expect(element('#ownersError')).toBeNull();
+    });
 
-    expect(component.owners).toEqual([testOwner]);
+    it('an empty page of a nonzero total keeps navigation and claims no "no matches"', () => {
+      getOwnerPage.and.returnValue(of(page([], 26)));
+      render();
+
+      expect(element('#noOwners')).toBeNull();
+      expect(element('mat-paginator')).not.toBeNull();
+    });
+
+    it('a failed request shows an explicit error, not an empty result', () => {
+      getOwnerPage.and.returnValue(throwError('server returned code 500'));
+      render();
+
+      expect(text('#ownersError')).toContain('server returned code 500');
+      expect(element('#noOwners')).toBeNull();
+      expect(element('mat-paginator')).toBeNull();
+    });
+
+    it('Add Owner stays available while loading, on no matches and on failure', () => {
+      getOwnerPage.and.returnValues(new Subject<OwnerPage>(), of(page([], 0)), throwError('boom'));
+      render();
+      expect(element('#addOwner')).withContext('loading').not.toBeNull();
+
+      component.search();
+      render();
+      expect(element('#addOwner')).withContext('no matches').not.toBeNull();
+
+      component.search();
+      render();
+      expect(element('#addOwner')).withContext('failure').not.toBeNull();
+    });
   });
 
+  describe('grid', () => {
+    it('lists the owners linking to their details', () => {
+      render();
+
+      expect(fixture.nativeElement.querySelectorAll('#ownersTable tbody .ownerFullName').length).toBe(10);
+      expect(text('.ownerFullName')).toBe('George Franklin');
+      expect(element('.ownerFullName a')?.getAttribute('href')).toBe('/owners/1');
+    });
+
+    it('shows the range and total, and offers 5, 10 and 20 rows per page', () => {
+      render();
+
+      expect(text('.mat-mdc-paginator-range-label')).toBe('1 – 10 of 26');
+      const paginator = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
+      expect(paginator.pageSizeOptions).toEqual([5, 10, 20]);
+      expect(paginator.pageSize).toBe(10);
+    });
+
+    it('next and previous buttons request the adjacent pages', () => {
+      openAndForgetCalls();
+
+      element('.mat-mdc-paginator-navigation-next')!.click();
+      render();
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({page: 1}));
+      expect(text('.mat-mdc-paginator-range-label')).toBe('11 – 20 of 26');
+
+      getOwnerPage.calls.reset();
+      element('.mat-mdc-paginator-navigation-previous')!.click();
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({page: 0}));
+    });
+
+    it('only Name and City are sortable', () => {
+      render();
+
+      const sortable: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('th[mat-sort-header]'));
+      expect(sortable.map(th => th.textContent?.trim())).toEqual(['Name', 'City']);
+      expect(fixture.nativeElement.querySelectorAll('#ownersTable th').length).toBe(5);
+    });
+
+    it('clicking a header toggles its direction and never clears the sort', () => {
+      openAndForgetCalls();
+      const city = fixture.debugElement.queryAll(By.css('th[mat-sort-header]'))[1].nativeElement as HTMLElement;
+
+      city.click();
+      city.click();
+      city.click();
+
+      expect(getOwnerPage.calls.allArgs().map(([q]) => `${q?.sort},${q?.direction}`))
+        .toEqual(['city,asc', 'city,desc', 'city,asc']);
+    });
+
+    it('sorts from the keyboard', () => {
+      openAndForgetCalls();
+      const name = element('th[mat-sort-header]')!;
+      const enter = new KeyboardEvent('keydown', {key: 'Enter'});
+      Object.defineProperty(enter, 'keyCode', {get: () => 13});
+
+      name.dispatchEvent(enter);
+
+      expect(getOwnerPage).toHaveBeenCalledOnceWith(query({direction: 'desc'}));
+    });
+  });
 });
