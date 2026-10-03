@@ -17,6 +17,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   draftLastName = '';
   query: OwnerPageQuery = FIRST_OWNER_PAGE;
   page: OwnerPage | null = null;
+  // The filter the displayed page answered, which a search still in flight has not replaced yet
+  pageLastName = '';
   loading = false;
   errorMessage: string | null = null;
   private request?: Subscription;
@@ -55,6 +57,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     }
   }
 
+  retry() {
+    this.load(this.query);
+  }
+
   onSelect(owner: Owner) {
     this.router.navigate(['/owners', owner.id]);
   }
@@ -73,6 +79,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.request = this.ownerService.listOwners(query).subscribe({
       next: page => {
         this.page = page;
+        this.pageLastName = query.lastName;
         this.loading = false;
       },
       error: () => {

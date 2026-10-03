@@ -5,7 +5,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.hibernate.resource.jdbc.spi.StatementInspector;
 
-/** Records every SQL statement Hibernate sends, once plugged in via {@code hibernate.session_factory.statement_inspector}. */
+/**
+ * Records every SQL statement Hibernate sends,
+ * once plugged in via {@code hibernate.session_factory.statement_inspector}.
+ */
 public class RecordedSql implements StatementInspector {
     private static final List<String> statements = new CopyOnWriteArrayList<>();
 

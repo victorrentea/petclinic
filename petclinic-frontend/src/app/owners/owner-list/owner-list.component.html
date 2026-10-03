@@ -19,9 +19,12 @@
       </div>
     </form>
 
-    <div *ngIf="errorMessage" id="ownersError" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+    <div *ngIf="errorMessage" id="ownersError" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+      <button type="button" id="retryOwners" class="btn btn-default btn-sm" (click)="retry()">Retry</button>
+    </div>
 
-    <div *ngIf="page?.totalElements === 0" id="noOwners">No owners with last name starting with "{{ query.lastName }}"</div>
+    <div *ngIf="page?.totalElements === 0" id="noOwners">No owners with last name starting with "{{ pageLastName }}"</div>
 
     <div class="table-responsive" id="ownersTable" *ngIf="page && page.totalElements > 0" [attr.aria-busy]="loading">
       <table class="table table-striped" matSort [matSortActive]="sortKey" [matSortDirection]="sortDirection" matSortDisableClear

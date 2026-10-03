@@ -15,6 +15,7 @@ import jakarta.validation.ValidationException;
 /**
  * Turns the raw list query parameters into a {@link Pageable}, rejecting anything else with a 400.
  * Parsed by hand rather than bound to ints: a bad value must be a validation error, not a type mismatch.
+ * Messages never echo the value: it is caller-controlled text that would land in the log.
  */
 final class OwnerPageRequest {
     static final String DEFAULT_PAGE = "0";
@@ -40,7 +41,7 @@ final class OwnerPageRequest {
     private static int pageIndex(String page) {
         int index = parseInt("page", page);
         if (index < 0) {
-            throw new ValidationException("page must not be negative, was " + page);
+            throw new ValidationException("page must not be negative");
         }
         return index;
     }
@@ -48,7 +49,7 @@ final class OwnerPageRequest {
     private static int pageSize(String size) {
         int parsed = parseInt("size", size);
         if (!SIZES.contains(parsed)) {
-            throw new ValidationException("size must be one of 5, 10, 20, was " + size);
+            throw new ValidationException("size must be one of 5, 10, 20");
         }
         return parsed;
     }
@@ -56,7 +57,7 @@ final class OwnerPageRequest {
     private static Sort sortOf(String sort) {
         Sort parsed = SORTS.get(sort);
         if (parsed == null) {
-            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc, was " + sort);
+            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc");
         }
         return parsed;
     }
@@ -65,7 +66,7 @@ final class OwnerPageRequest {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            throw new ValidationException(name + " must be an integer, was " + value);
+            throw new ValidationException(name + " must be an integer");
         }
     }
 }

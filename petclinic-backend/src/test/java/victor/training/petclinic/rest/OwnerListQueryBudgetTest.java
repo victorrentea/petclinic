@@ -30,7 +30,8 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 
 @SpringBootTest(properties = {
-        "spring.jpa.properties.hibernate.session_factory.statement_inspector=victor.training.petclinic.rest.RecordedSql",
+        "spring.jpa.properties.hibernate.session_factory.statement_inspector="
+                + "victor.training.petclinic.rest.RecordedSql",
         "spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=true",
         "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
         "spring.jpa.properties.hibernate.cache.use_query_cache=false"})

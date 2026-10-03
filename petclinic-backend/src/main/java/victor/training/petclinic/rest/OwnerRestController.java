@@ -106,8 +106,8 @@ public class OwnerRestController {
                     schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
     public OwnerPageDto listOwners(
-            @Parameter(description = "Case-sensitive prefix of the last name; empty matches every owner") @RequestParam(
-                    defaultValue = "") String lastName,
+            @Parameter(description = "Case-sensitive prefix of the last name; "
+                    + "empty matches every owner") @RequestParam(defaultValue = "") String lastName,
             @Parameter(description = "Zero-based page index",
                     schema = @Schema(type = "integer", format = "int32", minimum = "0",
                             defaultValue = OwnerPageRequest.DEFAULT_PAGE)) @RequestParam(

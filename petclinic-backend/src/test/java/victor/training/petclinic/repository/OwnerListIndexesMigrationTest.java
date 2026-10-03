@@ -33,7 +33,7 @@ class OwnerListIndexesMigrationTest {
             flyway(db, "3").migrate();
             Integer ownersAtV3 = new JdbcTemplate(db).queryForObject("SELECT count(*) FROM owners", Integer.class);
 
-            var result = flyway(db, null).migrate();
+            var result = flyway(db, "4").migrate();
 
             assertThat(result.migrations).extracting(m -> m.version).containsExactly("4");
             assertOwnerListIndexes(db);

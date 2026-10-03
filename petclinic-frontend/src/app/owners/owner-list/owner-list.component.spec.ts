@@ -55,7 +55,8 @@ describe('OwnerListComponent', () => {
 
   const query = (overrides: Partial<OwnerPageQuery>): OwnerPageQuery => ({...FIRST_OWNER_PAGE, ...overrides});
   const lastQuery = (): OwnerPageQuery => listOwnersSpy.calls.mostRecent().args[0];
-  const text = (selector: string): string => fixture.debugElement.query(By.css(selector))?.nativeElement.textContent ?? '';
+  const text = (selector: string): string =>
+    fixture.debugElement.query(By.css(selector))?.nativeElement.textContent ?? '';
   const exists = (selector: string): boolean => !!fixture.debugElement.query(By.css(selector));
   const paginator = (): MatPaginator => fixture.debugElement.query(By.directive(MatPaginator)).componentInstance;
 
@@ -237,6 +238,17 @@ describe('OwnerListComponent', () => {
     expect(exists('#ownersError')).toBeFalse();
   });
 
+  it('keeps naming the search that matched none while the next search is in flight', async () => {
+    listOwnersSpy.and.returnValue(of(pageOf([], 0)));
+    fixture.detectChanges();
+    await typeAndSubmit('Zz');
+    listOwnersSpy.and.returnValue(new Subject<OwnerPage>());
+
+    await typeAndSubmit('Pot');
+
+    expect(text('#noOwners')).toContain('"Zz"');
+  });
+
   it('keeps the paginator, and does not claim "no owners", on an empty page past the last', () => {
     listOwnersSpy.and.returnValue(of(pageOf([], 26)));
     fixture.detectChanges();
@@ -253,5 +265,20 @@ describe('OwnerListComponent', () => {
     expect(exists('#noOwners')).toBeFalse();
     expect(component.loading).toBeFalse();
     expect(text('#addOwner')).toContain('Add Owner');
+  });
+
+  it('retries the failed request, once, with the same filter, page, size and sort', () => {
+    listOwnersSpy.and.returnValue(throwError('server returned code 500'));
+    fixture.detectChanges();
+    component.onPage({pageIndex: 2, previousPageIndex: 1, pageSize: 10, length: 26});
+    fixture.detectChanges();
+    listOwnersSpy.calls.reset();
+    listOwnersSpy.and.returnValue(of(pageOf([george])));
+
+    fixture.debugElement.query(By.css('#retryOwners')).nativeElement.click();
+    fixture.detectChanges();
+
+    expect(listOwnersSpy.calls.allArgs()).toEqual([[query({page: 2})]]);
+    expect(exists('#ownersError')).toBeFalse();
   });
 });

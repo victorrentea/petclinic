@@ -110,6 +110,13 @@ class OwnerListTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void blankPagingParametersFallBackToTheDefaults() throws Exception {
+        JsonNode page = list("/api/owners?page=&size=&sort=");
+
+        assertThat(ids(page)).isEqualTo(idsFromDb("ORDER BY last_name, first_name, id LIMIT 10"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"lastName,asc", "telephone,asc", "name", "name,up", "city,", ",asc", "name,asc,city,desc"})
     void rejectsUnsupportedSort(String sort) throws Exception {
@@ -134,7 +141,8 @@ class OwnerListTest {
     void filtersByCaseSensitiveLastNamePrefix() throws Exception {
         JsonNode potters = list("/api/owners?lastName=Pot");
 
-        assertThat(potters.path("content").findValuesAsText("firstName")).containsExactlyInAnyOrder("Harry", "Beatrix");
+        assertThat(potters.path("content").findValuesAsText("firstName"))
+                .containsExactlyInAnyOrder("Harry", "Beatrix");
         assertThat(potters.path("totalElements").asLong()).isEqualTo(2);
     }
 
