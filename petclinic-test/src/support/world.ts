@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {appendWindow, forgetWindowsOf} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../genseq/sequence-tag';
+import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
 import {keepCaptionAcrossLoads, showCaption} from './captions';
@@ -53,6 +53,8 @@ export class PlaywrightWorld extends World {
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
   traceSource?: string;
+  // Named by GENSEQ_SELECT, untagged: the diagram's footer must not claim a tag.
+  traceSelected?: boolean;
   traceStartMs?: number;
   // Set for every scenario when PW_TRACE=on: where its recording lands, and when it began.
   recordingZip?: string;
@@ -117,6 +119,7 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
   if (shouldGenerateSequence(pickle.tags, pickle.name, pickle.uri)) {
     this.traceTitle = pickle.name;
     this.traceSource = path.relative(path.join(__dirname, '..', '..'), pickle.uri);
+    this.traceSelected = !isTagged(pickle.tags);
     // Stamp every browser span with the scenario name so Tempo can find this
     // run via `{ span.test.name = "..." }`.
     await this.page.addInitScript((name) => {
@@ -168,6 +171,7 @@ After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: 
       source: this.traceSource!,
       startMs: this.traceStartMs,
       endMs: Date.now() + POST_PAD_MS,
+      ...(this.traceSelected ? {selected: true} : {}),
     });
   }
   const video = this.page?.video();

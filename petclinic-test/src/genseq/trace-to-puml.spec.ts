@@ -604,6 +604,24 @@ test('a Java diagram names the annotation a @SpringBootTest actually carries', (
   expect(spec).toContain('footer @generate_sequence');
 });
 
+// A test GENSEQ_SELECT named (one the branch wrote) carries no tag. A footer claiming
+// `@GenerateSequence in OwnerListTest.java` sent the reader grepping for an annotation
+// that is not there, and contradicted the review card that said `new test`.
+test('a test traced because GENSEQ_SELECT named it does not claim the tag in its footer', () => {
+  const java = renderPuml('petclinic-backend/src/test/java/OwnerListTest.java', [{
+    title: 'returns the first page', traces: [], selected: true,
+  }], STATIC);
+  expect(java).toContain('footer traced because this branch wrote it in '
+    + 'petclinic-backend/src/test/java/OwnerListTest.java');
+  expect(java).not.toContain('@GenerateSequence');
+
+  const feature = renderPuml('src/owner-search.feature', [{
+    title: 'Sorting by city, then reversing it', traces: [], selected: true,
+  }], STATIC);
+  expect(feature).toContain('footer traced because this branch wrote it in src/owner-search.feature');
+  expect(feature).not.toContain('@generate_sequence');
+});
+
 // ── A second process ──────────────────────────────────────────────────────────────
 // The backend's HTTP client span and the SERVER span it opens in notification-service are
 // told apart by service.name alone: that is what makes the hop an arrow between two
