@@ -66,6 +66,14 @@ services:
       <<: *otel
       OTEL_SERVICE_NAME: notification-service
     volumes: *agent
+    # Published for the one traced JVM that is NOT in this network: `mvn -Pgenseq` runs the
+    # backend's @GenerateSequence tests in-process on the host, and their visit booking
+    # POSTs to notification-service.url — localhost:8090 by default, where nothing of this
+    # instance listens. The call failed (best effort, logged) and AddVisitApiTest's diagram
+    # silently lost NotificationService and the SMS gateway. `ports` prints this as
+    # NOTIFICATIONSERVICE_URL, which Spring binds to notification-service.url.
+    ports:
+      - "127.0.0.1::8090"
     depends_on:
       lgtm:
         condition: service_healthy

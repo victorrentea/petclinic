@@ -318,6 +318,14 @@
                         <configuration>
                             <!-- @{argLine} keeps jacoco's agent, which prepare-agent put there. -->
                             <argLine>@{argLine} -javaagent:${otel.agent.jar}</argLine>
+                            <!-- Only @GenerateSequence (Jupiter) tests draw a diagram, and
+                                -Dgroups=genseq filters every engine: FunctionalCucumberTest's
+                                @Suite then discovers nothing and fails the build with
+                                NoTestsDiscovered on every traced run. No suite runner here can
+                                draw one, so the suite engine is left out of this profile. -->
+                            <excludeJUnit5Engines>
+                                <excludeJUnit5Engine>junit-platform-suite</excludeJUnit5Engine>
+                            </excludeJUnit5Engines>
                             <!-- Environment, not systemPropertyVariables: surefire applies those
                                 inside the forked JVM *after* it has booted, which is after the
                                 agent's premain has already read its configuration. -->
