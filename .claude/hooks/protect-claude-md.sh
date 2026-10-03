@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Pre-tool-use hook: refuse to let an agent write project rules into CLAUDE.md.
+# Pre-tool-use hook: refuse to let an agent create or write a CLAUDE.md.
 #
-# CLAUDE.md in this repo is a one-line `@AGENTS.md` import and nothing else.
-# AGENTS.md holds the actual rules, because Copilot CLI and Codex read AGENTS.md
-# natively and have no import mechanism of their own — measured, not assumed:
-# a markdown link and an `@path` line in .github/copilot-instructions.md both
-# stay inert. A rule written into CLAUDE.md would therefore reach Claude Code
-# only, and silently miss every other agent.
+# This repo has no CLAUDE.md on purpose. AGENTS.md holds the rules, and every
+# agent reads it natively: Copilot CLI and Codex always, Claude Code (>= 2.1.277)
+# only in a project with NO CLAUDE.md — root or nested AGENTS.md alike. So a
+# single CLAUDE.md, anywhere, would silently switch off every AGENTS.md here for
+# Claude Code, and a rule written into it would miss every other agent.
 #
 # ONE script, TWO agents, same split as the other hooks here:
 #
@@ -68,15 +67,15 @@ print(m.group(1) if writes else "")
 [ "$(basename "$path")" = "CLAUDE.md" ] || exit 0
 case "$path" in *.claude/*) exit 0 ;; esac
 
-REASON="Blocked: CLAUDE.md is not the rules file in this repo.
+REASON="Blocked: this repo has no CLAUDE.md, on purpose.
 
   rules go in : $(dirname "$path")/AGENTS.md
-  you targeted: $path  (one line, \"@AGENTS.md\", never edited)
+  you targeted: $path
 
-AGENTS.md is what Copilot CLI and Codex read natively; Claude Code reaches it
-through that import. Writing here would make the rule Claude-only. Put your
-change in AGENTS.md in the same directory instead. Do not work around this with
-a shell command — the rule is the point, not the tool."
+Every agent reads AGENTS.md natively, but Claude Code reads it only while the
+project has no CLAUDE.md: creating one would silently switch off every AGENTS.md
+here. Put your change in AGENTS.md in the same directory instead. Do not work
+around this with a shell command — the rule is the point, not the tool."
 
 if [ "$AGENT" = copilot ]; then
   REASON="$REASON" python3 -c "
