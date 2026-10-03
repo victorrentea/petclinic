@@ -1,0 +1,43 @@
+@startuml
+' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.
+hide footbox
+skinparam hyperlinkUnderline false
+skinparam hyperlinkColor #1A4FA0
+title [[src://petclinic-test/src/owner-search.feature:26{Click to open the test} Searching with an empty last name shows the first page of every owner]]
+footer @generate_sequence in src/owner-search.feature — generated from real traces of end-to-end test runs, do not edit ❗
+participant Browser
+participant Backend
+participant DB
+Browser -> Backend: List owners\nGET /api/owners
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:32{Click to open OwnerRepository.findPageFetchingPetsAndVisits} OwnerRepository.findPageFetchingPetsAndVisits ↗]]
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:19{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+activate Backend
+Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+deactivate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:26{Click to open OwnerRepository.findByIdInFetchingPetsAndVisits} OwnerRepository.findByIdInFetchingPetsAndVisits ↗]]
+activate Backend
+Backend -> DB: [[genseq://075m496{Click for the statement behind this call} SELECT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH p.type … ⊕]]
+deactivate Backend
+deactivate Backend
+Backend --> Browser: [[genseq://1xy5syb{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+Browser -> Backend: List owners\nGET /api/owners
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:32{Click to open OwnerRepository.findPageFetchingPetsAndVisits} OwnerRepository.findPageFetchingPetsAndVisits ↗]]
+activate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:19{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+activate Backend
+Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+deactivate Backend
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:26{Click to open OwnerRepository.findByIdInFetchingPetsAndVisits} OwnerRepository.findByIdInFetchingPetsAndVisits ↗]]
+activate Backend
+Backend -> DB: [[genseq://075m496{Click for the statement behind this call} SELECT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH p.type … ⊕]]
+deactivate Backend
+deactivate Backend
+Backend --> Browser: [[genseq://1xy5syb{Click for this call’s JSON body} 200 ⊕]]
+deactivate Backend
+@enduml

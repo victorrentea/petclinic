@@ -13,10 +13,20 @@ Given('today is {word}', async function (this: PlaywrightWorld, isoDate: string)
   await this.page.clock.setFixedTime(new Date(`${isoDate}T10:00:00`));
 });
 
+/** Pages through the owners until one has a pet born that day; the list is paged, never whole. */
+async function ownerWithAPetBornOn(birthDate: string): Promise<any> {
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get(`${API_BASE}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    const owner = data.content.find((o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
+    if (owner || data.content.length === 0) {
+      return owner;
+    }
+  }
+}
+
 /** Found in the seed (Flyway's db/seed/R__seed.sql), so a changed seed fails here, not in a Then. */
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
+  const owner = await ownerWithAPetBornOn(birthDate);
   if (!owner) {
     throw new Error(`No seeded pet born on ${birthDate} — did db/seed/R__seed.sql change?`);
   }

@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { DEFAULT_OWNER_QUERY, OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,47 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  const expectedPage: OwnerPage = { content: expectedOwners, totalElements: 26 };
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+  it('lists the first page with the API defaults', () => {
+    ownerService.listOwners().subscribe((page) => expect(page).toEqual(expectedPage), fail);
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?page=0&size=10&sort=name,asc');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedPage);
+  });
+
+  it('sends the filter, page, size and sort it is given', () => {
+    ownerService.listOwners({ lastName: 'Fr', page: 2, size: 20, sort: 'city,desc' })
+      .subscribe((page) => expect(page.totalElements).toBe(26), fail);
+
+    const req = httpTestingController.expectOne((r) => r.url === ownerService.entityUrl);
+    expect(req.request.params.get('lastName')).toBe('Fr');
+    expect(req.request.params.get('page')).toBe('2');
+    expect(req.request.params.get('size')).toBe('20');
+    expect(req.request.params.get('sort')).toBe('city,desc');
+    req.flush(expectedPage);
+  });
+
+  it('encodes the last-name prefix as one query value', () => {
+    ownerService.listOwners({ ...DEFAULT_OWNER_QUERY, lastName: 'Wild%_ &x+' }).subscribe();
+
+    const req = httpTestingController.expectOne((r) => r.url === ownerService.entityUrl);
+    expect(req.request.urlWithParams).toContain('lastName=Wild%25_%20%26x%2B');
+    expect(req.request.urlWithParams).not.toContain('&x');
+    req.flush(expectedPage);
+  });
+
+  it('propagates a failed list request instead of answering an empty page', () => {
+    let answered = false;
+    let failed = false;
+    ownerService.listOwners().subscribe({ next: () => answered = true, error: () => failed = true });
+
+    httpTestingController.expectOne((r) => r.url === ownerService.entityUrl)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+
+    expect(failed).toBeTrue();
+    expect(answered).toBeFalse();
   });
 
   it('search the owner by id', () => {
@@ -129,17 +163,5 @@ describe('OwnerService', () => {
     expect(req.request.method).toEqual('DELETE');
     expect(req.request.body).toEqual(null);
     req.flush(null);
-  });
-
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
   });
 });

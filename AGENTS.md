@@ -52,7 +52,8 @@ To see how the pieces fit together, every diagram generated from the code is ren
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 `ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
-design system has no multi-select yet.
+design system has no multi-select yet. The owners grid pages and sorts with Material's
+`mat-paginator`/`matSort` directly: one grid does not make them standard, a second one would.
 
 
 ### Database

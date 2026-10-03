@@ -3,8 +3,10 @@ package victor.training.petclinic.rest;
 import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -19,6 +21,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -38,7 +41,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,15 +89,32 @@ public class OwnerRestController {
         this.clock = clock;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners",
+            description = "One page of the owners whose last name starts with `lastName`, in the requested order.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @ApiResponse(responseCode = "400", description = "`page`, `size` or `sort` is outside the documented values",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @Parameter(description = "Case-sensitive last-name prefix; empty matches every owner") @RequestParam(
+                    name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page index; past the last page gives empty `content`",
+                    schema = @Schema(type = "integer", format = "int32", minimum = "0",
+                            defaultValue = "0")) @RequestParam(name = "page", defaultValue = "0") int page,
+            @Parameter(description = "Owners per page: 5, 10 or 20", schema = @Schema(type = "integer",
+                    format = "int32", minimum = "5", maximum = "20", defaultValue = "10")) @RequestParam(name = "size",
+                            defaultValue = "10") int size,
+            @Parameter(description = "Defaults to `name,asc`. `name` orders by last name, first name, id;"
+                    + " `city` by city, then as `name`. The direction applies to every column.",
+                    schema = @Schema(
+                            allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"})) @RequestParam(
+                                    name = "sort", defaultValue = "name,asc") String sort) {
+        Pageable pageable = OwnerListPaging.toPageable(page, size, sort);
+        Page<Owner> owners = ownerRepository.findPageFetchingPetsAndVisits(lastName, pageable);
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners.getContent()), owners.getTotalElements());
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

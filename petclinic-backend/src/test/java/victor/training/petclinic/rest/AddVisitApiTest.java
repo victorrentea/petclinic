@@ -11,6 +11,7 @@ import static victor.training.petclinic.genseq.Steps.then;
 import static victor.training.petclinic.genseq.Steps.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -26,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -102,12 +104,22 @@ class AddVisitApiTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did db/seed/R__seed.sql change?"));
+        for (int page = 0;; page++) {
+            MockHttpServletRequestBuilder request = get("/api/owners");
+            if (page > 0) {
+                request.param("page", String.valueOf(page));
+            }
+            JsonNode owners = json(call(mockMvc, request).andExpect(status().isOk())).path("content");
+            if (owners.isEmpty()) {
+                throw new AssertionError("No owner with a pet in the seeded data — did db/seed/R__seed.sql change?");
+            }
+            Optional<JsonNode> withAPet = StreamSupport.stream(owners.spliterator(), false)
+                    .filter(o -> !o.path("pets").isEmpty())
+                    .findFirst();
+            if (withAPet.isPresent()) {
+                return withAPet.get();
+            }
+        }
     }
 
     /** The one visit this scenario booked — never `visits[0]`, whose position the seed data owns. */
