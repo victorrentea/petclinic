@@ -34,7 +34,9 @@
       "//9": "address as NAME=value — GRAFANA_URL, OTEL_EXPORTER_OTLP_ENDPOINT, BACKEND_URL,",
       "//10": "BASE_URL, API_BASE_URL — which the step exports to all three commands: the",
       "//11": "browser suites and generate.ts read them, the genseq profile's JVM inherits",
-      "//12": "OTEL_EXPORTER_OTLP_ENDPOINT. `requires` is probed after `up`, with those names",
+      "//12": "OTEL_EXPORTER_OTLP_ENDPOINT and NOTIFICATIONSERVICE_URL (its visit booking",
+      "//12b": "notifies this instance's service, or AddVisitApiTest's picture loses the",
+      "//12c": "call). `requires` is probed after `up`, with those names",
       "//13": "expanded: a stack that came up without the store is a skip saying so.",
       "app": {
         "up": "./start-docker.sh up --ref {sha} --name petclinic-{shortsha}-otel --otel --fresh --ttl 1800",
