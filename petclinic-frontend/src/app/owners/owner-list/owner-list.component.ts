@@ -24,7 +24,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string = null;
   private request: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   get sortKey(): string {

@@ -226,7 +226,7 @@ describe('OwnerListComponent', () => {
 
       fixture.destroy();
 
-      expect(lastRequest().response.observers.length).toBe(0);
+      expect(lastRequest().response.observers).toHaveSize(0);
     });
   });
 
@@ -273,6 +273,6 @@ describe('OwnerListComponent', () => {
 
     submitSearch('Fr');
 
-    expect(queries().length).toBe(2);
+    expect(queries()).toHaveSize(2);
   });
 });

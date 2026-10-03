@@ -106,11 +106,16 @@ class OwnerListTest {
             "size, 7",
             "size, 0",
             "size, -5",
+            "size, 15",
+            "size, 21",
+            "size, 100",
             "size, abc",
             "page, -1",
             "page, abc",
             "page, 1.5",
             "page, 99999999999",
+            "page, 2147483647",
+            "page, 214748365", // x 10 rows overflows the int offset
     })
     void invalidPaging_isBadRequest(String param, String value) throws Exception {
         mockMvc.perform(get("/api/owners").param(param, value))

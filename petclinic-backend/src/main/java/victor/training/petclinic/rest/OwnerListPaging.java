@@ -25,11 +25,12 @@ final class OwnerListPaging {
     }
 
     static Pageable toPageable(int page, int size, String sort) {
-        if (page < 0) {
-            throw new ValidationException("page must be 0 or more, was " + page);
-        }
         if (!PAGE_SIZES.contains(size)) {
             throw new ValidationException("size must be one of " + PAGE_SIZES + ", was " + size);
+        }
+        int lastAddressablePage = Integer.MAX_VALUE / size; // Spring Data passes the row offset to JPA as an int
+        if (page < 0 || page > lastAddressablePage) {
+            throw new ValidationException("page must be between 0 and " + lastAddressablePage + ", was " + page);
         }
         return PageRequest.of(page, size, toSort(sort));
     }
@@ -38,7 +39,7 @@ final class OwnerListPaging {
         String[] keyAndDirection = sort.split(",", -1);
         String[] chain = keyAndDirection.length == 2 ? SORT_CHAINS.get(keyAndDirection[0]) : null;
         if (chain == null || !DIRECTIONS.contains(keyAndDirection[1])) {
-            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc, was " + sort);
+            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc");
         }
         return Sort.by(Sort.Direction.fromString(keyAndDirection[1]), chain);
     }

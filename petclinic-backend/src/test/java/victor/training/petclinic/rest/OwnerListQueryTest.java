@@ -16,6 +16,7 @@ import org.hibernate.resource.jdbc.spi.StatementInspector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
@@ -143,12 +144,12 @@ class OwnerListQueryTest {
                 .hasSameSizeAs(sameNameIds).isSortedAccordingTo(Comparator.reverseOrder());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"5", "20"})
-    void fullPage_costsAtMostThreeSelects_pagingInTheDatabase(String size) throws Exception {
-        JsonNode response = list(size, "0", "name,asc");
+    @ParameterizedTest(name = "size {0}, page {1}")
+    @CsvSource({"5, 0", "20, 0", "5, 3", "20, 1"}) // the last is the partial last page: 5 of 25
+    void anyPage_costsAtMostThreeSelects_pagingInTheDatabase(int size, int page) throws Exception {
+        JsonNode response = list("" + size, "" + page, "name,asc");
 
-        assertThat(response.path("content").size()).isEqualTo(Integer.parseInt(size));
+        assertThat(response.path("content").size()).isEqualTo(Math.min(size, OWNERS - page * size));
         List<String> sql = sqlRecorder.statements;
         assertThat(sql).hasSizeLessThanOrEqualTo(3).allMatch(OwnerListQueryTest::isSelect);
         assertThat(sql.get(0)).as("the owner page is cut by the database").containsPattern(LIMIT);

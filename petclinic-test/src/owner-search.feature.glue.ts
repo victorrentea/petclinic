@@ -85,10 +85,12 @@ When('I show {int} owners per page', async function (this: PlaywrightWorld, size
   await this.page.getByRole('option', {name: String(size), exact: true}).click();
 });
 
+// Waits for the list request the click sends, not for the rows to change: a row change can come from elsewhere,
+// and a second click sent before the first answer lands would race it.
 When('I sort owners by {string}', async function (this: PlaywrightWorld, column: string) {
-  const before = await listedNames(this);
+  const answered = this.page.waitForResponse((r) => new URL(r.url()).pathname.endsWith('/api/owners'));
   await this.page.locator('#ownersTable th[mat-sort-header]', {hasText: column}).click();
-  await expect.poll(() => listedNames(this), {timeout: 10_000}).not.toEqual(before);
+  await answered;
 });
 
 When('I page through every owner, {int} at a time', async function (this: PlaywrightWorld, size: number) {
