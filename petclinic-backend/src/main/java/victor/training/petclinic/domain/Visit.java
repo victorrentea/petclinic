@@ -16,7 +16,7 @@ public class Visit {
     @Column(name = "visit_date", columnDefinition = "DATE")
     private LocalDate date = LocalDate.now();
 
-    /** Exact local time of the appointment; null on legacy rows created before V4. */
+    /** Exact local time of the appointment; null on legacy rows created before V3. */
     @Column(name = "visit_time", columnDefinition = "TIME")
     private LocalTime time;
 
