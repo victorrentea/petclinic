@@ -2,7 +2,8 @@
 #
 # run-tests-with-tracing.sh — run the e2e tests against an ALREADY-RUNNING stack
 # so each @generate_sequence scenario's browser↔backend↔DB trace is captured in
-# Tempo and turned into a PlantUML sequence diagram
+# Tempo and turned into a PlantUML sequence diagram — and each scenario named in
+# GENSEQ_SELECT (one `<file>::<title>` per line), tagged or not
 # (petclinic-test/generated/<test file>.<scenario>.genseq.puml).
 #
 # This script assumes the full telemetry stack is already up, started the
@@ -89,8 +90,18 @@ cd "$UI_TEST_DIR" || die "cannot cd into $UI_TEST_DIR"
 # own source files, so neither may do this sweep itself.
 rm -f "$UI_TEST_DIR"/generated/*.genseq.puml "$UI_TEST_DIR"/generated/*.genseq.json
 
-log "Running the tagged Playwright spec…"
-npm run test:sequence
+# GENSEQ_SELECT names tests to trace that carry no tag — what /human-review passes for the
+# tests a branch wrote (src/genseq/sequence-tag.ts). Cucumber already runs every scenario
+# and reads the list itself; Playwright only runs what its --grep lets through, so the
+# selected spec titles join the tag there.
+if [[ -n "${GENSEQ_SELECT:-}" ]]; then
+  log "Also tracing $(grep -c . <<<"$GENSEQ_SELECT") test(s) named in GENSEQ_SELECT."
+  log "Running the tagged and the selected Playwright specs…"
+  SKIP_SERVER_START=1 npx playwright test --grep "$(npx ts-node src/genseq/sequence-tag.ts grep)"
+else
+  log "Running the tagged Playwright spec…"
+  npm run test:sequence
+fi
 test_status=$?
 
 log "Running the .feature scenarios (Cucumber)…"

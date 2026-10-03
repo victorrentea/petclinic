@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -17,6 +18,7 @@ import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.support.AnnotationSupport;
 
 /**
  * Captures one test method as a Tempo trace and leaves behind the same "trace window" the browser
@@ -39,6 +41,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * <p>
  * With no agent attached this is all no-ops on a no-op tracer, and the window it writes describes an
  * interval Tempo has nothing in — the generator logs "no traces in window" and moves on.
+ * <p>
+ * Which tests: those carrying {@link GenerateSequence}, and — under <code>-Pgenseq</code>, where the
+ * extension is autodetected on every test — those <code>GENSEQ_SELECT</code> names, untagged.
  */
 public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCallback {
 
@@ -62,15 +67,36 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
     /**
      * Each runner clears its own windows before it starts, and only its own — the store is also what
      * a standalone `npm run diagram` replays, and wiping it whole would shrink that to whichever
-     * suite ran last. Once per JVM, which for surefire is once per run.
+     * suite ran last. Once per JVM, which for surefire is once per run — except a GENSEQ_SELECT run,
+     * which is a second JVM straight after the tagged one and must ADD to its windows, not erase
+     * them: the diagrams are rendered once, after both.
      */
     private static final AtomicBoolean swept = new AtomicBoolean();
 
+    /**
+     * The tests to trace that carry no {@link GenerateSequence}: <code>Class#method</code>, comma
+     * separated — the very string <code>-Dtest=</code> takes, so /human-review passes one value to
+     * both (human-review.json, steps.sequence.select). Its presence also makes the run additive: see
+     * {@link #forgetPreviousRunOnce}.
+     */
+    static final String SELECT_ENV = "GENSEQ_SELECT";
+
     @Override
     public void beforeEach(ExtensionContext context) {
+        // Registered twice on a tagged test — by @GenerateSequence and by autodetection under
+        // -Pgenseq — JUnit keeps one; this keeps it one even if it did not.
+        if (context.getStore(NAMESPACE).get(Run.class) != null) {
+            return;
+        }
+        String select = System.getenv(SELECT_ENV);
+        boolean tagged = isTagged(context);
+        if (!tagged && !isSelected(select, context)) {
+            return;
+        }
+        String title = titleOf(context, tagged);
         Span span = GlobalOpenTelemetry.getTracer("petclinic-genseq")
-                .spanBuilder("test: " + context.getDisplayName())
-                .setAttribute(TEST_NAME, context.getDisplayName())
+                .spanBuilder("test: " + title)
+                .setAttribute(TEST_NAME, title)
                 .setAttribute(Steps.PARTICIPANT, Steps.TEST_PARTICIPANT)
                 .startSpan();
         // No agent attached: this is an ordinary `mvn test`, the tracer is a no-op and there
@@ -81,9 +107,65 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
             span.end();
             return;
         }
-        forgetPreviousRunOnce();
+        if (select == null || select.isBlank()) {
+            forgetPreviousRunOnce();
+        }
         context.getStore(NAMESPACE).put(Run.class, new Run(span, span.makeCurrent(),
-                System.currentTimeMillis() - PRE_PAD_MS));
+                System.currentTimeMillis() - PRE_PAD_MS, title));
+    }
+
+    private static boolean isTagged(ExtensionContext context) {
+        return context.getTestMethod().map(m -> AnnotationSupport.isAnnotated(m, GenerateSequence.class))
+                .orElse(false)
+                || context.getTestClass().map(c -> AnnotationSupport.isAnnotated(c, GenerateSequence.class))
+                        .orElse(false);
+    }
+
+    /**
+     * Named in <code>select</code> — and, for a parameterized or repeated test, only its first
+     * invocation: one picture per test asked for, not one per row of its arguments.
+     */
+    static boolean isSelected(String select, ExtensionContext context) {
+        if (select == null || select.isBlank() || context.getTestMethod().isEmpty()) {
+            return false;
+        }
+        String uniqueId = context.getUniqueId();
+        if (uniqueId.contains("-invocation:#") && !uniqueId.endsWith("-invocation:#1]")) {
+            return false;
+        }
+        return selects(select, context.getRequiredTestClass(), context.getRequiredTestMethod().getName());
+    }
+
+    /** <code>OwnerListTest#a+b,pkg.OtherTest#c</code>, a class with no method meaning all of it. */
+    static boolean selects(String select, Class<?> testClass, String method) {
+        Class<?> outer = testClass;
+        while (outer.getEnclosingClass() != null) {
+            outer = outer.getEnclosingClass();
+        }
+        for (String item : select.split(",")) {
+            String[] parts = item.trim().split("#", 2);
+            String cls = parts[0];
+            boolean classMatches = cls.equals(outer.getName()) || cls.equals(outer.getSimpleName())
+                    || cls.equals(testClass.getName()) || cls.equals(testClass.getSimpleName());
+            if (classMatches && (parts.length == 1 || List.of(parts[1].split("\\+")).contains(method))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * What the window and the span are named, and so what the diagram is titled. A tagged test
+     * keeps its display name, as it always has. A selected invocation of a parameterized test
+     * would be titled <code>[1] size=5</code> by it: brackets break the PlantUML link the title is
+     * drawn as, and nothing in the source reads like that, so the generator could not point the
+     * title at the method. The method's own name can be found, and is what was asked for.
+     */
+    private static String titleOf(ExtensionContext context, boolean tagged) {
+        if (!tagged && context.getUniqueId().contains("-invocation:#")) {
+            return context.getRequiredTestMethod().getName();
+        }
+        return context.getDisplayName();
     }
 
     @Override
@@ -95,10 +177,10 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
         Steps.close();
         run.scope().close();
         run.span().end();
-        writeWindow(sourceOf(context), context.getDisplayName(), run.startMs());
+        writeWindow(sourceOf(context), run.title(), run.startMs());
     }
 
-    private record Run(Span span, Scope scope, long startMs) {
+    private record Run(Span span, Scope scope, long startMs, String title) {
     }
 
     // ---------------------------------------------------------------------
