@@ -24,7 +24,7 @@
     </div>
     <div *ngIf="noMatches" id="noOwners">No owners with last name starting with "{{ submittedLastName }}"</div>
 
-    <ng-container *ngIf="!noMatches && !errorMessage">
+    <ng-container *ngIf="!noMatches">
       <div class="table-responsive" id="ownersTable" [attr.aria-busy]="loading">
         <table class="table table-striped" matSort matSortDisableClear
           [matSortActive]="sortKey" [matSortDirection]="sortDirection" (matSortChange)="onSort($event)">

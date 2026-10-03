@@ -158,6 +158,24 @@ class OwnerListTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"page", "size", "sort"})
+    void rejectedInputIsNotEchoedBack(String param) throws Exception {
+        String body = mockMvc.perform(get("/api/owners").param(param, "<script>x</script>"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).doesNotContain("<script>");
+    }
+
+    @Test
+    void lastPageWhoseOffsetStillFitsAnInt_isAccepted() throws Exception {
+        // 107374182 * 20 = 2147483640 <= Integer.MAX_VALUE; one page more overflows the SQL OFFSET
+        assertThat(getOk("/api/owners?size=20&page=107374182").path("content")).isEmpty();
+        mockMvc.perform(get("/api/owners?size=20&page=107374183"))
+                .andExpect(status().isBadRequest());
+    }
+
     // ---------------------------------------------------------------- sorting
 
     @Test

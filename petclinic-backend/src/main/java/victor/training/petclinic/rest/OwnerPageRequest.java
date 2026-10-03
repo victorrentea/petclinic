@@ -41,7 +41,7 @@ final class OwnerPageRequest {
         if (keyAndDirection.length != 2
                 || !SORT_KEYS.containsKey(keyAndDirection[0])
                 || !DIRECTIONS.containsKey(keyAndDirection[1])) {
-            throw new ValidationException("sort must be name|city,asc|desc, but was " + sort);
+            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc");
         }
         return Sort.by(DIRECTIONS.get(keyAndDirection[1]), SORT_KEYS.get(keyAndDirection[0]));
     }

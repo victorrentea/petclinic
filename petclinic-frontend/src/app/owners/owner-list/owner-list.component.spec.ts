@@ -75,7 +75,7 @@ describe('OwnerListComponent', () => {
 
   describe('requests', () => {
     it('opens on page 0 of 10 owners by Name ascending', () => {
-      expect(requests.length).toBe(1);
+      expect(requests).toHaveSize(1);
       expect(lastRequest().query).toEqual({ lastName: '', page: 0, size: 10, sort: 'name,asc' });
     });
 
@@ -87,7 +87,7 @@ describe('OwnerListComponent', () => {
 
       component.search();
 
-      expect(requests.length).toBe(4);
+      expect(requests).toHaveSize(4);
       expect(lastRequest().query).toEqual({ lastName: 'Fr', page: 0, size: 10, sort: 'city,desc' });
     });
 
@@ -98,7 +98,7 @@ describe('OwnerListComponent', () => {
 
       component.onPage({ pageIndex: 1, pageSize: 10, length: 50 });
 
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
       expect(lastRequest().query).toEqual({ lastName: 'Fr', page: 1, size: 10, sort: 'name,asc' });
     });
 
@@ -107,7 +107,7 @@ describe('OwnerListComponent', () => {
 
       component.onPage({ pageIndex: 1, pageSize: 20, length: 50, previousPageIndex: 3 });
 
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
       expect(lastRequest().query).toEqual({ lastName: '', page: 0, size: 20, sort: 'name,asc' });
     });
 
@@ -116,7 +116,7 @@ describe('OwnerListComponent', () => {
 
       component.onSort({ active: 'name', direction: 'desc' });
 
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
       expect(lastRequest().query).toEqual({ lastName: '', page: 0, size: 5, sort: 'name,desc' });
     });
 
@@ -128,7 +128,7 @@ describe('OwnerListComponent', () => {
 
       query('#search-owner-form button[type=submit]').nativeElement.click();
 
-      expect(requests.length).toBe(2);
+      expect(requests).toHaveSize(2);
       expect(lastRequest().query.lastName).toBe('Fr');
     });
   });
@@ -165,7 +165,7 @@ describe('OwnerListComponent', () => {
 
       fixture.destroy();
 
-      expect(pending.response.observers.length).toBe(0);
+      expect(pending.response.observers).toHaveSize(0);
     });
   });
 
@@ -173,7 +173,7 @@ describe('OwnerListComponent', () => {
     it('shows the page rows, the range and total, and sizes 5, 10, 20', () => {
       answer(lastRequest(), owners(10), 26);
 
-      expect(fixture.debugElement.queryAll(By.css('#ownersTable td.ownerFullName')).length).toBe(10);
+      expect(fixture.debugElement.queryAll(By.css('#ownersTable td.ownerFullName'))).toHaveSize(10);
       expect(text('.mat-mdc-paginator-range-label')).toBe('1 – 10 of 26');
       const paginator: MatPaginator = query('mat-paginator').componentInstance;
       expect(paginator.pageSizeOptions).toEqual([5, 10, 20]);
@@ -184,12 +184,12 @@ describe('OwnerListComponent', () => {
       answer(lastRequest(), owners(10), 26);
 
       query('button.mat-mdc-paginator-navigation-next').nativeElement.click();
-      expect(requests.length).toBe(2);
+      expect(requests).toHaveSize(2);
       expect(lastRequest().query.page).toBe(1);
       answer(lastRequest(), owners(10), 26);
 
       query('button.mat-mdc-paginator-navigation-previous').nativeElement.click();
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
       expect(lastRequest().query.page).toBe(0);
     });
 
@@ -212,7 +212,7 @@ describe('OwnerListComponent', () => {
       expect(lastRequest().query.sort).toBe('name,desc');
       pressEnter(nameHeader);
       expect(lastRequest().query.sort).toBe('name,asc');
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
     });
 
     it('no match shows the submitted prefix and hides the paginator', () => {
@@ -240,6 +240,19 @@ describe('OwnerListComponent', () => {
       expect(text('#ownersError')).toContain('server returned code 500');
       expect(query('#noOwners')).toBeNull();
       expect(component.loading).toBeFalse();
+    });
+
+    it('a failed page keeps the paginator, so the user can retry from where they were', () => {
+      answer(lastRequest(), owners(10), 26);
+      query('button.mat-mdc-paginator-navigation-next').nativeElement.click();
+      lastRequest().response.error('server returned code 500');
+      fixture.detectChanges();
+
+      query('button.mat-mdc-paginator-navigation-previous').nativeElement.click();
+
+      expect(text('#ownersError')).toContain('server returned code 500');
+      expect(requests).toHaveSize(3);
+      expect(lastRequest().query.page).toBe(0);
     });
 
     it('owner names link to their detail page', () => {

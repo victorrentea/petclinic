@@ -12,8 +12,6 @@ import victor.training.petclinic.domain.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
-    List<Owner> findByLastNameStartingWith(String lastName);
-
     Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
 
     // Never page this one: a LIMIT over collection fetches is applied in memory, after loading every row

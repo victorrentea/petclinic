@@ -30,7 +30,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   private loaded = false;
   private pageRequest?: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   get noMatches(): boolean {

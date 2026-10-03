@@ -24,6 +24,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.PetType;
@@ -100,7 +101,7 @@ class OwnerCreateTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
 
-        assertThat(ownerRepository.findByLastNameStartingWith("Tesla")).isNotEmpty();
+        assertThat(ownerRepository.findByLastNameStartingWith("Tesla", Pageable.ofSize(1))).isNotEmpty();
     }
 
     @Test
