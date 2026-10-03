@@ -11,6 +11,24 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface PetDto {
+  id: number;
+  name: string;
+  birthDate: string;
+}
+
+export interface OwnerDto {
+  id: number;
+  firstName: string;
+  lastName: string;
+  pets: PetDto[];
+}
+
+export interface OwnerPage {
+  content: OwnerDto[];
+  totalElements: number;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -26,6 +44,28 @@ export class ApiClient {
   async fetchVisits(): Promise<VisitDto[]> {
     const response = await this.client.get<VisitDto[]>('/visits');
     return response.data;
+  }
+
+  /** GET /api/owners is paged: walks it 20 owners at a time, from the first page to the last. */
+  async *ownerPages(sort = 'name,asc'): AsyncGenerator<OwnerPage> {
+    for (let page = 0, seen = 0; ; page++) {
+      const {data} = await this.client.get<OwnerPage>('/owners', {params: {page, size: 20, sort}});
+      yield data;
+      seen += data.content.length;
+      if (data.content.length === 0 || seen >= data.totalElements) {
+        return;
+      }
+    }
+  }
+
+  async findOwner(matches: (owner: OwnerDto) => boolean): Promise<OwnerDto | undefined> {
+    for await (const {content} of this.ownerPages()) {
+      const owner = content.find(matches);
+      if (owner) {
+        return owner;
+      }
+    }
+    return undefined;
   }
 
   static sortedByDate<T extends {date: string}>(rows: T[]): T[] {

@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, optionally filtered by last name */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners. */
+    OwnerPageDto: {
+      /** @description The owners on the requested page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description The number of owners matching the filter, across all pages.
+       * @example 26
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,24 +564,31 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, optionally filtered by last name */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive prefix of the last name; empty matches all */
         lastName?: string;
+        /** @description Zero-based page index */
+        page?: number;
+        /** @description Owners per page */
+        size?: 5 | 10 | 20;
+        /** @description name: by last name, first name, id; city: by city, then as name. The direction applies to every field. */
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Invalid page, size or sort */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */

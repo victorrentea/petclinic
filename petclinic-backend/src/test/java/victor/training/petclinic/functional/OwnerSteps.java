@@ -51,7 +51,7 @@ public class OwnerSteps {
                 .baseUri(http.baseUri())
                 .get("/api/owners?lastName=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
-        List<String> lastNames = response.jsonPath().getList("lastName", String.class);
+        List<String> lastNames = response.jsonPath().getList("content.lastName", String.class);
         assertThat(lastNames).contains(lastName);
     }
 
@@ -64,14 +64,16 @@ public class OwnerSteps {
         }
     }
 
-    @Then("the response JSON array has size {int}")
-    public void theResponseJsonArrayHasSize(int expected) {
-        assertThat(http.getLastResponse().jsonPath().getList("$").size()).isEqualTo(expected);
+    @Then("the page lists {int} owner(s) out of {int}")
+    public void thePageListsOwnersOutOf(int pageSize, int total) {
+        var page = http.getLastResponse().jsonPath();
+        assertThat(page.getList("content")).hasSize(pageSize);
+        assertThat(page.getLong("totalElements")).isEqualTo(total);
     }
 
-    @Then("every item in the response has {string} equal to {string}")
-    public void everyItemInTheResponseHasFieldEqualTo(String field, String value) {
-        List<String> values = http.getLastResponse().jsonPath().getList(field, String.class);
+    @Then("every owner on the page has {string} equal to {string}")
+    public void everyOwnerOnThePageHasFieldEqualTo(String field, String value) {
+        List<String> values = http.getLastResponse().jsonPath().getList("content." + field, String.class);
         assertThat(values).isNotEmpty();
         assertThat(values).allMatch(v -> v.equals(value));
     }
