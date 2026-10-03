@@ -108,10 +108,11 @@ Then('the first {int} owners by name are listed, out of every owner in the clini
     await expectPaginatorToRead(this, `1 – ${count} of ${all.length}`);
   });
 
-Then('the first {int} owners by {string} are listed', async function (this: PlaywrightWorld, count: number, sort: string) {
-  const {content} = await ownersPage(0, count, sort);
-  expect(await rowsOnScreen(this)).toEqual(content.map(listed));
-});
+Then('the first {int} owners by {string} are listed',
+  async function (this: PlaywrightWorld, count: number, sort: string) {
+    const {content} = await ownersPage(0, count, sort);
+    expect(await rowsOnScreen(this)).toEqual(content.map(listed));
+  });
 
 Then('every owner in the clinic was listed once, in name order', async function (this: PlaywrightWorld) {
   const all = this.requireAllOwners();

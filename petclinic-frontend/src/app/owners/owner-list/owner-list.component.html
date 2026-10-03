@@ -26,7 +26,8 @@
 
     <ng-container *ngIf="!errorMessage && !noOwnersFound">
       <div class="table-responsive" id="ownersTable">
-        <table class="table table-striped" matSort matSortActive="name" matSortDirection="asc" matSortDisableClear
+        <table class="table table-striped" matSort [matSortActive]="sortKey" [matSortDirection]="sortDirection"
+          matSortDisableClear
           (matSortChange)="onSort($event)">
           <thead>
           <tr>

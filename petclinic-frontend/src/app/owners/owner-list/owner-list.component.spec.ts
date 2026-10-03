@@ -253,6 +253,26 @@ describe('OwnerListComponent', () => {
       expect(text('#ownersError')).toContain('server returned code 500');
       expect(text('#noOwners')).toBeNull();
       expect(component.loading).toBeFalse();
+      expect(text('#addOwner')).toContain('Add Owner');
+    });
+
+    it('the table rebuilt after a no-match search still shows the sort it requests', async () => {
+      respond(requests[0], { content: tenOwners, totalElements: 26 });
+      const city = await loader.getHarness(MatSortHeaderHarness.with({ label: 'City' }));
+      await city.click();
+      await city.click();
+      component.lastName = 'Zz';
+      component.search();
+      respond(last(), { content: [], totalElements: 0 });
+
+      component.lastName = 'Fr';
+      component.search();
+      respond(last(), { content: tenOwners, totalElements: 26 });
+
+      expect(last().query.sort).toBe('city,desc');
+      const rebuiltCity = await loader.getHarness(MatSortHeaderHarness.with({ label: 'City' }));
+      expect(await rebuiltCity.isActive()).toBeTrue();
+      expect(await rebuiltCity.getSortDirection()).toBe('desc');
     });
   });
 });

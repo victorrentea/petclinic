@@ -29,7 +29,8 @@ import victor.training.petclinic.domain.Visit;
 
 /** Guards the owner list against N+1 and in-memory pagination: page first, then fetch the graph of that page only. */
 @SpringBootTest(properties = {
-        "spring.jpa.properties.hibernate.session_factory.statement_inspector=victor.training.petclinic.rest.SqlStatementRecorder",
+        "spring.jpa.properties.hibernate.session_factory.statement_inspector="
+                + "victor.training.petclinic.rest.SqlStatementRecorder",
         "spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=true",
         "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
         "spring.jpa.properties.hibernate.cache.use_query_cache=false",
@@ -77,10 +78,11 @@ class OwnerListQueryBudgetTest {
 
         List<String> selects = SqlStatementRecorder.selects();
         assertThat(selects).as("SQL SELECTs through serialization").hasSizeLessThanOrEqualTo(3);
-        assertThat(firstIndexMatching(selects, "fetch first|limit"))
-                .as("the owners page is limited in SQL before any pet is loaded")
-                .isNotNegative()
-                .isLessThan(firstIndexMatching(selects, "\\bpets\\b"));
+        int pageQuery = firstIndexMatching(selects, "fetch first|limit");
+        int petsQuery = firstIndexMatching(selects, "\\bpets\\b");
+        assertThat(pageQuery).as("the owners page is limited in SQL").isNotEqualTo(Integer.MAX_VALUE);
+        assertThat(petsQuery).as("pets are loaded by a query of their own").isNotEqualTo(Integer.MAX_VALUE);
+        assertThat(pageQuery).as("the page is limited before any pet is loaded").isLessThan(petsQuery);
         assertThat(response.path("totalElements").asInt()).isEqualTo(MATCHING_OWNERS);
         assertThat(response.path("content")).hasSize(size);
         for (JsonNode owner : response.path("content")) {

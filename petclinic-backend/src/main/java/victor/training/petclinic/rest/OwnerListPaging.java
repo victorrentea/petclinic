@@ -40,7 +40,8 @@ final class OwnerListPaging {
         String[] chain = keyAndDirection.length == 2 ? SORT_CHAINS.get(keyAndDirection[0]) : null;
         Direction direction = keyAndDirection.length == 2 ? DIRECTIONS.get(keyAndDirection[1]) : null;
         if (chain == null || direction == null) {
-            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc; was " + sort);
+            // Not echoing the value: the message is logged, and a caller's text could forge log lines
+            throw new ValidationException("sort must be one of name,asc name,desc city,asc city,desc");
         }
         return Sort.by(direction, chain);
     }

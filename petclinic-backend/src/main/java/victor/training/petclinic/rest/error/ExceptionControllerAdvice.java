@@ -85,8 +85,9 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
             HttpServletRequest request) {
+        // The raw value goes back to the caller, JSON-escaped, never into the log: it could forge log lines
         String detail = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
-        log.warn(detail);
+        log.warn("Invalid value for parameter '{}'", ex.getName());
         return ResponseEntity.badRequest()
                 .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
     }
