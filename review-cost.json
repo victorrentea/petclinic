@@ -1,12 +1,13 @@
 {
   "schema": "review-cost/1",
   "harness": "claude-code",
-  "recordedAt": "2026-10-03T05:42:31+00:00",
+  "recordedAt": "2026-10-03T05:42:55+00:00",
   "base": "98cb82a7249fe9341595b3a5beb4b7a71a7f22ec",
   "implementation": "91905dff4690930507b443b5655573f6802ef608",
   "rounds": [
     "2026-10-03T05:41:55+00:00",
-    "2026-10-03T05:42:31+00:00"
+    "2026-10-03T05:42:31+00:00",
+    "2026-10-03T05:42:55+00:00"
   ],
   "aicUsd": 0.01,
   "components": [
@@ -114,7 +115,7 @@
       "source": "recorded",
       "window": [
         "2026-10-03T05:34:23+00:00",
-        "2026-10-03T05:42:31+00:00"
+        "2026-10-03T05:42:55+00:00"
       ],
       "harnesses": [
         "claude-code"
@@ -126,22 +127,22 @@
           "what": "deciding and fixing",
           "window": [
             "2026-10-03T05:34:23+00:00",
-            "2026-10-03T05:42:31+00:00"
+            "2026-10-03T05:42:55+00:00"
           ],
-          "tokens": 6154903,
+          "tokens": 6531866,
           "models": {
-            "Opus 5.5": 6154903
+            "Opus 5.5": 6531866
           },
-          "usd": 1.8756,
+          "usd": 1.9744,
           "aic": null,
-          "calls": 17,
-          "modelSeconds": 189.5
+          "calls": 18,
+          "modelSeconds": 197.3
         }
       ],
-      "tokens": 6154903,
-      "usd": 1.8756,
+      "tokens": 6531866,
+      "usd": 1.9744,
       "aic": null,
-      "modelSeconds": 189.5
+      "modelSeconds": 197.3
     }
   ]
 }
