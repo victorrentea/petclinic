@@ -248,5 +248,22 @@ describe('OwnerListComponent', () => {
       expect(query('#noOwners')).toBeNull();
       expect(text('#addOwner')).toBe('Add Owner');
     });
+
+    it('retries the very page that failed', () => {
+      fixture.detectChanges();
+      component.onSort({active: 'city', direction: 'desc'});
+      goToPage(2);
+      getOwnerPageSpy.and.returnValue(throwError(() => 'server returned code 500'));
+      goToPage(3);
+      getOwnerPageSpy.calls.reset();
+      getOwnerPageSpy.and.returnValue(of(pageOf([betty], 26)));
+
+      query('#retryOwners').nativeElement.click();
+      fixture.detectChanges();
+
+      expect(getOwnerPageSpy).toHaveBeenCalledOnceWith({...FIRST_OWNER_PAGE, page: 3, sort: 'city,desc'});
+      expect(query('#ownersError')).toBeNull();
+      expect(component.owners).toEqual([betty]);
+    });
   });
 });

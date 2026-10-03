@@ -76,8 +76,8 @@ class OwnerListQueryTest {
 
     @AfterEach
     void deleteFixture() {
-        jdbc.update(
-                "DELETE FROM visits WHERE pet_id IN (SELECT p.id FROM pets p JOIN owners o ON o.id = p.owner_id WHERE o.last_name LIKE 'Qz%')");
+        jdbc.update("DELETE FROM visits WHERE pet_id IN"
+                + " (SELECT p.id FROM pets p JOIN owners o ON o.id = p.owner_id WHERE o.last_name LIKE 'Qz%')");
         jdbc.update("DELETE FROM pets WHERE owner_id IN (SELECT id FROM owners WHERE last_name LIKE 'Qz%')");
         jdbc.update("DELETE FROM owners WHERE last_name LIKE 'Qz%'");
     }

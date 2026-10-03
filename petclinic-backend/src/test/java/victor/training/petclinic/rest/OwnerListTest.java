@@ -3,6 +3,7 @@ package victor.training.petclinic.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -98,7 +99,8 @@ class OwnerListTest {
     })
     void invalidPagingOrSort_isRejected(String param, String value) throws Exception {
         mockMvc.perform(get("/api/owners").param(param, value))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Validation Error"));
     }
 
     @ParameterizedTest

@@ -21,6 +21,7 @@
 
     <div *ngIf="errorMessage" class="alert alert-danger" id="ownersError" role="alert">
       Could not load owners: {{ errorMessage }}
+      <button type="button" id="retryOwners" class="btn btn-default btn-sm" (click)="reload()">Retry</button>
     </div>
     <div *ngIf="noOwnersMatch" id="noOwners">No owners with LastName starting with "{{ submittedLastName }}"</div>
 

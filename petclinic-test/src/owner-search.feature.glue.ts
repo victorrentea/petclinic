@@ -126,9 +126,10 @@ Then('the first {int} owners by {word} {word} are listed in order',
     await expectOwnersListedInOrder(this, expected.slice(0, count));
   });
 
-Then('the paginator shows {string} of every owner in the clinic', async function (this: PlaywrightWorld, range: string) {
-  await expect.poll(() => rangeLabel(this)).toBe(`${range} of ${this.requireAllOwnerNames().length}`);
-});
+Then('the paginator shows {string} of every owner in the clinic',
+  async function (this: PlaywrightWorld, range: string) {
+    await expect.poll(() => rangeLabel(this)).toBe(`${range} of ${this.requireAllOwnerNames().length}`);
+  });
 
 Then('the paginator shows {string}', async function (this: PlaywrightWorld, label: string) {
   await expect.poll(() => rangeLabel(this)).toBe(label);
