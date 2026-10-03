@@ -113,7 +113,8 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
   }
   await startTestCoverage(this.page);
 
-  if (shouldGenerateSequence(pickle.tags)) {
+  // Tagged, or named by GENSEQ_SELECT (sequence-tag.ts) — the scenarios a branch wrote.
+  if (shouldGenerateSequence(pickle.tags, pickle.name, pickle.uri)) {
     this.traceTitle = pickle.name;
     this.traceSource = path.relative(path.join(__dirname, '..', '..'), pickle.uri);
     // Stamp every browser span with the scenario name so Tempo can find this
