@@ -16,6 +16,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   // What is typed in the search box; only search() turns it into the query's lastName
   draftLastName = '';
   query: OwnerPageQuery = DEFAULT_OWNER_PAGE_QUERY;
+  // The prefix of the rows on screen, which lags `query` while a new search is in flight
+  shownLastName = '';
   owners: Owner[] = [];
   totalElements = 0;
   loaded = false;
@@ -56,6 +58,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.request = this.ownerService.getOwnerPage(query).subscribe(
       page => {
         this.owners = page.content;
+        this.shownLastName = query.lastName;
         this.totalElements = page.totalElements;
         this.errorMessage = null;
         this.loaded = true;

@@ -191,7 +191,7 @@ paths:
     get:
       operationId: listOwners
       parameters:
-      - description: Case-sensitive prefix of the last name; empty matches every owner
+      - description: Case-sensitive last-name prefix; empty matches every owner
         in: query
         name: lastName
         required: false

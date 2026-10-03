@@ -113,7 +113,7 @@ public class OwnerRestController {
                     schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
     public OwnerPageDto listOwners(
-            @Parameter(description = "Case-sensitive prefix of the last name; empty matches every owner") @RequestParam(
+            @Parameter(description = "Case-sensitive last-name prefix; empty matches every owner") @RequestParam(
                     name = "lastName", defaultValue = "") String lastName,
             @Parameter(description = "Zero-based page index",
                     schema = @Schema(type = "integer", format = "int32", minimum = "0",
@@ -149,7 +149,7 @@ public class OwnerRestController {
         List<String> chain = keyAndDirection.length == 2 ? SORT_CHAINS.get(keyAndDirection[0]) : null;
         if (chain == null || !List.of("asc", "desc").contains(keyAndDirection[1])) {
             throw new ValidationException(
-                    "sort must be one of name,asc name,desc city,asc city,desc, but was " + sort);
+                    "sort must be one of name,asc name,desc city,asc city,desc");
         }
         return Sort.by(Sort.Direction.fromString(keyAndDirection[1]), chain.toArray(String[]::new));
     }

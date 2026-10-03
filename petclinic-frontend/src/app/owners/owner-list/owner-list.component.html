@@ -22,7 +22,7 @@
     <div *ngIf="errorMessage" class="alert alert-danger" id="ownersError" role="alert">
       Could not load owners: {{ errorMessage }}
     </div>
-    <div *ngIf="!errorMessage && loaded && totalElements === 0" id="noOwners">No owners with LastName starting with "{{ query.lastName }}"</div>
+    <div *ngIf="!errorMessage && loaded && totalElements === 0" id="noOwners">No owners with LastName starting with "{{ shownLastName }}"</div>
     <div *ngIf="!errorMessage && !loaded" id="ownersLoading">Loading owners…</div>
 
     <ng-container *ngIf="!errorMessage && totalElements > 0">

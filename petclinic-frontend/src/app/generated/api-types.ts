@@ -568,7 +568,7 @@ export interface operations {
   listOwners: {
     parameters: {
       query?: {
-        /** @description Case-sensitive prefix of the last name; empty matches every owner */
+        /** @description Case-sensitive last-name prefix; empty matches every owner */
         lastName?: string;
         /** @description Zero-based page index */
         page?: number;

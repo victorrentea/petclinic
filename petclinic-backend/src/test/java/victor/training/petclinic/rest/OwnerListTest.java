@@ -112,6 +112,16 @@ class OwnerListTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"page", "sort"})
+    void rejectedInput_isNotEchoedBack(String parameter) throws Exception {
+        String body = mockMvc.perform(get("/api/owners").param(parameter, "x\nFORGED LOG LINE"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).doesNotContain("FORGED");
+    }
+
     @Test
     void lastNamePrefix_isCaseSensitiveAndAnchoredAtTheStart() throws Exception {
         assertThat(lastNames(list(get("/api/owners?lastName=Pot")))).containsExactly("Potter", "Potter");

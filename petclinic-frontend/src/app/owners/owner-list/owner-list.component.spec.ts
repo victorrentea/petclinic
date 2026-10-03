@@ -176,6 +176,31 @@ describe('OwnerListComponent', () => {
       expect(element('#ownersError')).toBeNull();
     });
 
+    it('while a new search loads, the no-owners message still names the prefix it answered', () => {
+      getOwnerPage.and.returnValues(of(page(tenOwners, 26)), of(page([], 0)), new Subject<OwnerPage>());
+      render();
+      component.draftLastName = 'Zz';
+      component.search();
+
+      component.draftLastName = 'Dav';
+      component.search();
+      render();
+
+      expect(text('#noOwners')).toBe('No owners with LastName starting with "Zz"');
+    });
+
+    it('a success after a failure clears the error and shows the rows', () => {
+      getOwnerPage.and.returnValues(throwError('server returned code 500'), of(page(tenOwners, 26)));
+      render();
+      expect(element('#ownersError')).not.toBeNull();
+
+      component.search();
+      render();
+
+      expect(element('#ownersError')).toBeNull();
+      expect(fixture.nativeElement.querySelectorAll('#ownersTable tbody .ownerFullName').length).toBe(10);
+    });
+
     it('an empty page of a nonzero total keeps navigation and claims no "no matches"', () => {
       getOwnerPage.and.returnValue(of(page([], 26)));
       render();
