@@ -102,6 +102,17 @@ describe('OwnerService', () => {
     req.flush({content: [], totalElements: 0});
   });
 
+  it('getOwners() fails on an array-shaped response instead of answering it as a page', () => {
+    let failure: unknown;
+    ownerService.getOwners().subscribe(
+      () => fail('an array must not pass for a page'),
+      (error) => failure = error);
+
+    httpTestingController.expectOne(ownerService.entityUrl).flush(expectedOwners);
+
+    expect(String(failure)).toContain('did not answer a page of owners');
+  });
+
   it('getOwners() propagates a failure instead of answering an empty page', () => {
     let failure: unknown;
     ownerService.getOwners().subscribe(

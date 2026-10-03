@@ -8,7 +8,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -130,8 +130,8 @@ public class OwnerRestController {
         Map<Integer, Owner> fetchedById = ownerRepository.findAllByIdFetchingPetsAndVisits(ids).stream()
                 .collect(toMap(Owner::getId, identity(), (same, duplicate) -> same));
         List<Owner> fetchedInPageOrder = ids.stream()
-                .map(id -> Optional.ofNullable(fetchedById.get(id))
-                        .orElseThrow(() -> new IllegalStateException("Owner " + id + " vanished while listing")))
+                .map(fetchedById::get)
+                .filter(Objects::nonNull) // deleted since the page query: the page shrinks, it does not fail
                 .toList();
         return ownerMapper.toOwnerDtoCollection(fetchedInPageOrder);
     }

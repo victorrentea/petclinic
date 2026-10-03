@@ -26,8 +26,9 @@
       No owners with LastName starting with "{{ submittedLastName }}"
     </div>
 
-    <ng-container *ngIf="totalElements > 0 && !errorMessage">
-      <div class="table-responsive" id="ownersTable">
+    <!-- the paginator outlives a failed request, so the user can retry that page or another one -->
+    <ng-container *ngIf="totalElements > 0">
+      <div class="table-responsive" id="ownersTable" *ngIf="!errorMessage">
         <table class="table table-striped" matSort matSortDisableClear [matSortActive]="sortKey"
                 [matSortDirection]="sortDirection" (matSortChange)="onSort($event)">
           <thead>
@@ -53,6 +54,7 @@
           </tr>
           </tbody>
         </table>
+        <p *ngIf="!loading && owners.length === 0">No owners on this page — go back to an earlier page.</p>
       </div>
       <mat-paginator [length]="totalElements" [pageIndex]="pageIndex" [pageSize]="pageSize"
                       [pageSizeOptions]="pageSizeOptions" [showFirstLastButtons]="true"

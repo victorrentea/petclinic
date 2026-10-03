@@ -148,6 +148,7 @@ describe('OwnerListComponent', () => {
       await paginator.setPageSize(20);
 
       expect(getOwnersSpy).toHaveBeenCalledOnceWith({...DEFAULT_QUERY, size: 20});
+      expect(await paginator.getRangeLabel()).toBe('1 – 20 of 26');
     });
 
     it('a sort change on a later page returns to page 0', async () => {
@@ -268,8 +269,25 @@ describe('OwnerListComponent', () => {
       fixture.detectChanges();
 
       expect(text()).not.toContain('No owners with LastName');
+      expect(text()).toContain('No owners on this page');
       const paginator = await loader.getHarness(MatPaginatorHarness);
       expect(paginator).toBeTruthy();
+    });
+
+    it('after a failed page, the paginator stays and retrying requests that page again', async () => {
+      fixture.detectChanges();
+      const paginator = await loader.getHarness(MatPaginatorHarness);
+      getOwnersSpy.and.returnValue(throwError('server returned code 500'));
+      await paginator.goToNextPage();
+      expect(fixture.nativeElement.querySelector('.alert-danger')).toBeTruthy();
+      getOwnersSpy.and.returnValue(of(pageOf([george], 26)));
+      getOwnersSpy.calls.reset();
+
+      await paginator.goToPreviousPage();
+
+      expect(getOwnersSpy).toHaveBeenCalledOnceWith(DEFAULT_QUERY);
+      expect(fixture.nativeElement.querySelector('.alert-danger')).toBeNull();
+      expect(text()).toContain('George Franklin');
     });
 
     it('a failure is reported as such, not as no matches', () => {

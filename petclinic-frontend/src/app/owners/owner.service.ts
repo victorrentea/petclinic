@@ -4,7 +4,7 @@ import { OwnerPage, OwnerQuery } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
 @Injectable()
@@ -29,7 +29,15 @@ export class OwnerService {
     }
     return this.http
       .get<OwnerPage>(this.entityUrl, {params})
-      .pipe(catchError(this.handlerError<OwnerPage>('getOwners')));
+      .pipe(
+        catchError(this.handlerError<OwnerPage>('getOwners')),
+        // a backend still on the array contract would otherwise render as a silently empty grid
+        map(page => {
+          if (!Array.isArray(page?.content)) {
+            throw new Error('the server did not answer a page of owners');
+          }
+          return page;
+        }));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {

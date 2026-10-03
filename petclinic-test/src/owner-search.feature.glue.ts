@@ -127,9 +127,10 @@ Then('the first 10 owners by {string} are listed', async function (this: Playwri
   await expectOwnersListedInOrder(this, data.content.map(fullName));
 });
 
-Then('the owners shown are 1 to {int} of every owner in the clinic', async function (this: PlaywrightWorld, end: number) {
-  await expect(rangeLabel(this)).toHaveText(`1 – ${end} of ${this.requireAllOwnerNames().length}`);
-});
+Then('the owners shown are 1 to {int} of every owner in the clinic',
+  async function (this: PlaywrightWorld, end: number) {
+    await expect(rangeLabel(this)).toHaveText(`1 – ${end} of ${this.requireAllOwnerNames().length}`);
+  });
 
 Then('the owners shown are 1 to {int} of {int}', async function (this: PlaywrightWorld, end: number, total: number) {
   await expect(rangeLabel(this)).toHaveText(`1 – ${end} of ${total}`);
