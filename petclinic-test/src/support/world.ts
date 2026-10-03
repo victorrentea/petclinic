@@ -39,6 +39,11 @@ const VIDEO_SIZE = {width: 1280, height: 800};
 const PRE_PAD_MS = 1_000;
 const POST_PAD_MS = 5_000;
 
+export interface ListedOwner {
+  id: number;
+  name: string;
+}
+
 export class PlaywrightWorld extends World {
   browser!: Browser;
   context!: BrowserContext;
@@ -47,8 +52,10 @@ export class PlaywrightWorld extends World {
   petId?: number;
   petName?: string;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
+  // Set by the owner-search scenarios: every owner the API knows, in name order.
+  allOwners?: ListedOwner[];
+  // The owners seen on each page, in the order the pages were visited.
+  pagedOwners: ListedOwner[] = [];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -66,11 +73,11 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
+  requireAllOwners(): ListedOwner[] {
+    if (!this.allOwners) {
       throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
-    return this.allOwnerNames;
+    return this.allOwners;
   }
 }
 
