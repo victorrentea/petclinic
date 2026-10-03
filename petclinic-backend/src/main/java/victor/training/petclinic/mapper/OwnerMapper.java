@@ -5,9 +5,6 @@ import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class OwnerMapper {
     private final PetMapper petMapper;
@@ -35,16 +32,5 @@ public class OwnerMapper {
         owner.setCity(ownerDto.getCity());
         owner.setTelephone(ownerDto.getTelephone());
         return owner;
-    }
-
-    public List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection) {
-        if (ownerCollection == null) {
-            return List.of();
-        }
-        List<OwnerDto> dtos = new ArrayList<>(ownerCollection.size());
-        for (Owner owner : ownerCollection) {
-            dtos.add(toOwnerDto(owner));
-        }
-        return dtos;
     }
 }
