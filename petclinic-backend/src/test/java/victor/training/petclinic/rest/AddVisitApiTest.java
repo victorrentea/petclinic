@@ -11,6 +11,7 @@ import static victor.training.petclinic.genseq.Steps.then;
 import static victor.training.petclinic.genseq.Steps.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -102,12 +103,19 @@ class AddVisitApiTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did db/seed/R__seed.sql change?"));
+        JsonNode page;
+        int pageIndex = 0;
+        do {
+            page = json(call(mockMvc, get("/api/owners").param("page", String.valueOf(pageIndex++)))
+                    .andExpect(status().isOk()));
+            Optional<JsonNode> ownerWithPet = StreamSupport.stream(page.path("content").spliterator(), false)
+                    .filter(o -> !o.path("pets").isEmpty())
+                    .findFirst();
+            if (ownerWithPet.isPresent()) {
+                return ownerWithPet.get();
+            }
+        } while (!page.path("content").isEmpty());
+        throw new AssertionError("No owner with a pet in the seeded data — did db/seed/R__seed.sql change?");
     }
 
     /** The one visit this scenario booked — never `visits[0]`, whose position the seed data owns. */

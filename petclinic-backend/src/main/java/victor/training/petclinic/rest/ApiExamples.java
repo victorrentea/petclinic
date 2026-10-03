@@ -30,14 +30,17 @@ public final class ApiExamples {
             ]""";
 
     public static final String OWNERS = """
-            [
-              { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
-                "city": "Madison", "telephone": "6085551023",
-                "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                            "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
-              { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
-                "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
-            ]""";
+            {
+              "content": [
+                { "id": 9, "firstName": "Henry", "lastName": "Baskerville", "address": "Baskerville Hall",
+                  "city": "Dartmoor", "telephone": "1626832093",
+                  "pets": [ { "id": 11, "name": "Baskerville", "birthDate": "2017-02-24",
+                              "type": { "id": 2, "name": "dog" }, "ownerId": 9, "visits": [] } ] },
+                { "id": 12, "firstName": "Sam", "lastName": "Carraclough", "address": "Greenall Bridge",
+                  "city": "Yorkshire", "telephone": "1943876543", "pets": [] }
+              ],
+              "totalElements": 26
+            }""";
 
     public static final String PETS = """
             [

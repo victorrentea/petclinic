@@ -1,9 +1,17 @@
 package victor.training.petclinic.rest;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
@@ -19,6 +27,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -38,7 +47,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -86,15 +96,47 @@ public class OwnerRestController {
         this.clock = clock;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time",
+            description = "Owners whose last name starts with `lastName` (case-sensitive, literal), "
+                    + "sorted and paged. Any `page`, `size` or `sort` outside the documented values is a 400.")
+    @Parameter(name = "lastName", in = ParameterIn.QUERY, description = "Last-name prefix; empty matches every owner")
+    @Parameter(name = "page", in = ParameterIn.QUERY, description = "Zero-based page index",
+            schema = @Schema(implementation = Integer.class, minimum = "0",
+                    defaultValue = OwnerPageRequest.DEFAULT_PAGE))
+    @Parameter(name = "size", in = ParameterIn.QUERY, description = "Owners per page: 5, 10 or 20",
+            schema = @Schema(implementation = Integer.class, defaultValue = OwnerPageRequest.DEFAULT_SIZE))
+    @Parameter(name = "sort", in = ParameterIn.QUERY,
+            description = "Name orders by last name, first name, id; city by city, then the same. "
+                    + "The direction applies to every key.",
+            schema = @Schema(type = "string", allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"},
+                    defaultValue = OwnerPageRequest.DEFAULT_SORT))
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", required = false) String page,
+            @RequestParam(name = "size", required = false) String size,
+            @RequestParam(name = "sort", required = false) String sort) {
+        Pageable pageable = OwnerPageRequest.parse(page, size, sort);
+        Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName, pageable);
+        return new OwnerPageDto(toDtosFetchingGraph(ownerPage.getContent()), ownerPage.getTotalElements());
+    }
+
+    private List<OwnerDto> toDtosFetchingGraph(List<Owner> pageOwners) {
+        if (pageOwners.isEmpty()) {
+            return List.of();
+        }
+        List<Integer> pageIds = pageOwners.stream().map(Owner::getId).toList();
+        Map<Integer, Owner> fetchedById = ownerRepository.findAllByIdFetchingPetsTypesAndVisits(pageIds).stream()
+                .collect(toMap(Owner::getId, identity()));
+        return pageIds.stream() // IN (...) does not keep the page order
+                .map(id -> Optional.ofNullable(fetchedById.get(id))
+                        .orElseThrow(() -> new IllegalStateException("Owner " + id + " vanished while listing")))
+                .map(ownerMapper::toOwnerDto)
+                .toList();
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

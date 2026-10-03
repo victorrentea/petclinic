@@ -189,14 +189,48 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "Owners whose last name starts with `lastName` (case-sensitive,\
+        \ literal), sorted and paged. Any `page`, `size` or `sort` outside the documented\
+        \ values is a 400."
       operationId: listOwners
       parameters:
-      - in: query
+      - description: Last-name prefix; empty matches every owner
+        in: query
         name: lastName
         required: false
         schema:
           type: string
           default: ""
+      - description: Zero-based page index
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - description: "Owners per page: 5, 10 or 20"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - description: "Name orders by last name, first name, id; city by city, then\
+          \ the same. The direction applies to every key."
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "name,asc"
+          enum:
+          - "name,asc"
+          - "name,desc"
+          - "city,asc"
+          - "city,desc"
       responses:
         "200":
           content:
@@ -205,32 +239,32 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
-                    - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                    content:
+                    - id: 9
+                      firstName: Henry
+                      lastName: Baskerville
+                      address: Baskerville Hall
+                      city: Dartmoor
+                      telephone: "1626832093"
+                      pets:
+                      - id: 11
+                        name: Baskerville
+                        birthDate: 2017-02-24
+                        type:
+                          id: 2
+                          name: dog
+                        ownerId: 9
+                        visits: []
+                    - id: 12
+                      firstName: Sam
+                      lastName: Carraclough
+                      address: Greenall Bridge
+                      city: Yorkshire
+                      telephone: "1943876543"
+                      pets: []
+                    totalElements: 26
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -250,7 +284,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
           description: Internal Server Error
-      summary: List owners
+      summary: "List owners, one page at a time"
       tags:
       - owner-rest-controller
     post:
@@ -1686,6 +1720,24 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      description: "One page of owners, plus how many owners match the filter across\
+        \ all pages."
+      properties:
+        content:
+          type: array
+          description: The owners on the requested page.
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        totalElements:
+          type: integer
+          format: int64
+          description: "The number of owners matching the filter, before pagination."
+          example: 26
+      required:
+      - content
+      - totalElements
     PetDto:
       type: object
       properties:
