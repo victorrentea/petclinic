@@ -18,4 +18,7 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
   editing it by hand is denied in `.claude/settings.json` — regenerate it instead
 - Constructor injection, global exception handling via `@RestControllerAdvice`
+- `GET /api/owners` is paged (`OwnerPageDto`: `content` + `totalElements`; `sort` takes business keys
+  `name|city,asc|desc`, never entity properties). Page the owner ids first, then fetch their pets/visits
+  by id: a `Pageable` on a collection fetch join makes Hibernate page in memory after loading every row
 

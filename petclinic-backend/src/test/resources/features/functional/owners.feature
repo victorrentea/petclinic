@@ -13,8 +13,22 @@ Feature: Owner management
       | Harold    | Davis     |
     When I GET "/api/owners?lastName=Dav"
     Then the response status is 200
-    And the response JSON array has size 2
-    And every item in the response has "lastName" equal to "Davis"
+    And the response page lists 2 owners out of 2
+    And every owner in the response page has "lastName" equal to "Davis"
+
+  Scenario: Owners are listed a page at a time, sorted by name
+    Given the following owners exist:
+      | firstName | lastName |
+      | Ann       | Cole     |
+      | Bob       | Adams    |
+      | Cid       | Brown    |
+      | Dan       | Evans    |
+      | Eve       | Drake    |
+      | Fay       | Green    |
+    When I GET "/api/owners?size=5&page=1"
+    Then the response status is 200
+    And the response page lists 1 owner out of 6
+    And every owner in the response page has "lastName" equal to "Green"
 
   Scenario: Owner profile includes pets with their type
     Given an owner "Jean Coleman" with a "dog" pet named "Samantha" born on "2020-03-15"

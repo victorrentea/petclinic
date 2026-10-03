@@ -1,35 +1,71 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort, SortDirection} from '@angular/material/sort';
+import {Subscription} from 'rxjs';
+import {finalize} from 'rxjs/operators';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {FIRST_OWNER_PAGE, OwnerSort} from '../owner-page';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizeOptions = [5, 10, 20];
+  draftLastName = FIRST_OWNER_PAGE.lastName;
+  submittedLastName = FIRST_OWNER_PAGE.lastName;
+  pageIndex = FIRST_OWNER_PAGE.page;
+  pageSize = FIRST_OWNER_PAGE.size;
+  sortKey = 'name';
+  sortDirection: SortDirection = 'asc';
+
+  owners: Owner[] = [];
+  totalElements = 0;
+  loading = false;
+  loaded = false;
+  errorMessage: string | null = null;
+  private load?: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
+  }
 
+  get noOwnersMatch(): boolean {
+    return this.loaded && this.totalElements === 0;
+  }
+
+  get hasMatches(): boolean {
+    return this.loaded && this.totalElements > 0;
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.loadPage();
+  }
+
+  ngOnDestroy() {
+    this.load?.unsubscribe();
+  }
+
+  search() {
+    this.submittedLastName = this.draftLastName;
+    this.pageIndex = 0;
+    this.loadPage();
+  }
+
+  onPage(event: PageEvent) {
+    const sizeChanged = event.pageSize !== this.pageSize;
+    this.pageSize = event.pageSize;
+    this.pageIndex = sizeChanged ? 0 : event.pageIndex;
+    this.loadPage();
+  }
+
+  onSort(sort: Sort) {
+    this.sortKey = sort.active;
+    this.sortDirection = sort.direction || 'asc';
+    this.pageIndex = 0;
+    this.loadPage();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +76,31 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
+  // Only the latest query may answer: cancelling the previous one first means none of its
+  // callbacks, finalize included, can touch the rows, total or loading state of this one.
+  private loadPage() {
     this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+    this.loading = true;
+    this.errorMessage = null;
+    this.load = this.ownerService.getOwnerPage({
+      lastName: this.submittedLastName,
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: `${this.sortKey},${this.sortDirection}` as OwnerSort
+    }).pipe(
+      finalize(() => this.loading = false)
+    ).subscribe({
+      next: page => {
+        this.owners = page.content;
+        this.totalElements = page.totalElements;
+        this.loaded = true;
+      },
+      error: error => {
+        this.owners = [];
+        this.totalElements = 0;
+        this.loaded = false;
+        this.errorMessage = String(error);
+      }
+    });
   }
 }

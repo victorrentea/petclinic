@@ -2,6 +2,7 @@ import {Given, Then, When} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
 import {PlaywrightWorld} from './support/world';
+import {findOwner} from './support/api-client';
 
 // Bound directly, like owner-search.feature.glue.ts. "Today" is the browser's clock only:
 // the form refuses the date before any request leaves, so the backend's own clock never
@@ -15,8 +16,7 @@ Given('today is {word}', async function (this: PlaywrightWorld, isoDate: string)
 
 /** Found in the seed (Flyway's db/seed/R__seed.sql), so a changed seed fails here, not in a Then. */
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
+  const owner = await findOwner(API_BASE, (o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
   if (!owner) {
     throw new Error(`No seeded pet born on ${birthDate} — did db/seed/R__seed.sql change?`);
   }

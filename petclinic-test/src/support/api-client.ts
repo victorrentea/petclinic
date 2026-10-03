@@ -11,6 +11,17 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+/** The first owner that matches, read a page at a time: GET /owners never answers with everyone. */
+export async function findOwner(apiBase: string, matches: (owner: any) => boolean): Promise<any | undefined> {
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get(`${apiBase}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    const owner = data.content.find(matches);
+    if (owner || data.content.length === 0) {
+      return owner;
+    }
+  }
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 

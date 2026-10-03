@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description One page of the owners whose last name starts with the given prefix, with their pets and visits, plus the total number of matches.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners matching the filter, in the requested order. */
+    OwnerPageDto: {
+      /** @description The owners on the requested page, with their pets and visits. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description How many owners match the filter across all pages.
+       * @example 26
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,24 +567,34 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description One page of the owners whose last name starts with the given prefix, with their pets and visits, plus the total number of matches.
+   */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive last-name prefix; empty matches every owner */
         lastName?: string;
+        /** @description Zero-based page index */
+        page?: number;
+        /** @description Owners per page: 5, 10 or 20 */
+        size?: number;
+        /** @description Name orders by last name, first name, id; city by city, then as name. The direction applies to the whole chain. */
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description A page, size or sort outside the documented values */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/problem+json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */
