@@ -250,11 +250,12 @@ cmd_ports() {
     local name; name="$(resolve "${1:-}")"
     local p; p="$(port_of "$name")"
     [ -n "$p" ] || die "$name is not running"
-    local back jacoco grafana otlp
+    local back jacoco grafana otlp notif
     back="$(published "$name" backend 8080)"
     jacoco="$(published "$name" backend 6300)"
     grafana="$(published "$name" lgtm 3000)"
     otlp="$(published "$name" lgtm 4318)"
+    notif="$(published "$name" notification 8090)"
     echo "PETCLINIC_INSTANCE=$name"
     echo "BASE_URL=http://127.0.0.1:$p"
     echo "API_BASE_URL=http://127.0.0.1:$p/api"
@@ -262,6 +263,9 @@ cmd_ports() {
     [ -n "$jacoco" ]  && echo "JACOCO_ADDRESS=127.0.0.1:$jacoco"
     [ -n "$grafana" ] && echo "GRAFANA_URL=http://127.0.0.1:$grafana"
     [ -n "$otlp" ]    && echo "OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:$otlp"
+    # For a JVM on the host that books visits (mvn -Pgenseq): Spring's relaxed binding reads
+    # it as notification-service.url, so the in-process tests notify THIS instance's service.
+    [ -n "$notif" ]   && echo "NOTIFICATIONSERVICE_URL=http://127.0.0.1:$notif"
     return 0
 }
 
