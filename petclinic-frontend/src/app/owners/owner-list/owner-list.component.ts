@@ -9,6 +9,15 @@ import {OwnerPage, OwnerPageSize, OwnerSort} from '../owner-page';
 
 type OwnerSortKey = 'name' | 'city';
 
+/** What a list request asks for: the controls that produced the page on screen. */
+interface ListState {
+  submittedLastName: string;
+  pageIndex: number;
+  pageSize: OwnerPageSize;
+  sortKey: OwnerSortKey;
+  sortDirection: 'asc' | 'desc';
+}
+
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
@@ -32,8 +41,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
 
   private request?: Subscription;
+  private shown?: ListState;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   ngOnInit() {
@@ -93,6 +103,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private show(page: OwnerPage) {
+    this.shown = this.listState();
     this.owners = page.content;
     this.totalElements = page.totalElements;
     this.errorMessage = null;
@@ -100,9 +111,18 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
+  // The last page that did load stays on screen, and the paginator and sort header go back to
+  // describing it: left on the page that failed, they would claim rows the table does not hold.
   private fail(error: unknown) {
-    this.owners = [];
+    if (this.shown) {
+      Object.assign(this, this.shown);
+    }
     this.errorMessage = String(error);
     this.loading = false;
+  }
+
+  private listState(): ListState {
+    const {submittedLastName, pageIndex, pageSize, sortKey, sortDirection} = this;
+    return {submittedLastName, pageIndex, pageSize, sortKey, sortDirection};
   }
 }

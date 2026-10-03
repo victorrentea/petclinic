@@ -69,7 +69,7 @@ describe('OwnerListComponent', () => {
       fixture.detectChanges();
       const pager = await loader.getHarness(MatPaginatorHarness);
 
-      expect(rows().length).toBe(10);
+      expect(rows()).toHaveSize(10);
       expect(await pager.getRangeLabel()).toBe('1 – 10 of 26');
       expect(await pager.getPageSize()).toBe(10);
       expect(component.pageSizes).toEqual([5, 10, 20]);
@@ -218,7 +218,7 @@ describe('OwnerListComponent', () => {
     it('leaving the screen cancels the outstanding request', () => {
       fixture.destroy();
 
-      expect(latest.observers.length).toBe(0);
+      expect(latest.observers).toHaveSize(0);
     });
   });
 
@@ -242,7 +242,7 @@ describe('OwnerListComponent', () => {
 
       await pager.goToNextPage();
 
-      expect(rows().length).toBe(0);
+      expect(rows()).toHaveSize(0);
       expect(noOwnersMessage()).toBeNull();
       expect(await pager.isPreviousPageDisabled()).toBeFalse();
     });
@@ -253,9 +253,25 @@ describe('OwnerListComponent', () => {
 
       expect(errorAlert().nativeElement.textContent).toContain('server returned code 500');
       expect(noOwnersMessage()).toBeNull();
-      expect(rows().length).toBe(0);
+      expect(rows()).toHaveSize(0);
       expect(addOwnerButton()).toBeTruthy();
       expect(component.loading).toBeFalse();
+    });
+
+    it('a failed later page leaves the last loaded page, with its paginator and sort, on screen', async () => {
+      const nextPage = new Subject<OwnerPage>();
+      getOwnerPage.and.returnValues(of(pageOf(10, 26)), nextPage);
+      fixture.detectChanges();
+      const pager = await loader.getHarness(MatPaginatorHarness);
+
+      await pager.goToNextPage();
+      nextPage.error('boom');
+      fixture.detectChanges();
+
+      expect(errorAlert()).toBeTruthy();
+      expect(rows()).toHaveSize(10);
+      expect(await pager.getRangeLabel()).toBe('1 – 10 of 26');
+      expect(component.pageIndex).toBe(0);
     });
 
     it('a later success clears the error', () => {
@@ -265,7 +281,7 @@ describe('OwnerListComponent', () => {
       submitSearch('');
 
       expect(errorAlert()).toBeNull();
-      expect(rows().length).toBe(3);
+      expect(rows()).toHaveSize(3);
       expect(text()).not.toContain('boom');
     });
   });

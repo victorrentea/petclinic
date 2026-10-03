@@ -2,6 +2,7 @@ package victor.training.petclinic.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -125,7 +126,16 @@ class OwnerListTest {
             "sort=name,asc,city", "sort=NAME,asc", "sort=name,asc&sort=city,asc"})
     void invalidParameters_400(String query) throws Exception {
         mockMvc.perform(get("/api/owners?" + query))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Validation Error"))
+                .andExpect(jsonPath("$.detail").isNotEmpty());
+    }
+
+    @Test
+    void typeMismatch_doesNotEchoTheRejectedInput() throws Exception {
+        mockMvc.perform(get("/api/owners").param("page", "x\r\nFORGED"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Invalid value for parameter 'page'"));
     }
 
     @ParameterizedTest
