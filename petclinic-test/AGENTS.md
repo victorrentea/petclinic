@@ -22,6 +22,11 @@
   change the test and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its
   diagram; the generator sweeps the old one. The path back to the test is *inside* the picture
   (the `src://` handle on its title), not in the file's location.
+- `GENSEQ_SELECT` traces tests by name, untagged — `<file>::<title>` per line for the two browser
+  runners (`src/genseq/sequence-tag.ts`), `Class#method,…` (the `-Dtest` syntax) for the JVM,
+  where `-Pgenseq` autodetects `SequenceTraceExtension` on every test. `/human-review` fills it
+  with the tests a branch wrote (`human-review.json`, `steps.sequence.select`) and keeps what
+  they draw in `.human-review/`, so those pictures are never committed by a review.
 - A traced run on an isolated stack: `../start-docker.sh up --otel` gives the instance its own
   Tempo, and `env $(../start-docker.sh ports <name>) ./run-tests-with-tracing.sh` points every
   piece at it. Never hardcode :3300/:4318/:8080 in tracing code — read `GRAFANA_URL`,

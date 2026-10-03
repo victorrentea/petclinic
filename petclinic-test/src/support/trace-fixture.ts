@@ -7,8 +7,9 @@ import {startTestCoverage, stopTestCoverage} from './coverage';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
-// Cucumber's scenario tags. Untagged tests run normally and record no trace
-// window, so no .puml is produced for them.
+// Cucumber's scenario tags — and the same GENSEQ_SELECT list of tests named without
+// a tag (genseq/sequence-tag.ts). Any other test runs normally and records no trace
+// window, so no .puml is produced for it.
 
 const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-windows');
 
@@ -30,7 +31,7 @@ export const test = base.extend({
       line: testInfo.line,
       status: testInfo.status ?? 'unknown',
     });
-    if (!shouldGenerateSequence(testInfo.tags)) {
+    if (!shouldGenerateSequence(testInfo.tags, testInfo.title, testInfo.file)) {
       await use(page);
       await harvest();
       return;
