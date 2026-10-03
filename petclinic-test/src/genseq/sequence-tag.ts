@@ -38,13 +38,16 @@ export function isSelected(
   });
 }
 
+/** Whether the test carries the opt-in tag itself (as opposed to being named by GENSEQ_SELECT). */
+export function isTagged(tags: readonly Tag[] = []): boolean {
+  return tags.some((t) => (typeof t === 'string' ? t : t.name) === GENERATE_SEQUENCE_TAG);
+}
+
 export function shouldGenerateSequence(
   tags: readonly Tag[] = [], title?: string, source?: string,
   env: Record<string, string | undefined> = process.env,
 ): boolean {
-  if (tags.some((t) => (typeof t === 'string' ? t : t.name) === GENERATE_SEQUENCE_TAG)) {
-    return true;
-  }
+  if (isTagged(tags)) return true;
   return title !== undefined && isSelected(title, source, env);
 }
 

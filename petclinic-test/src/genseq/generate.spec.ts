@@ -297,6 +297,26 @@ test('generateFromWindows caches the spans it fetched', async () => {
   expect(cached[0].scenarios[0].traces[0].length).toBeGreaterThan(0);
 });
 
+// The window says how the test got traced; the cache keeps it, so a re-render from the
+// cache cannot turn a selected test's footer back into a claim of the tag.
+test('a selected window\'s scenario stays selected in the cache and in its footer', async () => {
+  const written: Record<string, string> = {};
+  const deps: GenerateDeps = {
+    searchTraceIds: async () => ['t1'],
+    getTrace: async () => fixture,
+    writeFile: (p, c) => { written[p] = c; },
+    log: () => {},
+  };
+  await generateFromWindows([
+    {title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000, selected: true},
+  ], '/out', deps);
+
+  const cached: CachedSource[] = JSON.parse(written[spanCachePathFor('/out')]);
+  expect(cached[0].scenarios[0].selected).toBe(true);
+  expect(written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'])
+    .toContain('footer traced because this branch wrote it');
+});
+
 test('renderScenarios redraws from the cache at another detail level, touching no Tempo', () => {
   const written: Record<string, string> = {};
   const cached: CachedSource[] = JSON.parse(JSON.stringify([{

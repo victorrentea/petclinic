@@ -2,7 +2,7 @@ import {test as base} from '@playwright/test';
 import * as path from 'path';
 import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
-import {shouldGenerateSequence} from '../genseq/sequence-tag';
+import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {startTestCoverage, stopTestCoverage} from './coverage';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
@@ -53,6 +53,8 @@ export const test = base.extend({
       source: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
       startMs,
       endMs: Date.now() + POST_PAD_MS,
+      // Named by GENSEQ_SELECT, untagged: the diagram's footer must not claim a tag.
+      ...(isTagged(testInfo.tags) ? {} : {selected: true}),
     });
   },
 });

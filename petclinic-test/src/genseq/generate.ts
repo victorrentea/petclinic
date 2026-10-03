@@ -15,6 +15,8 @@ export interface TestWindow {
   source: string;
   startMs: number;
   endMs: number;
+  /** Traced because GENSEQ_SELECT named it rather than for carrying the tag. */
+  selected?: boolean;
 }
 
 /** What a re-render needs: no Tempo, no clock — only somewhere to write and to log. */
@@ -231,7 +233,8 @@ export async function generateFromWindows(
         for (const id of ids) {
           traces.push(parseTempoTrace(await deps.getTrace(id)));
         }
-        scenarios.push({title: w.title, traces: chronological(traces)});
+        scenarios.push({title: w.title, traces: chronological(traces),
+          ...(w.selected ? {selected: true} : {})});
         deps.log(`✅ "${w.title}": ${ids.length} trace(s)`);
       } catch (err) {
         // One scenario's Tempo error must not cost every other diagram — the runner

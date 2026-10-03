@@ -111,7 +111,7 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
             forgetPreviousRunOnce();
         }
         context.getStore(NAMESPACE).put(Run.class, new Run(span, span.makeCurrent(),
-                System.currentTimeMillis() - PRE_PAD_MS, title));
+                System.currentTimeMillis() - PRE_PAD_MS, title, !tagged));
     }
 
     private static boolean isTagged(ExtensionContext context) {
@@ -177,10 +177,11 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
         Steps.close();
         run.scope().close();
         run.span().end();
-        writeWindow(sourceOf(context), run.title(), run.startMs());
+        writeWindow(sourceOf(context), run.title(), run.startMs(), run.selected());
     }
 
-    private record Run(Span span, Scope scope, long startMs, String title) {
+    /** {@code selected}: traced because GENSEQ_SELECT named it, untagged — the footer must not claim a tag. */
+    private record Run(Span span, Scope scope, long startMs, String title, boolean selected) {
     }
 
     // ---------------------------------------------------------------------
@@ -192,17 +193,17 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
      * is petclinic-test/src/support/trace-window-store.ts's, and the hash has to agree with
      * <code>windowFileName()</code> there or a re-run would add a window instead of replacing one.
      */
-    private void writeWindow(String source, String title, long startMs) {
+    private void writeWindow(String source, String title, long startMs, boolean selected) {
         Path dir = repoRoot().resolve(WINDOWS_DIR);
         String json = """
                 {
                     "title": %s,
                     "source": %s,
                     "startMs": %d,
-                    "endMs": %d
+                    "endMs": %d%s
                 }
                 """.formatted(quote(title), quote(source), startMs,
-                System.currentTimeMillis() + POST_PAD_MS);
+                System.currentTimeMillis() + POST_PAD_MS, selected ? ",\n    \"selected\": true" : "");
         try {
             Files.createDirectories(dir);
             Path file = dir.resolve(sha1(source + "::" + title).substring(0, 16) + ".json");
