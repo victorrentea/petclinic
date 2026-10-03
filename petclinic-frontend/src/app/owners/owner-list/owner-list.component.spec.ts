@@ -87,14 +87,14 @@ describe('OwnerListComponent', () => {
 
   describe('on open', () => {
     it('requests page 0 of 10 owners by Name ascending, unfiltered', () => {
-      expect(requests.length).toBe(1);
+      expect(requests).toHaveSize(1);
       expect(requests[0].query).toEqual({lastName: '', page: 0, size: 10, sort: 'name,asc'});
     });
 
     it('renders the rows, the range and the total, offering sizes 5, 10 and 20', () => {
       answerLatest(pageOf(10, 26));
 
-      expect(fixture.nativeElement.querySelectorAll('.ownerFullName').length).toBe(10);
+      expect(fixture.nativeElement.querySelectorAll('.ownerFullName')).toHaveSize(10);
       expect(text()).toContain('1 – 10 of 26');
       const paginator = fixture.debugElement.query(By.directive(MatPaginator)).componentInstance as MatPaginator;
       expect(paginator.pageSizeOptions).toEqual([5, 10, 20]);
@@ -123,12 +123,12 @@ describe('OwnerListComponent', () => {
 
     it('next and previous each send exactly one request, keeping filter, size and sort', () => {
       click(NEXT);
-      expect(requests.length).toBe(2);
+      expect(requests).toHaveSize(2);
       expect(lastQuery()).toEqual({lastName: '', page: 1, size: 10, sort: 'name,asc'});
       answerLatest(pageOf(10, 26));
 
       click(PREVIOUS);
-      expect(requests.length).toBe(3);
+      expect(requests).toHaveSize(3);
       expect(lastQuery()).toEqual({lastName: '', page: 0, size: 10, sort: 'name,asc'});
     });
 
@@ -143,7 +143,7 @@ describe('OwnerListComponent', () => {
       paginator._changePageSize(20);
       fixture.detectChanges();
 
-      expect(requests.length).toBe(before + 1);
+      expect(requests).toHaveSize(before + 1);
       expect(lastQuery()).toEqual({lastName: '', page: 0, size: 20, sort: 'name,asc'});
     });
   });
@@ -161,7 +161,7 @@ describe('OwnerListComponent', () => {
         sortHeader('city').nativeElement.click();
         fixture.detectChanges();
 
-        expect(requests.length).toBe(before + 1);
+        expect(requests).toHaveSize(before + 1);
         expect(lastQuery()).toEqual({lastName: '', page: 0, size: 10, sort: sort as OwnerQuery['sort']});
         answerLatest(pageOf(10, 26));
       }
@@ -191,7 +191,7 @@ describe('OwnerListComponent', () => {
       typeLastName('Pot');
       click('#findOwner');
 
-      expect(requests.length).toBe(2);
+      expect(requests).toHaveSize(2);
       expect(lastQuery()).toEqual({lastName: 'Pot', page: 0, size: 10, sort: 'name,asc'});
     });
 
@@ -207,7 +207,7 @@ describe('OwnerListComponent', () => {
       typeLastName('Pot');
       click('#findOwner');
 
-      expect(requests.length).toBe(before + 1);
+      expect(requests).toHaveSize(before + 1);
       expect(lastQuery()).toEqual({lastName: 'Pot', page: 0, size: 10, sort: 'city,desc'});
     });
 
@@ -230,12 +230,12 @@ describe('OwnerListComponent', () => {
 
       requests[0].response.next(pageOf(10, 26));
       fixture.detectChanges();
-      expect(fixture.nativeElement.querySelectorAll('.ownerFullName').length).toBe(0);
+      expect(fixture.nativeElement.querySelectorAll('.ownerFullName')).toHaveSize(0);
 
       answerLatest(pageOf(2, 2));
       requests[0].response.next(pageOf(10, 26));
       fixture.detectChanges();
-      expect(fixture.nativeElement.querySelectorAll('.ownerFullName').length).toBe(2);
+      expect(fixture.nativeElement.querySelectorAll('.ownerFullName')).toHaveSize(2);
       expect(text()).toContain('1 – 2 of 2');
     });
 
@@ -254,7 +254,7 @@ describe('OwnerListComponent', () => {
     it('leaving the screen cancels the outstanding request', () => {
       fixture.destroy();
 
-      expect(requests[0].response.observers.length).toBe(0);
+      expect(requests[0].response.observers).toHaveSize(0);
     });
   });
 
@@ -284,6 +284,31 @@ describe('OwnerListComponent', () => {
       expect(el('#loadError')!.textContent).toContain('server returned code 500');
       expect(el(NO_OWNERS)).toBeNull();
       expect(fixture.componentInstance.loading).toBe(false);
+    });
+
+    it('a failed page keeps the paginator, so that page can be asked for again', () => {
+      answerLatest(pageOf(10, 26));
+      click(NEXT);
+      requests[1].response.error('server returned code 500');
+      fixture.detectChanges();
+
+      expect(el('#loadError')).toBeTruthy();
+      expect(el(NO_OWNERS)).toBeNull();
+      click(PREVIOUS);
+      expect(requests).toHaveSize(3);
+      expect(lastQuery()).toEqual({lastName: '', page: 0, size: 10, sort: 'name,asc'});
+    });
+
+    it('a failure after an empty search shows only the error', () => {
+      typeLastName('Zz');
+      click('#findOwner');
+      answerLatest(pageOf(0, 0));
+      click('#findOwner');
+      requests[requests.length - 1].response.error('server returned code 500');
+      fixture.detectChanges();
+
+      expect(el('#loadError')).toBeTruthy();
+      expect(el(NO_OWNERS)).toBeNull();
     });
   });
 });

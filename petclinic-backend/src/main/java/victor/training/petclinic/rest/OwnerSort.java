@@ -25,21 +25,21 @@ enum OwnerSort {
     static Sort parse(String token) {
         String[] parts = token.split(",", -1);
         if (parts.length != 2) {
-            throw invalid(token);
+            throw invalid();
         }
         OwnerSort sort = Arrays.stream(values())
                 .filter(s -> s.key.equals(parts[0]))
                 .findFirst()
-                .orElseThrow(() -> invalid(token));
+                .orElseThrow(OwnerSort::invalid);
         Direction direction = switch (parts[1]) {
             case "asc" -> Direction.ASC;
             case "desc" -> Direction.DESC;
-            default -> throw invalid(token);
+            default -> throw invalid();
         };
         return Sort.by(direction, sort.properties);
     }
 
-    private static ValidationException invalid(String token) {
-        return new ValidationException("sort must be one of " + ALLOWED + " (value: " + token + ")");
+    private static ValidationException invalid() {
+        return new ValidationException("sort must be one of " + ALLOWED);
     }
 }

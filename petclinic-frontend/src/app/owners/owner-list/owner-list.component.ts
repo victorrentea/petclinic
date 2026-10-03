@@ -31,11 +31,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   private request?: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly ownerService: OwnerService) {
   }
 
   get noMatches(): boolean {
-    return this.loaded && this.totalElements === 0;
+    return this.loaded && this.totalElements === 0 && !this.errorMessage;
   }
 
   ngOnInit() {
@@ -91,9 +91,9 @@ export class OwnerListComponent implements OnInit, OnDestroy {
         this.loaded = true;
         this.loading = false;
       },
+      // The last good total stays, so the paginator remains to retry the page that failed
       error: message => {
         this.owners = [];
-        this.loaded = false;
         this.errorMessage = String(message);
         this.loading = false;
       }

@@ -67,13 +67,15 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 }
 
 /**
- * Waits for the click to land: for the rows themselves to change, never the range label —
- * the paginator moves that on the click, before the new page has even been requested.
+ * Waits for the click to land: for the page it asked for to arrive and be drawn. Not the range
+ * label, which the paginator moves on the click itself; not the rows changing, which a page may
+ * legitimately not do.
  */
 async function andWaitForAnotherPage(world: PlaywrightWorld, click: () => Promise<void>): Promise<void> {
-  const before = await listedIds(world);
+  const answered = world.page.waitForResponse((r) => new URL(r.url()).pathname.endsWith('/api/owners'));
   await click();
-  await expect.poll(() => listedIds(world), {timeout: 10_000}).not.toEqual(before);
+  await answered;
+  await expect(world.page.locator('#ownersTable table')).toHaveAttribute('aria-busy', 'false');
 }
 
 /**
