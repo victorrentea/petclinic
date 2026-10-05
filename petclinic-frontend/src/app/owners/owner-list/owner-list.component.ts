@@ -1,35 +1,66 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
+import {OwnerPage, OwnerSort} from '../owner-page';
 import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
 import {Subscription} from 'rxjs';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort} from '@angular/material/sort';
+
+type SortKey = 'name' | 'city';
+type SortDirection = 'asc' | 'desc';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizeOptions = [5, 10, 20];
+
+  /** What the search box holds; only {@link submittedLastName} is ever sent. */
+  lastNameDraft = '';
+  submittedLastName = '';
+  pageIndex = 0;
+  pageSize = 10;
+  sortKey: SortKey = 'name';
+  sortDirection: SortDirection = 'asc';
+
+  /** The latest successful answer; null before the first one and after a failure. */
+  page: OwnerPage | null = null;
+  loading = false;
+  failed = false;
+  private request?: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
-
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.load();
+  }
+
+  ngOnDestroy() {
+    this.request?.unsubscribe();
+  }
+
+  search() {
+    this.submittedLastName = this.lastNameDraft;
+    this.pageIndex = 0;
+    this.load();
+  }
+
+  changePage(event: PageEvent) {
+    const sizeChanged = event.pageSize !== this.pageSize;
+    this.pageSize = event.pageSize;
+    this.pageIndex = sizeChanged ? 0 : event.pageIndex;
+    this.load();
+  }
+
+  changeSort(sort: Sort) {
+    this.sortKey = sort.active as SortKey;
+    this.sortDirection = sort.direction as SortDirection;
+    this.pageIndex = 0;
+    this.load();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +71,27 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  // Only the latest request may answer: unsubscribing the previous one silences its success,
+  // error and completion alike, so a late answer can never overwrite the page asked for since.
+  private load() {
+    this.request?.unsubscribe();
+    this.loading = true;
+    this.request = this.ownerService.getOwners({
+      lastName: this.submittedLastName,
+      page: this.pageIndex,
+      size: this.pageSize,
+      sort: `${this.sortKey},${this.sortDirection}` as OwnerSort
+    }).subscribe({
+      next: (page) => {
+        this.page = page;
+        this.failed = false;
+        this.loading = false;
+      },
+      error: () => {
+        this.page = null;
+        this.failed = true;
+        this.loading = false;
+      }
+    });
   }
 }

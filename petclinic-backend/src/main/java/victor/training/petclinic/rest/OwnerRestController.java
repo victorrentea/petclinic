@@ -1,8 +1,17 @@
 package victor.training.petclinic.rest;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +26,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,17 +46,27 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    // The largest page whose offset still fits the int Hibernate pages with, at the largest size.
+    static final int MAX_PAGE = Integer.MAX_VALUE / 20;
+    private static final String SORT_PATTERN = "(name|city),(asc|desc)";
+    private static final Map<String, String[]> SORT_CHAINS = Map.of(
+            "name", new String[]{"lastName", "firstName", "id"},
+            "city", new String[]{"city", "lastName", "firstName", "id"});
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -80,15 +100,51 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners",
+            description = "One page of the owners whose last name starts with `lastName` (case-sensitive), "
+                    + "with their pets and visits.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+                    schema = @Schema(implementation = OwnerPageDto.class),
+                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNER_PAGE)))
+    @ApiResponse(responseCode = "400", description = "page, size or sort outside the values listed here",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page index") @RequestParam(
+                    defaultValue = "0") @Min(0) @Max(MAX_PAGE) int page,
+            @Parameter(description = "Rows per page: 5, 10 or 20") @RequestParam(
+                    defaultValue = "10") @OneOf({5, 10, 20}) int size,
+            @Parameter(description = "Name orders by last name, first name, id; City by city, then as Name. "
+                    + "The direction applies to every field. Defaults to name,asc.",
+                    schema = @Schema(allowableValues = {"name,asc", "name,desc", "city,asc",
+                            "city,desc"})) @RequestParam(defaultValue = "name,asc") @Pattern(regexp = SORT_PATTERN,
+                                    message = "must be one of name,asc / name,desc / city,asc / city,desc") String sort) {
+        Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName,
+                PageRequest.of(page, size, toSort(sort)));
+        List<Owner> owners = withPetsAndVisits(ownerPage.getContent());
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners), ownerPage.getTotalElements());
+    }
+
+    private static Sort toSort(String sort) {
+        String[] keyAndDirection = sort.split(",");
+        return Sort.by(Sort.Direction.fromString(keyAndDirection[1]), SORT_CHAINS.get(keyAndDirection[0]));
+    }
+
+    // A second query, by id: fetching the associations in the paged query would make Hibernate
+    // page in memory. The IN list loses the order, so the page's own order is put back.
+    private List<Owner> withPetsAndVisits(List<Owner> page) {
+        if (page.isEmpty()) {
+            return List.of();
+        }
+        Map<Integer, Owner> fetched = ownerRepository
+                .findAllByIdFetchingPetsAndVisits(page.stream().map(Owner::getId).toList())
+                .stream().collect(toMap(Owner::getId, identity()));
+        return page.stream().map(owner -> Optional.ofNullable(fetched.get(owner.getId()))
+                .orElseThrow(() -> new IllegalStateException("Owner " + owner.getId() + " vanished mid-request")))
+                .toList();
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

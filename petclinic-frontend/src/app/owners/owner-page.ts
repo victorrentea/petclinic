@@ -1,9 +1,10 @@
+import { components, operations } from '../generated/api-types';
 import { Owner } from './owner';
 
-export interface OwnerPage {
+export type OwnerPage = Omit<components['schemas']['OwnerPageDto'], 'content'> & {
   content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
-}
+};
+
+export type OwnerListQuery = NonNullable<operations['listOwners']['parameters']['query']>;
+
+export type OwnerSort = NonNullable<OwnerListQuery['sort']>;

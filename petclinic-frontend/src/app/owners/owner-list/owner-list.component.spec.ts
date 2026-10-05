@@ -1,142 +1,254 @@
-/* tslint:disable:no-unused-variable */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {RouterTestingModule} from '@angular/router/testing';
+import {MatPaginator} from '@angular/material/paginator';
+import {Subject} from 'rxjs';
 
 import {OwnerListComponent} from './owner-list.component';
-import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import { OwnerService } from '../owner.service';
+import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Observable, of, Subject} from 'rxjs';
-import {RouterTestingModule} from '@angular/router/testing';
-import {CommonModule} from '@angular/common';
-import {PartsModule} from '../../parts/parts.module';
-import {ActivatedRouteStub} from '../../testing/router-stubs';
-import {OwnerDetailComponent} from '../owner-detail/owner-detail.component';
+import {OwnerListQuery, OwnerPage} from '../owner-page';
 import {OwnersModule} from '../owners.module';
 import {DummyComponent} from '../../testing/dummy.component';
-import {OwnerAddComponent} from '../owner-add/owner-add.component';
-import {OwnerEditComponent} from '../owner-edit/owner-edit.component';
-import Spy = jasmine.Spy;
-
-
-class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    return of();
-  }
-}
 
 describe('OwnerListComponent', () => {
-
-  let component: OwnerListComponent;
   let fixture: ComponentFixture<OwnerListComponent>;
-  let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
-  let de: DebugElement;
-  let el: HTMLElement;
+  let getOwners: jasmine.Spy;
+  /** One per request, in the order they were sent; each answers only when the test says so. */
+  let responses: Subject<OwnerPage>[];
 
+  const owner = (id: number, lastName = 'Franklin'): Owner => ({
+    id, firstName: 'George' + id, lastName, address: '110 W. Liberty St.', city: 'Madison',
+    telephone: '6085551023', pets: []
+  });
+  const page = (rows: number, totalElements: number, lastName?: string): OwnerPage => ({
+    content: Array.from({length: rows}, (_, i) => owner(i + 1, lastName)), totalElements
+  });
 
-  const testOwner: Owner = {
-    id: 1,
-    firstName: 'George',
-    lastName: 'Franklin',
-    address: '110 W. Liberty St.',
-    city: 'Madison',
-    telephone: '6085551023',
-    pets: []
-  };
-  let testOwners: Owner[];
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [DummyComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
-        RouterTestingModule.withRoutes(
-          [{path: 'owners', component: OwnerListComponent},
-            {path: 'owners/add', component: OwnerAddComponent},
-            {path: 'owners/:id', component: OwnerDetailComponent},
-            {path: 'owners/:id/edit', component: OwnerEditComponent}
-          ])],
-      providers: [
-        {provide: OwnerService, useValue: ownerService},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-      ]
-    })
-      .compileComponents();
-  }));
+      imports: [NoopAnimationsModule, OwnersModule,
+        RouterTestingModule.withRoutes([{path: 'owners/:id', component: DummyComponent}])],
+      providers: [{provide: OwnerService, useValue: jasmine.createSpyObj('OwnerService', ['getOwners'])}]
+    }).compileComponents();
 
-  beforeEach(() => {
-    testOwners = [testOwner];
-
-    fixture = TestBed.createComponent(OwnerListComponent);
-    component = fixture.componentInstance;
-    ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
-
-  });
-
-  it('should create OwnerListComponent', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should call ngOnInit() method', () => {
-    fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
-  });
-
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
-    fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
-      de = fixture.debugElement.query(By.css('.ownerFullName'));
-      el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
+    responses = [];
+    getOwners = TestBed.inject(OwnerService).getOwners as jasmine.Spy;
+    getOwners.and.callFake(() => {
+      const response = new Subject<OwnerPage>();
+      responses.push(response);
+      return response;
     });
-  }));
-
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('Fr');
-
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  // The page loads every owner on open; a search typed before that answer arrives must
-  // not be overwritten by it when it finally does.
-  it('a search is not overwritten by the initial load answering late', () => {
-    const initialLoad = new Subject<Owner[]>();
-    getOwnersSpy.and.returnValue(initialLoad);
+    fixture = TestBed.createComponent(OwnerListComponent);
     fixture.detectChanges();
-
-    component.searchByLastName('Franklin');
-    initialLoad.next([testOwner, {...testOwner, id: 2, lastName: 'Davis'}]);
-
-    expect(component.owners).toEqual([testOwner]);
   });
 
+  function answer(response: OwnerPage, request = responses.length - 1) {
+    responses[request].next(response);
+    responses[request].complete();
+    fixture.detectChanges();
+  }
+
+  function fail(request = responses.length - 1) {
+    responses[request].error('server returned code 500');
+    fixture.detectChanges();
+  }
+
+  const lastQuery = (): OwnerListQuery => getOwners.calls.mostRecent().args[0];
+  const element = (css: string): HTMLElement | null => fixture.nativeElement.querySelector(css);
+  const texts = (css: string): string[] =>
+    Array.from(fixture.nativeElement.querySelectorAll(css) as NodeListOf<HTMLElement>)
+      .map((e) => e.textContent!.trim());
+  const paginator = (): MatPaginator => fixture.debugElement.query(By.directive(MatPaginator)).componentInstance;
+
+  /** Every UI action must cost exactly one request: runs it and returns the one it sent. */
+  function oneRequestFor(action: () => void): OwnerListQuery {
+    const before = getOwners.calls.count();
+    action();
+    fixture.detectChanges();
+    expect(getOwners.calls.count()).withContext('requests sent').toBe(before + 1);
+    return lastQuery();
+  }
+
+  function click(css: string) {
+    element(css)!.click();
+  }
+
+  function submitSearch(prefix: string) {
+    const input = element('#lastName') as HTMLInputElement;
+    input.value = prefix;
+    input.dispatchEvent(new Event('input'));
+    click('#search-owner-form button[type="submit"]');
+  }
+
+  function goToNextPage() {
+    oneRequestFor(() => click('.mat-mdc-paginator-navigation-next'));
+    answer(page(10, 26));
+  }
+
+  describe('initial state', () => {
+    it('asks once for the first page of 10 by name ascending', () => {
+      expect(getOwners).toHaveBeenCalledTimes(1);
+      expect(lastQuery()).toEqual({lastName: '', page: 0, size: 10, sort: 'name,asc'});
+      expect(element('#addOwner')).withContext('Add Owner while loading').toBeTruthy();
+    });
+
+    it('shows the rows, the range and total, and sizes 5, 10 and 20', () => {
+      answer(page(10, 26));
+
+      expect(texts('#ownersTable td.ownerFullName').length).toBe(10);
+      expect(element('.mat-mdc-paginator-range-label')!.textContent).toContain('1 – 10 of 26');
+      expect(paginator().pageSizeOptions).toEqual([5, 10, 20]);
+      expect(paginator().pageSize).toBe(10);
+    });
+
+    it('offers sorting on Name and City only, Name ascending first', () => {
+      answer(page(10, 26));
+
+      expect(texts('#ownersTable th[mat-sort-header]')).toEqual(['Name', 'City']);
+      expect(texts('#ownersTable th:not([mat-sort-header])')).toEqual(['Address', 'Telephone', 'Pets']);
+      expect(element('th[mat-sort-header="name"]')!.getAttribute('aria-sort')).toBe('ascending');
+    });
+
+    it('links every row to the owner detail and keeps Add Owner', () => {
+      answer(page(1, 1));
+
+      expect(element('#ownersTable td.ownerFullName a')!.getAttribute('href')).toBe('/owners/1');
+      expect(element('#addOwner')).toBeTruthy();
+    });
+  });
+
+  describe('state transitions', () => {
+    beforeEach(() => answer(page(10, 26)));
+
+    it('next page sends one request with the same filter, size and sort', () => {
+      const query = oneRequestFor(() => click('.mat-mdc-paginator-navigation-next'));
+
+      expect(query).toEqual({lastName: '', page: 1, size: 10, sort: 'name,asc'});
+    });
+
+    it('a page-size change goes back to page 0', () => {
+      goToNextPage();
+
+      const query = oneRequestFor(() => paginator()._changePageSize(20));
+
+      expect(query).toEqual({lastName: '', page: 0, size: 20, sort: 'name,asc'});
+    });
+
+    it('a sort change goes back to page 0, and toggles direction without ever clearing', () => {
+      goToNextPage();
+
+      expect(oneRequestFor(() => click('th[mat-sort-header="city"]')))
+        .toEqual({lastName: '', page: 0, size: 10, sort: 'city,asc'});
+      answer(page(10, 26));
+      expect(oneRequestFor(() => click('th[mat-sort-header="city"]')).sort).toBe('city,desc');
+      answer(page(10, 26));
+      expect(oneRequestFor(() => click('th[mat-sort-header="city"]')).sort).toBe('city,asc');
+    });
+
+    it('a sort header answers the keyboard', () => {
+      const enter = new KeyboardEvent('keydown', {key: 'Enter'});
+      Object.defineProperty(enter, 'keyCode', {get: () => 13});
+
+      const query = oneRequestFor(() => element('th[mat-sort-header="name"]')!.dispatchEvent(enter));
+
+      expect(query.sort).toBe('name,desc');
+    });
+
+    it('a search goes back to page 0 and keeps the sort', () => {
+      oneRequestFor(() => click('th[mat-sort-header="city"]'));
+      answer(page(10, 26));
+      oneRequestFor(() => click('th[mat-sort-header="city"]'));
+      answer(page(10, 26));
+      goToNextPage();
+
+      const query = oneRequestFor(() => submitSearch('Da'));
+
+      expect(query).toEqual({lastName: 'Da', page: 0, size: 10, sort: 'city,desc'});
+    });
+
+    it('paging keeps the submitted prefix, not what is typed since', () => {
+      oneRequestFor(() => submitSearch('Fr'));
+      answer(page(10, 26));
+      const input = element('#lastName') as HTMLInputElement;
+      input.value = 'Zz';
+      input.dispatchEvent(new Event('input'));
+
+      const query = oneRequestFor(() => click('.mat-mdc-paginator-navigation-next'));
+
+      expect(query.lastName).toBe('Fr');
+    });
+  });
+
+  describe('latest request wins', () => {
+    it('a late answer to the initial load does not overwrite a search', () => {
+      oneRequestFor(() => submitSearch('Davis'));
+      answer(page(2, 2, 'Davis'));
+
+      answer(page(10, 26), 0);
+
+      expect(texts('#ownersTable td.ownerFullName')).toEqual(['George1 Davis', 'George2 Davis']);
+      expect(element('.mat-mdc-paginator-range-label')!.textContent).toContain('of 2');
+    });
+
+    it('a late failure of an older request shows no error and keeps loading the newer one', () => {
+      oneRequestFor(() => submitSearch('Davis'));
+
+      fail(0);
+
+      expect(element('#ownersError')).toBeNull();
+      expect(fixture.componentInstance.loading).toBe(true);
+      answer(page(2, 2, 'Davis'));
+      expect(fixture.componentInstance.loading).toBe(false);
+    });
+
+    it('leaving the screen cancels the request in flight', () => {
+      fixture.destroy();
+
+      expect(responses[0].observers.length).toBe(0);
+    });
+  });
+
+  describe('empty results and failures', () => {
+    it('no match: names the submitted prefix and hides the paginator', () => {
+      answer(page(10, 26));
+      oneRequestFor(() => submitSearch('Zz'));
+      answer(page(0, 0));
+
+      expect(element('#ownersEmpty')!.textContent).toContain('"Zz"');
+      expect(element('mat-paginator')).toBeNull();
+      expect(element('#ownersError')).toBeNull();
+    });
+
+    it('an empty page of a non-empty result keeps navigation and claims no "no match"', () => {
+      answer(page(10, 26));
+      oneRequestFor(() => click('.mat-mdc-paginator-navigation-next'));
+      answer(page(0, 8)); // owners deleted meanwhile: page 1 no longer exists, but 8 still match
+
+      expect(element('#ownersEmpty')).toBeNull();
+      expect(element('#ownersTable')!.textContent).toContain('This page is empty');
+      expect(paginator().hasPreviousPage()).toBe(true);
+    });
+
+    it('a failure shows an explicit error, never a "no match", and keeps Add Owner', () => {
+      fail();
+
+      expect(element('#ownersError')).toBeTruthy();
+      expect(element('#ownersEmpty')).toBeNull();
+      expect(element('#ownersTable')).toBeNull();
+      expect(element('#addOwner')).toBeTruthy();
+    });
+
+    it('the search form still works after a failure', () => {
+      fail();
+
+      oneRequestFor(() => submitSearch('Fr'));
+      answer(page(1, 1));
+
+      expect(element('#ownersError')).toBeNull();
+      expect(texts('#ownersTable td.ownerFullName').length).toBe(1);
+    });
+  });
 });

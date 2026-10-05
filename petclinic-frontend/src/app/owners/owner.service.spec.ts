@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,60 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
+  const expectedPage: OwnerPage = {content: expectedOwners, totalElements: 26};
+
+  it('getOwners without a query asks for the API defaults and returns the page', () => {
     ownerService
       .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+      .subscribe((page) => expect(page).toEqual(expectedPage), fail);
 
     const req = httpTestingController.expectOne(ownerService.entityUrl);
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    expect(req.request.params.keys()).toEqual([]);
+    req.flush(expectedPage);
+  });
+
+  it('getOwners sends the filter, page, size and sort as query parameters', () => {
+    ownerService
+      .getOwners({lastName: 'Fr', page: 2, size: 20, sort: 'city,desc'})
+      .subscribe((page) => {
+        expect(page.content).toEqual(expectedOwners);
+        expect(page.totalElements).toBe(26);
+      }, fail);
+
+    const req = httpTestingController.expectOne(
+      (r) => r.url === ownerService.entityUrl && r.method === 'GET');
+    expect(req.request.urlWithParams)
+      .toBe(ownerService.entityUrl + '?lastName=Fr&page=2&size=20&sort=city,desc');
+    req.flush(expectedPage);
+  });
+
+  it('getOwners leaves out an empty last name', () => {
+    ownerService.getOwners({lastName: '', page: 0, size: 10, sort: 'name,asc'}).subscribe();
+
+    const req = httpTestingController.expectOne((r) => r.url === ownerService.entityUrl);
+    expect(req.request.params.has('lastName')).toBe(false);
+    req.flush(expectedPage);
+  });
+
+  it('getOwners encodes the last name instead of pasting it into the URL', () => {
+    ownerService.getOwners({lastName: "O'Br & Co%+#"}).subscribe();
+
+    const req = httpTestingController.expectOne((r) => r.url === ownerService.entityUrl);
+    expect(req.request.urlWithParams)
+      .toBe(ownerService.entityUrl + "?lastName=O'Br%20%26%20Co%25%2B%23");
+    req.flush(expectedPage);
+  });
+
+  it('getOwners propagates a failure instead of answering an empty page', () => {
+    const outcome = jasmine.createSpyObj('outcome', ['next', 'error']);
+    ownerService.getOwners().subscribe(outcome);
+
+    httpTestingController.expectOne(ownerService.entityUrl)
+      .flush('boom', {status: 500, statusText: 'Server Error'});
+
+    expect(outcome.next).not.toHaveBeenCalled();
+    expect(outcome.error).toHaveBeenCalled();
   });
 
   it('search the owner by id', () => {
@@ -131,15 +178,4 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
-  });
 });
