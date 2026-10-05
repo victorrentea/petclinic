@@ -7,7 +7,7 @@ export class OverflowDirective implements OnDestroy {
   // Measured outside Angular's zone; change detection runs only when the answer flips.
   private readonly observer = new ResizeObserver(() => this.measure());
 
-  constructor(private element: ElementRef<HTMLElement>, private zone: NgZone) {
+  constructor(private readonly element: ElementRef<HTMLElement>, private readonly zone: NgZone) {
     zone.runOutsideAngular(() => this.observer.observe(element.nativeElement));
   }
 

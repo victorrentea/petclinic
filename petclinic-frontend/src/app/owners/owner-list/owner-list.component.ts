@@ -25,7 +25,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   readonly expandedPets = new Set<number>();
   private subscription: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly route: ActivatedRoute,
+              private readonly ownerService: OwnerService) {
   }
 
   // The URL holds the grid's state, so a refresh, a shared link or Back lands on the same page.
@@ -100,7 +101,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   // replaceUrl: Back leaves the Owners screen instead of stepping back through every page.
   private load(change: Partial<OwnerPageQuery>) {
     const query = {...this.query, ...change};
-    this.router.navigate([], {relativeTo: this.route, queryParams: urlParamsOf(query), replaceUrl: true});
+    // Nothing to do once it lands: queryParamMap drives the load.
+    void this.router.navigate([], {relativeTo: this.route, queryParams: urlParamsOf(query), replaceUrl: true});
   }
 }
 

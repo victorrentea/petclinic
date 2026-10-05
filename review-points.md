@@ -15,7 +15,7 @@ ticket: victorrentea/petclinic#25
 ## Fixed
 
 ### A failed page request froze the grid for good
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:42-56
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:43-57
 - file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.html:21-25
 - file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.spec.ts:213-226
 - source: /code-review xhigh
@@ -33,7 +33,7 @@ ticket: victorrentea/petclinic#25
 - fix: V4 sets the ICU en-x-icu collation on last_name, first_name and city.
 
 ### A page past the end showed "No owners yet" with no paginator
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:46-56
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:47-57
 - file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.spec.ts:228-236
 - source: /code-review xhigh
 - severity: medium
@@ -43,7 +43,7 @@ ticket: victorrentea/petclinic#25
 ### The record's Back button dropped the grid's page, sort and search
 - file: petclinic-frontend/src/app/owners/owner-detail/owner-detail.component.ts:28
 - file: petclinic-frontend/src/app/owners/owner.service.ts:15-16
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:39
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:40
 - file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.spec.ts:238-244
 - file: petclinic-frontend/src/app/owners/owner-detail/owner-detail.component.spec.ts:18
 - source: /code-review xhigh
@@ -67,7 +67,30 @@ ticket: victorrentea/petclinic#25
 - observation: the pre-push line-length check refused the implementation commit.
 - fix: wrapped the step definition.
 
+### The grid's URL navigation left its promise unhandled
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:104-105
+- source: CI
+- severity: medium
+- observation: SonarCloud BUG — router.navigate returns a promise nobody awaits or catches; the quality gate failed on it.
+- fix: mark it `void`; queryParamMap, not the promise, drives the load.
+
+### Injected members never reassigned were not readonly
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:28-29
+- file: petclinic-frontend/src/app/owners/owner-list/overflow.directive.ts:10
+- source: CI
+- severity: low
+- observation: SonarCloud S2933 on the grid component and the overflow directive.
+- fix: `private readonly` on the constructor parameters.
+
 ## Ignored
+
+### Duplicated "Validation failed" literals in ExceptionControllerAdvice
+- file: petclinic-backend/src/main/java/victor/training/petclinic/rest/error/ExceptionControllerAdvice.java:53
+- source: CI
+- severity: low
+- observation: SonarCloud S1192 — the same log and title literals appear three times.
+- why: not touched by this change; last edited by #40 (6de799de).
+
 
 ### e2e steps can read the previous page's rows
 - file: petclinic-test/src/owners-grid.feature.glue.ts:14-18
@@ -91,7 +114,7 @@ ticket: victorrentea/petclinic#25
 - why: type mismatch is a 500 on every endpoint today; needs its own handler.
 
 ### Typed but unsubmitted search text is erased by a sort click
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:38
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:39
 - source: /code-review xhigh
 - severity: low
 - observation: the tap writes the URL's lastName back into the box; Find with an unchanged query no longer reloads.
@@ -154,13 +177,13 @@ ticket: victorrentea/petclinic#25
 - why: one Sort direction over every key keeps the index scannable backwards. The spec only says "by last name, then first name" for ties, so a reviewer may well expect A to Z within a city.
 
 ### Grid changes replace the history entry instead of pushing one
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:103
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:105
 - alternative: push a history entry per page, so Back steps through pages
 - confidence: 0.6
 - why: you asked for refresh and links to keep the page, not for Back to walk pages. replaceUrl keeps Back meaning "leave the screen"; a staff member paging through 50k owners may disagree.
 
 ### Unreadable grid values in the URL fall back to defaults
-- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:123-127
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:125-129
 - alternative: forward them and show the API's 400
 - confidence: 0.75
 - why: a hand-edited or stale link should still open a usable screen; the API keeps rejecting such values for other clients.
