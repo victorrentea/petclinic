@@ -16,6 +16,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 const visitEditOwner = { id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.', city: 'Madison', telephone: '6085551023', pets: [] };
 
@@ -31,6 +33,12 @@ class VisitServiceStub {
 class OwnerServiceStub {
   getOwnerById(): Observable<any> {
     return of(visitEditOwner);
+  }
+}
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of([{id: 2, firstName: 'Helen', lastName: 'Leary', specialties: []}]);
   }
 }
 
@@ -57,6 +65,7 @@ describe('VisitEditComponent', () => {
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
         {provide: PetService, useClass: PetServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -110,6 +119,15 @@ describe('VisitEditComponent', () => {
     const visit: Visit = { id: 1, date: '2023-05-01', description: 'updated', pet: testPet };
     component.onSubmit(visit);
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('sends a cleared vet as null, so the server removes it', () => {
+    const update = spyOn(visitService, 'updateVisit').and.callThrough();
+    component.currentOwner = visitEditOwner as any;
+    const visit: Visit = { id: 1, date: '2023-05-01', description: 'updated', pet: testPet, vetId: null };
+    component.onSubmit(visit);
+    const body = JSON.parse(JSON.stringify(update.calls.mostRecent().args[1]));
+    expect(body.vetId).toBeNull();
   });
 
   it('should navigate to owner detail via gotoOwnerDetail', () => {

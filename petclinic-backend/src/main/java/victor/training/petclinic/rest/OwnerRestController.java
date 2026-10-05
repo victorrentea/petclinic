@@ -14,6 +14,7 @@ import victor.training.petclinic.notification.NotificationSender;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
@@ -52,6 +53,7 @@ public class OwnerRestController {
     private final PetRepository petRepository;
     private final VisitRepository visitRepository;
     private final PetTypeRepository petTypeRepository;
+    private final VetRepository vetRepository;
 
     private final OwnerMapper ownerMapper;
 
@@ -66,6 +68,7 @@ public class OwnerRestController {
             PetRepository petRepository,
             VisitRepository visitRepository,
             PetTypeRepository petTypeRepository,
+            VetRepository vetRepository,
             OwnerMapper ownerMapper,
             PetMapper petMapper,
             VisitMapper visitMapper,
@@ -74,6 +77,7 @@ public class OwnerRestController {
         this.petRepository = petRepository;
         this.visitRepository = visitRepository;
         this.petTypeRepository = petTypeRepository;
+        this.vetRepository = vetRepository;
         this.ownerMapper = ownerMapper;
         this.petMapper = petMapper;
         this.visitMapper = visitMapper;
@@ -185,6 +189,7 @@ public class OwnerRestController {
         Pet pet = new Pet();
         pet.setId(petId);
         visit.setPet(pet);
+        visit.setVet(vetRepository.findByIdOrNull(visitFieldsDto.getVetId()));
         visitRepository.save(visit);
         notifyOwner(ownerId, petId, visit);
         return visit.getId();

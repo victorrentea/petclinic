@@ -3,6 +3,7 @@ package victor.training.petclinic.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -29,7 +32,10 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -55,8 +61,16 @@ public class VisitTest {
     @Autowired
     OwnerRepository ownerRepository;
 
+    @Autowired
+    VetRepository vetRepository;
+
+    @Autowired
+    EntityManager entityManager;
+
     int visitId;
     int petId;
+    int ownerId;
+    Vet vet;
     @Autowired
     private PetTypeRepository petTypeRepository;
 
@@ -68,6 +82,12 @@ public class VisitTest {
         pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
         petRepository.save(pet);
         petId = pet.getId();
+        ownerId = owner.getId();
+
+        vet = new Vet();
+        vet.setFirstName("James");
+        vet.setLastName("Herriot");
+        vetRepository.save(vet);
 
         Visit visit = new Visit();
         visit.setDate(LocalDate.now());
@@ -230,5 +250,151 @@ public class VisitTest {
             assertThat(visit.getPet().getId()).isEqualTo(petId);
             assertThat(visit.getDate()).isNotNull();
         });
+    }
+
+    @Test
+    void create_withVet() throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("annual checkup")
+                .setVetId(vet.getId());
+
+        String location = mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+
+        VisitDto created = callGet(idFrom(location));
+        assertThat(created.getVetId()).isEqualTo(vet.getId());
+        assertThat(created.getVetFirstName()).isEqualTo("James");
+        assertThat(created.getVetLastName()).isEqualTo("Herriot");
+    }
+
+    @Test
+    void create_withoutVet() throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("annual checkup");
+
+        String location = mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getHeader("Location");
+
+        VisitDto created = callGet(idFrom(location));
+        assertThat(created.getVetId()).isNull();
+        assertThat(created.getVetFirstName()).isNull();
+        assertThat(created.getVetLastName()).isNull();
+    }
+
+    @Test
+    void create_withUnknownVet_notFound() throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now())
+                .setDescription("annual checkup")
+                .setVetId(99999);
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void bookFromOwnerPage_withVet_isShownOnOwnerPage() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("ear infection")
+                .setVetId(vet.getId());
+
+        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+        entityManager.flush();
+        entityManager.clear(); // as a fresh request would: the pet's visits are reloaded
+
+        mockMvc.perform(get("/api/owners/{ownerId}", ownerId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pets[0].visits[?(@.description == 'ear infection')].vetId")
+                        .value(vet.getId()))
+                .andExpect(jsonPath("$.pets[0].visits[?(@.description == 'ear infection')].vetLastName")
+                        .value("Herriot"))
+                .andExpect(jsonPath("$.pets[0].visits[?(@.description == 'rabies shot')].vetId")
+                        .value(contains(nullValue())));
+    }
+
+    @Test
+    void bookFromOwnerPage_withoutVet() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("ear infection");
+
+        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated());
+
+        assertThat(visitRepository.findByPetId(petId))
+                .filteredOn(v -> "ear infection".equals(v.getDescription()))
+                .singleElement()
+                .extracting(Visit::getVet)
+                .isNull();
+    }
+
+    @Test
+    void update_assignsVet() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("rabies shot")
+                .setVetId(vet.getId());
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        assertThat(callGet(visitId).getVetId()).isEqualTo(vet.getId());
+    }
+
+    @Test
+    void update_clearsVet() throws Exception {
+        Visit visit = visitRepository.findById(visitId).orElseThrow();
+        visit.setVet(vet);
+        visitRepository.save(visit);
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("rabies shot")
+                .setVetId(null);
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        VisitDto updated = callGet(visitId);
+        assertThat(updated.getVetId()).isNull();
+        assertThat(updated.getVetLastName()).isNull();
+    }
+
+    @Test
+    void getAll_returnsVetNames() throws Exception {
+        Visit visit = visitRepository.findById(visitId).orElseThrow();
+        visit.setVet(vet);
+        visitRepository.save(visit);
+
+        mockMvc.perform(get("/api/visits"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == %d)].vetFirstName", visitId).value("James"))
+                .andExpect(jsonPath("$[?(@.id == %d)].vetLastName", visitId).value("Herriot"));
+    }
+
+    private static int idFrom(String location) {
+        return Integer.parseInt(location.substring(location.lastIndexOf('/') + 1));
     }
 }
