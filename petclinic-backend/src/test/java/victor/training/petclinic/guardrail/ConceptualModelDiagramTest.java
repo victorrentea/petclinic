@@ -84,7 +84,8 @@ class ConceptualModelDiagramTest {
     void everyAssociationInTheCodeIsDrawn() throws Exception {
         assertThat(drawnAssociations(diagram()).keySet())
                 .describedAs("Associations between domain classes that %s does not draw. Run "
-                        + "docs/scripts/conceptual-model-patch.py to add the line, then route it.",
+                        + "docs/scripts/conceptual-model-patch.py to add the line: it draws it "
+                        + "straight and red, and a human then lays it out by hand.",
                         DIAGRAM)
                 .containsAll(expectedAssociations().keySet());
     }
