@@ -12,7 +12,9 @@
 
 - [x] 2.1 Reconfirm migration numbering and owner indexes before authoring `V4__owner_list_indexes.sql`; add the pattern-prefix, Name-chain, and City-chain indexes without editing V1-V3 or seed data. Verify Flyway migrates a fresh embedded database and an existing V3 database and exposes the intended indexes via `pg_indexes`.
 - [x] 2.2 Verify database-level LIMIT/OFFSET before graph loading using the small functional fixtures and query-budget tests from 1.2. Do not generate a 100,000-owner dataset or run load measurements for this change; verify the validation summary explicitly states that large-scale performance is unverified.
+  - Verified: `OwnerListQueryBudgetTest` (database paging, fail-fast on in-memory collection paging, <= 3 SELECTs). Large-scale performance is **unverified** — no 100,000-owner dataset was generated.
 - [x] 2.3 Adapt `OwnerSearchThroughLatencyProxyTest` to the page envelope/default size while retaining its existing thresholds. Verify it compiles with test compilation only; do not execute this load test today, even if the proxy is available, and report the measurement as deferred for budget.
+  - Compiled only (`mvn test-compile`) and excluded from every test run; the measurement is deferred for budget.
 
 ## 3. Frontend contract, request state, and grid controls
 
@@ -25,13 +27,17 @@
 
 ## 4. End-to-end consumers and trace-derived outputs
 
-- [ ] 4.1 Update `petclinic-test/src/owner-search.feature` and its glue: obtain fixture owners by traversing API pages, replace the traced empty-search all-rows assertion with first-page/total assertions, and add ordered page traversal, sort, size-reset, and prefix-reset scenarios. Verify a seeded dataset larger than 20 owners is traversed without missing/duplicate IDs and existing case-sensitive search scenarios still pass.
-- [ ] 4.2 Audit and migrate affected Playwright specs and list mocks. Inspect the JMeter plan's actual HTTP methods and extractors; update only list consumers, leaving unchanged CRUD contracts intact. Verify the relevant Playwright scenarios pass and no list extractor/assertion assumes a top-level array.
-- [ ] 4.3 Run focused Cucumber/browser scenarios and regenerate affected sequence outputs with the existing trace tooling. Verify generated first-page traces contain the paged list flow and `DeploymentDiagramTest` passes, without editing guardrail/generator infrastructure or adding chatbot diagram scope.
+- [x] 4.1 Update `petclinic-test/src/owner-search.feature` and its glue: obtain fixture owners by traversing API pages, replace the traced empty-search all-rows assertion with first-page/total assertions, and add ordered page traversal, sort, size-reset, and prefix-reset scenarios. Verify a seeded dataset larger than 20 owners is traversed without missing/duplicate IDs and existing case-sensitive search scenarios still pass.
+- [x] 4.2 Audit and migrate affected Playwright specs and list mocks. Inspect the JMeter plan's actual HTTP methods and extractors; update only list consumers, leaving unchanged CRUD contracts intact. Verify the relevant Playwright scenarios pass and no list extractor/assertion assumes a top-level array.
+  - JMeter plan unchanged: it only POSTs to `/api/owners` and reads owners by id, no list sampler or extractor. No Playwright spec mocks the list.
+- [x] 4.3 Run focused Cucumber/browser scenarios and regenerate affected sequence outputs with the existing trace tooling. Verify generated first-page traces contain the paged list flow and `DeploymentDiagramTest` passes, without editing guardrail/generator infrastructure or adding chatbot diagram scope.
 - [ ] 4.4 Comment on #25 with the verified implementation state, breaking coordinated rollout, and Name/City-only sorting; notify Bizu through the available issue channel without guessing an identity. Verify the published update is accurate and references the narrower accepted scope.
+  - **Not done, deliberately:** this run was not allowed to post anything on GitHub, so no comment on #25 and no notification to Bizu. Still owed before merge: state that the earlier "implemented" claim never reached `main`, that this change ships it, the coordinated breaking rollout, and that sorting is narrowed to Name and City.
 
 ## 5. Integrated acceptance and release readiness
 
-- [ ] 5.1 Run the relevant backend REST/functional/security/migration suites, frontend headless tests and strict build, owner browser/Cucumber scenarios, API lint/drift checks, and diagram guardrails together, explicitly excluding load/performance tests. Verify the owner-list spec scenarios are covered and record large-dataset and load measurements as deferred, not passed.
-- [ ] 5.2 Review the integrated diff for atomic backend/frontend contract migration, generated-file consistency, and unchanged detail/CRUD/chatbot behavior. Verify only intended application and generated-output changes are present; if tooling edits become necessary, follow the project's tooling-on-main rule rather than leaving them solely on `db27oct`.
-- [ ] 5.3 Prepare the one-PR/one-deploy release and paired application rollback instructions. Verify both old application versions remain compatible with the additive indexes and no applied Flyway migration is edited or removed.
+- [x] 5.1 Run the relevant backend REST/functional/security/migration suites, frontend headless tests and strict build, owner browser/Cucumber scenarios, API lint/drift checks, and diagram guardrails together, explicitly excluding load/performance tests. Verify the owner-list spec scenarios are covered and record large-dataset and load measurements as deferred, not passed.
+  - Backend: 240 tests (load test excluded); frontend: 135 headless tests + strict build; Cucumber 11/11 and Playwright 11 passed / 2 chatbot specs skipped (no chatbot in the stack), on an isolated Docker instance; Spectral 0 errors; `DeploymentDiagramTest` green on regenerated traces. Large-dataset and load measurements: **deferred, not passed**.
+- [x] 5.2 Review the integrated diff for atomic backend/frontend contract migration, generated-file consistency, and unchanged detail/CRUD/chatbot behavior. Verify only intended application and generated-output changes are present; if tooling edits become necessary, follow the project's tooling-on-main rule rather than leaving them solely on `db27oct`.
+- [x] 5.3 Prepare the one-PR/one-deploy release and paired application rollback instructions. Verify both old application versions remain compatible with the additive indexes and no applied Flyway migration is edited or removed.
+  - See [release.md](release.md).

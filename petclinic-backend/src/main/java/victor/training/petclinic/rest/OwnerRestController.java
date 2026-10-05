@@ -62,7 +62,7 @@ import jakarta.validation.constraints.Pattern;
 public class OwnerRestController {
 
     // The largest page whose offset still fits the int Hibernate pages with, at the largest size.
-    static final int MAX_PAGE = Integer.MAX_VALUE / 20;
+    private static final int MAX_PAGE = Integer.MAX_VALUE / 20;
     private static final String SORT_PATTERN = "(name|city),(asc|desc)";
     private static final Map<String, String[]> SORT_CHAINS = Map.of(
             "name", new String[]{"lastName", "firstName", "id"},
