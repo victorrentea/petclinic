@@ -107,9 +107,6 @@ seed() { # seed ID "what breaks" -- <edit_line args...>
 #   • the *extractor* tests don't assert — they OVERWRITE the artifact, and pre-push's
 #     "generated artifacts drifted from committed state" gate is what actually blocks.
 plant_tier1() {
-  seed pom-libs "pre-push list-unversioned-deps --check (ungated, fires first)" -- \
-    del petclinic-backend/pom-libs.txt '^  org\.postgresql:postgresql$'
-
   seed openapi "pre-push drift gate (OpenApiExtractorTest rewrites openapi.yaml)" -- \
     sub openapi.yaml '^  version: "1\.0"$' "  version: \"1.0-$MARK\""
 
@@ -217,5 +214,5 @@ GUARDRAILS.md. Undo with: git reset --hard HEAD~1"
 
 echo ""
 echo "✅ Committed $(git rev-parse --short HEAD) with --no-verify — ${#TOUCHED[@]} file(s) broken, nothing pushed."
-echo "   Next 'git push' now hits: pom-libs → guardrail tests → drift → frontend build."
+echo "   Next 'git push' now hits: guardrail tests → drift → frontend build."
 echo "   Undo: git reset --hard HEAD~1"

@@ -48,6 +48,8 @@ class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/*.css", "/*.js").permitAll()
                         // Actuator open for scraping (demo): Prometheus pulls /actuator/prometheus without a JWT.
                         .requestMatchers("/actuator/**").permitAll()
+                        // Jev demo opens from the browser address bar, no JWT to paste.
+                        .requestMatchers("/jev").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new BearerAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();

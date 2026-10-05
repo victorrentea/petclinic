@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -70,15 +69,6 @@ public class ExceptionControllerAdvice {
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
-    }
-
-    // A rule checked in code rather than by an annotation, e.g. Pet.checkVisitDate
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ProblemDetail> handleValidationException(ValidationException ex,
-            HttpServletRequest request) {
-        log.warn("Validation failed: {}", ex.getMessage());
-        return ResponseEntity.badRequest()
-                .body(buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
     }
 
     // e.g. ?page=abc, which Spring itself would answer with a 400, were it not for the catch-all below

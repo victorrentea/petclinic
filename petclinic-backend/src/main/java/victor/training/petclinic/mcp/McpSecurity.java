@@ -68,6 +68,14 @@ public class McpSecurity {
             this.apiKey = apiKey;
         }
 
+        // A tool that elicits finishes on another request's thread, so Spring MVC closes the original SSE
+        // stream with an ASYNC dispatch. AuthorizationFilter runs on it too: skipped here (the default), it
+        // sees no Authentication, denies the already-committed response, and Tomcat aborts the stream.
+        @Override
+        protected boolean shouldNotFilterAsyncDispatch() {
+            return false;
+        }
+
         @Override
         protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
                 throws ServletException, IOException {

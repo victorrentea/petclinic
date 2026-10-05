@@ -5,6 +5,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
+import jakarta.persistence.ManyToMany;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -20,21 +22,23 @@ import java.util.Set;
 
 /**
  * The domain model as the code actually declares it — classes and the associations
- * between them, with cardinalities — read with PLAIN JAVA REFLECTION, no JPA (or any
- * other) annotations. Rules, inferred from field types alone:
+ * between them, with cardinalities — read with PLAIN JAVA REFLECTION, from field types
+ * and one annotation (see below). Rules:
  * <ul>
  *   <li>a field whose (element) type is another domain class → an association;</li>
  *   <li>a collection field ⇒ the target end is "0..*"; a single reference ⇒ "1";</li>
  *   <li>when only one side declares the reference (unidirectional), the missing end
  *       defaults to the classic foreign-key shape: a lone single ref implies "0..*"
- *       referrers; a lone collection implies a single "1" owner;</li>
+ *       referrers; a lone collection implies a single "1" owner, unless it is a
+ *       {@code @ManyToMany};</li>
  *   <li>the association is BIDIRECTIONAL when both classes declare a field for the
  *       other, and unidirectional when only one does — a fact about the code the
  *       cardinalities alone cannot state, so each end also carries the role name the
  *       far class knows it by (the field through which it is reached).</li>
  * </ul>
- * The price of dropping annotations: a unidirectional collection can't be told apart
- * from a many-to-many join table, so it reads as one-to-many.
+ * The one annotation read is {@code @ManyToMany}: field types alone can't tell a
+ * unidirectional collection from a join table, and reading it as one-to-many drew Vet →
+ * Specialty with a single vet per specialty.
  *
  * <p>This lives apart from any one test because two guardrails now compare a drawing
  * against it — {@link DomainModelExtractorTest}, which regenerates the PlantUML, and
@@ -50,7 +54,7 @@ class DomainModelExtractor {
     private static final String DOMAIN_MODEL_PKG = "victor.training.petclinic.domain";
 
     /** A field that points at another domain class. */
-    private record Ref(Class<?> owner, Class<?> target, boolean many, String field) {
+    private record Ref(Class<?> owner, Class<?> target, boolean many, boolean manyToMany, String field) {
     }
 
     /**
@@ -113,7 +117,8 @@ class DomainModelExtractor {
                 if (target == null || target.equals(cls))
                     continue; // skip self-references
                 byPair.computeIfAbsent(pairKey(cls, target), k -> new ArrayList<>())
-                        .add(new Ref(cls, target, isCollection(f.getType()), f.getName()));
+                        .add(new Ref(cls, target, isCollection(f.getType()),
+                                f.isAnnotationPresent(ManyToMany.class), f.getName()));
             }
         }
 
@@ -165,7 +170,7 @@ class DomainModelExtractor {
         if (counterpartToThis != null)
             return counterpartToThis.many() ? MANY : ONE;
         if (thisToCounterpart != null)
-            return thisToCounterpart.many() ? ONE : MANY;
+            return thisToCounterpart.many() && !thisToCounterpart.manyToMany() ? ONE : MANY;
         return ONE;
     }
 
