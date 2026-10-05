@@ -5,11 +5,12 @@ The conceptual model is hand-arranged on purpose: people remember where things a
 here is allowed to move a box a human put somewhere. This script does the two jobs a human
 should not have to do by hand:
 
-  * a concept or an association the code has and the map does not is ADDED — every new box
-    in the staging lane down the left-hand side, marked `placed="auto"`, so
-    ConceptualModelDiagramTest keeps failing until someone drags it onto the map proper;
-  * a staged box that has since been moved is GRADUATED — the marker and the staging style
-    come off, and it becomes an ordinary part of the map.
+    * a concept or an association the code has and the map does not is ADDED — every new box
+        in the staging lane down the left-hand side, marked `placed="auto"`, so
+        ConceptualModelDiagramTest keeps failing until someone drags it onto the map proper;
+        every new line as one straight segment from box to box, red, never routed;
+    * a staged box that has since been moved is GRADUATED — the marker and the staging style
+        come off, and it becomes an ordinary part of the map.
 
 What it never does: reposition, restyle or delete anything else. Removing a concept the
 code dropped is left to a human too, because deleting from a map is a decision about the
@@ -59,8 +60,11 @@ STAGED_BOX_STYLE = (
     "rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;"
     f"strokeColor={TODO_COLOR};strokeWidth={STROKE_W};dashed=1;fontSize=15;fontStyle=1;")
 EDGE_STYLE = f"endArrow=none;html=1;strokeColor=#333333;strokeWidth={STROKE_W};fontSize=12;"
-# A line this script routed is a to-do like a staged box is: it is joined to the right two
-# concepts and it is routed by nobody. It turns black when a human has looked at it.
+# A line this script draws is a to-do like a staged box is: it is joined to the right two
+# concepts and laid out by nobody. On purpose it is ONE STRAIGHT SEGMENT, centre to centre —
+# no edgeStyle, no waypoints, no exit/entry anchors — even when that runs it straight through
+# a box in the way: a line that looks finished is a line nobody lays out. Routing it is a
+# human's call about the map, made by hand in draw.io; the line turns black once made.
 STAGED_EDGE_STYLE = (
     f"endArrow=none;html=1;strokeColor={TODO_COLOR};strokeWidth={STROKE_W};fontSize=12;")
 # the * is the only marker on the map, so it is read at a glance; no white label
@@ -80,6 +84,10 @@ NOTE_TEXT = (
 NOTE_STYLE = f"text;html=1;align=center;fontSize=13;fontColor={TODO_COLOR};"
 NOTE_W, NOTE_H = 260, 60
 NOTE_GAP = 40  # breathing room between the lowest box and the note
+
+# How far along its line an end's * sits: -1 is the source box, 1 the target, so 0.6 puts
+# it near the end it qualifies — where every hand-drawn line on the map has its marker.
+LABEL_AT = "0.6"
 
 BOX_W, BOX_H = 140, 50
 LANE_GAP = 300  # how far left of the map the staging lane sits
@@ -226,7 +234,7 @@ def patch(model_root, concepts, associations):
             changes.append(f"skipped    {key} — one of its concepts is not on the map yet")
             continue
         root.extend(edge_cells(key, a))
-        changes.append(f"drew       {key} — check how it routes")
+        changes.append(f"drew       {key} — a straight red line; lay it out by hand")
 
     # 4. say, on the map itself, what the red means and how to clear it
     if any(c.startswith(("staged", "drew")) for c in changes) and not note_drawn(cells):
@@ -297,7 +305,10 @@ def staged_box(name, x, y):
 
 def edge_cells(key, a):
     """The line, plus a * at each many end. Nothing is drawn on a to-one end, and the line
-    carries no role name: the map shows the shape of the model, not the field names."""
+    carries no role name: the map shows the shape of the model, not the field names.
+
+    The line is straight and unrouted (see STAGED_EDGE_STYLE); each * sits on the line near
+    the end it qualifies, at the same relative position the hand-drawn lines use."""
     edge_id = "e-" + key.lower()
     obj = ET.Element("object", {"label": "", "assoc": key, "id": edge_id})
     cell = ET.SubElement(obj, "mxCell", {
@@ -306,13 +317,16 @@ def edge_cells(key, a):
     ET.SubElement(cell, "mxGeometry", {"relative": "1", "as": "geometry"})
 
     labels = []
-    for suffix, value, position in (("s", a["left_card"], "-0.6"), ("t", a["right_card"], "0.6")):
+    for suffix, value, position in (("s", a["left_card"], f"-{LABEL_AT}"),
+                                    ("t", a["right_card"], LABEL_AT)):
         if not value:
             continue  # a to-one end is left unmarked
-        label = ET.Element("mxCell", {"id": f"{edge_id}-{suffix}", "value": value,
-                                      "style": LABEL_STYLE, "vertex": "1",
-                                      "connectable": "0", "parent": edge_id})
-        ET.SubElement(label, "mxGeometry", {"x": position, "relative": "1", "as": "geometry"})
+        label = ET.Element("mxCell", {
+            "id": f"{edge_id}-{suffix}", "value": value, "style": LABEL_STYLE,
+            "vertex": "1", "connectable": "0", "parent": edge_id})
+        geometry = ET.SubElement(label, "mxGeometry", {
+            "x": position, "relative": "1", "as": "geometry"})
+        ET.SubElement(geometry, "mxPoint", {"as": "offset"})
         labels.append(label)
     return [obj] + labels
 
@@ -326,8 +340,9 @@ def render(model_root):
         sys.exit("draw.io CLI not found — install it with: brew install --cask drawio")
 
     body = ET.tostring(model_root, encoding="unicode")
-    mxfile = (f'<mxfile host="petclinic-guardrail">'
-              f'<diagram name="Conceptual Model" id="conceptual-model">{body}</diagram></mxfile>')
+    mxfile = (
+        f'<mxfile host="petclinic-guardrail">'
+        f'<diagram name="Conceptual Model" id="conceptual-model">{body}</diagram></mxfile>')
 
     with tempfile.TemporaryDirectory() as tmp:
         source = Path(tmp) / "ConceptualModel.drawio"
@@ -366,8 +381,14 @@ def main():
     render(model_root)
     print(f"\nRe-rendered {DIAGRAM}.")
     if any(c.startswith("staged") for c in changes):
-        print("Open it in the draw.io desktop app, drag the orange boxes onto the map, save,\n"
-              "then run this script again to clear their staging markers.")
+        print(
+            "Open it in the draw.io desktop app, drag the red boxes onto the map, save,\n"
+            "then run this script again to clear their staging markers.")
+    if any(c.startswith("drew") for c in changes):
+        print(
+            "Each new line is drawn straight from box to box, through whatever is in the way.\n"
+            "Route it by hand in draw.io and set its colour back to default — that call is\n"
+            "a human's, and neither this script nor an agent makes it.")
 
 
 if __name__ == "__main__":
