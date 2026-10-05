@@ -9,8 +9,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
-import {VetService} from '../../vets/vet.service';
-import {toVetOptions, VetOption} from '../../vets/vet';
 
 @Component({
   selector: 'app-visit-edit',
@@ -22,14 +20,12 @@ export class VisitEditComponent implements OnInit {
   currentPet: Pet;
   currentOwner: Owner;
   currentPetType: PetType;
-  vetOptions: VetOption[] = [];
   updateSuccess = false;
   errorMessage: string;
 
   constructor(private visitService: VisitService,
               private petService: PetService,
               private ownerService: OwnerService,
-              private vetService: VetService,
               private route: ActivatedRoute,
               private router: Router) {
     this.visit = {} as Visit;
@@ -39,10 +35,6 @@ export class VisitEditComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.vetService.getVets().subscribe(
-      vets => this.vetOptions = toVetOptions(vets),
-      error => this.errorMessage = error as any);
-
     const visitId = this.route.snapshot.params.id;
     this.visitService.getVisitById(visitId).subscribe(
       visit => {

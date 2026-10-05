@@ -47,10 +47,6 @@ export class PlaywrightWorld extends World {
   petId?: number;
   petName?: string;
   visitDescription?: string;
-  // The vet the booking scenario picked out of the form, so the Thens can name whoever the
-  // When happened to get — book-visit-with-vet.feature chooses "the first vet offered" rather
-  // than a seeded name, and the assertion has to follow that choice.
-  vetName?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
   allOwnerNames?: string[];
   // Set only for @generate_sequence scenarios: the title + start of the Tempo

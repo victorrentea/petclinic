@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {finalize} from 'rxjs/operators';
 import {VisitService} from '../visit.service';
-import {vetLabel, Visit} from '../visit';
+import {Visit} from '../visit';
 
 @Component({
   selector: 'app-visits-page',
@@ -12,7 +12,6 @@ export class VisitsPageComponent implements OnInit {
   visits: Visit[] = [];
   errorMessage: string;
   isDataReceived = false;
-  readonly vetLabel = vetLabel;
 
   constructor(private visitService: VisitService) {}
 

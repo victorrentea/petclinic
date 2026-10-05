@@ -27,15 +27,15 @@
         }
       ]
     },
-    "1eq1h2q": {
+    "13apewa": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=1"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=1"
           }
         }
       ]
@@ -53,15 +53,15 @@
         }
       ]
     },
-    "1bcshtp": {
+    "1cdku0l": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=2"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=2"
           }
         }
       ]
@@ -79,15 +79,15 @@
         }
       ]
     },
-    "0z85hco": {
+    "0d1jj9s": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=3"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=3"
           }
         }
       ]
@@ -105,15 +105,15 @@
         }
       ]
     },
-    "00y4ify": {
+    "1chbokm": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=25"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=25"
           }
         }
       ]
@@ -131,15 +131,28 @@
         }
       ]
     },
-    "19jw8ly": {
+    "1g0ncac": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=5"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=7"
+          }
+        }
+      ]
+    },
+    "1dje28p": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=6"
           }
         }
       ]
@@ -157,28 +170,15 @@
         }
       ]
     },
-    "1k944l8": {
+    "1vijc0e": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=7"
-          }
-        }
-      ]
-    },
-    "15hw4kh": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=6"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=5"
           }
         }
       ]
@@ -196,15 +196,15 @@
         }
       ]
     },
-    "1uai9tz": {
+    "0ko7c1b": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=8"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=8"
           }
         }
       ]
@@ -222,28 +222,28 @@
         }
       ]
     },
-    "0ppzjxe": {
+    "0g653ka": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=10"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=10"
           }
         }
       ]
     },
-    "0prupmi": {
+    "17b1f4y": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=9"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=9"
           }
         }
       ]
@@ -261,15 +261,15 @@
         }
       ]
     },
-    "1uessj3": {
+    "16xt6fr": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=11"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=11"
           }
         }
       ]
@@ -287,15 +287,15 @@
         }
       ]
     },
-    "1xzehhk": {
+    "005pv1s": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=12"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=12"
           }
         }
       ]
@@ -313,28 +313,28 @@
         }
       ]
     },
-    "0jv36o6": {
+    "1v91y5q": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=14"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=14"
           }
         }
       ]
     },
-    "1jqpq99": {
+    "0jndtsl": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=13"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=13"
           }
         }
       ]
@@ -352,6 +352,19 @@
         }
       ]
     },
+    "112wt6j": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=15"
+          }
+        }
+      ]
+    },
     "179pa5r": {
       "title": "select pets",
       "steps": [
@@ -361,6 +374,32 @@
           "alternate": {
             "label": "",
             "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=13"
+          }
+        }
+      ]
+    },
+    "0s7bw5w": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=16"
+          }
+        }
+      ]
+    },
+    "0q2g6ih": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=17"
           }
         }
       ]
@@ -378,15 +417,15 @@
         }
       ]
     },
-    "02hi82b": {
+    "07widtu": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=15"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=18"
           }
         }
       ]
@@ -404,28 +443,15 @@
         }
       ]
     },
-    "1s4i48c": {
+    "1vvzxvz": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=16"
-          }
-        }
-      ]
-    },
-    "0sxylsh": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=17"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=19"
           }
         }
       ]
@@ -443,15 +469,28 @@
         }
       ]
     },
-    "0qywo6i": {
+    "0nzx8gf": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=18"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=20"
+          }
+        }
+      ]
+    },
+    "1hnj4n6": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=21"
           }
         }
       ]
@@ -469,15 +508,15 @@
         }
       ]
     },
-    "0i95j7b": {
+    "106x3nx": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=19"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=22"
           }
         }
       ]
@@ -495,28 +534,15 @@
         }
       ]
     },
-    "0z1nibr": {
+    "125n4x4": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=20"
-          }
-        }
-      ]
-    },
-    "1luphfe": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=21"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=23"
           }
         }
       ]
@@ -534,15 +560,15 @@
         }
       ]
     },
-    "02ksvnp": {
+    "0p5qgoj": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=22"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=24"
           }
         }
       ]
@@ -560,15 +586,15 @@
         }
       ]
     },
-    "0vfbpsw": {
+    "11orrff": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=23"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=4"
           }
         }
       ]
@@ -586,15 +612,15 @@
         }
       ]
     },
-    "1k8rtyj": {
+    "1s8lcdt": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=24"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=26"
           }
         }
       ]
@@ -612,15 +638,28 @@
         }
       ]
     },
-    "014al43": {
+    "1xe5lsn": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=4"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=28"
+          }
+        }
+      ]
+    },
+    "18kphn0": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=27"
           }
         }
       ]
@@ -638,15 +677,15 @@
         }
       ]
     },
-    "1wfrp61": {
+    "1dn4wsq": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=26"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=29"
           }
         }
       ]
@@ -664,28 +703,15 @@
         }
       ]
     },
-    "131zikf": {
+    "1w0jtro": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=28"
-          }
-        }
-      ]
-    },
-    "0wl4y10": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=27"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=30"
           }
         }
       ]
@@ -703,15 +729,28 @@
         }
       ]
     },
-    "0cgh436": {
+    "1hoo8wr": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=29"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=33"
+          }
+        }
+      ]
+    },
+    "1tjajq1": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=31"
           }
         }
       ]
@@ -729,41 +768,15 @@
         }
       ]
     },
-    "18twor0": {
+    "0chbrim": {
       "title": "select visits",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=30"
-          }
-        }
-      ]
-    },
-    "1klw40a": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
-          }
-        }
-      ]
-    },
-    "1ksbt81": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=31"
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=32"
           }
         }
       ]
@@ -781,34 +794,86 @@
         }
       ]
     },
-    "1obsoh2": {
-      "title": "select visits",
+    "1klw40a": {
+      "title": "select pets",
       "steps": [
         {
           "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=?",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
           "alternate": {
             "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, v2_0.id, v2_0.first_name, v2_0.last_name\nFROM visits v1_0\nLEFT JOIN vets v2_0\nON v2_0.id=v1_0.vet_id\nWHERE v1_0.pet_id=32"
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
           }
         }
       ]
     },
-    "1n6eywt": {
-      "title": "Backend → Browser: 200",
+    "0loo58e": {
+      "title": "select pets",
       "steps": [
         {
-          "label": "response body",
-          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": null,\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201553987\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201570506\",\n            \"id\": 35,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201568958\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201552426\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201421139\",\n            \"id\": 30,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201422801\",\n            \"id\": 31,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790201402620\",\n            \"id\": 28,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790201402641\",\n            \"id\": 29,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": 2,\n            \"vetFirstName\": \"Helen\",\n            \"vetLastName\": \"Leary\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": 2,\n            \"vetFirstName\": \"Helen\",\n            \"vetLastName\": \"Leary\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Salazar\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"Hogwarts Dungeons\",\n    \"city\": \"Hogsmeade\",\n    \"telephone\": \"0441463555113\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Salazar\",\n            \"ownerLastName\": \"Śliwiński\",\n            \"vetId\": 6,\n            \"vetFirstName\": \"Sharon\",\n            \"vetLastName\": \"Jenkins\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ronald\",\n    \"lastName\": \"Weasley\",\n    \"address\": \"The Burrow\",\n    \"city\": \"Ottery St Catchpole\",\n    \"telephone\": \"0119544321\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Scabbers\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 5,\n        \"ownerId\": 5\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=30"
+          }
         }
       ]
     },
-    "0zy7m3v": {
+    "1aa5cr0": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=29"
+          }
+        }
+      ]
+    },
+    "1cgc83v": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=31"
+          }
+        }
+      ]
+    },
+    "0i4db38": {
+      "title": "select pets",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=32"
+          }
+        }
+      ]
+    },
+    "06vflj1": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": null,\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201421139\",\n            \"id\": 30,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201553987\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201552426\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201570506\",\n            \"id\": 35,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201568958\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-06-18\",\n            \"description\": \"Annual check-up 1790201422801\",\n            \"id\": 31,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790201402620\",\n            \"id\": 28,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": 4,\n            \"vetFirstName\": \"Rafael\",\n            \"vetLastName\": \"Ortega\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790201402641\",\n            \"id\": 29,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": null,\n            \"vetFirstName\": null,\n            \"vetLastName\": null\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": 2,\n            \"vetFirstName\": \"Helen\",\n            \"vetLastName\": \"Leary\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\",\n            \"vetId\": 2,\n            \"vetFirstName\": \"Helen\",\n            \"vetLastName\": \"Leary\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Salazar\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"Hogwarts Dungeons\",\n    \"city\": \"Hogsmeade\",\n    \"telephone\": \"0441463555113\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Salazar\",\n            \"ownerLastName\": \"Śliwiński\",\n            \"vetId\": 6,\n            \"vetFirstName\": \"Sharon\",\n            \"vetLastName\": \"Jenkins\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ronald\",\n    \"lastName\": \"Weasley\",\n    \"address\": \"The Burrow\",\n    \"city\": \"Ottery St Catchpole\",\n    \"telephone\": \"0119544321\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Scabbers\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 5,\n        \"ownerId\": 5\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": \"0018474461990\",\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600424916\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600404126\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790602734636\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ștefan\",\n    \"lastName\": \"Mureșan\",\n    \"address\": \"Mariahilfer Straße 12\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0043152634418\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Ștefan\",\n            \"ownerLastName\": \"Mureșan\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Łukasz\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"ul. Floriańska 14\",\n    \"city\": \"Kraków\",\n    \"telephone\": \"0048124221357\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Perdita\",\n        \"birthDate\": \"2018-03-07\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 7,\n        \"ownerId\": 5,\n        \"visits\": []\n      },\n      {\n        \"name\": \"Pongo\",\n        \"birthDate\": \"2018-04-17\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 6,\n        \"ownerId\": 5,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Roger\",\n    \"lastName\": \"Radcliff\",\n    \"address\": \"27 Outer Circle\",\n    \"city\": \"London\",\n    \"telephone\": \"0442074860707\",\n    \"id\": 6,\n    \"pets\": [\n      {\n        \"name\": \"Reksio\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 5,\n        \"ownerId\": 6,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Newt\",\n    \"lastName\": \"Scamander\",\n    \"address\": \"Diagon Alley\",\n    \"city\": \"London\",\n    \"telephone\": \"0442079460001\",\n    \"id\": 7,\n    \"pets\": [\n      {\n        \"name\": \"Pickett\",\n        \"birthDate\": \"2020-11-30\",\n        \"type\": {\n          \"name\": \"lizard\",\n          \"id\": 3\n        },\n        \"id\": 8,\n        \"ownerId\": 7,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Alice\",\n    \"lastName\": \"Liddell\",\n    \"address\": \"Christ Church\",\n    \"city\": \"Oxford\",\n    \"telephone\": \"0441865276150\",\n    \"id\": 8,\n    \"pets\": [\n      {\n        \"name\": \"Cheshire\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 10,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 2,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2023-06-04\",\n            \"description\": \"neutered\",\n            \"id\": 3,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Dinah\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 9,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 1,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2022-09-04\",\n            \"description\": \"spayed\",\n            \"id\": 4,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+        }
+      ]
+    },
+    "00kbib9": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": \"0018474461990\",\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600424916\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790602734636\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600404126\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ștefan\",\n    \"lastName\": \"Mureșan\",\n    \"address\": \"Mariahilfer Straße 12\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0043152634418\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Ștefan\",\n            \"ownerLastName\": \"Mureșan\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Łukasz\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"ul. Floriańska 14\",\n    \"city\": \"Kraków\",\n    \"telephone\": \"0048124221357\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Perdita\",\n        \"birthDate\": \"2018-03-07\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 7,\n        \"ownerId\": 5,\n        \"visits\": []\n      },\n      {\n        \"name\": \"Pongo\",\n        \"birthDate\": \"2018-04-17\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 6,\n        \"ownerId\": 5,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Roger\",\n    \"lastName\": \"Radcliff\",\n    \"address\": \"27 Outer Circle\",\n    \"city\": \"London\",\n    \"telephone\": \"0442074860707\",\n    \"id\": 6,\n    \"pets\": [\n      {\n        \"name\": \"Reksio\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 5,\n        \"ownerId\": 6,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Newt\",\n    \"lastName\": \"Scamander\",\n    \"address\": \"Diagon Alley\",\n    \"city\": \"London\",\n    \"telephone\": \"0442079460001\",\n    \"id\": 7,\n    \"pets\": [\n      {\n        \"name\": \"Pickett\",\n        \"birthDate\": \"2020-11-30\",\n        \"type\": {\n          \"name\": \"lizard\",\n          \"id\": 3\n        },\n        \"id\": 8,\n        \"ownerId\": 7,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Alice\",\n    \"lastName\": \"Liddell\",\n    \"address\": \"Christ Church\",\n    \"city\": \"Oxford\",\n    \"telephone\": \"0441865276150\",\n    \"id\": 8,\n    \"pets\": [\n      {\n        \"name\": \"Cheshire\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 10,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 2,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2023-06-04\",\n            \"description\": \"neutered\",\n            \"id\": 3,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Dinah\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 9,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 1,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2022-09-04\",\n            \"description\": \"spayed\",\n            \"id\": 4,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
         }
       ]
     }
