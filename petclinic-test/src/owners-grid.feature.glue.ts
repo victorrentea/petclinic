@@ -48,6 +48,10 @@ When('I go to the next page', async function (this: PlaywrightWorld) {
   await andLoad(this, () => this.page.locator('button.mat-mdc-paginator-navigation-next').click());
 });
 
+When('I open the second page of {int} owners sorted by city', async function (this: PlaywrightWorld, size: number) {
+  await andLoad(this, () => this.page.goto(`/owners?sort=city&page=1&size=${size}`));
+});
+
 When('I refresh the screen', async function (this: PlaywrightWorld) {
   await andLoad(this, () => this.page.reload());
 });
