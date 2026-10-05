@@ -23,7 +23,7 @@
           <td class="visit-pet">{{ visit.petName }}</td>
           <td class="visit-owner">
             <a class="owner-link" [routerLink]="'/owners/' + visit.ownerId">
-              {{ visit.ownerFirstName }} {{ visit.ownerLastName }}
+              {{ {firstName: visit.ownerFirstName, lastName: visit.ownerLastName} | ownerName }}
             </a>
           </td>
         </tr>

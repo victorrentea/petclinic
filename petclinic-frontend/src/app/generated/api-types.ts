@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, filtered by last name and sorted */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, with the number of owners matching the filter across all pages. */
+    OwnerPageDto: {
+      /** @description The owners on the requested page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description The number of owners matching the filter, across all pages.
+       * @example 29
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,24 +564,31 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, filtered by last name and sorted */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Prefix of the last name, case-sensitive */
         lastName?: string;
+        sort?: "name" | "city";
+        dir?: "asc" | "desc";
+        /** @description 0-based page number */
+        page?: number;
+        /** @description Rows per page: 5, 10 or 20 */
+        size?: number;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Unsupported sort, dir, page or size */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/problem+json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */

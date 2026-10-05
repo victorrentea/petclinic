@@ -8,6 +8,7 @@ import {VisitAddComponent} from './visit-add/visit-add.component';
 import {VisitDateFieldComponent} from './visit-date-field/visit-date-field.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {FormsModule} from '@angular/forms';
+import {SharedModule} from '../shared/shared.module';
 import {PetsRoutingModule} from '../pets/pets-routing.module';
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -28,6 +29,7 @@ export const MY_DATE_FORMATS = {
 @NgModule({
   imports: [
     CommonModule,
+    SharedModule,
     FormsModule,
     MatDatepickerModule,
     MatMomentDateModule,

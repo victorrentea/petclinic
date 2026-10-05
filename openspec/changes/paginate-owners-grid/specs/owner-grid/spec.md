@@ -103,3 +103,37 @@ page.
 #### Scenario: Only Name and City are sortable
 - **WHEN** the user looks at the Address, Telephone and Pets headers
 - **THEN** they offer no sorting
+
+#### Scenario: Sortable headers show it
+- **WHEN** the user looks at the Name and City headers
+- **THEN** both show a sort arrow without hovering, the one the grid is sorted by stands out
+
+### Requirement: The Owners screen keeps its place
+The screen's search text, sort, direction, page and page size SHALL be part of its address, so
+that refreshing it, opening a shared link to it or coming back to it shows the same owners. Values
+the screen does not offer SHALL be ignored in favour of the defaults.
+
+#### Scenario: Refresh keeps the page
+- **WHEN** the user on page 2, sorted by city, refreshes the screen
+- **THEN** it still shows page 2 sorted by city
+
+#### Scenario: Back from an owner's record
+- **WHEN** the user opens an owner from page 2 and goes back
+- **THEN** the grid shows page 2 again
+
+### Requirement: Every row has the same height
+Each owner's pets SHALL be listed on one line, separated by commas. When they do not fit, the line
+SHALL end in an ellipsis and offer to unfold them, one pet per line.
+
+#### Scenario: Many pets
+- **WHEN** an owner has more pets than fit in the Pets column
+- **THEN** the row shows the first ones followed by "…" and a toggle
+- **AND** using the toggle lists every pet, one under another
+
+### Requirement: No match shows a message, not an empty grid
+When no owner matches, the screen SHALL show a message naming the search text instead of the
+table and the paginator.
+
+#### Scenario: Search without a match
+- **WHEN** the user searches for a last name no owner has
+- **THEN** a message says no owner's last name starts with it, and no table or paginator shows

@@ -7,52 +7,67 @@
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
           <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
+          <div class="col-sm-10 owner-search">
             <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
+              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/>
+            <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
+              Owner</button>
           </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
         </div>
       </div>
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div class="no-owners" *ngIf="owners?.length === 0">
+      <div class="no-owners-icon" aria-hidden="true">🐾</div>
+      <ng-container *ngIf="query.lastName; else noOwnersYet">
+        <p class="no-owners-title">No owner's last name starts with “{{ query.lastName }}”</p>
+        <p>Check the spelling — or, if they are new to the clinic, welcome them with <b>Add Owner</b>.</p>
+      </ng-container>
+      <ng-template #noOwnersYet>
+        <p class="no-owners-title">No owners yet</p>
+        <p>Welcome the clinic's first one with <b>Add Owner</b>.</p>
+      </ng-template>
+    </div>
+    <div class="table-responsive" id="ownersTable" *ngIf="owners?.length">
+      <table class="table table-striped" matSort [matSortActive]="query.sort" [matSortDirection]="query.dir" matSortDisableClear
+              (matSortChange)="onSort($event)">
         <thead>
         <tr>
-          <th>Name</th>
+          <th mat-sort-header="name">Name</th>
           <th>Address</th>
-          <th>City</th>
+          <th mat-sort-header="city">City</th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr *ngFor="let owner of owners">
+        <tr *ngFor="let owner of owners; trackBy: byId">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+            (click)="onSelect(owner)">{{ owner | ownerName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div class="owner-pets" *ngIf="{open: expandedPets.has(owner.id)} as pets" [class.expanded]="pets.open">
+              <span class="pet-names" appOverflow #names="overflow" [hidden]="pets.open">{{ petNames(owner) }}</span>
+              <div class="pet-names" *ngIf="pets.open">
+                <div *ngFor="let pet of owner.pets">{{ pet.name }}</div>
+              </div>
+              <button *ngIf="names.overflowing || pets.open" type="button" class="pets-toggle"
+                      [attr.aria-expanded]="pets.open" [attr.aria-label]="(pets.open ? 'Hide' : 'Show all') + ' pets'"
+                      (click)="togglePets(owner)">▾</button>
+            </div>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
+    </div>
+    <div class="owners-footer">
+      <button *ngIf="owners" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <mat-paginator *ngIf="owners?.length" [length]="totalElements" [pageIndex]="query.page" [pageSize]="query.size"
+                      [pageSizeOptions]="pageSizes" showFirstLastButtons (page)="onPage($event)"></mat-paginator>
     </div>
   </div>
 </div>

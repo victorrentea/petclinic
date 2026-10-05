@@ -10,6 +10,8 @@ import java.util.Set;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,6 +49,9 @@ public class Pet {
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    // the visits of a page of owners' pets load in one statement, not one per pet: a page of
+    // 20 owners holds more than 20 pets, and on Postgres the batch is one array parameter (= any(?))
+    @BatchSize(size = 100)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
     private Set<Visit> visits = new HashSet<>();
 

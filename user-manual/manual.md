@@ -44,17 +44,30 @@ The Owners area is the heart of the clinic's records. Here you find a pet owner,
 ![](screenshots/owners-list.png)
 
 1. Click *Owners* in the navigation bar.
-2. The table lists every owner with their name, address, city, telephone number and the names of their pets.
-3. Click an owner's name to open their record.
-4. Click *Add Owner* at the bottom of the list to register a new owner.
+2. The table shows the first 10 owners, in alphabetical order of last name. Each owner is written last name first — *McCallister, Kevin* — followed by their address, city, telephone number and the names of their pets.
+3. An owner's pets share one line. When they do not all fit, the line ends in *…* — click the ▾ beside it to see every pet, one under another, and click it again to fold them back.
+4. Below the table you see which owners are on screen and how many there are in all, for example *1 – 10 of 26*. Use the arrows beside it to move to the next or previous page, or straight to the first or the last one.
+5. Click an owner's name to open their record. When you come back, or refresh the screen, you find the list on the same page, sorted and searched the same way.
+6. Click *Add Owner*, at the bottom left of the list, to register a new owner.
+
+### Sorting and changing the page size
+
+![](screenshots/owners-sort-page.png)
+
+1. Click the *Name* or *City* column heading to sort the table by it. Both headings carry an arrow; the white one shows which column the table is sorted by.
+2. Click the same heading again to reverse the order, from Z to A. Owners in the same city are listed by name.
+3. *Address*, *Telephone* and *Pets* cannot be sorted.
+4. Pick 5, 10 or 20 in *Items per page* to see fewer or more owners at a time.
+5. A new sort or page size always takes you back to the first page.
 
 ### Finding an owner
 
 ![](screenshots/owners-search.png)
 
-1. Type all or the start of the owner's last name into the *Last name* box above the table.
-2. Click *Find Owner*, or press Enter. The table shrinks to the owners whose last name matches.
-3. To see everyone again, clear the box and click *Find Owner*.
+1. Type all or the start of the owner's last name into the *Last name* box above the table. Capital and small letters must match.
+2. Click *Find Owner*, or press Enter. The table shrinks to the owners whose last name matches, starting from the first page, and the count below it shows how many matched.
+3. If no owner's last name starts with what you typed, a message says so — check the spelling, or click *Add Owner* if they are new to the clinic.
+4. To see everyone again, clear the box and click *Find Owner*.
 
 ### Creating a new owner
 
@@ -71,7 +84,7 @@ The Owners area is the heart of the clinic's records. Here you find a pet owner,
 ![](screenshots/owners-detail.png)
 
 1. Click an owner's name on the owners list.
-2. *Owner Information* at the top shows their name, address, city and telephone.
+2. *Owner Information* at the top shows their name (last name first), address, city and telephone.
 3. Below it, *Pets and Visits* shows every pet the owner has. On the left you see the pet's name, birth date and type; on the right, a table of that pet's visits.
 4. The buttons under the owner's details let you go *Back* to the list, *Edit Owner*, or *Add New Pet*.
 5. Each pet has its own *Edit Pet*, *Delete Pet* and *Add Visit* buttons, and each visit has *Edit Visit* and *Delete Visit*.

@@ -103,7 +103,7 @@ class AddVisitApiTest {
      */
     private JsonNode anOwnerWithAPet() throws Exception {
         JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
+        return StreamSupport.stream(owners.path("content").spliterator(), false)
                 .filter(o -> !o.path("pets").isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError(

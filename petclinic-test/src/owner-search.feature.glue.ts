@@ -1,6 +1,6 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import axios from 'axios';
+import {ApiClient, ownerName} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin, bound directly: the steps do the work themselves, with no DSL layer
@@ -11,32 +11,34 @@ import {PlaywrightWorld} from './support/world';
 // Nothing below decides anything: the Background states the data, the Examples
 // table states the search term and the expected result set.
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
+const api = new ApiClient();
+const namesIn = (cell: string) => cell.split(';').map((n) => n.trim()).filter(Boolean);
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
-
-/** Polls until the table has settled on exactly `expected` — order-insensitive. */
+/** Polls until the table has settled on exactly `expected`, in that order: the grid sorts by name. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean);
 
-  await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
+  await expect.poll(listed, {timeout: 10_000}).toEqual(expected);
 }
 
 /**
- * Remembers every owner the clinic holds, after checking that the ones the
- * Background names are among them — so a changed seed (Flyway's
+ * Remembers the first page of owners and how many the clinic holds, after checking
+ * that the ones the Background names exist — so a changed seed (Flyway's
  * db/seed/R__seed.sql) fails on the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const names = owners.raw().map(([name]) => name.trim());
+  const lastNames = [...new Set(names.map((name) => name.split(',')[0]))];
+  const [firstPage, ...matching] = await Promise.all([
+    api.fetchOwnersPage(),
+    ...lastNames.map((lastName) => api.fetchOwnersPage({lastName, size: 20})),
+  ]);
+  if (!firstPage.totalElements) {
     throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
   }
-  const names: string[] = data.map(fullName);
-  expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
-  this.allOwnerNames = names;
+  expect(matching.flatMap((page) => page.content.map(ownerName))).toEqual(expect.arrayContaining(names));
+  this.firstPage = {names: firstPage.content.map(ownerName), count: firstPage.totalElements};
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
@@ -53,6 +55,8 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+Then('the first page of every owner in the clinic is listed', async function (this: PlaywrightWorld) {
+  const {names, count} = this.requireFirstPage();
+  await expectOwnersListed(this, names);
+  await expect(this.page.locator('.mat-mdc-paginator-range-label')).toHaveText(`1 – ${names.length} of ${count}`);
 });

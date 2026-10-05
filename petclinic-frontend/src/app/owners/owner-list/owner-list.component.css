@@ -1,79 +1,100 @@
-#ownersByLastName
-{
-display:none;
-}
-
-#nameGroup {
+/* Find Owner sits at the right end of the search box, level with the table's edge */
+.owner-search {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-}
-
-#addressGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-}
-
-.owner-search-label {
-  margin: 0;
-  text-align: left;
-  min-width: 60px;
-}
-
-.owner-search-input {
-  flex: 1;
-}
-
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.owners-page-size {
-  display: flex;
-  align-items: center;
   gap: 8px;
 }
 
-.owners-page-size .form-control {
-  width: auto;
+/* Add Owner on the paginator's row, at its left */
+.owners-footer {
+  display: flex;
+  align-items: center;
 }
 
-@media (max-width: 576px) {
-  #nameGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.owners-footer mat-paginator {
+  flex: 1;
+}
 
-  #addressGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.no-owners {
+  margin: 32px 0 24px;
+  text-align: center;
+  color: #6c6560;
+}
 
-  .owner-search-input {
-    width: 100%;
-  }
+.no-owners-icon {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
 
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.no-owners-title {
+  font-size: 18px;
+  color: #34302d;
+}
+
+/* Pets on one line, like every other cell; a ▾ unfolds the ones the ellipsis hides */
+.owner-pets {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.pet-names {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pets-toggle {
+  border: none;
+  background: none;
+  padding: 0 4px;
+  line-height: 20px;
+  color: #34302d;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.owner-pets.expanded .pets-toggle {
+  transform: rotate(180deg);
+}
+
+/* Half of Bootstrap's 20px gap, and a dark rule closing the table above the paginator */
+#ownersTable table {
+  /* Columns sized by the header, not by the rows on screen: a new sort or page must not
+    slide the header you just clicked out from under the mouse */
+  table-layout: fixed;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #34302d; /* the same rule Bootstrap draws between rows */
+}
+
+#ownersTable th:nth-child(1) { width: 25%; }
+#ownersTable th:nth-child(2) { width: 27%; }
+#ownersTable th:nth-child(3) { width: 15%; }
+#ownersTable th:nth-child(4) { width: 15%; }
+#ownersTable th:nth-child(5) { width: 18%; }
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+/* The paginator speaks in the table's font, not Material's Roboto 12px */
+.mat-mdc-paginator {
+  background: transparent;
+  --mat-paginator-container-text-font: varela_roundregular, sans-serif;
+  --mat-paginator-container-text-size: 14px;
+  --mat-paginator-select-trigger-text-size: 14px;
+  --mat-select-trigger-text-font: varela_roundregular, sans-serif;
+}
+
+/* Every sortable header shows its arrow, not only on hover; the active one is solid white */
+:host ::ng-deep #ownersTable th[mat-sort-header] .mat-sort-header-arrow {
+  color: #fff;
+  opacity: 0.4 !important;
+  transform: none !important;
+}
+
+:host ::ng-deep #ownersTable th[mat-sort-header]:not([aria-sort="none"]) .mat-sort-header-arrow {
+  opacity: 1 !important;
 }

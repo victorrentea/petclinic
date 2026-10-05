@@ -1,35 +1,50 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import {Owner, OwnerPageQuery} from '../owner';
+import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {map, switchMap, tap} from 'rxjs/operators';
+import {Sort} from '@angular/material/sort';
+import {PageEvent} from '@angular/material/paginator';
+
+const PAGE_SIZES = [5, 10, 20];
+const DEFAULT_QUERY: OwnerPageQuery = {lastName: '', sort: 'name', dir: 'asc', page: 0, size: 10};
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
-  errorMessage: string;
-  lastName: string;
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizes = PAGE_SIZES;
+  lastName = '';
+  query: OwnerPageQuery = DEFAULT_QUERY;
   owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+  totalElements = 0;
+  readonly expandedPets = new Set<number>();
+  private subscription: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
-
+  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
   }
 
+  // The URL holds the grid's state, so a refresh, a shared link or Back lands on the same page.
+  // switchMap: only the latest query may answer, so a slow earlier page never overwrites a newer one.
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.subscription = this.route.queryParamMap.pipe(
+      map(params => queryFrom(params)),
+      tap(query => {
+        this.query = query;
+        this.lastName = query.lastName;
+      }),
+      switchMap(query => this.ownerService.getOwnersPage(query))
+    ).subscribe(page => {
+      this.owners = page.content;
+      this.totalElements = page.totalElements;
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +55,60 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
-  searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+  byId(index: number, owner: Owner): number {
+    return owner.id;
   }
+
+  petNames(owner: Owner): string {
+    return owner.pets.map(pet => pet.name).join(', ');
+  }
+
+  togglePets(owner: Owner) {
+    if (!this.expandedPets.delete(owner.id)) {
+      this.expandedPets.add(owner.id);
+    }
+  }
+
+  searchByLastName(lastName: string) {
+    this.load({lastName: lastName ?? '', page: 0});
+  }
+
+  onSort(sort: Sort) {
+    this.load({sort: sort.active as OwnerPageQuery['sort'], dir: sort.direction as OwnerPageQuery['dir'], page: 0});
+  }
+
+  // A new page size starts again from the first page, wherever the paginator would keep you.
+  onPage(event: PageEvent) {
+    const sizeChanged = event.pageSize !== this.query.size;
+    this.load({page: sizeChanged ? 0 : event.pageIndex, size: event.pageSize});
+  }
+
+  // replaceUrl: Back leaves the Owners screen instead of stepping back through every page.
+  private load(change: Partial<OwnerPageQuery>) {
+    const query = {...this.query, ...change};
+    this.router.navigate([], {relativeTo: this.route, queryParams: urlParamsOf(query), replaceUrl: true});
+  }
+}
+
+/** Only what differs from the defaults goes in the URL; anything unreadable there falls back to them. */
+function urlParamsOf(query: OwnerPageQuery): Partial<OwnerPageQuery> {
+  const params: Partial<OwnerPageQuery> = {};
+  for (const key of Object.keys(query) as (keyof OwnerPageQuery)[]) {
+    if (query[key] !== DEFAULT_QUERY[key]) {
+      (params as any)[key] = query[key];
+    }
+  }
+  return params;
+}
+
+function queryFrom(params: ParamMap): OwnerPageQuery {
+  const page = Number(params.get('page'));
+  const size = Number(params.get('size'));
+  return {
+    lastName: params.get('lastName') ?? '',
+    sort: params.get('sort') === 'city' ? 'city' : DEFAULT_QUERY.sort,
+    dir: params.get('dir') === 'desc' ? 'desc' : DEFAULT_QUERY.dir,
+    page: Number.isInteger(page) && page > 0 ? page : 0,
+    size: PAGE_SIZES.includes(size) ? size : DEFAULT_QUERY.size,
+  };
 }

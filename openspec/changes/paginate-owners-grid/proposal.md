@@ -20,12 +20,18 @@ open and nobody could find anyone by scrolling. (GitHub issue #25.)
   list, the owner's page, the Visits list, and the pet and visit forms. Vets' names do not change.
 - **Search by last name works as before**, and its results are paged and sorted the same way.
   A new search, a new sort or a new page size starts again from the first page.
+- **The screen keeps its place.** Refreshing the page, sharing its link or coming Back from an
+  owner's record shows the same search, sort, page and page size.
+- **Pets fit on one line**, separated by commas, so every row has the same height. When they do
+  not fit, a ▾ unfolds them one under another.
+- **No match, no empty table**: a short, friendly message suggests checking the spelling or
+  adding the owner.
 
 ![The Owners screen after this change: sorted by name, 10 rows per page](mockup/owners-grid.png)
 
-**Not in this change:** coming back to the Owners screen does not remember the page or sort you
-left it on; search stays by the beginning of the last name, with capitals and small letters
-matched exactly as today.
+**Not in this change:** search stays by the beginning of the last name, with capitals and small
+letters matched exactly as today. (Remembering the page was out of scope until the first review
+of the screen, on 5 Oct, asked for it.)
 
 ## Capabilities
 

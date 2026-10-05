@@ -38,8 +38,9 @@ export class PlaywrightWorld extends World {
   ownerId?: number;
   petId?: number;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
+  // Set by the owner-search scenarios: the first page of owners as the UI names them, and their total.
+  firstPage?: {names: string[]; count: number};
+  lastCityOnPage?: string;
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -53,11 +54,11 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
+  requireFirstPage(): {names: string[]; count: number} {
+    if (!this.firstPage) {
       throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
     }
-    return this.allOwnerNames;
+    return this.firstPage;
   }
 }
 

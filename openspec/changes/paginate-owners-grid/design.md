@@ -44,7 +44,6 @@ Any other value is a 400 `ProblemDetail`. Only the Frontend calls this endpoint 
 - One place formats an owner's name.
 
 **Non-Goals:**
-- Grid state in the URL (refresh/Back/shared link keeping the page) — later, if staff ask.
 - A reusable paginated-grid widget in the design system — wrap one when a second grid needs it.
 - Case-insensitive or full-name search — the filter keeps today's semantics.
 - Cleaning up the test owners (`Ada Acceptance…`) that accumulate in the dev DB.
@@ -77,8 +76,10 @@ is exactly what we pushed back on. Invalid values → `ValidationException` → 
 - `(last_name text_pattern_ops)` — serves `LIKE 'Da%'`. Under `en_US.UTF-8` a plain btree cannot
   serve a prefix `LIKE`, and a `text_pattern_ops` one cannot serve `ORDER BY`, hence both.
 
-**D6 💡 `@BatchSize(size = 20)` on `Owner.pets` and `Pet.visits`.** One query per page for the
-pets and one for their visits, instead of one per owner. Rejected: `JOIN FETCH` of a collection
+**D6 💡 `@BatchSize(size = 20)` on `Owner.pets`, `@BatchSize(size = 100)` on `Pet.visits`.** One
+query per page for the pets and one for their visits, instead of one per owner. The visits batch
+is keyed by pet, and a page of 20 owners holds more than 20 pets (found while applying: 20 split
+it in two); on Postgres Hibernate binds the batch as one array (`= any(?)`), so 100 costs nothing. Rejected: `JOIN FETCH` of a collection
 with paging — Hibernate then pages in memory (HHH90003004). Rejected: a slimmer grid DTO without
 visits — it would fork `OwnerDto`, which the owner record also uses.
 
@@ -94,6 +95,20 @@ fields (`ownerFirstName`/`ownerLastName`), so the pipe takes anything with a fir
 
 **D9 💡 Count on every request.** `Page` from Spring Data runs a `count(*)` with the same filter —
 milliseconds at 50k rows, and the paginator needs the total.
+
+**D10 ✅ Grid state in the URL** (asked for at the first review, 5 Oct). `sort`, `dir`, `page`,
+`size` and `lastName` are query params; only values that differ from the defaults are written, so
+`/owners` stays the plain link. The component reads `queryParamMap` as its only source of truth and
+every change navigates with `replaceUrl` — Back leaves the screen instead of stepping through each
+page, yet Back from an owner's record still lands on the page left. A value the grid does not
+offer (`size=1000`) falls back to its default rather than reaching the API's 400.
+
+**D11 ✅ Review polish (5 Oct).** Pets on one comma-separated line with an ellipsis, a ▾ unfolding
+them one per line (an `appOverflow` directive shows it only when the line is cut); fixed column
+widths (`table-layout: fixed`) so a re-sort never slides the header under the mouse; Name/City
+arrows always visible, the active one white; paginator in the table's font with first/last
+buttons, on one row with *Add Owner*; *Find Owner* at the end of the search row; no table and no
+paginator when nothing matches, a centred message instead.
 
 ## Risks / Trade-offs
 

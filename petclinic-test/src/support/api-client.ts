@@ -11,6 +11,24 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface OwnerName {
+  firstName: string;
+  lastName: string;
+}
+
+export interface OwnerPage {
+  content: (OwnerName & {id: number; city: string})[];
+  totalElements: number;
+}
+
+export interface PetDto {
+  id: number;
+  ownerId?: number;
+}
+
+/** How the UI writes an owner's name (the frontend's `ownerName` pipe): last name first. */
+export const ownerName = (o: OwnerName) => `${o.lastName}, ${o.firstName}`;
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -25,6 +43,16 @@ export class ApiClient {
 
   async fetchVisits(): Promise<VisitDto[]> {
     const response = await this.client.get<VisitDto[]>('/visits');
+    return response.data;
+  }
+
+  async fetchOwnersPage(params: {lastName?: string; size?: number} = {}): Promise<OwnerPage> {
+    const response = await this.client.get<OwnerPage>('/owners', {params});
+    return response.data;
+  }
+
+  async fetchPets(): Promise<PetDto[]> {
+    const response = await this.client.get<PetDto[]>('/pets');
     return response.data;
   }
 

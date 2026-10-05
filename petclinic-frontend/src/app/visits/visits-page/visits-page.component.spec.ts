@@ -8,6 +8,7 @@ import {By} from '@angular/platform-browser';
 import {VisitsPageComponent} from './visits-page.component';
 import {VisitService} from '../visit.service';
 import {Visit} from '../visit';
+import {SharedModule} from '../../shared/shared.module';
 
 class VisitServiceStub {
   getVisits(): Observable<Visit[]> {
@@ -39,7 +40,7 @@ describe('VisitsPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [VisitsPageComponent],
       schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, RouterTestingModule],
+      imports: [SharedModule, CommonModule, RouterTestingModule],
       providers: [{provide: VisitService, useClass: VisitServiceStub}],
     }).compileComponents();
   }));
@@ -80,6 +81,7 @@ describe('VisitsPageComponent', () => {
       fixture.detectChanges();
       const links = fixture.debugElement.queryAll(By.css('a.owner-link'));
       expect(links.length).toBe(visits.length);
+      expect(links[0].nativeElement.textContent.trim()).toBe('Davis, Betty');
       expect(links[0].attributes['ng-reflect-router-link'] || links[0].nativeElement.getAttribute('href'))
         .toContain('/owners/');
     });

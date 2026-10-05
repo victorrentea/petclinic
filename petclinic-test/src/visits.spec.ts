@@ -2,7 +2,7 @@ import {test, expect} from './support/trace-fixture';
 import * as fs from 'fs';
 import * as path from 'path';
 import {VisitsPage} from './pages/VisitsPage';
-import {ApiClient, VisitDto} from './support/api-client';
+import {ApiClient, ownerName, VisitDto} from './support/api-client';
 
 test.describe('Visits Page', () => {
   let apiClient: ApiClient;
@@ -30,7 +30,7 @@ test.describe('Visits Page', () => {
       date: v.date,
       description: v.description,
       petName: v.petName ?? '',
-      ownerFullName: `${v.ownerFirstName ?? ''} ${v.ownerLastName ?? ''}`.trim(),
+      ownerFullName: ownerName({firstName: v.ownerFirstName ?? '', lastName: v.ownerLastName ?? ''}),
     }));
 
     const visitsPage = new VisitsPage(page);
