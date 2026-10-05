@@ -265,6 +265,7 @@ public class VisitTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getHeader("Location");
+        flushAndClear();
 
         VisitDto created = callGet(idFrom(location));
         assertThat(created.getVetId()).isEqualTo(vet.getId());
@@ -316,8 +317,7 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(newVisit))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated());
-        entityManager.flush();
-        entityManager.clear(); // as a fresh request would: the pet's visits are reloaded
+        flushAndClear();
 
         mockMvc.perform(get("/api/owners/{ownerId}", ownerId))
                 .andExpect(status().isOk())
@@ -348,6 +348,19 @@ public class VisitTest {
     }
 
     @Test
+    void bookFromOwnerPage_withUnknownVet_notFound() throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("ear infection")
+                .setVetId(99999);
+
+        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void update_assignsVet() throws Exception {
         VisitFieldsDto update = new VisitFieldsDto()
                 .setDate(LocalDate.now())
@@ -358,8 +371,22 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(update))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
+        flushAndClear();
 
         assertThat(callGet(visitId).getVetId()).isEqualTo(vet.getId());
+    }
+
+    @Test
+    void update_withUnknownVet_notFound() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now())
+                .setDescription("rabies shot")
+                .setVetId(99999);
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -367,6 +394,7 @@ public class VisitTest {
         Visit visit = visitRepository.findById(visitId).orElseThrow();
         visit.setVet(vet);
         visitRepository.save(visit);
+        flushAndClear();
         VisitFieldsDto update = new VisitFieldsDto()
                 .setDate(LocalDate.now())
                 .setDescription("rabies shot")
@@ -376,6 +404,7 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(update))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
+        flushAndClear();
 
         VisitDto updated = callGet(visitId);
         assertThat(updated.getVetId()).isNull();
@@ -387,11 +416,35 @@ public class VisitTest {
         Visit visit = visitRepository.findById(visitId).orElseThrow();
         visit.setVet(vet);
         visitRepository.save(visit);
+        flushAndClear();
 
         mockMvc.perform(get("/api/visits"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == %d)].vetFirstName", visitId).value("James"))
                 .andExpect(jsonPath("$[?(@.id == %d)].vetLastName", visitId).value("Herriot"));
+    }
+
+    @Test
+    @WithMockUser(roles = {"OWNER_ADMIN", "VET_ADMIN"})
+    void deletingAVet_leavesTheirVisitsWithNoVet() throws Exception {
+        Visit visit = visitRepository.findById(visitId).orElseThrow();
+        visit.setVet(vet);
+        visitRepository.save(visit);
+        flushAndClear();
+
+        mockMvc.perform(delete("/api/vets/" + vet.getId()))
+                .andExpect(status().isOk());
+        flushAndClear();
+
+        VisitDto kept = callGet(visitId);
+        assertThat(kept.getDescription()).isEqualTo("rabies shot");
+        assertThat(kept.getVetId()).isNull();
+    }
+
+    /** As a fresh request would: what is read next comes from the database, not this test's session. */
+    private void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private static int idFrom(String location) {
