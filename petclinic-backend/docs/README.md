@@ -48,6 +48,11 @@ down the left-hand side, marked `placed="auto"`, and draws the new line. The tes
 to clear the marker. That failure is the point: an automatic layout would be quicker and
 would cost exactly what this diagram is for.
 
+A new line is drawn the same way, by the script and never by hand or by an agent: **one
+straight red segment** between the two boxes, with no routing, no waypoints, and its `*`
+near the end it qualifies. If it cuts straight through another box, that is the signal,
+not a bug: it says "lay me out". A human routes it in draw.io and sets it back to black.
+
 ```sh
 python3 docs/scripts/conceptual-model-patch.py --dry-run   # what is missing
 python3 docs/scripts/conceptual-model-patch.py             # add it, re-render the PNG
