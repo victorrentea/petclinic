@@ -5,7 +5,7 @@ package victor.training.petclinic.rest;
  * source of truth.
  *
  * <p>Each constant is referenced from an {@code @ExampleObject(value = ...)} on the matching
- * {@code GET} list endpoint (for owners, a page envelope), so springdoc copies it verbatim into the generated
+ * {@code GET} list endpoint, so springdoc copies it verbatim into the generated
  * {@code openapi.yaml} (under {@code responses.200.content.application/json.examples}). From
  * there the optional dev tool {@code petclinic-frontend/wiremock/start.sh} turns each example
  * into a WireMock stub — so a stand-in mock backend can never drift from the documented contract.
@@ -30,17 +30,14 @@ public final class ApiExamples {
             ]""";
 
     public static final String OWNERS = """
-            {
-              "content": [
-                { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
-                  "city": "Madison", "telephone": "6085551023",
-                  "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                              "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
-                { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
-                  "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
-              ],
-              "totalElements": 26
-            }""";
+            [
+              { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
+                "city": "Madison", "telephone": "6085551023",
+                "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
+                            "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+              { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
+                "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
+            ]""";
 
     public static final String PETS = """
             [

@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -101,7 +100,7 @@ class OwnerCreateTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
 
-        assertThat(ownerRepository.findByLastNameStartingWith("Tesla", Pageable.unpaged())).isNotEmpty();
+        assertThat(ownerRepository.findByLastNameStartingWith("Tesla")).isNotEmpty();
     }
 
     @Test

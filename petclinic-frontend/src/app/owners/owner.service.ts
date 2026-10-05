@@ -2,18 +2,9 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParameterCodec, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
-import { OwnerPage, OwnerPageQuery } from './owner-page';
-
-/** Angular's default codec leaves '+' raw, which the server decodes as a space: "A+B" would search "A B". */
-class StrictQueryEncoder implements HttpParameterCodec {
-  encodeKey = (key: string) => encodeURIComponent(key);
-  encodeValue = (value: string) => encodeURIComponent(value).replace(/%2C/g, ',');
-  decodeKey = (key: string) => decodeURIComponent(key);
-  decodeValue = (value: string) => decodeURIComponent(value);
-}
 
 @Injectable()
 export class OwnerService {
@@ -28,17 +19,10 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  /** Omitted query fields fall back to the server defaults: page 0 of 10, sorted by name ascending. */
-  getOwnerPage(query: OwnerPageQuery = {}): Observable<OwnerPage> {
-    let params = new HttpParams({encoder: new StrictQueryEncoder()});
-    for (const [name, value] of Object.entries(query)) {
-      if (value !== undefined && value !== null) {
-        params = params.set(name, value);
-      }
-    }
+  getOwners(): Observable<Owner[]> {
     return this.http
-      .get<OwnerPage>(this.entityUrl, {params})
-      .pipe(catchError(this.handlerError<OwnerPage>('getOwnerPage')));
+      .get<Owner[]>(this.entityUrl)
+      .pipe(catchError(this.handlerError('getOwners', [])));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -64,5 +48,15 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
+  }
+
+  searchOwners(lastName: string): Observable<Owner[]> {
+    let url = this.entityUrl;
+    if (lastName !== undefined) {
+      url += '?lastName=' + lastName;
+    }
+    return this.http
+      .get<Owner[]>(url)
+      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

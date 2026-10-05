@@ -12,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -69,16 +68,6 @@ public class ExceptionControllerAdvice {
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
-    }
-
-    // e.g. ?page=abc, which Spring itself would answer with a 400, were it not for the catch-all below
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
-            HttpServletRequest request) {
-        String detail = "Invalid value '" + ex.getValue() + "' for parameter '" + ex.getName() + "'";
-        log.warn("Validation failed: {}", detail);
-        return ResponseEntity.badRequest()
-                .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
     }
 
     @ExceptionHandler(Exception.class)

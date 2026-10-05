@@ -1,67 +1,35 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {PageEvent} from '@angular/material/paginator';
-import {Sort} from '@angular/material/sort';
-import {Subscription} from 'rxjs';
+import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {OwnerPage, OwnerPageSize, OwnerSort} from '../owner-page';
-
-type OwnerSortKey = 'name' | 'city';
+import {Router} from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit, OnDestroy {
-  readonly pageSizes: OwnerPageSize[] = [5, 10, 20];
-
-  /** What is typed in the search box; only a submitted search reaches the query. */
-  lastName = '';
-  submittedLastName = '';
-  pageIndex = 0;
-  pageSize: OwnerPageSize = 10;
-  sortKey: OwnerSortKey = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
-
-  owners: Owner[] = [];
-  totalElements = 0;
-  loading = false;
-  loaded = false;
-  errorMessage: string | null = null;
-
-  private request?: Subscription;
+export class OwnerListComponent implements OnInit {
+  errorMessage: string;
+  lastName: string;
+  owners: Owner[];
+  listOfOwnersWithLastName: Owner[];
+  isOwnersDataReceived: boolean = false;
+  private load: Subscription;
 
   constructor(private router: Router, private ownerService: OwnerService) {
+
   }
 
   ngOnInit() {
-    this.loadPage();
-  }
-
-  ngOnDestroy() {
-    this.request?.unsubscribe();
-  }
-
-  search() {
-    this.submittedLastName = this.lastName ?? '';
-    this.pageIndex = 0;
-    this.loadPage();
-  }
-
-  onPage(event: PageEvent) {
-    const sizeChanged = event.pageSize !== this.pageSize;
-    this.pageSize = event.pageSize as OwnerPageSize;
-    this.pageIndex = sizeChanged ? 0 : event.pageIndex;
-    this.loadPage();
-  }
-
-  onSort(sort: Sort) {
-    this.sortKey = sort.active as OwnerSortKey;
-    this.sortDirection = sort.direction || 'asc'; // matSortDisableClear: never '' in practice
-    this.pageIndex = 0;
-    this.loadPage();
+    this.load = this.ownerService.getOwners().pipe(
+      finalize(() => {
+        this.isOwnersDataReceived = true;
+      })
+    ).subscribe(
+      owners => this.owners = owners,
+      error => this.errorMessage = error as any);
   }
 
   onSelect(owner: Owner) {
@@ -72,37 +40,13 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/owners/add']);
   }
 
-  get noMatches(): boolean {
-    return this.loaded && !this.errorMessage && this.totalElements === 0;
-  }
-
-  // Cancelling the previous request first means only the latest one may answer:
-  // an unsubscribed observer gets no next, error or complete.
-  private loadPage() {
-    this.request?.unsubscribe();
-    this.loading = true;
-    this.request = this.ownerService.getOwnerPage({
-      lastName: this.submittedLastName,
-      page: this.pageIndex,
-      size: this.pageSize,
-      sort: `${this.sortKey},${this.sortDirection}` as OwnerSort
-    }).subscribe({
-      next: page => this.show(page),
-      error: error => this.fail(error)
-    });
-  }
-
-  private show(page: OwnerPage) {
-    this.owners = page.content;
-    this.totalElements = page.totalElements;
-    this.errorMessage = null;
-    this.loaded = true;
-    this.loading = false;
-  }
-
-  private fail(error: unknown) {
-    this.owners = [];
-    this.errorMessage = String(error);
-    this.loading = false;
+  // Only the latest query may answer: a search sent while the initial load is still in
+  // flight would otherwise be overwritten by the full list when it lands afterwards.
+  searchByLastName(lastName: string) {
+    this.load?.unsubscribe();
+    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
+    this.load = owners$.subscribe(
+      owners => this.owners = owners,
+      () => this.owners = null);
   }
 }

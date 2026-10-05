@@ -1,27 +1,15 @@
 package victor.training.petclinic.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import victor.training.petclinic.domain.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
-    Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
-
-    // Never paged: a LIMIT over collection fetch joins would be applied in memory, after loading every row
-    @Query("""
-            SELECT DISTINCT o FROM Owner o
-            LEFT JOIN FETCH o.pets p
-            LEFT JOIN FETCH p.type
-            LEFT JOIN FETCH p.visits
-            WHERE o.id IN :ids""")
-    List<Owner> findAllByIdFetchingPetsAndVisits(Collection<Integer> ids);
+    List<Owner> findByLastNameStartingWith(String lastName);
 
     Optional<Owner> findById(int id);
 
