@@ -48,6 +48,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>Only solid PlantUML arrows ({@code ->}) count. A dashed {@code -->} is the return leg
  * of a call already counted, and self-calls ({@code Backend -> Backend}) are internal.
+ * A lifeline whose name is not a bare identifier is quoted by the generator
+ * ({@code NotificationService -> "SMS gateway"}) and counts just the same, unquoted: an
+ * external system is still a box someone has to draw.
  */
 class DeploymentDiagramTest {
 
@@ -165,8 +168,9 @@ class DeploymentDiagramTest {
 
     // ── the trace side ────────────────────────────────────────────────────────────
 
-    /** {@code A -> B} in a solid arrow, out of the PlantUML the traces generated. */
-    private static final Pattern CALL = Pattern.compile("^\\s*(\\w+)\\s+->\\s+(\\w+)\\s*:", Pattern.MULTILINE);
+    /** {@code A -> B} in a solid arrow, out of the PlantUML the traces generated; either end may be quoted. */
+    private static final Pattern CALL = Pattern.compile(
+            "^\\s*(?:\"([^\"]+)\"|(\\w+))\\s+->\\s+(?:\"([^\"]+)\"|(\\w+))\\s*:", Pattern.MULTILINE);
 
     private static Set<Edge> observedEdges() throws IOException {
         Set<Edge> edges = new LinkedHashSet<>();
@@ -182,8 +186,10 @@ class DeploymentDiagramTest {
         for (Path source : sources) {
             Matcher m = CALL.matcher(Files.readString(source));
             while (m.find()) {
-                if (!m.group(1).equals(m.group(2))) { // a self-call stays inside one container
-                    edges.add(new Edge(m.group(1), m.group(2)));
+                String from = m.group(1) != null ? m.group(1) : m.group(2);
+                String to = m.group(3) != null ? m.group(3) : m.group(4);
+                if (!from.equals(to)) { // a self-call stays inside one container
+                    edges.add(new Edge(from, to));
                 }
             }
         }
