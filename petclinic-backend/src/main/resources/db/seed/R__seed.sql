@@ -40,34 +40,34 @@ INSERT INTO types (name) VALUES
 
 -- Owners and pets drawn from European literature, film, and science.
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
-  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '0018474461990'),
+  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '+18474461990'),
   ('Harry',     'Potter',       '4 Privet Drive',            'Little Whinging',  '0119084455'),
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
-  ('Ștefan',    'Mureșan',      'Mariahilfer Straße 12',     'Vienna',           '0043152634418'),
-  ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '0048124221357'),
-  ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '0442074860707'),
-  ('Newt',      'Scamander',    'Diagon Alley',              'London',           '0442079460001'),
-  ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '0441865276150'),
-  ('Henry',     'Baskerville',  'Baskerville Hall',          'Dartmoor',         '0441626832093'),
-  ('John',      'Dolittle',     'Oxenthorpe Road',           'Puddleby',         '0441803712345'),
-  ('George',    'Darling',      '14 Kensington Gardens',     'London',           '0442079372121');
+  ('Ștefan',    'Mureșan',      '12 Boltzmanngasse',         'Vienna',           '(0043)152634418'),
+  ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '+48124221357'),
+  ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '+442074860707'),
+  ('Newt',      'Scamander',    'Diagon Alley',              'London',           '(0044)2079460001'),
+  ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '+441865276150'),
+  ('Henry',     'Baskerville',  'Baskerville Hall',          'Dartmoor',         '(0044)1626832093'),
+  ('John',      'Dolittle',     'Oxenthorpe Road',           'Puddleby',         '+441803712345'),
+  ('George',    'Darling',      '14 Kensington Gardens',     'London',           '(0044)2079372121');
 
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
-  ('Sam',       'Carraclough',  'Greenall Bridge',           'Yorkshire',        '0441943876543'),
-  ('Beatrix',   'Potter',       'Hill Top Farm',             'Near Sawrey',      '0441539436269'),
-  ('Long',      'Silver',       'Admiral Benbow Inn',        'Bristol',          '0441179293000'),
-  ('Argus',     'Filch',        'Hogwarts Castle',           'Inverness',        '0441463245678'),
-  ('Wallace',   'Wensleydale',  '62 West Wallaby Street',    'Wigan',            '0441942244466'),
-  ('Wendy',     'Darling',      '14 Kensington Gardens',     'London',           '0442079372122'),
-  ('Rubeus',   'Hagrid',        'Gamekeepers Hut',           'Hogsmeade',        '0441463555111'),
-  ('Hermione', 'Granger',       'Gryffindor Tower',          'Hogsmeade',        '0441463555112'),
+  ('Sam',       'Carraclough',  'Greenall Bridge',           'Yorkshire',        '+441943876543'),
+  ('Beatrix',   'Potter',       'Hill Top Farm',             'Near Sawrey',      '(0044)1539436269'),
+  ('Long',      'Silver',       'Admiral Benbow Inn',        'Bristol',          '+441179293000'),
+  ('Argus',     'Filch',        'Hogwarts Castle',           'Inverness',        '(0044)1463245678'),
+  ('Wallace',   'Wensleydale',  '62 West Wallaby Street',    'Wigan',            '+441942244466'),
+  ('Wendy',     'Darling',      '14 Kensington Gardens',     'London',           '(0044)2079372122'),
+  ('Rubeus',   'Hagrid',        'Gamekeepers Hut',           'Hogsmeade',        '+441463555111'),
+  ('Hermione', 'Granger',       'Gryffindor Tower',          'Hogsmeade',        '(0044)1463555112'),
   ('Tom',      'Riddle',        'Malfoy Manor',              'Wiltshire',        '0119844321'),
-  ('Tintin',   'Reporter',      '26 Rue du Labrador',        'Brussels',         '0032225112233'),
+  ('Tintin',   'Reporter',      '26 Rue du Labrador',        'Brussels',         '(0032)225112233'),
   ('Lady',     'Tremaine',      'Chateau Tremaine',          'Ile-de-France',    '0146203030'),
-  ('Mister',   'Geppetto',      'Via dei Tessitori 7',       'Florence',         '0039055290383'),
-  ('Alonso',   'Quixano',       'Campo de Montiel',          'La Mancha',        '0034926215566'),
-  ('Charles',  'Dickens',       'Gad''s Hill Place',         'Higham',           '0441634406030'),
-  ('Sherlock', 'Holmes',        '221B Baker Street',         'London',           '0442079351269');
+  ('Mister',   'Geppetto',      'Via dei Tessitori 7',       'Florence',         '+39055290383'),
+  ('Alonso',   'Quixano',       'Campo de Montiel',          'La Mancha',        '(0034)926215566'),
+  ('Charles',  'Dickens',       'Gad''s Hill Place',         'Higham',           '+441634406030'),
+  ('Sherlock', 'Holmes',        '221B Baker Street',         'London',           '(0044)2079351269');
 
 INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Axel',            DATE '2018-12-24', 6, 1),  -- Buzz McCallister's tarantula (hamster stand-in)
@@ -86,6 +86,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Liza',            DATE '2019-06-08', 1, 11);
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
+  (1,  DATE '2025-12-27', 'ate the Christmas tinsel; kept under observation'),  -- Axel
   (9,  DATE '2024-03-04', 'rabies shot'),   -- Dinah
   (10, DATE '2024-03-04', 'rabies shot'),   -- Cheshire
   (10, DATE '2023-06-04', 'neutered'),

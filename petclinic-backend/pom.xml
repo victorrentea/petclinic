@@ -318,12 +318,33 @@
                         <configuration>
                             <!-- @{argLine} keeps jacoco's agent, which prepare-agent put there. -->
                             <argLine>@{argLine} -javaagent:${otel.agent.jar}</argLine>
+                            <!-- Only @GenerateSequence (Jupiter) tests draw a diagram, and
+                                -Dgroups=genseq filters every engine: FunctionalCucumberTest's
+                                @Suite then discovers nothing and fails the build with
+                                NoTestsDiscovered on every traced run. No suite runner here can
+                                draw one, so the suite engine is left out of this profile. -->
+                            <excludeJUnit5Engines>
+                                <excludeJUnit5Engine>junit-platform-suite</excludeJUnit5Engine>
+                            </excludeJUnit5Engines>
+                            <!-- SequenceTraceExtension on EVERY test (src/test/resources/META-INF/
+                                services), so a test named in GENSEQ_SELECT is traced without carrying
+                                @GenerateSequence — /human-review names the tests a branch wrote:
+                                mvn -Pgenseq test -Dtest=OwnerListTest#m1+m2 with GENSEQ_SELECT set.
+                                The extension still traces nothing else, and a plain `mvn test` does
+                                not autodetect, so the services file is inert there. -->
+                            <properties>
+                                <configurationParameters>junit.jupiter.extensions.autodetection.enabled=true</configurationParameters>
+                            </properties>
                             <!-- Environment, not systemPropertyVariables: surefire applies those
                                 inside the forked JVM *after* it has booted, which is after the
                                 agent's premain has already read its configuration. -->
                             <environmentVariables>
                                 <OTEL_SERVICE_NAME>petclinic-backend</OTEL_SERVICE_NAME>
-                                <OTEL_EXPORTER_OTLP_ENDPOINT>http://localhost:4318</OTEL_EXPORTER_OTLP_ENDPOINT>
+                                <!-- No OTEL_EXPORTER_OTLP_ENDPOINT on purpose: the forked JVM
+                                    inherits Maven's environment, so a caller's value (what
+                                    `start-docker.sh ports` prints for a traced instance) gets
+                                    through, and without one the agent's own default is
+                                    http://localhost:4318, the ./start-grafana.sh collector. -->
                                 <OTEL_EXPORTER_OTLP_PROTOCOL>http/protobuf</OTEL_EXPORTER_OTLP_PROTOCOL>
                                 <OTEL_TRACES_EXPORTER>otlp</OTEL_TRACES_EXPORTER>
                                 <OTEL_METRICS_EXPORTER>none</OTEL_METRICS_EXPORTER>

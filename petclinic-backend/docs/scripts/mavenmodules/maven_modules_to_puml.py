@@ -49,8 +49,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_OUT = REPO_ROOT / "petclinic-backend" / "docs" / "generated" / "MavenModules.puml"
 
-# Same spirit as scripts/list-unversioned-deps.py's PRUNE_DIRS: build output,
-# vendored/cloned tool checkouts, and VCS internals never hold a *source* pom.
+# Build output, vendored/cloned tool checkouts, and VCS internals never hold a *source* pom.
 PRUNE_DIRS = {
     "target", "node_modules", ".git", ".claude", ".worktrees", ".tools", ".idea", ".codegraph",
 }

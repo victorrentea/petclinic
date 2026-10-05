@@ -31,6 +31,4 @@
 # Dependencies / SBOM (the surface the guardrail dep-drift check polices)
 **/pom.xml      @victorrentea/elders
 **/package.json @victorrentea/elders
-# Generated surface of deps declared with no <version> (inherited from a parent/BOM)
-/petclinic-backend/pom-libs.txt @victorrentea/elders
 

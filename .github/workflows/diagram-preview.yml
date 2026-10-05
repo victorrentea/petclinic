@@ -70,15 +70,6 @@ jobs:
                 echo "![$f]($proxy/$repo/$branch/$f)"
                 echo
               done < changed.txt
-              echo '<details><summary>See only what changed (red delta), locally</summary>'
-              echo
-              echo '```sh'
-              while IFS= read -r f; do
-                [ -n "$f" ] || continue
-                echo "./petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh $f origin/${{ github.base_ref }}"
-              done < changed.txt
-              echo '```'
-              echo '</details>'
             fi
           } > body.md
           cat body.md

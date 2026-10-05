@@ -7,6 +7,10 @@
 - `@wip` scenarios state a rule the code does not enforce yet; `cucumber.js` skips them.
 - `npm run test:with-apps` auto-starts both apps, but is experimental; prefer starting apps manually.
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
+- `PW_VIDEO=on npm run test:cucumber` films each scenario into `test-results/cucumber-videos/`,
+  slowed down (`PW_SLOWMO`, default 400ms) and subtitled with its Gherkin steps plus a ✅/❌
+  verdict — a caption bar drawn *in the page* (`src/support/captions.ts`), because Homebrew's
+  ffmpeg has no drawtext/subtitles filter to burn one in afterwards.
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
   `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
@@ -18,6 +22,17 @@
   change the test and re-run `./run-tests-with-tracing.sh`. Renaming a scenario renames its
   diagram; the generator sweeps the old one. The path back to the test is *inside* the picture
   (the `src://` handle on its title), not in the file's location.
+- `GENSEQ_SELECT` traces tests by name, untagged — `<file>::<title>` per line for the two browser
+  runners (`src/genseq/sequence-tag.ts`), `Class#method,…` (the `-Dtest` syntax) for the JVM,
+  where `-Pgenseq` autodetects `SequenceTraceExtension` on every test. `/human-review` fills it
+  with the tests a branch wrote (`human-review.json`, `steps.sequence.select`) and keeps what
+  they draw in `.human-review/`, so those pictures are never committed by a review.
+- A traced run on an isolated stack: `../start-docker.sh up --otel` gives the instance its own
+  Tempo, and `env $(../start-docker.sh ports <name>) ./run-tests-with-tracing.sh` points every
+  piece at it. Never hardcode :3300/:4318/:8080 in tracing code — read `GRAFANA_URL`,
+  `OTEL_EXPORTER_OTLP_ENDPOINT`, `BACKEND_URL`, keeping the dev port as the default. In a
+  container the browser's spans reach the collector only through the frontend's nginx
+  (`location = /v1/traces` → `lgtm:4318`), the same path `proxy.conf.js` serves under `ng serve`.
 - ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
   *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
   the suite runs `fullyParallel` against one shared DB.

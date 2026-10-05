@@ -291,6 +291,15 @@ function optInOf(source: string): string {
 }
 
 /**
+ * Why this test was traced, as the footer says it. A test GENSEQ_SELECT named carries no
+ * tag: naming one there would send the reader looking for an annotation the file lacks.
+ */
+function provenanceOf(source: string, scenarios: DiagramScenario[]): string {
+  const selected = scenarios.length > 0 && scenarios.every((s) => s.selected);
+  return selected ? 'traced because this branch wrote it' : optInOf(source);
+}
+
+/**
  * A scenario's heading, qualified by the class it lives in — for Java, and only for Java.
  *
  * `remembers the vet who attended it` is a method name read back as a sentence, and a
@@ -516,6 +525,8 @@ export interface DiagramScenario {
   traces: NormSpan[][];
   /** `src://path:line` of the test this section came from, when it could be located. */
   link?: string;
+  /** Traced because GENSEQ_SELECT named it, not because it carries the tag. */
+  selected?: boolean;
 }
 
 /** The picture and, when it is interactive, what each of its markers reveals. */
@@ -594,7 +605,10 @@ export function renderDiagram(
     // …and, since the title stopped being the file, the file. A `.puml` embedded in a
     // README or pasted into a slide is read with nothing around it to say where it came
     // from; here it costs a few words on a line that was already there.
-    `footer ${optInOf(title)} in ${title} — generated from real traces of end-to-end `
+    //
+    // A test traced only because GENSEQ_SELECT named it carries no tag, so it says so instead.
+    `footer ${provenanceOf(title, scenarios)} in ${title} — `
+    + 'generated from real traces of end-to-end '
     + 'test runs, do not edit ❗',
     ...orderedParticipants(present).map((p) => `participant ${pumlName(p)}`),
   ];

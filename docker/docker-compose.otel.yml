@@ -1,0 +1,79 @@
+# Overlay for `start-docker.sh up --otel`: the instance's own trace store, and both JVMs
+# under the OpenTelemetry agent exporting to it.
+#
+# Its own, never the global petclinic-observability container: that one sits on fixed host
+# ports (3300 / 4318), so two traced instances — two branches under review at once — would
+# export into the same Tempo, and a diagram generator searching by test name would pick up
+# the other branch's spans. Here the collector is `lgtm` inside the project's network, and
+# Grafana (3000) and OTLP/HTTP (4318) are published host-picked and loopback-only, like
+# every other port of an instance: `start-docker.sh ports` reads them back.
+#
+# No volume: the store is the container's own filesystem, so every `up --fresh` starts with
+# an empty Tempo — and a search can only find this instance's traces.
+#
+# JDK_JAVA_OPTIONS, not JAVA_TOOL_OPTIONS: the JaCoCo overlay owns that one, and both
+# overlays must stack (`--jacoco --otel`). The `java` launcher of both images reads it.
+
+x-otel: &otel
+  JDK_JAVA_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://lgtm:4318
+  OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment=local
+  # The same capture start-backend.sh asks for: the most detail the agent can give, with
+  # what a diagram shows decided at render time (petclinic-test SEQ_SQL=…).
+  OTEL_INSTRUMENTATION_COMMON_DB_STATEMENT_SANITIZER_ENABLED: "false"
+  OTEL_INSTRUMENTATION_JDBC_EXPERIMENTAL_CAPTURE_QUERY_PARAMETERS: "true"
+  OTEL_SEMCONV_STABILITY_OPT_IN: database/dup
+  # The genseq profile's reason: a test is over in seconds, and a 5 s batch delay leaves
+  # its last spans outside the window the generator searches.
+  OTEL_BSP_SCHEDULE_DELAY: "500"
+
+x-agent: &agent
+  - ${OTEL_AGENT_JAR:?run through ../start-docker.sh up --otel}:/otel/opentelemetry-javaagent.jar:ro
+
+services:
+  lgtm:
+    image: grafana/otel-lgtm:0.8.1
+    labels:
+      ro.victorrentea.petclinic.env: "1"
+    ports:
+      - "127.0.0.1::3000"
+      - "127.0.0.1::4318"
+    # The image's own run-all.sh touches this file once Grafana, Tempo and the collector
+    # all answer — the one signal that covers the three.
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 90
+
+  backend:
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: petclinic-backend
+    volumes: *agent
+    # Not for the agent, which buffers and retries: so that `up --wait` returning means
+    # the first request of a test run is already traced into a store that is listening.
+    depends_on:
+      lgtm:
+        condition: service_healthy
+
+  notification:
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: notification-service
+    volumes: *agent
+    # Published for the one traced JVM that is NOT in this network: `mvn -Pgenseq` runs the
+    # backend's @GenerateSequence tests in-process on the host, and their visit booking
+    # POSTs to notification-service.url — localhost:8090 by default, where nothing of this
+    # instance listens. The call failed (best effort, logged) and AddVisitApiTest's diagram
+    # silently lost NotificationService and the SMS gateway. `ports` prints this as
+    # NOTIFICATIONSERVICE_URL, which Spring binds to notification-service.url.
+    ports:
+      - "127.0.0.1::8090"
+    depends_on:
+      lgtm:
+        condition: service_healthy

@@ -10,7 +10,9 @@
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
-      "Edit(./openapi.yaml)"
+      "Edit(./openapi.yaml)",
+      "Edit(./petclinic-frontend/src/app/generated/api-types.ts)",
+      "Edit(./petclinic-backend/docs/generated/**)"
     ],
     "ask": [
       "Edit(.claude/settings.json)"
@@ -39,9 +41,9 @@
         "matcher": "Write|Edit|Bash",
         "hooks": [
           {
-            "//": "CLAUDE.md is a 1-line @AGENTS.md import; rules belong in AGENTS.md.",
+            "//": "No CLAUDE.md in this repo: Claude Code reads AGENTS.md only while none exists.",
             "//2": "Bash is matched too: a guard that watches only the file tools is walked",
-            "//3": "around by one `echo >> CLAUDE.md` — which is what Copilot reaches for first.",
+            "//3": "around by one `echo > CLAUDE.md` — which is what Copilot reaches for first.",
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/protect-claude-md.sh\""
           }
@@ -70,5 +72,6 @@
         ]
       }
     ]
-  }
+  },
+  "autoMemoryEnabled": false
 }

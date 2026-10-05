@@ -23,9 +23,60 @@
       }
     },
     "sequence": {
+      "//": "The traced suites run against a stack of their own, never the host's: `up`",
+      "//2": "builds the commit under review WITH its own Grafana LGTM (--otel), so the",
+      "//3": "backend's and the browser's spans land in a Tempo nobody else exports to, and",
+      "//4": "two branches traced at once cannot draw each other's calls. --fresh drops the",
+      "//5": "instance's volumes, so every run starts from the seed: a diagram drawn on",
+      "//6": "yesterday's leftover rows shows queries the code does not make on a clean DB.",
+      "//7": "Its own name (-otel), not video's petclinic-{shortsha}: that one is shared and",
+      "//8": "reused across steps, and has no trace store. `vars` prints every host-picked",
+      "//9": "address as NAME=value — GRAFANA_URL, OTEL_EXPORTER_OTLP_ENDPOINT, BACKEND_URL,",
+      "//10": "BASE_URL, API_BASE_URL — which the step exports to every command: the",
+      "//11": "browser suites and generate.ts read them, the genseq profile's JVM inherits",
+      "//12": "OTEL_EXPORTER_OTLP_ENDPOINT and NOTIFICATIONSERVICE_URL (its visit booking",
+      "//12b": "notifies this instance's service, or AddVisitApiTest's picture loses the",
+      "//12c": "call). `requires` is probed after `up`, with those names",
+      "//13": "expanded: a stack that came up without the store is a skip saying so.",
+      "app": {
+        "up": "./start-docker.sh up --ref {sha} --name petclinic-{shortsha}-otel --otel --fresh --ttl 1800",
+        "vars": "./start-docker.sh ports petclinic-{shortsha}-otel",
+        "down": "./start-docker.sh down petclinic-{shortsha}-otel"
+      },
+      "requires": [
+        {"url": "{GRAFANA_URL}/api/health", "what": "Grafana"},
+        {"url": "{OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces", "what": "OTLP collector"}
+      ],
+      "//14": "`select` adds the tests this branch WROTE or EDITED (test-changes.py's",
+      "//15": "manifest) to the tagged ones, untagged: `{tests.<suite>}` in a command expands",
+      "//16": "to that suite's picks, each spelled as `item` and joined by `join` — the way",
+      "//17": "its runner takes them. GENSEQ_SELECT is read by both browser runners",
+      "//18": "(sequence-tag.ts: <file>::<title>, one per line) and by the JVM's",
+      "//19": "SequenceTraceExtension (Class#method, the -Dtest syntax). The `when: java` run",
+      "//20": "boots a Spring context only when there is a JVM test to trace. Capped at 6",
+      "//21": "(4 browser + 2 JVM) to bound the step's time; a test already tagged takes no slot.",
+      "select": {
+        "max": 6,
+        "suites": {
+          "e2e": {
+            "files": ["petclinic-test/src/**/*.feature", "petclinic-test/src/**/*.spec.ts"],
+            "exclude": ["petclinic-test/src/genseq/**"],
+            "item": "{file}::{name}", "join": "\n", "max": 4
+          },
+          "java": {
+            "files": ["petclinic-backend/src/test/java/**/*.java"],
+            "exclude": ["**/genseq/**"],
+            "item": "{class}#{name}", "join": ",", "max": 2
+          }
+        }
+      },
       "commands": [
-        "cd petclinic-test && ./run-tests-with-tracing.sh",
+        "cd petclinic-test && GENSEQ_SELECT={tests.e2e} ./run-tests-with-tracing.sh",
         "cd petclinic-backend && mvn -o -Pgenseq test -Dgroups=genseq",
+        {
+          "run": "cd petclinic-backend && GENSEQ_SELECT={tests.java} mvn -o -Pgenseq test -Dtest={tests.java} -Dsurefire.failIfNoSpecifiedTests=false",
+          "when": "java"
+        },
         "cd petclinic-test && GENSEQ_REFRESH=1 npm run trace:diagram"
       ]
     },
@@ -48,6 +99,14 @@
       "//16": "one `drop` covers a suite that renamed its own lifeline on this branch.",
       "//17": "`NotificationService` is a container of its own: a separate JVM on :8090,",
       "//18": "reached over HTTP. Its `SMS gateway` stays external — still a log line.",
+      "//19": "`drawio` is the hand-drawn picture of the same containers, shown under the",
+      "//20": "projected one: arrows a test walked drawn heavy, the rest grey, and a call the",
+      "//21": "traces made that no arrow carries added in dashed red. DeploymentDiagramTest",
+      "//22": "is the guardrail that fails on that red; the page shows where it is.",
+      "drawio": {
+        "diagram": "petclinic-backend/docs/Deployment.drawio.png",
+        "tested_against": "traced sequence diagrams"
+      },
       "system": "PetClinic",
       "containers": {
         "Browser": {"kind": "container", "tech": "Angular 16"},
@@ -163,6 +222,7 @@
       "app": {
         "up": "./start-docker.sh up --ref {sha} --ttl 1800",
         "url": "./start-docker.sh url petclinic-{shortsha}",
+        "reset": "/__reset",
         "down": "./start-docker.sh down petclinic-{shortsha}"
       }
     },

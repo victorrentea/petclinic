@@ -1,13 +1,11 @@
 # Project Memory
-Coding agents auto-load this file in any new conversation in this folder.
-It's the most important file on this Git repo.
-Add to rules here to prevent AI fail/slop.
-Review carefully its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
+New conversations in this folder auto-load this file.
+Add to rules here to prevent repeating AI fail/slop.
+Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
 GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
-Warning: git-pushed symlinks don't work reliably when cloned on Windows not having WSL.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -15,10 +13,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 **Structure:**
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
-- `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it
-  after every booked visit
-- `petclinic-commons/` - plain jar both Java apps depend on (the notification request).
-  No reactor pom: it is a standalone build, `mvn install`ed before either app compiles
+- `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
+- `petclinic-commons/` - jar both Java apps depend on. standalone build, `mvn install`ed before either app compiles
 
 ## Common Commands
 
@@ -26,13 +22,12 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 Each script is foreground; run them in separate terminals.
 ```sh
 ./start-database.sh        # embedded Postgres on localhost:5432
-./start-backend.sh         # installs petclinic-commons, then BOTH Java apps: notification-service
-                           # on :8090 (background) and the backend on :8080 (also Spring AI MCP at /mcp)
+./start-backend.sh         # starts notification-service on :8090 and backend on :8080 (also MCP at /mcp) after installing commons
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
 Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeout. A port held
-by an orphan is reported in under a second, before anything is built or wiped — the script
+by an orphan is reported in < 1s, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
 
 ### Backend (petclinic-backend/)
@@ -72,7 +67,8 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 **Key Patterns:**
 - DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
 - `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead
+  editing it by hand is denied in `.claude/settings.json` — regenerate it instead.
+  Same deny on `petclinic-frontend/src/app/generated/api-types.ts` and `petclinic-backend/docs/generated/**`
 - Constructor injection, global exception handling via `@RestControllerAdvice`
 
 ## Additional Knowledge
@@ -82,18 +78,6 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 
 To see how the pieces fit together, every diagram generated from the code is rendered in
 [ARCHITECTURE.md](ARCHITECTURE.md).
-
-### Lifelines in the generated sequence diagrams
-`service.name` picks the lifeline: `notification-service` is drawn as `NotificationService`, so
-booking a visit shows `Backend -> NotificationService`. That name is a bare identifier on purpose:
-`DeploymentDiagramTest` matches `\w+ -> \w+` and demands the same arrow on
-`Deployment.drawio.png`, where the service has its own box.
-
-A span carrying `genseq.participant="<name>"` is drawn on a lifeline of that name instead. It
-keeps a `@SpringBootTest`'s own sentences off the app's lifeline (`Test`), and draws
-notification-service's (fake) `SMS gateway`. A name that is not a bare identifier is quoted by
-the generator and so stays out of `DeploymentDiagramTest`; `human-review.json` marks
-`SMS gateway` external.
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
@@ -119,26 +103,11 @@ command here changes.
 
 **Tooling changes go to `main` first.** Any change to the guardrails, the anti-drift checks or the `/human-review` wiring (`human-review.json`, `scripts/`, genseq, Code City, traces) made while working on a downstream PR branch is committed on `main`, pushed, and then merged into that branch (e.g. `test-pr`) — never left living only on the PR.
 
-`scripts/ensure-human-review.sh` resolves it for the script that borrows its PlantUML
-differs (`petclinic-backend/docs/scripts/puml-diff/puml-diff-vs-git.sh`): `$CLAUDE_PLUGIN_ROOT`,
-then the installed plugin, then the marketplace's own clone, then a local checkout symlinked
-into `.claude/skills/`, and finally a clone into a gitignored `petclinic-backend/.tools/` on
-a runner. Never vendor a second copy — a private fork of the review pipeline drifts in
-silence.
-
-The installed plugin's path carries the installed commit
-(`~/.claude/plugins/cache/human-review/human-review/<sha>/`), so that script asks the CLI's
-own `installed_plugins.json` which one it installed rather than naming a directory that
-changes on every update — or guessing. An update leaves the previous sha's directory in
-place with an identical mtime, so "the newest one" tie-breaks alphabetically and hands back
-the superseded skill; that happened, and `ensure-human-review-test.sh` now pins it.
-
 ⚠️ **There is no symlink here any more, and putting one back in git is a mistake with a
 history.** `.claude/skills/human-review` was committed for a while as mode 120000 pointing
 at `/Users/<someone>/workspace/…`, so every clone of this public repo carried a link that
-resolved for exactly one person on one laptop. `scripts/check-agents-md.sh` no longer
-allowlists it. Developing the skill against this repo does not need one either — install the
-plugin from a local marketplace, or point `$HUMAN_REVIEW_HOME` at your checkout.
+resolved for exactly one person on one laptop. Developing the skill against this repo does
+not need one either — install the plugin from a local marketplace.
 
 **Run the review passes before you ask for the guide.** `/human-review` no longer invokes
 `/code-review` or `/simplify` — it writes up the passes that already ran in the
@@ -194,20 +163,6 @@ Core entities and relationships:
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on every `@RequestBody`
 - Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
-
-## A feature is not done until one Gherkin scenario drives it through the UI
-
-Every user-facing feature gets at least one `.feature` scenario in `petclinic-test/src/`
-(bound by the `*.feature.glue.ts` beside it) that opens the screens a user opens. It is the
-acceptance test of the story — the one artefact a non-programmer can read.
-
-`petclinic-backend/src/test/resources/features/` does not count: that suite is Cucumber over
-the REST API, so a field the backend stores and no page shows passes all of it. A `*.spec.ts`
-does not count either — it is a second account of the same journey, written for the people
-who write it (`add-visit.spec.ts` and `book-visit-with-vet.feature` are deliberately a pair).
-
-Tag it `@generate_sequence` when the feature crosses the stack, so the story reaches the
-review page with a picture of what its run did.
 
 ## Core Values
 - Write non-trivial code using TDD
