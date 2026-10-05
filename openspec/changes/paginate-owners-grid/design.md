@@ -115,9 +115,10 @@ paginator when nothing matches, a centred message instead.
 - [Dev DB already ran another branch's `V4`] → Flyway validation fails on boot. Check
   `flyway_schema_history` first; if a foreign V4 is there, reset once with `./start-database.sh`
   (wipes runtime rows).
-- [The embedded test Postgres may use a `C` collation] → `Ś` sorts after `Z` there, breaking the
-  diacritics scenario. Verify in the first backend test; if so, set the locale where the test DB
-  is initialised rather than weakening the spec.
+- [The server's default collation depends on the host] → under the `C` locale of a CI runner `Ś`
+  sorts after `Z`. V4 pins `last_name`, `first_name` and `city` to ICU's `en-x-icu` (bundled with
+  the zonky binaries on every platform), so the order no longer depends on how the server was
+  initialised — in tests, on CI or in production.
 - [Tests read the whole list as an array] → migrated to `$.content` / `totalElements`; e2e helpers
   that scanned all owners to find a pet use `GET /api/pets` (it carries `ownerId`) instead.
 - [Parallel e2e suites add owners to one shared DB] → the acceptance scenario asserts order and

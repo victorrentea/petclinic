@@ -10,7 +10,7 @@
 
 - [x] 2.1 Write failing `OwnerTest` cases for the `owner-grid` API scenarios (default page, next page continues, page past the end, size 5 / 1000, sort by name and by city desc, `sort=telephone` → 400, filtered page, diacritics) — verify they fail for the right reason
 - [x] 2.2 Add `OwnerPageDto`, the sort-key/direction enum and the paged repository method; change `listOwners` to take `lastName, sort, dir, page, size`, reject invalid values through `ValidationException`, and update its `@Operation`/`@ApiResponse` + `ApiExamples.OWNERS` — verify 2.1 passes
-- [x] 2.3 If the embedded test Postgres sorts `Ś` after `Z`, set its locale where the test DB is initialised — verify the diacritics case passes without being weakened
+- [x] 2.3 Pin the name and city columns to the ICU `en-x-icu` collation in V4, so `Ś` sorts among the S's whatever the server's locale — verify the diacritics case passes without being weakened
 - [x] 2.4 Migrate the backend callers of the full list to `$.content` / `totalElements`: `owners.feature` + `OwnerSteps`, `PetSteps`, `OwnerSearchThroughLatencyProxyTest`, `AddVisitApiTest`, `VisitDateRangeTest`, `genseq/Rest` + `Steps`, the JMeter plan — verify `mvn test` in `petclinic-backend` is green
 - [x] 2.5 Regenerate `openapi.yaml` (`OpenApiExtractorTest`) and the frontend types (`npm run generate:api`), and run `npm run lint:openapi` — verify the diff shows only the new params and `OwnerPageDto`, and Spectral passes
 

@@ -3,6 +3,7 @@ import { Owner, OwnerPage, OwnerPageQuery } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Params } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
@@ -11,6 +12,8 @@ export class OwnerService {
   entityUrl = environment.REST_API_URL + 'owners';
 
   private readonly handlerError: HandleError;
+  /** The Owners grid's last query params, so leaving an owner's record returns to the same page. */
+  listParams: Params = {};
 
   constructor(
     private http: HttpClient,

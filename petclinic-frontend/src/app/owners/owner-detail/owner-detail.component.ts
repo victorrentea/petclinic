@@ -25,7 +25,7 @@ export class OwnerDetailComponent implements OnInit {
   }
 
   gotoOwnersList() {
-    this.router.navigate(['/owners']);
+    this.router.navigate(['/owners'], {queryParams: this.ownerService.listParams});
   }
 
   editOwner() {

@@ -9,5 +9,10 @@ describe('OwnerNamePipe', () => {
 
   it('writes nothing while the owner is not loaded yet', () => {
     expect(pipe.transform(undefined)).toBe('');
+    expect(pipe.transform({} as any)).toBe('');
+  });
+
+  it('writes what it has when a part is missing', () => {
+    expect(pipe.transform({firstName: null, lastName: 'McCallister'})).toBe('McCallister');
   });
 });

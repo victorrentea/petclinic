@@ -27,10 +27,11 @@ const sortedColumn = {
   city: cities,
 };
 
-Then('{int} owners are listed, sorted by {word}', async function (this: PlaywrightWorld, count: number, by: 'name' | 'city') {
-  await expect(rows(this)).toHaveCount(count);
-  expect(inOrder(await sortedColumn[by](this))).toBe(true);
-});
+Then('{int} owners are listed, sorted by {word}',
+  async function (this: PlaywrightWorld, count: number, by: 'name' | 'city') {
+    await expect(rows(this)).toHaveCount(count);
+    expect(inOrder(await sortedColumn[by](this))).toBe(true);
+  });
 
 When('I sort the owners by {string}', async function (this: PlaywrightWorld, header: string) {
   await andLoad(this, () => this.page.locator('#ownersTable th', {hasText: header}).click());

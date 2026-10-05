@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
-import {Owner, OwnerPageQuery} from '../owner';
+import {Owner, OwnerPage, OwnerPageQuery} from '../owner';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
-import {Subscription} from 'rxjs';
-import {map, switchMap, tap} from 'rxjs/operators';
+import {of, Subscription} from 'rxjs';
+import {catchError, map, switchMap, tap} from 'rxjs/operators';
 import {Sort} from '@angular/material/sort';
 import {PageEvent} from '@angular/material/paginator';
 
@@ -21,6 +21,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   query: OwnerPageQuery = DEFAULT_QUERY;
   owners: Owner[];
   totalElements = 0;
+  loadFailed = false;
   readonly expandedPets = new Set<number>();
   private subscription: Subscription;
 
@@ -35,12 +36,25 @@ export class OwnerListComponent implements OnInit, OnDestroy {
       tap(query => {
         this.query = query;
         this.lastName = query.lastName;
+        this.ownerService.listParams = urlParamsOf(query);
       }),
-      switchMap(query => this.ownerService.getOwnersPage(query))
-    ).subscribe(page => {
-      this.owners = page.content;
-      this.totalElements = page.totalElements;
-    });
+      // A failed page must not end the stream: the next sort, page or search would fetch nothing.
+      switchMap(query => this.ownerService.getOwnersPage(query).pipe(catchError(() => of(null))))
+    ).subscribe(page => this.show(page));
+  }
+
+  private show(page: OwnerPage | null) {
+    this.loadFailed = !page;
+    if (!page) {
+      return;
+    }
+    const lastPage = Math.max(0, Math.ceil(page.totalElements / this.query.size) - 1);
+    if (this.query.page > lastPage) {
+      this.load({page: lastPage}); // a link or a refresh past the end lands on the last page
+      return;
+    }
+    this.owners = page.content;
+    this.totalElements = page.totalElements;
   }
 
   ngOnDestroy() {

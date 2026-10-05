@@ -18,7 +18,12 @@
 
     </form>
 
-    <div class="no-owners" *ngIf="owners?.length === 0">
+    <div class="no-owners" *ngIf="loadFailed">
+      <div class="no-owners-icon" aria-hidden="true">🔌</div>
+      <p class="no-owners-title">The owners could not be loaded</p>
+      <p>Check your connection, then search again.</p>
+    </div>
+    <div class="no-owners" *ngIf="!loadFailed && owners?.length === 0">
       <div class="no-owners-icon" aria-hidden="true">🐾</div>
       <ng-container *ngIf="query.lastName; else noOwnersYet">
         <p class="no-owners-title">No owner's last name starts with “{{ query.lastName }}”</p>

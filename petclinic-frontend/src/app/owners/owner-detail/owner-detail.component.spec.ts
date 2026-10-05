@@ -15,6 +15,8 @@ import { Observable, of } from 'rxjs';
 import {SharedModule} from '../../shared/shared.module';
 
 class OwnerServiceStub {
+  listParams = {sort: 'city', page: 1};
+
   getOwnerById(): Observable<Owner> {
     return of({ id: 1, firstName: 'James', lastName: 'Franklin'  } as Owner);
   }
@@ -95,17 +97,17 @@ describe('OwnerDetailComponent', () => {
     let ownersListButton = buttons[0].nativeElement;
     ownersListButton.click();
     spyOn(component, 'gotoOwnersList').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners'], {queryParams: {sort: 'city', page: 1}});
 
     let editOwnerButton = buttons[1].nativeElement;
     editOwnerButton.click();
     spyOn(component, 'editOwner').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners'], {queryParams: {sort: 'city', page: 1}});
 
     let addNewPetButton = buttons[2].nativeElement;
     addNewPetButton.click();
     spyOn(component, 'addPet').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners'], {queryParams: {sort: 'city', page: 1}});
   });
 
 });

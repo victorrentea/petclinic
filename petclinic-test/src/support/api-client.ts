@@ -27,7 +27,7 @@ export interface PetDto {
 }
 
 /** How the UI writes an owner's name (the frontend's `ownerName` pipe): last name first. */
-export const ownerName = (o: OwnerName) => `${o.lastName}, ${o.firstName}`;
+export const ownerName = (o: OwnerName) => [o.lastName, o.firstName].filter(Boolean).join(', ');
 
 export class ApiClient {
   private client: AxiosInstance;

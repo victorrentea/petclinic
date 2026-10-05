@@ -9,7 +9,7 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import { OwnerService } from '../owner.service';
 import {Owner, OwnerPage, OwnerPageQuery} from '../owner';
-import {Observable, of, Subject} from 'rxjs';
+import {Observable, of, Subject, throwError} from 'rxjs';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatPaginator} from '@angular/material/paginator';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -208,6 +208,39 @@ describe('OwnerListComponent', () => {
     expect(component.expandedPets.has(owner.id)).toBeTrue();
     component.togglePets(owner);
     expect(component.expandedPets.has(owner.id)).toBeFalse();
+  }));
+
+  it('a failed page does not stop the grid: the next search loads again', fakeAsync(() => {
+    createComponent();
+    getOwnersPageSpy.and.returnValue(throwError('server returned code 500'));
+    component.searchByLastName('Fr');
+    settle();
+    expect(component.loadFailed).toBeTrue();
+
+    getOwnersPageSpy.and.returnValue(of(testPage));
+    component.searchByLastName('Franklin');
+    settle();
+
+    expect(component.loadFailed).toBeFalse();
+    expect(component.owners).toEqual([testOwner]);
+  }));
+
+  it('a page past the end, from a link or a refresh, lands on the last page', fakeAsync(() => {
+    TestBed.inject(Router).navigateByUrl('/?page=7');
+    tick();
+
+    createComponent();
+
+    expect(lastQuery()).toEqual(jasmine.objectContaining({page: 2})); // 29 owners, 10 a page
+    expect(TestBed.inject(Router).url).toBe('/?page=2');
+  }));
+
+  it('remembers its URL params, so an owner\'s record can send the user back to the same page', fakeAsync(() => {
+    createComponent();
+    paginator().nextPage();
+    settle();
+
+    expect(TestBed.inject(OwnerService).listParams).toEqual({page: 1});
   }));
 
   it('an earlier page answering late does not overwrite a newer one', fakeAsync(() => {
