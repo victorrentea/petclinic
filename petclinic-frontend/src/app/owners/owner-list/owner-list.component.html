@@ -20,7 +20,8 @@
     </form>
 
     <div *ngIf="failed" id="ownersError" class="alert alert-danger" role="alert">
-      The owners could not be loaded. Please try again.
+      The owners could not be loaded.
+      <button id="retryOwners" type="button" class="btn btn-default btn-sm" (click)="retry()">Try again</button>
     </div>
 
     <div *ngIf="page?.totalElements === 0 && !loading" id="ownersEmpty">

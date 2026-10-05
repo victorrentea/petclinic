@@ -241,6 +241,21 @@ describe('OwnerListComponent', () => {
       expect(element('#addOwner')).toBeTruthy();
     });
 
+    it('Try again re-asks for the page that failed, keeping its page, size and sort', () => {
+      answer(page(10, 26));
+      oneRequestFor(() => paginator()._changePageSize(5));
+      answer(page(5, 26));
+      oneRequestFor(() => click('th[mat-sort-header="city"]'));
+      answer(page(5, 26));
+      const failedQuery = oneRequestFor(() => click('.mat-mdc-paginator-navigation-next'));
+      fail();
+
+      expect(oneRequestFor(() => click('#retryOwners'))).toEqual(failedQuery);
+      answer(page(5, 26));
+      expect(element('#ownersError')).toBeNull();
+      expect(element('.mat-mdc-paginator-range-label')!.textContent).toContain('6 – 10 of 26');
+    });
+
     it('the search form still works after a failure', () => {
       fail();
 

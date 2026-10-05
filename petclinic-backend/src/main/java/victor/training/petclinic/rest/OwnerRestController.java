@@ -64,6 +64,7 @@ public class OwnerRestController {
     // The largest page whose offset still fits the int Hibernate pages with, at the largest size.
     private static final int MAX_PAGE = Integer.MAX_VALUE / 20;
     private static final String SORT_PATTERN = "(name|city),(asc|desc)";
+    private static final String SORT_MESSAGE = "must be one of name,asc / name,desc / city,asc / city,desc";
     private static final Map<String, String[]> SORT_CHAINS = Map.of(
             "name", new String[]{"lastName", "firstName", "id"},
             "city", new String[]{"city", "lastName", "firstName", "id"});
@@ -121,7 +122,7 @@ public class OwnerRestController {
                     + "The direction applies to every field. Defaults to name,asc.",
                     schema = @Schema(allowableValues = {"name,asc", "name,desc", "city,asc",
                             "city,desc"})) @RequestParam(defaultValue = "name,asc") @Pattern(regexp = SORT_PATTERN,
-                                    message = "must be one of name,asc / name,desc / city,asc / city,desc") String sort) {
+                                    message = SORT_MESSAGE) String sort) {
         Page<Owner> ownerPage = ownerRepository.findByLastNameStartingWith(lastName,
                 PageRequest.of(page, size, toSort(sort)));
         List<Owner> owners = withPetsAndVisits(ownerPage.getContent());

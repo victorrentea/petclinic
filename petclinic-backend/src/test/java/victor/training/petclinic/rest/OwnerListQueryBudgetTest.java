@@ -11,7 +11,7 @@ import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -77,9 +77,9 @@ class OwnerListQueryBudgetTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {5, 20})
-    void aFullPage_costsAtMostThreeSelects(int size) throws Exception {
-        JsonNode page = list("/api/owners?lastName=Qbudget&size=" + size);
+    @CsvSource({"5, name,asc", "10, city,desc", "20, name,desc"})
+    void aFullPage_costsAtMostThreeSelects(int size, String sortKey, String direction) throws Exception {
+        JsonNode page = list("/api/owners?lastName=Qbudget&size=" + size + "&sort=" + sortKey + "," + direction);
 
         assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(3);
         assertThat(page.get("content")).hasSize(size);

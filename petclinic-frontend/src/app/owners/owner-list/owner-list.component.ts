@@ -63,6 +63,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.load();
   }
 
+  /** Asks again for the very page that failed: same filter, page, size and sort. */
+  retry() {
+    this.load();
+  }
+
   onSelect(owner: Owner) {
     this.router.navigate(['/owners', owner.id]);
   }
