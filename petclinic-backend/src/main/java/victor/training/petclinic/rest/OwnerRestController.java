@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -165,7 +166,7 @@ public class OwnerRestController {
     @Operation(operationId = "addVisitToOwner", summary = "Add a visit for an owner's pet")
     @PostMapping("{ownerId}/pets/{petId}/visits")
     public ResponseEntity<Void> addVisitToOwner(@PathVariable int ownerId, @PathVariable int petId,
-            @RequestBody VisitFieldsDto visitFieldsDto) {
+            @RequestBody @Validated VisitFieldsDto visitFieldsDto) {
         int visitId = bookVisit(ownerId, petId, visitFieldsDto);
 
         URI createdUri = UriComponentsBuilder.fromPath("/api/pets/{petId}/visits/{id}")
@@ -181,9 +182,9 @@ public class OwnerRestController {
     // no-service-layer house style.
     @WithSpan("book-visit")
     private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        pet.requireValidVisitDate(visitFieldsDto.getDate(), LocalDate.now());
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
         visit.setPet(pet);
         visitRepository.save(visit);
         notifyOwner(ownerId, petId, visit);

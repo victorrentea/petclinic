@@ -45,6 +45,8 @@ export class PlaywrightWorld extends World {
   page!: Page;
   ownerId?: number;
   petId?: number;
+  // A pet a scenario created for itself, deleted after it.
+  createdPetId?: number;
   petName?: string;
   visitDescription?: string;
   // Set by the owner-search scenarios: every owner the API knows, by full name.
