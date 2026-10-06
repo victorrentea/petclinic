@@ -73,6 +73,9 @@ const DB_NAME_RE = /^(SELECT|INSERT|UPDATE|DELETE|MERGE)\b/i;
 // Set by petclinic-backend's genseq/Steps.java; the two are one contract.
 export const PARTICIPANT_ATTRIBUTE = 'genseq.participant';
 
+/** What kind of thing a declared lifeline is — `module`, for a jar linked into the services. */
+export const STEREOTYPE_ATTRIBUTE = 'genseq.stereotype';
+
 /** The lifeline a @SpringBootTest's own `given`/`when`/`then` marks are drawn on. */
 export const TEST_PARTICIPANT = 'Test';
 
@@ -339,6 +342,24 @@ export function pumlName(participant: string): string {
   return BARE_IDENTIFIER.test(participant) ? participant : `"${participant}"`;
 }
 
+function stereotypesOf(scenarios: DiagramScenario[]): Map<string, string> {
+  const kinds = new Map<string, string>();
+  for (const span of scenarios.flatMap((s) => s.traces.flat())) {
+    const participant = span.attributes[PARTICIPANT_ATTRIBUTE]?.trim();
+    const kind = span.attributes[STEREOTYPE_ATTRIBUTE]?.trim();
+    if (participant && kind) kinds.set(participant, kind);
+  }
+  return kinds;
+}
+
+// «kind» goes into the display name rather than as PlantUML's own `<<kind>>`: the review
+// page's parsers read `participant X` and `participant "…" as X`, and nothing after either.
+function participantLine(participant: string, kind: string | undefined): string {
+  return kind
+    ? `participant "«${kind}»\\n${participant}" as ${pumlName(participant)}`
+    : `participant ${pumlName(participant)}`;
+}
+
 function orderedParticipants(present: Set<string>): string[] {
   const ranked = PARTICIPANT_ORDER.filter((p) => present.has(p));
   const rest = [...present].filter((p) => !PARTICIPANT_ORDER.includes(p)).sort();
@@ -585,6 +606,7 @@ export function renderDiagram(
   // path any more, but `renderDiagram` is a public function and a caller handing it two
   // scenarios means two chapters, which need naming and separating.
   const solo = sections.length === 1 ? sections[0] : undefined;
+  const kinds = stereotypesOf(scenarios);
   const header = [
     '@startuml',
     // ' starts a PlantUML comment: this one warns whoever opens the *file*.
@@ -610,7 +632,7 @@ export function renderDiagram(
     `footer ${provenanceOf(title, scenarios)} in ${title} — `
     + 'generated from real traces of end-to-end '
     + 'test runs, do not edit ❗',
-    ...orderedParticipants(present).map((p) => `participant ${pumlName(p)}`),
+    ...orderedParticipants(present).map((p) => participantLine(p, kinds.get(p))),
   ];
   // A divider per chapter, only where there are chapters to tell apart. PlantUML renders
   // a creole link inside one, and the review page resolves the handle against its own
