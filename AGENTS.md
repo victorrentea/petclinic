@@ -152,6 +152,10 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Expected volume (business, Oct 2026):** ~100,000 owners in production within one year.
+Any endpoint listing owners — or anything that grows with them (pets, visits) — pages and
+filters in the database, never loads the full table into memory or the browser.
+
 ## Java Code Style
 - Keep line length < 120 chars
 - Keep methods under 30 lines
