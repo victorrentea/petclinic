@@ -1,4 +1,4 @@
-# refactoring-legacy
+# refactoring-tools
 
 A **self-contained** [OpenRewrite](https://docs.openrewrite.org/) module. It does **not** touch the
 backend build in any way — `petclinic-backend/pom.xml` has no OpenRewrite config. You run the recipes
@@ -56,9 +56,9 @@ On an empty list `get(0)` throws `IndexOutOfBoundsException` while `getFirst()` 
 ## Build & test
 
 ```sh
-cd refactoring-legacy
+cd refactoring-tools
 mvn test        # 17 tests: 13 for the imperative recipe, 4 for the Refaster one
-mvn install     # publishes victor.training.agentic:refactoring-legacy:1.0 to your ~/.m2
+mvn install     # publishes victor.training.agentic:refactoring-tools:1.0 to your ~/.m2
 ```
 
 The Refaster recipe class `ListGetFirstRecipe` is **generated** at build time by the
@@ -75,12 +75,12 @@ cd petclinic-backend
 
 # Preview only — writes target/rewrite/rewrite.patch, changes no sources:
 mvn org.openrewrite.maven:rewrite-maven-plugin:6.44.0:dryRun \
-  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-legacy:1.0 \
+  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-tools:1.0 \
   -Drewrite.activeRecipes=victor.training.petclinic.rewrite.ListGetFirstRecipe,victor.training.petclinic.rewrite.InlineSingleUseLocalVariable
 
 # Apply in place (review with `git diff`, undo with `git checkout .`):
 mvn org.openrewrite.maven:rewrite-maven-plugin:6.44.0:run \
-  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-legacy:1.0 \
+  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-tools:1.0 \
   -Drewrite.activeRecipes=victor.training.petclinic.rewrite.ListGetFirstRecipe,victor.training.petclinic.rewrite.InlineSingleUseLocalVariable
 ```
 
@@ -96,7 +96,7 @@ cd petclinic-clone
 git checkout petclinic-backend/src/main/java/victor/training/petclinic/rest/PetTypeRestController.java
 cd petclinic-backend
 mvn org.openrewrite.maven:rewrite-maven-plugin:6.44.0:run \
-  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-legacy:1.0 \
+  -Drewrite.recipeArtifactCoordinates=victor.training.agentic:refactoring-tools:1.0 \
   -Drewrite.activeRecipes=victor.training.petclinic.rewrite.InlineSingleUseLocalVariable
 git diff   # getPetType inlined again — by the recipe; `type` (2 uses) left untouched
 ```
