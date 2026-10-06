@@ -50,6 +50,12 @@ export function sourcePathOf(serviceName: string, namespace: string): string | u
   return `${serviceName}/src/main/java/${topLevel.split('.').join('/')}.java`;
 }
 
+/**
+ * Jars linked into every service. A span opened inside one carries the service that loaded
+ * it, so its class is looked for there first and then here.
+ */
+const LIBRARY_MODULES = ['petclinic-commons'];
+
 /** A call, not a declaration: `x.foo(`, `y = foo(`, `return foo(`, `foo(bar(`. */
 const CALLED_NOT_DECLARED = /[.=(,]\s*$/;
 
@@ -104,12 +110,14 @@ export function methodHandle(
   const namespace = attributes['code.namespace'];
   const fn = attributes['code.function'];
   if (!namespace || !fn) return undefined;
-  const relative = sourcePathOf(serviceName, namespace);
-  if (!relative) return undefined;
-  const text = readSource(`${repoRoot}/${relative}`);
-  if (text === undefined) return undefined;
-  const line = lineOfMethod(text, fn);
-  return `src://${relative}${line > 0 ? `:${line}` : ''}${methodLinkTooltip(namespace, fn)}`;
+  for (const module of [serviceName, ...LIBRARY_MODULES]) {
+    const relative = sourcePathOf(module, namespace);
+    const text = relative ? readSource(`${repoRoot}/${relative}`) : undefined;
+    if (text === undefined) continue;
+    const line = lineOfMethod(text, fn);
+    return `src://${relative}${line > 0 ? `:${line}` : ''}${methodLinkTooltip(namespace, fn)}`;
+  }
+  return undefined;
 }
 
 /**
