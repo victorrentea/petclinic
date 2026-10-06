@@ -18,6 +18,19 @@ schema: spec-driven
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      Write for a product owner who is not a developer: plain business language about what
+      users see and can do, and why. No JSON, HTTP verbs or status codes, URLs, query
+      parameters, class/file/table names, frameworks or SQL.
+    - >-
+      Technical details (API shape, error codes, data structures, files affected) go to
+      design.md, testable behaviour to the spec; the proposal only points to them.
+    - >-
+      Keep the template headings and the capability ids in Capabilities (validation needs
+      them), but describe each capability in plain words. Mark a BREAKING change by who or
+      what it affects, not by the technical contract.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.

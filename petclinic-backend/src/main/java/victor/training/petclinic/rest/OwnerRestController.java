@@ -1,8 +1,11 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +20,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,17 +40,22 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 
 @RestController
+@Validated
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    static final int MAX_PAGE_SIZE = 100;
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -80,15 +89,33 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List one page of owners")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(defaultValue = "") String lastName,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(MAX_PAGE_SIZE) int size,
+            @RequestParam(defaultValue = "name,asc") @Pattern(regexp = "(name|city)(,(asc|desc))?",
+                    message = "must be name or city, optionally followed by ,asc or ,desc") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName,
+                PageRequest.of(page, size, toSort(sort)));
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners.getContent()),
+                owners.getTotalElements(), owners.getTotalPages(), owners.getNumber(), owners.getSize());
+    }
+
+    // The direction applies to the clicked column only; the tie-breakers stay ascending and end
+    // in id, so rows tied on every sorted field never show up on two pages, or on none.
+    private static Sort toSort(String sort) {
+        String[] keyAndDirection = sort.split(",");
+        Direction direction = keyAndDirection.length > 1 ? Direction.fromString(keyAndDirection[1]) : Direction.ASC;
+        if (keyAndDirection[0].equals("city")) {
+            return Sort.by(direction, "city").and(Sort.by("firstName", "lastName", "id"));
+        }
+        return Sort.by(direction, "firstName", "lastName").and(Sort.by("id"));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
