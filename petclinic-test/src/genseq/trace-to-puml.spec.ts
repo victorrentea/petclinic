@@ -760,3 +760,26 @@ test('a DB span with an empty statement draws nothing at all', () => {
   expect(withStatement).toContain(
     'Backend -> DB: select owners\\nSELECT o1_0.id\\nFROM owners o1_0');
 });
+
+// A lifeline that is a module, not a service, says so above its name. The guillemets go
+// into the display name, behind `as`: the review page's parsers read `participant X` and
+// `participant "…" as X`, and nothing after either.
+test('a lifeline declared with a stereotype names its kind above it', () => {
+  const span = (spanId: string, parentSpanId: string, name: string,
+    attributes: Record<string, string>): NormSpan => ({
+    traceId: 'm', spanId, parentSpanId, name, kind: parentSpanId ? 'INTERNAL' : 'SERVER',
+    serviceName: 'petclinic-backend', startNano: Number(spanId.slice(1)) * 1e6, attributes,
+  });
+  const spans = [
+    span('m1', '', 'POST /api/visits', {'http.status_code': '201'}),
+    span('m2', 'm1', 'PhoneNumbers.normalize',
+      {'genseq.participant': 'Commons', 'genseq.stereotype': 'module'}),
+    span('m3', 'm2', 'NotificationServiceClient.homeDialCode', {}),
+  ];
+  const puml = renderPuml('add-visit.spec.ts', [{title: 'x', traces: [spans]}], STATIC);
+
+  expect(puml).toContain('participant "«module»\\nCommons" as Commons');
+  expect(puml).toContain('participant Backend\n');
+  expect(puml).toContain('Backend -> Commons: PhoneNumbers.normalize');
+  expect(puml).toContain('Commons -> Backend: NotificationServiceClient.homeDialCode');
+});

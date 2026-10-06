@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import victor.training.commons.PhoneNumbers;
 import victor.training.commons.VisitBookedNotification;
 
 @RestController
@@ -19,7 +20,8 @@ public class NotificationController {
     @PostMapping(VisitBookedNotification.PATH)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void visitBooked(@RequestBody @Validated VisitBookedNotification notification) {
-        smsGateway.send(notification.ownerPhone(), "Visit for %s booked on %s. Reply STOP to unsubscribe."
+        String phone = PhoneNumbers.normalize(notification.ownerPhone());
+        smsGateway.send(phone, "Visit for %s booked on %s. Reply STOP to unsubscribe."
                 .formatted(notification.petName(), notification.visitDate()));
     }
 }

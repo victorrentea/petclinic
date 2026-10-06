@@ -102,3 +102,15 @@ test('the marker rides inside the link, so the whole label is the target', () =>
 test('without a handle the label is exactly what it always was', () => {
   expect(linkedMethodLabel('book-visit', undefined)).toBe('book-visit');
 });
+
+// petclinic-commons is linked into both services, so a span opened inside it carries the
+// service that loaded it — and its class lives under neither service's folder.
+test('a class from the shared library links into the library, whichever service ran it', () => {
+  const handle = methodHandle(
+    {'code.namespace': 'victor.training.commons.PhoneNumbers', 'code.function': 'normalize'},
+    'notification-service', '/repo', (p) => (p ===
+      '/repo/petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers.java'
+      ? 'class PhoneNumbers {\n  static String normalize(String phone) {' : undefined));
+  expect(handle).toBe('src://petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers'
+    + '.java:2{Click to open PhoneNumbers.normalize}');
+});

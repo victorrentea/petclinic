@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import victor.training.commons.HomeCountry;
+import victor.training.commons.PhoneNumbers;
 import victor.training.commons.VisitBookedNotification;
 
 /** POSTs to notification-service; path and payload come from petclinic-commons, shared with it. */
 @Component
-public class NotificationServiceClient implements NotificationSender {
+public class NotificationServiceClient implements NotificationSender, HomeCountry {
     private static final Logger log = LoggerFactory.getLogger(NotificationServiceClient.class);
 
     private final RestClient restClient;
@@ -30,11 +32,17 @@ public class NotificationServiceClient implements NotificationSender {
         try {
             restClient.post()
                     .uri(VisitBookedNotification.PATH)
-                    .body(new VisitBookedNotification(ownerPhone, petName, visitDate))
+                    .body(new VisitBookedNotification(PhoneNumbers.normalize(ownerPhone, this), petName, visitDate))
                     .retrieve()
                     .toBodilessEntity();
         } catch (RestClientException e) {
             log.warn("Owner not notified of the visit booked for {}: {}", petName, e.getMessage());
         }
+    }
+
+    /** The clinic's own country: an owner's number typed without a prefix is dialled from here. */
+    @Override
+    public String homeDialCode() {
+        return "+1";
     }
 }

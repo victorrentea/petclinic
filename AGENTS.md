@@ -14,7 +14,7 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
-- `petclinic-commons/` - jar both Java apps depend on. standalone build, `mvn install`ed before either app compiles
+- `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
 
 ## Common Commands
 

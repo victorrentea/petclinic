@@ -103,6 +103,8 @@
       "//20": "projected one: arrows a test walked drawn heavy, the rest grey, and a call the",
       "//21": "traces made that no arrow carries added in dashed red. DeploymentDiagramTest",
       "//22": "is the guardrail that fails on that red; the page shows where it is.",
+      "//23": "`Commons` is petclinic-commons, a jar linked into both JVMs: its lifeline is",
+      "//24": "drawn by ModuleBoundaryTracing for the Sequence tab, and is no container here.",
       "drawio": {
         "diagram": "petclinic-backend/docs/Deployment.drawio.png",
         "tested_against": "traced sequence diagrams"
@@ -116,6 +118,7 @@
         "Backend": {"kind": "container", "tech": "Java 21 / Spring Boot 3.5"},
         "NotificationService": {"kind": "container", "tech": "Java 21 / Spring Boot 3.5"},
         "SMS gateway": {"kind": "external", "tech": "SMS provider (simulated)"},
+        "Commons": {"drop": true},
         "DB": {"kind": "db", "tech": "PostgreSQL"}
       }
     },
