@@ -40,7 +40,7 @@ INSERT INTO types (name) VALUES
 
 -- Owners and pets drawn from European literature, film, and science.
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
-  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '+18474461990'),
+  ('Kevin',     'McCallister',  '671 Lincoln Boulevard',     'Winnetka',         '8474461990'),
   ('Harry',     'Potter',       '4 Privet Drive',            'Little Whinging',  '0119084455'),
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
   ('Ștefan',    'Mureșan',      '12 Boltzmanngasse',         'Vienna',           '(0043)152634418'),

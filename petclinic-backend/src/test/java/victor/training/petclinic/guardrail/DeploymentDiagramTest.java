@@ -50,7 +50,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * of a call already counted, and self-calls ({@code Backend -> Backend}) are internal.
  * A lifeline whose name is not a bare identifier is quoted by the generator
  * ({@code NotificationService -> "SMS gateway"}) and counts just the same, unquoted: an
- * external system is still a box someone has to draw.
+ * external system is still a box someone has to draw. A library lifeline does not: its calls
+ * never leave the JVM that links it, so they are internal too.
  */
 class DeploymentDiagramTest {
 
@@ -68,6 +69,9 @@ class DeploymentDiagramTest {
      * for the same reason (see {@code human-review.json}).
      */
     private static final Pattern DEPLOYED_SUITE = Pattern.compile("\\.(?:spec\\.ts|feature)\\..*\\.genseq\\.puml$");
+
+    /** Drawn by petclinic-commons' ModuleBoundaryTracing; deployed inside every Java app, never on its own. */
+    private static final Set<String> LIBRARIES = Set.of("Commons");
 
     /** A call from one deployed container to another, named as the traces name them. */
     private record Edge(String from, String to) {
@@ -188,7 +192,8 @@ class DeploymentDiagramTest {
             while (m.find()) {
                 String from = m.group(1) != null ? m.group(1) : m.group(2);
                 String to = m.group(3) != null ? m.group(3) : m.group(4);
-                if (!from.equals(to)) { // a self-call stays inside one container
+                boolean insideOneContainer = from.equals(to) || LIBRARIES.contains(from) || LIBRARIES.contains(to);
+                if (!insideOneContainer) {
                     edges.add(new Edge(from, to));
                 }
             }
