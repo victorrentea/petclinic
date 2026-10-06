@@ -3,14 +3,15 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:75{Click to open the test} AddVisitApiTest: adds a visit to an existing pet]]
+title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:76{Click to open the test} AddVisitApiTest: adds a visit to an existing pet]]
 footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java — generated from real traces of end-to-end test runs, do not edit ❗
 participant Test
 participant Backend
 participant DB
 participant NotificationService
+participant "«module»\nCommons" as Commons
 participant "SMS gateway"
-Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:76{Click to open the line of the test that says this} given an owner with at least one pet exists ↗]]
+Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:77{Click to open the line of the test that says this} given an owner with at least one pet exists ↗]]
 activate Test
 Test -> Backend: List owners\nGET /api/owners
 activate Backend
@@ -26,7 +27,7 @@ deactivate Backend
 Backend --> Test: [[genseq://1ywqtdh{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
-Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:81{Click to open the line of the test that says this} when the owner detail page is opened ↗]]
+Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:82{Click to open the line of the test that says this} when the owner detail page is opened ↗]]
 activate Test
 Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
@@ -41,16 +42,16 @@ Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} sele
 Backend --> Test: [[genseq://1cg6dk5{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
-Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:84{Click to open the line of the test that says this} and a visit is added for the first pet ↗]]
+Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:85{Click to open the line of the test that says this} and a visit is added for the first pet ↗]]
 activate Test
-Test -> Backend: [[genseq://1mtzmuy{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
+Test -> Backend: [[genseq://1yv4zr4{Click for this call’s JSON body} Add a visit for an owner's pet\nPOST /api/owners/{ownerId}/pets/{petId}/visits ⊕]]
 activate Backend
-Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:239{Click to open OwnerRestController.bookVisit} book-visit ↗]]
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:240{Click to open OwnerRestController.bookVisit} book-visit ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
 group tx
-Backend -> DB: [[genseq://0bv2pby{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
+Backend -> DB: [[genseq://07tob6g{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:28{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
@@ -60,8 +61,10 @@ Backend -> DB: [[genseq://083xusu{Click for the statement behind this call} sele
 end
 deactivate Backend
 Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
-Backend -> NotificationService: [[genseq://0a5r3wo{Click for this call’s JSON body} POST /api/notifications/visit-booked ⊕]]
+Backend -> Commons: [[src://petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers.java:8{Click to open PhoneNumbers.normalize} PhoneNumbers.normalize ↗]]
+Backend -> NotificationService: [[genseq://06g5a1e{Click for this call’s JSON body} POST /api/notifications/visit-booked ⊕]]
 activate NotificationService
+NotificationService -> Commons: [[src://petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers.java:8{Click to open PhoneNumbers.normalize} PhoneNumbers.normalize ↗]]
 NotificationService -> "SMS gateway": [[src://notification-service/src/main/java/victor/training/notification/SmsGateway.java:23{Click to open SmsGateway.send} send-sms ↗]]
 NotificationService --> Backend: 202
 deactivate NotificationService
@@ -69,7 +72,7 @@ deactivate Backend
 Backend --> Test: 201
 deactivate Backend
 deactivate Test
-Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:91{Click to open the line of the test that says this} then the visit is listed under the pet ↗]]
+Test -> Test: [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:92{Click to open the line of the test that says this} then the visit is listed under the pet ↗]]
 activate Test
 Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
@@ -81,7 +84,7 @@ end
 deactivate Backend
 Backend -> DB: [[genseq://0j0trn8{Click for the statement behind this call} select pets ⊕]]
 Backend -> DB: [[genseq://16xt6fr{Click for the statement behind this call} select visits ⊕]]
-Backend --> Test: [[genseq://09nes9m{Click for this call’s JSON body} 200 ⊕]]
+Backend --> Test: [[genseq://0qfgh4s{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
 deactivate Test
 @enduml
