@@ -3,7 +3,7 @@
 
 This repo has no aggregator/reactor pom at its root (see the comment in
 petclinic-chatbot/pom.xml): petclinic-backend, petclinic-chatbot, petclinic-database
-and refactoring-legacy are four independent, standalone Maven builds, each with its
+and refactoring-tools are four independent, standalone Maven builds, each with its
 own external <parent> (spring-boot-starter-parent, or none). "The module graph" is
 therefore a question with a real, checkable answer — either these projects declare
 Maven <dependency> edges on one another, or they don't — and the only trustworthy way
@@ -156,7 +156,7 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]],
     # puml_diff.py's structural differ, when an element is removed entirely, re-emits it
     # as `component "<s>Name</s>" as Name` — reusing Name as an *unquoted* PlantUML
     # identifier. Maven artifactIds conventionally contain hyphens (petclinic-backend,
-    # refactoring-legacy, ...), which are not legal there, so a bracket-form removal
+    # refactoring-tools, ...), which are not legal there, so a bracket-form removal
     # diff fails to render ("Error line N", confirmed empirically against this file).
     # `component "artifactId" as safe_alias` sidesteps it: the quoted text
     # can be anything, and the differ never needs to turn it into an identifier.
