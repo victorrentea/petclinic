@@ -49,8 +49,8 @@ export class PlaywrightWorld extends World {
   createdPetId?: number;
   petName?: string;
   visitDescription?: string;
-  // Set by the owner-search scenarios: every owner the API knows, by full name.
-  allOwnerNames?: string[];
+  // Set by the owner-search scenarios: how many owners the API knows.
+  ownerCount?: number;
   // Set only for @generate_sequence scenarios: the title + start of the Tempo
   // search window whose traces become a sequence diagram.
   traceTitle?: string;
@@ -68,11 +68,11 @@ export class PlaywrightWorld extends World {
     super(options);
   }
 
-  requireAllOwnerNames(): string[] {
-    if (!this.allOwnerNames) {
-      throw new Error('Expected the sample owners to have been loaded earlier in the scenario');
+  requireOwnerCount(): number {
+    if (this.ownerCount === undefined) {
+      throw new Error('Expected the sample owners to have been checked earlier in the scenario');
     }
-    return this.allOwnerNames;
+    return this.ownerCount;
   }
 }
 
