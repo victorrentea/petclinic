@@ -1,19 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Params, Router} from '@angular/router';
 import {PageEvent} from '@angular/material/paginator';
-import {Sort} from '@angular/material/sort';
-import {EMPTY, Subscription} from 'rxjs';
+import {EMPTY, merge, Subject, Subscription} from 'rxjs';
 import {catchError, map, switchMap, tap} from 'rxjs/operators';
-import {OwnerService} from '../owner.service';
+import {OwnerQuery, OwnerService} from '../owner.service';
 import {OwnerPage} from '../owner-page';
 
-/** What the grid shows, as kept in the URL: `page` is 1-based there, and `sort` is spelled as the API spells it. */
-interface OwnerListQuery {
-  lastName: string;
-  page: number;
-  size: number;
-  sort: string;
-}
+/** What the grid shows, as kept in the URL: the API's query, except that `page` is 1-based there. */
+type OwnerListQuery = Required<OwnerQuery>;
+type SortColumn = 'name' | 'city';
 
 const DEFAULTS: OwnerListQuery = {lastName: '', page: 1, size: 10, sort: 'name,asc'};
 const PAGE_SIZES = [5, 10, 20];
@@ -33,20 +28,20 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   page: OwnerPage | undefined;
   errorMessage: string | undefined;
   private load: Subscription;
+  // Asks again for the query already in the URL: navigating to an identical URL emits nothing.
+  private reload = new Subject<OwnerListQuery>();
 
   constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
   }
 
   ngOnInit() {
-    this.load = this.route.queryParamMap.pipe(
-      map(fromUrl),
+    this.load = merge(this.route.queryParamMap.pipe(map(fromUrl)), this.reload).pipe(
       tap((query) => {
         this.query = query;
         this.lastName = query.lastName;
       }),
       // switchMap: only the latest query may answer, however late an earlier one comes back
-      switchMap((query) => this.ownerService.getOwnersPage(
-        {lastName: query.lastName, page: query.page - 1, size: query.size, sort: query.sort}).pipe(
+      switchMap((query) => this.ownerService.getOwnersPage({...query, page: query.page - 1}).pipe(
         catchError((error) => {
           this.errorMessage = String(error);
           this.page = undefined;
@@ -60,7 +55,12 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   search() {
-    this.navigate({lastName: this.lastName, page: 1});
+    const searched = {...this.query, lastName: this.lastName, page: 1};
+    if (JSON.stringify(toUrl(searched)) === JSON.stringify(toUrl(this.query))) {
+      this.reload.next(searched);
+      return;
+    }
+    this.navigate(searched);
   }
 
   onPage(event: PageEvent) {
@@ -68,16 +68,30 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.navigate({size: event.pageSize, page: sizeChanged ? 1 : event.pageIndex + 1});
   }
 
-  onSort(sort: Sort) {
-    this.navigate({sort: `${sort.active},${sort.direction || 'asc'}`, page: 1});
+  // A click on the sorted column flips its direction; on the other one it sorts ascending.
+  sortBy(column: SortColumn) {
+    const direction = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.navigate({sort: `${column},${direction}`, page: 1});
   }
 
-  get sortColumn(): string {
+  ariaSort(column: SortColumn): 'ascending' | 'descending' | null {
+    if (this.sortColumn !== column) {
+      return null;
+    }
+    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
+  indicator(column: SortColumn) {
+    const active = this.sortColumn === column;
+    return {active, asc: active && this.sortDirection === 'asc', desc: active && this.sortDirection === 'desc'};
+  }
+
+  private get sortColumn(): string {
     return this.query.sort.split(',')[0];
   }
 
-  get sortDirection(): 'asc' | 'desc' {
-    return this.query.sort.endsWith('desc') ? 'desc' : 'asc';
+  private get sortDirection(): string {
+    return this.query.sort.split(',')[1];
   }
 
   private show(page: OwnerPage) {

@@ -121,6 +121,20 @@ class OwnerListTest {
     }
 
     @Test
+    void pageThatIsNotANumber_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?page=abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("page")));
+    }
+
+    @Test
+    void pageWhoseOffsetWouldOverflow_isRejected() throws Exception {
+        mockMvc.perform(get("/api/owners?page=30000000&size=100"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString("page")));
+    }
+
+    @Test
     void sortByName_putsFirstNamesFirst() throws Exception {
         owner("Harry", "Pagerpotter", "London");
         owner("Beatrix", "Pagerpotter", "Near Sawrey");
@@ -201,11 +215,14 @@ class OwnerListTest {
         Statistics statistics = entityManager.getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
         statistics.setStatisticsEnabled(true);
         statistics.clear();
+        try {
+            list("?size=20");
 
-        list("?size=20");
-
-        // page + count + one batch of pets + one batch of visits (+ pet types)
-        assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(5);
+            // page + count + one batch of pets + one batch of visits (+ pet types)
+            assertThat(statistics.getPrepareStatementCount()).isLessThanOrEqualTo(5);
+        } finally {
+            statistics.setStatisticsEnabled(false); // the SessionFactory outlives this test
+        }
     }
 
     private Owner owner(String firstName, String lastName, String city) {

@@ -8,9 +8,6 @@ body {
 
 .main-wrapper {
   flex: 1;
-  /* the navbar runs edge to edge, not inside the container's gutter */
-  padding-left: 0;
-  padding-right: 0;
 }
 
 div.navbar-header {

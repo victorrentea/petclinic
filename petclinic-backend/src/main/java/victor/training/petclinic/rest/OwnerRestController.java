@@ -57,6 +57,8 @@ import jakarta.validation.constraints.Pattern;
 public class OwnerRestController {
 
     static final int MAX_PAGE_SIZE = 100;
+    // page * size must stay an int: Spring Data's offset overflows past it
+    static final int MAX_PAGE = Integer.MAX_VALUE / MAX_PAGE_SIZE;
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -98,14 +100,13 @@ public class OwnerRestController {
     @GetMapping(produces = "application/json")
     public OwnerPageDto listOwners(
             @RequestParam(defaultValue = "") String lastName,
-            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "0") @Min(0) @Max(MAX_PAGE) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(MAX_PAGE_SIZE) int size,
             @RequestParam(defaultValue = "name,asc") @Pattern(regexp = "(name|city)(,(asc|desc))?",
                     message = "must be name or city, optionally followed by ,asc or ,desc") String sort) {
         Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName,
                 PageRequest.of(page, size, toSort(sort)));
-        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners.getContent()),
-                owners.getTotalElements(), owners.getTotalPages(), owners.getNumber(), owners.getSize());
+        return ownerMapper.toOwnerPageDto(owners);
     }
 
     // The direction applies to the clicked column only; the tie-breakers stay ascending and end

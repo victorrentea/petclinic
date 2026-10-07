@@ -204,6 +204,7 @@ paths:
           type: integer
           format: int32
           default: 0
+          maximum: 21474836
           minimum: 0
       - in: query
         name: size

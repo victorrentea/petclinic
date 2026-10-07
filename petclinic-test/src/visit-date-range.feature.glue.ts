@@ -13,15 +13,20 @@ Given('today is {word}', async function (this: PlaywrightWorld, today: string) {
   await this.page.clock.setFixedTime(new Date(`${today}T10:00:00`));
 });
 
-/** A pet of its own, on the last owner — the seed has none born that day, and no other scenario looks there. */
+const idFrom = (location: string) => Number(location.split('/').pop());
+
+/** A pet of its own, on an owner of its own — no other scenario looks there. */
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.reduce((a: any, b: any) => (a.id > b.id ? a : b));
+  const {headers: created} = await axios.post(`${API_BASE}/owners`, {
+    firstName: 'Ada', lastName: `Daterange${Date.now()}`,
+    address: '110 Analytical Engine Way', city: 'London', telephone: '6085551023',
+  }, {timeout: 10_000});
+  const ownerId = idFrom(created.location);
   const name = `Born ${birthDate} ${Date.now()}`;
-  const {headers} = await axios.post(`${API_BASE}/owners/${owner.id}/pets`,
+  const {headers} = await axios.post(`${API_BASE}/owners/${ownerId}/pets`,
     {name, birthDate, type: {id: 1, name: 'cat'}}, {timeout: 10_000});
-  this.ownerId = owner.id;
-  this.createdPetId = this.petId = Number(headers.location.split('/').pop());
+  this.ownerId = ownerId;
+  this.createdPetId = this.petId = idFrom(headers.location);
   this.petName = name;
 });
 

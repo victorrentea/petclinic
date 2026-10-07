@@ -1,29 +1,24 @@
 import {expect, Page} from '@playwright/test';
-import axios from 'axios';
+import {ApiClient} from './support/api-client';
 
 // The sentences of add-visit.spec.ts, as plain functions: named for what the
 // reader of a scenario wants to see, not for the widget being clicked. The
 // selectors live here so the spec never mentions one.
-
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
 export interface OwnerWithPet {
   ownerId: number;
   petId: number;
 }
 
-// Walks the pages: the pet-less owners other runs leave behind ("Ada Acceptance…") sort first by name.
+// The seed's owner 1 (Kevin McCallister) has a pet, so the list needs no searching.
+const SEEDED_OWNER_WITH_PET = 1;
+
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  for (let page = 0; ; page++) {
-    const {data} = await axios.get(`${API_BASE}/owners?size=100&page=${page}`, {timeout: 10_000});
-    const ownerWithPet = data.content.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-    if (ownerWithPet) {
-      return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
-    }
-    if (page + 1 >= data.totalPages) {
-      throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
-    }
+  const owner = await new ApiClient().fetchOwner(SEEDED_OWNER_WITH_PET);
+  if (owner.pets.length === 0) {
+    throw new Error(`Owner ${SEEDED_OWNER_WITH_PET} has no pet — did db/seed/R__seed.sql change?`);
   }
+  return {ownerId: owner.id, petId: owner.pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

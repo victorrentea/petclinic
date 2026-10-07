@@ -11,6 +11,18 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface OwnerSummary {
+  id: number;
+  firstName: string;
+  lastName: string;
+  pets: {id: number}[];
+}
+
+export interface OwnerPage {
+  content: OwnerSummary[];
+  totalElements: number;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -25,6 +37,16 @@ export class ApiClient {
 
   async fetchVisits(): Promise<VisitDto[]> {
     const response = await this.client.get<VisitDto[]>('/visits');
+    return response.data;
+  }
+
+  async fetchOwnersPage(query: string): Promise<OwnerPage> {
+    const response = await this.client.get<OwnerPage>(`/owners?${query}`);
+    return response.data;
+  }
+
+  async fetchOwner(ownerId: number): Promise<OwnerSummary> {
+    const response = await this.client.get<OwnerSummary>(`/owners/${ownerId}`);
     return response.data;
   }
 

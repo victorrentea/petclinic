@@ -1,18 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { OwnerPage } from './owner-page';
+import { operations } from '../generated/api-types';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
 
-export interface OwnerQuery {
-  lastName?: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
+export type OwnerQuery = NonNullable<operations['listOwners']['parameters']['query']>;
 
 @Injectable()
 export class OwnerService {
@@ -37,7 +33,7 @@ export class OwnerService {
     }
     return this.http
       .get<OwnerPage>(this.entityUrl, {params})
-      .pipe(catchError(this.handlerError('getOwnersPage', {} as OwnerPage)));
+      .pipe(catchError(this.handlerError<OwnerPage>('getOwnersPage')));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {

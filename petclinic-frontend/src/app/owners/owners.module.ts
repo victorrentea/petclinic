@@ -9,7 +9,6 @@ import {OwnerEditComponent} from './owner-edit/owner-edit.component';
 import {OwnersRoutingModule} from './owners-routing.module';
 import {PetsModule} from '../pets/pets.module';
 import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatSortModule} from '@angular/material/sort';
 
 @NgModule({
   imports: [
@@ -17,8 +16,7 @@ import {MatSortModule} from '@angular/material/sort';
     FormsModule,
     OwnersRoutingModule,
     PetsModule,
-    MatPaginatorModule,
-    MatSortModule
+    MatPaginatorModule
   ],
   declarations: [
     OwnerListComponent,
