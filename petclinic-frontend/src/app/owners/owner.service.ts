@@ -1,18 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Owner } from './owner';
-import { OwnerPage } from './owner-page';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
-
-export interface OwnerQuery {
-  lastName?: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
 
 @Injectable()
 export class OwnerService {
@@ -27,17 +19,10 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  // Only the parameters given are sent: the server owns the defaults (page 0, size 10, name,asc).
-  getOwnersPage(query: OwnerQuery = {}): Observable<OwnerPage> {
-    let params = new HttpParams();
-    for (const [name, value] of Object.entries(query)) {
-      if (value !== undefined && value !== '') {
-        params = params.set(name, String(value));
-      }
-    }
+  getOwners(): Observable<Owner[]> {
     return this.http
-      .get<OwnerPage>(this.entityUrl, {params})
-      .pipe(catchError(this.handlerError('getOwnersPage', {} as OwnerPage)));
+      .get<Owner[]>(this.entityUrl)
+      .pipe(catchError(this.handlerError('getOwners', [])));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -65,4 +50,13 @@ export class OwnerService {
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
   }
 
+  searchOwners(lastName: string): Observable<Owner[]> {
+    let url = this.entityUrl;
+    if (lastName !== undefined) {
+      url += '?lastName=' + lastName;
+    }
+    return this.http
+      .get<Owner[]>(url)
+      .pipe(catchError(this.handlerError('searchOwners', [])));
+  }
 }

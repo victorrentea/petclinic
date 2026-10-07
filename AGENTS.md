@@ -137,8 +137,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}` — the list is always one page: `page` (0-based), `size` ≤ 100,
-  `sort=name|city[,asc|desc]`, `lastName` prefix; never an unpaged list (see Expected volume)
+- Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`
@@ -152,10 +151,6 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
-
-**Expected volume (business, Oct 2026):** ~100,000 owners in production within one year.
-Any endpoint listing owners — or anything that grows with them (pets, visits) — pages and
-filters in the database, never loads the full table into memory or the browser.
 
 ## Java Code Style
 - Keep line length < 120 chars
