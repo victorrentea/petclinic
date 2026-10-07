@@ -67,7 +67,7 @@ When('I choose {int} rows per page', async function (this: PlaywrightWorld, size
 });
 
 When('I sort the owners by {string}', async function (this: PlaywrightWorld, column: string) {
-  await this.page.locator(`#ownersTable th:has-text("${column}")`).click();
+  await this.page.locator(`#ownersTable th:has-text("${column}") button`).click();
 });
 
 Then('exactly these owners are listed: {string}', async function (this: PlaywrightWorld, owners: string) {

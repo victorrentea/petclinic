@@ -29,9 +29,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   errorMessage: string | undefined;
   private load: Subscription;
   // Asks again for the query already in the URL: navigating to an identical URL emits nothing.
-  private reload = new Subject<OwnerListQuery>();
+  private readonly reload = new Subject<OwnerListQuery>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly route: ActivatedRoute,
+              private readonly ownerService: OwnerService) {
   }
 
   ngOnInit() {
@@ -106,7 +107,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
 
   private navigate(change: Partial<OwnerListQuery>, replaceUrl = false) {
     const queryParams = toUrl({...this.query, ...change});
-    this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl});
+    this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl})
+      .catch((error) => this.errorMessage = String(error));
   }
 }
 

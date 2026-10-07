@@ -20,12 +20,16 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th class="col-name sortable" [attr.aria-sort]="ariaSort('name')" (click)="sortBy('name')">
-            Name<span class="sort-indicator" [ngClass]="indicator('name')"></span>
+          <th class="col-name sortable" [attr.aria-sort]="ariaSort('name')">
+            <button type="button" class="sort-button" (click)="sortBy('name')">
+              Name<span class="sort-indicator" [ngClass]="indicator('name')"></span>
+            </button>
           </th>
           <th class="col-address">Address</th>
-          <th class="col-city sortable" [attr.aria-sort]="ariaSort('city')" (click)="sortBy('city')">
-            City<span class="sort-indicator" [ngClass]="indicator('city')"></span>
+          <th class="col-city sortable" [attr.aria-sort]="ariaSort('city')">
+            <button type="button" class="sort-button" (click)="sortBy('city')">
+              City<span class="sort-indicator" [ngClass]="indicator('city')"></span>
+            </button>
           </th>
           <th class="col-telephone">Telephone</th>
           <th class="col-pets">Pets</th>

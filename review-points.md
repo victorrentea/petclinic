@@ -190,6 +190,30 @@ anchors: review-commit
 - observation: zonky inherits the runner's locale; under C.UTF-8 'Łukasz' sorts after 'Mister' and accentedNames_sortAlphabetically failed CI.
 - fix: Postgres 16 binaries on every platform and an ICU English default collation for the test database.
 
+### Sort headers reachable only with a mouse
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.html:24
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.html:30
+- file: petclinic-test/src/owner-search.feature.glue.ts:70
+- source: CI (SonarCloud Web:MouseEventWithoutKeyboardEquivalentCheck)
+- severity: medium
+- observation: (click) on a <th> has no keyboard equivalent, so keyboard users could not sort; it failed the quality gate.
+- fix: each sortable header holds a plain-styled <button>, focusable and Enter/Space-activated natively.
+
+### Navigation promise left unhandled
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:111
+- source: CI (SonarCloud typescript:S9383)
+- severity: low
+- observation: router.navigate returns a promise nobody handled; a failed navigation was swallowed silently.
+- fix: a rejection now shows as the grid's error message.
+
+### Injected and internal members not readonly
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:34
+- file: petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:32
+- source: CI (SonarCloud typescript:S2933)
+- severity: info
+- observation: the router, route, service and reload subject are never reassigned.
+- fix: marked readonly.
+
 ## Ignored
 
 ### ListGetFirstTest input snippet has unbalanced braces

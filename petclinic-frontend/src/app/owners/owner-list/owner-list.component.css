@@ -48,9 +48,14 @@
 }
 
 /* Sort indicator: a dim ▲▼ pair marks a sortable column, a bright ▲ or ▼ the active sort. */
-th.sortable {
+/* A button, so the sort is reachable from the keyboard; styled to read as the header text */
+.sort-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  user-select: none;
 }
 
 .sort-indicator {
