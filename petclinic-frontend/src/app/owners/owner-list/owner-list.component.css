@@ -77,3 +77,96 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Fixed widths: auto layout sized the columns to each page's rows, so the headers jumped on every sort. */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+#ownersTable th:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2) { width: 26%; }
+#ownersTable th:nth-child(3) { width: 16%; }
+#ownersTable th:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5) { width: 18%; }
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+/* Paginator reads as the table's footer: no gap, no white panel */
+#ownersTable table {
+  margin-bottom: 0;
+}
+
+.owners-footer {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #ddd;
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+  background: transparent;
+}
+
+/* One row as wide as the table: label, stretching input, search button */
+.owner-search-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.owner-search-row .control-label {
+  padding-top: 0;
+  margin-bottom: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.owner-search-row button {
+  flex-shrink: 0;
+}
+
+/* Sort indicator: a dim ▲▼ pair marks a sortable column, a bright ▲ or ▼ the active sort. */
+/* Replaces Material's stem+halves arrow; !important beats its animations' inline styles. */
+::ng-deep #ownersTable .mat-sort-header-arrow {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  width: 10px;
+  min-width: 10px;
+  color: #fff;
+  opacity: 0.4 !important;
+  transform: none !important;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow > * {
+  display: none;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow::before,
+::ng-deep #ownersTable .mat-sort-header-arrow::after {
+  content: '';
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow::before {
+  border-bottom: 5px solid currentColor;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow::after {
+  border-top: 5px solid currentColor;
+}
+
+::ng-deep #ownersTable th[aria-sort="ascending"] .mat-sort-header-arrow,
+::ng-deep #ownersTable th[aria-sort="descending"] .mat-sort-header-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep #ownersTable th[aria-sort="ascending"] .mat-sort-header-arrow::after,
+::ng-deep #ownersTable th[aria-sort="descending"] .mat-sort-header-arrow::before {
+  display: none;
+}
