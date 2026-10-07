@@ -182,6 +182,14 @@ anchors: review-commit
 - observation: the badRequest extraction removed @ResponseStatus(BAD_REQUEST); springdoc then dropped the 400 response from every operation in openapi.yaml.
 - fix: restored on the two validation handlers; openapi.yaml back to its committed state.
 
+### Accented names sorted after Z under CI's C collation
+- file: petclinic-backend/src/test/resources/config/application.properties:4
+- file: petclinic-backend/pom.xml:39
+- source: /code-review xhigh, CI
+- severity: medium
+- observation: zonky inherits the runner's locale; under C.UTF-8 'Łukasz' sorts after 'Mister' and accentedNames_sortAlphabetically failed CI.
+- fix: Postgres 16 binaries on every platform and an ICU English default collation for the test database.
+
 ## Ignored
 
 ### ListGetFirstTest input snippet has unbalanced braces
@@ -190,13 +198,6 @@ anchors: review-commit
 - severity: medium
 - observation: 5190fd3c deleted the `firstPet` method line from the rewrite input, so the test's Java no longer parses.
 - why: the human's own live-coding edit, committed as found at their request.
-
-### Accented names sort after Z under a C collation
-- file: petclinic-backend/src/test/java/victor/training/petclinic/rest/OwnerListTest.java:168
-- source: /code-review xhigh, CI
-- severity: medium
-- observation: zonky inherits the runner's locale; under C.UTF-8 'Łukasz' sorts after 'Mister' and accentedNames_sortAlphabetically fails CI.
-- why: the human chose to leave CI red on this for now.
 
 ### Booking does not check the pet belongs to the owner
 - file: petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:213

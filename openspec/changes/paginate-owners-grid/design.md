@@ -141,8 +141,8 @@ end and confirmed as written before implementation.
 
 - **[The sort collation differs between dev, CI and prod]** The accented-name scenario passes
   only under a linguistic collation, and zonky's `initdb` follows the machine locale.
-  → The scenario runs in CI. If CI collates `C`, pin zonky's locale in the shared test
-  config rather than weakening the scenario.
+  → Done: CI collated `C`, so the test database is pinned to ICU English
+  (`petclinic-backend/src/test/resources/config/application.properties`), not the scenario weakened.
 - **[`count(*)` on every page request]** At 100k rows, a filtered or unfiltered count is in the low
   milliseconds. → Accept it, because the total is what the paginator shows. Revisit at millions of rows.
 - **[Deep offsets get slower]** `OFFSET 99990` still walks 99,990 index entries. → It stays acceptable at
