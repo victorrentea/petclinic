@@ -8,9 +8,6 @@ body {
 
 .main-wrapper {
   flex: 1;
-  /* the navbar runs edge to edge, not inside the container's gutter */
-  padding-left: 0;
-  padding-right: 0;
 }
 
 div.navbar-header {
@@ -34,8 +31,6 @@ div.navbar-header {
   height: 70px;
   display: flex;
   align-items: center;
-  /* flex drops the leading space in "<span> Home</span>" */
-  gap: 6px;
 }
 
 ::ng-deep .navbar a.navbar-brand.brand-emoji {

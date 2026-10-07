@@ -12,18 +12,13 @@ export interface OwnerWithPet {
   petId: number;
 }
 
-// Walks the pages: the pet-less owners other runs leave behind ("Ada Acceptance…") sort first by name.
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  for (let page = 0; ; page++) {
-    const {data} = await axios.get(`${API_BASE}/owners?size=100&page=${page}`, {timeout: 10_000});
-    const ownerWithPet = data.content.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-    if (ownerWithPet) {
-      return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
-    }
-    if (page + 1 >= data.totalPages) {
-      throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
-    }
+  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
+  if (!ownerWithPet) {
+    throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
+  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

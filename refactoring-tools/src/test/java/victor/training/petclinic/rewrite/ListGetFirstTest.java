@@ -46,6 +46,7 @@ class ListGetFirstTest implements RewriteTest {
             import java.util.List;
             class Owner { List<String> getPets() { return List.of(); } }
             class A {
+                String firstPet(Owner owner) {
                     return owner.getPets().get(0);
                 }
             }
