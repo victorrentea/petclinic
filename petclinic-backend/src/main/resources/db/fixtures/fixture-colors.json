@@ -1,0 +1,4 @@
+{
+  "//": "One colour per fixture (file name without .sql), shown as a dot on the review page's Demo-tab buttons and on each E2E test that starts from it. Unlisted fixtures get a fallback palette; the seed (Default) is always grey. The reset sidecar only loads *.sql, so this file is inert there.",
+  "green": "#2fa84f"
+}
