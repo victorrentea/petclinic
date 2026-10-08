@@ -17,10 +17,12 @@ left to right direction
 
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
   Container(PetClinic.Database, "Database", $techn="PostgreSQL", $descr="Stores all data", $tags="", $link="")
+  Container(PetClinic.notificationservice, "notification-service", $techn="Java / Spring Boot", $descr="Texts pet owners when a visit is booked", $tags="", $link="")
   Container(PetClinic.Backend, "Backend", $techn="Java / Spring Boot", $descr="REST API", $tags="", $link="")
 }
 
 Rel(PetClinic.Backend, PetClinic.Database, "Reads/writes", $techn="JPA", $tags="", $link="")
+Rel(PetClinic.Backend, PetClinic.notificationservice, "Notifies of booked visits", $techn="HTTP/JSON", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

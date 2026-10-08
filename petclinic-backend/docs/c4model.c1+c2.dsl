@@ -20,7 +20,9 @@ workspace "PetClinic" "Veterinary practice management system" {
                 !include c4model.c3.dsl
             }
             database = container "Database" "Stores all data" "PostgreSQL"
+            notificationService = container "notification-service" "Texts pet owners when a visit is booked" "Java / Spring Boot"
         }
+        smsGateway = softwareSystem "SMS gateway" "Delivers text messages to pet owners" "External"
 
         petOwner -> petClinic "Manages pets and visits"
         veterinarian -> petClinic "Manages appointments and records"
@@ -28,9 +30,14 @@ workspace "PetClinic" "Veterinary practice management system" {
         veterinarian -> frontend "Uses"
         frontend -> backend "REST API calls" "HTTPS/JSON"
         backend -> database "Reads/writes" "JPA"
+        backend -> notificationService "Notifies of booked visits" "HTTP/JSON"
+        notificationService -> smsGateway "Sends SMS"
+        notification -> notificationService "POSTs visit-booked notifications" "HTTP/JSON"
     }
 
     views {
+        theme default
+
         systemContext petClinic "C1-Context" "Who uses PetClinic" {
             include *
             autoLayout
