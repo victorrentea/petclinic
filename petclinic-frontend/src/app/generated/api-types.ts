@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description One page of owners, sorted by name or city, with the totals of all matches.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,60 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description An owner as listed in the Owners grid, with pets by id and name only. */
+    OwnerListItemDto: {
+      /** @example 110 W. Liberty St. */
+      address: string;
+      /** @example Madison */
+      city: string;
+      /** @example George */
+      firstName: string;
+      /**
+       * Format: int32
+       * @example 1
+       */
+      id: number;
+      /** @example Franklin */
+      lastName: string;
+      pets: components["schemas"]["OwnerListItemPet"][];
+      /** @example 6085551023 */
+      telephone: string;
+    };
+    /** @description A pet of a listed owner. */
+    OwnerListItemPet: {
+      /**
+       * Format: int32
+       * @example 1
+       */
+      id: number;
+      /** @example Leo */
+      name: string;
+    };
+    /** @description One page of owners, with the totals of the whole matching list. */
+    OwnerPageDto: {
+      content: components["schemas"]["OwnerListItemDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based page number.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @example 27
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,18 +610,27 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description One page of owners, sorted by name or city, with the totals of all matches.
+   */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive prefix of the last name */
         lastName?: string;
+        /** @description Zero-based page number */
+        page?: number;
+        size?: number;
+        /** @description name or city, optionally followed by ,asc or ,desc */
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

@@ -189,14 +189,42 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "One page of owners, sorted by name or city, with the totals of\
+        \ all matches."
       operationId: listOwners
       parameters:
-      - in: query
+      - description: Case-sensitive prefix of the last name
+        in: query
         name: lastName
         required: false
         schema:
           type: string
           default: ""
+      - description: Zero-based page number
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+          maximum: 100
+          minimum: 1
+      - description: "name or city, optionally followed by ,asc or ,desc"
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "name,asc"
       responses:
         "200":
           content:
@@ -205,32 +233,29 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                    totalElements: 2
+                    totalPages: 1
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1686,6 +1711,87 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerListItemDto:
+      type: object
+      description: "An owner as listed in the Owners grid, with pets by id and name\
+        \ only."
+      properties:
+        address:
+          type: string
+          example: 110 W. Liberty St.
+        city:
+          type: string
+          example: Madison
+        firstName:
+          type: string
+          example: George
+        id:
+          type: integer
+          format: int32
+          example: 1
+        lastName:
+          type: string
+          example: Franklin
+        pets:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerListItemPet"
+        telephone:
+          type: string
+          example: "6085551023"
+      required:
+      - address
+      - city
+      - firstName
+      - id
+      - lastName
+      - pets
+      - telephone
+    OwnerListItemPet:
+      type: object
+      description: A pet of a listed owner.
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: Leo
+      required:
+      - id
+      - name
+    OwnerPageDto:
+      type: object
+      description: "One page of owners, with the totals of the whole matching list."
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OwnerListItemDto"
+        number:
+          type: integer
+          format: int32
+          description: Zero-based page number.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 27
+        totalPages:
+          type: integer
+          format: int32
+          example: 3
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
     PetDto:
       type: object
       properties:
