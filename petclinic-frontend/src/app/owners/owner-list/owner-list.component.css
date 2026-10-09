@@ -1,6 +1,13 @@
-#ownersByLastName
-{
-display:none;
+/* The search box spans the row. */
+.owners-search-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.owners-search-row #lastName {
+  flex: 1;
 }
 
 #nameGroup {
@@ -76,4 +83,35 @@ display:none;
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* A sortable header always shows its arrow, so staff can see what sorts: gray at rest, white on
+    the column the grid is sorted by. Material animates it in only on hover, hence !important. */
+:host ::ng-deep #ownersTable .mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: none !important;
+  color: #9e9893;
+}
+
+:host ::ng-deep #ownersTable .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #fff;
+}
+
+/* Fixed column widths: sized by the rows on screen, the headers jumped on every sort or page. */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+.col-name { width: 22%; }
+.col-address { width: 25%; }
+.col-city { width: 17%; }
+.col-telephone { width: 17%; }
+.col-pets { width: 19%; }
+
+.owners-actions {
+  margin-top: 14px;
 }
