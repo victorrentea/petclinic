@@ -67,7 +67,8 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Mister',   'Geppetto',      'Via dei Tessitori 7',       'Florence',         '+39055290383'),
   ('Alonso',   'Quixano',       'Campo de Montiel',          'La Mancha',        '(0034)926215566'),
   ('Charles',  'Dickens',       'Gad''s Hill Place',         'Higham',           '+441634406030'),
-  ('Sherlock', 'Holmes',        '221B Baker Street',         'London',           '(0044)2079351269');
+  ('Sherlock', 'Holmes',        '221B Baker Street',         'London',           '(0044)2079351269'),
+  ('Ana',      'Șerban',        'Strada Republicii 12',      'Brașov',           '0268411222');  -- owner-list spec: Ș sorts after every S
 
 INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Axel',            DATE '2018-12-24', 6, 1),  -- Buzz McCallister's tarantula (hamster stand-in)
@@ -110,7 +111,8 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Figaro',          DATE '2019-09-09', 1, 23),  -- Geppetto's cat
   ('Rocinante',       DATE '2015-05-05', 7, 24),  -- Don Quixote's horse
   ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
-  ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
+  ('Toby of Lambeth', DATE '2020-11-27', 2, 26),  -- Sherlock Holmes's bloodhound
+  ('Bubu',            DATE '2022-04-02', 2, 27);
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
   (15, DATE '2025-11-12', 'rabies vaccine'),
