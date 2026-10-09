@@ -1,0 +1,5 @@
+{
+  "name": "petclinic-tools",
+  "description": "Skills shared by every petclinic service, installed instead of copied",
+  "author": { "name": "Victor Rentea" }
+}
