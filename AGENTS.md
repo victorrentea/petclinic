@@ -76,8 +76,8 @@ Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 When a guardrail test fails, or a living diagram no longer matches the code, the drift
 checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS.md).
 
-To see how the pieces fit together, every diagram generated from the code is rendered in
-[ARCHITECTURE.md](ARCHITECTURE.md).
+Before changing how the layers, the database or the notification call work, read the decisions
+and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
