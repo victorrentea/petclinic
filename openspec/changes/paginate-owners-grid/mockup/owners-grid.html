@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owners grid mockup</title>
+<style>
+  @font-face {
+    font-family: 'montserrat';
+    src: url('../../../../petclinic-frontend/src/assets/fonts/montserrat-webfont.woff') format('woff');
+  }
+  :root {
+    --brown: #34302d; --green: #6db33f; --page: #f1f1f1; --row: #f9f9f9; --line: #34302d;
+    --note: #ffd600; --note-ink: #1d1b19;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font: 14px/1.42 montserrat, 'Helvetica Neue', Arial, sans-serif; color: #333; }
+  .navbar { margin: 0 15px; background: var(--brown); border-top: 4px solid var(--green); height: 74px;
+            display: flex; align-items: center; gap: 38px; padding: 0 40px; }
+  .navbar .logo { font-size: 46px; line-height: 1; }
+  .navbar a { color: #fff; text-decoration: none; text-transform: uppercase; font-weight: 600; font-size: 14px; }
+  .container { max-width: 1190px; margin: 0 auto; padding: 30px 30px 60px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 10px 0 18px; }
+  .search { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+  .search input { flex: 1; height: 34px; border: 1px solid #ccc; padding: 6px 10px; font: inherit; }
+  .btn { background: var(--brown); color: #fff; border: 2px solid var(--green); padding: 7px 12px; font: inherit; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--brown); color: #fff; text-align: left; font-weight: 600; padding: 9px 8px; white-space: nowrap; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--green); }
+  th .arrow { display: inline-block; width: 16px; margin-left: 4px; color: #9e9893; }
+  th.active .arrow { color: #fff; }
+  tbody td { padding: 8px; border-top: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(odd) { background: var(--row); }
+  td.name a { color: var(--green); text-decoration: none; }
+  td.pets div { line-height: 20px; }
+  .empty { padding: 18px 8px; border-top: 1px solid var(--line); }
+  .paginator { display: flex; justify-content: flex-end; align-items: center; gap: 28px; padding: 10px 8px;
+                background: #fff; border-top: 1px solid var(--line); font-size: 13px; color: #555; }
+  .paginator select { font: inherit; padding: 3px 4px; }
+  .paginator .nav button { background: none; border: 0; font-size: 18px; width: 34px; height: 34px; border-radius: 50%;
+                            cursor: pointer; color: #333; }
+  .paginator .nav button:disabled { color: #bbb; cursor: default; }
+  .paginator .nav button:not(:disabled):hover { background: #eee; }
+  .actions { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .address { font: 12px/1.3 ui-monospace, Menlo, monospace; color: #666; background: #fff; border: 1px dashed #bbb;
+              padding: 6px 10px; }
+  .toggle { font-size: 13px; color: #555; }
+  /* Notes: numbered pins explaining each decision, for the business meeting */
+  .pin { display: none; position: absolute; width: 26px; height: 26px; border-radius: 50%; background: var(--note);
+          color: var(--note-ink); font: 700 14px/26px montserrat, sans-serif; text-align: center;
+          box-shadow: 0 1px 4px rgba(0,0,0,.35); z-index: 5; }
+  body.notes .pin { display: block; }
+  .notes-panel { display: none; margin-top: 26px; background: #fffbe0; border: 2px solid var(--note); padding: 14px 20px; }
+  body.notes .notes-panel { display: block; }
+  .notes-panel ol { margin: 6px 0 0; padding-left: 22px; }
+  .notes-panel li { margin: 5px 0; }
+  .rel { position: relative; }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <span class="logo">🐶</span>
+  <a href="#">Home</a><a href="#">Owners</a><a href="#">Veterinarians</a><a href="#">Visits</a><a href="#">Pet types</a><a href="#">Specialties</a>
+</nav>
+
+<div class="container">
+  <h2>Owners</h2>
+  <div class="search rel">
+    <input id="lastName" autocomplete="off" placeholder="Last name">
+    <span class="pin" style="left:-34px; top:4px">5</span>
+  </div>
+
+  <div class="rel">
+    <table>
+      <thead>
+      <tr>
+        <th class="sortable" data-key="name">Name<span class="arrow"></span></th>
+        <th>Address</th>
+        <th class="sortable" data-key="city">City<span class="arrow"></span></th>
+        <th>Telephone</th>
+        <th>Pets</th>
+      </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="paginator rel">
+      <label>Owners per page
+        <select id="size"><option>5</option><option selected>10</option><option>20</option></select>
+      </label>
+      <span id="range"></span>
+      <span class="nav">
+        <button id="first" title="First page">⇤</button><button id="prev" title="Previous page">‹</button><button id="next" title="Next page">›</button><button id="last" title="Last page">⇥</button>
+      </span>
+      <span class="pin" style="right:-34px; top:14px">4</span>
+    </div>
+    <span class="pin" style="left:-34px; top:6px">1</span>
+    <span class="pin" id="pin2" style="top:6px">2</span>
+    <span class="pin" id="pin3" style="top:6px">3</span>
+  </div>
+
+  <div class="actions">
+    <button class="btn" type="button">Add Owner</button>
+    <span class="address rel" title="What the browser's address bar would show">
+      Address bar: <span id="url"></span>
+      <span class="pin" style="right:-34px; top:2px">6</span>
+    </span>
+  </div>
+
+  <p class="toggle"><label><input type="checkbox" id="notesToggle"> Show notes for the business meeting</label></p>
+
+  <div class="notes-panel">
+    <b>What this screen proposes</b>
+    <ol>
+      <li><b>Name is shown surname first</b> and sorts by surname, then first name — like a phone book. Click the heading to flip A→Z / Z→A.</li>
+      <li><b>Only Name and City can be sorted.</b> Addresses are free text and phone numbers come in mixed formats, so sorting them would look broken.</li>
+      <li><b>City sorts by city, then by name.</b> Z→A reverses the cities only; owners inside one city still read A→Z.</li>
+      <li><b>5, 10 or 20 owners per page</b> (10 to start), with the total and arrows to move between pages.</li>
+      <li><b>Search as you type</b>: no Find Owner button, the list updates once you stop typing, back on page 1. Try "Pot".</li>
+      <li><b>The screen remembers where you were</b>: the page, sort and search travel in the address, so going back or refreshing returns here.</li>
+    </ol>
+    <p>Accented names follow Romanian alphabet rules: Ș after S, Ț after T — so Șerban comes after Śliwiński. Today they would sink below Z.</p>
+  </div>
+</div>
+
+<script>
+const OWNERS = [["Kevin", "McCallister", "671 Lincoln Boulevard", "Winnetka", "8474461990", ["Axel"]], ["Harry", "Potter", "4 Privet Drive", "Little Whinging", "0119084455", ["Hedwig"]], ["Erwin", "Schroedinger", "Boltzmanngasse 5", "Vienna", "0131914920", ["Milton"]], ["Ștefan", "Mureșan", "12 Boltzmanngasse", "Vienna", "(0043)152634418", ["Basilisk"]], ["Łukasz", "Śliwiński", "ul. Floriańska 14", "Kraków", "+48124221357", ["Perdita", "Pongo"]], ["Roger", "Radcliff", "27 Outer Circle", "London", "+442074860707", ["Reksio"]], ["Newt", "Scamander", "Diagon Alley", "London", "(0044)2079460001", ["Pickett"]], ["Alice", "Liddell", "Christ Church", "Oxford", "+441865276150", ["Cheshire", "Dinah"]], ["Henry", "Baskerville", "Baskerville Hall", "Dartmoor", "(0044)1626832093", ["Baskerville"]], ["John", "Dolittle", "Oxenthorpe Road", "Puddleby", "+441803712345", ["Polynesia"]], ["George", "Darling", "14 Kensington Gardens", "London", "(0044)2079372121", ["Liza", "Nana"]], ["Sam", "Carraclough", "Greenall Bridge", "Yorkshire", "+441943876543", ["Lassie"]], ["Beatrix", "Potter", "Hill Top Farm", "Near Sawrey", "(0044)1539436269", ["Mittens", "Pickles"]], ["Long", "Silver", "Admiral Benbow Inn", "Bristol", "+441179293000", ["Captain Flint"]], ["Argus", "Filch", "Hogwarts Castle", "Inverness", "(0044)1463245678", ["Mrs Norris"]], ["Wallace", "Wensleydale", "62 West Wallaby Street", "Wigan", "+441942244466", ["Gromit", "Hutch"]], ["Wendy", "Darling", "14 Kensington Gardens", "London", "(0044)2079372122", ["Toby"]], ["Rubeus", "Hagrid", "Gamekeepers Hut", "Hogsmeade", "+441463555111", ["Norbert"]], ["Hermione", "Granger", "Gryffindor Tower", "Hogsmeade", "(0044)1463555112", ["Crookshanks"]], ["Tom", "Riddle", "Malfoy Manor", "Wiltshire", "0119844321", ["Nagini"]], ["Tintin", "Reporter", "26 Rue du Labrador", "Brussels", "(0032)225112233", ["Snowy"]], ["Lady", "Tremaine", "Chateau Tremaine", "Ile-de-France", "0146203030", ["Jaq", "Lucifer"]], ["Mister", "Geppetto", "Via dei Tessitori 7", "Florence", "+39055290383", ["Figaro"]], ["Alonso", "Quixano", "Campo de Montiel", "La Mancha", "(0034)926215566", ["Rocinante"]], ["Charles", "Dickens", "Gad's Hill Place", "Higham", "+441634406030", ["Grip"]], ["Sherlock", "Holmes", "221B Baker Street", "London", "(0044)2079351269", ["Toby of Lambeth"]], ["Ana", "Șerban", "Strada Republicii 12", "Brașov", "0268411222", ["Bubu"]]].map(([firstName, lastName, address, city, telephone, pets]) =>
+  ({firstName, lastName, address, city, telephone, pets}));
+const ro = new Intl.Collator('ro');
+const byName = (a, b) => ro.compare(a.lastName, b.lastName) || ro.compare(a.firstName, b.firstName);
+const state = {lastName: '', page: 0, size: 10, sort: 'name', dir: 'asc'};
+
+function readUrl() {
+  const q = new URLSearchParams(location.search);
+  state.lastName = q.get('lastName') || '';
+  state.page = Math.max(0, (parseInt(q.get('page'), 10) || 1) - 1);
+  state.size = [5, 10, 20].includes(+q.get('size')) ? +q.get('size') : 10;
+  const [key, dir] = (q.get('sort') || 'name,asc').split(',');
+  state.sort = key === 'city' ? 'city' : 'name';
+  state.dir = dir === 'desc' ? 'desc' : 'asc';
+}
+
+function writeUrl() {
+  const q = new URLSearchParams();
+  if (state.lastName) q.set('lastName', state.lastName);
+  if (state.page) q.set('page', state.page + 1);
+  if (state.size !== 10) q.set('size', state.size);
+  if (state.sort !== 'name' || state.dir !== 'asc') q.set('sort', `${state.sort},${state.dir}`);
+  const query = q.toString();
+  try { history.replaceState(null, '', query ? `?${query}` : location.pathname); } catch (e) { /* file:// in some browsers */ }
+  document.getElementById('url').textContent = '/owners' + (query ? '?' + decodeURIComponent(query) : '');
+}
+
+function ordered() {
+  const matches = OWNERS.filter(o => o.lastName.startsWith(state.lastName));
+  const flip = state.dir === 'desc' ? -1 : 1;
+  return matches.sort(state.sort === 'name'
+    ? (a, b) => flip * byName(a, b)
+    : (a, b) => flip * ro.compare(a.city, b.city) || byName(a, b));
+}
+
+function render() {
+  const all = ordered();
+  const pages = Math.max(1, Math.ceil(all.length / state.size));
+  if (state.page >= pages) state.page = pages - 1;
+  const from = state.page * state.size;
+  const page = all.slice(from, from + state.size);
+  document.getElementById('rows').innerHTML = page.length ? page.map(o => `
+    <tr><td class="name"><a href="#">${o.lastName}, ${o.firstName}</a></td><td>${o.address}</td><td>${o.city}</td>
+        <td>${o.telephone}</td><td class="pets">${o.pets.map(p => `<div>${p}</div>`).join('')}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="empty">No owners found with a last name starting with "${state.lastName}"</td></tr>`;
+  document.getElementById('range').textContent = all.length
+    ? `${from + 1} – ${from + page.length} of ${all.length}` : '0 of 0';
+  document.getElementById('first').disabled = document.getElementById('prev').disabled = state.page === 0;
+  document.getElementById('next').disabled = document.getElementById('last').disabled = state.page >= pages - 1;
+  document.getElementById('size').value = state.size;
+  document.getElementById('lastName').value = state.lastName;
+  document.querySelectorAll('th.sortable').forEach(th => {
+    const active = th.dataset.key === state.sort;
+    th.classList.toggle('active', active);
+    th.querySelector('.arrow').textContent = active && state.dir === 'desc' ? '↓' : '↑';
+  });
+  placePins();
+  writeUrl();
+}
+
+function placePins() {
+  const ths = document.querySelectorAll('thead th');
+  document.getElementById('pin2').style.left = (ths[1].offsetLeft + 70) + 'px';
+  document.getElementById('pin3').style.left = (ths[2].offsetLeft + 78) + 'px';
+}
+
+function go(changes, resetPage = true) {
+  Object.assign(state, changes, resetPage ? {page: 0} : {});
+  render();
+}
+
+document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
+  const key = th.dataset.key;
+  go({sort: key, dir: state.sort === key && state.dir === 'asc' ? 'desc' : 'asc'});
+}));
+let typing;
+document.getElementById('lastName').addEventListener('input', e => {
+  clearTimeout(typing);
+  typing = setTimeout(() => go({lastName: e.target.value}), 300);
+});
+document.getElementById('size').addEventListener('change', e => go({size: +e.target.value}));
+const pages = () => Math.ceil(ordered().length / state.size);
+document.getElementById('first').onclick = () => go({page: 0}, false);
+document.getElementById('prev').onclick = () => go({page: state.page - 1}, false);
+document.getElementById('next').onclick = () => go({page: state.page + 1}, false);
+document.getElementById('last').onclick = () => go({page: pages() - 1}, false);
+document.getElementById('notesToggle').addEventListener('change', e => document.body.classList.toggle('notes', e.target.checked));
+if (new URLSearchParams(location.search).has('notes')) {
+  document.body.classList.add('notes');
+  document.getElementById('notesToggle').checked = true;
+}
+window.addEventListener('resize', placePins);
+
+readUrl();
+render();
+</script>
+</body>
+</html>
