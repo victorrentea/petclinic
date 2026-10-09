@@ -153,7 +153,7 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Core Values
-- Write non-trivial code using TDD
+- Write non-trivial code using BDD
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind CYA comments when deleting or moving stuff
 - Always run tests after any complex refactoring

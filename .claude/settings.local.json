@@ -3,7 +3,8 @@
     "context7",
     "playwright",
     "postgres-db",
-    "grafana"
+    "grafana",
+    "petclinic-mcp"
   ],
   "autoMemoryEnabled": false
 }
