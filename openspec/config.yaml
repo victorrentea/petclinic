@@ -18,6 +18,23 @@ schema: spec-driven
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      The reader is a non-developer product owner. Write in plain business language: no
+      endpoints, HTTP verbs, JSON, field or parameter names, class or file names, database
+      terms (index, collation, migration, query), framework names or code identifiers. The
+      only exceptions are the capability ids in the Capabilities section and a pointer to
+      design.md and the spec.
+    - >-
+      Every technical detail - API contract, breaking changes for callers, affected code,
+      tests, data migration - goes into design.md (its "Impact on the code" section), never
+      into the proposal. Describe the business effect of a breaking change instead, e.g.
+      "other systems are not affected".
+    - >-
+      When the change alters what users see, sketch it: a clickable HTML mockup in the
+      change's mockup/ folder, built on the app's own look and the seed data, plus PNG
+      screenshots of it, and reference the screenshot from the proposal's What Changes.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
