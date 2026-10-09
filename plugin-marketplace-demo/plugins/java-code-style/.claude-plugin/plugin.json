@@ -1,0 +1,5 @@
+{
+  "name": "java-code-style",
+  "description": "PetClinic's Java code style rules, loaded whenever Java code is written or reviewed",
+  "author": { "name": "Victor Rentea" }
+}

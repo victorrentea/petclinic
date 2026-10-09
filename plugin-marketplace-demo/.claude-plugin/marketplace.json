@@ -11,6 +11,11 @@
       "name": "petclinic-tools",
       "description": "Skills shared by every petclinic service, installed instead of copied",
       "source": "./plugins/petclinic-tools"
+    },
+    {
+      "name": "java-code-style",
+      "description": "PetClinic's Java code style rules, loaded whenever Java code is written or reviewed",
+      "source": "./plugins/java-code-style"
     }
   ]
 }

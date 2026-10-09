@@ -15,3 +15,11 @@ both, although no `.claude/skills/` holds it any more.
 
 Claude Code and Copilot read the plugin live from this folder; Codex copies it into its cache, so
 after an edit run `codex plugin add` again.
+
+## The same marketplace, served from git
+
+The repo's `.claude/settings.json` declares this marketplace as a **git** source, the way a team
+points at an internal GitLab/Bitbucket, and enables `java-code-style@petclinic-local` for everyone
+who trusts the folder. The marketplace is a subfolder of the repo, which `claude plugin marketplace
+add` cannot express, so the declaration carries a `path` to the `marketplace.json`. Being git, it
+serves what is **pushed** to the `ref` branch, not the working tree.

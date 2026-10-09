@@ -2,6 +2,20 @@
   "enabledMcpjsonServers": [
     "petclinic-mcp"
   ],
+  "extraKnownMarketplaces": {
+    "petclinic-local": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/victorrentea/petclinic.git",
+        "ref": "jax26",
+        "path": "plugin-marketplace-demo/.claude-plugin/marketplace.json",
+        "sparsePaths": ["plugin-marketplace-demo"]
+      }
+    }
+  },
+  "enabledPlugins": {
+    "java-code-style@petclinic-local": true
+  },
   "env": {
     "//": "keep playwright-cli snapshots/console logs out of the working tree",
     "PLAYWRIGHT_MCP_OUTPUT_DIR": "/tmp/playwright-cli"

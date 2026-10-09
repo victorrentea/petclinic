@@ -1,7 +1,7 @@
 ---
 name: java-code-style
-description: PetClinic's Java code style rules. Use whenever writing, editing, reviewing or refactoring Java code in this repo.
-paths: ["**/*.java"] #MUST HAVE here = IT ALWAYS LOADS this before touch any .java file
+description: PetClinic's Java code style rules. Use whenever writing, editing, reviewing or refactoring Java code in any module of this repo (backend, notification-service, commons, database).
+paths: ["**/*.java"]
 ---
 
 # Java Code Style
