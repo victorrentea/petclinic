@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.IOException;
 import java.net.Socket;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,6 +53,6 @@ class OwnerSearchThroughLatencyProxyTest {
     void ownerSearchThroughProxy() throws Exception {
         mockMvc.perform(get("/api/owners"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(10))));
+                .andExpect(jsonPath("$.content", hasSize(10)));
     }
 }

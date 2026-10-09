@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +27,13 @@ import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
+import victor.training.petclinic.rest.dto.OwnerListItemDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -127,12 +127,11 @@ public class OwnerTest {
     }
 
     @Test
-    void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
+    void getAll_countsEveryOwnerAcrossPages() throws Exception {
+        OwnerPageDto page = search("/api/owners");
 
-        assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-                .contains(Assertions.tuple(ownerId, "George", "Franklin"));
+        assertThat(page.totalElements()).isEqualTo(ownerRepository.count());
+        assertThat(page.content()).hasSize((int) Math.min(10, ownerRepository.count()));
     }
 
     @Test
@@ -141,14 +140,14 @@ public class OwnerTest {
         owner2.setLastName("JavaBeans");
         int owner2Id = ownerRepository.save(owner2).getId();
 
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
+        OwnerPageDto page = search("/api/owners?lastName=Java");
 
-        assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getLastName)
+        assertThat(page.content())
+                .extracting(OwnerListItemDto::id, OwnerListItemDto::lastName)
                 .contains(Assertions.tuple(owner2Id, "JavaBeans"));
     }
 
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
+    private OwnerPageDto search(String uriTemplate) throws Exception {
         String responseJson = mockMvc.perform(get(uriTemplate))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -156,15 +155,15 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(responseJson, OwnerPageDto.class);
     }
 
     @Test
     void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
+        OwnerPageDto results = search("/api/owners?lastName=NonExistent");
 
-        assertThat(results).isEmpty();
+        assertThat(results.content()).isEmpty();
+        assertThat(results.totalElements()).isZero();
     }
 
     @Test
