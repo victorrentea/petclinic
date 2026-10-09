@@ -1,0 +1,16 @@
+{
+  "name": "petclinic-local",
+  "owner": {
+    "name": "Victor Rentea"
+  },
+  "metadata": {
+    "description": "Local marketplace demo: one folder, no git, shared by every petclinic service"
+  },
+  "plugins": [
+    {
+      "name": "petclinic-tools",
+      "description": "Skills shared by every petclinic service, installed instead of copied",
+      "source": "./plugins/petclinic-tools"
+    }
+  ]
+}

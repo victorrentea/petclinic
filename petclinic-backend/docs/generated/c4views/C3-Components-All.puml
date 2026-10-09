@@ -13,6 +13,7 @@ left to right direction
 
 !include <C4/C4>
 !include <C4/C4_Context>
+!include <C4/C4_Container>
 !include <C4/C4_Component>
 
 System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
@@ -26,6 +27,7 @@ System_Boundary("PetClinic_boundary", "PetClinic", $tags="") {
     Component(PetClinic.Backend.MapperLayer, "Mapper Layer", $techn="Spring", $descr="[mapper] hand-written entity<->DTO mappers", $tags="", $link="")
   }
 
+  Container(PetClinic.notificationservice, "notification-service", $techn="Java / Spring Boot", $descr="Texts pet owners when a visit is booked", $tags="", $link="")
 }
 
 Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.MapperLayer, "uses", $techn="", $tags="", $link="")
@@ -37,6 +39,7 @@ Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "uses", $techn
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.Notification, PetClinic.notificationservice, "POSTs visit-booked notifications", $techn="HTTP/JSON", $tags="", $link="")
 
 SHOW_LEGEND(true)
 hide stereotypes

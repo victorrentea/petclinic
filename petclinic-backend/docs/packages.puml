@@ -1,7 +1,7 @@
 @startuml
 
-title Backend Logical Architecture (java packages)
-caption All boxes and lines are ArchUnit-tested vs code
+title Backend Logical Architecture
+caption All packages and their dependencies are ArchUnit-tested against the code
 footer petclinic-backend/docs/packages.puml
 
 skinparam shadowing false
