@@ -10,6 +10,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { OwnerService } from '../owner.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
+import { OwnerGridState } from '../owner-grid-state';
 import { Owner } from '../owner';
 import { Observable, of } from 'rxjs';
 
@@ -89,24 +90,32 @@ describe('OwnerDetailComponent', () => {
     });
   });
 
-  it('routing to owners page on click of editOwner,addPet,gotoOwnersList', () => {
+  it('Back returns to the Owners grid as the user left it', () => {
+    TestBed.inject(OwnerGridState).url = '/owners?page=2&sort=city,desc';
+    spyOn(router, 'navigateByUrl');
+
+    component.gotoOwnersList();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/owners?page=2&sort=city,desc');
+  });
+
+  it('Back opens the Owners grid when the user never came from it', () => {
+    spyOn(router, 'navigateByUrl');
+
+    component.gotoOwnersList();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/owners');
+  });
+
+  it('routes to editing the owner and to adding a pet', () => {
+    component.owner = owner;
     spyOn(router, 'navigate');
-    let buttons = fixture.debugElement.queryAll(By.css('button'));
 
-    let ownersListButton = buttons[0].nativeElement;
-    ownersListButton.click();
-    spyOn(component, 'gotoOwnersList').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+    component.editOwner();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 10, 'edit']);
 
-    let editOwnerButton = buttons[1].nativeElement;
-    editOwnerButton.click();
-    spyOn(component, 'editOwner').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
-
-    let addNewPetButton = buttons[2].nativeElement;
-    addNewPetButton.click();
-    spyOn(component, 'addPet').and.callThrough();
-    expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+    component.addPet(owner);
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 10, 'pets', 'add']);
   });
 
 });

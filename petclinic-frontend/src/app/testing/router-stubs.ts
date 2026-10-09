@@ -27,6 +27,9 @@ export class RouterOutletStubComponent {
 export class RouterStub {
   navigate(commands: any[], extras?: NavigationExtras) {
   }
+
+  navigateByUrl(url: string) {
+  }
 }
 
 

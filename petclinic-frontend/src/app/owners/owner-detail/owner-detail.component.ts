@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Owner} from '../owner';
+import {OwnerGridState} from '../owner-grid-state';
 
 
 @Component({
@@ -13,7 +14,8 @@ export class OwnerDetailComponent implements OnInit {
   errorMessage: string;
   owner: Owner;
 
-  constructor(private route: ActivatedRoute, private router: Router, private ownerService: OwnerService) {
+  constructor(private route: ActivatedRoute, private router: Router, private ownerService: OwnerService,
+              private gridState: OwnerGridState) {
     this.owner = {} as Owner;
   }
 
@@ -25,7 +27,7 @@ export class OwnerDetailComponent implements OnInit {
   }
 
   gotoOwnersList() {
-    this.router.navigate(['/owners']);
+    this.router.navigateByUrl(this.gridState.url);
   }
 
   editOwner() {
