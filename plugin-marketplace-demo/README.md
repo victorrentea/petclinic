@@ -6,9 +6,9 @@ harnesses. Run from the repo root:
 
 | Harness | Install | Use |
 | --- | --- | --- |
-| Claude Code | `claude plugin marketplace add ./demo-plugin-marketplace`<br>`claude plugin install petclinic-tools@petclinic-local` | `/petclinic-tools:grill-me <plan>` |
-| Copilot CLI | `copilot plugin marketplace add ./demo-plugin-marketplace`<br>`copilot plugin install petclinic-tools@petclinic-local` | `/petclinic-tools:grill-me <plan>` |
-| Codex | `codex plugin marketplace add ./demo-plugin-marketplace`<br>`codex plugin add petclinic-tools@petclinic-local` | `$petclinic-tools:grill-me <plan>` |
+| Claude Code | `claude plugin marketplace add ./plugin-marketplace-demo`<br>`claude plugin install petclinic-tools@petclinic-local` | `/petclinic-tools:grill-me <plan>` |
+| Copilot CLI | `copilot plugin marketplace add ./plugin-marketplace-demo`<br>`copilot plugin install petclinic-tools@petclinic-local` | `/petclinic-tools:grill-me <plan>` |
+| Codex | `codex plugin marketplace add ./plugin-marketplace-demo`<br>`codex plugin add petclinic-tools@petclinic-local` | `$petclinic-tools:grill-me <plan>` |
 
 Then start the agent in `petclinic-backend/` and in `notification-service/`: the skill is there in
 both, although no `.claude/skills/` holds it any more.
