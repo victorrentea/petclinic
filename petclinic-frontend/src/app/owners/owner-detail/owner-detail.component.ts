@@ -27,7 +27,7 @@ export class OwnerDetailComponent implements OnInit {
   }
 
   gotoOwnersList() {
-    this.router.navigateByUrl(this.gridState.url);
+    void this.router.navigateByUrl(this.gridState.url);
   }
 
   editOwner() {

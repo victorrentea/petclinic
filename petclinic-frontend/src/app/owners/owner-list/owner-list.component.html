@@ -3,6 +3,7 @@
     <h2>Owners</h2>
 
     <div class="owners-search-row">
+      <label for="lastName" class="sr-only">Last name</label>
       <input class="form-control" id="lastName" name="lastName" maxlength="80" placeholder="Last name"
               autocomplete="off" [(ngModel)]="lastName" (ngModelChange)="onLastNameTyped($event)"/>
     </div>
