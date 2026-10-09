@@ -13,8 +13,13 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
+  // Page by page: the first pages can be all pet-less owners other specs left behind.
+  let ownerWithPet: any;
+  for (let page = 0, totalPages = 1; !ownerWithPet && page < totalPages; page++) {
+    const {data} = await axios.get(`${API_BASE}/owners`, {params: {page, size: 100}, timeout: 10_000});
+    totalPages = data.totalPages;
+    ownerWithPet = data.content.find((o: any) => o.pets.length > 0);
+  }
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
