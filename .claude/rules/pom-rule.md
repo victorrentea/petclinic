@@ -1,5 +1,5 @@
 ---
-# Harness auto-injects its body before any file of this type is accessed.
+# Loaded when Claude reads/edits a matching file (Read/Edit/Write, or cat/head on it) — not on mvn/grep.
 paths: ["**/pom.xml"]
 ---
 
