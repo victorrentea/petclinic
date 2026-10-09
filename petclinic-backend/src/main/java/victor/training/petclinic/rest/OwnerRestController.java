@@ -4,6 +4,9 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -18,6 +21,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -37,12 +41,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/owners")
@@ -81,15 +88,41 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners",
+            description = "One page of owners, sorted by name or city, with the totals of all matches.")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @Parameter(description = "Case-sensitive prefix of the last name") @RequestParam(
+                    defaultValue = "") String lastName,
+            @Parameter(description = "Zero-based page number") @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+            @Parameter(description = "name or city, optionally followed by ,asc or ,desc") @RequestParam(
+                    defaultValue = "name,asc") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName,
+                PageRequest.of(page, size, ownerOrder(sort)));
+        return OwnerPageDto.of(owners.map(ownerMapper::toOwnerListItemDto));
+    }
+
+    // A fixed list, not a bound Pageable: a client may only ask for an order an index serves.
+    // id last makes every order total, so no owner repeats or vanishes between pages.
+    private static Sort ownerOrder(String sort) {
+        String[] keyAndDirection = sort.split(",", -1);
+        String direction = keyAndDirection.length > 1 ? keyAndDirection[1] : "asc";
+        if (keyAndDirection.length > 2 || !List.of("asc", "desc").contains(direction)) {
+            throw new ValidationException("sort direction must be asc or desc: " + sort);
+        }
+        Sort.Direction clicked = Sort.Direction.fromString(direction);
+        return switch (keyAndDirection[0]) {
+            case "name" -> Sort.by(clicked, "lastName", "firstName", "id");
+            // descending reverses the cities only: owners within a city stay A→Z
+            case "city" -> Sort.by(clicked, "city").and(Sort.by("lastName", "firstName", "id"));
+            default -> throw new ValidationException(
+                    "sort must be name or city, optionally followed by ,asc or ,desc: " + sort);
+        };
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

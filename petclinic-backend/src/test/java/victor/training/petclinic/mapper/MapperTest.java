@@ -14,6 +14,7 @@ import victor.training.petclinic.domain.User;
 import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerListItemDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
@@ -129,7 +130,6 @@ class MapperTest {
         assertThat(petMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(petTypeMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(visitMapper.toVisitsDto(null)).isEmpty();
-        assertThat(ownerMapper.toOwnerDtoCollection(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialtyDtos(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialty((List<SpecialtyDto>) null)).isEmpty();
         assertThat(vetMapper.toVetDtos(null)).isEmpty();
@@ -147,7 +147,22 @@ class MapperTest {
         assertThat(dto.getFirstName()).isEqualTo("Sherlock");
         assertThat(dto.getCity()).isEqualTo("London");
         assertThat(dto.getPets()).extracting(PetDto::getName).containsExactly("Leo");
-        assertThat(ownerMapper.toOwnerDtoCollection(List.of(owner))).hasSize(1);
+    }
+
+    @Test
+    void ownerToListItem_carries_its_pets_by_id_and_name_only() {
+        Owner owner = anOwner();
+        owner.setId(7);
+        Pet pet = aPet();
+        pet.setId(3);
+        owner.addPet(pet);
+
+        var item = ownerMapper.toOwnerListItemDto(owner);
+
+        assertThat(item.id()).isEqualTo(7);
+        assertThat(item.lastName()).isEqualTo("Holmes");
+        assertThat(item.city()).isEqualTo("London");
+        assertThat(item.pets()).containsExactly(new OwnerListItemDto.PetRef(3, "Leo"));
     }
 
     @Test
