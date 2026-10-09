@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,37 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  const aPage: OwnerPage = {content: [], totalElements: 27, totalPages: 6, number: 2, size: 5};
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+  it('asks for one page with its search, size and sort', () => {
+    ownerService
+      .listOwners({lastName: 'Pot', page: 2, size: 5, sort: 'city', direction: 'desc'})
+      .subscribe((page) => expect(page).toEqual(aPage), fail);
+
+    const req = httpTestingController.expectOne(
+      (r) => r.url === ownerService.entityUrl &&
+        r.params.get('lastName') === 'Pot' && r.params.get('page') === '2' &&
+        r.params.get('size') === '5' && r.params.get('sort') === 'city,desc');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(aPage);
+  });
+
+  it('leaves an empty search out of the request', () => {
+    ownerService.listOwners({lastName: '', page: 0, size: 10, sort: 'name', direction: 'asc'}).subscribe();
+
+    const req = httpTestingController.expectOne((r) => r.url === ownerService.entityUrl);
+    expect(req.request.params.has('lastName')).toBeFalse();
+    req.flush(aPage);
+  });
+
+  it('surfaces a failure instead of turning it into an empty page', () => {
+    let failed = false;
+    ownerService.listOwners({lastName: '', page: 0, size: 10, sort: 'name', direction: 'asc'})
+      .subscribe(() => fail('a failure is not a page'), () => failed = true);
+
+    httpTestingController.expectOne((r) => r.url === ownerService.entityUrl)
+      .flush('boom', {status: 500, statusText: 'Server Error'});
+    expect(failed).toBeTrue();
   });
 
   it('search the owner by id', () => {
@@ -131,15 +155,4 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
-  });
 });
