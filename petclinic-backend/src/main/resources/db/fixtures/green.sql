@@ -2,10 +2,10 @@
 -- one vet with one specialty, one pet type, one user with one role. The smallest dataset on
 -- which every screen still has something to show, for a demo that must read row by row.
 --
--- A fixture is a DELTA ON THE SEED, never a dataset of its own. The reset sidecar
--- (docker/reset/reset-server.py) empties every table, restores the seed, and only then runs
--- this file — all in one transaction. So this one trims the seed down with DELETEs and adds
--- its own rows; when the schema or R__seed.sql moves, only the rows named here move with it.
+-- A fixture is a DATASET OF ITS OWN, built on an empty database — never a delta on the seed.
+-- The reset sidecar (docker/reset/reset-server.py) empties every table, restarting the
+-- identity sequences, and runs this file on that, in one transaction. So every row green
+-- has is written here, and what R__seed.sql holds never leaks into it.
 --
 -- NOT a Flyway location: spring.flyway.locations names db/migration and db/seed only, so the
 -- application never runs this. It ships next to the seed so the two read side by side; the
@@ -13,38 +13,34 @@
 --
 -- The file name is the fixture's name: the review page draws one button per *.sql here.
 --
--- Ids are looked up, not hardcoded: the seed owns ids 1..N and may grow, and a fixture that
--- assumed "the next owner is 27" would break the day the seed gains a row.
+-- The ids are literal because the database starts empty with every sequence at 1: the first
+-- row of each table is id 1.
 
--- Children before parents, so no foreign key is ever left dangling mid-file.
-DELETE FROM visits WHERE TRUE;
-DELETE FROM pets    WHERE TRUE;
-DELETE FROM owners  WHERE TRUE;
+-- Parents before children, so no foreign key ever points at a row not yet written.
+INSERT INTO types (name) VALUES ('bird');                                  -- type 1
 
--- The one vet kept, Helen Leary, is the seed's radiologist: one vet, one specialty, one link.
-DELETE FROM vet_specialties
-WHERE vet_id NOT IN (SELECT id FROM vets WHERE first_name = 'Helen' AND last_name = 'Leary')
-  OR specialty_id NOT IN (SELECT id FROM specialties WHERE name = 'radiology');
-DELETE FROM vets WHERE NOT (first_name = 'Helen' AND last_name = 'Leary');
-DELETE FROM specialties WHERE name <> 'radiology';
+-- The one vet, Helen Leary, the seed's radiologist: one vet, one specialty, one link.
+INSERT INTO vets (first_name, last_name) VALUES ('Helen', 'Leary');        -- vet 1
 
-DELETE FROM types WHERE name <> 'bird';
+INSERT INTO specialties (name, description) VALUES
+  ('radiology',
+    'limping, limp, broken bone, fracture, suspected fracture, swollen leg, can''t bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.');
 
--- The seed's only user, admin, keeps one role. Security is off in the demo stack
--- (petclinic.security.enable=false); with it on, OWNER_ADMIN is the role that opens the
--- owner, pet and visit screens this dataset is about.
-DELETE FROM roles WHERE role <> 'ROLE_OWNER_ADMIN';
+INSERT INTO vet_specialties (specialty_id, vet_id) VALUES (1, 1);
 
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Molly', 'Weasley', 'The Burrow', 'Ottery St Catchpole', '0441404812345');
 
-INSERT INTO pets (name, birth_date, type_id, owner_id)
-SELECT 'Errol', DATE '2012-03-01', t.id, o.id      -- the family owl, crashes into windows
-FROM types t
-JOIN owners o ON o.first_name = 'Molly' AND o.last_name = 'Weasley'
-WHERE t.name = 'bird';
+INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
+  ('Errol', DATE '2012-03-01', 1, 1);      -- the family owl, crashes into windows
 
-INSERT INTO visits (pet_id, visit_date, visit_time, description)
-SELECT pet.id, DATE '2024-01-18', TIME '11:00', 'concussion after flying into a window'
-FROM pets pet
-WHERE pet.name = 'Errol';
+INSERT INTO visits (pet_id, visit_date, visit_time, description) VALUES
+  (1, DATE '2024-01-18', TIME '11:00', 'concussion after flying into a window');
+
+-- One user, admin, with the seed's password hash and one role. Security is off in the
+-- demo stack (petclinic.security.enable=false); with it on, OWNER_ADMIN is the role that
+-- opens the owner, pet and visit screens this dataset is about.
+INSERT INTO users (username, password, enabled) VALUES
+  ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+
+INSERT INTO roles (username, role) VALUES ('admin', 'ROLE_OWNER_ADMIN');
