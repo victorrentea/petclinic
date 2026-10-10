@@ -51,6 +51,13 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="vet" class="col-sm-2 control-label">Vet</label>
+          <div class="col-sm-10">
+            <app-combo inputId="vet" name="vetId" [(ngModel)]="visit.vetId" [options]="vetOptions" valueKey="id"
+              [placeholder]="noVet"></app-combo>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">

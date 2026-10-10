@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -30,10 +31,12 @@ public class VisitRestController {
 
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
+    private final VetRepository vetRepository;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
+    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper, VetRepository vetRepository) {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
+        this.vetRepository = vetRepository;
     }
 
     @GetMapping
@@ -69,6 +72,7 @@ public class VisitRestController {
     private int bookVisit(VisitDto visitDto) {
         log.info("Booking visit for pet {}: {}", visitDto.getPetId(), visitDto.getDescription());
         Visit visit = visitMapper.toVisit(visitDto);
+        visit.setVet(vetRepository.findByIdOrNull(visitDto.getVetId()));
         visitRepository.save(visit);
         return visit.getId();
     }
@@ -78,6 +82,7 @@ public class VisitRestController {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
+        currentVisit.setVet(vetRepository.findByIdOrNull(visitDto.getVetId()));
         visitRepository.save(currentVisit);
     }
 

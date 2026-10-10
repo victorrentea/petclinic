@@ -137,6 +137,13 @@ INSERT INTO visits (pet_id, visit_date, description) VALUES
   (3,  DATE '2025-06-12', 'patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation'),
   (3,  DATE '2025-08-21', 'wave function collapsed during auscultation; patient definitively purring');
 
+-- The vet who attended, on a few visits only: the rest read as having none, like every visit
+-- booked before vets were tracked.
+UPDATE visits SET vet_id = 3  -- Linda Douglas: surgery, dentistry
+  WHERE description IN ('neutered', 'spayed', 'hind leg surgery', 'surgical suture removal', 'dental exam');
+UPDATE visits SET vet_id = 1  -- James Carter
+  WHERE pet_id = 3 AND visit_date IN (DATE '2026-05-03', DATE '2025-08-21');  -- Milton
+
 INSERT INTO users (username, password, enabled) VALUES
   ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
 
