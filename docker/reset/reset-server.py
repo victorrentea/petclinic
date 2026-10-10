@@ -16,9 +16,10 @@ Dropping the schema invalidates those plans and poisons every pooled connection 
 Hikari retires it, up to half an hour later.
 
 A fixture is a *.sql file baked into /fixtures from petclinic-backend's db/fixtures, next to
-the seed it builds on. It is a delta: POST /<name> truncates, restores the seed, and runs
-<name>.sql on top, in one transaction — so a fixture that fails leaves the database exactly
-as it was, not half-emptied. GET / lists them, and the review page draws one button each.
+the seed. It is a dataset of its own, not a delta on the seed: POST /<name> truncates and
+runs <name>.sql on the empty tables, in one transaction — so a fixture that fails leaves the
+database exactly as it was, not half-emptied. POST / restores the seed instead. GET / lists
+the fixtures, and the review page draws one button each.
 """
 import http.server
 import json
@@ -39,8 +40,9 @@ NAME = re.compile(r"[a-z0-9][a-z0-9-]*")
 PSQL = ["psql", "-v", "ON_ERROR_STOP=1", "-q"]
 
 # Every table in public, whatever the schema happens to be by then — a hand-kept list
-# would silently stop covering a table the next migration adds.
-TRUNCATE = """
+# would silently stop covering a table the next migration adds. `{keep}` spares tables
+# by name.
+_TRUNCATE = """
 DO $$
 DECLARE stmt text;
 BEGIN
@@ -48,10 +50,16 @@ BEGIN
         || string_agg(format('%I.%I', schemaname, tablename), ', ')
         || ' RESTART IDENTITY CASCADE'
     INTO stmt
-    FROM pg_tables WHERE schemaname = 'public';
+    FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ({keep});
     IF stmt IS NOT NULL THEN EXECUTE stmt; END IF;
 END $$;
 """
+# Before the seed: everything, Flyway's history included — the dump puts it back.
+TRUNCATE = _TRUNCATE.format(keep="''")
+# Before a fixture: everything but Flyway's history. A fixture is hand-written and does not
+# carry the history, and a backend that boots onto an empty history over a full schema
+# refuses to start.
+TRUNCATE_DATA = _TRUNCATE.format(keep="'flyway_schema_history'")
 
 _lock = threading.Lock()
 
@@ -96,12 +104,13 @@ def current():
 
 
 def do_reset(fixture=None):
-    args = PSQL + ["--single-transaction", "-c", TRUNCATE, "-f", SEED]
+    # A fixture starts from the empty tables, never from the seed: what it shows is only
+    # what its own file writes. RESTART IDENTITY in TRUNCATE puts every id back at 1.
     if fixture:
-        # pg_dump's output empties search_path for the rest of the session, and the fixture
-        # names its tables unqualified, as any hand-written SQL would.
-        args += ["-c", "SET search_path TO DEFAULT",
-                "-f", os.path.join(FIXTURES, fixture + ".sql")]
+        args = ["-c", TRUNCATE_DATA, "-f", os.path.join(FIXTURES, fixture + ".sql")]
+    else:
+        args = ["-c", TRUNCATE, "-f", SEED]
+    args = PSQL + ["--single-transaction"] + args
     with _lock:
         r = _run(args)
         if r.returncode != 0:
