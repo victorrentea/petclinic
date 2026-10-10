@@ -1,10 +1,17 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Visit} from './visit';
+import {VisitPage} from './visit-page';
 import {environment} from '../../environments/environment';
 import {HandleError, HttpErrorHandler} from '../error.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
+
+export interface VisitQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
 
 @Injectable()
 export class VisitService {
@@ -17,10 +24,17 @@ export class VisitService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getVisits(): Observable<Visit[]> {
-    return this.http.get<Visit[]>(this.entityUrl)
+  // Only the parameters given are sent: the server owns the defaults (page 0, size 10, date,desc).
+  getVisitsPage(query: VisitQuery = {}): Observable<VisitPage> {
+    let params = new HttpParams();
+    for (const [name, value] of Object.entries(query)) {
+      if (value !== undefined) {
+        params = params.set(name, String(value));
+      }
+    }
+    return this.http.get<VisitPage>(this.entityUrl, {params})
       .pipe(
-        catchError(this.handlerError('getVisits', []))
+        catchError(this.handlerError('getVisitsPage', {} as VisitPage))
       );
   }
 

@@ -57,7 +57,7 @@ public class VisitSteps {
         var response = RestAssured.given().baseUri(http.baseUri()).get("/api/visits");
         assertThat(response.statusCode()).isEqualTo(200);
         var matching = response.jsonPath().getList(
-                "findAll { it.petId == " + petId + " && it.description == '" + description + "' }");
+                "content.findAll { it.petId == " + petId + " && it.description == '" + description + "' }");
         assertThat(matching).hasSize(expectedCount);
     }
 

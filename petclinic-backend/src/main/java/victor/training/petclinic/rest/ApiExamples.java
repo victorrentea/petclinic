@@ -49,10 +49,15 @@ public final class ApiExamples {
             ]""";
 
     public static final String VISITS = """
-            [
-              { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 7 },
-              { "id": 2, "date": "2013-01-02", "description": "annual checkup", "petId": 8 }
-            ]""";
+            {
+              "content": [
+                { "id": 2, "date": "2013-01-02", "description": "annual checkup", "petId": 8, "petName": "Pickett",
+                  "ownerId": 7, "ownerFirstName": "Newt", "ownerLastName": "Scamander" },
+                { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 9, "petName": "Dinah",
+                  "ownerId": 8, "ownerFirstName": "Alice", "ownerLastName": "Liddell" }
+              ],
+              "totalElements": 2, "totalPages": 1, "number": 0, "size": 10
+            }""";
 
     public static final String SPECIALTIES = """
             [
