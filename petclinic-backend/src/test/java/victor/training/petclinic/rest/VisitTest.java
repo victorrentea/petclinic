@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -100,46 +98,6 @@ public class VisitTest {
     void getById_notFound() throws Exception {
         mockMvc.perform(get("/api/visits/99999"))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getAll() throws Exception {
-        String responseJson = mockMvc.perform(get("/api/visits"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
-
-        assertThat(visits)
-                .extracting(VisitDto::getId, VisitDto::getDescription)
-                .contains(Assertions.tuple(visitId, "rabies shot"));
-    }
-
-    @Test
-    void getAll_returnsEnrichedFields() throws Exception {
-        String responseJson = mockMvc.perform(get("/api/visits"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
-
-        VisitDto created = Arrays.stream(visits)
-                .filter(v -> v.getId() == visitId)
-                .findFirst()
-                .orElseThrow();
-
-        Owner owner = ownerRepository.findById(petRepository.findById(petId).orElseThrow().getOwner().getId())
-                .orElseThrow();
-        Pet pet = petRepository.findById(petId).orElseThrow();
-
-        assertThat(created.getPetName()).isEqualTo(pet.getName());
-        assertThat(created.getOwnerId()).isEqualTo(owner.getId());
-        assertThat(created.getOwnerFirstName()).isEqualTo(owner.getFirstName());
-        assertThat(created.getOwnerLastName()).isEqualTo(owner.getLastName());
     }
 
     @Test

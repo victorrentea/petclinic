@@ -52,6 +52,19 @@ export class VisitsPage {
     return result;
   }
 
+  async sortBy(header: string): Promise<void> {
+    await this.page.locator('#visitsTable th', {hasText: header}).click();
+  }
+
+  async choosePageSize(size: number): Promise<void> {
+    await this.page.locator('mat-paginator mat-select').click();
+    await this.page.getByRole('option', {name: String(size), exact: true}).click();
+  }
+
+  async nextPage(): Promise<void> {
+    await this.page.getByRole('button', {name: 'Next page'}).click();
+  }
+
   async getDates(): Promise<string[]> {
     // The title renders before the visits arrive; counting then reads an empty table.
     await this.rows.first().waitFor({state: 'visible', timeout: 10000});
