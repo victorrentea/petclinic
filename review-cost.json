@@ -1,12 +1,13 @@
 {
   "schema": "review-cost/1",
   "harness": "claude-code",
-  "recordedAt": "2026-10-10T20:20:52+00:00",
+  "recordedAt": "2026-10-10T20:29:46+00:00",
   "base": "f7ebe11c6a5c2d7652f6a1be2b6c75b3f2f3d9bf",
   "implementation": "6305ee43b4e27cebdad0ffd75cf66b74be3bfcf9",
   "rounds": [
-    "2026-10-10T20:20:00+00:00",
-    "2026-10-10T20:20:52+00:00"
+    "2026-10-10T20:20:52+00:00",
+    "2026-10-10T20:28:54+00:00",
+    "2026-10-10T20:29:46+00:00"
   ],
   "aicUsd": 0.01,
   "components": [
@@ -97,7 +98,7 @@
       "source": "recorded",
       "window": [
         "2026-10-10T20:17:57+00:00",
-        "2026-10-10T20:20:52+00:00"
+        "2026-10-10T20:29:46+00:00"
       ],
       "harnesses": [
         "claude-code"
@@ -109,22 +110,22 @@
           "what": "deciding and fixing",
           "window": [
             "2026-10-10T20:17:57+00:00",
-            "2026-10-10T20:20:49+00:00"
+            "2026-10-10T20:29:40+00:00"
           ],
-          "tokens": 2739748,
+          "tokens": 4658633,
           "models": {
-            "Opus 5.5": 2739748
+            "Opus 5.5": 4658633
           },
-          "usd": 0.9099,
+          "usd": 1.4226,
           "aic": null,
-          "calls": 12,
-          "modelSeconds": 104.2
+          "calls": 20,
+          "modelSeconds": 139.1
         }
       ],
-      "tokens": 2739748,
-      "usd": 0.9099,
+      "tokens": 4658633,
+      "usd": 1.4226,
       "aic": null,
-      "modelSeconds": 104.2
+      "modelSeconds": 139.1
     }
   ]
 }

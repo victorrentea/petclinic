@@ -28,6 +28,21 @@ anchors: review-commit
 - observation: the step filtered `content` of `GET /api/visits`, which is the 10 latest visits only. A visit beyond that page counts as absent, so a "0 visits" check passes vacuously.
 - fix: read the pet's own visits from `GET /api/pets/{id}` instead of a page of everyone's.
 
+### Navigation promise left unhandled; a failed navigation vanished silently
+- file: petclinic-frontend/src/app/visits/visits-page/visits-page.component.ts:86-87
+- file: petclinic-frontend/src/app/visits/visits-page/visits-page.component.spec.ts:164-172
+- source: CI
+- severity: medium
+- observation: `router.navigate` returns a promise nobody awaited or caught (Sonar BUG typescript:S9383). A rejected navigation was swallowed, and the grid stayed on the old query with no error.
+- fix: catch the rejection into `errorMessage`, pinned by a spec that rejects the navigation.
+
+### Injected dependencies were not readonly
+- file: petclinic-frontend/src/app/visits/visits-page/visits-page.component.ts:35-36
+- source: CI
+- severity: low
+- observation: `router`, `route` and `visitService` are never reassigned but were not marked `readonly` (Sonar code smell typescript:S2933).
+- fix: declare the three constructor parameters `private readonly`.
+
 ## Ignored
 
 ### Service fallback `{}` would hide errors and crash `show()`
@@ -59,7 +74,7 @@ anchors: review-commit
 - why: the ticket constrains the grid; the API serves other clients. Recorded under Assumptions.
 
 ### Past-the-end redirect could loop or show stale rows
-- file: petclinic-frontend/src/app/visits/visits-page/visits-page.component.ts:75-77
+- file: petclinic-frontend/src/app/visits/visits-page/visits-page.component.ts:76-78
 - source: correctness reviewer
 - severity: low
 - observation: when the last page empties after deletes, `show()` navigates to `totalPages`. If the data shifts again it re-navigates while the old rows stay on screen.

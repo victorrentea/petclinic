@@ -32,7 +32,8 @@ export class VisitsPageComponent implements OnInit, OnDestroy {
   errorMessage: string | undefined;
   private load: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private visitService: VisitService) {}
+  constructor(private readonly router: Router, private readonly route: ActivatedRoute,
+              private readonly visitService: VisitService) {}
 
   ngOnInit(): void {
     this.load = this.route.queryParamMap.pipe(
@@ -82,7 +83,8 @@ export class VisitsPageComponent implements OnInit, OnDestroy {
 
   private navigate(change: Partial<VisitsPageQuery>, replaceUrl = false): void {
     const queryParams = toUrl({...this.query, ...change});
-    this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl});
+    this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl})
+      .catch(error => this.errorMessage = String(error));
   }
 }
 

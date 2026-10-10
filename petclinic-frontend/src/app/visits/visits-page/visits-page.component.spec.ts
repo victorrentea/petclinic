@@ -161,6 +161,18 @@ describe('VisitsPageComponent', () => {
     expect(fixture.debugElement.query(By.css('.no-visits'))).toBeNull();
   });
 
+  it('shows a failed navigation as an error', waitForAsync(() => {
+    navigate.and.returnValue(Promise.reject('navigation cancelled'));
+    fixture.detectChanges();
+
+    component.onSort({active: 'pet', direction: 'asc'});
+
+    fixture.whenStable().then(() => {
+      fixture.detectChanges();
+      expect(text('#visitsError')).toContain('navigation cancelled');
+    });
+  }));
+
   it('moves to the last page when the URL points past it', () => {
     getVisitsPage.and.returnValue(of(aPage([], 26, 3)));
     url.set({page: '9'});
