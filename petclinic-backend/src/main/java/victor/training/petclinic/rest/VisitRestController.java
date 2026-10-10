@@ -35,6 +35,8 @@ public class VisitRestController {
     private static final Logger log = LoggerFactory.getLogger(VisitRestController.class);
 
     static final int MAX_PAGE_SIZE = 100;
+    private static final String SORTS = "(date|description|pet|owner)(,(asc|desc))?";
+    private static final String SORTS_HINT = "must be date, description, pet or owner, optionally with ,asc or ,desc";
 
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
@@ -52,8 +54,7 @@ public class VisitRestController {
     public VisitPageDto listVisits(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) @Max(MAX_PAGE_SIZE) int size,
-            @RequestParam(defaultValue = "date,desc") @Pattern(regexp = "(date|description|pet|owner)(,(asc|desc))?",
-                    message = "must be date, description, pet or owner, optionally followed by ,asc or ,desc") String sort) {
+            @RequestParam(defaultValue = "date,desc") @Pattern(regexp = SORTS, message = SORTS_HINT) String sort) {
         Page<Visit> visits = visitRepository.findAllWithPetAndOwner(PageRequest.of(page, size, toSort(sort)));
         return new VisitPageDto(visitMapper.toVisitsDto(visits.getContent()),
                 visits.getTotalElements(), visits.getTotalPages(), visits.getNumber(), visits.getSize());
