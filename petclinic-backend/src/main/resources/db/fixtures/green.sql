@@ -17,9 +17,9 @@
 -- assumed "the next owner is 27" would break the day the seed gains a row.
 
 -- Children before parents, so no foreign key is ever left dangling mid-file.
-DELETE FROM visits;
-DELETE FROM pets;
-DELETE FROM owners;
+DELETE FROM visits WHERE TRUE;
+DELETE FROM pets    WHERE TRUE;
+DELETE FROM owners  WHERE TRUE;
 
 -- The one vet kept, Helen Leary, is the seed's radiologist: one vet, one specialty, one link.
 DELETE FROM vet_specialties
