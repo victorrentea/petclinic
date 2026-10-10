@@ -1,79 +1,92 @@
-#ownersByLastName
-{
-display:none;
-}
-
-#nameGroup {
+/* One row as wide as the table: label, stretching input, search button */
+.owner-search-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
-#addressGroup {
+.owner-search-row label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.owner-search-row button {
+  flex-shrink: 0;
+}
+
+/* Fixed widths: auto layout sized the columns to each page's rows, so the headers jumped on every sort. */
+#ownersTable table {
+  table-layout: fixed;
+  margin-bottom: 0;
+}
+
+.col-name { width: 22%; }
+.col-address { width: 26%; }
+.col-city { width: 16%; }
+.col-telephone { width: 18%; }
+.col-pets { width: 18%; }
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+.owners-empty-actions {
+  margin-top: 15px;
+}
+
+/* Paginator reads as the table's footer: no gap, no white panel */
+.owners-footer {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
+  border-top: 1px solid #ddd;
 }
 
-.owner-search-label {
-  margin: 0;
-  text-align: left;
-  min-width: 60px;
-}
-
-.owner-search-input {
+.owners-footer mat-paginator {
   flex: 1;
+  background: transparent;
 }
 
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+/* Sort indicator: a dim ▲▼ pair marks a sortable column, a bright ▲ or ▼ the active sort. */
+/* A button, so the sort is reachable from the keyboard; styled to read as the header text */
+.sort-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.sort-indicator {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0.4;
 }
 
-.owners-page-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.sort-indicator.active {
+  opacity: 1;
 }
 
-.owners-page-size .form-control {
-  width: auto;
+.sort-indicator::before,
+.sort-indicator::after {
+  content: '';
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
 }
 
-@media (max-width: 576px) {
-  #nameGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.sort-indicator::before {
+  border-bottom: 5px solid currentColor;
+}
 
-  #addressGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.sort-indicator::after {
+  border-top: 5px solid currentColor;
+}
 
-  .owner-search-input {
-    width: 100%;
-  }
-
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.sort-indicator.asc::after,
+.sort-indicator.desc::before {
+  display: none;
 }

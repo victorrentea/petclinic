@@ -1,0 +1,45 @@
+schema: spec-driven
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      Write for a product owner who is not a developer: plain business language about what
+      users see and can do, and why. No JSON, HTTP verbs or status codes, URLs, query
+      parameters, class/file/table names, frameworks or SQL.
+    - >-
+      Technical details (API shape, error codes, data structures, files affected) go to
+      design.md, testable behaviour to the spec; the proposal only points to them.
+    - >-
+      Keep the template headings and the capability ids in Capabilities (validation needs
+      them), but describe each capability in plain words. Mark a BREAKING change by who or
+      what it affects, not by the technical contract.
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

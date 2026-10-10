@@ -23,6 +23,7 @@ import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -57,6 +58,7 @@ public class VisitTest {
 
     int visitId;
     int petId;
+    int ownerId;
     @Autowired
     private PetTypeRepository petTypeRepository;
 
@@ -68,6 +70,7 @@ public class VisitTest {
         pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
         petRepository.save(pet);
         petId = pet.getId();
+        ownerId = owner.getId();
 
         Visit visit = new Visit();
         visit.setDate(LocalDate.now());
@@ -210,6 +213,60 @@ public class VisitTest {
 
         Visit updated = visitRepository.findById(visitId).orElseThrow();
         assertThat(updated.getDescription()).isEqualTo("updated description");
+    }
+
+    @Test
+    void create_beforePetBirth_isRefused() throws Exception {
+        postVisit(PetTest.BIRTH_DATE.minusDays(1)).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_onPetBirthDate_ok() throws Exception {
+        postVisit(PetTest.BIRTH_DATE).andExpect(status().isCreated());
+    }
+
+    @Test
+    void create_moreThanAYearAhead_isRefused() throws Exception {
+        postVisit(LocalDate.now().plusYears(1).plusDays(1)).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_exactlyAYearAhead_ok() throws Exception {
+        postVisit(LocalDate.now().plusYears(1)).andExpect(status().isCreated());
+    }
+
+    @Test
+    void update_beforePetBirth_isRefused() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(PetTest.BIRTH_DATE.minusDays(1))
+                .setDescription("rabies shot");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addVisitToOwner_moreThanAYearAhead_isRefused() throws Exception {
+        VisitFieldsDto visit = new VisitFieldsDto()
+                .setDate(LocalDate.now().plusYears(1).plusDays(1))
+                .setDescription("annual checkup");
+
+        mockMvc.perform(post("/api/owners/" + ownerId + "/pets/" + petId + "/visits")
+                .content(mapper.writeValueAsString(visit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    private ResultActions postVisit(LocalDate date) throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(date)
+                .setDescription("annual checkup");
+        return mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test

@@ -2,56 +2,56 @@
   <div class="container xd-container">
     <h2>Owners</h2>
 
-    <form method="get"
-          class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
+    <form id="search-owner-form" (ngSubmit)="search()">
+      <div class="owner-search-row">
+        <label for="lastName">Last name</label>
+        <input class="form-control" size="30"
+          maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName"/>
+        <button type="submit" class="btn btn-default">Find Owner</button>
       </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
-
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
+    <div *ngIf="errorMessage" id="ownersError" class="alert alert-danger">Could not load the owners: {{ errorMessage }}</div>
+    <div *ngIf="page?.totalElements === 0" id="noOwners">No owners with last name starting with "{{ query.lastName }}"</div>
+    <div *ngIf="page?.totalElements === 0 || errorMessage" class="owners-empty-actions">
+      <button class="btn btn-default" routerLink="/owners/add">Add Owner</button>
+    </div>
+    <div class="table-responsive" id="ownersTable" *ngIf="page && page.totalElements > 0">
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
+          <th class="col-name sortable" [attr.aria-sort]="ariaSort('name')">
+            <button type="button" class="sort-button" (click)="sortBy('name')">
+              Name<span class="sort-indicator" [ngClass]="indicator('name')"></span>
+            </button>
+          </th>
+          <th class="col-address">Address</th>
+          <th class="col-city sortable" [attr.aria-sort]="ariaSort('city')">
+            <button type="button" class="sort-button" (click)="sortBy('city')">
+              City<span class="sort-indicator" [ngClass]="indicator('city')"></span>
+            </button>
+          </th>
+          <th class="col-telephone">Telephone</th>
+          <th class="col-pets">Pets</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
+        <tr *ngFor="let owner of page.content">
+          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active">{{ owner.firstName }} {{ owner.lastName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets">{{ pet.name }}</div>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <div class="owners-footer">
+        <button class="btn btn-default" routerLink="/owners/add">Add Owner</button>
+        <mat-paginator [length]="page.totalElements" [pageIndex]="query.page - 1" [pageSize]="query.size"
+                        [pageSizeOptions]="pageSizes" showFirstLastButtons (page)="onPage($event)"></mat-paginator>
       </div>
     </div>
   </div>

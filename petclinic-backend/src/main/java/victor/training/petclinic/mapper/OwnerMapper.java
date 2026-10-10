@@ -1,9 +1,11 @@
 package victor.training.petclinic.mapper;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,11 @@ public class OwnerMapper {
                 .setCity(owner.getCity())
                 .setTelephone(owner.getTelephone())
                 .setPets(petMapper.toPetsDto(owner.getPets()));
+    }
+
+    public OwnerPageDto toOwnerPageDto(Page<Owner> owners) {
+        return new OwnerPageDto(toOwnerDtoCollection(owners.getContent()),
+                owners.getTotalElements(), owners.getTotalPages(), owners.getNumber(), owners.getSize());
     }
 
     public Owner toOwner(OwnerFieldsDto ownerDto) {

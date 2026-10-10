@@ -31,6 +31,8 @@ div.navbar-header {
   height: 70px;
   display: flex;
   align-items: center;
+  /* flex drops the leading space in "<span> Home</span>" */
+  gap: 6px;
 }
 
 ::ng-deep .navbar a.navbar-brand.brand-emoji {
