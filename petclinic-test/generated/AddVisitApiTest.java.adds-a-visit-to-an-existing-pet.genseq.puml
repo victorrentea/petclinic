@@ -3,7 +3,7 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:75{Click to open the test} AddVisitApiTest: adds a visit to an existing pet]]
+title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:75{Click to open the test} Test: AddVisitApiTest: adds a visit to an existing pet]]
 footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java — generated from real traces of end-to-end test runs, do not edit ❗
 participant Test
 participant Backend
