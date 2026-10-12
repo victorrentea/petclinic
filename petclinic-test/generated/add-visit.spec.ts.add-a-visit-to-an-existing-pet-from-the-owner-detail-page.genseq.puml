@@ -3,7 +3,7 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
-title [[src://petclinic-test/src/add-visit.spec.ts:31{Click to open the test} Add a visit to an existing pet from the owner detail page]]
+title [[src://petclinic-test/src/add-visit.spec.ts:31{Click to open the test} Test: Add a visit to an existing pet from the owner detail page]]
 footer @generate_sequence in src/add-visit.spec.ts — generated from real traces of end-to-end test runs, do not edit ❗
 participant Browser
 participant Backend
