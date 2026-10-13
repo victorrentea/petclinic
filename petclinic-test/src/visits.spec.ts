@@ -24,21 +24,44 @@ test.describe('Visits Page', () => {
     console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
-  test('shows all visits on initial load', async ({page}) => {
-    const visits = await apiClient.fetchVisits();
-    const expected = visits.map((v: VisitDto) => ({
-      date: v.date,
-      description: v.description,
-      petName: v.petName ?? '',
-      ownerFullName: `${v.ownerFirstName ?? ''} ${v.ownerLastName ?? ''}`.trim(),
-    }));
+  const asRows = (visits: VisitDto[]) => visits.map((v: VisitDto) => ({
+    date: v.date,
+    description: v.description,
+    petName: v.petName ?? '',
+    ownerFullName: `${v.ownerFirstName ?? ''} ${v.ownerLastName ?? ''}`.trim(),
+  }));
+
+  test('shows the ten latest visits on initial load', async ({page}) => {
+    const expected = asRows((await apiClient.fetchVisitsPage()).content);
 
     const visitsPage = new VisitsPage(page);
     await visitsPage.open();
     await visitsPage.waitForVisitsCount(expected.length);
 
-    const actual = await visitsPage.getVisitRows();
-    expect(ApiClient.sortedByDate(actual)).toEqual(ApiClient.sortedByDate(expected));
+    expect(await visitsPage.getVisitRows()).toEqual(expected);
+  });
+
+  test('clicking a column header sorts by it and keeps the sort in the URL', async ({page}) => {
+    const expected = asRows((await apiClient.fetchVisitsPage({sort: 'pet,asc'})).content);
+
+    const visitsPage = new VisitsPage(page);
+    await visitsPage.open();
+    await visitsPage.sortBy('Pet');
+
+    await expect(page).toHaveURL(/sort=pet,asc/);
+    await expect.poll(() => visitsPage.getVisitRows()).toEqual(expected);
+  });
+
+  test('a page of 5 visits, then the next one', async ({page}) => {
+    const expected = asRows((await apiClient.fetchVisitsPage({page: 1, size: 5})).content);
+
+    const visitsPage = new VisitsPage(page);
+    await visitsPage.open();
+    await visitsPage.choosePageSize(5);
+    await visitsPage.nextPage();
+
+    await expect(page).toHaveURL(/page=2/);
+    await expect.poll(() => visitsPage.getVisitRows()).toEqual(expected);
   });
 
   test('rows are sorted descending by date', async ({page}) => {
