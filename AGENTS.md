@@ -44,6 +44,7 @@ npm start                           # Dev server on localhost:4200
 npm run build                       # Production build
 npm test                            # Karma tests
 npm run test-headless               # Headless Chrome tests
+npm run test:arch                   # imports adhere to docs/frontend-packages.puml
 npm run e2e                         # Protractor e2e tests
 ```
 

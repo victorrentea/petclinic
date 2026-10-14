@@ -321,6 +321,14 @@ function qualifiedTitle(title: string, source: string): string {
   return `${cls}: ${title}`;
 }
 
+/**
+ * The picture's heading says it is a test. Without the word, `Add a visit to an existing
+ * pet from the owner detail page` reads like a feature's name, and a reader landing on the
+ * picture (a review page, a slide) takes the arrows for how the app always behaves rather
+ * than for one recorded run of one test (12 Oct 2026, Victor).
+ */
+export const TEST_TITLE_PREFIX = 'Test: ';
+
 // Left to right is the direction a call travels. Browser and Test never appear together:
 // one is a browser suite's lifeline, the other a @SpringBootTest's, and each drives the
 // backend from the same place on the page.
@@ -616,7 +624,7 @@ export function renderDiagram(
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
-    `title ${solo ? linkedSectionTitle(qualifiedTitle(solo.title, title), solo.link) : title}`,
+    `title ${solo ? linkedSectionTitle(TEST_TITLE_PREFIX + qualifiedTitle(solo.title, title), solo.link) : title}`,
     // footer (bottom of every page) states the diagram's provenance, naming the opt-in
     // the reader will actually find in the file above: a .feature/.spec.ts carries the
     // `@generate_sequence` tag, a @SpringBootTest the `@GenerateSequence` annotation.
