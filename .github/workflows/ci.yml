@@ -194,6 +194,10 @@ jobs:
         working-directory: petclinic-frontend
         run: npm run lint:openapi --silent
 
+      - name: Frontend logical architecture (imports adhere to docs/frontend-packages.puml)
+        working-directory: petclinic-frontend
+        run: npm run test:arch
+
       - name: Run frontend tests (Karma + ChromeHeadlessCI)
         working-directory: petclinic-frontend
         run: npm run test-headless -- --code-coverage
