@@ -33,10 +33,7 @@
             <mat-datepicker-toggle matSuffix [for]="visitDateDatepicker"></mat-datepicker-toggle>
             <mat-datepicker #visitDateDatepicker></mat-datepicker>
             <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="date.valid" [class.glyphicon-remove]="!date.valid" aria-hidden="true"></span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('required')">Date is required</span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('matDatepickerParse')">Date is not a valid date</span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('matDatepickerMin')">Date must not be before the pet's birth date ({{ currentPet.birthDate }})</span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('matDatepickerMax')">Date must be at most 1 year in the future</span>
+            <app-visit-date-errors [date]="date" [birthDate]="currentPet.birthDate"></app-visit-date-errors>
 
           </div>
         </div>

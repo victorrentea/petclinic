@@ -1,0 +1,6 @@
+<ng-container *ngIf="date.dirty">
+  <span class="help-block" *ngIf="date.hasError('required')">Date is required</span>
+  <span class="help-block" *ngIf="date.hasError('matDatepickerParse')">Date is not a valid date</span>
+  <span class="help-block" *ngIf="date.hasError('matDatepickerMin')">Date must not be before the pet's birth date ({{ birthDate }})</span>
+  <span class="help-block" *ngIf="date.hasError('matDatepickerMax')">Date must be at most 1 year in the future</span>
+</ng-container>
