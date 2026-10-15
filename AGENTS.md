@@ -164,6 +164,8 @@ Core entities and relationships:
 
 ## Core Values
 - Write non-trivial code using TDD
+- Every bug fixed in the UI ships with a Playwright UI test written as a Gherkin scenario
+  (`petclinic-test/src/*.feature` + its `*.feature.glue.ts`), seen failing without the fix
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind CYA comments when deleting or moving stuff
 - Always run tests after any complex refactoring
