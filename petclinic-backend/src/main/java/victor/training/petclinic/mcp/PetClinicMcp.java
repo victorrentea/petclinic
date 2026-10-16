@@ -19,6 +19,7 @@ import io.modelcontextprotocol.spec.McpSchema.ElicitResult;
 
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
@@ -121,7 +122,9 @@ public class PetClinicMcp {
         return "- id=%d — %s (%s), born %s".formatted(pet.getId(), pet.getName(), type, pet.getBirthDate());
     }
 
-    public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description) {
+    /** {@code vetName} is null for a visit no vet is assigned to. */
+    public record VisitView(int id, int petId, String petName, LocalDate date, LocalTime time, String description,
+            String vetName) {
     }
 
     public record AmbulanceAddressInput(String address) {
@@ -143,10 +146,15 @@ public class PetClinicMcp {
             // Navigate the mapped Pet→Visit association (lazy; safe under @Transactional) instead of a per-pet repo query.
             for (Visit v : pet.getVisitsSortedByDate()) {
                 result.add(new VisitView(v.getId(), pet.getId(), pet.getName(), v.getDate(), v.getTime(),
-                        v.getDescription()));
+                        v.getDescription(), vetNameOf(v)));
             }
         }
         return result;
+    }
+
+    private static String vetNameOf(Visit visit) {
+        Vet vet = visit.getVet();
+        return vet == null ? null : vet.getFirstName() + " " + vet.getLastName();
     }
 
     @McpTool(

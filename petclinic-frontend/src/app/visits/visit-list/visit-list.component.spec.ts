@@ -4,6 +4,8 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 import {VisitListComponent} from './visit-list.component';
+import {VisitVetPipe} from '../visit-vet.pipe';
+import {By} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
 import {VisitService} from '../visit.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -30,7 +32,7 @@ describe('VisitListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VisitListComponent],
+      declarations: [VisitListComponent, VisitVetPipe],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [FormsModule],
       providers: [
@@ -67,6 +69,12 @@ describe('VisitListComponent', () => {
       date: '2016-09-07',
       description: '',
       pet: testPet
+    }, {
+      id: 2,
+      date: '2017-01-01',
+      description: 'checkup',
+      pet: testPet,
+      vetId: 2, vetFirstName: 'Helen', vetLastName: 'Leary'
     }];
 
     visitService = fixture.debugElement.injector.get(VisitService);
@@ -81,6 +89,12 @@ describe('VisitListComponent', () => {
 
   it('should create VisitListComponent', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the vet of each visit, and "No vet" where there is none', () => {
+    const cells = fixture.debugElement.queryAll(By.css('td.visit-vet'))
+      .map(cell => cell.nativeElement.textContent.trim());
+    expect(cells).toEqual(['No vet', 'Helen Leary']);
   });
 
   it('should call deleteVisit() method', () => {
