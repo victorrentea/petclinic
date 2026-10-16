@@ -19,6 +19,18 @@ schema: spec-driven
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
 
+rules:
+  proposal:
+    - Write for a product owner, not an engineer - welcoming, plain language, readable without
+      knowing what JSON, an endpoint or a status code is
+    - Describe what changes for the people using the app and why, not how it is built
+    - No URLs, HTTP verbs, query parameters, payload shapes, status codes, class/file names or
+      framework names - all of that goes to design.md
+    - Mark a breaking API change in one plain sentence that points engineers to design.md
+  design:
+    - Hold every technical detail kept out of proposal.md - API contract (parameters, payload,
+      errors, consumers) and the list of affected code
+
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
 # This is separate from artifact rules above.
