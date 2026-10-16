@@ -159,7 +159,6 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep line length < 120 chars
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary: 2+ DB updates
