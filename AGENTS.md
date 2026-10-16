@@ -15,6 +15,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
 - `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
+- `petclinic-chatbot/` - Spring AI app on :8082 (`./start-chatbot.sh`); reaches the backend through its MCP server at
+  `/mcp` and `GET /api/specialties/feed`, never through the owners list
 
 **Scale:** business expects ~10,000 owners within a year (said on 2026-10-15), while the seed has 26.
 Design every owner list for that size: paged and sorted by the database, never loaded whole into the browser.
@@ -141,7 +143,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners` (paged: `page`, `size` ∈ 5/10/20, `sort=name|city,asc|desc`, `lastName` prefix → `{content, totalElements}`), `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

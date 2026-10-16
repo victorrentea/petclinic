@@ -31,30 +31,6 @@ display:none;
   flex: 1;
 }
 
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.owners-page-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.owners-page-size .form-control {
-  width: auto;
-}
-
 @media (max-width: 576px) {
   #nameGroup {
     flex-direction: column;
@@ -71,9 +47,62 @@ display:none;
   .owner-search-input {
     width: 100%;
   }
+}
 
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* Add Owner on the left, the paginator on the right, in one row under the table. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.owners-footer mat-paginator {
+  margin-left: auto;
+}
+
+/* Fixed widths: auto layout sized the columns to each page's rows, so the headers jumped on every sort. */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+#ownersTable th:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2) { width: 26%; }
+#ownersTable th:nth-child(3) { width: 16%; }
+#ownersTable th:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5) { width: 18%; }
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+/* Sort indicator: one solid triangle instead of Material's stem arrow - dim on a sortable column, */
+/* bright ▲ or ▼ on the active sort. */
+/* !important beats the inline styles of Material's arrow animations. */
+::ng-deep #ownersTable .mat-sort-header-arrow {
+  justify-content: center;
+  align-items: center;
+  color: currentColor;
+  opacity: 0.35 !important; /* always shown, dim: this column can be sorted */
+  transform: none !important;
+}
+
+::ng-deep #ownersTable th[aria-sort="ascending"] .mat-sort-header-arrow,
+::ng-deep #ownersTable th[aria-sort="descending"] .mat-sort-header-arrow {
+  opacity: 1 !important;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow > * {
+  display: none;
+}
+
+::ng-deep #ownersTable .mat-sort-header-arrow::after {
+  content: '';
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 6px solid currentColor;
+}
+
+::ng-deep #ownersTable th[aria-sort="descending"] .mat-sort-header-arrow::after {
+  border-bottom: none;
+  border-top: 6px solid currentColor;
 }

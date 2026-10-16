@@ -43,7 +43,7 @@ The Owners area is where you keep records for the people who bring pets to the c
 
 ![](screenshots/owners-list.png)
 
-The list shows every registered owner. Each row includes the address, city, telephone, and the names of the pets associated with that owner. Above the table is a *Last name* search box — type a last name (or any prefix) and click *Find Owner* to narrow the list to matching owners. Click an owner's name in the *Name* column to open their full record. The *Add Owner* button at the bottom of the list opens the new-owner form.
+The list shows the registered owners a page at a time, 10 per page to start with; the selector below the table switches to 5 or 20, and the arrows move between pages, next to the total number of owners. Each row includes the address, city, telephone, and the names of the pets associated with that owner. The list opens sorted by name; click the *Name* or *City* header to sort by that column, and click it again to reverse the order. Above the table is a *Last name* search box — type a last name (or any prefix) and click *Find Owner* to narrow the list to matching owners, starting again from the first page. The page keeps its place: after opening an owner and going back, or refreshing the browser, you see the same page, order and search. Click an owner's name in the *Name* column to open their full record. The *Add Owner* button below the list opens the new-owner form, and stays there even when a search finds nobody.
 
 ### Creating a new owner
 

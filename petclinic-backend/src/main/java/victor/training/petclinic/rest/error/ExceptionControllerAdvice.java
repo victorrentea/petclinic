@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -80,6 +81,14 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
+    }
+
+    // e.g. GET /api/owners?size=abc: the client sent a value of the wrong type
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        return handleValidation(new ValidationException(ex.getName() + " must be a valid "
+                + ex.getRequiredType().getSimpleName() + ", got '" + ex.getValue() + "'"), request);
     }
 
     @ExceptionHandler(Exception.class)

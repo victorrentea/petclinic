@@ -22,14 +22,16 @@
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
+    <div *ngIf="totalElements === 0">No owners with LastName starting with "{{query.lastName}}"</div>
+    <div class="table-responsive" id="ownersTable">
+      <table *ngIf="totalElements > 0" class="table table-striped"
+        matSort matSortDisableClear [matSortActive]="sortActive" [matSortDirection]="sortDirection"
+        (matSortChange)="onSort($event)">
         <thead>
         <tr>
-          <th>Name</th>
+          <th mat-sort-header="name">Name</th>
           <th>Address</th>
-          <th>City</th>
+          <th mat-sort-header="city">City</th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
@@ -43,15 +45,17 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets">{{ pet.name }}</div>
+            <span *ngIf="!owner.pets?.length">—</span>
+          </td>
         </tr>
         </tbody>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <div class="owners-footer">
+        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <mat-paginator *ngIf="totalElements > 0" [length]="totalElements" [pageIndex]="query.page"
+          [pageSize]="query.size" [pageSizeOptions]="pageSizeOptions" (page)="onPage($event)">
+        </mat-paginator>
       </div>
     </div>
   </div>
