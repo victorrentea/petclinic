@@ -31,4 +31,4 @@
 ## 5. Integration and docs
 
 - [x] 5.1 Update AGENTS.md: the Owners endpoint is paged, giving the parameter contract in one line, and the user manual if it documents the grid. Verify that `git grep` finds no doc still describing `GET /api/owners` as returning all owners.
-- [ ] 5.2 Run the full stack (`./start-backend.sh`, `./start-frontend.sh`) and click through paging, both sorts, search, back navigation and the empty result in a browser. Verify CI is green on the pushed branch, Sonar gate included (coverage ≥ 80%, duplication ≤ 3%).
+- [x] 5.2 Run the full stack (`./start-backend.sh`, `./start-frontend.sh`) and click through paging, both sorts, search, back navigation and the empty result in a browser. Verify CI is green on the pushed branch, Sonar gate included (coverage ≥ 80%, duplication ≤ 3%).
