@@ -83,7 +83,7 @@ export class OwnerListComponent implements OnInit {
 
   private navigate(changes: Partial<OwnerQuery>, replaceUrl = false) {
     const queryParams = toQueryParams({...this.query, ...changes});
-    this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl});
+    void this.router.navigate([], {relativeTo: this.route, queryParams, replaceUrl});
   }
 }
 
