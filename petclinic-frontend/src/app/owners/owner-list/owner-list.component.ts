@@ -90,7 +90,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(query: OwnerQuery) {
-    this.router.navigate([], {relativeTo: this.route, queryParams: withoutUndefined(query)});
+    void this.router.navigate([], {relativeTo: this.route, queryParams: withoutUndefined(query)});
   }
 }
 

@@ -75,8 +75,9 @@
 
 ## 5. Docs and integration
 
-- [x] 5.1 Regenerate the owners section and screenshot of `user-manual/` with the
-  `regen-user-manual` skill.
+- [x] 5.1 Recapture `user-manual/screenshots/owners-list.png` (1280×800, full page, as `/regen-user-manual`
+  does) and rewrite the owners-list paragraph of `manual.md`. (Done by hand rather than with the
+  command, which rewrites every section and screenshot.)
   - Verify: the manual describes paging and the Name/City sort.
 - [x] 5.2 Update `AGENTS.md` if anything drifted. The REST contract line for `/api/owners` should
   mention paging; `VOLUMETRY.md` is linked.

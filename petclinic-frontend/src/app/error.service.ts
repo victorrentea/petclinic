@@ -29,7 +29,7 @@ export class HttpErrorHandler {
         error.error.message :
         `server returned code ${error.status} with body "${error.error}"`;
       const problemErrors = error.error?.errors;
-      if ((problemErrors instanceof Array) && problemErrors.length > 0) { // a ProblemDetail from the backend
+      if (Array.isArray(problemErrors) && problemErrors.length > 0) { // a ProblemDetail from the backend
         message = problemErrors.join('; ');
       }
       const errorsHeader = error.headers.get('errors');
