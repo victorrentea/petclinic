@@ -11,6 +11,10 @@ order the user can choose.
 
 - **Pages.** Owners are shown 10 at a time, and the user can switch to 5 or 20 per page. The screen
   shows how many owners there are in total.
+- **Page numbers built for halving.** Instead of previous/next arrows, the screen offers the first and
+  last page, the pages next to the current one, and the pages halfway back to the start and halfway on
+  to the end. On page 5 of 80 that is 1 … 3 4 5 6 … 43 … 80, so the user can home in on an owner the way
+  one looks up a word in a dictionary.
 - **Sorting by Name or City.** Clicking the column title sorts by it; clicking again reverses the
   order.
   - Names are shown surname first, as in "Liddell, Alice", and sort that way: by surname, then

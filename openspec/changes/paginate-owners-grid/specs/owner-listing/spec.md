@@ -96,9 +96,10 @@ ascending, then descending, with no unsorted state.
 - **WHEN** the user moves to the next page of the grid
 - **THEN** the next owners in the current order are shown
 
-#### Scenario: Jumping to the last page
-- **WHEN** the user clicks the last-page button
-- **THEN** the last owners in the current order are shown
+#### Scenario: Page numbers to bisect the list
+- **WHEN** the user is on page 5 of 80
+- **THEN** the grid offers pages 1, 3, 4, 5, 6, 43 and 80, with a gap mark between pages that do not touch
+- **AND** clicking a page number shows that page
 
 #### Scenario: Only Name and City are sortable
 - **WHEN** the user views the grid headers

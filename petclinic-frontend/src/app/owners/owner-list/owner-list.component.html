@@ -52,9 +52,15 @@
     <div class="owners-controls" *ngIf="page">
       <button class="btn btn-default" id="addOwner" (click)="addOwner()">Add Owner</button>
       <mat-paginator *ngIf="page.content.length" [length]="page.totalElements" [pageIndex]="pageIndex"
-                      [pageSize]="pageSize" [pageSizeOptions]="pageSizes" showFirstLastButtons
-                      (page)="changePage($event)">
+                      [pageSize]="pageSize" [pageSizeOptions]="pageSizes" (page)="changePage($event)">
       </mat-paginator>
+      <nav class="owner-pages" aria-label="Pages" *ngIf="page.content.length">
+        <ng-container *ngFor="let link of pageLinks">
+          <span *ngIf="link === '…'" class="owner-pages-gap">…</span>
+          <button *ngIf="link !== '…'" type="button" class="btn btn-link" (click)="goToPage(link)"
+                  [attr.aria-current]="link === pageIndex + 1 ? 'page' : null">{{ link }}</button>
+        </ng-container>
+      </nav>
     </div>
   </div>
 </div>

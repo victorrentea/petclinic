@@ -6,6 +6,7 @@ import {EMPTY, Subscription} from 'rxjs';
 import {catchError, map, switchMap, tap} from 'rxjs/operators';
 import {OwnerService} from '../owner.service';
 import {OwnerPage, OwnerQuery} from '../owner-page';
+import {PageLink, pageLinks} from './page-links';
 
 const DEFAULT_SIZE = 10;
 const DEFAULT_SORT = 'name';
@@ -52,6 +53,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     return this.query.size ?? DEFAULT_SIZE;
   }
 
+  get pageLinks(): PageLink[] {
+    const lastPage = Math.max(1, Math.ceil(this.page.totalElements / this.pageSize));
+    return pageLinks(this.pageIndex + 1, lastPage);
+  }
+
   get sortField(): string {
     return (this.query.sort ?? DEFAULT_SORT).split(',')[0];
   }
@@ -76,6 +82,12 @@ export class OwnerListComponent implements OnInit, OnDestroy {
       this.navigate({...this.query, page: undefined, size});
     } else {
       this.navigate({...this.query, page: event.pageIndex || undefined});
+    }
+  }
+
+  goToPage(link: PageLink) {
+    if (link !== '…') {
+      this.navigate({...this.query, page: link - 1 || undefined});
     }
   }
 

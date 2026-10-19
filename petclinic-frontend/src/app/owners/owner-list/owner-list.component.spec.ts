@@ -81,11 +81,21 @@ describe('OwnerListComponent', () => {
     expect(sortable.map(header => header.nativeElement.textContent.trim())).toEqual(['Name', 'City']);
   });
 
-  it('offers to jump to the first and the last page', () => {
-    open();
+  it('offers page numbers to bisect the list, marking the current one', () => {
+    open({size: '5'});
 
-    const buttons = fixture.debugElement.queryAll(By.css('mat-paginator button')).map(b => b.attributes['aria-label']);
-    expect(buttons).toEqual(['First page', 'Previous page', 'Next page', 'Last page']);
+    const links = fixture.debugElement.queryAll(By.css('.owner-pages > *'));
+    expect(links.map(link => link.nativeElement.textContent.trim())).toEqual(['1', '2', '…', '4', '…', '6']);
+    expect(fixture.debugElement.query(By.css('[aria-current=page]')).nativeElement.textContent.trim()).toBe('1');
+  });
+
+  it('opens the page whose number is clicked', () => {
+    open({size: '5', sort: 'city'});
+
+    const buttons = fixture.debugElement.queryAll(By.css('.owner-pages button'));
+    buttons.find(button => button.nativeElement.textContent.trim() === '4').nativeElement.click();
+
+    expect(queryNavigatedTo()).toEqual({page: 3, size: 5, sort: 'city'});
   });
 
   it('moves to the next page keeping the sort, size and search', () => {

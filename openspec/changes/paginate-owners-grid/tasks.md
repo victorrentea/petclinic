@@ -105,5 +105,6 @@
 - [x] 6.5 Fix the column widths, always show the sort arrows (the active one in white), and put
   Find Owner at the right end of the Last name row.
   - Verify: the new `owners-grid.feature` scenarios for column positions and arrows pass.
-- [x] 6.6 Add first-page and last-page buttons to the paginator.
-  - Verify: the Karma case for the paginator buttons passes.
+- [x] 6.6 Replace the previous/next arrows with page numbers for bisecting: 1, halfway back, the
+  neighbours, halfway on, and the last page, with "…" over gaps (`page-links.ts`).
+  - Verify: `page-links.spec.ts` is red first, then green; the component spec clicks a page number.

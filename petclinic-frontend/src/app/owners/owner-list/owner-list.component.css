@@ -74,6 +74,34 @@ display:none;
 
 .owners-controls mat-paginator {
   background: transparent;
+  margin-left: auto;
+}
+
+/* the page numbers below replace the paginator's previous/next arrows */
+:host ::ng-deep .owners-controls .mat-mdc-paginator-range-actions button {
+  display: none;
+}
+
+.owner-pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.owner-pages button {
+  min-width: 32px;
+  padding: 4px 8px;
+}
+
+.owner-pages button[aria-current=page] {
+  background: #34302d;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.owner-pages-gap {
+  padding: 0 4px;
+  color: #8a8a8a;
 }
 
 .owners-pagination {

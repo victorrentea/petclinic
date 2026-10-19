@@ -36,7 +36,7 @@ When('I show {int} owners per page', async function (this: PlaywrightWorld, size
 });
 
 When('I go to the next page', async function (this: PlaywrightWorld) {
-  await this.page.getByRole('button', {name: 'Next page'}).click();
+  await this.page.locator('.owner-pages').getByRole('button', {name: '2', exact: true}).click();
   await this.page.waitForURL(/[?&]page=1\b/);
 });
 
