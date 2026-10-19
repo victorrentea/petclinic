@@ -84,40 +84,6 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
-### /human-review is a plugin, and nothing of it lives in this repo
-
-It is installed, not vendored:
-
-```
-/plugin marketplace add victorrentea/human-review
-/plugin install human-review@human-review
-```
-
-Everything petclinic-specific about it is **`human-review.json`** at the root — the traced
-test run, the Code City generator, the complexity extractor, the screens the design-system
-audit visits. The skill itself knows nothing about this project, and a step this file does
-not describe is skipped and named on the built page. That is the only file to touch when a
-command here changes.
-
-**Tooling changes go to `main` first.** Any change to the guardrails, the anti-drift checks or the `/human-review` wiring (`human-review.json`, `scripts/`, genseq, Code City, traces) made while working on a downstream PR branch is committed on `main`, pushed, and then merged into that branch (e.g. `test-pr`) — never left living only on the PR.
-
-⚠️ **There is no symlink here any more, and putting one back in git is a mistake with a
-history.** `.claude/skills/human-review` was committed for a while as mode 120000 pointing
-at `/Users/<someone>/workspace/…`, so every clone of this public repo carried a link that
-resolved for exactly one person on one laptop. Developing the skill against this repo does
-not need one either — install the plugin from a local marketplace.
-
-**Run the review passes before you ask for the guide.** `/human-review` no longer invokes
-`/code-review` or `/simplify` — it writes up the passes that already ran in the
-conversation, and stops with an explanation if it finds none. So the order is: finish the
-work, run whichever passes you trust, *then* `/human-review`.
-
-**The review guide is built by hand, not by CI.** It deep-links into a working tree and
-drives a whole local stack — a browser, a database, Tempo, PlantUML, a Maven build — so
-there is no online version and no PR automation for it. Run `/human-review` when you want
-one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
-which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
-
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
