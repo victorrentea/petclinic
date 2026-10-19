@@ -1,9 +1,9 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
 
-// The sentences of add-visit.spec.ts, as plain functions: named for what the
-// reader of a scenario wants to see, not for the widget being clicked. The
-// selectors live here so the spec never mentions one.
+// The sentences of add-visit.spec.ts and of visit-vet.feature's glue, as plain functions:
+// named for what the reader of a scenario wants to see, not for the widget being clicked.
+// The selectors live here so neither the spec nor the glue mentions one.
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
