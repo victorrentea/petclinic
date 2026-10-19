@@ -89,3 +89,21 @@
 - [x] 5.4 Open a separate issue for the stray "Ada Acceptance…" owners left by `add-owner.spec.ts`.
   - Verify: the issue URL is recorded in this file.
   - Opened: https://github.com/victorrentea/petclinic/issues/56
+
+## 6. Surname first (the business changed its mind after the demo)
+
+- [x] 6.1 Sort Name by last name, then first name; City by city, then last name, then first name.
+  - Verify: `OwnerListTest` is red with the old order first, then green; the accented case
+    becomes Silver → Śliwiński → Tremaine.
+- [x] 6.2 Show the Name column as "Liddell, Alice".
+  - Verify: the Karma case for the name cell is red first, then green.
+- [x] 6.3 Move the e2e glue and `add-owner.spec.ts` to the "Last, First" cell text.
+  - Verify: Cucumber and Playwright both pass.
+- [x] 6.4 Recapture `owners-list.png` and update its paragraph in `manual.md`; update `AGENTS.md` if it
+  mentions the order.
+  - Verify: the screenshot shows "Liddell, Alice".
+- [x] 6.5 Fix the column widths, always show the sort arrows (the active one in white), and put
+  Find Owner at the right end of the Last name row.
+  - Verify: the new `owners-grid.feature` scenarios for column positions and arrows pass.
+- [x] 6.6 Add first-page and last-page buttons to the paginator.
+  - Verify: the Karma case for the paginator buttons passes.

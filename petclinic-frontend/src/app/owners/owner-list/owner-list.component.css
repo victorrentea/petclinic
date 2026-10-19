@@ -39,6 +39,39 @@ display:none;
   margin-bottom: 16px;
 }
 
+.owner-search-row {
+  display: flex;
+  gap: 12px;
+}
+
+.owner-search-row button {
+  flex-shrink: 0;
+}
+
+/* fixed widths, so the columns stay put when another page or order loads */
+#ownersTable table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+#ownersTable th:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2) { width: 26%; }
+#ownersTable th:nth-child(3) { width: 14%; }
+#ownersTable th:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5) { width: 20%; }
+
+/* every sortable column always shows its arrow, the one sorting now in bright white;
+  Material hides an inactive arrow with inline animation styles, hence !important */
+:host ::ng-deep #ownersTable .mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: none !important;
+  color: #8a8a8a;
+}
+
+:host ::ng-deep #ownersTable .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #fff;
+}
+
 .owners-controls mat-paginator {
   background: transparent;
 }

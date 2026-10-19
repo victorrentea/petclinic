@@ -34,8 +34,8 @@ public record OwnerListQuery(
     private Sort toSort() {
         Direction direction = sort.endsWith(",desc") ? Direction.DESC : Direction.ASC;
         if (sort.startsWith("city")) {
-            return Sort.by(direction, "city").and(Sort.by("firstName", "lastName", "id"));
+            return Sort.by(direction, "city").and(Sort.by("lastName", "firstName", "id"));
         }
-        return Sort.by(direction, "firstName", "lastName").and(Sort.by("id"));
+        return Sort.by(direction, "lastName", "firstName").and(Sort.by("id"));
     }
 }

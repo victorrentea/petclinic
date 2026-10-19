@@ -62,10 +62,10 @@ describe('OwnerListComponent', () => {
     expect(listOwners).toHaveBeenCalledWith({page: 2, size: 5, sort: 'city,desc', lastName: 'Fr'});
   });
 
-  it('shows the full name of each owner', () => {
+  it('shows each owner last name first, the order it sorts in', () => {
     open();
 
-    expect(text('.ownerFullName')).toBe('George Franklin');
+    expect(text('.ownerFullName')).toBe('Franklin, George');
   });
 
   it('tells the paginator how many owners there are', () => {
@@ -79,6 +79,13 @@ describe('OwnerListComponent', () => {
 
     const sortable = fixture.debugElement.queryAll(By.css('[mat-sort-header]'));
     expect(sortable.map(header => header.nativeElement.textContent.trim())).toEqual(['Name', 'City']);
+  });
+
+  it('offers to jump to the first and the last page', () => {
+    open();
+
+    const buttons = fixture.debugElement.queryAll(By.css('mat-paginator button')).map(b => b.attributes['aria-label']);
+    expect(buttons).toEqual(['First page', 'Previous page', 'Next page', 'Last page']);
   });
 
   it('moves to the next page keeping the sort, size and search', () => {

@@ -28,13 +28,13 @@ default.
 
 ### Requirement: Owners sort by name or by city
 The owner list SHALL sort by `name` or by `city`, ascending or descending, with `name` ascending as the
-default. Name order is first name, then last name. City order is city, then first name, then last name.
+default. Name order is last name, then first name. City order is city, then last name, then first name.
 A descending sort SHALL reverse only the chosen field. Equal values SHALL end in a fixed order, so
 consecutive pages never repeat or skip an owner.
 
 #### Scenario: Default order
 - **WHEN** the owner list is requested without a sort
-- **THEN** owners are ordered by first name, then last name
+- **THEN** owners are ordered by last name, then first name
 
 #### Scenario: Sort by city, descending
 - **WHEN** the owner list is sorted by city, descending
@@ -46,7 +46,7 @@ consecutive pages never repeat or skip an owner.
 - **THEN** every one of them appears on exactly one page
 
 #### Scenario: Accented names sort where readers expect them
-- **WHEN** owners named "Long Silver", "Łukasz Śliwiński" and "Mister Geppetto" are sorted by name
+- **WHEN** owners with the last names "Silver", "Śliwiński" and "Tremaine" are sorted by name
 - **THEN** they appear in that order
 
 ### Requirement: Paging combines with the last-name filter
@@ -80,6 +80,13 @@ It SHALL NOT silently replace a bad value with a default.
 - **WHEN** the owner list is requested with page -1
 - **THEN** the response is 400
 
+### Requirement: The Owners grid shows the last name first
+The Name column SHALL show each owner as "last name, first name", the order it sorts in.
+
+#### Scenario: An owner's name in the grid
+- **WHEN** the grid lists Alice Liddell
+- **THEN** her Name cell reads "Liddell, Alice"
+
 ### Requirement: The Owners grid pages and sorts
 The Owners grid SHALL offer a paginator with 5, 10 and 20 rows per page, showing the total number of
 owners. Only the Name and City headers SHALL be sortable. Clicking a sortable header SHALL sort it
@@ -89,10 +96,23 @@ ascending, then descending, with no unsorted state.
 - **WHEN** the user moves to the next page of the grid
 - **THEN** the next owners in the current order are shown
 
+#### Scenario: Jumping to the last page
+- **WHEN** the user clicks the last-page button
+- **THEN** the last owners in the current order are shown
+
 #### Scenario: Only Name and City are sortable
 - **WHEN** the user views the grid headers
 - **THEN** Name and City can be clicked to sort
 - **AND** Address, Telephone and Pets cannot
+
+#### Scenario: Sortable columns are visible without hovering
+- **WHEN** the grid is sorted by City
+- **THEN** both Name and City show a sort arrow
+- **AND** the City arrow is highlighted
+
+#### Scenario: Columns stay in place
+- **WHEN** the order or the page changes
+- **THEN** every column keeps its width and position
 
 #### Scenario: Changing order or size returns to the first page
 - **WHEN** the user is on page 3 and changes the sort or the page size

@@ -8,12 +8,12 @@ import {PlaywrightWorld} from './support/world';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
+const shownName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
 
 async function expectTheApiPage(world: PlaywrightWorld, params: Record<string, string | number>): Promise<void> {
   const {data} = await axios.get(`${API_BASE}/owners`, {params, timeout: 10_000});
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  await expect(cells).toHaveText(data.content.map(fullName), {timeout: 10_000});
+  await expect(cells).toHaveText(data.content.map(shownName), {timeout: 10_000});
 }
 
 async function sortBy(world: PlaywrightWorld, column: string): Promise<void> {
@@ -65,3 +65,25 @@ Then('only {string} can be sorted', async function (this: PlaywrightWorld, colum
   const expected = columns.split(',').map((c) => c.trim());
   await expect(this.page.locator('th[mat-sort-header]')).toHaveText(expected, {timeout: 10_000});
 });
+
+const columnEdges = (world: PlaywrightWorld) => world.page.locator('#ownersTable th')
+  .evaluateAll((ths) => ths.map((th) => Math.round(th.getBoundingClientRect().left)));
+
+When('I note where the columns are', async function (this: PlaywrightWorld) {
+  await this.page.locator('#ownersTable td.ownerFullName').first().waitFor();
+  this.columnEdges = await columnEdges(this);
+});
+
+Then('the columns have not moved', async function (this: PlaywrightWorld) {
+  await expect.poll(() => columnEdges(this)).toEqual(this.columnEdges);
+});
+
+Then('the {string} arrow is highlighted and the {string} arrow is dimmed',
+  async function (this: PlaywrightWorld, active: string, inactive: string) {
+    const arrow = (column: string) =>
+      this.page.locator('th[mat-sort-header]', {hasText: column}).locator('.mat-sort-header-arrow');
+    await this.page.mouse.move(0, 0); // Material lights an arrow up on hover; the point is to see it without
+    await expect(arrow(inactive)).toHaveCSS('opacity', '1');
+    await expect(arrow(inactive)).toHaveCSS('color', 'rgb(138, 138, 138)');
+    await expect(arrow(active)).toHaveCSS('color', 'rgb(255, 255, 255)');
+  });

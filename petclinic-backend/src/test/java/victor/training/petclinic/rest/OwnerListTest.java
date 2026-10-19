@@ -91,23 +91,25 @@ class OwnerListTest {
     }
 
     @Test
-    void ownersSortByFirstNameThenLastNameByDefault() throws Exception {
+    void ownersSortByLastNameThenFirstNameByDefault() throws Exception {
         owner("Bob", PREFIX + "b", "Oslo");
         owner("Ann", PREFIX + "z", "Oslo");
+        owner("Cid", PREFIX + "a", "Oslo");
         owner("Ann", PREFIX + "a", "Oslo");
 
         assertThat(fullNames(list("lastName=" + PREFIX)))
-                .containsExactly("Ann Pgxa", "Ann Pgxz", "Bob Pgxb");
+                .containsExactly("Ann Pgxa", "Cid Pgxa", "Bob Pgxb", "Ann Pgxz");
     }
 
     @Test
     void aDescendingNameSortReversesTheWholeName() throws Exception {
         owner("Bob", PREFIX + "b", "Oslo");
         owner("Ann", PREFIX + "z", "Oslo");
+        owner("Cid", PREFIX + "a", "Oslo");
         owner("Ann", PREFIX + "a", "Oslo");
 
         assertThat(fullNames(list("lastName=" + PREFIX + "&sort=name,desc")))
-                .containsExactly("Bob Pgxb", "Ann Pgxz", "Ann Pgxa");
+                .containsExactly("Ann Pgxz", "Bob Pgxb", "Cid Pgxa", "Ann Pgxa");
     }
 
     @Test
@@ -123,13 +125,13 @@ class OwnerListTest {
 
     @Test
     void anAscendingCitySortOrdersCitiesThenNames() throws Exception {
-        owner("Bob", PREFIX, "Zurich");
+        owner("Ann", PREFIX + "b", "Zurich");
         owner("Cid", PREFIX, "Athens");
-        owner("Ann", PREFIX, "Zurich");
+        owner("Bob", PREFIX + "a", "Zurich");
 
         DocumentContext page = list("lastName=" + PREFIX + "&sort=city");
 
-        assertThat(firstNames(page)).containsExactly("Cid", "Ann", "Bob");
+        assertThat(firstNames(page)).containsExactly("Cid", "Bob", "Ann");
     }
 
     @Test
@@ -147,9 +149,12 @@ class OwnerListTest {
 
     @Test
     void accentedNamesSortWhereReadersExpectThem() throws Exception {
-        ownersNamed("Mister", "Łukasz", "Long");
+        owner("Ann", PREFIX + "tremaine", "Oslo");
+        owner("Ann", PREFIX + "śliwiński", "Oslo");
+        owner("Ann", PREFIX + "silver", "Oslo");
 
-        assertThat(firstNames(list("lastName=" + PREFIX))).containsExactly("Long", "Łukasz", "Mister");
+        assertThat(values(list("lastName=" + PREFIX), "lastName"))
+                .containsExactly("Pgxsilver", "Pgxśliwiński", "Pgxtremaine");
     }
 
     @Test
@@ -223,7 +228,11 @@ class OwnerListTest {
     }
 
     private static List<String> firstNames(DocumentContext page) {
-        return page.read("$.content[*].firstName");
+        return values(page, "firstName");
+    }
+
+    private static List<String> values(DocumentContext page, String field) {
+        return page.read("$.content[*]." + field);
     }
 
     private static List<String> fullNames(DocumentContext page) {

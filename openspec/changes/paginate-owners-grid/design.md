@@ -59,8 +59,8 @@
    then leak into `openapi.yaml` and `api-types.ts`.
 
 3. **A fixed whitelist maps the `sort` parameter to a `Sort`; the client never names a column.**
-   - `name` sorts by `firstName, lastName, id`.
-   - `city` sorts by `city, firstName, lastName, id`.
+   - `name` sorts by `lastName, firstName, id`; the grid shows "Last, First" to match.
+   - `city` sorts by `city, lastName, firstName, id`.
    - The direction applies to the first property only, so a descending city keeps names ascending
      (spec: "reverse only the chosen field").
 
@@ -117,7 +117,7 @@
 
 - **Collation differs between environments.** zonky, CI or Docker Postgres may not use the dev
   collation, so the accented-name order could differ. → The first backend test asserts the
-  Łukasz/Long/Mister order. If zonky runs under `C` collation, set its locale explicitly
+  Silver/Śliwiński/Tremaine order. If zonky runs under `C` collation, set its locale explicitly
   (`initdb --locale`) rather than weakening the scenario.
 - **Breaking API change.** An external client of `GET /api/owners` would break. → There is none in
   the repo besides those listed above; the chatbot calls only `/api/owners/{id}` and the MCP uses

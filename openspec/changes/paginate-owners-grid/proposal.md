@@ -13,9 +13,10 @@ order the user can choose.
   shows how many owners there are in total.
 - **Sorting by Name or City.** Clicking the column title sorts by it; clicking again reverses the
   order.
-  - Names sort the way they are displayed: by first name, then surname.
+  - Names are shown surname first, as in "Liddell, Alice", and sort that way: by surname, then
+    first name.
   - Within the same city, owners stay in name order.
-  - Accented names such as Łukasz or Ștefan sort where a reader expects them.
+  - Accented names such as Śliwiński or Mureșan sort where a reader expects them.
 - **No sorting by Address, Telephone or Pets.** This was agreed after the demo: the addresses and
   phone numbers we hold are written in too many different ways for their order to mean anything.
 - **Search works as before**, and its results come in pages too. A new search, a new sort or a new

@@ -24,3 +24,12 @@ Feature: Browse owners page by page
 
   Scenario: Only Name and City can be sorted
     Then only "Name, City" can be sorted
+
+  Scenario: Columns stay in place when the order changes
+    When I note where the columns are
+    And I sort the owners by "Name" again
+    Then the columns have not moved
+
+  Scenario: Every sortable column shows its arrow, the active one highlighted
+    When I sort the owners by "City"
+    Then the "City" arrow is highlighted and the "Name" arrow is dimmed

@@ -15,11 +15,13 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
 const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+// the grid shows "Potter, Harry"; the scenarios name people the way they are called
+const asCalled = (shown: string) => shown.split(', ').reverse().join(' ');
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  const listed = async () => (await cells.allTextContents()).map((t) => asCalled(t.trim())).filter(Boolean).sort();
 
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }
