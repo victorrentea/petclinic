@@ -9,9 +9,11 @@ on:
 permissions:
   contents: write
 
-# Cancel an in-progress run when the same branch is pushed again.
+# Cancel an in-progress run when the same branch is pushed again. One group per event: a
+# same-repo PR's pull_request run skips its build (the push run covers it), and sharing the
+# push run's group it cancelled that real run first, leaving the commit with no CI at all.
 concurrency:
-  group: ci-${{ github.head_ref || github.ref_name }}
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
