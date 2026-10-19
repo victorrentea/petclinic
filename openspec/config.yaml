@@ -11,13 +11,16 @@ schema: spec-driven
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Write for a business stakeholder who has never seen code; it gets reviewed with them
+    - Describe what users see and do on screen, in plain words - no endpoints, JSON, HTTP codes,
+      parameter names, class, file or library names, and no "BREAKING" markers
+    - Impact names screens, data and documents affected, never code
+    - State any question the business still has to answer
+  design:
+    - Holds every technical detail kept out of the proposal - API contract, breaking changes,
+      affected files, technical out-of-scope - reviewed with engineers only
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
