@@ -41,6 +41,7 @@ arrow {
 [..rest] --> [..mapper]
 [..rest] --> [..rest.dto]
 [..rest] --> [..notification]
+[..rest.error] --> [..domain]
 [..mcp] --> [..domain]
 [..mcp] --> [..repository]
 

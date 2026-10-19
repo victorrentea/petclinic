@@ -39,7 +39,8 @@ When('I book a visit for {word}', async function (this: PlaywrightWorld, date: s
 });
 
 Then('the visit is refused', async function (this: PlaywrightWorld) {
-  await expect(this.page.locator('#visit .has-error .help-block')).toBeVisible();
+  await expect(this.page.locator('#visit .has-error .help-block', {hasText: /cannot predate|at most one year ahead/}))
+    .toBeVisible();
   await expect(this.page).toHaveURL(/\/visits\/add$/);
 
   const {data: pet} = await axios.get(`${API_BASE}/pets/${this.petId}`, {timeout: 10_000});

@@ -121,6 +121,22 @@ class VisitDateRangeTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void aVisitDatedBeforeTheRuleCanStillBeReworded() throws Exception {
+        LocalDate legacyDate = LocalDate.of(9, 7, 20);
+        Visit visit = new Visit();
+        visit.setDate(legacyDate);
+        visit.setDescription("checkup");
+        petRepository.findById(petId).orElseThrow().addVisit(visit);
+        visitRepository.save(visit);
+        VisitFieldsDto reworded = new VisitFieldsDto().setDate(legacyDate).setDescription("annual checkup");
+
+        mockMvc.perform(put("/api/visits/" + visit.getId())
+                .content(mapper.writeValueAsString(reworded))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+    }
+
     private ResultActions bookForOwner(LocalDate date) throws Exception {
         VisitFieldsDto visit = new VisitFieldsDto().setDate(date).setDescription("checkup");
         return mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)

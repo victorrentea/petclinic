@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
+import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
@@ -23,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/visits")
@@ -73,7 +75,9 @@ public class VisitRestController {
     private int bookVisit(VisitDto visitDto) {
         log.info("Booking visit for pet {}: {}", visitDto.getPetId(), visitDto.getDescription());
         Visit visit = visitMapper.toVisit(visitDto);
-        petRepository.findById(visitDto.getPetId()).orElseThrow().checkVisitDate(visit.getDate(), LocalDate.now());
+        Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
+        pet.checkVisitDate(visit.getDate(), LocalDate.now());
+        visit.setPet(pet);
         visitRepository.save(visit);
         return visit.getId();
     }
@@ -81,7 +85,9 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
-        currentVisit.getPet().checkVisitDate(visitDto.getDate(), LocalDate.now());
+        if (!Objects.equals(visitDto.getDate(), currentVisit.getDate())) { // a legacy date may stay as it is
+            currentVisit.getPet().checkVisitDate(visitDto.getDate(), LocalDate.now());
+        }
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);

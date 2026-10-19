@@ -12,6 +12,18 @@ describe('VisitDateRange', () => {
     expect(range.max.format('YYYY-MM-DD')).toBe(moment().add(1, 'year').format('YYYY-MM-DD'));
   });
 
+  it('keeps a visit dated before the rule editable', () => {
+    const range = new VisitDateRange(dapple, '0009-07-20');
+
+    expect(range.min.format('YYYY-MM-DD')).toBe('0009-07-20');
+  });
+
+  it('keeps a visit booked further ahead editable', () => {
+    const farAhead = moment().add(2, 'years').format('YYYY-MM-DD');
+
+    expect(new VisitDateRange(dapple, farAhead).max.format('YYYY-MM-DD')).toBe(farAhead);
+  });
+
   it('has no lower bound before the pet is loaded', () => {
     expect(new VisitDateRange().min).toBeNull();
   });

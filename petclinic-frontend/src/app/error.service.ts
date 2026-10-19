@@ -28,6 +28,10 @@ export class HttpErrorHandler {
       let message = (error.error instanceof ErrorEvent) ?
         error.error.message :
         `server returned code ${error.status} with body "${error.error}"`;
+      const problemErrors = error.error?.errors;
+      if ((problemErrors instanceof Array) && problemErrors.length > 0) { // a ProblemDetail from the backend
+        message = problemErrors.join('; ');
+      }
       const errorsHeader = error.headers.get('errors');
       if (errorsHeader) {
         const errors = JSON.parse(errorsHeader);

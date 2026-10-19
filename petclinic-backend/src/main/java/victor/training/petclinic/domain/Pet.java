@@ -21,7 +21,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
 
@@ -66,12 +65,12 @@ public class Pet {
             return;
         }
         if (birthDate != null && visitDate.isBefore(birthDate)) {
-            throw new ValidationException(
+            throw new VisitDateOutOfRangeException(
                     "Visit date " + visitDate + " is before " + name + "'s birth date " + birthDate);
         }
         LocalDate latest = today.plusYears(1);
         if (visitDate.isAfter(latest)) {
-            throw new ValidationException(
+            throw new VisitDateOutOfRangeException(
                     "Visit date " + visitDate + " is too far: book at most one year ahead, by " + latest);
         }
     }

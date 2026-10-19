@@ -98,6 +98,7 @@ class DomainModelExtractor {
         return classes.stream()
                 .filter(c -> c.getPackageName().equals(DOMAIN_MODEL_PKG))
                 .filter(c -> !c.isAnonymousClass() && !c.isInnerClass())
+                .filter(c -> !c.isAssignableTo(Throwable.class)) // a rule the model enforces, not a concept
                 .<Class<?>>map(JavaClass::reflect)
                 .sorted(Comparator.comparing(Class::getSimpleName))
                 .toList();
