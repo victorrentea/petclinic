@@ -54,7 +54,7 @@ test('the header wraps the title in the link, and is the bare title without one'
 });
 
 // A @SpringBootTest's section is titled with the sentence JUnit shows for the method
-// (@DisplayNameGeneration(PrettyTestNames)), which is never written in the .java file —
+// (PrettyTestNames, the backend's default generator), which is never written in the .java file —
 // the method is `adds_a_visit_to_an_existing_pet`. Matching the title as a literal
 // substring therefore finds nothing, and the diagram loses the line it links to.
 const JAVA = [

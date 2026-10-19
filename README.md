@@ -59,35 +59,34 @@ B) Manual: Run in separate terminals:
 
 Tell an agent running in this repo:
 
-### Context Engineering
+### Agent Tasks
 
-- **Trim boilerplate** — remove from AGENTS.md the mvn/npm instructions any LLM already knows.
-- **Point at generated sources** — replace AGENTS.md's `## API Endpoints` with a pointer to the auto-synced `openapi.yaml`.
+- **Trim boilerplate from .md** — remove from AGENTS.md the mvn/npm instructions any LLM already knows.
+- **AGENTS.md: Fix drift** — check it is non-contradictory and in sync with project modules.
 - **Scope rules by folder** — extract backend rules into a nested `petclinic-backend/AGENTS.md` that loads only there.
-- **Path-scoped skill** — move `### Java Code Style` into a `java/SKILL.md`
-- **Force load a skill for by file paths**: Add to skill's frontmatter `paths: petclinic-backend/**/*.java`, so it 100% activates before any `.java` edit.
-- **Reference drift-safe knowledge** — replace the drifting `## Domain Model` chapter with a link to the in-sync `DomainModel.puml`. Add a link to DB.sql and openapi.yaml
-- **Audit AGENTS.md** — check it is non-contradictory and in sync with recent code changes.
+- **Prevent .md drift** — replace AGENTS.md's `## API Endpoints` with a pointer to the in-sync `openapi.yaml`.
+- **AGENTS.md: Reference drift-safe knowledge** — replace the list of REST Endpoints in AGENTS.md with a link to the in-sync `openapi.yaml`.
+- **Create a skill** — move `### Java Code Style` from AGENTS.md into a `java-code-style/SKILL.md`. Test it activates ±eval on 3 runs.
+- **Turn skill into rule**: Turn the Java Code Style skill you extracted into a .claude/rules/java-rule.md that is loaded 100% before any .java file is edited.
+- **Hooks** – create a hook that plays a sound when the agent finished its turn or waits for your answer/approval.
+- **Scripted guardrail** – remove the rule about < 120 chars and try to manually violate it
 
-### Tasks
+### Petclinic Tasks
 
 The tasks below have the pattern: **<description>** – <prompt to paste to agent>
 
 - **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
 - **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
 - **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
-- **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
 - **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
-- **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
 - **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is most time lost?
 - **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
-- **Query tuning** — optimize the "search owners by last name" query.
-- **Speedup tests** — speedup the backend tests.
-- **Rule → guardrail** — replace the AGENTS.md rule "Keep line length < 120 chars" with a script that enforces it on `git push`, over the Java files the push actually changes.
-- **⭐DevOps drills** — seed a red pipeline, a latency incident or a stale runbook, then drive an agent to green: [`exercises/devops/`](exercises/devops/)
+- **Query tuning** — optimize the "search owners by last name" flow.
+- **Tuning tests** — speedup the backend tests (takes lots of time & tokens).
+- **Exploratory QA** — download the [Playwright test agents](https://playwright.dev/docs/test-agents) and explore the app to write 10 significant automated .feature e2e tests
+- **Grafana dashboard** — create a dashboard of what to monitor, then open it (start Grafana's Docker if needed).
   
 Some tasks above require tools from the project's `.mcp.json`, which should autoload when you start the agent in this folder.
-
 
 ### Tools
 Start YOUR agent in YOUR🫵 work project and tell it:
@@ -105,32 +104,27 @@ Patiently guide the agent through this setup, then tell it: Turn the lessons you
 
 ### Tools for Agentic Lifestyle
 - [WisprFlow](https://wisprflow.ai) to dictate.
-- [CodexBar](https://codexbar.app) to see the remaining Claude/Codex/Copilot quota.
-- [ScreenBrush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before screenshot to agent. 
-- Custom statusline: [victorrentea/victor-statusline](https://github.com/victorrentea/victor-statusline) — rich status bars for Claude Code and Copilot CLI (per-turn cost, quota burn-rate, prompt-cache health). Tell your CLI agent: *configure yourself a status bar following that repo's README*.
+- [CodexBar](https://codexbar.app) and/or [AgentsView](https://www.agentsview.io/) to monitor the remaining Claude/Codex/Copilot quota/usage.
+- [ScreenBrush](https://apps.apple.com/us/app/screenbrush/id1233965871) to draw on screen before a screenshot to agent. 
+- [WalkieTalkie](https://github.com/victorrentea/walkie-talkie) to speak and point/crop/move/select/copy/record.
+- [Victor's status line](https://github.com/victorrentea/victor-statusline) for Claude Code and Copilot CLI: per-turn cost, quota burn-rate, prompt-cache health, suspend until quota refills
+- [Human Review](https://github.com/victorrentea/human-review) - helper suite to review AI-gen PRs effectively
 
-### Adopt ideas from `petclinic` into your own project ❤️
+### Ideas to adopt into your own project ❤️
 
-Start an agent in **your** project and tell it: 
-From the https://github.com/victorrentea/petclinic repo…
-- get the mechanism that keeps `packages.puml` in sync with code structure.
-- get the mechanism that generates `DomainModel.puml` from code.
-- adopt the database migrations scripts technique
-- get the mechanism to auto-build `DB.puml` from the incremental DB scripts.
-- show me where my GitHub Copilot AI credits went — per day, per model and per session — using
-  https://github.com/victorrentea/copilot-usage.
-- copy the idea to keep the backend Java in sync with `openapi.yaml`, and the frontend `api-types.ts` - prove that a change in a backend Dto fails the FE build, ran automatically prepush and on CI.
-- get the way agent is kept in a loop to fix CI its push broke.
-- get how to run critical tests before every push and again remotely in CI.
-- copy the CODEOWNERS idea to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
-- write 3 .feature tests for the most critical flows of my app XYZ
-- adopt the technique to generate sequence diagrams from key e2e tests, one per scenario, as in `petclinic-test/generated/*.genseq.puml`.
-- get the code review skill using local sonar scanner and multi-agent review
-- assemble a reviewer's guide for a change set — diagram deltas, Code City, a video of the
-  feature, complexity delta and snippets deep-linked into the editor — with
-  https://github.com/victorrentea/human-review (`/plugin marketplace add victorrentea/human-review`),
-  which is the `/human-review` skill this repo symlinks into `.claude/skills/`.
-- set up an End/Stop hook that plays a sound when the agent finishes its turn.
+Start an agent in **your** project and prompt it: 
+From the https://github.com/victorrentea/petclinic repo adopt…
+- `packages.puml` kept in sync with code structure via tests.
+- `DomainModel.puml` generated from code via reflection.
+- `ConceptualModel.drawio.png` unit-tested vs code using reflection.
+- `DB.puml` built from from the incremental DB scripts.
+- In-sync Backend Java REST API <=> `openapi.yaml` <=> frontend `api-types.ts`.
+- Agent auto-fixes the CI after any push.
+- Running critical tests before every push (githooks/) and again in CI (workflows/).
+- CODEOWNERS file to protect critical files behind tech-lead/architect review to prevent dev fatigue-LGTM.
+- Gherkin .feature tests - write 3 for the most critical flows of my app
+- Generate sequence diagrams from selected e2e tests, as in `petclinic-test/generated/*.genseq.puml`.
+- assemble a reviewer's guide for a change set — as in https://github.com/victorrentea/human-review
 
 ## Architecture diagrams
 
