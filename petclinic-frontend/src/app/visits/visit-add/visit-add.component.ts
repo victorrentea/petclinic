@@ -44,7 +44,7 @@ export class VisitAddComponent implements OnInit {
     this.petService.getPetById(petId).subscribe(
       pet => {
         this.currentPet = pet;
-        this.dateRange = new VisitDateRange(pet.birthDate);
+        this.dateRange = new VisitDateRange(pet);
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
