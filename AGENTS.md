@@ -65,6 +65,8 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 Before changing how the layers, the database or the notification call work, read the decisions
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
+Before sizing a query, a page or an index, check the expected data volumes in [VOLUMETRY.md](VOLUMETRY.md).
+
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a

@@ -67,7 +67,7 @@ Tell an agent running in this repo:
 - **Prevent .md drift** — replace AGENTS.md's `## API Endpoints` with a pointer to the in-sync `openapi.yaml`.
 - **AGENTS.md: Reference drift-safe knowledge** — replace the list of REST Endpoints in AGENTS.md with a link to the in-sync `openapi.yaml`.
 - **Create a skill** — move `### Java Code Style` from AGENTS.md into a `java-code-style/SKILL.md`. Test it activates ±eval on 3 runs.
-- **Turn skill into rule**: Turn the Java Code Style skill you extracted into a .claude/rules/java-rule.md that is loaded 100% before any .java file is edited.
+- **Turn skill into rule**: Turn tWhat copilot? Hook in Claude Code. he Java Code Style skill you extracted into a .claude/rules/java-rule.md that is loaded 100% before any .java file is edited.
 - **Hooks** – create a hook that plays a sound when the agent finished its turn or waits for your answer/approval.
 - **Scripted guardrail** – remove the rule about < 120 chars and try to manually violate it
 

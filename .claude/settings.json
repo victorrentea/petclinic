@@ -48,6 +48,17 @@
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/protect-claude-md.sh\""
           }
         ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "//": "sound: the agent asks you a question",
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Submarine.aiff >/dev/null 2>&1 &",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -68,6 +79,31 @@
             "//": "after a git push lands, make the agent watch the CI run and repair a red build",
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/watch-ci-after-push.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "//": "sound: the agent finished its turn",
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Funk.aiff >/dev/null 2>&1 &",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "//": "sound: the agent waits for your approval",
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Submarine.aiff >/dev/null 2>&1 &",
+            "timeout": 5
           }
         ]
       }
