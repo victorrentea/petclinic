@@ -39,6 +39,10 @@ display:none;
   margin-bottom: 16px;
 }
 
+.owners-controls mat-paginator {
+  background: transparent;
+}
+
 .owners-pagination {
   display: flex;
   align-items: center;

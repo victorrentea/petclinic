@@ -76,7 +76,8 @@ design system has no multi-select yet.
 
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
-- **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
+- **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed); its collation is pinned to
+  `en_US.UTF-8` in `src/test/resources/config/application.properties`, or Linux CI sorts "Łukasz" after "Wendy"
 - **Flyway boots from two locations** (`ddl-auto=none`); an empty DB before that is normal.
   `db/migration/` is the versioned **schema** chain — no rows here, ever: seed data in a frozen
   migration is what forced the old V5/V7/V8 to patch each other. `db/seed/R__seed.sql` is the
@@ -91,7 +92,7 @@ design system has no multi-select yet.
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners` (one page: `page`, `size` 5/10/20, `sort=name|city[,desc]`, `lastName`), `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

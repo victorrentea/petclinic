@@ -11,6 +11,8 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -52,6 +54,7 @@ public class Owner {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
     private String telephone;
 
+    @BatchSize(size = 20) // a page of up to 20 owners loads its pets, then their visits, in one query each
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner", fetch = FetchType.LAZY)
     private Set<Pet> pets = new HashSet<>();
 

@@ -13,13 +13,12 @@ Given('today is {word}', async function (this: PlaywrightWorld, today: string) {
 });
 
 Given('a pet born on {word}', async function (this: PlaywrightWorld, birthDate: string) {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const owner = owners.find((o: any) => o.pets.some((p: any) => p.birthDate === birthDate));
-  if (!owner) {
+  const {data: pets} = await axios.get(`${API_BASE}/pets`, {timeout: 10_000});
+  const pet = pets.find((p: any) => p.birthDate === birthDate);
+  if (!pet) {
     throw new Error(`No pet born on ${birthDate} in the seed (db/seed/R__seed.sql)`);
   }
-  const pet = owner.pets.find((p: any) => p.birthDate === birthDate);
-  this.ownerId = owner.id;
+  this.ownerId = pet.ownerId;
   this.petId = pet.id;
   this.petName = pet.name;
 });

@@ -69,15 +69,16 @@
    - *Alternative:* Spring's `?sort=lastName,desc` binding. Rejected: it accepts any entity
      property, which would make Telephone sortable again through the API and expose field names.
 
-4. **Validation answers 400, never a fallback.**
-   - `size` is checked against {5, 10, 20} and `page` against ≥ 0.
-   - An unknown sort field or direction throws a dedicated exception; the advice maps it to the
-     existing `validationProblem` shape.
-   - `MethodArgumentTypeMismatchException` (for example `page=abc`) gets its own 400 handler instead
-     of falling into the catch-all 500.
-
-   Hand-parsing the parameters, rather than using `@Min`/`@Pattern` method validation, keeps every
-   message in one place and testable without Spring.
+4. **Validation answers 400, never a fallback.** `page`, `size` and `sort` bind to a validated
+   record, `OwnerListQuery` in `rest.dto` (`@ParameterObject @Validated`).
+   - `@Min(0)` checks the page; `@Pattern` checks `size` (`5|10|20`) and `sort`
+     (`(name|city)(,(asc|desc))?`).
+   - The record's `toPageable()` maps the checked values to a `PageRequest`.
+   - Errors reach the existing `MethodArgumentNotValidException` handler. That includes binding
+     errors such as `page=abc`, so `ExceptionControllerAdvice` doesn't change.
+   - *Alternative:* hand-parse the parameters and throw a dedicated exception. Rejected during
+     apply: `docs/packages.puml` allows neither `rest → rest.error` nor `rest.error → rest`, so that
+     exception would have needed a new dependency arrow.
 
 5. **Fixed query count via `@BatchSize(size = 20)` on `Owner.pets` and `Pet.visits`.** A page of up
    to 20 owners then loads in about 4 statements: page, count, pets batch, visits batch.
@@ -134,8 +135,10 @@
   - `OwnerRestController.listOwners` and `OwnerRepository`.
   - A new `OwnerPageDto`.
   - `@BatchSize` on `Owner.pets` and `Pet.visits`.
-  - `ExceptionControllerAdvice`.
-  - `ApiExamples.OWNERS` and `OwnerTest`'s list tests.
+  - The query parameters bind to a new `OwnerListQuery`.
+  - The test-only `config/application.properties` pins zonky's collation.
+  - `ApiExamples.OWNERS`, and the tests that read the bare array: `OwnerTest`, `AddVisitApiTest`,
+    the functional `OwnerSteps`/`owners.feature`, and `OwnerSearchThroughLatencyProxyTest`.
   - The regenerated `openapi.yaml` and `DomainModel.puml`.
 - **Frontend:**
   - `OwnerService` and `OwnerListComponent` (template, spec).

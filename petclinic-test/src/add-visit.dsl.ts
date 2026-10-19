@@ -13,12 +13,11 @@ export interface OwnerWithPet {
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!ownerWithPet) {
-    throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
+  const {data: pets} = await axios.get(`${API_BASE}/pets`, {timeout: 10_000});
+  if (pets.length === 0) {
+    throw new Error('No pet found in the system; cannot run add-visit scenario');
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  return {ownerId: pets[0].ownerId, petId: pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {
