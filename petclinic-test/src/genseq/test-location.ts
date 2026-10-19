@@ -27,7 +27,7 @@ const JAVA_METHOD = /\bvoid\s+([A-Za-z_$][\w$]*)\s*\(/;
  * `sourceName` is the file the text came from. In a .java file the method declaration is
  * looked for **first**, because there the title is never written out anyway: a
  * @SpringBootTest's section is titled with the sentence JUnit displays for the method
- * (@DisplayNameGeneration(PrettyTestNames)), and the method is
+ * (PrettyTestNames, the backend's default generator), and the method is
  * `adds_a_visit_to_an_existing_pet`. Rather than reimplement the generator, the method
  * name goes through the same camelCase/snake_case-to-words reading the DSL narration
  * uses; the two agree because they are the same transformation.

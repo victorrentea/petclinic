@@ -7,7 +7,8 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 
 /**
  * Turns camelCase class and method names into plain sentences, so a @Nested test class reads as a
- * specification rather than as code. Use via @DisplayNameGeneration on the test class.
+ * specification rather than as code. The default for every test in this module
+ * (src/test/resources/junit-platform.properties), so no class has to opt in.
  */
 public class PrettyTestNames extends DisplayNameGenerator.ReplaceUnderscores {
 

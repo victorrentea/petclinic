@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,6 @@ import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
-import victor.training.petclinic.tools.PrettyTestNames;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,7 +54,6 @@ import static org.mockito.Mockito.when;
  * Spring context, no database, so the whole class runs in milliseconds.
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(PrettyTestNames.class)
 class CreateVisitShould {
     private static final int OWNER_ID = 7;
     private static final int PET_ID = 13;
