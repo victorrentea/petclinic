@@ -1,10 +1,7 @@
 ---
-name: java-code-style
-description: PetClinic's Java code style rules. Use whenever writing, editing, reviewing or refactoring Java code in this repo.
-paths: ["**/*.java"] #MUST HAVE here = IT ALWAYS LOADS this before touch any .java file
+paths: ["**/*.java"]
 ---
 
-# Java Code Style
 - Keep < 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
