@@ -4,8 +4,8 @@ Add to rules here to prevent repeating AI fail/slop.
 Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
-Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
-GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
+Claude Code: never write rules into `CLAUDE.md`.
+GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -66,11 +66,8 @@ Request → REST Controller → Repository / Mapper → JPA Entity
 Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 
 **Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead.
-  Same deny on `petclinic-frontend/src/app/generated/api-types.ts` and `petclinic-backend/docs/generated/**`
-- Constructor injection, global exception handling via `@RestControllerAdvice`
+- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
+- `/openapi.yaml` is generated (don't edit it!) from Java DTOs & REST Controllers by `OpenApiExtractorTest`
 
 ## Additional Knowledge
 
@@ -154,13 +151,13 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep line length < 120 chars
+- Keep < 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
+- Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on every `@RequestBody`
-- Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
+- Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
 - Write non-trivial code using TDD
