@@ -117,6 +117,14 @@ class CreateVisitToolTest {
     }
 
     @Test
+    void date_more_than_a_year_ahead_is_rejected() {
+        LocalDate tooFar = LocalDate.now().plusYears(1).plusDays(1);
+
+        assertThatThrownBy(() -> petClinicMcp.createVisit(petId, tooFar, LocalTime.of(10, 30), "Checkup"))
+                .hasMessageContaining("at most one year ahead");
+    }
+
+    @Test
     void rejects_booking_when_pet_already_has_max_upcoming_visits() {
         // Fill the pet up to the cap with future visits, on distinct future days.
         for (int i = 0; i < PetClinicMcp.MAX_UPCOMING_VISITS_PER_PET; i++) {

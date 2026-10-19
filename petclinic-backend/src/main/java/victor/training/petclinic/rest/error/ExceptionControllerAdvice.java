@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,16 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ProblemDetail> handleValidation(ValidationException ex, HttpServletRequest request) {
+        log.warn("Validation failed: {}", ex.getMessage());
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", List.of(ex.getMessage()));
         return ResponseEntity.badRequest().body(pd);
     }
 
