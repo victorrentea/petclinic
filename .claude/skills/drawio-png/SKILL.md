@@ -1,6 +1,6 @@
 ---
 name: drawio-png
-description: Read the draw.io diagram embedded in a *.drawio.png (also .drawio / .drawio.svg) as text — vertices, edges, and the custom attributes behind the picture (kind, port, traced, …). Use whenever a task asks what a diagram says, who calls whom in an architecture/deployment picture, or to check a diagram against the code — instead of eyeballing the image.
+description: Read the draw.io diagram embedded in a *.drawio.png (also .drawio / .drawio.svg) as text — vertices, edges, and the custom attributes behind the picture (kind, port, tech, traced, …). Use whenever someone mentions the deployment, architecture, container or conceptual-model diagram, a "drawio" picture, or its hidden/embedded XML, metadata or "headers"; whenever a question is who calls, consumes or depends on the backend / its API, or what talks to what; and to check a diagram against the code. Load it FIRST, even mid-task, before searching for the file, eyeballing the image, or decoding PNG text chunks (zTXt/tEXt/mxGraphModel) by hand. The diagrams live in petclinic-backend/docs/.
 allowed-tools: Bash(.claude/skills/drawio-png/drawio.py:*)
 ---
 
@@ -43,3 +43,10 @@ picture for a month (`a57d5e18`) with every test green.
 
 `petclinic-backend/src/test/java/victor/training/petclinic/guardrail/DrawioDiagram.java`
 does the same decoding in Java for tests; keep both in step if the format handling changes.
+
+## Trigger eval
+
+`evals/trigger_eval.py [reps]` runs every phrasing in `evals/prompts.json` through headless
+`claude -p` and passes a run only if it loads this skill (~2 min, a few $). Rerun it after
+touching `description`; the bar is 10/10 at 2 reps. It was 9/10 before the 2026-10-15
+rewording ("architecture diagram" without "drawio" went grepping instead).
