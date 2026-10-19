@@ -82,8 +82,10 @@
 - [x] 5.2 Update `AGENTS.md` if anything drifted. The REST contract line for `/api/owners` should
   mention paging; `VOLUMETRY.md` is linked.
   - Verify: re-read it against the code.
-- [ ] 5.3 Commit, push, and watch CI.
+- [x] 5.3 Commit, push, and watch CI.
   - Verify: `ci.yml` is green, including the Sonar gate (new coverage ≥ 80%, duplication ≤ 3%).
+  - Green on a7531c2d (https://github.com/victorrentea/petclinic/actions/runs/39275827820), after
+    clearing two Sonar reliability issues that failed 13a91dea.
 - [x] 5.4 Open a separate issue for the stray "Ada Acceptance…" owners left by `add-owner.spec.ts`.
   - Verify: the issue URL is recorded in this file.
   - Opened: https://github.com/victorrentea/petclinic/issues/56
