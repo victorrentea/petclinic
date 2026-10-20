@@ -219,7 +219,18 @@ paths:
                         id: 1
                         name: cat
                       ownerId: 1
-                      visits: []
+                      visits:
+                      - id: 1
+                        date: 2013-01-01
+                        description: neutered
+                        petId: 1
+                        vetId: 3
+                        vetFirstName: Linda
+                        vetLastName: Douglas
+                      - id: 2
+                        date: 2013-01-02
+                        description: annual checkup
+                        petId: 1
                   - id: 2
                     firstName: Betty
                     lastName: Davis
@@ -633,6 +644,9 @@ paths:
                       date: 2013-01-01
                       description: rabies shot
                       petId: 2
+                      vetId: 1
+                      vetFirstName: James
+                      vetLastName: Carter
               schema:
                 type: array
                 items:
@@ -1412,6 +1426,9 @@ paths:
                     date: 2013-01-01
                     description: rabies shot
                     petId: 7
+                    vetId: 1
+                    vetFirstName: James
+                    vetLastName: Carter
                   - id: 2
                     date: 2013-01-02
                     description: annual checkup
