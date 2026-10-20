@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {
-  METHOD_LINK_MARKER, lineOfMethod, linkedMethodLabel, methodHandle, sourcePathOf,
+  METHOD_LINK_MARKER, lineOfMethod, linkedMethodLabel, methodHandle, overloadOf, sourcePathOf,
 } from './code-location';
 
 const CONTROLLER = `package victor.training.petclinic.rest;
@@ -113,4 +113,61 @@ test('a class from the shared library links into the library, whichever service 
       ? 'class PhoneNumbers {\n  static String normalize(String phone) {' : undefined));
   expect(handle).toBe('src://petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers'
     + '.java:2{Click to open PhoneNumbers.normalize}');
+});
+
+// Two methods named `normalize`: the javadoc of the second even names the first, and the
+// second calls the first. Each arrow has to open the overload it drew.
+const PHONE_NUMBERS = `package victor.training.commons;
+
+public final class PhoneNumbers {
+    /** {@code +1 (608) 555-1023} → {@code +16085551023}. */
+    public static String normalize(String phone) {
+        return phone;
+    }
+
+    /** Like {@link #normalize(String)}, but a national number is given the caller's dial code. */
+    public static String normalize(String phone,
+            HomeCountry homeCountry) {
+        String normalized = normalize(phone);
+        return homeCountry.homeDialCode() + normalized;
+    }
+}
+`;
+const PHONE_NUMBERS_PATH =
+  '/repo/petclinic-commons/src/main/java/victor/training/commons/PhoneNumbers.java';
+const phoneHandle = (attributes: Record<string, string>) => methodHandle(
+  {'code.namespace': 'victor.training.commons.PhoneNumbers', 'code.function': 'normalize',
+    ...attributes},
+  'petclinic-backend', '/repo', (p) => (p === PHONE_NUMBERS_PATH ? PHONE_NUMBERS : undefined));
+
+test('an overload is found by the parameter types the span was stamped with', () => {
+  expect(phoneHandle({'boundary.parameters': 'String, HomeCountry'})).toContain('PhoneNumbers.java:10{');
+  expect(phoneHandle({'boundary.parameters': 'String'})).toContain('PhoneNumbers.java:5{');
+});
+
+// A span recorded before the types were stamped still printed its arguments.
+test('without stamped types, the number of arguments picks the overload', () => {
+  expect(phoneHandle({'boundary.args': '[8474461990, victor.training.X@64fb61b]'}))
+    .toContain('PhoneNumbers.java:10{');
+  expect(phoneHandle({'boundary.args': '[+18474461990]'})).toContain('PhoneNumbers.java:5{');
+});
+
+test('with nothing to tell overloads apart, the first one by name is the answer', () => {
+  expect(phoneHandle({})).toContain('PhoneNumbers.java:5{');
+});
+
+test('a record or a list among the arguments counts as one', () => {
+  expect(overloadOf({'boundary.args': '[Owner[id=1, name=x], [a, b], 3]'})).toEqual({arity: 3});
+  expect(overloadOf({'boundary.args': '[]'})).toEqual({arity: 0});
+});
+
+test('parameter types are compared erased and unqualified, annotations ignored', () => {
+  const source = [
+    'class C {',
+    '  void put(int id) {}',
+    '  void put(@RequestBody final java.util.Map<String, List<Integer>> byId, String... rest) {}',
+    '}',
+  ].join('\n');
+  expect(lineOfMethod(source, 'put', {types: ['Map', 'String[]']})).toBe(3);
+  expect(lineOfMethod(source, 'put', {types: ['int']})).toBe(2);
 });
