@@ -1,0 +1,77 @@
+@startuml
+
+title Frontend Logical Architecture
+caption All folders and their imports are tested against the code by scripts/packages-arch.test.mjs
+footer petclinic-frontend/docs/frontend-packages.puml
+
+skinparam shadowing false
+' the review page themes this colour for dark mode (--dgm-link)
+skinparam hyperlinkColor #1A4FA0
+skinparam componentStyle rectangle
+skinparam nodesep 20
+' the stereotype is the box's folder, relative to petclinic-frontend/, which the test and the
+' review page read; it is hidden so the folder is not printed under its name.
+' A file belongs to the box with the deepest folder containing it.
+' Only production .ts counts (*.spec.ts is skipped, like ArchUnit's DoNotIncludeTests).
+' testing/ keeps its box: its stubs are non-spec files, imported by specs alone.
+' Imports leaving src/app (../environments) are not boxes and are not checked.
+hide stereotype
+skinparam ranksep 30
+<style>
+component {
+  BackGroundColor #ECEFF1
+  LineColor #546E7A
+}
+arrow {
+  LineColor #78909C
+}
+</style>
+
+[app] <<src/app>>
+[owners] <<src/app/owners>>
+[vets] <<src/app/vets>>
+[pets] <<src/app/pets>>
+[visits] <<src/app/visits>>
+[pettypes] <<src/app/pettypes>>
+[specialties] <<src/app/specialties>>
+[parts] <<src/app/parts>>
+[invoice] <<src/app/invoice>>
+[design-system] <<src/app/design-system>>
+[generated] <<src/app/generated>>
+[testing] <<src/app/testing>>
+
+' <--> is two arrows, one each way: the test reads it as both dependencies.
+' Every feature module is registered by app.module, and every feature service
+' takes HttpErrorHandler from the root error.service.
+[app] <--> [owners]
+[app] <--> [pets]
+[app] <--> [visits]
+[app] <--> [vets]
+[app] <--> [pettypes]
+[app] <--> [specialties]
+[app] --> [parts]
+
+[owners] <--> [pets]
+[pets] <--> [visits]
+[visits] --> [owners]
+[pets] --> [pettypes]
+[visits] --> [pettypes]
+[pettypes] --> [specialties]
+[vets] --> [specialties]
+
+[pets] --> [design-system]
+[vets] --> [design-system]
+
+[owners] --> [generated]
+[pets] --> [generated]
+[visits] --> [generated]
+[pettypes] --> [generated]
+[specialties] --> [generated]
+[vets] --> [generated]
+
+' layout only, ignored by the test: shared and unused boxes on the bottom row
+[specialties] -[hidden]-> [parts]
+[specialties] -[hidden]-> [invoice]
+[specialties] -[hidden]-> [testing]
+
+@enduml

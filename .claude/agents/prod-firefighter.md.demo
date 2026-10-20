@@ -1,5 +1,5 @@
 ---
-name: firefighter
+name: prod-firefighter
 description: >
   On-call SRE for a fictional PetClinic production. A game, not an operator: it
   "fights" a made-up 3am outage using pseudo-tools it narrates itself — nothing it

@@ -1,10 +1,12 @@
 @startuml
 
 title Backend Logical Architecture
-caption All packages and their dependencies are ArchUnit-tested against the code
+caption All packages and their dependencies are [[https://www.archunit.org/{What is ArchUnit?} ArchUnit]]-tested against the code
 footer petclinic-backend/docs/packages.puml
 
 skinparam shadowing false
+' the review page themes this colour for dark mode (--dgm-link)
+skinparam hyperlinkColor #1A4FA0
 skinparam componentStyle rectangle
 skinparam nodesep 20
 ' the box label is the package pattern itself, which ArchUnit reads from the stereotype;

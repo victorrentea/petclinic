@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
-import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import victor.training.petclinic.genseq.GenerateSequence;
-import victor.training.petclinic.tools.PrettyTestNames;
 
 /**
  * The same journey as petclinic-test/src/add-visit.spec.ts, one layer down: no Chromium, no Angular,
@@ -52,7 +50,6 @@ import victor.training.petclinic.tools.PrettyTestNames;
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @AutoConfigureMockMvc
 @WithMockUser(roles = "OWNER_ADMIN")
-@DisplayNameGeneration(PrettyTestNames.class)
 // The diagram lays its sections out in the order the tests ran, so without a pinned order the
 // picture is JUnit's arbitrary method order — and adding a test reshuffles every section, which
 // the differ can only report as a rewrite. @Order makes the diagram read the way this file does.

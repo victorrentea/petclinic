@@ -141,12 +141,12 @@ test('generateFromWindows writes one puml per scenario', async () => {
   const addVisit = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
   // The scenario names the picture; the file it lives in is in the footer, and the
   // divider that used to separate chapters is gone with the chapters.
-  expect(addVisit).toContain('title Add a visit');
+  expect(addVisit).toContain('title Test: Add a visit');
   expect(addVisit).not.toContain('== ');
   // …and the other scenario is a picture of its own, not a section further down this one
   expect(addVisit).not.toContain('Cancel a visit');
   expect(written['/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.puml'])
-    .toContain('title Cancel a visit');
+    .toContain('title Test: Cancel a visit');
   // the arrow is wrapped in its reveal link now, so match the label inside it
   expect(addVisit).toContain('addVisit\\nPOST /api/visits');
   expect(addVisit).toContain("' ⚠️  GENERATED FILE — DO NOT EDIT");
@@ -167,7 +167,7 @@ test('each section header links to the test that drew it', () => {
     },
   );
   expect(written['/out/petclinic-test/generated/add-visit.spec.ts.add-a-visit.genseq.puml']).toContain(
-    'title [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Add a visit]]');
+    'title [[src://petclinic-test/src/add-visit.spec.ts:1{Click to open the test} Test: Add a visit]]');
 });
 
 // Nothing to read the source with means nothing to point at: a header that links into a
@@ -180,7 +180,7 @@ test('a header stays plain when the test source cannot be read', () => {
     '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
   );
   expect(written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'])
-    .toContain('title Add a visit');
+    .toContain('title Test: Add a visit');
 });
 
 test('generateFromWindows skips (no throw) when a test has zero traces', async () => {
@@ -328,7 +328,7 @@ test('renderScenarios redraws from the cache at another detail level, touching n
     {sql: 'off', httpBodies: false, interactive: false});
 
   const puml = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
-  expect(puml).toContain('title Add a visit');
+  expect(puml).toContain('title Test: Add a visit');
   expect(puml).not.toContain('SELECT');
 });
 

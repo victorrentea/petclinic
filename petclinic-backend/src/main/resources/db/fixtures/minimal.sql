@@ -41,6 +41,6 @@ INSERT INTO visits (pet_id, visit_date, visit_time, description) VALUES
 -- demo stack (petclinic.security.enable=false); with it on, OWNER_ADMIN is the role that
 -- opens the owner, pet and visit screens this dataset is about.
 INSERT INTO users (username, password, enabled) VALUES
-  ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE);
+  ('admin', '$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS', TRUE); -- NOSONAR: test-fixture hash, not a real credential
 
 INSERT INTO roles (username, role) VALUES ('admin', 'ROLE_OWNER_ADMIN');

@@ -81,7 +81,7 @@ test('spansToPuml footers the diagram with its provenance', () => {
   // a PlantUML footer renders at the very bottom — provenance, not diagram content
   expect(puml).toContain('footer @generate_sequence');
   // the title stays a clean single line, no subtitle, no note, no caption
-  expect(puml).toContain('\ntitle add a visit\n');
+  expect(puml).toContain('\ntitle Test: add a visit\n');
   expect(puml).not.toContain('note across');
   expect(puml).not.toContain('caption');
 });
@@ -202,7 +202,7 @@ test('renderPuml drops traces that would draw nothing', () => {
 
   // Two scenarios in, one drawn — so what comes out is a solo diagram: the survivor
   // names the picture, and there is no chapter left to divide it from.
-  expect(puml).toContain('title Add a visit');
+  expect(puml).toContain('title Test: Add a visit');
   expect(puml).not.toContain('Clicked around');
   expect(puml).not.toContain('== ');
   expect(puml).toContain(ADD_VISIT);
@@ -228,11 +228,11 @@ test('a Java scenario is headed by its class, a Playwright one by itself', () =>
   const java = renderPuml(
     'petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java',
     [{title: 'remembers the vet who attended it', traces: [parseTempoTrace(fixture)]}]);
-  expect(java).toContain('title AddVisitApiTest: remembers the vet who attended it');
+  expect(java).toContain('title Test: AddVisitApiTest: remembers the vet who attended it');
 
   const spec = renderPuml('add-visit.spec.ts',
     [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]);
-  expect(spec).toContain('title Add a visit');
+  expect(spec).toContain('title Test: Add a visit');
 
   // Two chapters in one Java file are two qualified headings, for the same reason.
   const two = renderPuml(
