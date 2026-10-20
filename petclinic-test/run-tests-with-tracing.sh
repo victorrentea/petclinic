@@ -94,13 +94,17 @@ rm -f "$UI_TEST_DIR"/generated/*.genseq.puml "$UI_TEST_DIR"/generated/*.genseq.j
 # tests a branch wrote (src/genseq/sequence-tag.ts). Cucumber already runs every scenario
 # and reads the list itself; Playwright only runs what its --grep lets through, so the
 # selected spec titles join the tag there.
+# One worker: every spec shares the one traced stack and its database, so in parallel a
+# test that books a visit shifts the rows another is paging through, and both time out
+# (visits-paginated, 10 Oct 2026: 2 of 6 red, green on a rerun alone). The coverage run
+# already goes one at a time (playwright.config.ts, COVERAGE_DIR).
 if [[ -n "${GENSEQ_SELECT:-}" ]]; then
   log "Also tracing $(grep -c . <<<"$GENSEQ_SELECT") test(s) named in GENSEQ_SELECT."
   log "Running the tagged and the selected Playwright specs…"
-  SKIP_SERVER_START=1 npx playwright test --grep "$(npx ts-node src/genseq/sequence-tag.ts grep)"
+  SKIP_SERVER_START=1 npx playwright test --workers=1 --grep "$(npx ts-node src/genseq/sequence-tag.ts grep)"
 else
   log "Running the tagged Playwright spec…"
-  npm run test:sequence
+  npm run test:sequence -- --workers=1
 fi
 test_status=$?
 
