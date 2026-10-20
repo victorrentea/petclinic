@@ -20,6 +20,7 @@ class ModuleBoundaryTracingTest {
     private static final AttributeKey<String> FUNCTION = AttributeKey.stringKey("code.function");
     private static final AttributeKey<String> ARGS = AttributeKey.stringKey("boundary.args");
     private static final AttributeKey<String> RETURN = AttributeKey.stringKey("boundary.return");
+    private static final AttributeKey<String> PARAMETERS = AttributeKey.stringKey("boundary.parameters");
 
     @RegisterExtension
     static final OpenTelemetryExtension otel = OpenTelemetryExtension.create();
@@ -34,6 +35,7 @@ class ModuleBoundaryTracingTest {
             assertThat(span.getAttributes().get(STEREOTYPE)).isEqualTo("module");
             assertThat(span.getAttributes().get(NAMESPACE)).isEqualTo(PhoneNumbers.class.getName());
             assertThat(span.getAttributes().get(FUNCTION)).isEqualTo("normalize");
+            assertThat(span.getAttributes().get(PARAMETERS)).isEqualTo("String");
             assertThat(span.getAttributes().get(ARGS)).isEqualTo("[+1 (608) 555-1023]");
             assertThat(span.getAttributes().get(RETURN)).isEqualTo("+16085551023");
         });
@@ -45,6 +47,7 @@ class ModuleBoundaryTracingTest {
 
         SpanData entered = span("PhoneNumbers.normalize");
         SpanData left = span("Clinic.homeDialCode");
+        assertThat(entered.getAttributes().get(PARAMETERS)).as("which overload ran").isEqualTo("String, HomeCountry");
         assertThat(left.getParentSpanId()).isEqualTo(entered.getSpanId());
         assertThat(left.getAttributes().get(PARTICIPANT)).as("drawn on its caller's own lifeline").isNull();
         assertThat(left.getAttributes().get(NAMESPACE)).isEqualTo(Clinic.class.getName());

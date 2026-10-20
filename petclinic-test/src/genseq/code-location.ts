@@ -60,32 +60,136 @@ const LIBRARY_MODULES = ['petclinic-commons'];
 const CALLED_NOT_DECLARED = /[.=(,]\s*$/;
 
 /**
+ * Which of a method's overloads ran, as the span knows it.
+ *
+ * `types` is the real answer: the simple names of the declared parameter types, which
+ * petclinic-commons' boundary aspect stamps as `boundary.parameters` (`String, HomeCountry`).
+ * `arity` is the next best, counted from the arguments the same aspect printed — a span
+ * recorded before the types were stamped still tells `normalize(phone)` from
+ * `normalize(phone, country)` by how many values went in.
+ */
+export interface Overload {
+  types?: string[];
+  arity?: number;
+}
+
+/**
  * The 1-based line `fn` is declared on, or 0 when the source never declares it.
  *
  * 0 is the ordinary answer for a method this repo inherits rather than writes — one a
  * Spring Data base interface declares, say — and the honest one: the class is still
  * where the reader wants to land, and the line would be a guess.
  *
- * The scan is deliberately as small as the one in test-location.ts. It takes the first
+ * The scan is deliberately as small as the one in test-location.ts. A declaration is a
  * line that mentions the name in a position a declaration can occupy, which rules out the
- * two shapes that actually occur above a declaration in this codebase: the method being
- * called on a receiver, and the method being called to fill a variable or a return. It is
- * not a Java parser and does not try to be one; a wrong line inside the right file is a
- * cheap mistake, and no line at all is the fallback.
+ * shapes that actually occur above a declaration in this codebase: the method being
+ * called on a receiver, called to fill a variable or a return, or named in a comment
+ * (`{@link #normalize(String)}`). It is not a Java parser and does not try to be one.
+ *
+ * With overloads, the name alone lands on the first of them — `PhoneNumbers.normalize`
+ * once opened the 1-arg method for an arrow that had called the 2-arg one. So when the
+ * span says which overload ran, the declaration whose parameters match it wins; failing
+ * that, the first one by name.
  */
-export function lineOfMethod(source: string, fn: string): number {
+export function lineOfMethod(source: string, fn: string, overload: Overload = {}): number {
   const mention = new RegExp(`(^|[^\\w$.])${escapeRegExp(fn)}\\s*\\(`);
   const lines = source.split(/\r?\n/);
+  const declared: {line: number; types: string[]}[] = [];
   for (let i = 0; i < lines.length; i++) {
     const at = lines[i].search(mention);
     if (at < 0) continue;
     const before = lines[i].slice(0, at + (lines[i][at] === fn[0] ? 0 : 1));
     if (CALLED_NOT_DECLARED.test(before)) continue;
     if (/^\s*(?:return|throw)\b/.test(lines[i])) continue;
-    return i + 1;
+    if (/^\s*(?:\/\/|\/\*|\*)/.test(lines[i])) continue;
+    declared.push({line: i + 1, types: parameterTypesFrom(lines, i, lines[i].indexOf('(', at))});
   }
-  return 0;
+  const {types, arity} = overload;
+  const exact = types && declared.find((d) => sameTypes(d.types, types));
+  const counted = arity !== undefined ? declared.find((d) => d.types.length === arity) : undefined;
+  return (exact || counted || declared[0])?.line ?? 0;
 }
+
+/**
+ * The parameter types of the declaration whose `(` is at `lines[row][column]`, as simple
+ * names: `(@RequestBody final Map<String, Integer> m, String... rest)` → `Map`, `String[]`.
+ * Erased and unqualified, which is what `Class.getSimpleName()` gives on the other side.
+ */
+export function parameterTypesFrom(lines: string[], row: number, column: number): string[] {
+  let text = '';
+  let depth = 0;
+  for (let i = row; i < lines.length; i++) {
+    for (let j = i === row ? column : 0; j < lines[i].length; j++) {
+      const ch = lines[i][j];
+      if (ch === '(') depth++;
+      else if (ch === ')' && --depth === 0) return splitParameters(text.slice(1));
+      text += ch;
+    }
+    text += ' ';
+  }
+  return [];
+}
+
+function splitParameters(list: string): string[] {
+  const cleaned = list.replace(/@[\w.]+(\s*\([^)]*\))?/g, ' ');
+  const params: string[] = [];
+  let depth = 0;
+  let current = '';
+  for (const ch of cleaned) {
+    if (ch === '<') depth++;
+    if (ch === '>') depth--;
+    if (ch === ',' && depth === 0) {
+      params.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  params.push(current);
+  return params.map(simpleTypeOf).filter((t) => t !== '');
+}
+
+/** `final java.util.Map<K, V> byId` → `Map`; `String... rest` → `String[]`. */
+function simpleTypeOf(parameter: string): string {
+  let generic = parameter;
+  while (/<[^<>]*>/.test(generic)) generic = generic.replace(/<[^<>]*>/g, '');
+  const words = generic.replace(/\bfinal\b/g, ' ').replace(/\.\.\./g, '[] ')
+    .replace(/\s*\[\s*\]/g, '[]').trim().split(/\s+/);
+  if (words.length < 2) return '';
+  const type = words.slice(0, -1).join('');
+  return type.slice(type.lastIndexOf('.') + 1);
+}
+
+function sameTypes(declared: string[], ran: string[]): boolean {
+  return declared.length === ran.length && declared.every((t, i) => t === ran[i]);
+}
+
+/**
+ * The overload a span names: its stamped parameter types when it has them, else the
+ * number of arguments it printed. `[8474461990, a.B@64fb61b]` is two; brackets nest, so a
+ * record's `Owner[id=1, name=x]` is one.
+ */
+export function overloadOf(attributes: Record<string, string>): Overload {
+  const stamped = attributes[PARAMETERS_ATTRIBUTE];
+  if (stamped !== undefined) {
+    return {types: stamped.split(',').map((t) => t.trim()).filter((t) => t !== '')};
+  }
+  const printed = attributes['boundary.args'];
+  if (printed === undefined || !/^\[.*\]$/s.test(printed)) return {};
+  const inner = printed.slice(1, -1);
+  if (inner.trim() === '') return {arity: 0};
+  let depth = 0;
+  let arity = 1;
+  for (const ch of inner) {
+    if (ch === '[' || ch === '(' || ch === '{') depth++;
+    else if (ch === ']' || ch === ')' || ch === '}') depth--;
+    else if (ch === ',' && depth === 0) arity++;
+  }
+  return {arity};
+}
+
+/** Stamped by petclinic-commons' ModuleBoundaryTracing: `String, HomeCountry`. */
+export const PARAMETERS_ATTRIBUTE = 'boundary.parameters';
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -114,7 +218,7 @@ export function methodHandle(
     const relative = sourcePathOf(module, namespace);
     const text = relative ? readSource(`${repoRoot}/${relative}`) : undefined;
     if (text === undefined) continue;
-    const line = lineOfMethod(text, fn);
+    const line = lineOfMethod(text, fn, overloadOf(attributes));
     return `src://${relative}${line > 0 ? `:${line}` : ''}${methodLinkTooltip(namespace, fn)}`;
   }
   return undefined;
