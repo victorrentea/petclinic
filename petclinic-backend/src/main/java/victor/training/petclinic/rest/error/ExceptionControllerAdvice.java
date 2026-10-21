@@ -72,7 +72,8 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ProblemDetail> handleValidationException(ValidationException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleValidationException(ValidationException ex,
+            HttpServletRequest request) {
         log.warn("Validation failed: {}", ex.getMessage());
         ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(pd);
