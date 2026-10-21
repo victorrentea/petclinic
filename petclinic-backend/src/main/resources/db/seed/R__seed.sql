@@ -42,7 +42,7 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
   ('Ștefan',    'Mureșan',      '12 Boltzmanngasse',         'Vienna',           '(0043)152634418'),
   ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '+48124221357'),
-  ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '+442074860707'),
+  ('Juan Carlos', 'Martín García Lorca', 'Calle de Alcalá 42',  'Madrid',           '0034915312233'),
   ('Newt',      'Scamander',    'Diagon Alley',              'London',           '(0044)2079460001'),
   ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '+441865276150'),
   ('Henry',     'Baskerville',  'Baskerville Hall',          'Dartmoor',         '(0044)1626832093'),
@@ -107,7 +107,8 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Figaro',          DATE '2019-09-09', 1, 23),  -- Geppetto's cat
   ('Rocinante',       DATE '2015-05-05', 7, 24),  -- Don Quixote's horse
   ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
-  ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
+  ('Toby of Lambeth', DATE '2020-11-27', 2, 26),  -- Sherlock Holmes's bloodhound
+  ('Michi',           DATE '2021-04-23', 1, 6);   -- Juan Carlos's cat: which of his five names is the surname?
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
   (15, DATE '2025-11-12', 'rabies vaccine'),
