@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Put the demo database back to the state Flyway left it in — or to a named fixture.
+"""Put the demo database back to the state Flyway left it in, to a named fixture, or empty.
 
 This is deliberately *not* part of the backend, and that is the whole design. A reset
 endpoint that ships inside the application is one misconfigured profile away from being
@@ -20,6 +20,12 @@ the seed. It is a dataset of its own, not a delta on the seed: POST /<name> trun
 runs <name>.sql on the empty tables, in one transaction — so a fixture that fails leaves the
 database exactly as it was, not half-emptied. POST / restores the seed instead. GET / lists
 the fixtures, and the review page draws one button each.
+
+POST /empty is the state a test that declares no fixture starts on — the e2e suites reset to
+it before each such test (petclinic-test/src/support/db-fixture.ts), as the Spring tests do:
+every table emptied, then the reference rows written back (pet types, specialties —
+db/reference/R__reference.sql, baked in as /reference.sql). Built in rather than a file in
+/fixtures: it is the absence of a dataset, not one more of them, and gets no button.
 """
 import http.server
 import json
@@ -31,6 +37,8 @@ import threading
 
 SEED = "/seed/seed-data.sql"
 FIXTURES = "/fixtures"
+REFERENCE = "/reference.sql"
+EMPTY = "empty"
 # On the seed volume, so the page can still say which state it last reset to after this
 # container restarts. "Last reset to", not "is in": a reviewer may have typed since.
 CURRENT = "/seed/current"
@@ -106,7 +114,9 @@ def current():
 def do_reset(fixture=None):
     # A fixture starts from the empty tables, never from the seed: what it shows is only
     # what its own file writes. RESTART IDENTITY in TRUNCATE puts every id back at 1.
-    if fixture:
+    if fixture == EMPTY:
+        args = ["-c", TRUNCATE_DATA, "-f", REFERENCE]
+    elif fixture:
         args = ["-c", TRUNCATE_DATA, "-f", os.path.join(FIXTURES, fixture + ".sql")]
     else:
         args = ["-c", TRUNCATE, "-f", SEED]
@@ -132,7 +142,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         name = self.path.split("?")[0].strip("/")
-        if name and name not in fixtures():
+        if name and name != EMPTY and name not in fixtures():
             self._send(404, {"ok": False, "error": "no such fixture: " + name,
                     "fixtures": fixtures()})
             return

@@ -11,6 +11,7 @@ import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
 import {keepCaptionAcrossLoads, showCaption} from './captions';
+import {fixtureOfTags, resetDatabaseTo} from './db-fixture';
 
 setDefaultTimeout(60_000);
 
@@ -96,6 +97,10 @@ BeforeAll(function () {
 });
 
 Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) {
+  // The data the scenario starts on (db-fixture.ts): `@fixture:<name>` on it or on its
+  // Feature, else 'empty'. Every scenario, before anything is recorded — the suite runs
+  // one scenario at a time, so resetting the shared database never pulls rows from under another.
+  await resetDatabaseTo(fixtureOfTags(pickle.tags));
   this.browser = await chromium.launch({
     headless: !process.env.HEADED,
     slowMo: VIDEO_ON ? Number(process.env.PW_SLOWMO ?? 400) : undefined,
@@ -214,4 +219,6 @@ function recordingSlug(uri: string, name: string): string {
 // runGenerate() never throws, so a telemetry hiccup can't fail the suite.
 AfterAll(async function () {
   await runGenerate(CUCUMBER_SOURCES);
+  // Back on Default, the dataset the app's demo comes up in, whatever the last scenario declared.
+  await resetDatabaseTo('default').catch(e => console.warn(`could not put the stack back on Default: ${e}`));
 });

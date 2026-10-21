@@ -15,8 +15,8 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -44,8 +44,13 @@ import org.junit.platform.commons.support.AnnotationSupport;
  * <p>
  * Which tests: those carrying {@link GenerateSequence}, and — under <code>-Pgenseq</code>, where the
  * extension is autodetected on every test — those <code>GENSEQ_SELECT</code> names, untagged.
+ * <p>
+ * Around the test method's body ({@code BeforeTestExecution}), not around {@code beforeEach}: an
+ * autodetected extension's {@code beforeEach} runs before Spring's, so the span was current while
+ * Spring loaded a test's {@code @Sql} — a {@code @DefaultFixture} seed — and every TRUNCATE and
+ * INSERT of the seed opened the picture, ahead of the first sentence of the test.
  */
-public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCallback {
+public class SequenceTraceExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
     /** What the generator searches Tempo by; the same attribute the browser spans carry. */
     private static final AttributeKey<String> TEST_NAME = AttributeKey.stringKey("test.name");
@@ -82,7 +87,7 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
     static final String SELECT_ENV = "GENSEQ_SELECT";
 
     @Override
-    public void beforeEach(ExtensionContext context) {
+    public void beforeTestExecution(ExtensionContext context) {
         // Registered twice on a tagged test — by @GenerateSequence and by autodetection under
         // -Pgenseq — JUnit keeps one; this keeps it one even if it did not.
         if (context.getStore(NAMESPACE).get(Run.class) != null) {
@@ -169,7 +174,7 @@ public class SequenceTraceExtension implements BeforeEachCallback, AfterEachCall
     }
 
     @Override
-    public void afterEach(ExtensionContext context) {
+    public void afterTestExecution(ExtensionContext context) {
         Run run = context.getStore(NAMESPACE).remove(Run.class, Run.class);
         if (run == null) {
             return;

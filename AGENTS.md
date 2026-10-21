@@ -121,14 +121,20 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
-- **Flyway boots from two locations** (`ddl-auto=none`); an empty DB before that is normal.
+- **Flyway boots from three locations** (`ddl-auto=none`); an empty DB before that is normal.
   `db/migration/` is the versioned **schema** chain — no rows here, ever: seed data in a frozen
-  migration is what forced the old V5/V7/V8 to patch each other. `db/seed/R__seed.sql` is the
-  **dataset**, repeatable, so edit it freely; it re-runs on checksum change after all versioned
-  migrations, opening with `TRUNCATE ... RESTART IDENTITY` (ids are deterministic — tests rely on
-  owner 1 = Kevin McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the
-  name `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
+  migration is what forced the old V5/V7/V8 to patch each other. `db/reference/R__reference.sql`
+  holds the lookup rows every environment needs (pet types, specialties), as a repeatable upsert
+  with literal ids. `db/seed/R__seed.sql` is the demo **dataset** ("Default"), repeatable, so edit
+  it freely; it re-runs on checksum change after all versioned migrations and after the reference
+  rows, opening with `TRUNCATE ... RESTART IDENTITY` (ids are deterministic — owner 1 = Kevin
+  McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the name
+  `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
   resolved migrations sharing one description, so two can never both apply.
+- **Tests start on an empty database** (schema + reference rows), never on the seed: the tests'
+  `src/test/resources/config/application.properties` drops `db/seed` and gives every test method
+  a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
+  `test.use({dbFixture: 'default'})` (Playwright), `@fixture:default` (Cucumber).
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
 

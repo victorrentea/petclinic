@@ -4,6 +4,7 @@ import {appendWindow} from './trace-window-store';
 import {flushBrowserSpans} from './otel-flush';
 import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {startTestCoverage, stopTestCoverage} from './coverage';
+import {DbFixture, resetDatabaseTo} from './db-fixture';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
@@ -18,8 +19,20 @@ const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-wind
 const PRE_PAD_MS = 1_000;
 const POST_PAD_MS = 5_000;
 
-export const test = base.extend({
-  page: async ({page}, use, testInfo) => {
+export const test = base.extend<{dbFixture: DbFixture; database: void}>({
+  // The data the test starts on (support/db-fixture.ts): 'empty' unless the spec says
+  // `test.use({dbFixture: 'default'})` — or the name of a db/fixtures/<name>.sql.
+  dbFixture: ['empty', {option: true}],
+  // Reset before EVERY test, auto so a test with no page (no-reset-endpoint.spec.ts) gets it too.
+  // That is only correct with one test at a time: the reset empties the one database every
+  // worker shares, so playwright.config.ts runs the suite on a single worker.
+  database: [async ({dbFixture}, use) => {
+    await resetDatabaseTo(dbFixture);
+    await use();
+  }, {auto: true}],
+  // `database` first: the trace window and the coverage dump open after the reset, never on it.
+  page: async ({page, database}, use, testInfo) => {
+    void database;
     // Per-test coverage for /human-review (support/coverage.ts). Inert without
     // COVERAGE_DIR; around the body so a traced test and an untraced one are measured alike.
     await startTestCoverage(page);
@@ -60,3 +73,4 @@ export const test = base.extend({
 });
 
 export {expect} from '@playwright/test';
+export type {Page} from '@playwright/test';
