@@ -20,6 +20,20 @@ githubCopilot:
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - >-
+      Write for the business people who approve the change and have never seen the code:
+      no class, file, endpoint, JSON, HTTP status, SQL, database, library or framework names.
+    - Say what users see and can do, in their words, with examples from the screen.
+    - >-
+      Put every technical detail in design.md instead, including breaking API changes
+      (marked **BREAKING** there, not here), affected code, data migrations and tests.
+      Impact names who notices the change, not which code changes.
+  design:
+    - >-
+      Carry the technical details the proposal leaves out: API contract changes (mark
+      **BREAKING**), the callers checked, affected code, data migrations and tests.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
