@@ -30,6 +30,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -164,6 +165,35 @@ public class VisitTest {
                 .content(mapper.writeValueAsString(existing))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void update_beforePetBirth_isRefused() throws Exception {
+        VisitDto existing = callGet(visitId);
+        existing.setDate(PetTest.BIRTH_DATE.minusDays(1));
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(existing))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(
+                        "Visit date cannot be before the pet's birth date (" + PetTest.BIRTH_DATE + ")"));
+    }
+
+    @Test
+    void create_moreThanAYearAhead_isRefused() throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(LocalDate.now().plusYears(1).plusDays(1))
+                .setDescription("far future");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Visit date cannot be more than one year from today"));
+
+        assertThat(visitRepository.findAll()).noneMatch(v -> "far future".equals(v.getDescription()));
     }
 
     @Test
