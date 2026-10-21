@@ -17,7 +17,7 @@ class Owner [[src://petclinic-backend/src/main/java/victor/training/petclinic/do
   city : String
   telephone : String
 }
-class Pet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:29{Click to open in editor}]] {
+class Pet [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Pet.java:30{Click to open in editor}]] {
   id : Integer
   name : String
   birthDate : LocalDate
