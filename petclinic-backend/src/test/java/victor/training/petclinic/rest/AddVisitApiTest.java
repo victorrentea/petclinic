@@ -1,5 +1,6 @@
 package victor.training.petclinic.rest;
 
+import victor.training.petclinic.DefaultFixture;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,6 +69,7 @@ class AddVisitApiTest {
     // every one of them.
     @GenerateSequence
     @Test
+    @DefaultFixture // books onto an owner's pet the seed already holds
     @Order(1)
     void addsAVisitToAnExistingPet() throws Exception {
         given("an owner with at least one pet exists");

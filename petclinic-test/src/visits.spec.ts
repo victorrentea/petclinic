@@ -4,6 +4,9 @@ import * as path from 'path';
 import {VisitsPage} from './pages/VisitsPage';
 import {ApiClient, VisitDto} from './support/api-client';
 
+// Reads the seed's visits: the page must have rows to list, sort and link from.
+test.use({dbFixture: 'default'});
+
 test.describe('Visits Page', () => {
   let apiClient: ApiClient;
   let screenshotDir: string;

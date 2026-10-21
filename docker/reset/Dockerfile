@@ -14,6 +14,12 @@ COPY reset-server.py /reset-server.py
 # exit, so a mount would leave every pinned instance with an empty folder.
 COPY --from=fixtures . /fixtures/
 
+# The reference rows (pet types, specialties) an "empty" reset writes back after emptying
+# every table — the same file Flyway runs, so an empty stack and an empty test database
+# hold the same rows. Named, not globbed: renaming it should fail this build, not leave the
+# empty reset writing nothing.
+COPY --from=reference R__reference.sql /reference.sql
+
 # Docker copies ownership from the image's directory when it first populates an empty
 # named volume. Without this, /seed arrives root-owned and the unprivileged process
 # cannot write the dump into it.
