@@ -1,3 +1,5 @@
+# Books onto an owner's pet and picks among vets that are already there: the Default dataset's.
+@fixture:default
 Feature: Choose the vet who attends a visit
   As a clinic user
   I want to say which vet will attend a visit when I book it
