@@ -19,10 +19,13 @@ function route(fixture: DbFixture): string {
   return fixture === 'default' || fixture === 'seed' ? '/__reset' : `/__reset/${fixture}`;
 }
 
-/** The fixture a Cucumber pickle declares with `@fixture:<name>`, else 'empty'. */
+/**
+ * The fixture a Cucumber pickle declares with `@fixture:<name>`, else 'empty'. A pickle lists
+ * its Feature's tags before its own, so the last one wins: the scenario's tag beats the Feature's.
+ */
 export function fixtureOfTags(tags: readonly {name: string}[]): DbFixture {
   const named = tags.map(t => /^@fixture[:=-]([a-z0-9][a-z0-9-]*)$/.exec(t.name)?.[1]).filter(Boolean);
-  return (named[0] as string | undefined) ?? 'empty';
+  return (named[named.length - 1] as string | undefined) ?? 'empty';
 }
 
 let warned = false;
