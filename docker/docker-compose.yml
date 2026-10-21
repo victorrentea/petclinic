@@ -95,6 +95,8 @@ services:
       # the review page. See the Dockerfile for why they are copied in, not mounted.
       additional_contexts:
         fixtures: ${PETCLINIC_SRC}/petclinic-backend/src/main/resources/db/fixtures
+        # The reference rows an "empty" reset (POST /__reset/empty) writes back.
+        reference: ${PETCLINIC_SRC}/petclinic-backend/src/main/resources/db/reference
     labels:
       ro.victorrentea.petclinic.env: "1"
     environment:

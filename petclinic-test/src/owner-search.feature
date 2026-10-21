@@ -1,3 +1,4 @@
+@fixture:default
 Feature: Search owners by last name
   As a clinic user
   I want to filter owners by typing part of a last name

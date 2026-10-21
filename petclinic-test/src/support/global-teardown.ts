@@ -1,6 +1,7 @@
 import {execFileSync} from 'child_process';
 import * as path from 'path';
 import {runGenerate, PLAYWRIGHT_SOURCES} from '../genseq/generate';
+import {resetDatabaseTo} from './db-fixture';
 
 // Pull the acceptance suite's coverage out of the backend JVM while it is STILL RUNNING.
 // That JVM is the one the browser exercised, and surefire's JaCoCo agent never sees it —
@@ -54,4 +55,7 @@ function dumpAcceptanceCoverage(): void {
 export default async function globalTeardown(): Promise<void> {
   dumpAcceptanceCoverage();
   await runGenerate(PLAYWRIGHT_SOURCES);
+  // Each test reset the database to the fixture it declares; leave the stack on Default, the
+  // dataset the app's demo comes up in, rather than on whatever the last test asked for.
+  await resetDatabaseTo('default').catch(e => console.warn(`could not put the stack back on Default: ${e}`));
 }
