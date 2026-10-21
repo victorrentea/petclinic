@@ -13,13 +13,18 @@ export default defineConfig({
   // to the per-test artifacts, not in a second top-level folder. They must not
   // nest: the HTML reporter wipes its own folder before writing.
   outputDir: './test-results/artifacts',
-  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  // One worker under COVERAGE_DIR as well: per-test coverage dumps the backend's one global
-  // set of counters after each test, and two tests running at once would share a dump
-  // (src/support/coverage.ts).
-  workers: process.env.CI || process.env.COVERAGE_DIR ? 1 : undefined,
+  // One test at a time, always. Each test starts on the DB fixture it declares — 'empty'
+  // unless it says `test.use({dbFixture: 'default'})` — and the reset before it
+  // (src/support/trace-fixture.ts) empties the ONE database the whole stack shares: a second
+  // worker's test would lose its rows mid-run. Datasets as projects chained by `dependencies`
+  // would keep parallelism inside a group, but Playwright skips every dependent project as
+  // soon as one test of its dependency fails, so one red spec would hide the rest of the suite.
+  // Per-test coverage needed one worker anyway: it dumps the backend's one global set of
+  // counters after each test (src/support/coverage.ts).
+  fullyParallel: false,
+  workers: 1,
   reporter: [
     ['html', {outputFolder: 'test-results/playwright-report'}],
     ['list'],

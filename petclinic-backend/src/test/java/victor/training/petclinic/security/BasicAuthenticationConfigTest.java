@@ -1,5 +1,6 @@
 package victor.training.petclinic.security;
 
+import victor.training.petclinic.DefaultFixture;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ class BasicAuthenticationConfigTest {
     }
 
     @Test
+    @DefaultFixture // logs in as the seed's admin/admin
     void adminUser_canAccessOwners() throws Exception {
         String credentials = Base64.getEncoder().encodeToString("admin:admin".getBytes());
         mockMvc.perform(get("/api/owners")

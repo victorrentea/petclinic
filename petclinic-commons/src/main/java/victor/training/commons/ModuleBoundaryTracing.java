@@ -7,7 +7,9 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.CodeSignature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
@@ -27,6 +29,8 @@ public class ModuleBoundaryTracing {
     /** Where the method is, as the agent stamps its own spans: the diagram links the arrow to it. */
     private static final AttributeKey<String> NAMESPACE = AttributeKey.stringKey("code.namespace");
     private static final AttributeKey<String> FUNCTION = AttributeKey.stringKey("code.function");
+    /** Which overload ran — `String, HomeCountry` — so the link opens that one, not the first by name. */
+    private static final AttributeKey<String> PARAMETERS = AttributeKey.stringKey("boundary.parameters");
     private static final String APPS = "victor.training.";
     private static final String COMMONS = "victor.training.commons.";
 
@@ -60,12 +64,19 @@ public class ModuleBoundaryTracing {
         return type.getName().startsWith(APPS) && !type.getName().startsWith(COMMONS);
     }
 
+    private static String parameterTypes(ProceedingJoinPoint call) {
+        return Arrays.stream(((CodeSignature) call.getSignature()).getParameterTypes())
+                .map(Class::getSimpleName)
+                .collect(Collectors.joining(", "));
+    }
+
     private static Object traced(ProceedingJoinPoint call, Class<?> type, boolean entering) throws Throwable {
         String method = call.getSignature().getName();
         SpanBuilder builder = GlobalOpenTelemetry.getTracer("petclinic-commons")
                 .spanBuilder(type.getSimpleName() + "." + method)
                 .setAttribute(NAMESPACE, type.getName())
                 .setAttribute(FUNCTION, method)
+                .setAttribute(PARAMETERS, parameterTypes(call))
                 .setAttribute("boundary.args", Arrays.toString(call.getArgs()));
         if (entering) { // leaving: drawn on the caller's own lifeline
             builder.setAttribute(PARTICIPANT, "Commons").setAttribute(STEREOTYPE, "module");
