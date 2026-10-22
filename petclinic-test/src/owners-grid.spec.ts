@@ -79,7 +79,8 @@ test('only Name and City can be sorted', async ({page}) => {
   await expect(page.locator('th.mat-sort-header')).toHaveText(['Name', 'City']);
 });
 
-test('the address bar keeps the view: a refresh, a shared link and Back show the same page', async ({page, browser}) => {
+test('the address bar keeps the view: a refresh, a shared link and Back show the same page',
+  async ({page, browser}) => {
   await searchTheGridOwnersFiveAPage(page);
   await sortBy(page, 'City');
   await sortBy(page, 'City');

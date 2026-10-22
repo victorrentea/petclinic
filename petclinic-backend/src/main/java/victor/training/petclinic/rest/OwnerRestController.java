@@ -121,7 +121,8 @@ public class OwnerRestController {
         Sort byName = Sort.by(dir, "lastName", "firstName", "id");
         return switch (keyAndDirection[0]) {
             case "name" -> PageRequest.of(page, size, byName);
-            case "city" -> PageRequest.of(page, size, Sort.by(dir, "city").and(Sort.by("lastName", "firstName", "id")));
+            case "city" -> PageRequest.of(page, size,
+                    Sort.by(dir, "city").and(Sort.by("lastName", "firstName", "id")));
             default -> throw new ValidationException("Sort by name or city");
         };
     }
