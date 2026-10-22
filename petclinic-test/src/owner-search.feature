@@ -6,8 +6,8 @@ Feature: Search owners by last name
 
   Background:
     Given the clinic has these owners
-      | Harry Potter   |
-      | Beatrix Potter |
+      | Potter, Harry   |
+      | Potter, Beatrix |
 
   Scenario Outline: Filter owners by a case-sensitive prefix of the last name
     When I open the owners page
@@ -15,9 +15,9 @@ Feature: Search owners by last name
     Then exactly these owners are listed: "<owners>"
 
     Examples:
-      | search | owners                       |
-      | Potter | Harry Potter, Beatrix Potter |
-      | Pot    | Harry Potter, Beatrix Potter |
+      | search | owners                           |
+      | Potter | Potter, Beatrix; Potter, Harry   |
+      | Pot    | Potter, Beatrix; Potter, Harry   |
       | otter  |                              |
       | Harry  |                              |
       | potter |                              |

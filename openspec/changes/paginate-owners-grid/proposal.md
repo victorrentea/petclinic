@@ -21,11 +21,17 @@ application down. This change lets staff see owners a page at a time and put the
   application runs.
 - **Search works as before**, by the start of the last name, and now combines with paging. A
   new search, a different sort or a different page size goes back to the first page.
+- **The screen remembers where you were.** The search, the sort, the page and the number of
+  owners per page are kept in the browser's address bar. Refreshing the screen, pressing Back
+  after opening an owner, or sending the link to a colleague all show the same page.
+- **Easier to read and use:** column titles stand out on a dark header bar, the columns that
+  can be sorted always show their arrow (white on the one sorted by), columns keep their width
+  while sorting, the search box, Find Owner and Add Owner sit on one line, and the menu keeps
+  the current screen's tab green.
 - **Two small fixes on the same screen:** each owner's pets are listed as "Nana, Tinker",
   and the Add Owner button stays available when a search finds nobody.
 
-**Not included:** returning to the same page after opening an owner and pressing Back (staff
-land on the first page); finding "Mureșan" by typing "Mures"; showing last name first on other
+**Not included:** finding "Mureșan" by typing "Mures"; showing last name first on other
 screens.
 
 ## Capabilities

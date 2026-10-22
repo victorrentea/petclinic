@@ -122,3 +122,28 @@ whether or not the search found anyone.
 #### Scenario: Add Owner after an empty search
 - **WHEN** staff search a last name nobody has
 - **THEN** the grid says no owners match and still offers Add Owner
+
+### Requirement: The grid's view lives in the address bar
+The grid SHALL keep its search, sort, page and page size in the page's address, leaving out
+whatever is at its default, so that a refresh, a Back from an owner or a shared link shows the
+same page. Pages count from 1 there. A value the grid cannot show SHALL fall back to its default.
+
+#### Scenario: The address names the view
+- **WHEN** staff search "Dar", sort by City descending, choose 5 rows and go to page 2
+- **THEN** the address ends in `?lastName=Dar&sort=city,desc&page=2&size=5`
+
+#### Scenario: A shared link shows the same page
+- **WHEN** someone else opens that address in their own browser
+- **THEN** they see page 2 of the "Dar" owners by City descending, 5 rows, with "Dar" in the search box
+
+#### Scenario: Back from an owner
+- **WHEN** staff open an owner from page 2 and press Back
+- **THEN** the grid shows page 2 again, with the same search, sort and page size
+
+#### Scenario: The default view has a clean address
+- **WHEN** staff open the Owners screen and change nothing
+- **THEN** the address is `/owners`, with no query parameters
+
+#### Scenario: A hand-edited address falls back
+- **WHEN** the address says `?sort=telephone,asc&size=50000&page=-2`
+- **THEN** the grid shows page 1 by name ascending, 10 rows

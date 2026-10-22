@@ -33,12 +33,23 @@ function idFromLocation(location: string): number {
   return Number(location.split('/').pop());
 }
 
+// Every owner created here is deleted after the file, with its pet and visits: a dev database
+// shared by every test run must not fill up with Lovelaces.
+const createdOwnerIds: number[] = [];
+
+test.afterAll(async () => {
+  for (const ownerId of createdOwnerIds) {
+    await axios.delete(`${API_BASE}/owners/${ownerId}`);
+  }
+});
+
 async function a_pet_born_on(birthDate: string): Promise<OwnerAndPet> {
   const owner = await axios.post(`${API_BASE}/owners`, {
     firstName: 'Ada', lastName: 'Lovelace', address: '110 Analytical Engine Way',
     city: 'London', telephone: '6085551023',
   });
   const ownerId = idFromLocation(owner.headers.location);
+  createdOwnerIds.push(ownerId);
   const pet = await axios.post(`${API_BASE}/owners/${ownerId}/pets`, {
     name: 'Bull', birthDate, type: CAT_TYPE,
   });

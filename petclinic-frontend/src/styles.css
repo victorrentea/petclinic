@@ -2,3 +2,22 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+
+/* petclinic.css gives every .table a dark header bar with light text; a Material table
+  paints its header cells white over it, leaving the titles light-on-white. */
+.table > thead > tr > th.mat-mdc-header-cell {
+  background-color: #3c3834;
+  color: #f1f1f1;
+}
+
+/* Which columns sort is visible without hovering: every sort arrow always shows, grey until its
+  column is the one sorted by, then white. Material hides it with an inline opacity animation. */
+.table > thead .mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: none !important;
+  color: #9e9a95;
+}
+
+.table > thead .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #ffffff;
+}

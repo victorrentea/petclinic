@@ -41,7 +41,6 @@ is superseded by this one: different volume, name order and Back behaviour.
 - Sorting and the prefix search can use an index at 50,000 owners.
 
 **Non-Goals:**
-- Keeping grid state in the URL (Back and refresh reset to page 1).
 - Normalizing telephone numbers or addresses.
 - A reusable design-system grid component.
 
@@ -73,7 +72,7 @@ was rejected: an index can only serve the collation it was built with.
 Verified with `EXPLAIN` on 50,000 generated owners, not assumed.
 
 **5. Load the page's pets and visits in batches.**
-`spring.jpa.properties.hibernate.default_batch_fetch_size=20` (the largest page): one query
+`spring.jpa.properties.hibernate.default_batch_fetch_size=100` (a full page of 20 owners and their pets; Hibernate 6 binds the ids as one array, so a larger batch costs nothing): one query
 for the owner page, one for the count, one `IN (…)` for their pets, one for those pets' visits.
 A `JOIN FETCH` with paging was rejected — Hibernate then pages in memory (HHH90003004) over
 every matching owner. A slimmer row DTO without visits was rejected for now: keeping `OwnerDto`
@@ -85,6 +84,24 @@ Already a dependency (16.2.1, used by the visit datepicker). `matSortDisableClea
 asc/desc-only toggle; `mat-sort-header` only on Name and City. The component asks the server
 on every sort/page/search event; a new search, sort or page size resets `pageIndex` to 0. The
 existing "only the latest query may answer" guard (`load?.unsubscribe()`) stays.
+
+**7. The URL is the grid's state.** Added after the first review in the browser: refresh and
+Back used to reset the grid. `?lastName=&sort=&page=&size=` holds the view (page 1-based for
+people, defaults left out), parsed by `ownerQueryFrom` and written by `urlParamsOf` in
+`owner-page.ts`. Every search, sort and page event navigates; the component fetches only from
+`ActivatedRoute.queryParamMap`, so Back, refresh and a pasted link take one code path. The
+router ignores a navigation to the URL it is already on, so re-searching the same name fetches
+directly. Each change pushes a history entry, so Back also steps through pages; `replaceUrl`
+was rejected because then Back from an owner would skip the grid's page. A value the grid
+cannot show falls back to its default instead of a 400 from the API on a hand-edited link.
+
+**8. Header look, in global `styles.css`.** `petclinic.css` paints every `.table` header bar
+dark with light text, and a Material table repaints its header cells white; the global rule
+restores the bar for any Material table. Material hides inactive sort arrows with an inline
+opacity animation, so showing them always (grey; white on the sorted column) needs
+`!important`. Columns are `table-layout: fixed` with set widths, or they re-measure to every
+page's rows. The navbar's `routerLinkActive` moved from `<a>` to `<li>`, where the theme's
+`.navbar-nav > .active > a` expects it.
 
 ## Risks / Trade-offs
 
