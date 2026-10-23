@@ -23,7 +23,8 @@ async function expectGridToShow(page: Page, query: OwnerQuery): Promise<void> {
 /** The grid shows the server's answer to `query`, and the URL holds `query` so refresh/Back keep it. */
 async function expectGridAndUrlToShow(page: Page, query: OwnerQuery): Promise<void> {
   await expectGridToShow(page, query);
-  await expect(page).toHaveURL(new RegExp(`page=${query.page}&size=${query.size}&sort=${query.sort}&dir=${query.dir}`));
+  await expect(page).toHaveURL(
+    new RegExp(`page=${query.page}&size=${query.size}&sort=${query.sort}&dir=${query.dir}`));
 }
 
 test.use({dbFixture: 'default'});
@@ -43,7 +44,8 @@ test('sorts by city, pages, and changes page size, all answered by the server', 
   await page.locator('#ownersTable mat-select').click();
   await page.getByRole('option', {name: '5', exact: true}).click();
   await expectGridAndUrlToShow(page, {page: 0, size: 5, sort: 'city', dir: 'desc'});
-  await expect(page.locator('#ownersTable .mat-mdc-paginator-range-label')).toHaveText(/^\s*Page 1 – 1\.\.5 of \d+\s*$/);
+  await expect(page.locator('#ownersTable .mat-mdc-paginator-range-label'))
+    .toHaveText(/^\s*Page 1 – 1\.\.5 of \d+\s*$/);
 
   await page.reload();
   await expectGridAndUrlToShow(page, {page: 0, size: 5, sort: 'city', dir: 'desc'});

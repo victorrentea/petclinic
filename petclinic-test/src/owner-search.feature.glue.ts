@@ -75,7 +75,8 @@ Then('every owner in the clinic is listed, {int} per page', async function (this
   const listed: string[] = [];
   for (let page = 0; ; page++) {
     const first = page * pageSize + 1;
-    await expect(rangeLabel).toHaveText(new RegExp(`^\\s*Page ${page + 1} – ${first}\\.\\.\\d+ of ${everyOwner.length}\\s*$`));
+    await expect(rangeLabel).toHaveText(
+      new RegExp(`^\\s*Page ${page + 1} – ${first}\\.\\.\\d+ of ${everyOwner.length}\\s*$`));
     const onThisPage = (await cells.allTextContents()).map((t) => t.trim());
     expect(onThisPage.length).toBeLessThanOrEqual(pageSize);
     listed.push(...onThisPage);
