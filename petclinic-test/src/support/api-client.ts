@@ -11,6 +11,14 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface VisitPageDto {
+  content: VisitDto[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -23,12 +31,8 @@ export class ApiClient {
     });
   }
 
-  async fetchVisits(): Promise<VisitDto[]> {
-    const response = await this.client.get<VisitDto[]>('/visits');
+  async fetchVisitsPage(params: {page?: number; size?: number; sort?: string} = {}): Promise<VisitPageDto> {
+    const response = await this.client.get<VisitPageDto>('/visits', {params});
     return response.data;
-  }
-
-  static sortedByDate<T extends {date: string}>(rows: T[]): T[] {
-    return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
 }
