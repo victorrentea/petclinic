@@ -253,27 +253,6 @@ public class VisitTest {
     }
 
     @Test
-    void create_withVet() throws Exception {
-        VisitDto newVisit = new VisitDto()
-                .setPetId(petId)
-                .setDate(LocalDate.now())
-                .setDescription("annual checkup")
-                .setVetId(vet.getId());
-
-        String location = mockMvc.perform(post("/api/visits")
-                .content(mapper.writeValueAsString(newVisit))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getHeader("Location");
-        flushAndClear();
-
-        VisitDto created = callGet(idFrom(location));
-        assertThat(created.getVetId()).isEqualTo(vet.getId());
-        assertThat(created.getVetFirstName()).isEqualTo("James");
-        assertThat(created.getVetLastName()).isEqualTo("Herriot");
-    }
-
-    @Test
     void create_withoutVet() throws Exception {
         VisitDto newVisit = new VisitDto()
                 .setPetId(petId)

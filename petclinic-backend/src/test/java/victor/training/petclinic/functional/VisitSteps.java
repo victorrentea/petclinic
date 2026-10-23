@@ -51,6 +51,32 @@ public class VisitSteps {
                 .post("/api/visits"));
     }
 
+    @When("I schedule a visit for {string} on {string} with description {string} and vet {string}")
+    public void iScheduleAVisitWithVet(String petName, String date, String description, String vetName) {
+        int petId = http.idOf("pet:" + petName);
+        int vetId = http.idOf("vet:" + vetName);
+        String body = """
+                {"petId":%d,"date":"%s","description":"%s","vetId":%d}
+                """.formatted(petId, date, description, vetId);
+
+        http.setLastResponse(RestAssured.given()
+                .baseUri(http.baseUri())
+                .contentType(ContentType.JSON)
+                .body(body)
+                .post("/api/visits"));
+    }
+
+    @Then("the scheduled visit is with vet {string}")
+    public void theScheduledVisitIsWithVet(String vetName) {
+        String location = http.getLastResponse().getHeader("Location");
+        var response = RestAssured.given().baseUri(http.baseUri()).get(location);
+        assertThat(response.statusCode()).isEqualTo(200);
+        String[] parts = vetName.split(" ", 2);
+        assertThat(response.jsonPath().getInt("vetId")).isEqualTo(http.idOf("vet:" + vetName));
+        assertThat(response.jsonPath().getString("vetFirstName")).isEqualTo(parts[0]);
+        assertThat(response.jsonPath().getString("vetLastName")).isEqualTo(parts[1]);
+    }
+
     @Then("{string} has {int} visit with description {string}")
     public void petHasVisitsWithDescription(String petName, int expectedCount, String description) {
         int petId = http.idOf("pet:" + petName);
