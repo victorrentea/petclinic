@@ -30,7 +30,7 @@ export class OwnerDetailComponent implements OnInit {
   gotoOwnersList() {
     const lastQuery = this.ownerListState.lastQuery;
     if (lastQuery) {
-      this.router.navigate(['/owners'], {queryParams: toQueryParams(lastQuery)});
+      void this.router.navigate(['/owners'], {queryParams: toQueryParams(lastQuery)});
     } else {
       this.router.navigate(['/owners']);
     }
