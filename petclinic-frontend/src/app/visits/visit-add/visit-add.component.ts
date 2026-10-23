@@ -23,6 +23,7 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
+  readonly latestVisitDate = moment().add(1, 'year');
 
   constructor(private visitService: VisitService,
               private petService: PetService,

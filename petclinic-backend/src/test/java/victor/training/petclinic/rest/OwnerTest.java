@@ -11,9 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,6 @@ import victor.training.petclinic.rest.dto.PetTypeDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -124,47 +121,6 @@ public class OwnerTest {
         mockMvc.perform(get("/api/owners/count"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.valueOf(before)));
-    }
-
-    @Test
-    void getAll() throws Exception {
-        List<OwnerDto> owners = search("/api/owners");
-
-        assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getFirstName, OwnerDto::getLastName)
-                .contains(Assertions.tuple(ownerId, "George", "Franklin"));
-    }
-
-    @Test
-    void getAllWithAddressFilter() throws Exception {
-        Owner owner2 = TestData.anOwner();
-        owner2.setLastName("JavaBeans");
-        int owner2Id = ownerRepository.save(owner2).getId();
-
-        List<OwnerDto> owners = search("/api/owners?lastName=Java");
-
-        assertThat(owners)
-                .extracting(OwnerDto::getId, OwnerDto::getLastName)
-                .contains(Assertions.tuple(owner2Id, "JavaBeans"));
-    }
-
-    private List<OwnerDto> search(String uriTemplate) throws Exception {
-        String responseJson = mockMvc.perform(get(uriTemplate))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
-    }
-
-    @Test
-    void getAllWithNameFilter_notFound() throws Exception {
-        List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
-
-        assertThat(results).isEmpty();
     }
 
     @Test

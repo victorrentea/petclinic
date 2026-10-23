@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, by last name prefix */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, and how many owners match in total. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description How many owners match, across all pages.
+       * @example 23
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,18 +564,24 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, by last name prefix */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Page number, from 0 */
+        page?: number;
+        /** @description 5, 10 or 20 */
+        size?: number;
+        /** @description name or city, then ,asc or ,desc */
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

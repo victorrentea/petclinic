@@ -16,7 +16,7 @@ test.beforeAll(async () => {
 });
 
 type Owner = {id: number; firstName: string; lastName: string};
-const owners = async () => (await axios.get(`${API}/owners`)).data as Owner[];
+const owners = async () => (await axios.get(`${API}/owners`)).data.content as Owner[];
 
 test.describe('a test that declares no DB fixture', () => {
   test('starts on an empty database, the reference pet types still there', async () => {
@@ -38,7 +38,7 @@ test.describe('a test that declares the Default fixture', () => {
   test.use({dbFixture: 'default'});
 
   test('starts on the seed: owner 1 is Kevin McCallister', async () => {
-    const kevin = (await owners()).find(o => o.id === 1);
+    const kevin = (await axios.get(`${API}/owners/1`)).data as Owner;
     expect(`${kevin?.firstName} ${kevin?.lastName}`).toBe('Kevin McCallister');
   });
 });
