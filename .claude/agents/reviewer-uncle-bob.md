@@ -1,4 +1,5 @@
 ---
+# porneste MEREU intr-o conversatie noua (sub-agent, top-level daca-l alegi din meniu)
 name: reviewer-uncle-bob
 description: Single-focused code review agent for advanced CLEAN CODE only (CQS, SRP, function size). Flags design smells the diff introduces.
 tools: Bash, Read, Grep

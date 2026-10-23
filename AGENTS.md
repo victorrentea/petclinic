@@ -1,7 +1,8 @@
 # Project Memory
 New conversations in this folder auto-load this file.
 Add to rules here to prevent repeating AI fail/slop.
-Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
+Carefully review its contents at every retrospective to remove:
+   obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md`.
@@ -15,6 +16,12 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
 - `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
+- `petclinic-database/` - embedded Postgres launcher jar behind `./start-database.sh`
+- `petclinic-test/` - Playwright + Cucumber e2e tests (TypeScript) against the running stack; also generates sequence diagrams from traces
+- `petclinic-chatbot/` - Spring AI triage assistant on :8082, talks to the backend's MCP server (`./start-chatbot.sh`)
+- `petclinic-observability/` - Grafana LGTM + OTel collector compose (Grafana on :3300, OTLP on :4317/:4318)
+- `refactoring-tools/` - OpenRewrite recipes reproducing refactorings done by hand in this repo
+- `plugin-marketplace-demo/` - a folder-based plugin marketplace demo (one plugin, one skill)
 
 ## Common Commands
 
@@ -48,27 +55,6 @@ npm run test:arch                   # imports adhere to docs/frontend-packages.p
 npm run e2e                         # Protractor e2e tests
 ```
 
-## Architecture
-
-### Backend Architecture
-
-**Layered Structure:**
-1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
-2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
-3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
-4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
-5. Notification (`notification/`) - `NotificationServiceClient`, called after a visit is booked:
-   an HTTP POST to notification-service, best effort (a failure is logged, the booking stands).
-   Takes plain values, never an entity, and reaches no repository
-
-**Data Flow:**
-Request → REST Controller → Repository / Mapper → JPA Entity
-Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
-
-**Key Patterns:**
-- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
-- `/openapi.yaml` is generated (don't edit it!) from Java DTOs & REST Controllers by `OpenApiExtractorTest`
-
 ## Additional Knowledge
 
 When a guardrail test fails, or a living diagram no longer matches the code, the drift
@@ -76,6 +62,9 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 
 Before changing how the layers, the database or the notification call work, read the decisions
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+Before designing a listing, query, endpoint or anything sensitive to data size, latency or load,
+read the production volumes and non-functional requirements in [volumetrii.md](volumetrii.md).
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
@@ -155,15 +144,6 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
-
-## Java Code Style
-- Keep < 120 chars / line
-- Keep methods under 30 lines
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on every `@RequestBody`
-- Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
 - Write non-trivial code using TDD
