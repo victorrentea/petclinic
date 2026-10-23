@@ -4,7 +4,7 @@ Issue: [#25 Add pagination to Owners grid](https://github.com/victorrentea/petcl
 grila sortabilă după orice coloană, paginată în pagini de 5, 10 sau 20 de rânduri.
 
 Status: **toate răspunsurile de mai jos sunt aprobate** (2026-10-23).
-Volumele de producție care stau la baza deciziilor: [volumetrii.md](volumetrii.md).
+Volumele de producție care stau la baza deciziilor: [volumetry.md](volumetry.md).
 
 ## API
 
@@ -117,7 +117,7 @@ Da, printr-un comentariu pe #25 care explică motivele de la Q8 și Q11.
 
 ## Rămase deschise
 
-- **Latența țintă pentru o pagină.** Business n-a dat o cifră; [volumetrii.md](volumetrii.md)
+- **Latența țintă pentru o pagină.** Business n-a dat o cifră; [volumetry.md](volumetry.md)
   nu are încă o cerință de latență.
 - **Q9 față de Q7.** Name se sortează după prenume, dar căutarea se face după nume de familie:
   cine caută „Potter” vede rezultatele ordonate după prenume.

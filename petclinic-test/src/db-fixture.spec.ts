@@ -16,7 +16,7 @@ test.beforeAll(async () => {
 });
 
 type Owner = {id: number; firstName: string; lastName: string};
-const owners = async () => (await axios.get(`${API}/owners`)).data as Owner[];
+const owners = async () => (await axios.get(`${API}/owners`, {params: {size: 20}})).data.content as Owner[];
 
 test.describe('a test that declares no DB fixture', () => {
   test('starts on an empty database, the reference pet types still there', async () => {

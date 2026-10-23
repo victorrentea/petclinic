@@ -77,3 +77,66 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Material paints header cells white; keep the theme's dark header (.table>thead>tr>th) and its light text. */
+#ownersTable th.mat-mdc-header-cell {
+  background-color: #3c3834;
+  color: #f1f1f1;
+}
+
+#ownersTable th.mat-mdc-header-cell ::ng-deep .mat-sort-header-arrow {
+  color: #f1f1f1;
+}
+
+/* Material hides the arrow of an unsorted column until hover (inline animation styles, hence !important). */
+#ownersTable th.mat-mdc-header-cell ::ng-deep .mat-sort-header-container:not(.mat-sort-header-sorted) .mat-sort-header-arrow {
+  color: #9a9a9a;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Fixed widths, so re-sorting a page doesn't reflow the columns to fit its content. */
+#ownersTable table.mat-mdc-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable .mat-mdc-cell {
+  overflow-wrap: anywhere;
+}
+
+#ownersTable .mat-column-name { width: 24%; }
+#ownersTable .mat-column-address { width: 26%; }
+#ownersTable .mat-column-city { width: 14%; }
+#ownersTable .mat-column-telephone { width: 18%; }
+#ownersTable .mat-column-pets { width: 18%; }
+
+#search-owner-form {
+  margin-bottom: 24px;
+}
+
+.owner-search-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* Same height for the input and the thicker-bordered buttons. */
+.owner-search-row > * {
+  height: 36px;
+}
+
+/* No page title: the green Owners tab names the page, so the search row sits close under the navbar. */
+.xd-container {
+  margin-top: 16px;
+}
+
+/* Bootstrap sinks header text to the bottom of Material's 56px row. */
+#ownersTable tr.mat-mdc-header-row {
+  height: 40px;
+}
+
+#ownersTable th.mat-mdc-header-cell {
+  vertical-align: middle;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}

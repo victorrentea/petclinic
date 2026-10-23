@@ -64,7 +64,7 @@ Before changing how the layers, the database or the notification call work, read
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Before designing a listing, query, endpoint or anything sensitive to data size, latency or load,
-read the production volumes and non-functional requirements in [volumetrii.md](volumetrii.md).
+read the production volumes and non-functional requirements in [volumetry.md](volumetry.md).
 
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
@@ -130,7 +130,8 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners`, `/api/owners/{id}` — the list is paged: `?page=&size=&sort=&dir=&lastName=`
+  (size 5/10/20, sort `name`|`city`) returns `{content, totalElements}`, never the whole table
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

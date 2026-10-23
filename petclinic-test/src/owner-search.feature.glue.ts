@@ -24,6 +24,16 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }
 
+/** The API serves at most 20 owners a page: walk the pages to get them all. */
+async function everyOwnerInTheApi(): Promise<{firstName: string; lastName: string}[]> {
+  const owners: {firstName: string; lastName: string}[] = [];
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get(`${API_BASE}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    owners.push(...data.content);
+    if (data.content.length === 0 || owners.length >= data.totalElements) return owners;
+  }
+}
+
 /**
  * Remembers every owner the clinic holds, after checking that the ones the
  * Background names are among them — so a changed seed (Flyway's
@@ -31,12 +41,12 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const allOwners = await everyOwnerInTheApi();
+  if (allOwners.length === 0) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  const names: string[] = data.map(fullName);
+  const names: string[] = allOwners.map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
   this.allOwnerNames = names;
 });
@@ -55,6 +65,25 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+Then('every owner in the clinic is listed, {int} per page', async function (this: PlaywrightWorld, pageSize: number) {
+  const everyOwner = this.requireAllOwnerNames();
+  const cells = this.page.locator('#ownersTable td.ownerFullName');
+  const rangeLabel = this.page.locator('#ownersTable .mat-mdc-paginator-range-label');
+  const nextPage = this.page.getByRole('button', {name: 'Next page'});
+  await expect(rangeLabel).toHaveText(`Page 1 – 1..${Math.min(pageSize, everyOwner.length)} of ${everyOwner.length}`);
+
+  const listed: string[] = [];
+  for (let page = 0; ; page++) {
+    const first = page * pageSize + 1;
+    await expect(rangeLabel).toHaveText(new RegExp(`^\\s*Page ${page + 1} – ${first}\\.\\.\\d+ of ${everyOwner.length}\\s*$`));
+    const onThisPage = (await cells.allTextContents()).map((t) => t.trim());
+    expect(onThisPage.length).toBeLessThanOrEqual(pageSize);
+    listed.push(...onThisPage);
+    if (await nextPage.isDisabled()) break;
+    await nextPage.click();
+    // The paginator's label moves on at the click; the rows only when the server answers.
+    await expect.poll(async () => (await cells.allTextContents()).map((t) => t.trim()), {timeout: 10_000})
+      .not.toEqual(onThisPage);
+  }
+  expect(listed.sort()).toEqual([...everyOwner].sort());
 });

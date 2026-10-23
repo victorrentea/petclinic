@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Owner} from '../owner';
+import {OwnerListState} from '../owner-list/owner-list-state';
+import {toQueryParams} from '../owner-list/owner-list-url';
 
 
 @Component({
@@ -13,7 +15,8 @@ export class OwnerDetailComponent implements OnInit {
   errorMessage: string;
   owner: Owner;
 
-  constructor(private route: ActivatedRoute, private router: Router, private ownerService: OwnerService) {
+  constructor(private route: ActivatedRoute, private router: Router, private ownerService: OwnerService,
+              private ownerListState: OwnerListState) {
     this.owner = {} as Owner;
   }
 
@@ -25,7 +28,12 @@ export class OwnerDetailComponent implements OnInit {
   }
 
   gotoOwnersList() {
-    this.router.navigate(['/owners']);
+    const lastQuery = this.ownerListState.lastQuery;
+    if (lastQuery) {
+      this.router.navigate(['/owners'], {queryParams: toQueryParams(lastQuery)});
+    } else {
+      this.router.navigate(['/owners']);
+    }
   }
 
   editOwner() {

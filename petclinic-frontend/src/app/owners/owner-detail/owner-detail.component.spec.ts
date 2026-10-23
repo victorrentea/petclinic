@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
 import { Observable, of } from 'rxjs';
+import { OwnerListState } from '../owner-list/owner-list-state';
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
@@ -107,6 +108,24 @@ describe('OwnerDetailComponent', () => {
     addNewPetButton.click();
     spyOn(component, 'addPet').and.callThrough();
     expect(router.navigate).toHaveBeenCalledWith(['/owners']);
+  });
+
+  it('Back returns to the grid page, size, sort and search last shown', () => {
+    const navigate = spyOn(router, 'navigate');
+    TestBed.inject(OwnerListState).lastQuery = {lastName: 'Dav', page: 2, size: 20, sort: 'city', dir: 'desc'};
+
+    component.gotoOwnersList();
+
+    expect(navigate).toHaveBeenCalledWith(['/owners'],
+      {queryParams: {lastName: 'Dav', page: 2, size: 20, sort: 'city', dir: 'desc'}});
+  });
+
+  it('Back opens the grid on its defaults when the grid was never shown', () => {
+    const navigate = spyOn(router, 'navigate');
+
+    component.gotoOwnersList();
+
+    expect(navigate).toHaveBeenCalledWith(['/owners']);
   });
 
 });

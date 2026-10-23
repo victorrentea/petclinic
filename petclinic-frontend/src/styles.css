@@ -2,3 +2,19 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+
+/* Green border only on hover (or keyboard focus); at rest it blends into the brown fill. */
+.btn-default,
+.btn-default:focus {
+  background-color: #34302d;
+  border-color: #34302d;
+  color: #f1f1f1;
+}
+
+.btn-default:hover,
+.btn-default:focus:hover,
+.btn-default:focus-visible {
+  background-color: #34302d;
+  border-color: #6db33f;
+  color: #f1f1f1;
+}

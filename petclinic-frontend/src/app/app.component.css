@@ -33,6 +33,12 @@ div.navbar-header {
   align-items: center;
 }
 
+/* Bootstrap paints .active on the <li>, but routerLinkActive marks the <a>. */
+::ng-deep .navbar .navbar-nav > li > a.active {
+  background-color: #6db33f;
+  color: #f1f1f1;
+}
+
 ::ng-deep .navbar a.navbar-brand.brand-emoji {
   background: none !important;
   width: auto !important;

@@ -98,9 +98,12 @@ the API contract does not depend on `PageImpl`'s JSON (see Q&A Q3). The `List` o
 deleted, and `OwnerCreateTest` moves to the paged method.
 
 ### D4. Batch-fetch pets **and** their visits
-`@BatchSize(size = 20)` on `Owner.pets` (as decided in Q14) **and** on `Pet.visits`. Q14 only
-covered pets. In the code, `OwnerDto` also serializes every pet's visits, so batching only pets
-would still run one query per pet. With both annotations, a page runs a bounded number of
+`@BatchSize(size = 20)` on `Owner.pets` (as decided in Q14) **and** `@BatchSize(size = 100)` on
+`Pet.visits`. Q14 only covered pets. In the code, `OwnerDto` also serializes every pet's visits,
+so batching only pets would still run one query per pet. Visits get a larger batch because a full
+page of 20 owners usually has more than 20 pets; with a batch of 20, those visits would load in
+two queries. Measured: 17 → 62 queries for 5 vs 20 owners before, and the same count for both
+after (`OwnerListingQueryCountTest`). With both annotations, a page runs a bounded number of
 queries: page + count + pets + visits, with no per-row queries.
 - *Alternative:* `JOIN FETCH` / `@EntityGraph` with a `Pageable`. Rejected: Hibernate then
   pages in memory (HHH90003004) over all owners.
@@ -132,7 +135,9 @@ CREATE INDEX owners_last_name_like_idx ON owners (last_name text_pattern_ops);
 ### D6. Frontend: one query stream, `switchMap`, Material table
 - `OwnerPage` becomes `{ content: Owner[]; totalElements: number }`. `OwnerService.getOwners(query)`
   builds `HttpParams` from `{ lastName, page, size, sort, dir }`. `searchOwners` disappears
-  because the filter is now one of the parameters. The error fallback is an empty page.
+  because the filter is now one of the parameters. `HttpErrorHandler` logs and rethrows, so the
+  empty-page fallback lives in the component: `catchError` *inside* the `switchMap`, so that one
+  failed request does not end the stream for good.
 - `OwnerListComponent` keeps a `BehaviorSubject<OwnerListQuery>`. A search, `matSortChange` and
   the paginator's `page` event each push the next query: a search or sort change resets `page`
   to 0, and a size change resets it to 0 as well. The pipe is `query$ → switchMap(getOwners)`,
@@ -151,7 +156,12 @@ CREATE INDEX owners_last_name_like_idx ON owners (last_name text_pattern_ops);
 On each query change: `router.navigate([], { queryParams, replaceUrl: true })`. On init, the
 first query is read from `ActivatedRoute.snapshot.queryParamMap`, and missing or invalid values
 fall back to the defaults. `replaceUrl` keeps page flips out of history, so Back from an owner
-lands on the last grid state. The code is isolated in two helpers (`toQueryParams` /
+lands on the last grid state. A non-empty `lastName` goes into the URL too: without it, a
+refresh during a search would restore page N of the *unfiltered* list. The browser's Back keeps the
+grid state through the URL; the owner page's own "Back" button navigates instead, so the grid
+also keeps its last query in a root-provided `OwnerListState` that this button restores from
+(`Location.back()` was rejected: after an owner → edit → save round trip it would return to the
+edit form). The code is isolated in two helpers (`toQueryParams` /
 `fromQueryParams`) so that cutting it means deleting them and the spec requirement
 "Grid state survives refresh and Back".
 

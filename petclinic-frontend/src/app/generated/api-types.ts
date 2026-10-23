@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, sorted and filtered */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, sorted and filtered as requested. */
+    OwnerPageDto: {
+      /** @description The owners on this page, with their pets. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description How many owners match the filter, across all pages.
+       * @example 26
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,21 +564,30 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, sorted and filtered */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Keep only owners whose last name starts with this (case-sensitive). */
         lastName?: string;
+        /** @description 0-based page index. */
+        page?: number;
+        /** @description Owners per page. */
+        size?: 5 | 10 | 20;
+        /** @description Sort key. */
+        sort?: "name" | "city";
+        /** @description Sort direction. */
+        dir?: "asc" | "desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Unknown sort key or direction, size not in 5/10/20, or page < 0 */
       400: {
         content: {
           "*/*": components["schemas"]["ProblemDetail"];

@@ -27,4 +27,4 @@ Feature: Search owners by last name
   Scenario: Searching with an empty last name lists every owner
     When I open the owners page
     And I search owners for ""
-    Then every owner in the clinic is listed
+    Then every owner in the clinic is listed, 10 per page
