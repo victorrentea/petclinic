@@ -153,3 +153,4 @@ Core entities and relationships:
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
+- After every `git push`, load the `ci-watch` skill and follow it until `ci.yml` is green — even if no hook reminded you
