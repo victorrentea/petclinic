@@ -51,8 +51,8 @@ public class VisitSteps {
                 .post("/api/visits"));
     }
 
-    @When("I schedule a visit for {string} on {string} with description {string} and vet {string}")
-    public void iScheduleAVisitWithVet(String petName, String date, String description, String vetName) {
+    @When("I book a visit for {string} on {string} with description {string}, choosing vet {string}")
+    public void iBookAVisitChoosingVet(String petName, String date, String description, String vetName) {
         int petId = http.idOf("pet:" + petName);
         int vetId = http.idOf("vet:" + vetName);
         String body = """
@@ -66,8 +66,8 @@ public class VisitSteps {
                 .post("/api/visits"));
     }
 
-    @Then("the scheduled visit is with vet {string}")
-    public void theScheduledVisitIsWithVet(String vetName) {
+    @Then("the booked visit shows vet {string}")
+    public void theBookedVisitShowsVet(String vetName) {
         String location = http.getLastResponse().getHeader("Location");
         var response = RestAssured.given().baseUri(http.baseUri()).get(location);
         assertThat(response.statusCode()).isEqualTo(200);
