@@ -1,10 +1,10 @@
--- Fixture "green": exactly ONE of everything — one owner (Molly Weasley), one pet, one visit,
+-- Fixture "minimal": exactly ONE of everything — one owner (Molly Weasley), one pet, one visit,
 -- one vet with one specialty, one pet type, one user with one role. The smallest dataset on
 -- which every screen still has something to show, for a demo that must read row by row.
 --
 -- A fixture is a DATASET OF ITS OWN, built on an empty database — never a delta on the seed.
 -- The reset sidecar (docker/reset/reset-server.py) empties every table, restarting the
--- identity sequences, and runs this file on that, in one transaction. So every row green
+-- identity sequences, and runs this file on that, in one transaction. So every row minimal
 -- has is written here, and what R__seed.sql holds never leaks into it.
 --
 -- NOT a Flyway location: spring.flyway.locations names db/migration and db/seed only, so the
