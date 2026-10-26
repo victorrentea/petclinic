@@ -45,7 +45,7 @@ class Vet [[src://petclinic-backend/src/main/java/victor/training/petclinic/doma
   firstName : String
   lastName : String
 }
-class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:11{Click to open in editor}]] {
+class Visit [[src://petclinic-backend/src/main/java/victor/training/petclinic/domain/Visit.java:12{Click to open in editor}]] {
   id : Integer
   date : LocalDate
   time : LocalTime

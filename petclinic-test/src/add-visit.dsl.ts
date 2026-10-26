@@ -10,6 +10,7 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 export interface OwnerWithPet {
   ownerId: number;
   petId: number;
+  petBirthDate: string;
 }
 
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
@@ -18,7 +19,23 @@ export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWith
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  const pet = ownerWithPet.pets[0];
+  return {ownerId: ownerWithPet.id, petId: pet.id, petBirthDate: pet.birthDate};
+}
+
+export async function fill_visit_date(page: Page, date: string): Promise<void> {
+  await page.locator('input[name="date"]').fill(date);
+  await page.locator('input[name="date"]').blur();
+}
+
+export async function expect_visit_date_refused(page: Page, reason: string): Promise<void> {
+  await expect(page.getByText(reason)).toBeVisible();
+  await expect(page.locator('button[type="submit"]:has-text("Add Visit")')).toBeDisabled();
+}
+
+export async function expect_visit_date_accepted(page: Page): Promise<void> {
+  await expect(page.locator('.help-block')).toHaveCount(0);
+  await expect(page.locator('button[type="submit"]:has-text("Add Visit")')).toBeEnabled();
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

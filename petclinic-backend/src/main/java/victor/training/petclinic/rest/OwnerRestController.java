@@ -182,9 +182,8 @@ public class OwnerRestController {
     @WithSpan("book-visit")
     private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
-        visit.setPet(pet);
+        visit.setPet(petRepository.findById(petId).orElseThrow());
+        visit.requireDateWithinRange();
         visitRepository.save(visit);
         notifyOwner(ownerId, petId, visit);
         return visit.getId();

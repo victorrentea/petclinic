@@ -1,6 +1,7 @@
 package victor.training.petclinic.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.time.LocalDate;
@@ -65,5 +66,22 @@ public class Visit {
 
     public void setPet(Pet pet) {
         this.pet = pet;
+    }
+
+    /** A visit is dated between the pet's birth and one year from today. */
+    public void requireDateWithinRange() {
+        if (date == null) {
+            return;
+        }
+        LocalDate birthDate = pet.getBirthDate();
+        if (birthDate != null && date.isBefore(birthDate)) {
+            throw new ValidationException(
+                    "The visit (" + date + ") cannot predate the pet's birth (" + birthDate + ")");
+        }
+        LocalDate latestDate = LocalDate.now().plusYears(1);
+        if (date.isAfter(latestDate)) {
+            throw new ValidationException(
+                    "The visit (" + date + ") cannot be more than one year ahead (" + latestDate + ")");
+        }
     }
 }
