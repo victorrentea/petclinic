@@ -1,8 +1,8 @@
 <div class="form-group has-feedback" [class.has-success]="dateModel.dirty && dateModel.valid"
     [class.has-error]="dateModel.dirty && !dateModel.valid">
-  <label class="col-sm-2 control-label">Date</label>
+  <label class="col-sm-2 control-label" for="date">Date</label>
   <div class="col-sm-10">
-    <input matInput [matDatepicker]="visitDateDatepicker" required [ngModel]="date | date:'yyyy-MM-dd'" name="date"
+    <input id="date" matInput [matDatepicker]="visitDateDatepicker" required [ngModel]="date | date:'yyyy-MM-dd'" name="date"
       #dateModel="ngModel" [min]="petBirthDate" [max]="maxVisitDate">
     <mat-datepicker-toggle matSuffix [for]="visitDateDatepicker"></mat-datepicker-toggle>
     <mat-datepicker #visitDateDatepicker></mat-datepicker>
