@@ -9,7 +9,6 @@ import {Owner} from '../../owners/owner';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
-import {latestVisitDate} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-add',
@@ -24,7 +23,6 @@ export class VisitAddComponent implements OnInit {
   currentPetType: PetType;
   addedSuccess = false;
   errorMessage: string;
-  readonly maxVisitDate = latestVisitDate();
 
   constructor(private visitService: VisitService,
               private petService: PetService,

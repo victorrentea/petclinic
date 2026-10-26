@@ -9,7 +9,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
 import {PetService} from '../../pets/pet.service';
-import {latestVisitDate} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-edit',
@@ -23,7 +22,6 @@ export class VisitEditComponent implements OnInit {
   currentPetType: PetType;
   updateSuccess = false;
   errorMessage: string;
-  readonly maxVisitDate = latestVisitDate();
 
   constructor(private visitService: VisitService,
               private petService: PetService,
