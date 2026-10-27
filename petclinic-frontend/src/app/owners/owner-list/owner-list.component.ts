@@ -21,7 +21,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   ownerPage: OwnerPage;
   private subscription: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly route: ActivatedRoute,
+              private readonly ownerService: OwnerService) {
   }
 
   get sortActive(): string {
@@ -75,7 +76,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(query: OwnerQuery) {
-    this.router.navigate(['/owners'], {queryParams: {...query, lastName: query.lastName || undefined}});
+    void this.router.navigate(['/owners'], {queryParams: {...query, lastName: query.lastName || undefined}});
   }
 }
 
