@@ -68,6 +68,9 @@ The backend layers, data flow and DTO/OpenAPI conventions, plus the decisions be
 [ARCHITECTURE.md](ARCHITECTURE.md) — read it before changing the layers, the database or the
 notification call.
 
+Expected data volumes (e.g. 100k owners within a year) are in [VOLUMETRY.md](VOLUMETRY.md). Read it
+before designing any list, search or query.
+
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
@@ -155,4 +158,3 @@ Core entities and relationships:
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
-- An AI-made commit ends with `Co-Authored-By: Claude <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`
