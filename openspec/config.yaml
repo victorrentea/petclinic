@@ -11,15 +11,17 @@ githubCopilot:
 #     Designs and tasks must cover Windows, macOS, and Linux
 #     Write all artifacts in Spanish
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# Per-artifact rules: the proposal is for the business, the design is for engineers.
+rules:
+  proposal:
+    - Write for a non-technical business person, as if explaining to a five-year-old; they must be able to discuss it without an engineer present
+    - No technical terms at all - no API, endpoint, JSON, HTTP status, database, index, migration, framework, library, class, file or test names
+    - Describe what users will see and be able to do, and why the business needs it, using concrete examples from the business domain
+    - Keep it short enough to read aloud in five minutes; state plainly what is NOT included
+    - Write a breaking change as its effect on people (who must do what differently), never as an API or contract change
+    - Move every technical detail into design.md instead of dropping it
+  design:
+    - Hold every technical detail the proposal leaves out, including an "Impact" section listing affected code, API contract changes (mark them BREAKING), data and schema changes, tests to update, and CI or deployment risks
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
