@@ -1,6 +1,7 @@
 # One self-contained PetClinic. Every service keeps its default port *inside* the
-# network; only the frontend is published, and to a port the host picks, so several
-# instances (one per branch under review) can run at once without colliding.
+# network; the frontend (and, for tools on the host, the backend and the database) are
+# published to ports the host picks, so several instances (one per branch under review)
+# can run at once without colliding.
 #
 # Driven by ../start-docker.sh — it sets COMPOSE_PROJECT_NAME, which is what namespaces
 # containers, network and volumes, and what the reaper matches on to tear one instance
@@ -15,6 +16,11 @@ services:
       POSTGRES_USER: petclinic
       POSTGRES_PASSWORD: petclinic
       POSTGRES_DB: petclinic
+    ports:
+      # So DataGrip / DBeaver / psql on the host can look inside a running instance: the
+      # review page's "Running Database" row prints its JDBC URL (`start-docker.sh db`).
+      # Host-picked and loopback-bound like the frontend's, for the same two reasons.
+      - "127.0.0.1::5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
