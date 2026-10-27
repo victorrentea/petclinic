@@ -172,4 +172,5 @@ Core entities and relationships:
 - Always run tests after any complex refactoring
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
-- Before any git commit, make sure to update any drifted knowledge in AGENTS.md
+- Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
+- An AI-made commit ends with `Co-Authored-By: Claude <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`

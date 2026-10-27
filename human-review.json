@@ -225,6 +225,8 @@
       "app": {
         "up": "./start-docker.sh up --ref {sha} --ttl 1800",
         "url": "./start-docker.sh url petclinic-{shortsha}",
+        "//db": "KEY=value lines (JDBC_URL, DB_HOST_PORT, DB_CONTAINER_PORT, DB_USER, DB_PASSWORD): the review page's Running Database row.",
+        "db": "./start-docker.sh db petclinic-{shortsha}",
         "reset": "/__reset",
         "down": "./start-docker.sh down petclinic-{shortsha}"
       }
