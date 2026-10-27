@@ -4,7 +4,7 @@
 
 - [x] 1.1 Write a failing `@DataJpaTest`/Spring test that saves owners "Silver", "Śliwiński", "Wensleydale" and asserts `ORDER BY last_name` returns them in that order; verify it fails on the current `C.UTF-8` order
 - [x] 1.2 Add `db/migration/V4__owners_icu_collation.sql` (collation on `first_name`, `last_name`, `city` + the three indexes from design D5); verify test 1.1 passes locally and the backend boots on the dev database (`./start-backend.sh` prints ✅)
-- [ ] 1.3 Push and verify the backend tests pass on the Linux CI runner; if `und-x-icu` is missing there, add the matching Linux Zonky 16.2 binaries to the pom and re-verify
+- [x] 1.3 Push and verify the backend tests pass on the Linux CI runner; if `und-x-icu` is missing there, add the matching Linux Zonky 16.2 binaries to the pom and re-verify
 - [x] 1.4 Verify the existing prefix search still uses an index: `EXPLAIN` of `last_name LIKE 'Pot%'` shows `owners_last_name_like_idx` (run via db-cli on the dev database)
 
 ## 2. Backend: paged, sorted `GET /api/owners`
