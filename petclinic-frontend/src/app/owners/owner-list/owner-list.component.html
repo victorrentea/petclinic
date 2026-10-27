@@ -4,22 +4,13 @@
 
     <form method="get"
           class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
+      <div class="form-group owners-controls" id="lastNameGroup">
+        <label class="control-label owner-search-label" for="lastName">Last name </label>
+        <input class="form-control owner-search-input" size="30"
+          maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/>
+        <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
+          Owner</button>
       </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
-        </div>
-      </div>
-
     </form>
 
     <div id="noOwnersFound" *ngIf="ownerPage?.totalElements === 0">No owners with LastName starting with "{{query.lastName}}"</div>
@@ -29,19 +20,19 @@
         <thead>
         <tr>
           <th mat-sort-header="name">Name</th>
-          <th>Address</th>
           <th mat-sort-header="city">City</th>
+          <th>Address</th>
           <th>Telephone</th>
           <th>Pets</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr *ngFor="let owner of ownerPage.content">
+        <tr *ngFor="let owner of ownerPage.content; trackBy: trackByOwnerId">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
-          <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
+          <td>{{ owner.address }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
         <tr *ngFor="let pet of owner.pets">
@@ -51,10 +42,13 @@
         </tr>
         </tbody>
       </table>
-      <mat-paginator [length]="ownerPage.totalElements" [pageIndex]="query.page" [pageSize]="query.size"
-        [pageSizeOptions]="pageSizeOptions" (page)="onPage($event)"></mat-paginator>
+      <div class="owners-controls">
+        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
+        <mat-paginator [length]="ownerPage.totalElements" [pageIndex]="query.page" [pageSize]="query.size"
+          [pageSizeOptions]="pageSizeOptions" (page)="onPage($event)"></mat-paginator>
+      </div>
     </div>
-    <div *ngIf="ownerPage">
+    <div *ngIf="ownerPage && !ownerPage.totalElements">
       <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
     </div>
   </div>

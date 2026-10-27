@@ -89,7 +89,7 @@ describe('OwnerListComponent', () => {
   });
 
   it('state restored from the URL', () => {
-    queryParams.next({lastName: 'Fr', page: '2', size: '5', sort: 'city,desc'});
+    queryParams.next({lastName: 'Fr', page: '3', size: '5', sort: 'city,desc'});
     getOwnersSpy.and.returnValue(of({content: [testOwner], totalElements: 11, totalPages: 3, number: 2, size: 5}));
 
     fixture.detectChanges();
@@ -108,45 +108,45 @@ describe('OwnerListComponent', () => {
   it('reloads when the URL changes', () => {
     fixture.detectChanges();
 
-    queryParams.next({page: '1', size: '10', sort: 'name'});
+    queryParams.next({page: '2', size: '10', sort: 'name'});
 
     expect(getOwnersSpy).toHaveBeenCalledWith({lastName: '', page: 1, size: 10, sort: 'name'});
   });
 
   it('new search starts at page one', () => {
-    queryParams.next({lastName: 'Fr', page: '2', size: '5', sort: 'city,asc'});
+    queryParams.next({lastName: 'Fr', page: '3', size: '5', sort: 'city,asc'});
     fixture.detectChanges();
 
     component.searchByLastName('Da');
 
-    expect(lastNavigatedQueryParams()).toEqual({lastName: 'Da', page: 0, size: 5, sort: 'city,asc'});
+    expect(lastNavigatedQueryParams()).toEqual({lastName: 'Da', page: 1, size: 5, sort: 'city,asc'});
   });
 
   it('changing the sort starts at page one', () => {
-    queryParams.next({page: '2', size: '5', sort: 'name'});
+    queryParams.next({page: '3', size: '5', sort: 'name'});
     fixture.detectChanges();
 
     component.onSort({active: 'city', direction: 'desc'});
 
-    expect(lastNavigatedQueryParams()).toEqual(jasmine.objectContaining({page: 0, size: 5, sort: 'city,desc'}));
+    expect(lastNavigatedQueryParams()).toEqual(jasmine.objectContaining({page: 1, size: 5, sort: 'city,desc'}));
   });
 
   it('changing the page size starts at page one', () => {
-    queryParams.next({page: '2', size: '5', sort: 'name'});
+    queryParams.next({page: '3', size: '5', sort: 'name'});
     fixture.detectChanges();
 
     component.onPage({pageIndex: 1, previousPageIndex: 2, pageSize: 10, length: 27});
 
-    expect(lastNavigatedQueryParams()).toEqual(jasmine.objectContaining({page: 0, size: 10}));
+    expect(lastNavigatedQueryParams()).toEqual(jasmine.objectContaining({page: 1, size: 10}));
   });
 
   it('moving to another page keeps the search, size and sort', () => {
-    queryParams.next({lastName: 'Fr', page: '0', size: '5', sort: 'city,asc'});
+    queryParams.next({lastName: 'Fr', page: '1', size: '5', sort: 'city,asc'});
     fixture.detectChanges();
 
     component.onPage({pageIndex: 1, previousPageIndex: 0, pageSize: 5, length: 27});
 
-    expect(lastNavigatedQueryParams()).toEqual({lastName: 'Fr', page: 1, size: 5, sort: 'city,asc'});
+    expect(lastNavigatedQueryParams()).toEqual({lastName: 'Fr', page: 2, size: 5, sort: 'city,asc'});
   });
 
   it('no match: shows "no owners found" instead of the table', () => {

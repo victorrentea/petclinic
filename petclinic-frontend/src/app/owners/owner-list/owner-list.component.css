@@ -55,6 +55,40 @@ display:none;
   width: auto;
 }
 
+/* Keep sort arrows always visible: gray hint on sortable columns, bright white on the active one */
+::ng-deep th[mat-sort-header] .mat-sort-header-arrow {
+  opacity: 0.6 !important;
+  color: rgba(255, 255, 255, 0.6);
+  transform: translateY(0) !important;
+}
+
+::ng-deep th[mat-sort-header] .mat-sort-header-sorted .mat-sort-header-arrow {
+  opacity: 1 !important;
+  color: #ffffff;
+}
+
+/* Fixed column widths so rows of varying text length never reflow the header/columns */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+#ownersTable th:nth-child(1), #ownersTable td:nth-child(1) { width: 22%; }
+#ownersTable th:nth-child(2), #ownersTable td:nth-child(2) { width: 14%; }
+#ownersTable th:nth-child(3), #ownersTable td:nth-child(3) { width: 28%; }
+#ownersTable th:nth-child(4), #ownersTable td:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5), #ownersTable td:nth-child(5) { width: 18%; }
+
+#ownersTable td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#ownersTable td:nth-child(5) {
+  white-space: normal;
+}
+
+
 @media (max-width: 576px) {
   #nameGroup {
     flex-direction: column;

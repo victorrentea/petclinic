@@ -39,7 +39,6 @@ export class OwnerListComponent implements OnInit, OnDestroy {
       tap(query => {
         this.query = query;
         this.lastName = query.lastName;
-        this.ownerPage = undefined;
         this.errorMessage = undefined;
       }),
       switchMap(query => this.ownerService.getOwners(query).pipe(
@@ -75,15 +74,24 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.navigate({...this.query, page: 0, sort: `${active},${direction}`});
   }
 
+  trackByOwnerId(index: number, owner: Owner): number {
+    return owner.id;
+  }
+
   private navigate(query: OwnerQuery) {
-    void this.router.navigate(['/owners'], {queryParams: {...query, lastName: query.lastName || undefined}});
+    void this.router.navigate(['/owners'], {
+      queryParams: {...query, page: query.page + 1, lastName: query.lastName || undefined}
+    });
   }
 }
 
+// The URL's page number is 1-based (human-friendly); internally
+// (OwnerQuery, mat-paginator, the backend API) it stays 0-based.
 function toOwnerQuery(params: ParamMap): OwnerQuery {
+  const urlPage = Number(params.get('page')) || 1;
   return {
     lastName: params.get('lastName') ?? '',
-    page: Number(params.get('page')) || 0,
+    page: Math.max(0, urlPage - 1),
     size: Number(params.get('size')) || 10,
     sort: params.get('sort') || 'name'
   };
