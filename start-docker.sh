@@ -1,13 +1,15 @@
 #!/bin/bash
 # The whole PetClinic in containers, one isolated instance per branch under review.
 #
-# Inside the network every service keeps its default port (5432 / 8080 / 4200). Only the
-# frontend is published, and the host picks the port, so instances never collide — and
-# neither does an instance with the plain ./start-*.sh stack on :4200 and :5432.
+# Inside the network every service keeps its default port (5432 / 8080 / 4200). What is
+# published (frontend, backend, database) goes to a port the host picks, on loopback, so
+# instances never collide — and neither does one with the plain ./start-*.sh stack on
+# :4200 and :5432.
 #
 #   ./start-docker.sh up [--ref SHA] [--name N] [--ttl SECS] [--fresh] [--jacoco] [--otel]
 #   ./start-docker.sh url   [name]        # the URL again
 #   ./start-docker.sh ports [name]        # every published endpoint, as KEY=value lines
+#   ./start-docker.sh db    [name]        # the database's JDBC URL and login, as KEY=value
 #   ./start-docker.sh reset [name]        # database back to the seed
 #   ./start-docker.sh ls
 #   ./start-docker.sh down  [name|--all]
@@ -269,6 +271,25 @@ cmd_ports() {
     return 0
 }
 
+# Where DataGrip / DBeaver / psql on the host reach this instance's database, as KEY=value
+# lines (the review page's "Running Database" row reads them). The login is read off the
+# container's own environment, so it cannot drift from the compose file.
+cmd_db() {
+    local name; name="$(resolve "${1:-}")"
+    local p; p="$(published "$name" db 5432)"
+    [ -n "$p" ] || die "$name publishes no database port (started before it was published?)"
+    local env user pass db
+    env="$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$name-db-1")"
+    user="$(printf '%s\n' "$env" | sed -n 's/^POSTGRES_USER=//p')"
+    pass="$(printf '%s\n' "$env" | sed -n 's/^POSTGRES_PASSWORD=//p')"
+    db="$(printf '%s\n' "$env" | sed -n 's/^POSTGRES_DB=//p')"
+    echo "JDBC_URL=jdbc:postgresql://localhost:$p/${db:-${user:-postgres}}"
+    echo "DB_HOST_PORT=$p"
+    echo "DB_CONTAINER_PORT=5432"
+    echo "DB_USER=${user:-postgres}"
+    echo "DB_PASSWORD=$pass"
+}
+
 # Same starting point every time, so repeated deep links cannot pile up duplicate rows or
 # trip a unique constraint.
 # One implementation, reachable two ways. The button on the review page and this command
@@ -309,9 +330,10 @@ case "${1:-up}" in
     up)    shift || true; cmd_up "$@" ;;
     url)   shift || true; cmd_url "$@" ;;
     ports) shift || true; cmd_ports "$@" ;;
+    db)    shift || true; cmd_db "$@" ;;
     reset) shift || true; cmd_reset "$@" ;;
     ls)    cmd_ls ;;
     down)  shift || true; cmd_down "$@" ;;
-    -h|--help|help) sed -n '2,28p' "${BASH_SOURCE[0]}" | sed -e 's/^#//' -e 's/^ //' ;;
-    *) die "unknown command: $1  (up | url | ports | reset | ls | down)" ;;
+    -h|--help|help) sed -n '2,30p' "${BASH_SOURCE[0]}" | sed -e 's/^#//' -e 's/^ //' ;;
+    *) die "unknown command: $1  (up | url | ports | db | reset | ls | down)" ;;
 esac
