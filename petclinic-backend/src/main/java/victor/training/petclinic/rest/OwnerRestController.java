@@ -3,6 +3,8 @@ package victor.training.petclinic.rest;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +19,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,17 +39,19 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -80,15 +85,31 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+                    schema = @Schema(implementation = OwnerPageDto.class),
+                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNER_PAGE)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @Parameter(description = "Case-sensitive last name prefix") @RequestParam(
+                    defaultValue = "") String lastName,
+            @Parameter(description = "0-based page index") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Owners per page: 5, 10 or 20") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "name or city, then optionally ,asc or ,desc") @RequestParam(
+                    defaultValue = "name") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageRequest(page, size, sort));
+        return ownerMapper.toOwnerPageDto(owners);
+    }
+
+    private static PageRequest pageRequest(int page, int size, String sort) {
+        if (page < 0) {
+            throw new ValidationException("page must be 0 or more, but was " + page);
+        }
+        if (!ALLOWED_PAGE_SIZES.contains(size)) {
+            throw new ValidationException("size must be one of " + ALLOWED_PAGE_SIZES + ", but was " + size);
+        }
+        return PageRequest.of(page, size, OwnerSort.parse(sort));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
@@ -13,7 +15,9 @@ import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.domain.User;
 import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
@@ -129,7 +133,6 @@ class MapperTest {
         assertThat(petMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(petTypeMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(visitMapper.toVisitsDto(null)).isEmpty();
-        assertThat(ownerMapper.toOwnerDtoCollection(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialtyDtos(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialty((List<SpecialtyDto>) null)).isEmpty();
         assertThat(vetMapper.toVetDtos(null)).isEmpty();
@@ -147,7 +150,21 @@ class MapperTest {
         assertThat(dto.getFirstName()).isEqualTo("Sherlock");
         assertThat(dto.getCity()).isEqualTo("London");
         assertThat(dto.getPets()).extracting(PetDto::getName).containsExactly("Leo");
-        assertThat(ownerMapper.toOwnerDtoCollection(List.of(owner))).hasSize(1);
+    }
+
+    @Test
+    void ownerPage_carries_the_owners_and_the_paging_counters() {
+        Owner owner = anOwner();
+        owner.setId(7);
+        var page = new PageImpl<>(List.of(owner), PageRequest.of(2, 5), 11);
+
+        OwnerPageDto dto = ownerMapper.toOwnerPageDto(page);
+
+        assertThat(dto.getContent()).extracting(OwnerDto::getId).containsExactly(7);
+        assertThat(dto.getTotalElements()).isEqualTo(11);
+        assertThat(dto.getTotalPages()).isEqualTo(3);
+        assertThat(dto.getNumber()).isEqualTo(2);
+        assertThat(dto.getSize()).isEqualTo(5);
     }
 
     @Test

@@ -135,7 +135,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners` (one page: `?lastName=&page=&size=5|10|20&sort=name|city[,desc]`), `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

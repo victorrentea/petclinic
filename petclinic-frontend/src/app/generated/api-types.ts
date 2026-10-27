@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List owners, one page at a time */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,35 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, in the requested order. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description 0-based index of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description The requested page size.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many owners match, across all pages.
+       * @example 27
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description How many pages of this size the matching owners fill.
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,18 +582,25 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List owners, one page at a time */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive last name prefix */
         lastName?: string;
+        /** @description 0-based page index */
+        page?: number;
+        /** @description Owners per page: 5, 10 or 20 */
+        size?: number;
+        /** @description name or city, then optionally ,asc or ,desc */
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

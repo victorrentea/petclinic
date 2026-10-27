@@ -21,7 +21,7 @@ Q1, Q3–Q5 are **decided**; Q2 was folded into Q3; Q6–Q25 are **recommendatio
 | **Database / performance** | | | |
 | Q12 | What does the migration contain? | A new `V…__owners_sort_collation.sql`: `COLLATE "und-x-icu"` on `first_name`, `last_name`, `city`, plus indexes | Schema only, no rows, per the rule for `db/migration/` |
 | Q13 | Which indexes? | `(last_name, first_name, id)`, `(city, id)`, and `last_name text_pattern_ops` for the `LIKE 'Pot%'` search | The search can't use the ICU indexes |
-| Q14 | How are pets loaded? | `@BatchSize(size = 20)` on `Owner.pets`, never `JOIN FETCH` together with `Pageable` | `JOIN FETCH` plus paging makes Hibernate load everything and page in memory (HHH90003004). `pets` is LAZY today, so a page of 20 would otherwise run 20 extra queries |
+| Q14 | How are pets loaded? | Global `hibernate.default_batch_fetch_size=20` (design D6, refining the original `@BatchSize` on `Owner.pets`), never `JOIN FETCH` together with `Pageable` | `JOIN FETCH` plus paging makes Hibernate load everything and page in memory (HHH90003004). `Owner.pets` and `Pet.visits` are both LAZY, so a page of 20 would otherwise run dozens of extra queries; batching keeps it at ~4 |
 | Q15 | Trim the list payload (pets come with all their visits)? | **No**, keep `OwnerDto` | Out of scope for #25. 20 owners per page is a small payload. Could be its own issue |
 | Q16 | Does the search become case-insensitive? | **No** | Today's behaviour stays the same; separate issue if wanted |
 | **Frontend** | | | |

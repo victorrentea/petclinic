@@ -1,35 +1,56 @@
-import {Component, OnInit} from '@angular/core';
-import {OwnerService} from '../owner.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {OwnerQuery, OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {Router} from '@angular/router';
-import { finalize } from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {OwnerPage} from '../owner-page';
+import {ActivatedRoute, ParamMap, Router} from '@angular/router';
+import {catchError, map, switchMap, tap} from 'rxjs/operators';
+import {EMPTY, Subscription} from 'rxjs';
+import {PageEvent} from '@angular/material/paginator';
+import {Sort, SortDirection} from '@angular/material/sort';
 
 @Component({
   selector: 'app-owner-list',
   templateUrl: './owner-list.component.html',
   styleUrls: ['./owner-list.component.css']
 })
-export class OwnerListComponent implements OnInit {
+export class OwnerListComponent implements OnInit, OnDestroy {
+  readonly pageSizeOptions = [5, 10, 20];
   errorMessage: string;
   lastName: string;
-  owners: Owner[];
-  listOfOwnersWithLastName: Owner[];
-  isOwnersDataReceived: boolean = false;
-  private load: Subscription;
+  query: OwnerQuery;
+  ownerPage: OwnerPage;
+  private subscription: Subscription;
 
-  constructor(private router: Router, private ownerService: OwnerService) {
+  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
+  }
 
+  get sortActive(): string {
+    return this.query.sort.split(',')[0];
+  }
+
+  get sortDirection(): SortDirection {
+    return this.query.sort.split(',')[1] === 'desc' ? 'desc' : 'asc';
   }
 
   ngOnInit() {
-    this.load = this.ownerService.getOwners().pipe(
-      finalize(() => {
-        this.isOwnersDataReceived = true;
-      })
-    ).subscribe(
-      owners => this.owners = owners,
-      error => this.errorMessage = error as any);
+    this.subscription = this.route.queryParamMap.pipe(
+      map(toOwnerQuery),
+      tap(query => {
+        this.query = query;
+        this.lastName = query.lastName;
+        this.ownerPage = undefined;
+        this.errorMessage = undefined;
+      }),
+      switchMap(query => this.ownerService.getOwners(query).pipe(
+        catchError(error => {
+          this.errorMessage = error;
+          return EMPTY;
+        })))
+    ).subscribe(ownerPage => this.ownerPage = ownerPage);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   onSelect(owner: Owner) {
@@ -40,13 +61,29 @@ export class OwnerListComponent implements OnInit {
     this.router.navigate(['/owners/add']);
   }
 
-  // Only the latest query may answer: a search sent while the initial load is still in
-  // flight would otherwise be overwritten by the full list when it lands afterwards.
   searchByLastName(lastName: string) {
-    this.load?.unsubscribe();
-    const owners$ = lastName ? this.ownerService.searchOwners(lastName) : this.ownerService.getOwners();
-    this.load = owners$.subscribe(
-      owners => this.owners = owners,
-      () => this.owners = null);
+    this.navigate({...this.query, lastName, page: 0});
   }
+
+  onPage({pageIndex, pageSize}: PageEvent) {
+    const page = pageSize === this.query.size ? pageIndex : 0;
+    this.navigate({...this.query, page, size: pageSize});
+  }
+
+  onSort({active, direction}: Sort) {
+    this.navigate({...this.query, page: 0, sort: `${active},${direction}`});
+  }
+
+  private navigate(query: OwnerQuery) {
+    this.router.navigate(['/owners'], {queryParams: {...query, lastName: query.lastName || undefined}});
+  }
+}
+
+function toOwnerQuery(params: ParamMap): OwnerQuery {
+  return {
+    lastName: params.get('lastName') ?? '',
+    page: Number(params.get('page')) || 0,
+    size: Number(params.get('size')) || 10,
+    sort: params.get('sort') || 'name'
+  };
 }

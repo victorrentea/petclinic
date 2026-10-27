@@ -25,20 +25,23 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 }
 
 /**
- * Remembers every owner the clinic holds, after checking that the ones the
+ * Remembers how many owners the clinic holds, after checking that the ones the
  * Background names are among them — so a changed seed (Flyway's
  * db/seed/R__seed.sql, which the feature asks for with @fixture:default) fails on
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const {data: page} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  if (!page?.totalElements) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  const names: string[] = data.map(fullName);
-  expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
-  this.allOwnerNames = names;
+  for (const [name] of owners.raw()) {
+    const lastName = name.trim().split(' ').pop();
+    const {data: matches} = await axios.get(`${API_BASE}/owners`, {params: {lastName, size: 20}, timeout: 10_000});
+    expect(matches.content.map(fullName)).toContain(name.trim());
+  }
+  this.ownerCount = page.totalElements;
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
@@ -55,6 +58,50 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+const listedCells = (world: PlaywrightWorld, cssClass: string) =>
+  world.page.locator(`#ownersTable td${cssClass}`).allTextContents();
+const paginatorRange = (world: PlaywrightWorld) => world.page.locator('.mat-mdc-paginator-range-label');
+
+When('I choose {int} owners per page', async function (this: PlaywrightWorld, size: number) {
+  await this.page.locator('mat-paginator mat-select').click();
+  await this.page.getByRole('option', {name: String(size), exact: true}).click();
+});
+
+When('I sort owners by city', async function (this: PlaywrightWorld) {
+  await this.page.locator('#ownersTable th', {hasText: 'City'}).click();
+  await expect(this.page).toHaveURL(/sort=city/);
+});
+
+When('I go to the next page of owners', async function (this: PlaywrightWorld) {
+  await this.page.locator('mat-paginator button.mat-mdc-paginator-navigation-next').click();
+  await expect(this.page).toHaveURL(/page=1/);
+});
+
+When('I open the first listed owner and go back', async function (this: PlaywrightWorld) {
+  await this.page.locator('#ownersTable td.ownerFullName a').first().click();
+  await expect(this.page).toHaveURL(/\/owners\/\d+/);
+  await this.page.goBack();
+});
+
+Then('the first page lists {int} owners out of every owner in the clinic',
+  async function (this: PlaywrightWorld, size: number) {
+    await expect(this.page.locator('#ownersTable td.ownerFullName')).toHaveCount(size);
+    await expect(paginatorRange(this)).toHaveText(new RegExp(`^\\s*1 – ${size} of ${this.requireOwnerCount()}\\s*$`));
+  });
+
+Then('the listed owners are in alphabetical order of city', async function (this: PlaywrightWorld) {
+  const collator = new Intl.Collator('und');
+  const cityColumn = 3;
+  await expect.poll(async () => {
+    const cities = (await listedCells(this, `:nth-child(${cityColumn})`)).map((c) => c.trim());
+    return cities.length > 0 && cities.every((c, i) => i === 0 || collator.compare(cities[i - 1], c) <= 0);
+  }, {timeout: 10_000}).toBe(true);
+});
+
+Then('page {int} sorted by city is shown', async function (this: PlaywrightWorld, pageNumber: number) {
+  await expect(this.page).toHaveURL(new RegExp(`page=${pageNumber - 1}`));
+  await expect(this.page).toHaveURL(/sort=city/);
+  const size = 10;
+  const first = (pageNumber - 1) * size + 1;
+  await expect(paginatorRange(this)).toHaveText(new RegExp(`^\\s*${first} – ${first + size - 1} of`));
 });
