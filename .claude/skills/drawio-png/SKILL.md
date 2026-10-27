@@ -1,6 +1,6 @@
 ---
 name: drawio-png
-description: Read the draw.io diagram embedded in a *.drawio.png (also .drawio / .drawio.svg) as text — vertices, edges, and the custom attributes behind the picture (kind, port, tech, traced, …). Use whenever someone mentions the deployment, architecture, container or conceptual-model diagram, a "drawio" picture, or its hidden/embedded XML, metadata or "headers"; whenever a question is who calls, consumes or depends on the backend / its API, or what talks to what; and to check a diagram against the code. Load it FIRST, even mid-task, before searching for the file, eyeballing the image, or decoding PNG text chunks (zTXt/tEXt/mxGraphModel) by hand. The diagrams live in petclinic-backend/docs/.
+description: Reads a *.drawio.png (.drawio, .drawio.svg) diagram as text — vertices, edges and their hidden attributes (port, tech, traced). Use FIRST for any question about the deployment, architecture or conceptual-model diagram in petclinic-backend/docs/, who calls or depends on the backend, or whether a diagram matches the code.
 allowed-tools: Bash(.claude/skills/drawio-png/drawio.py:*)
 ---
 
@@ -50,3 +50,4 @@ does the same decoding in Java for tests; keep both in step if the format handli
 `claude -p` and passes a run only if it loads this skill (~2 min, a few $). Rerun it after
 touching `description`; the bar is 10/10 at 2 reps. It was 9/10 before the 2026-10-15
 rewording ("architecture diagram" without "drawio" went grepping instead).
+Cut from 688 to 320 chars on 2026-10-27: still 10/10 here and 30/30 on three extra tasks, on Sonnet 5.5.
