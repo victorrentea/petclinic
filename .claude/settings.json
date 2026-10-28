@@ -56,6 +56,16 @@
             "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/watch-ci-after-push.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "//": "demo: on drawio-png load, beep and inject a rule with a marker phrase",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.claude/hooks/post-drawio-skill.sh\""
+          }
+        ]
       }
     ]
   },
