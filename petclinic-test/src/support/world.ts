@@ -10,7 +10,8 @@ import {flushBrowserSpans} from './otel-flush';
 import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
-import {keepCaptionAcrossLoads, showCaption} from './captions';
+import {keepCaptionAcrossLoads, showCaption, showTikTokCaption} from './captions';
+import {Narration} from './narration';
 import {fixtureOfTags, resetDatabaseTo} from './db-fixture';
 
 setDefaultTimeout(60_000);
@@ -33,6 +34,9 @@ const TRACE_ON = process.env.PW_TRACE === 'on';
 const VIDEOS_DIR = path.join(__dirname, '..', '..', 'test-results', 'cucumber-videos');
 const VIDEO_ON = process.env.PW_VIDEO === 'on';
 const VIDEO_SIZE = {width: 1280, height: 800};
+// On top of PW_VIDEO=on: TikTok-style subtitles, each also spoken (support/narration.ts), and
+// an .mp4 with the voice-over beside the .webm. PW_VIDEO_TITLE opens every video with a title card.
+const NARRATE_ON = VIDEO_ON && process.env.PW_NARRATE === 'on';
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range — mirrors the Playwright
@@ -62,6 +66,8 @@ export class PlaywrightWorld extends World {
   recordingStartMs?: number;
   // Set when PW_VIDEO=on: the subtitle currently on screen.
   caption?: string;
+  // Set when PW_NARRATE=on: the voice-over being recorded for this scenario's video.
+  narration?: Narration;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -115,7 +121,17 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
     this.recordingStartMs = Date.now();
   }
   this.page = await this.context.newPage();
-  if (VIDEO_ON) {
+  if (NARRATE_ON) {
+    const cuesDir = path.join(VIDEOS_DIR, '.cues-' + recordingSlug(pickle.uri, pickle.name));
+    this.narration = new Narration(cuesDir, Date.now());
+    this.page.on('load', () => {
+      if (this.caption) void showTikTokCaption(this.page, this.caption, 0);
+    });
+    if (process.env.PW_VIDEO_TITLE) {
+      await subtitle(this, `${process.env.PW_VIDEO_TITLE}: ${pickle.name}`, 'step', 0);
+      this.caption = undefined;
+    }
+  } else if (VIDEO_ON) {
     keepCaptionAcrossLoads(this.page, () => this.caption);
   }
   await startTestCoverage(this.page);
@@ -182,8 +198,10 @@ After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: 
   const video = this.page?.video();
   await this.context?.close();
   if (video) {
-    await video.saveAs(path.join(VIDEOS_DIR, recordingSlug(pickle.uri, pickle.name) + '.webm'));
+    const webm = path.join(VIDEOS_DIR, recordingSlug(pickle.uri, pickle.name) + '.webm');
+    await video.saveAs(webm);
     await video.delete();
+    this.narration?.muxOnto(webm);
   }
   await this.browser?.close();
 });
@@ -192,19 +210,36 @@ BeforeStep(async function (this: PlaywrightWorld, {pickleStep}: ITestStepHookPar
   if (!VIDEO_ON) return;
   const keywords: Record<string, string> = {Context: 'Given', Action: 'When', Outcome: 'Then'};
   const keyword = keywords[pickleStep.type ?? ''] ?? '';
-  this.caption = `${keyword} ${pickleStep.text}`.trim();
-  await showCaption(this.page, this.caption);
-  await this.page.waitForTimeout(1_200); // time to read it before the step acts
+  await subtitle(this, `${keyword} ${pickleStep.text}`.trim(), 'step', 1_200); // read it before the step acts
 });
 
 AfterStep(async function (this: PlaywrightWorld, {result}: ITestStepHookParameter) {
   if (!VIDEO_ON) return;
   const failed = result.status !== 'PASSED';
-  const verdict = failed ? `❌ FAILED: ${this.caption}` : `✅ ${this.caption}`;
-  await showCaption(this.page, verdict, failed ? 'fail' : 'pass');
+  if (NARRATE_ON) {
+    // Spoken, a verdict names the reason, not the step it repeats: the step was just said.
+    const reason = (result.message ?? '').split('\n')[0].replace(/^\w*Error:\s*/, '');
+    await subtitle(this, failed ? `❌ Failed: ${reason}` : '✅ Passed', failed ? 'fail' : 'pass', failed ? 2_500 : 500);
+  } else {
+    const verdict = failed ? `❌ FAILED: ${this.caption}` : `✅ ${this.caption}`;
+    await subtitle(this, verdict, failed ? 'fail' : 'pass', failed ? 3_500 : 900);
+  }
   this.caption = undefined;
-  await this.page.waitForTimeout(failed ? 3_500 : 900);
 });
+
+/** Shows `text` — said aloud too, with PW_NARRATE=on — and holds it on screen at least `minMs`. */
+async function subtitle(world: PlaywrightWorld, text: string, tone: 'step' | 'pass' | 'fail',
+                        minMs: number): Promise<void> {
+  world.caption = text;
+  if (!world.narration) {
+    await showCaption(world.page, text, tone);
+    await world.page.waitForTimeout(minMs);
+    return;
+  }
+  const spokenMs = world.narration.say(text);
+  await showTikTokCaption(world.page, text, spokenMs, tone);
+  await world.page.waitForTimeout(Math.max(minMs, spokenMs + 300));
+}
 
 // One file per scenario, named so a human can find it and short enough for any disk:
 // the feature's basename, then the scenario, lower-cased and dashed.

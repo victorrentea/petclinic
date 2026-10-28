@@ -11,6 +11,8 @@
   slowed down (`PW_SLOWMO`, default 400ms) and subtitled with its Gherkin steps plus a ✅/❌
   verdict — a caption bar drawn *in the page* (`src/support/captions.ts`), because Homebrew's
   ffmpeg has no drawtext/subtitles filter to burn one in afterwards.
+  Add `PW_NARRATE=on` for TikTok-style subtitles also spoken by macOS `say` (`PW_VOICE`), muxed
+  into an `.mp4` beside the `.webm` (`src/support/narration.ts`); `PW_VIDEO_TITLE` adds a title card.
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
   `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
