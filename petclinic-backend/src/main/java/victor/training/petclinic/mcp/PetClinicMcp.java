@@ -54,7 +54,7 @@ public class PetClinicMcp {
     @Transactional
     public String createVisit(
             @McpToolParam(description = "Pet ID (must belong to the authenticated owner)", required = true) int petId,
-            @McpToolParam(description = "Visit date (yyyy-MM-dd); must be today or in the future",
+            @McpToolParam(description = "Visit date (yyyy-MM-dd); from today to one year ahead",
                     required = true) LocalDate visitDate,
             @McpToolParam(description = "Exact local time of the appointment (HH:mm), e.g. 08:00",
                     required = true) LocalTime visitTime,
@@ -67,6 +67,7 @@ public class PetClinicMcp {
             throw new IllegalArgumentException("Pet " + petId + " does not belong to owner " + ownerId);
         }
         requireFutureDate(visitDate);
+        pet.checkVisitDate(visitDate, LocalDate.now());
         if (LocalDateTime.of(visitDate, visitTime).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Visit time must be in the future: " + visitDate + " " + visitTime);
         }
