@@ -158,7 +158,7 @@ Core entities and relationships:
 
 ## Java Code Style
 - Keep < 120 chars / line
-- Keep methods under 30 linesKeep methods under 30 linesKeep methods under 30 linesKeep methods under 30 linesKeep methods under 30 linesKeep methods under 30 lines
+- Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
 - Global REST exception handling is done via `@RestControllerAdvice`
