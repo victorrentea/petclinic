@@ -1,0 +1,19 @@
+@startuml
+
+title Pet Triage (draft)
+footer petclinic-backend/docs/PetTriage.puml
+
+skinparam shadowing false
+
+start
+:Record symptoms;
+:Check vital signs;
+if (Life-threatening?) then (yes)
+  :Call vet ambulance;
+else (no)
+  :Book visit;
+  :Notify owner by SMS;
+endif
+stop
+
+@enduml
