@@ -77,3 +77,24 @@ display:none;
     align-items: flex-start;
   }
 }
+
+#search-owner-form .btn-default:hover {
+  background-color: #6db33f;
+  border-color: #6db33f;
+}
+
+.owners-table-scroll {
+  max-height: calc(100vh - 290px);
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.owners-table-scroll .table {
+  margin-bottom: 0;
+}
+
+.owners-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
