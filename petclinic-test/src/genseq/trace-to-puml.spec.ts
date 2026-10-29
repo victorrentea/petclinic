@@ -447,7 +447,7 @@ const selectOwners = {
 };
 
 // Every frame says how its transaction ended, beside the tab — PlantUML's `[…]` tail.
-const COMMITTED_TX = 'group tx [<color:#888888>committed</color>]';
+const COMMITTED_TX = 'group tx [committed]';
 
 const inTransaction: NormSpan[] = [
   backendSpan('t1', '', 'GET /api/owners', 'SERVER'),
@@ -566,8 +566,10 @@ const outcome = (spans: NormSpan[], value: string): NormSpan[] => spans
     ? {...s, attributes: {...s.attributes, 'transaction.outcome': value}} : s));
 
 test('a committed transaction says so beside its tab, in grey', () => {
-  expect(spansToPuml(outcome(inTransaction, 'committed'), 'tx', STATIC))
-    .toContain(`${COMMITTED_TX}\n`);
+  const puml = spansToPuml(outcome(inTransaction, 'committed'), 'tx', STATIC);
+  expect(puml).toContain(`${COMMITTED_TX}\n`);
+  // grey from the header, not an inline <color>: that splits the label into three runs
+  expect(puml).toContain('skinparam sequenceGroupFontColor #888888\n');
 });
 
 test('a rolled-back transaction is framed too, and says so in amber', () => {
