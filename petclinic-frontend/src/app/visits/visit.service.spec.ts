@@ -5,6 +5,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { VisitService } from './visit.service';
 import { Visit } from './visit';
+import { VisitPage } from './visit-page';
 
 describe('VisitService', () => {
   let httpTestingController: HttpTestingController;
@@ -28,11 +29,21 @@ describe('VisitService', () => {
 
   afterEach(() => httpTestingController.verify());
 
-  it('should return expected visits', () => {
-    visitService.getVisits().subscribe(v => expect(v).toEqual(expectedVisits), fail);
+  const aPage = (visits: Visit[]): VisitPage =>
+    ({ content: visits, totalElements: visits.length, totalPages: 1, number: 0, size: 10 });
+
+  it('asks for the first page with the server defaults when given no query', () => {
+    visitService.getVisitsPage().subscribe(page => expect(page).toEqual(aPage(expectedVisits)), fail);
     const req = httpTestingController.expectOne(baseUrl);
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedVisits);
+    req.flush(aPage(expectedVisits));
+  });
+
+  it('sends every query parameter it is given', () => {
+    visitService.getVisitsPage({ page: 2, size: 5, sort: 'owner,desc' }).subscribe();
+    const req = httpTestingController.expectOne(baseUrl + '?page=2&size=5&sort=owner,desc');
+    expect(req.request.method).toEqual('GET');
+    req.flush(aPage([]));
   });
 
   it('should get visit by id', () => {

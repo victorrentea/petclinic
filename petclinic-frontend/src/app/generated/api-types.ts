@@ -357,6 +357,32 @@ export interface components {
        */
       description: string;
     };
+    /** @description One page of visits, with the totals of all visits. */
+    VisitPageDto: {
+      content: components["schemas"]["VisitDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based index of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description Visits on all pages.
+       * @example 26
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @example 3
+       */
+      totalPages: number;
+    };
   };
   responses: never;
   parameters: never;
@@ -1571,11 +1597,18 @@ export interface operations {
     };
   };
   listVisits: {
+    parameters: {
+      query?: {
+        page?: number;
+        size?: number;
+        sort?: string;
+      };
+    };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["VisitDto"][];
+          "application/json": components["schemas"]["VisitPageDto"];
         };
       };
       /** @description Bad Request */

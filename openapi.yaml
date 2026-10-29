@@ -1400,6 +1400,31 @@ paths:
   /api/visits:
     get:
       operationId: listVisits
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+          maximum: 100
+          minimum: 1
+      - in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: "date,desc"
+          pattern: "(date|description|pet|owner)(,(asc|desc))?"
       responses:
         "200":
           content:
@@ -1408,18 +1433,29 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    date: 2013-01-01
-                    description: rabies shot
-                    petId: 7
-                  - id: 2
-                    date: 2013-01-02
-                    description: annual checkup
-                    petId: 8
+                    content:
+                    - id: 2
+                      date: 2013-01-02
+                      description: annual checkup
+                      petId: 8
+                      petName: Pickett
+                      ownerId: 7
+                      ownerFirstName: Newt
+                      ownerLastName: Scamander
+                    - id: 1
+                      date: 2013-01-01
+                      description: rabies shot
+                      petId: 9
+                      petName: Dinah
+                      ownerId: 8
+                      ownerFirstName: Alice
+                      ownerLastName: Liddell
+                    totalElements: 2
+                    totalPages: 1
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/VisitDto"
+                $ref: "#/components/schemas/VisitPageDto"
           description: OK
         "400":
           content:
@@ -1956,3 +1992,35 @@ components:
           minLength: 1
       required:
       - description
+    VisitPageDto:
+      type: object
+      description: "One page of visits, with the totals of all visits."
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/VisitDto"
+        number:
+          type: integer
+          format: int32
+          description: Zero-based index of this page.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: Visits on all pages.
+          example: 26
+        totalPages:
+          type: integer
+          format: int32
+          example: 3
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
