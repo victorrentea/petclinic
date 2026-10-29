@@ -298,14 +298,23 @@ const COMMITTED = 'committed';
 
 // The frame's tab says just `tx` — whatever opened it is named by the call it sits inside,
 // so a longer tab would only repeat that. How it ended goes *beside* the tab: PlantUML draws
-// a group's `[bracketed]` tail as a second label to the right of it. Grey when it committed,
-// the expected case read as a quiet status; amber for anything else, the case a reader must
-// not skim past. #888888 is the review page's muted grey, which it re-themes for dark mode;
-// the amber reads on a light and a dark background as it is.
+// a group's `[bracketed]` tail as a second label to the right of it, in the header's grey
+// (GROUP_TAIL_STYLE) — the expected case, read as a quiet status. Anything but a commit is
+// amber, the case a reader must not skim past; it reads on a light and a dark page as it is.
 function transactionHeader(outcome: string): string {
-  const colour = outcome === COMMITTED ? '#888888' : '#B26A00';
-  return `group tx [<color:${colour}>${outcome}</color>]`;
+  return outcome === COMMITTED
+    ? `group tx [${outcome}]`
+    : `group tx [<color:#B26A00>${outcome}</color>]`;
 }
+
+// The tail's style, for every group: grey and plain where the `tx` tab stays bold. In the
+// header rather than as an inline <color>, which splits `[committed]` into three text runs —
+// and the review page, redrawing labels in its own font, then opens a gap before the `]`.
+// #888888 is that page's muted grey, which it re-themes for dark mode.
+const GROUP_TAIL_STYLE = [
+  'skinparam sequenceGroupFontColor #888888',
+  'skinparam sequenceGroupFontStyle plain',
+];
 
 /** The opt-in a reader will find in the source this diagram was drawn from. */
 function optInOf(source: string): string {
@@ -641,6 +650,7 @@ export function renderDiagram(
     `' ⚠️  GENERATED FILE — DO NOT EDIT. Every edit is lost on the next run.`,
     'hide footbox',
     ...interactiveHeader,
+    ...GROUP_TAIL_STYLE,
     `title ${solo ? linkedSectionTitle(TEST_TITLE_PREFIX + qualifiedTitle(solo.title, title), solo.link) : title}`,
     // footer (bottom of every page) states the diagram's provenance, naming the opt-in
     // the reader will actually find in the file above: a .feature/.spec.ts carries the

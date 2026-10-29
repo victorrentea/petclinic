@@ -3,6 +3,8 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
+skinparam sequenceGroupFontColor #888888
+skinparam sequenceGroupFontStyle plain
 title [[src://petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java:75{Click to open the test} Test: AddVisitApiTest: adds a visit to an existing pet]]
 footer @GenerateSequence in petclinic-backend/src/test/java/victor/training/petclinic/rest/AddVisitApiTest.java — generated from real traces of end-to-end test runs, do not edit ❗
 participant Test
@@ -86,7 +88,7 @@ Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
 activate Backend
-group tx [<color:#888888>committed</color>]
+group tx [committed]
 Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} select owners ⊕]]
 end
 deactivate Backend
@@ -103,13 +105,13 @@ Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petc
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/VisitRepository.java:14{Click to open VisitRepository.save} VisitRepository.save ↗]]
 activate Backend
-group tx [<color:#888888>committed</color>]
+group tx [committed]
 Backend -> DB: [[genseq://1frwl7f{Click for the statement behind this call} insert for victor.training.petclinic.domain.Visit ⊕]]
 end
 deactivate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
 activate Backend
-group tx [<color:#888888>committed</color>]
+group tx [committed]
 Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} select owners ⊕]]
 end
 deactivate Backend
@@ -134,7 +136,7 @@ Test -> Backend: Get an owner by ID\nGET /api/owners/{ownerId}
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:14{Click to open OwnerRepository.findById} OwnerRepository.findById ↗]]
 activate Backend
-group tx [<color:#888888>committed</color>]
+group tx [committed]
 Backend -> DB: [[genseq://0x8aana{Click for the statement behind this call} select owners ⊕]]
 end
 deactivate Backend
