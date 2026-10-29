@@ -12,7 +12,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,7 +42,7 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
         pd.setDetail(detail);
-        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
+        pd.setType(URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
@@ -66,6 +69,37 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    // A request parameter outside its constraints (e.g. a page size not offered). The rejected
+    // value is left out on purpose: it is whatever the caller typed, and the parameter name is enough.
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ProblemDetail> handleHandlerMethodValidation(HandlerMethodValidationException ex,
+            HttpServletRequest request) {
+        List<String> errors = ex.getParameterValidationResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream()
+                        .map(error -> result.getMethodParameter().getParameterName() + " "
+                                + error.getDefaultMessage()))
+                .toList();
+        log.warn("Invalid request parameters: {}", errors);
+        return badRequest(errors, request);
+    }
+
+    // A request parameter that does not even convert to its type, like page=abc.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String type = ex.getRequiredType() == null ? "value" : ex.getRequiredType().getSimpleName();
+        List<String> errors = List.of(ex.getName() + " must be a valid " + type);
+        log.warn("Invalid request parameters: {}", errors);
+        return badRequest(errors, request);
+    }
+
+    private ResponseEntity<ProblemDetail> badRequest(List<String> errors, HttpServletRequest request) {
+        ProblemDetail pd = buildProblemDetail("Invalid Request Parameter",
+                "The request parameters are invalid. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(pd);
     }

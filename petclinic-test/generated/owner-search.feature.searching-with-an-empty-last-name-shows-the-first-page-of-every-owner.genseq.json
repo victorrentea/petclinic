@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "details": {
+    "06lhb5c": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST 10 rows only"
+          }
+        }
+      ]
+    },
+    "0rcs8yy": {
+      "title": "OwnerRepository.findByLastNameStartingWith",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
+          "alternate": {
+            "label": "",
+            "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
+          }
+        }
+      ]
+    },
+    "075m496": {
+      "title": "SELECT o FROM Owner o LEFT JOIN FETCH o.pets p LEFT JOIN FETCH p.type …",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name, v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, o1_0.telephone\nFROM owners o1_0\nLEFT JOIN pets p1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nLEFT JOIN visits v1_0\nON p1_0.id=v1_0.pet_id\nWHERE o1_0.id in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "alternate": {
+            "label": "",
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name, v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time, o1_0.telephone\nFROM owners o1_0\nLEFT JOIN pets p1_0\nON o1_0.id=p1_0.owner_id\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nLEFT JOIN visits v1_0\nON p1_0.id=v1_0.pet_id\nWHERE o1_0.id in (9, 12, 11, 17, 25, 10, 15, 23, 19, 18)"
+          }
+        }
+      ]
+    },
+    "159qzfj": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "{\"content\":[{\"firstName\":\"Henry\",\"lastName\":\"Baskerville\",\"address\":\"Baskerville Hall\",\"city\":\"Dartmoor\",\"telephone\":\"(0044)1626832093\",\"id\":9,\"pets\":[{\"name\":\"Baskerville\",\"birthDate\":\"2017-02-24\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":11,\"ownerId\":9,\"visits\":[{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1791280918344\",\"id\":29,\"petId\":11,\"petName\":\"Baskerville\",\"ownerId\":9,\"ownerFirstName\":\"Henry\",\"ownerLastName\":\"Baskerville\"}]}]},{\"firstName\":\"Sam\",\"lastName\":\"Carraclough\",\"address\":\"Greenall Bridge\",\"city\":\"Yorkshire\",\"telephone\":\"+441943876543\",\"id\":12,\"pets\":[{\"name\":\"Lassie\",\"birthDate\":\"2020-05-12\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":15,\"ownerId\":12,\"visits\":[{\"date\":\"2026-05-02\",\"description\":\"post-vaccine follow-up\",\"id\":24,\"petId\":15,\"petName\":\"Lassie\",\"ownerId\":12,\"ownerFirstName\":\"Sam\",\"ownerLastName\":\"Carraclough\"},{\"date\":\"2025-11-12\",\"description\":\"rabies vaccine\",\"id\":6,\"petId\":15,\"petName\":\"Lassie\",\"ownerId\":12,\"ownerFirstName\":\"Sam\",\"ownerLastName\":\"Carraclough\"}]}]},{\"firstName\":\"George\",\"lastName\":\"Darling\",\"address\":\"14 Kensington Gardens\",\"city\":\"London\",\"telephone\":\"(0044)2079372121\",\"id\":11,\"pets\":[{\"name\":\"Liza\",\"birthDate\":\"2019-06-08\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":14,\"ownerId\":11,\"visits\":[]},{\"name\":\"Nana\",\"birthDate\":\"2018-06-24\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":13,\"ownerId\":11,\"visits\":[]}]},{\"firstName\":\"Wendy\",\"lastName\":\"Darling\",\"address\":\"14 Kensington Gardens\",\"city\":\"London\",\"telephone\":\"(0044)2079372122\",\"id\":17,\"pets\":[{\"name\":\"Toby\",\"birthDate\":\"2020-09-14\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":22,\"ownerId\":17,\"visits\":[{\"date\":\"2026-04-10\",\"description\":\"spay/neuter\",\"id\":13,\"petId\":22,\"petName\":\"Toby\",\"ownerId\":17,\"ownerFirstName\":\"Wendy\",\"ownerLastName\":\"Darling\"}]}]},{\"firstName\":\"Charles\",\"lastName\":\"Dickens\",\"address\":\"Gad's Hill Place\",\"city\":\"Higham\",\"telephone\":\"+441634406030\",\"id\":25,\"pets\":[{\"name\":\"Grip\",\"birthDate\":\"2023-08-19\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":31,\"ownerId\":25,\"visits\":[{\"date\":\"2026-05-01\",\"description\":\"plumage check\",\"id\":22,\"petId\":31,\"petName\":\"Grip\",\"ownerId\":25,\"ownerFirstName\":\"Charles\",\"ownerLastName\":\"Dickens\"}]}]},{\"firstName\":\"John\",\"lastName\":\"Dolittle\",\"address\":\"Oxenthorpe Road\",\"city\":\"Puddleby\",\"telephone\":\"+441803712345\",\"id\":10,\"pets\":[{\"name\":\"Polynesia\",\"birthDate\":\"2016-03-09\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":12,\"ownerId\":10,\"visits\":[]}]},{\"firstName\":\"Argus\",\"lastName\":\"Filch\",\"address\":\"Hogwarts Castle\",\"city\":\"Inverness\",\"telephone\":\"(0044)1463245678\",\"id\":15,\"pets\":[{\"name\":\"Mrs Norris\",\"birthDate\":\"2018-11-10\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":19,\"ownerId\":15,\"visits\":[{\"date\":\"2026-03-05\",\"description\":\"trivalent vaccine\",\"id\":10,\"petId\":19,\"petName\":\"Mrs Norris\",\"ownerId\":15,\"ownerFirstName\":\"Argus\",\"ownerLastName\":\"Filch\"}]}]},{\"firstName\":\"Mister\",\"lastName\":\"Geppetto\",\"address\":\"Via dei Tessitori 7\",\"city\":\"Florence\",\"telephone\":\"+39055290383\",\"id\":23,\"pets\":[{\"name\":\"Figaro\",\"birthDate\":\"2019-09-09\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":29,\"ownerId\":23,\"visits\":[{\"date\":\"2026-04-25\",\"description\":\"rabies vaccine\",\"id\":20,\"petId\":29,\"petName\":\"Figaro\",\"ownerId\":23,\"ownerFirstName\":\"Mister\",\"ownerLastName\":\"Geppetto\"}]}]},{\"firstName\":\"Hermione\",\"lastName\":\"Granger\",\"address\":\"Gryffindor Tower\",\"city\":\"Hogsmeade\",\"telephone\":\"(0044)1463555112\",\"id\":19,\"pets\":[{\"name\":\"Crookshanks\",\"birthDate\":\"2019-03-15\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":24,\"ownerId\":19,\"visits\":[{\"date\":\"2025-11-30\",\"description\":\"trivalent vaccine\",\"id\":15,\"petId\":24,\"petName\":\"Crookshanks\",\"ownerId\":19,\"ownerFirstName\":\"Hermione\",\"ownerLastName\":\"Granger\"}]}]},{\"firstName\":\"Rubeus\",\"lastName\":\"Hagrid\",\"address\":\"Gamekeepers Hut\",\"city\":\"Hogsmeade\",\"telephone\":\"+441463555111\",\"id\":18,\"pets\":[{\"name\":\"Norbert\",\"birthDate\":\"2021-07-22\",\"type\":{\"name\":\"lizard\",\"id\":3},\"id\":23,\"ownerId\":18,\"visits\":[{\"date\":\"2025-10-22\",\"description\":\"skin and scale check\",\"id\":14,\"petId\":23,\"petName\":\"Norbert\",\"ownerId\":18,\"ownerFirstName\":\"Rubeus\",\"ownerLastName\":\"Hagrid\"}]}…"
+        }
+      ]
+    }
+  }
+}

@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description One page of the owners whose last name starts with `lastName` (case-sensitive), with their pets and visits.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,17 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners in the requested order. */
+    OwnerPageDto: {
+      /** @description The owners on this page; empty past the last page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int64
+       * @description How many owners match the filter, across all pages.
+       * @example 26
+       */
+      totalElements: number;
     };
     PetDto: {
       /**
@@ -553,24 +567,33 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description One page of the owners whose last name starts with `lastName` (case-sensitive), with their pets and visits.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Zero-based page index */
+        page?: number;
+        /** @description Rows per page: 5, 10 or 20 */
+        size?: number;
+        /** @description Name orders by last name, first name, id; City by city, then as Name. The direction applies to every field. Defaults to name,asc. */
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description page, size or sort outside the values listed here */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/problem+json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */
