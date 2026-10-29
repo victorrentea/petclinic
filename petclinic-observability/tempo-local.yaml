@@ -1,0 +1,51 @@
+# Tempo on its own, no Docker, no Grafana — started by ../start-tempo.sh.
+# It is all the sequence diagrams need: OTLP in on :4318, the search/trace API on :3200
+# (petclinic-test/src/genseq/tempo-client.ts talks to it directly when TEMPO_URL is set).
+# Traces live under ./.tempo-data and are wiped on every start.
+stream_over_http_enabled: true
+
+server:
+  http_listen_address: 127.0.0.1
+  http_listen_port: 3200
+  grpc_listen_address: 127.0.0.1
+  grpc_listen_port: 9095
+  log_level: error
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+          endpoint: "127.0.0.1:4318"
+
+# Tempo 3 leaves the last 30 s out of every search, so as not to answer with a trace still
+# coming in. The diagrams are fetched seconds after a test, and the generator waits for each
+# test's window to close anyway; at 30 s it gave up on every one of them.
+query_frontend:
+  query_end_cutoff: 0s
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: ./.tempo-data/wal
+    local:
+      path: ./.tempo-data/blocks
+
+# Tempo 3 defaults every one of these to /var/tempo, which a non-root user cannot create.
+live_store:
+  # A trace is searchable once the live store has cut it: 5-10 s after its last span by
+  # default, which already eats most of the generator's 14 s of retries.
+  max_trace_idle: 1s
+  flush_check_period: 1s
+  shutdown_marker_dir: ./.tempo-data/live-store/shutdown-marker
+  wal:
+    path: ./.tempo-data/live-store/wal
+block_builder:
+  wal:
+    path: ./.tempo-data/block-builder/wal
+backend_scheduler:
+  local_work_path: ./.tempo-data/backend-scheduler
+
+usage_report:
+  reporting_enabled: false

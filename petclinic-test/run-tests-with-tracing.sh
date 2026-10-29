@@ -11,6 +11,7 @@
 #
 #     ./start-database.sh     # embedded Postgres        :5432
 #     ./start-grafana.sh      # Grafana LGTM + Tempo      :3300, OTLP :4318
+#       or ./start-tempo.sh   # Tempo alone, no Docker    :3200, OTLP :4318
 #     ./start-backend.sh      # Spring Boot + OTel agent  :8080
 #     ./start-frontend.sh     # Angular dev server        :4200
 #
@@ -22,7 +23,8 @@
 #
 # Every endpoint comes from the environment when set — BASE_URL, BACKEND_URL,
 # GRAFANA_URL, OTEL_EXPORTER_OTLP_ENDPOINT, the names `start-docker.sh ports`
-# prints — and defaults to the dev stack's fixed ports above.
+# prints, or TEMPO_URL for a bare Tempo — and defaults to the dev stack's fixed
+# ports above: Grafana if it answers on :3300, else ./start-tempo.sh's :3200.
 #
 # It does NOT start or stop anything — it only verifies the stack is reachable,
 # runs both suites (which reuse the running apps), and reports the diagrams
@@ -54,10 +56,21 @@ http_up() { curl -fsS "$1" >/dev/null 2>&1; }
 answers() { curl -s -o /dev/null --max-time 3 "$1"; }
 port_up() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null && exec 3>&- 3<&-; }
 
+# No Grafana named and none on :3300, but ./start-tempo.sh's Tempo is up: fetch from it
+# directly. Exported, so the diagram generator the suites run reads it too.
+if [[ -z "${TEMPO_URL:-}${GRAFANA_URL:-}" ]] && ! http_up "$GRAFANA/api/health" \
+    && http_up "http://127.0.0.1:3200/ready"; then
+  export TEMPO_URL=http://127.0.0.1:3200
+fi
+
 # --- preflight: the stack must already be running --------------------------
 down=()
-http_up "$GRAFANA/api/health"   || down+=("Grafana ($GRAFANA)        → ./start-grafana.sh")
-answers "$OTLP/v1/traces"       || down+=("OTLP collector ($OTLP)    → ./start-grafana.sh")
+if [[ -n "${TEMPO_URL:-}" ]]; then
+  http_up "$TEMPO_URL/ready"    || down+=("Tempo ($TEMPO_URL)        → ./start-tempo.sh")
+else
+  http_up "$GRAFANA/api/health" || down+=("Grafana ($GRAFANA)        → ./start-grafana.sh, or ./start-tempo.sh (no Docker)")
+fi
+answers "$OTLP/v1/traces"       || down+=("OTLP collector ($OTLP)    → ./start-grafana.sh or ./start-tempo.sh")
 ((DEV_STACK)) && { port_up "$DB_PORT" || down+=("Postgres (:$DB_PORT)            → ./start-database.sh"); }
 http_up "$BACKEND/api/pettypes" || down+=("Backend ($BACKEND)        → ./start-backend.sh")
 http_up "$FRONTEND/"            || down+=("Frontend ($FRONTEND)      → ./start-frontend.sh")
@@ -67,7 +80,8 @@ if ((${#down[@]})); then
   for d in "${down[@]}"; do printf '   • %s\n' "$d" >&2; done
   die "aborting — nothing was started or stopped."
 fi
-log "✅ Stack reachable (Grafana, Tempo/OTLP, Postgres, backend+agent, frontend)."
+store="Grafana+Tempo"; [[ -n "${TEMPO_URL:-}" ]] && store="Tempo alone at $TEMPO_URL"
+log "✅ Stack reachable ($store, OTLP, Postgres, backend+agent, frontend)."
 
 # The backend only attaches the OTel agent when :4318 was already up at boot, so
 # a backend started before Grafana passes every check above yet emits no traces.
@@ -94,13 +108,17 @@ rm -f "$UI_TEST_DIR"/generated/*.genseq.puml "$UI_TEST_DIR"/generated/*.genseq.j
 # tests a branch wrote (src/genseq/sequence-tag.ts). Cucumber already runs every scenario
 # and reads the list itself; Playwright only runs what its --grep lets through, so the
 # selected spec titles join the tag there.
+# One worker: every spec shares the one traced stack and its database, so in parallel a
+# test that books a visit shifts the rows another is paging through, and both time out
+# (visits-paginated, 10 Oct 2026: 2 of 6 red, green on a rerun alone). The coverage run
+# already goes one at a time (playwright.config.ts, COVERAGE_DIR).
 if [[ -n "${GENSEQ_SELECT:-}" ]]; then
   log "Also tracing $(grep -c . <<<"$GENSEQ_SELECT") test(s) named in GENSEQ_SELECT."
   log "Running the tagged and the selected Playwright specs…"
-  SKIP_SERVER_START=1 npx playwright test --grep "$(npx ts-node src/genseq/sequence-tag.ts grep)"
+  SKIP_SERVER_START=1 npx playwright test --workers=1 --grep "$(npx ts-node src/genseq/sequence-tag.ts grep)"
 else
   log "Running the tagged Playwright spec…"
-  npm run test:sequence
+  npm run test:sequence -- --workers=1
 fi
 test_status=$?
 
@@ -117,7 +135,7 @@ if ((${#diagrams[@]})); then
   for d in "${diagrams[@]}"; do echo "      - ${d#"$ROOT"/}"; done
 else
   warn "No .puml collected — is the backend running WITH the OTel agent"
-  warn "(./start-backend.sh while Grafana is up), so traces reached Tempo?"
+  warn "(./start-backend.sh while Grafana or Tempo is up), so traces reached Tempo?"
 fi
 
 if [[ $test_status -eq 0 ]]; then

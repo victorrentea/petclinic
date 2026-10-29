@@ -26,6 +26,9 @@ const {
 // @generate_sequence turns this run into add-visit.spec.ts.<scenario>.genseq.puml, right here
 // in this folder — one section per tagged test in the file.
 
+// Books onto an owner's pet that is already there: the Default dataset's.
+test.use({dbFixture: 'default'});
+
 const VISIT_DATE = '2026-05-12';
 
 test('Add a visit to an existing pet from the owner detail page',

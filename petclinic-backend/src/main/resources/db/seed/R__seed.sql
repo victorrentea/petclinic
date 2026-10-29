@@ -1,8 +1,13 @@
--- Demo / test dataset. NOT part of the incremental chain in db/migration.
+-- Demo dataset ("Default"). NOT part of the incremental chain in db/migration, and NOT
+-- loaded by the tests: a test starts on an empty database (schema + db/reference) unless it
+-- declares this dataset — @DefaultFixture on a Spring test, test.use({dbFixture: 'default'})
+-- on a Playwright spec, @fixture:default on a Cucumber feature.
 --
 -- Repeatable (R__), so Flyway re-applies it whenever its checksum changes and runs it after
--- every versioned migration — i.e. always against the final schema. That is what frees this
--- file from the "never edit an applied migration" rule the old V3__sample_data.sql lived under.
+-- every versioned migration — i.e. always against the final schema — and after
+-- db/reference/R__reference.sql (repeatables run by description), whose pet types and
+-- specialties the rows below point at by id. That is what frees this file from the "never
+-- edit an applied migration" rule the old V3__sample_data.sql lived under.
 --
 -- To offer a second dataset later, give it the SAME description in a sibling location
 -- (db/seed/minimal/R__seed.sql) and switch spring.flyway.locations between them. Flyway refuses
@@ -10,7 +15,8 @@
 
 -- Idempotent, and resets the identity sequences so the ids below stay deterministic
 -- (owner 1 = Kevin McCallister, pet 3 = Milton) — several tests and e2e specs rely on them.
-TRUNCATE roles, users, visits, pets, owners, vet_specialties, specialties, vets, types
+-- Not types or specialties: those are reference data, never the seed's to empty.
+TRUNCATE roles, users, visits, pets, owners, vet_specialties, vets
     RESTART IDENTITY CASCADE;
 
 INSERT INTO vets (first_name, last_name) VALUES
@@ -21,22 +27,13 @@ INSERT INTO vets (first_name, last_name) VALUES
   ('Henry',  'Stevens'),
   ('Sharon', 'Jenkins');
 
--- description = the symptoms that identify the specialty; vectorized into the chatbot's RAG.
-INSERT INTO specialties (name, description) VALUES
-  ('radiology',
-    'limping, limp, broken bone, fracture, suspected fracture, swollen leg, can''t bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.'),
-  ('surgery',
-    'skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.'),
-  ('dentistry',
-    'bad breath, tooth pain, bleeding gums, difficulty eating, dropping food, drooling, broken tooth, loose tooth, pawing at the mouth, reluctance to chew.');
-
 -- Pairs preserved from upstream petclinic data; column order matches
--- the original ON CONFLICT (specialty_id, vet_id) hint.
+-- the original ON CONFLICT (specialty_id, vet_id) hint. The specialties themselves
+-- (1 radiology, 2 surgery, 3 dentistry) are reference data: db/reference/R__reference.sql.
 INSERT INTO vet_specialties (specialty_id, vet_id) VALUES
   (1, 2), (2, 3), (3, 3), (2, 4), (1, 5);
 
-INSERT INTO types (name) VALUES
-  ('cat'), ('dog'), ('lizard'), ('snake'), ('bird'), ('hamster'), ('horse');
+-- Pet types 1..7 (cat, dog, lizard, snake, bird, hamster, horse) are reference data too.
 
 -- Owners and pets drawn from European literature, film, and science.
 INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
@@ -45,7 +42,7 @@ INSERT INTO owners (first_name, last_name, address, city, telephone) VALUES
   ('Erwin',     'Schroedinger', 'Boltzmanngasse 5',          'Vienna',           '0131914920'),
   ('Ștefan',    'Mureșan',      '12 Boltzmanngasse',         'Vienna',           '(0043)152634418'),
   ('Łukasz',    'Śliwiński',    'ul. Floriańska 14',         'Kraków',           '+48124221357'),
-  ('Roger',     'Radcliff',     '27 Outer Circle',           'London',           '+442074860707'),
+  ('Juan Carlos', 'Martín García Lorca', 'Calle de Alcalá 42',  'Madrid',           '0034915312233'),
   ('Newt',      'Scamander',    'Diagon Alley',              'London',           '(0044)2079460001'),
   ('Alice',     'Liddell',      'Christ Church',             'Oxford',           '+441865276150'),
   ('Henry',     'Baskerville',  'Baskerville Hall',          'Dartmoor',         '(0044)1626832093'),
@@ -110,7 +107,8 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Figaro',          DATE '2019-09-09', 1, 23),  -- Geppetto's cat
   ('Rocinante',       DATE '2015-05-05', 7, 24),  -- Don Quixote's horse
   ('Grip',            DATE '2023-08-19', 5, 25),  -- Dickens's raven
-  ('Toby of Lambeth', DATE '2020-11-27', 2, 26);  -- Sherlock Holmes's bloodhound
+  ('Toby of Lambeth', DATE '2020-11-27', 2, 26),  -- Sherlock Holmes's bloodhound
+  ('Michi',           DATE '2021-04-23', 1, 6);   -- Juan Carlos's cat: which of his five names is the surname?
 
 INSERT INTO visits (pet_id, visit_date, description) VALUES
   (15, DATE '2025-11-12', 'rabies vaccine'),

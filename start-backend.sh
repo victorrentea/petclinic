@@ -47,6 +47,13 @@ if [[ -f "$AGENT_JAR" ]]; then
     export OTEL_METRICS_EXPORTER=otlp
     export OTEL_TRACES_EXPORTER=otlp
     export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
+    # Behind :4318 is either Grafana LGTM (./start-grafana.sh), which takes everything, or a
+    # bare Tempo (./start-tempo.sh), which only takes traces and would answer every logs and
+    # metrics export with a 404 logged by the agent.
+    if ! curl -fsS -o /dev/null --max-time 2 http://localhost:3300/api/health 2>/dev/null; then
+      export OTEL_LOGS_EXPORTER=none OTEL_METRICS_EXPORTER=none
+      echo "ℹ️  No Grafana on :3300 — exporting traces only (Tempo alone)."
+    fi
     # Capture the *most* detail the agent can give; what a sequence diagram
     # actually shows is decided at render time (petclinic-test SEQ_SQL=…), so a
     # different level of detail never costs another test run.
@@ -60,7 +67,7 @@ if [[ -f "$AGENT_JAR" ]]; then
     export OTEL_SEMCONV_STABILITY_OPT_IN=database/dup
     OTEL_JVM_ARGS="-javaagent:$AGENT_JAR"
   else
-    echo "ℹ️  OTel collector not running on :4318 — telemetry disabled. Run ./start-grafana.sh to enable."
+    echo "ℹ️  OTel collector not running on :4318 — telemetry disabled. Run ./start-grafana.sh (or ./start-tempo.sh, no Docker) to enable."
   fi
 fi
 

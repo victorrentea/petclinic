@@ -72,6 +72,11 @@ They are generated artifacts and say so on their first lines; edit the test, not
 backend only attaches the OpenTelemetry Java agent if `:4318` is already listening. Both
 scripts now say so out loud if the order was wrong, instead of silently producing no diagrams.
 
+**No Docker?** `../start-tempo.sh` in place of `./start-grafana.sh`: Tempo alone, one binary
+downloaded on first start, OTLP on the same `:4318` and its API on `:3200`. The diagrams need
+nothing more — `run-tests-with-tracing.sh` (both) find it by themselves when no Grafana answers
+on `:3300`, and `generate.ts` reads it from `TEMPO_URL`. Same start order: Tempo before backend.
+
 **Or skip the host stack entirely** — an isolated instance carries its own Tempo, on ports the
 host picks, from a freshly seeded database (what `/human-review` does, `human-review.json`
 `steps.sequence.app`):

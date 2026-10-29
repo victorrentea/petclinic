@@ -68,12 +68,14 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 /**
  * Remembers every owner the clinic holds, after checking that the ones the
  * Background names are among them — so a changed seed (Flyway's
- * db/seed/R__seed.sql) fails on the Given instead of looking like a broken search.
+ * db/seed/R__seed.sql, which the feature asks for with @fixture:default) fails on
+ * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
   const all = await fetchAllOwners();
   if (all.length === 0) {
-    throw new Error('The API returned no owners — is the backend up and the DB seeded by Flyway?');
+    throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
+      'the @fixture:default this feature declares?');
   }
   expect(new Set(all.map((o) => o.id)).size, 'API pages overlap').toBe(all.length);
   expect(all.map((o) => o.name)).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));

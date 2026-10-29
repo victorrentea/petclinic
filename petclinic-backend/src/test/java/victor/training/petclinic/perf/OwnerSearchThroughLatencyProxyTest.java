@@ -23,8 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Boots the app against the local dev Postgres reached through the latency proxy started by petclinic-database.
- *  Skipped on machines without the proxy on localhost:15432 (e.g. CI). */
-@SpringBootTest
+ *  Skipped on machines without the proxy on localhost:15432 (e.g. CI).
+ *  Reads whatever that database holds and never migrates it: the tests' Flyway config (no seed,
+ *  src/test/resources/config/) would refuse a dev database the seed was applied to — and a
+ *  test has no business migrating somebody's running app either. */
+@SpringBootTest(properties = "spring.flyway.enabled=false")
 @AutoConfigureMockMvc
 @ExtendWith(JUnitPerfInterceptor.class)
 @EnabledIf("latencyProxyReachable")

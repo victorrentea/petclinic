@@ -3,6 +3,8 @@
 hide footbox
 skinparam hyperlinkUnderline false
 skinparam hyperlinkColor #1A4FA0
+skinparam sequenceGroupFontColor #888888
+skinparam sequenceGroupFontStyle plain
 title [[src://petclinic-test/src/owner-search.feature:26{Click to open the test} Searching with an empty last name shows the first page of every owner]]
 footer @generate_sequence in src/owner-search.feature — generated from real traces of end-to-end test runs, do not edit ❗
 participant Browser

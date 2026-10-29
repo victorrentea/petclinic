@@ -6,7 +6,7 @@ import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan,
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
-import {methodHandle} from './code-location';
+import {methodHandle, overloadOf} from './code-location';
 import {defaultOperations} from './openapi-operations';
 
 export interface TestWindow {
@@ -306,8 +306,10 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
     }
     // One trace draws the same repository method many times over — an N+1 is exactly what
     // these pictures are for — and each hit would otherwise re-read and re-scan the file.
+    // The overload is part of the key: `normalize(phone)` and `normalize(phone, country)`
+    // share a class and a name and live on different lines.
     const key = [span.serviceName, span.attributes['code.namespace'],
-      span.attributes['code.function']].join('#');
+      span.attributes['code.function'], JSON.stringify(overloadOf(span.attributes))].join('#');
     if (!cache.has(key)) {
       cache.set(key, methodHandle(span.attributes, span.serviceName, repoRoot, readFile));
     }
@@ -511,8 +513,9 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       return;
     }
 
-    // GRAFANA_URL names whose Tempo this is: an isolated `start-docker.sh up --otel`
-    // instance prints its own under `ports`; unset, the dev stack's :3300.
+    // TEMPO_URL is a bare Tempo (../start-tempo.sh, no Docker); otherwise GRAFANA_URL names
+    // whose Tempo this is: an isolated `start-docker.sh up --otel` instance prints its own
+    // under `ports`; unset, the dev stack's :3300.
     const cfg = tempoConfigFromEnv();
     console.log(`🔭 Tempo behind ${cfg.baseUrl}`);
     const deps: GenerateDeps = {

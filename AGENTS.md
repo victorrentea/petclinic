@@ -4,8 +4,8 @@ Add to rules here to prevent repeating AI fail/slop.
 Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
-Claude Code: never write rules into `CLAUDE.md` - that file only contains @AGENTS.md to include this file.
-GitHub Copilot: use this file over your proprietary `.github/copilot-instructions.md`.
+Claude Code: never write rules into `CLAUDE.md`.
+GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -66,11 +66,8 @@ Request → REST Controller → Repository / Mapper → JPA Entity
 Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 
 **Key Patterns:**
-- DTOs are hand-written in `src/main/java/.../rest/dto/` (not generated)
-- `openapi.yaml` at project root is generated output (from `OpenApiExtractorTest`), not a source spec;
-  editing it by hand is denied in `.claude/settings.json` — regenerate it instead.
-  Same deny on `petclinic-frontend/src/app/generated/api-types.ts` and `petclinic-backend/docs/generated/**`
-- Constructor injection, global exception handling via `@RestControllerAdvice`
+- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
+- `/openapi.yaml` is generated (don't edit it!) from Java DTOs & REST Controllers by `OpenApiExtractorTest`
 
 ## Additional Knowledge
 
@@ -124,14 +121,20 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
-- **Flyway boots from two locations** (`ddl-auto=none`); an empty DB before that is normal.
+- **Flyway boots from three locations** (`ddl-auto=none`); an empty DB before that is normal.
   `db/migration/` is the versioned **schema** chain — no rows here, ever: seed data in a frozen
-  migration is what forced the old V5/V7/V8 to patch each other. `db/seed/R__seed.sql` is the
-  **dataset**, repeatable, so edit it freely; it re-runs on checksum change after all versioned
-  migrations, opening with `TRUNCATE ... RESTART IDENTITY` (ids are deterministic — tests rely on
-  owner 1 = Kevin McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the
-  name `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
+  migration is what forced the old V5/V7/V8 to patch each other. `db/reference/R__reference.sql`
+  holds the lookup rows every environment needs (pet types, specialties), as a repeatable upsert
+  with literal ids. `db/seed/R__seed.sql` is the demo **dataset** ("Default"), repeatable, so edit
+  it freely; it re-runs on checksum change after all versioned migrations and after the reference
+  rows, opening with `TRUNCATE ... RESTART IDENTITY` (ids are deterministic — owner 1 = Kevin
+  McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the name
+  `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
   resolved migrations sharing one description, so two can never both apply.
+- **Tests start on an empty database** (schema + reference rows), never on the seed: the tests'
+  `src/test/resources/config/application.properties` drops `db/seed` and gives every test method
+  a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
+  `test.use({dbFixture: 'default'})` (Playwright), `@fixture:default` (Cucumber).
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
 
@@ -155,13 +158,13 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep line length < 120 chars
+- Keep < 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary: 2+ DB updates
+- Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
 - Global REST exception handling is done via `@RestControllerAdvice`
 - Apply `@Validated` on every `@RequestBody`
-- Write only the `equals`/`hashCode`/`toString` a class actually needs, not all three reflexively
+- Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
 - Write non-trivial code using TDD
@@ -170,4 +173,5 @@ Core entities and relationships:
 - Always run tests after any complex refactoring
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
-- Before any git commit, make sure to update any drifted knowledge in AGENTS.md
+- Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
+- An AI-made commit ends with `Co-Authored-By: Claude <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`

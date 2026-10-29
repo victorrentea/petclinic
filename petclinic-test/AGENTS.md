@@ -33,9 +33,15 @@
   `OTEL_EXPORTER_OTLP_ENDPOINT`, `BACKEND_URL`, keeping the dev port as the default. In a
   container the browser's spans reach the collector only through the frontend's nginx
   (`location = /v1/traces` → `lgtm:4318`), the same path `proxy.conf.js` serves under `ng serve`.
-- ⚠️ **Specs in `src/` must not create/delete visits or owners.** `visits.spec.ts` compares the
-  *entire* visit list against the API, so a row appearing mid-run fails an unrelated test —
-  the suite runs `fullyParallel` against one shared DB.
+- **Every test starts on the DB fixture it declares, and declaring nothing means empty** — the
+  schema plus the reference rows (pet types, specialties). A spec that reads rows it did not
+  write says so: `test.use({dbFixture: 'default'})` for the seed, or the name of a
+  `db/fixtures/<name>.sql`; a Cucumber feature or scenario tags itself `@fixture:default`.
+  The reset runs before **every** test (`src/support/db-fixture.ts`, through the docker
+  stack's `/__reset` sidecar), which is why the suite runs on **one worker**: a reset empties
+  the one database the stack shares. On `ng serve` there is no sidecar, and the tests run on
+  whatever the database holds, with a warning. The review page draws the declared fixture as
+  the test's dot; a test with no dot started empty.
 - A `Backend -> DB` arrow is labelled with **the call the query came from**, not the query —
   `SELECT petclinic` (operation + *database*) is what all sixty queries of an N+1 are named.
   `src/genseq/trace-to-puml.ts` takes the first of: Hibernate's own comment on the statement
@@ -104,6 +110,12 @@
   method) the commit lands on the SERVER span, so the frame wraps the handler's *body*.
   Framing the span itself would swallow the request and response arrows with it, and the
   picture would lose the call it is about.
+- **How a transaction ended is written beside its tab**: `group tx [committed]` in grey,
+  `[rolled back]` / `[commit failed]` in amber (PlantUML draws a group's `[…]` tail to the
+  right of the tab). The agent records no rollback at all, so the backend's
+  `TransactionOutcomeTracing` (a Spring `TransactionExecutionListener`) stamps
+  `transaction.outcome` on the span that opened the transaction; a trace without it falls back
+  to the commit span, i.e. `committed`.
 - The **`Session.*` / `Hibernate Query` spans are dropped** when a Spring Data repository span
   above them already said the same thing. They are kept with no repository above them — code
   using the EntityManager directly, where the session call is the only account of the request.

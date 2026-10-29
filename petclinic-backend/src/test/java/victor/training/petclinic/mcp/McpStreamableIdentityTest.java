@@ -1,5 +1,6 @@
 package victor.training.petclinic.mcp;
 
+import victor.training.petclinic.DefaultFixture;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * user assertion.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DefaultFixture // owners 1 and 2 of the seed are the identities the bearer tokens name
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 class McpStreamableIdentityTest {
 
