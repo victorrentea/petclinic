@@ -10,6 +10,19 @@ test('tempoConfigFromEnv falls back to localhost grafana admin', () => {
   expect(cfg.password).toBe('admin');
 });
 
+test('TEMPO_URL talks to Tempo itself: no Grafana proxy, no login', async () => {
+  const cfg = tempoConfigFromEnv({TEMPO_URL: 'http://localhost:3200', GRAFANA_URL: 'http://localhost:3300'});
+  expect(buildTraceUrl(cfg, 'abc123')).toBe('http://localhost:3200/api/traces/abc123');
+  expect(buildSearchUrl(cfg, '{}', 1, 2, 3)).toMatch(/^http:\/\/localhost:3200\/api\/search\?/);
+  const seen: any[] = [];
+  const fakeFetch = async (_url: string, init: any) => {
+    seen.push(init.headers);
+    return {ok: true, json: async () => ({traces: []})};
+  };
+  await searchTraceIds(cfg, '{}', 0, 1, fakeFetch as any);
+  expect(seen[0].Authorization).toBeUndefined();
+});
+
 test('authHeader builds Basic base64', () => {
   const h = authHeader({ baseUrl: 'x', user: 'admin', password: 'admin' });
   expect(h).toBe('Basic ' + Buffer.from('admin:admin').toString('base64'));

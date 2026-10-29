@@ -51,6 +51,8 @@ B) Manual: Run in separate terminals:
 ./start-frontend.sh   # ⇒ Angular dev server        :4200
 ./start-grafana.sh   # ⇒ :3300 (Requires Docker)
 ```
+No Docker? `./start-tempo.sh` instead of `./start-grafana.sh` — Tempo alone (one downloaded
+binary, :3200 + OTLP :4318): no dashboards, but everything the sequence diagrams need.
 
 - App UI: http://localhost:4200 
 - Backend Swagger: http://localhost:8080/swagger-ui.html
