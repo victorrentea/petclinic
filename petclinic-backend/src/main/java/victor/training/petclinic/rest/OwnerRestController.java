@@ -1,8 +1,12 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +21,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,17 +41,19 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+    private static final Set<Integer> PAGE_SIZES = Set.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -80,15 +87,44 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List one page of owners, by last name prefix")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @Parameter(description = "Page number, from 0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "5, 10 or 20") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "name or city, then ,asc or ,desc") @RequestParam(
+                    defaultValue = "name,asc") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, ownersPage(page, size, sort));
+        return new OwnerPageDto(ownerMapper.toOwnerDtoCollection(owners.getContent()), owners.getTotalElements());
+    }
+
+    // The API sorts by words the grid shows, never by entity fields; every order ends on the id,
+    // so namesakes keep their place and none shows up on two pages (#25).
+    private static PageRequest ownersPage(int page, int size, String sort) {
+        if (page < 0) {
+            throw new ValidationException("Page must be 0 or more");
+        }
+        if (!PAGE_SIZES.contains(size)) {
+            throw new ValidationException("Page size must be 5, 10 or 20");
+        }
+        String[] keyAndDirection = sort.split(",");
+        String direction = keyAndDirection.length > 1 ? keyAndDirection[1] : "asc";
+        if (!Set.of("asc", "desc").contains(direction)) {
+            throw new ValidationException("Sort direction must be asc or desc");
+        }
+        Direction dir = Direction.fromString(direction);
+        Sort byName = Sort.by(dir, "lastName", "firstName", "id");
+        return switch (keyAndDirection[0]) {
+            case "name" -> PageRequest.of(page, size, byName);
+            case "city" -> PageRequest.of(page, size,
+                    Sort.by(dir, "city").and(Sort.by("lastName", "firstName", "id")));
+            default -> throw new ValidationException("Sort by name or city");
+        };
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")
@@ -182,8 +218,8 @@ public class OwnerRestController {
     @WithSpan("book-visit")
     private int bookVisit(int ownerId, int petId, VisitFieldsDto visitFieldsDto) {
         Visit visit = visitMapper.toVisit(visitFieldsDto);
-        Pet pet = new Pet();
-        pet.setId(petId);
+        Pet pet = petRepository.findById(petId).orElseThrow();
+        pet.checkVisitDate(visit.getDate());
         visit.setPet(pet);
         visitRepository.save(visit);
         notifyOwner(ownerId, petId, visit);

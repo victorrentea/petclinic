@@ -77,6 +77,9 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 Before changing how the layers, the database or the notification call work, read the decisions
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
+Before designing a list, query or endpoint, read the data volumes the business expects in
+[VOLUMETRY.md](VOLUMETRY.md).
+
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
@@ -157,7 +160,6 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep < 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates

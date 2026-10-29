@@ -3,6 +3,22 @@
 display:none;
 }
 
+/* The search box, Find Owner and Add Owner on one line; the box takes what the buttons leave. */
+.owner-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-search-row input {
+  flex: 1;
+}
+
+/* Lined up with the page's left edge, under the "Owners" title, not right-aligned to the box. */
+#lastNameGroup .control-label {
+  text-align: left;
+}
+
 #nameGroup {
   display: flex;
   align-items: center;
@@ -77,3 +93,21 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Fixed widths: with automatic layout every sort or page re-measures the columns to the rows on
+  screen, and the headers jump sideways. A long value wraps inside its own cell instead. */
+#ownersTable table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable th,
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+.mat-column-name { width: 22%; }
+.mat-column-address { width: 24%; }
+.mat-column-city { width: 16%; }
+.mat-column-telephone { width: 18%; }
+.mat-column-pets { width: 20%; }

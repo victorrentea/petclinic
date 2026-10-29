@@ -4,55 +4,58 @@
 
     <form method="get"
           class="form-horizontal" id="search-owner-form">
-      <div class="form-group">
-        <div class="control-group" id="lastNameGroup">
-          <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
-            <input class="form-control" size="30"
-              maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
+      <div class="form-group" id="lastNameGroup">
+        <label class="col-sm-2 control-label" for="lastName">Last name</label>
+        <div class="col-sm-10 owner-search-row">
+          <input class="form-control" size="30"
+            maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/>
+          <button type="submit" class="btn btn-default" (click)="search()">Find Owner</button>
+          <button type="button" class="btn btn-default" (click)="addOwner()">Add Owner</button>
         </div>
       </div>
 
     </form>
 
-    <div *ngIf="!owners">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="owners">
-      <table class="table table-striped">
-        <thead>
-        <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>City</th>
-          <th>Telephone</th>
-          <th>Pets</th>
-        </tr>
-        </thead>
+    <div *ngIf="errorMessage" class="alert alert-danger" id="ownersError">{{ errorMessage }}</div>
+    <div *ngIf="isOwnersDataReceived && !errorMessage && totalOwners === 0" id="noOwners">
+      No owners with LastName starting with "{{ query.lastName }}"
+    </div>
 
-        <tbody>
-        <tr *ngFor="let owner of owners">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
-            (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
-          <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
-        </tr>
-        </tbody>
+    <div class="table-responsive" id="ownersTable" [hidden]="totalOwners === 0">
+      <table mat-table [dataSource]="owners" class="table table-striped"
+              matSort [matSortActive]="sortKey" [matSortDirection]="sortDirection" matSortDisableClear
+              (matSortChange)="onSort($event)">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let owner" class="ownerFullName">
+            <a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+                (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef>Address</th>
+          <td mat-cell *matCellDef="let owner">{{ owner.address }}</td>
+        </ng-container>
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+          <td mat-cell *matCellDef="let owner">{{ owner.city }}</td>
+        </ng-container>
+        <ng-container matColumnDef="telephone">
+          <th mat-header-cell *matHeaderCellDef>Telephone</th>
+          <td mat-cell *matCellDef="let owner">{{ owner.telephone }}</td>
+        </ng-container>
+        <ng-container matColumnDef="pets">
+          <th mat-header-cell *matHeaderCellDef>Pets</th>
+          <td mat-cell *matCellDef="let owner" class="ownerPets">{{ petNames(owner) }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let owner; columns: columns"></tr>
       </table>
-      <div>
-        <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
+
+      <mat-paginator [length]="totalOwners" [pageIndex]="query.page" [pageSize]="query.size"
+                      [pageSizeOptions]="pageSizes" showFirstLastButtons
+                      (page)="onPage($event)" aria-label="Owners pages"></mat-paginator>
     </div>
   </div>
 </div>

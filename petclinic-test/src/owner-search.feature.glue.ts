@@ -13,15 +13,45 @@ import {PlaywrightWorld} from './support/world';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+// As the grid shows a name: last name first, the way names are written in Romania (#25).
+const fullName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+const namesIn = (cell: string) => cell.split(';').map((n) => n.trim()).filter(Boolean);
+
+const ownerCells = (world: PlaywrightWorld) => world.page.locator('#ownersTable td.ownerFullName');
+const namesListed = async (world: PlaywrightWorld) =>
+  (await ownerCells(world).allTextContents()).map((t) => t.trim()).filter(Boolean);
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
-  const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  await expect.poll(async () => (await namesListed(world)).sort(), {timeout: 10_000}).toEqual([...expected].sort());
+}
 
-  await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
+/** Every name the grid shows, page after page, until the paginator's Next button gives out. */
+async function namesOnEveryPage(world: PlaywrightWorld): Promise<string[]> {
+  const next = world.page.locator('.mat-mdc-paginator-navigation-next');
+  const names: string[] = [];
+  for (;;) {
+    await expect(ownerCells(world).first()).toBeVisible();
+    const onThisPage = await namesListed(world);
+    names.push(...onThisPage);
+    if (await next.isDisabled()) {
+      return names;
+    }
+    await next.click();
+    await expect(ownerCells(world).first()).not.toHaveText(onThisPage[0]);
+  }
+}
+
+/** Every owner the API holds, page by page: no request may ask for all of them at once. */
+async function allOwners(): Promise<{firstName: string; lastName: string}[]> {
+  const owners = [];
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get(`${API_BASE}/owners`, {params: {page, size: 20}, timeout: 10_000});
+    owners.push(...data.content);
+    if (owners.length >= data.totalElements || data.content.length === 0) {
+      return owners;
+    }
+  }
 }
 
 /**
@@ -31,8 +61,8 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const data = await allOwners();
+  if (data.length === 0) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
@@ -56,5 +86,5 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
 });
 
 Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+  expect((await namesOnEveryPage(this)).sort()).toEqual([...this.requireAllOwnerNames()].sort());
 });
