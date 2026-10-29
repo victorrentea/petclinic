@@ -513,8 +513,9 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       return;
     }
 
-    // GRAFANA_URL names whose Tempo this is: an isolated `start-docker.sh up --otel`
-    // instance prints its own under `ports`; unset, the dev stack's :3300.
+    // TEMPO_URL is a bare Tempo (../start-tempo.sh, no Docker); otherwise GRAFANA_URL names
+    // whose Tempo this is: an isolated `start-docker.sh up --otel` instance prints its own
+    // under `ports`; unset, the dev stack's :3300.
     const cfg = tempoConfigFromEnv();
     console.log(`🔭 Tempo behind ${cfg.baseUrl}`);
     const deps: GenerateDeps = {

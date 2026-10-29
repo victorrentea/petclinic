@@ -288,6 +288,25 @@ const REPOSITORY_SPAN_RE = /Repository\.\w+$/;
 // transaction ended somewhere above, and leaves the reader to guess how far up.
 const TRANSACTION_COMMIT = 'Transaction.commit';
 
+// How the transaction ended, stamped by the backend's TransactionOutcomeTracing on the span
+// that opened it: `committed`, `rolled back` or `commit failed`. The agent draws a commit as
+// a span of its own (above) but a rollback as nothing at all, so a transaction that rolled
+// back used to get no frame, and a frame could only ever have meant "committed". A trace
+// recorded before the attribute existed still has its commit span, and that says the same.
+export const TRANSACTION_OUTCOME_ATTRIBUTE = 'transaction.outcome';
+const COMMITTED = 'committed';
+
+// The frame's tab says just `tx` — whatever opened it is named by the call it sits inside,
+// so a longer tab would only repeat that. How it ended goes *beside* the tab: PlantUML draws
+// a group's `[bracketed]` tail as a second label to the right of it. Grey when it committed,
+// the expected case read as a quiet status; amber for anything else, the case a reader must
+// not skim past. #888888 is the review page's muted grey, which it re-themes for dark mode;
+// the amber reads on a light and a dark background as it is.
+function transactionHeader(outcome: string): string {
+  const colour = outcome === COMMITTED ? '#888888' : '#B26A00';
+  return `group tx [<color:${colour}>${outcome}</color>]`;
+}
+
 /** The opt-in a reader will find in the source this diagram was drawn from. */
 function optInOf(source: string): string {
   return source.endsWith('.java') ? '@GenerateSequence' : '@generate_sequence';
@@ -393,18 +412,17 @@ function emitTrace(
   const childrenOf = (id: string) => childrenByParent.get(id) ?? [];
 
   /**
-   * A span that opened a transaction: the interceptor committed inside it.
+   * How the transaction this span opened ended, or undefined when it opened none.
    *
-   * In this codebase that is every Spring Data repository method, because nothing above
-   * them is `@Transactional` — so each call gets its own transaction and its own session,
-   * which is a fact about the design worth being able to see.
+   * In this codebase the opener is every Spring Data repository method, because nothing
+   * above them is `@Transactional` — so each call gets its own transaction and its own
+   * session, which is a fact about the design worth being able to see.
    */
-  const opensTransaction = (span: NormSpan): boolean =>
-    childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT);
-
-  // Just `tx`. The frame's job is to show an *extent*, and whatever opened it is named
-  // by the call the frame sits inside — a longer label only repeats that.
-  const TRANSACTION_LABEL = 'tx';
+  const transactionOutcome = (span: NormSpan): string | undefined =>
+    span.attributes[TRANSACTION_OUTCOME_ATTRIBUTE]?.trim()
+      || (childrenOf(span.spanId).some((c) => c.name === TRANSACTION_COMMIT)
+        ? COMMITTED : undefined);
+  const opensTransaction = (span: NormSpan): boolean => transactionOutcome(span) !== undefined;
 
   const nearestAncestor = (span: NormSpan, matches: RegExp): NormSpan | undefined => {
     for (let up = span.parentSpanId ? byId.get(span.parentSpanId) : undefined;
@@ -467,9 +485,8 @@ function emitTrace(
     // transaction is opened by the request handler itself — `@Transactional` on a
     // controller method — framing the span would swallow the request and the response
     // with it, and the picture would lose the call it is about.
-    const body = opensTransaction(span) && inner.length > 0
-      ? [`group ${TRANSACTION_LABEL}`, ...inner, 'end']
-      : inner;
+    const outcome = inner.length > 0 ? transactionOutcome(span) : undefined;
+    const body = outcome ? [transactionHeader(outcome), ...inner, 'end'] : inner;
 
     if (!crossing && !selfCustom) {
       present.add(p);

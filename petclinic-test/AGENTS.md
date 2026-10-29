@@ -110,6 +110,12 @@
   method) the commit lands on the SERVER span, so the frame wraps the handler's *body*.
   Framing the span itself would swallow the request and response arrows with it, and the
   picture would lose the call it is about.
+- **How a transaction ended is written beside its tab**: `group tx [committed]` in grey,
+  `[rolled back]` / `[commit failed]` in amber (PlantUML draws a group's `[…]` tail to the
+  right of the tab). The agent records no rollback at all, so the backend's
+  `TransactionOutcomeTracing` (a Spring `TransactionExecutionListener`) stamps
+  `transaction.outcome` on the span that opened the transaction; a trace without it falls back
+  to the commit span, i.e. `committed`.
 - The **`Session.*` / `Hibernate Query` spans are dropped** when a Spring Data repository span
   above them already said the same thing. They are kept with no repository above them — code
   using the EntityManager directly, where the session call is the only account of the request.
