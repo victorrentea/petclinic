@@ -56,11 +56,13 @@ arrow {
 [visits] --> [owners]
 [pets] --> [pettypes]
 [visits] --> [pettypes]
+[visits] --> [vets]
 [pettypes] --> [specialties]
 [vets] --> [specialties]
 
 [pets] --> [design-system]
 [vets] --> [design-system]
+[visits] --> [design-system]
 
 [owners] --> [generated]
 [pets] --> [generated]

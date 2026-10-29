@@ -8,6 +8,12 @@ Feature: Visits
     Then the response status is 201
     And "Samantha" has 1 visit with description "rabies shot"
 
+  Scenario: Book a visit choosing its vet
+    Given a vet "James Herriot"
+    When I book a visit for "Samantha" on "2026-05-10" with description "annual checkup", choosing vet "James Herriot"
+    Then the response status is 201
+    And the booked visit shows vet "James Herriot"
+
   Scenario: Edit a visit description
     Given a visit for "Samantha" on "2026-04-01" described as "checkup"
     When I update that visit's description to "annual checkup"
