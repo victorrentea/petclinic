@@ -446,6 +446,9 @@ const selectOwners = {
   attributes: {'db.system': 'postgresql', 'db.statement': 'select o1_0.id from owners o1_0'},
 };
 
+// Every frame says how its transaction ended, beside the tab — PlantUML's `[…]` tail.
+const COMMITTED_TX = 'group tx [<color:#888888>committed</color>]';
+
 const inTransaction: NormSpan[] = [
   backendSpan('t1', '', 'GET /api/owners', 'SERVER'),
   backendSpan('t2', 't1', 'OwnerRepository.findById', 'INTERNAL'),
@@ -456,7 +459,7 @@ const inTransaction: NormSpan[] = [
 
 test('a transaction is drawn as a frame around what ran inside it', () => {
   const body = spansToPuml(inTransaction, 'tx', STATIC).split('\n').map((l) => l.trim());
-  const open = body.indexOf('group tx');
+  const open = body.indexOf(COMMITTED_TX);
   const close = body.indexOf('end', open);
   expect(open).toBeGreaterThan(-1);
   expect(close).toBeGreaterThan(open);
@@ -474,7 +477,7 @@ test('the commit is the frame, not another arrow inside it', () => {
 test('a query inside a frame does not repeat the frame\'s label', () => {
   // split on the whole line: "Backend" contains "end"
   const inside = spansToPuml(inTransaction, 'tx', STATIC)
-    .split('group tx\n')[1].split('\nend\n')[0];
+    .split(`${COMMITTED_TX}\n`)[1].split('\nend\n')[0];
   expect(inside).not.toContain('OwnerRepository.findById');
   expect(inside).toContain('select owners');
 });
@@ -511,7 +514,7 @@ test('a handler-level transaction frames its body, not the request', () => {
     (l) => l.startsWith('Browser -> Backend:') && l.includes('POST /api/visits'));
   expect(request).toBeGreaterThan(-1);
   expect(body).toContain('Backend --> Browser: 201');
-  const open = body.indexOf('group tx');
+  const open = body.indexOf(COMMITTED_TX);
   const close = body.indexOf('end', open);
   expect(open).toBeGreaterThan(request);
   expect(body.slice(open, close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(2);
@@ -538,7 +541,7 @@ test('a service-level transaction is a frame inside the call that opened it', ()
   const call = body.indexOf('Backend -> Backend: VisitService.book');
   expect(call).toBeGreaterThan(-1);
   expect(body[call + 1]).toBe('activate Backend');
-  const open = body.indexOf('group tx', call);
+  const open = body.indexOf(COMMITTED_TX, call);
   expect(open).toBeGreaterThan(call);
   const close = body.indexOf('end', open);
   expect(body.slice(open, close).filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(2);
@@ -547,9 +550,41 @@ test('a service-level transaction is a frame inside the call that opened it', ()
 // The frame's job is to show an extent. Whatever opened it is named by the call the frame
 // sits inside, so a longer label would only repeat the line above it.
 test('the frame is called tx, wherever it was opened', () => {
-  expect(spansToPuml(onController, 'tx', STATIC)).toContain('group tx\n');
-  expect(spansToPuml(onService, 'tx', STATIC)).toContain('group tx\n');
+  expect(spansToPuml(onController, 'tx', STATIC)).toContain(`${COMMITTED_TX}\n`);
+  expect(spansToPuml(onService, 'tx', STATIC)).toContain(`${COMMITTED_TX}\n`);
   expect(spansToPuml(onService, 'tx', STATIC)).not.toContain('transaction ·');
+});
+
+// ── How the transaction ended ───────────────────────────────────────────────────
+// The agent draws a commit as a span and a rollback as nothing, so the outcome comes from
+// the backend's TransactionOutcomeTracing, stamped on the span that opened the transaction.
+// A trace from before that existed still has its commit span, which says "committed".
+
+const outcome = (spans: NormSpan[], value: string): NormSpan[] => spans
+  .filter((s) => s.name !== 'Transaction.commit')
+  .map((s) => (s.spanId === 't2'
+    ? {...s, attributes: {...s.attributes, 'transaction.outcome': value}} : s));
+
+test('a committed transaction says so beside its tab, in grey', () => {
+  expect(spansToPuml(outcome(inTransaction, 'committed'), 'tx', STATIC))
+    .toContain(`${COMMITTED_TX}\n`);
+});
+
+test('a rolled-back transaction is framed too, and says so in amber', () => {
+  const body = spansToPuml(outcome(inTransaction, 'rolled back'), 'tx', STATIC)
+    .split('\n').map((l) => l.trim());
+  const open = body.indexOf('group tx [<color:#B26A00>rolled back</color>]');
+  expect(open).toBeGreaterThan(-1);
+  expect(body.slice(open, body.indexOf('end', open))
+    .filter((l) => l.startsWith('Backend -> DB:'))).toHaveLength(1);
+});
+
+test('the stamped outcome wins over the commit span', () => {
+  const failed = inTransaction.map((s) => (s.spanId === 't2'
+    ? {...s, attributes: {'transaction.outcome': 'commit failed'}} : s));
+  const puml = spansToPuml(failed, 'tx', STATIC);
+  expect(puml).toContain('group tx [<color:#B26A00>commit failed</color>]');
+  expect(puml).not.toContain(COMMITTED_TX);
 });
 
 // ── A @SpringBootTest drives the very same renderer ─────────────────────────────
