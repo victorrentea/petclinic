@@ -8,8 +8,9 @@
 # pipeline: the JVM writes the very same "trace window" the browser suites write, and the very
 # same generator turns windows into diagrams. What differs is only how much has to be running.
 #
-# Needed:   ./start-grafana.sh   — Tempo + the OTLP collector on :4318, or any other one named by
-#           OTEL_EXPORTER_OTLP_ENDPOINT + GRAFANA_URL (`env $(../start-docker.sh ports N) …` for an
+# Needed:   ./start-grafana.sh   — Tempo + the OTLP collector on :4318, or ./start-tempo.sh (Tempo
+#           alone, no Docker), or any other one named by
+#           OTEL_EXPORTER_OTLP_ENDPOINT + GRAFANA_URL / TEMPO_URL (`env $(../start-docker.sh ports N) …` for an
 #           instance up with --otel)
 # NOT needed: the database (the tests boot an embedded Postgres), the backend (they *are* the
 #             backend) and the frontend.
@@ -36,7 +37,13 @@ die()  { printf '\033[1;31m[tracing] %s\033[0m\n' "$*" >&2; exit 1; }
 # Any HTTP answer at all: a collector GETs back a 405, which is still a collector.
 answers() { curl -s -o /dev/null --max-time 3 "$1"; }
 
-answers "$OTLP/v1/traces" || die "Nothing is listening at $OTLP — start Tempo first: ./start-grafana.sh"
+answers "$OTLP/v1/traces" || die "Nothing is listening at $OTLP — start Tempo first: ./start-tempo.sh (or ./start-grafana.sh)"
+# No Grafana named and none on :3300, but ./start-tempo.sh's Tempo is up: the generator fetches
+# from it directly.
+if [[ -z "${TEMPO_URL:-}${GRAFANA_URL:-}" ]] && ! curl -fsS -o /dev/null http://localhost:3300/api/health 2>/dev/null \
+    && curl -fsS -o /dev/null http://127.0.0.1:3200/ready 2>/dev/null; then
+  export TEMPO_URL=http://127.0.0.1:3200
+fi
 log "✅ OTLP collector reachable at $OTLP."
 
 if [[ ! -f "$AGENT_JAR" ]]; then

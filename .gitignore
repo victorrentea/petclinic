@@ -116,3 +116,7 @@ rag-vector-store.json
 # construction (it is an absolute path), so it is never committed — see AGENTS.md.
 /.claude/skills/human-review
 petclinic-backend/.codecity-tool/
+
+# ./start-tempo.sh: the downloaded binary, and the traces it keeps until its next start
+petclinic-observability/.tools/
+petclinic-observability/.tempo-data/
