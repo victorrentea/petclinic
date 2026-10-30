@@ -16,6 +16,12 @@
       ]
     },
 
+    "playwright-test": {
+      "//": "Test runner MCP of the Playwright Test Agents (.claude/agents/playwright-test-*.md); runs petclinic-test's own Playwright",
+      "command": "sh",
+      "args": ["-c", "cd petclinic-test && exec npx playwright run-test-mcp-server"]
+    },
+
     "postgres-db": {
       "//": "In case MCPs are disabled, tell agent to use .claude/skills/db-cli/db-cli.py (same server, over the CLI)",
       "command": "npx",

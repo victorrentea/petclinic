@@ -28,7 +28,30 @@ export class ApiClient {
     return response.data;
   }
 
+  /** @returns the new owner's id */
+  async createOwner(firstName: string, lastName: string): Promise<number> {
+    const response = await this.client.post('/owners',
+      {firstName, lastName, address: '1 Test Street', city: 'Testville', telephone: '6085551023'});
+    return idFromLocation(response.headers.location);
+  }
+
+  /** @returns the new pet's id */
+  async createPet(ownerId: number, name: string): Promise<number> {
+    const response = await this.client.post(`/owners/${ownerId}/pets`,
+      {name, birthDate: '2020-01-01', type: {id: 2, name: 'dog'}});
+    return idFromLocation(response.headers.location);
+  }
+
+  async createVisit(ownerId: number, petId: number, date: string, description: string): Promise<void> {
+    await this.client.post(`/owners/${ownerId}/pets/${petId}/visits`, {date, description});
+  }
+
   static sortedByDate<T extends {date: string}>(rows: T[]): T[] {
     return [...rows].sort((a, b) => a.date.localeCompare(b.date));
   }
+}
+
+/** POSTs answer 201 with an empty body: the new id is only in `Location`, e.g. /api/pets/34 */
+function idFromLocation(location: string): number {
+  return Number(location.split('/').pop());
 }

@@ -64,8 +64,10 @@ export class PlaywrightWorld extends World {
   // Set for every scenario when PW_TRACE=on: where its recording lands, and when it began.
   recordingZip?: string;
   recordingStartMs?: number;
-  // Set when PW_VIDEO=on: the subtitle currently on screen.
+  // Set when PW_VIDEO=on: the subtitle currently on screen, and how it is drawn again after a page load.
   caption?: string;
+  captionTone: 'step' | 'pass' | 'fail' = 'step';
+  redrawCaption?: () => Promise<void>;
   // Set when PW_NARRATE=on: the voice-over being recorded for this scenario's video.
   narration?: Narration;
 
@@ -124,15 +126,9 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
   if (NARRATE_ON) {
     const cuesDir = path.join(VIDEOS_DIR, '.cues-' + recordingSlug(pickle.uri, pickle.name));
     this.narration = new Narration(cuesDir, Date.now());
-    this.page.on('load', () => {
-      if (this.caption) void showTikTokCaption(this.page, this.caption, 0);
-    });
-    if (process.env.PW_VIDEO_TITLE) {
-      await subtitle(this, `${process.env.PW_VIDEO_TITLE}: ${pickle.name}`, 'step', 0);
-      this.caption = undefined;
-    }
+    this.page.on('load', () => void this.redrawCaption?.());
   } else if (VIDEO_ON) {
-    keepCaptionAcrossLoads(this.page, () => this.caption);
+    keepCaptionAcrossLoads(this.page, () => this.caption ? {text: this.caption, tone: this.captionTone} : undefined);
   }
   await startTestCoverage(this.page);
 
@@ -147,6 +143,17 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, pickle.name);
     this.traceStartMs = Date.now() - PRE_PAD_MS;
+  }
+
+  if (VIDEO_ON) {
+    // Last, once the page is stamped and measured: the app behind the title and the Given steps,
+    // not the white about:blank they would otherwise play on.
+    await this.page.goto('/');
+    if (process.env.PW_VIDEO_TITLE) {
+      await subtitle(this, `${process.env.PW_VIDEO_TITLE}: ${pickle.name}`, 'step', 0);
+      this.caption = undefined;
+      this.redrawCaption = undefined;
+    }
   }
 });
 
@@ -225,20 +232,24 @@ AfterStep(async function (this: PlaywrightWorld, {result}: ITestStepHookParamete
     await subtitle(this, verdict, failed ? 'fail' : 'pass', failed ? 3_500 : 900);
   }
   this.caption = undefined;
+  this.redrawCaption = undefined;
 });
 
 /** Shows `text` — said aloud too, with PW_NARRATE=on — and holds it on screen at least `minMs`. */
 async function subtitle(world: PlaywrightWorld, text: string, tone: 'step' | 'pass' | 'fail',
                         minMs: number): Promise<void> {
   world.caption = text;
+  world.captionTone = tone;
   if (!world.narration) {
     await showCaption(world.page, text, tone);
     await world.page.waitForTimeout(minMs);
     return;
   }
-  const spokenMs = world.narration.say(text);
-  await showTikTokCaption(world.page, text, spokenMs, tone);
-  await world.page.waitForTimeout(Math.max(minMs, spokenMs + 300));
+  const {durationMs, words} = await world.narration.say(text);
+  const shownAt = Date.now();
+  world.redrawCaption = () => showTikTokCaption(world.page, text, words, tone, Date.now() - shownAt);
+  await showTikTokCaption(world.page, text, words, tone);
+  await world.page.waitForTimeout(Math.max(minMs, durationMs + 300));
 }
 
 // One file per scenario, named so a human can find it and short enough for any disk:
