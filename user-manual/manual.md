@@ -91,13 +91,13 @@ The Visits area gives you a chronological view of every visit across the clinic.
 
 ![](screenshots/visits-list.png)
 
-The list is sorted with the most recent visit first. Each row shows the visit date, the description of what was done, the pet's name, and a link to the owner's record. Click an owner name to jump to their detail page; from there you can see the visit in the context of that pet's history.
+The list is sorted with the most recent visit first and grouped by year. Each row shows the visit date, the description of what was done, the pet's name, and a link to the owner's record. Click an owner name to jump to their detail page; from there you can see the visit in the context of that pet's history.
 
 ### Adding a visit
 
 ![](screenshots/visits-add.png)
 
-To add a visit, open the owner's record (see [Owners](#owners)), find the pet that came in for the visit, and click *Add Visit* in that pet's section. The *New Visit* form opens with the pet's identifying details at the top and the pet's previous visits listed below. Pick the *Date* from the calendar, write a *Description* of what was done, and click *Add Visit* to save. The visit appears under that pet on the owner record and in the chronological *Visits* list. The *Add Visit* button at the bottom of the list page only works in the context of a specific pet — always start from the owner's record.
+To add a visit, open the owner's record (see [Owners](#owners)), find the pet that came in for the visit, and click *Add Visit* in that pet's section. The *New Visit* form opens with the pet's identifying details at the top and the pet's previous visits listed below. Pick the *Date* from the calendar, write a *Description* of what was done, and click *Add Visit* to save. The visit appears under that pet on the owner record and in the chronological *Visits* list.
 
 ---
 
@@ -109,7 +109,7 @@ Pet Types is the list of species the clinic accepts as patients. Whenever you re
 
 ![](screenshots/pettypes-list.png)
 
-Each pet type appears as a single row with its name in a read-only field and *Edit* and *Delete* buttons on the right. Click *Edit* to make the name field editable and rename the type, then save. Click *Delete* to remove a type the clinic no longer accepts. *Home* returns to the welcome screen; *Add* opens the new-type form below.
+Each pet type appears as a row with *Edit* and *Delete* buttons. Click *Edit* to open the form for renaming a type (see below). Click *Delete* to remove a type the clinic no longer accepts. *Home* returns to the welcome screen; *Add* opens the new-type form below.
 
 ### Adding a new pet type
 
