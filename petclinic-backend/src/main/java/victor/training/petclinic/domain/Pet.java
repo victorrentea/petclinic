@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
-import org.springframework.lang.Nullable;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -22,7 +21,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.PastOrPresent;
 
@@ -60,20 +58,6 @@ public class Pet {
     public void addVisit(Visit visit) {
         visits.add(visit);
         visit.setPet(this);
-    }
-
-    public void checkVisitDate(@Nullable LocalDate visitDate, LocalDate today) {
-        if (visitDate == null) {
-            return;
-        }
-        if (visitDate.isBefore(birthDate)) {
-            throw new ValidationException("Visit date cannot be before the pet's birth date (" + birthDate + ").");
-        }
-        LocalDate latestVisitDate = today.plusYears(1);
-        if (visitDate.isAfter(latestVisitDate)) {
-            throw new ValidationException(
-                    "Visit date cannot be more than one year ahead (after " + latestVisitDate + ").");
-        }
     }
 
     public Integer getId() {

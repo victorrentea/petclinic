@@ -11,9 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
-import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.Visit;
-import victor.training.petclinic.repository.PetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -33,13 +30,10 @@ public class VisitRestController {
 
     private final VisitRepository visitRepository;
     private final VisitMapper visitMapper;
-    private final PetRepository petRepository;
 
-    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper,
-            PetRepository petRepository) {
+    public VisitRestController(VisitRepository visitRepository, VisitMapper visitMapper) {
         this.visitRepository = visitRepository;
         this.visitMapper = visitMapper;
-        this.petRepository = petRepository;
     }
 
     @GetMapping
@@ -74,8 +68,6 @@ public class VisitRestController {
     @WithSpan("book-visit")
     private int bookVisit(VisitDto visitDto) {
         log.info("Booking visit for pet {}: {}", visitDto.getPetId(), visitDto.getDescription());
-        Pet pet = petRepository.findById(visitDto.getPetId()).orElseThrow();
-        pet.checkVisitDate(visitDto.getDate(), LocalDate.now());
         Visit visit = visitMapper.toVisit(visitDto);
         visitRepository.save(visit);
         return visit.getId();
@@ -84,7 +76,6 @@ public class VisitRestController {
     @PutMapping("{visitId}")
     public void updateVisit(@PathVariable int visitId, @RequestBody @Validated VisitFieldsDto visitDto) {
         Visit currentVisit = visitRepository.findById(visitId).orElseThrow();
-        currentVisit.getPet().checkVisitDate(visitDto.getDate(), LocalDate.now());
         currentVisit.setDate(visitDto.getDate());
         currentVisit.setDescription(visitDto.getDescription());
         visitRepository.save(currentVisit);
