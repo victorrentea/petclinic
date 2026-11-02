@@ -80,7 +80,7 @@ The tasks below have the pattern: **<description>** – <prompt to paste to agen
 - **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
 - **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
 - **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
-- **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
+- **Regenerate the [user manual](docs/user-manual/manual.md)** — `/regen-user-manual`
 - **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is most time lost?
 - **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
 - **Query tuning** — optimize the "search owners by last name" flow.
