@@ -94,15 +94,16 @@ Some tasks above require tools from the project's `.mcp.json`, which should auto
 Start YOUR agent in YOUR🫵 work project and tell it:
 
 "Help me grant you access to:..."
-- **Issues** — fetch the issues assigned to me on this git repo, put a test comment on the last one
-- **CI** — find out how much time the tests took in the last CI run 
-- **Logs** — get the last errors from the dev environment log
-- **Browser** – reproduce a recent FE bug in a browser
-- **DB** - which database tables have the most rows in my dev DB?
-- **Metrics** - What is the endpoint with the highest latency in Grafana?
-- **Token Saving** - Configure me headroom or at least RTK to save tokens.
+- **Issues** — proof: fetch the issues assigned to me on this git repo, put a test comment on the last one
+- **Confluence** — proof: get all pages I've edited/commented / find pages about sick leave procedure
+- **CI** — proof: find out how much time the tests took in the last CI run 
+- **Logs** — proof: get the last errors from the dev/uat environment log
+- **Browser** – proof: reproduce in a browser the latest UI bug in my app / explore my app at localhost:... and find 3 critical flows to test
+- **DB** - proof: which tables have the most rows in my dev DB?
+- **Metrics** - proof: what is the endpoint with the highest latency in Grafana?
 
-Patiently guide the agent through this setup, then tell it: Turn the lessons you learned into a reusable skill, ideally scripting as much work you can. 
+Patiently help the agent through this setup - you might need to provide it with an API key.
+When done, prompt it: Turn the lessons you learned into a reusable skill, scripting as much work you can. 
 
 ### Tools for Agentic Lifestyle
 - [WisprFlow](https://wisprflow.ai) to dictate.
