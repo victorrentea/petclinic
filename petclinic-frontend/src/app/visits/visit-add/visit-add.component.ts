@@ -9,6 +9,7 @@ import {Owner} from '../../owners/owner';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
+import {visitDateRange, VisitDateRange} from '../visit-date-range';
 
 @Component({
   selector: 'app-visit-add',
@@ -21,6 +22,7 @@ export class VisitAddComponent implements OnInit {
   currentPet: Pet;
   currentOwner: Owner;
   currentPetType: PetType;
+  dateRange: VisitDateRange;
   addedSuccess = false;
   errorMessage: string;
 
@@ -44,6 +46,7 @@ export class VisitAddComponent implements OnInit {
         this.currentPet = pet;
         this.visit.pet = this.currentPet;
         this.currentPetType = this.currentPet.type;
+        this.dateRange = visitDateRange(pet.birthDate);
         this.ownerService.getOwnerById(pet.ownerId).subscribe(
           owner => {
             this.currentOwner = owner;
