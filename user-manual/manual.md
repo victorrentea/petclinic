@@ -117,6 +117,12 @@ Each pet type appears as a row with *Edit* and *Delete* buttons. Click *Edit* to
 
 Click *Add* on the Pet Types list. Enter the new type's *Name* in the field — for example, "rabbit" or "ferret" — and click *Save*. The new type immediately becomes available in the *Type* dropdown when registering a pet.
 
+### Editing a pet type
+
+![](screenshots/pettypes-edit.png)
+
+Click *Edit* beside the type you want to change. Update its name, then click *Update*. Click *Cancel* to leave the form without saving.
+
 ---
 
 ## Veterinarians
@@ -153,10 +159,16 @@ Specialties is the list of veterinary disciplines a vet can be qualified in. The
 
 ![](screenshots/specialties-list.png)
 
-Each specialty appears as a row with its name in a read-only field and *Edit* and *Delete* buttons. Click *Edit* to rename a specialty, then save. *Delete* removes a specialty from the list. Removing a specialty unassigns it from any vet who currently practices it, so be careful before deleting.
+Each specialty appears as a row with its name and *Edit* and *Delete* buttons. Click *Edit* to open the specialty's form (see below). *Delete* removes a specialty from the list. Removing a specialty unassigns it from any vet who currently practices it, so be careful before deleting.
 
 ### Adding a new specialty
 
 ![](screenshots/specialties-add.png)
 
 Click *Add* at the bottom of the Specialties list. A *New Specialty* form opens directly below the table. Type the name of the new discipline — for example, "cardiology" or "oncology" — and click *Save*. The new specialty becomes available in the *Type* dropdown when adding a vet, and in the multi-select picker when editing one.
+
+### Editing a specialty
+
+![](screenshots/specialties-edit.png)
+
+Click *Edit* beside a specialty. Update its name or the description of symptoms associated with it, then click *Update*. Click *Cancel* to return to the list without saving.
