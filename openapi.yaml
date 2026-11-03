@@ -191,12 +191,36 @@ paths:
     get:
       operationId: listOwners
       parameters:
-      - in: query
+      - description: Keep only owners whose last name starts with this
+        in: query
         name: lastName
         required: false
         schema:
           type: string
           default: ""
+      - description: 0-based page index
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - description: "Owners per page: 5, 10 or 20"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          default: 10
+      - description: "`name` (first, last) or `city`, then `,asc` or `,desc`. Default\
+          \ `name,asc`"
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          example: "city,desc"
       responses:
         "200":
           content:
@@ -205,32 +229,35 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
+                    totalElements: 12
+                    totalPages: 6
+                    number: 0
+                    size: 2
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
@@ -1686,6 +1713,41 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      description: One page of owners
+      properties:
+        content:
+          type: array
+          description: The owners on this page
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: 0-based index of this page
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Requested page size
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "Owners matching the filter, across all pages"
+          example: 12
+        totalPages:
+          type: integer
+          format: int32
+          description: Number of pages for the current size
+          example: 2
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
     PetDto:
       type: object
       properties:

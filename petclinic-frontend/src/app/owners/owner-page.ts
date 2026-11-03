@@ -7,3 +7,11 @@ export interface OwnerPage {
   number: number;
   size: number;
 }
+
+/** What the Owners grid asks the server for. */
+export interface OwnerQuery {
+  page: number;
+  size: number;
+  sort: string;
+  lastName: string;
+}

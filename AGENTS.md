@@ -133,6 +133,8 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the name
   `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
   resolved migrations sharing one description, so two can never both apply.
+- `owners.first_name/last_name/city` use the ICU collation `und-x-icu` (V4), so sorting is linguistic
+  (`Ștefan` beside `S`); V4 also holds the indexes serving the owners-list sorts and prefix filter.
 - **Tests start on an empty database** (schema + reference rows), never on the seed: the tests'
   `src/test/resources/config/application.properties` drops `db/seed` and gives every test method
   a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
@@ -143,7 +145,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/
 REST Contract: 
-- Owners: `/api/owners`, `/api/owners/{id}`
+- Owners: `/api/owners` (a page: `page`, `size` 5/10/20, `sort` name|city + `,asc|desc`, `lastName`), `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
 - Visits: `/api/visits`

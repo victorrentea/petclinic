@@ -1,6 +1,7 @@
 package victor.training.petclinic.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +17,9 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
@@ -156,8 +160,9 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(mapper.readTree(responseJson).get("content").toString(),
+                new TypeReference<List<OwnerDto>>() {
+                });
     }
 
     @Test
@@ -165,6 +170,162 @@ public class OwnerTest {
         List<OwnerDto> results = search("/api/owners?lastName=NonExistent");
 
         assertThat(results).isEmpty();
+    }
+
+    private int saveOwner(String firstName, String lastName, String city) {
+        Owner owner = TestData.anOwner();
+        owner.setFirstName(firstName);
+        owner.setLastName(lastName);
+        owner.setCity(city);
+        return ownerRepository.save(owner).getId();
+    }
+
+    private List<String> citiesSortedBy(String sort) throws Exception {
+        return search("/api/owners?size=20&sort=" + sort).stream().map(OwnerDto::getCity).toList();
+    }
+
+    private void saveOwnersNamed(String firstNamePrefix, int count) {
+        for (int i = 1; i <= count; i++) {
+            saveOwner("%s%02d".formatted(firstNamePrefix, i), "Smith", "London");
+        }
+    }
+
+    @Test
+    void list_defaultPage() throws Exception {
+        saveOwnersNamed("A", 11); // + George = 12 owners
+
+        mockMvc.perform(get("/api/owners"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(10))
+                .andExpect(jsonPath("$.content[0].firstName").value("A01"))
+                .andExpect(jsonPath("$.content[9].firstName").value("A10"))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(12))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    void list_requestedPage() throws Exception {
+        saveOwnersNamed("A", 11); // + George = 12 owners
+
+        mockMvc.perform(get("/api/owners?page=1&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(5))
+                .andExpect(jsonPath("$.content[0].firstName").value("A06"))
+                .andExpect(jsonPath("$.content[4].firstName").value("A10"))
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(12))
+                .andExpect(jsonPath("$.totalPages").value(3));
+    }
+
+    @Test
+    void list_pageBeyondTheEnd() throws Exception {
+        saveOwnersNamed("A", 11); // + George = 12 owners
+
+        mockMvc.perform(get("/api/owners?page=7&size=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(12))
+                .andExpect(jsonPath("$.totalPages").value(3));
+    }
+
+    @Test
+    void list_lastNameFilterCombinedWithPaging() throws Exception {
+        for (int i = 1; i <= 7; i++) {
+            saveOwner("Mc%d".formatted(i), "McDonald", "London");
+        }
+
+        mockMvc.perform(get("/api/owners?lastName=Mc&size=5&page=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(7))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    void list_sortByCityDescending() throws Exception {
+        saveOwner("Ann", "Smith", "Berlin");
+        saveOwner("Bob", "Smith", "Paris");
+
+        assertThat(citiesSortedBy("city,desc")).containsExactly("Paris", "London", "Berlin");
+    }
+
+    @Test
+    void list_sortByCityTiesBrokenByName() throws Exception {
+        saveOwner("Zed", "Smith", "Winnetka");
+        saveOwner("Amy", "Smith", "Winnetka");
+        saveOwner("Amy", "Jones", "Winnetka");
+
+        assertThat(search("/api/owners?size=20&sort=city,asc"))
+                .extracting(OwnerDto::getCity, OwnerDto::getFirstName, OwnerDto::getLastName)
+                .containsExactly(
+                        Assertions.tuple("London", "George", "Franklin"),
+                        Assertions.tuple("Winnetka", "Amy", "Jones"),
+                        Assertions.tuple("Winnetka", "Amy", "Smith"),
+                        Assertions.tuple("Winnetka", "Zed", "Smith"));
+    }
+
+    @Test
+    void list_ownersSharingAFullNameAppearExactlyOnceAcrossPages() throws Exception {
+        List<Integer> savedIds = new java.util.ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            savedIds.add(saveOwner("Kevin", "McCallister", "Winnetka"));
+        }
+
+        List<Integer> pagedIds = new java.util.ArrayList<>();
+        for (int page = 0; page < 3; page++) {
+            search("/api/owners?lastName=McCallister&size=5&sort=name,asc&page=" + page)
+                    .forEach(owner -> pagedIds.add(owner.getId()));
+        }
+
+        assertThat(pagedIds).isEqualTo(savedIds);
+    }
+
+    @Test
+    void list_descendingAppliesToEveryKeyOfTheName() throws Exception {
+        int first = saveOwner("Kevin", "McCallister", "Winnetka");
+        int second = saveOwner("Kevin", "McCallister", "Winnetka");
+
+        assertThat(search("/api/owners?lastName=McCallister&sort=name,desc"))
+                .extracting(OwnerDto::getId).containsExactly(second, first);
+    }
+
+    @Test
+    void list_diacriticsSortNextToTheirBaseLetter() throws Exception {
+        saveOwner("Tom", "Smith", "London");
+        saveOwner("Ștefan", "Smith", "London");
+
+        assertThat(search("/api/owners?size=20&sort=name,asc"))
+                .extracting(OwnerDto::getFirstName).containsExactly("George", "Ștefan", "Tom");
+    }
+
+    @Test
+    void list_lowercaseDoesNotPushACityToTheEnd() throws Exception {
+        saveOwner("Ann", "Smith", "Edinburgh");
+        saveOwner("Bob", "Smith", "Dublin");
+        saveOwner("Cid", "Smith", "de Panne");
+
+        assertThat(citiesSortedBy("city,asc"))
+                .containsExactly("de Panne", "Dublin", "Edinburgh", "London");
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "size=7|size", "size=1000|size", "size=0|size", "page=-1|page",
+            "sort=telephone,asc|sort", "sort=name,sideways|sort", "sort=name,asc,extra|sort"})
+    void list_invalidPagingParameter_400NamingTheParameter(String query, String parameter) throws Exception {
+        mockMvc.perform(get("/api/owners?" + query))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail", containsString(parameter)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"size=5", "size=10", "size=20", "sort=name", "sort=NAME,DESC", "sort=city,desc"})
+    void list_validPagingParameter_200(String query) throws Exception {
+        mockMvc.perform(get("/api/owners?" + query))
+                .andExpect(status().isOk());
     }
 
     @Test
