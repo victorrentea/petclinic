@@ -77,7 +77,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(queryParams: {[name: string]: string | number | null}, replaceUrl = false) {
-    this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
+    void this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
   }
 
   private toQuery(params: ParamMap): OwnerQuery {
