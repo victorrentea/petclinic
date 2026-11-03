@@ -12,6 +12,16 @@ githubCopilot:
 #     Write all artifacts in Spanish
 
 # Per-artifact rules (optional)
+rules:
+  proposal:
+    - Audience is product owners and business analysts, not engineers - write in plain language a non-technical reader understands
+    - No JSON, HTTP verbs, status codes, class/file names, SQL, collations or library names - move every such detail to design.md
+    - Describe behavior as the user sees it on screen (what they click, what they see), with concrete examples from real demo data
+    - Include a static visual (annotated UI mockup, chart or diagram) as an SVG under the change's images/ folder, embedded in the proposal
+    - Also include an animated SVG (CSS keyframes, loops on its own) showing the main user flow step by step, with a caption per step
+    - Fill mockups with real demo data queried from the database, label them as mockups, and render-check them in a browser before embedding
+  design:
+    - Hold every technical consequence the proposal omits - API contract and breaking changes, parameters, error codes, affected code, callers to adapt
 # Add custom rules for specific artifacts.
 # Example:
 #   rules:
