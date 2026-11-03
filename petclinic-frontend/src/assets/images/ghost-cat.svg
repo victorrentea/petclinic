@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="A ghost cat">
+  <!-- halo -->
+  <ellipse cx="100" cy="22" rx="34" ry="8" fill="none" stroke="#f1c40f" stroke-width="5"/>
+  <!-- shadow on the ground: it floats -->
+  <ellipse cx="100" cy="188" rx="46" ry="6" fill="#34302d" opacity="0.15"/>
+  <!-- ghost body with cat ears and a wavy hem -->
+  <path d="M42 170
+           V82
+           C42 72 44 62 48 54
+           L44 26 L70 42
+           C80 38 90 36 100 36
+           C110 36 120 38 130 42
+           L156 26 L152 54
+           C156 62 158 72 158 82
+           V170
+           Q148 156 138 170 Q128 184 118 170 Q108 156 100 170 Q92 184 82 170 Q72 156 62 170 Q52 184 42 170 Z"
+        fill="#ffffff" stroke="#34302d" stroke-width="4" stroke-linejoin="round"/>
+  <!-- inner ears -->
+  <path d="M50 34 L66 44 L54 52 Z" fill="#f4b6c2"/>
+  <path d="M150 34 L134 44 L146 52 Z" fill="#f4b6c2"/>
+  <!-- X eyes -->
+  <g stroke="#34302d" stroke-width="5" stroke-linecap="round">
+    <path d="M68 80 L84 96 M84 80 L68 96"/>
+    <path d="M116 80 L132 96 M132 80 L116 96"/>
+  </g>
+  <!-- nose, mouth and a little tongue -->
+  <path d="M95 106 L105 106 L100 112 Z" fill="#f4b6c2" stroke="#34302d" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M88 116 Q94 122 100 116 Q106 122 112 116" fill="none" stroke="#34302d" stroke-width="3" stroke-linecap="round"/>
+  <path d="M102 119 Q104 130 110 128 Q113 124 110 118" fill="#e74c3c" stroke="#34302d" stroke-width="2"/>
+  <!-- whiskers -->
+  <g stroke="#34302d" stroke-width="2" stroke-linecap="round">
+    <path d="M58 108 L78 112 M58 118 L78 116"/>
+    <path d="M142 108 L122 112 M142 118 L122 116"/>
+  </g>
+  <!-- blush -->
+  <circle cx="66" cy="126" r="7" fill="#f4b6c2" opacity="0.6"/>
+  <circle cx="134" cy="126" r="7" fill="#f4b6c2" opacity="0.6"/>
+</svg>

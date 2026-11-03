@@ -2,3 +2,33 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+
+/* Sort indicators: plain triangles in the app's green, drawn here instead of Material's arrow.
+  The sorted column shows its direction; every other sortable column a still, faint pair.
+  (Material's arrow on those pointed wherever the column was last sorted, and flipped on hover.) */
+.mat-sort-header-arrow {
+  display: none !important; /* Material's own stylesheet is injected after this one */
+}
+
+.mat-sort-header-container::after {
+  content: '';
+  width: 12px;
+  height: 16px;
+  margin-left: 6px;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16' fill='%236db33f'%3E%3Cpath d='M1 7L6 1l5 6z'/%3E%3Cpath d='M1 9l5 6 5-6z'/%3E%3C/svg%3E");
+  opacity: 0.45;
+}
+
+.mat-sort-header-container:hover::after {
+  opacity: 0.8;
+}
+
+th[aria-sort="ascending"] .mat-sort-header-container::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16' fill='%236db33f'%3E%3Cpath d='M1 11l5-6 5 6z'/%3E%3C/svg%3E");
+  opacity: 1;
+}
+
+th[aria-sort="descending"] .mat-sort-header-container::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16' fill='%236db33f'%3E%3Cpath d='M1 5l5 6 5-6z'/%3E%3C/svg%3E");
+  opacity: 1;
+}

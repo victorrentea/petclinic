@@ -72,8 +72,8 @@ describe('OwnerListComponent', () => {
     expect(name.innerText).toBe('George Franklin');
   });
 
-  it('restores page, size, sort and last name from the URL', () => {
-    openWith({page: '2', size: '5', sort: 'city,desc', lastName: 'Fr'},
+  it('restores page (1-based in the URL), size, sort and last name from the URL', () => {
+    openWith({page: '3', size: '5', sort: 'city,desc', lastName: 'Fr'},
       of(pageOf([george], {number: 2, totalPages: 3, totalElements: 11})));
 
     expect(getOwners).toHaveBeenCalledWith({page: 2, size: 5, sort: 'city,desc', lastName: 'Fr'});
@@ -85,7 +85,7 @@ describe('OwnerListComponent', () => {
   });
 
   it('ignores nonsense in the URL', () => {
-    openWith({page: '-3', size: '7', sort: 'telephone,asc'});
+    openWith({page: '0', size: '7', sort: 'telephone,asc'});
 
     expect(getOwners).toHaveBeenCalledWith({page: 0, size: 10, sort: 'name,asc', lastName: ''});
   });
@@ -111,7 +111,7 @@ describe('OwnerListComponent', () => {
     component.onSort({active: 'city', direction: 'desc'});
 
     expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
-      queryParams: {sort: 'city,desc', page: 0}, queryParamsHandling: 'merge'}));
+      queryParams: {sort: 'city,desc', page: 1}, queryParamsHandling: 'merge'}));
   });
 
   it('changing the page size goes to the first page', () => {
@@ -119,7 +119,7 @@ describe('OwnerListComponent', () => {
 
     component.onPage({pageIndex: 3, pageSize: 20, length: 100});
 
-    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {size: 20, page: 0}}));
+    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {size: 20, page: 1}}));
   });
 
   it('moving between pages keeps everything else', () => {
@@ -128,7 +128,7 @@ describe('OwnerListComponent', () => {
     component.onPage({pageIndex: 1, pageSize: 10, length: 100});
 
     expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
-      queryParams: {page: 1}, queryParamsHandling: 'merge'}));
+      queryParams: {page: 2}, queryParamsHandling: 'merge'}));
   });
 
   it('a new search starts from the first page', () => {
@@ -136,7 +136,7 @@ describe('OwnerListComponent', () => {
 
     component.searchByLastName('Fr');
 
-    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {lastName: 'Fr', page: 0}}));
+    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {lastName: 'Fr', page: 1}}));
   });
 
   it('an empty search drops the last name from the URL', () => {
@@ -144,15 +144,26 @@ describe('OwnerListComponent', () => {
 
     component.searchByLastName('');
 
-    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {lastName: null, page: 0}}));
+    expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({queryParams: {lastName: null, page: 1}}));
   });
 
   it('a page past the last one redirects to the last page, replacing the URL', () => {
-    openWith({page: '7', size: '5'}, of(pageOf([], {number: 7, totalPages: 3, totalElements: 12})));
+    openWith({page: '8', size: '5'}, of(pageOf([], {number: 7, totalPages: 3, totalElements: 12})));
 
     expect(navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
-      queryParams: {page: 2}, replaceUrl: true}));
+      queryParams: {page: 3}, replaceUrl: true}));
     expect(component.owners).toEqual([]);
+  });
+
+  it('no match shows the searched name instead of an empty table, and keeps it while typing', () => {
+    openWith({lastName: 'Zz'}, of(pageOf([], {totalElements: 0, totalPages: 0})));
+
+    component.lastName = 'Zzq';
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('#ownersTable'))).toBeNull();
+    const empty = fixture.debugElement.query(By.css('#noOwners')).nativeElement;
+    expect(empty.textContent).toContain('No owners whose last name starts with "Zz"');
   });
 
   it('a failed request shows no owners and the next query still loads', () => {

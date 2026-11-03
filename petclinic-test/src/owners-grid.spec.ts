@@ -30,12 +30,12 @@ test('pages, sorts and remembers where it was', async ({page}) => {
   await expect(page).toHaveURL(/sort=city(,|%2C)desc/);
 
   await page.getByRole('button', {name: 'Next page'}).click();
-  await expect(page).toHaveURL(/page=1/);
+  await expect(page).toHaveURL(/page=2/);
   const secondPage = await namesOnServer('page=1&size=5&sort=city,desc');
   await expect.poll(listed).toEqual(secondPage);
 
   await page.reload();
-  await expect(page).toHaveURL(/page=1/);
+  await expect(page).toHaveURL(/page=2/);
   await expect.poll(listed).toEqual(secondPage);
 
   const url = page.url();

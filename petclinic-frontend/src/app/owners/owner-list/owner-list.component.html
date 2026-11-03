@@ -1,38 +1,46 @@
 <div class="container-fluid">
   <div class="container xd-container">
-    <h2>Owners</h2>
+    <h2 class="sr-only">Owners</h2>
 
     <form method="get"
           class="form-horizontal" id="search-owner-form">
       <div class="form-group">
         <div class="control-group" id="lastNameGroup">
           <label class="col-sm-2 control-label">Last name </label>
-          <div class="col-sm-10">
+          <div class="col-sm-8">
             <input class="form-control" size="30"
               maxlength="80" id="lastName" name="lastName" [(ngModel)]="lastName" value=""/> <span class="help-inline"></span>
           </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find
-            Owner</button>
+          <div class="col-sm-2 text-right">
+            <button type="submit" class="btn btn-default" (click)="searchByLastName(lastName)">Find Owner</button>
+          </div>
         </div>
       </div>
 
     </form>
 
-    <div *ngIf="isOwnersDataReceived && owners.length === 0">No owners with LastName starting with "{{lastName}}"</div>
-    <div class="table-responsive" id="ownersTable"  *ngIf="isOwnersDataReceived">
-      <table class="table table-striped" matSort matSortDisableClear
+    <div class="owners-empty" id="noOwners" *ngIf="isOwnersDataReceived && owners.length === 0">
+      <img src="assets/images/ghost-cat.svg" alt="" width="160" height="160">
+      <p *ngIf="searchedLastName">No owners whose last name starts with "{{ searchedLastName }}"</p>
+      <p *ngIf="!searchedLastName">No owners yet</p>
+    </div>
+    <div id="ownersTable" *ngIf="isOwnersDataReceived && owners.length > 0">
+      <table class="table table-striped owners-table" matSort matSortDisableClear
         [matSortActive]="sortKey" [matSortDirection]="sortDirection" (matSortChange)="onSort($event)">
+        <colgroup>
+          <col class="col-name">
+          <col class="col-pets">
+          <col class="col-city">
+          <col class="col-address">
+          <col class="col-telephone">
+        </colgroup>
         <thead>
         <tr>
           <th mat-sort-header="name">Name</th>
-          <th>Address</th>
-          <th mat-sort-header="city">City</th>
-          <th>Telephone</th>
           <th>Pets</th>
+          <th mat-sort-header="city">City</th>
+          <th>Address</th>
+          <th>Telephone</th>
         </tr>
         </thead>
 
@@ -40,23 +48,24 @@
         <tr *ngFor="let owner of owners">
           <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.firstName }} {{ owner.lastName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
-          <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets" class="owner-pet">
+              <span role="img" [attr.aria-label]="pet.type?.name" [title]="pet.type?.name">{{ pet.type?.name | petTypeEmoji }}</span>
+              {{ pet.name }}
+            </div>
+          </td>
+          <td>{{ owner.city }}</td>
+          <td>{{ owner.address }}</td>
+          <td>{{ owner.telephone }}</td>
         </tr>
         </tbody>
       </table>
-      <mat-paginator [length]="totalElements" [pageSize]="size" [pageIndex]="pageIndex"
+    </div>
+    <div class="owners-footer" *ngIf="isOwnersDataReceived">
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <mat-paginator *ngIf="owners.length > 0" [length]="totalElements" [pageSize]="size" [pageIndex]="pageIndex"
         [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
         (page)="onPage($event)"></mat-paginator>
-      <div>
-        <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
-      </div>
     </div>
   </div>
 </div>

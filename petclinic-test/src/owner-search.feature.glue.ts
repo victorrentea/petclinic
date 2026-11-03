@@ -44,7 +44,7 @@ Given('the clinic has these owners', async function (this: PlaywrightWorld, owne
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
   await this.page.goto('/owners');
-  await this.page.locator('h2:has-text("Owners")').waitFor({state: 'visible', timeout: 10_000});
+  await this.page.locator('#search-owner-form').waitFor({state: 'visible', timeout: 10_000});
 });
 
 When('I search owners for {string}', async function (this: PlaywrightWorld, search: string) {

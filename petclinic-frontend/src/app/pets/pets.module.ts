@@ -7,6 +7,7 @@ import {VisitsModule} from '../visits/visits.module';
 import {PetEditComponent} from './pet-edit/pet-edit.component';
 import {FormsModule} from '@angular/forms';
 import {PetAddComponent} from './pet-add/pet-add.component';
+import {PetTypeEmojiPipe} from './pet-type-emoji.pipe';
 
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -39,12 +40,14 @@ export const MY_DATE_FORMATS = {
   declarations: [
     PetListComponent,
     PetEditComponent,
-    PetAddComponent
+    PetAddComponent,
+    PetTypeEmojiPipe
   ],
   exports: [
     PetListComponent,
     PetEditComponent,
-    PetAddComponent
+    PetAddComponent,
+    PetTypeEmojiPipe
   ],
   providers: [
     PetService,

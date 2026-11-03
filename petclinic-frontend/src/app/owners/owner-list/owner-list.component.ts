@@ -19,6 +19,7 @@ const DEFAULT_SORT = 'name,asc';
 export class OwnerListComponent implements OnInit, OnDestroy {
   readonly pageSizeOptions = [5, 10, 20];
   lastName = '';
+  searchedLastName = '';
   owners: Owner[] = [];
   totalElements = 0;
   pageIndex = 0;
@@ -61,18 +62,18 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   searchByLastName(lastName: string) {
-    this.navigate({lastName: lastName || null, page: 0});
+    this.navigate({lastName: lastName || null, page: 1});
   }
 
   onSort(sort: Sort) {
-    this.navigate({sort: `${sort.active},${sort.direction}`, page: 0});
+    this.navigate({sort: `${sort.active},${sort.direction}`, page: 1});
   }
 
   onPage(event: PageEvent) {
     if (event.pageSize !== this.size) {
-      this.navigate({size: event.pageSize, page: 0});
+      this.navigate({size: event.pageSize, page: 1});
     } else {
-      this.navigate({page: event.pageIndex});
+      this.navigate({page: event.pageIndex + 1});
     }
   }
 
@@ -81,11 +82,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private toQuery(params: ParamMap): OwnerQuery {
-    const page = Number(params.get('page'));
+    const pageInUrl = Number(params.get('page')); // 1-based for people, 0-based for the API
     const size = Number(params.get('size'));
     const sort = params.get('sort');
     return {
-      page: Number.isInteger(page) && page > 0 ? page : 0,
+      page: Number.isInteger(pageInUrl) && pageInUrl > 1 ? pageInUrl - 1 : 0,
       size: this.pageSizeOptions.includes(size) ? size : DEFAULT_SIZE,
       sort: sort && /^(name|city),(asc|desc)$/.test(sort) ? sort : DEFAULT_SORT,
       lastName: params.get('lastName') || ''
@@ -93,6 +94,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private show(query: OwnerQuery, page: OwnerPage | null) {
+    this.searchedLastName = query.lastName;
     if (!page) {
       this.owners = [];
       this.totalElements = 0;
@@ -101,7 +103,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     }
     const lastExistingPage = Math.max(page.totalPages - 1, 0);
     if (query.page > lastExistingPage) {
-      this.navigate({page: lastExistingPage}, true);
+      this.navigate({page: lastExistingPage + 1}, true);
       return;
     }
     const [sortKey, sortDirection] = query.sort.split(',');

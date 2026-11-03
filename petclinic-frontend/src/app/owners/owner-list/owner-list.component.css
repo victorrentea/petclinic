@@ -77,3 +77,49 @@ display:none;
     align-items: flex-start;
   }
 }
+
+.owners-empty {
+  text-align: center;
+  padding: 32px 0;
+  font-size: 18px;
+}
+
+.owners-empty p {
+  margin-top: 12px;
+}
+
+/* Fixed widths: the columns stay put when sorting or paging brings rows of other lengths. */
+.owners-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.owners-table td {
+  overflow-wrap: anywhere;
+}
+
+.col-name { width: 22%; }
+.col-pets { width: 18%; }
+.col-city { width: 14%; }
+.col-address { width: 26%; }
+.col-telephone { width: 20%; }
+
+/* The header stays on top while scrolling a long page. Needs no overflow on any ancestor
+  (Bootstrap's .table-responsive has one), and the fixed widths above make it unnecessary. */
+.owners-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Add Owner sits on the left of the paginator's white bar. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding-left: 16px;
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+}
