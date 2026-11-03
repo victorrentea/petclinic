@@ -5,7 +5,6 @@ applyTo: "**/*.java"
 
 # Java Code Style
 
-- Keep lines under 120 characters.
 - Keep methods under 30 lines.
 - Use constructor injection in `src/main`; use `@Autowired` only in tests.
 - Use `@Transactional` only when strictly necessary to wrap two or more database updates.

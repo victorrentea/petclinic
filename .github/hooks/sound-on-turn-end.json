@@ -3,7 +3,7 @@
   "//2": "afplay is macOS-only; elsewhere the hook is a silent no-op.",
   "version": 1,
   "hooks": {
-    "agentStop": [
+    "//agentStop": [
       {
         "type": "command",
         "bash": "command -v afplay >/dev/null && afplay /System/Library/Sounds/Glass.aiff >/dev/null 2>&1 &",
