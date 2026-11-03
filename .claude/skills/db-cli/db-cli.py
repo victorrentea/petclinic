@@ -9,7 +9,7 @@ harnesses where MCP servers are disabled by org policy but the shell is availabl
     .claude/skills/db-cli/db-cli.py tools
     .claude/skills/db-cli/db-cli.py call execute_sql --params '{"sql":"select 1"}'
 
-Needs only python3 and npx. Connection: $DATABASE_URL, defaulting to the local database.
+Needs only python3 and npx. Connection: $DATABASE_URL, defaulting to db-cli.env next to this script.
 """
 import argparse
 import glob
@@ -21,7 +21,19 @@ import subprocess
 import sys
 import threading
 
-DSN = os.environ.get("DATABASE_URL", "postgres://petclinic:petclinic@localhost:5432/petclinic")
+
+def load_env_file():
+    """Defaults live in db-cli.env next to this script; a variable already set in the shell wins."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "db-cli.env")
+    with open(path) as file:
+        for line in file:
+            key, separator, value = line.strip().partition("=")
+            if separator and not key.startswith("#"):
+                os.environ.setdefault(key.strip(), value.strip())
+
+
+load_env_file()
+DSN = os.environ["DATABASE_URL"]
 # pinned: a mid-workshop release must not break the demo
 DBHUB_VERSION = os.environ.get("DBHUB_VERSION", "1.2.0")
 # Generous on purpose: on a laptop that never ran this version, npx first downloads the package.
