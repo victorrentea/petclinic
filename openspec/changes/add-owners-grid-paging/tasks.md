@@ -20,10 +20,10 @@
 - [x] 3.1 Replace `getOwners()`/`searchOwners()` in `OwnerService` with `getOwners({page, size, sort, lastName}): Observable<OwnerPage>`. Update `owner.service.spec.ts` to assert the query string and the page mapping. Verify with `npm run test-headless`.
 - [x] 3.2 Add `MatPaginatorModule` and `MatSortModule` to `OwnersModule`. In `owner-list.component.html`, put `matSort` on the table, `mat-sort-header` on the Name (`name`) and City (`city`) headers only, and a `<mat-paginator>` with `[5,10,20]` and the total count. Verify that `npm run build` passes and `npm run test:arch` stays green.
 - [x] 3.3 Rewrite `OwnerListComponent` to derive its state from `queryParamMap`, with `switchMap` for the request. Paginator, sort and search update the URL (sort, size and search reset `page` to 0), and an out-of-range page redirects to the last page with `replaceUrl`. Add component specs for each of these behaviors. Verify with `npm run test-headless`.
-- [ ] 3.4 Update the Owners section of `user-manual/manual.md` to describe paging, page sizes and sortable columns. Verify that the text matches the running grid.
+- [x] 3.4 Update the Owners section of `user-manual/manual.md` to describe paging, page sizes and sortable columns. Verify that the text matches the running grid.
 
 ## 4. End-to-end and contract consumers
 
-- [ ] 4.1 Adapt the `petclinic-test` callers of `GET /api/owners`: `add-visit.dsl.ts`, `db-fixture.spec.ts`, `owner-search.feature.glue.ts` (read `content`, ask for `size=20` or page through when all owners are needed) and `add-owner.spec.ts` (search so the new owner is on page 1). Verify that these specs pass against the running stack.
-- [ ] 4.2 Add a Playwright spec for the grid: change the page size, sort by City twice, go to page 2, reload (the state is kept), open an owner and press Back (still page 2). Verify that it passes.
+- [x] 4.1 Adapt the `petclinic-test` callers of `GET /api/owners`: `add-visit.dsl.ts`, `db-fixture.spec.ts`, `owner-search.feature.glue.ts` (read `content`, ask for `size=20` or page through when all owners are needed) and `add-owner.spec.ts` (search so the new owner is on page 1). Verify that these specs pass against the running stack.
+- [x] 4.2 Add a Playwright spec for the grid: change the page size, sort by City twice, go to page 2, reload (the state is kept), open an owner and press Back (still page 2). Verify that it passes.
 - [ ] 4.3 Run the full backend suite, `npm run test-headless`, and the `petclinic-test` suite, then push and verify that CI is green.

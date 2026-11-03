@@ -1,5 +1,6 @@
 import {test, expect} from './support/trace-fixture';
 import axios from 'axios';
+import {allOwners} from './support/all-owners';
 
 // What an e2e test starts on, pinned down — the browser suites' half of the backend's
 // StartingDatabaseTest: the reference rows alone when it declares nothing, the Default seed
@@ -16,7 +17,7 @@ test.beforeAll(async () => {
 });
 
 type Owner = {id: number; firstName: string; lastName: string};
-const owners = async () => (await axios.get(`${API}/owners`)).data as Owner[];
+const owners = () => allOwners<Owner>(API);
 
 test.describe('a test that declares no DB fixture', () => {
   test('starts on an empty database, the reference pet types still there', async () => {

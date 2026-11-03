@@ -3,7 +3,7 @@ import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {PageEvent} from '@angular/material/paginator';
 import {Sort, SortDirection} from '@angular/material/sort';
 import {of, Subject} from 'rxjs';
-import {catchError, map, switchMap, takeUntil} from 'rxjs/operators';
+import {catchError, map, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
 import {OwnerPage, OwnerQuery} from '../owner-page';
@@ -39,6 +39,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.route.queryParamMap.pipe(
       map(params => this.toQuery(params)),
+      tap(query => this.lastName = query.lastName), // not on the answer: it would erase what is being typed
       switchMap(query => this.ownerService.getOwners(query).pipe(
         map(page => ({query, page})),
         catchError(() => of({query, page: null as OwnerPage})))),
@@ -104,7 +105,6 @@ export class OwnerListComponent implements OnInit, OnDestroy {
       return;
     }
     const [sortKey, sortDirection] = query.sort.split(',');
-    this.lastName = query.lastName;
     this.sortKey = sortKey;
     this.sortDirection = sortDirection as SortDirection;
     this.size = query.size;

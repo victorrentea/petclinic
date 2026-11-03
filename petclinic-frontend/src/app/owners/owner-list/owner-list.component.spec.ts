@@ -165,6 +165,16 @@ describe('OwnerListComponent', () => {
     expect(component.owners).toEqual([george]);
   });
 
+  it('an answer arriving late does not erase what is being typed in the search box', () => {
+    const answer = new Subject<OwnerPage>();
+    openWith({}, answer);
+
+    component.lastName = 'Fra';
+    answer.next(pageOf([george]));
+
+    expect(component.lastName).toBe('Fra');
+  });
+
   it('a late answer to an older query does not overwrite the latest one', () => {
     const first = new Subject<OwnerPage>();
     const second = new Subject<OwnerPage>();
