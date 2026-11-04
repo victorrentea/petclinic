@@ -15,10 +15,10 @@ CREATE TABLE public.flyway_schema_history (
 
 CREATE TABLE public.owners (
     id integer NOT NULL,
-    first_name text,
-    last_name text,
+    first_name text COLLATE pg_catalog."und-x-icu",
+    last_name text COLLATE pg_catalog."und-x-icu",
     address text,
-    city text,
+    city text COLLATE pg_catalog."und-x-icu",
     telephone text
 );
 

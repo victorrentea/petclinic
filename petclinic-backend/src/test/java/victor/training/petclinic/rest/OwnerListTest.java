@@ -161,6 +161,48 @@ class OwnerListTest {
                 .containsExactly("Pagerpotter, Harry", "Pagerpotter, Beatrix", "Pageraaron, Zoe");
     }
 
+    // These tests list without a filter: the names share no prefix, and a test starts on an empty database.
+    @Test
+    void sortByNameDescending_keepsAnAccentedNameBesideItsBaseLetter() throws Exception {
+        owner("Basil", "Silver", "London");
+        owner("Łukasz", "Śliwiński", "Kraków");
+        owner("Ada", "Tremaine", "London");
+        owner("Wallace", "Wensleydale", "Wigan");
+
+        OwnerPageDto page = list("?sort=name,desc");
+
+        assertThat(page.content()).extracting(OwnerDto::getLastName)
+                .containsExactly("Wensleydale", "Tremaine", "Śliwiński", "Silver");
+    }
+
+    @Test
+    void sortByCity_keepsAnAccentedCityBesideItsBaseLetter() throws Exception {
+        owner("Ada", "Citysort", "Zagreb");
+        owner("Bo", "Citysort", "Krakowiec");
+        owner("Cy", "Citysort", "Kraków");
+        owner("Dan", "Citysort", "Istanbul");
+        owner("Eve", "Citysort", "Île-de-France");
+
+        OwnerPageDto page = list("?lastName=Citysort&sort=city");
+
+        assertThat(page.content()).extracting(OwnerDto::getCity)
+                .containsExactly("Île-de-France", "Istanbul", "Kraków", "Krakowiec", "Zagreb");
+    }
+
+    @Test
+    void sortByName_ignoresCaseUntilItIsTheOnlyDifference() throws Exception {
+        owner("Ada", "Smith", "London");
+        owner("Bo", "smith", "London");
+        owner("Cy", "Dumont", "London");
+        owner("Dan", "de Vries", "London");
+        owner("Eve", "Dawson", "London");
+
+        OwnerPageDto page = list("?sort=name");
+
+        assertThat(page.content()).extracting(OwnerDto::getLastName)
+                .containsExactly("Dawson", "de Vries", "Dumont", "smith", "Smith");
+    }
+
     @Test
     void unsupportedSortKey_isRejected() throws Exception {
         mockMvc.perform(get("/api/owners?sort=telephone,asc"))

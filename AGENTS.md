@@ -131,6 +131,11 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the name
   `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
   resolved migrations sharing one description, so two can never both apply.
+- **Sorted owner columns use the ICU root collation** (`und-x-icu`, V5): the database default comes from
+  initdb's locale (`C.UTF-8` here) and puts `Śliwiński` after Z. A new text column users sort on needs the
+  same. `LIKE 'x%'` is served by the `text_pattern_ops` index, never by the sort indexes.
+- ⚠️ With the backend running and IntelliJ open, saving a file in `db/migration/` applies it within
+  seconds (auto-build → devtools restart → Flyway), and from then on it is frozen: an edit fails the next boot.
 - **Tests start on an empty database** (schema + reference rows), never on the seed: the tests'
   `src/test/resources/config/application.properties` drops `db/seed` and gives every test method
   a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
