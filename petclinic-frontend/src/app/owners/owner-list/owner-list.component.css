@@ -77,3 +77,20 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Fixed columns: sorting or paging swaps the rows, and must not resize the grid under the cursor */
+#ownersTable table {
+  table-layout: fixed;
+  min-width: 600px;
+}
+
+#ownersTable td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#ownersTable th:nth-child(1) { width: 28%; }
+#ownersTable th:nth-child(2) { width: 28%; }
+#ownersTable th:nth-child(3) { width: 14%; }
+#ownersTable th:nth-child(4) { width: 16%; }
+#ownersTable th:nth-child(5) { width: 14%; }
