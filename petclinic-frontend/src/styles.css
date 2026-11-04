@@ -2,3 +2,27 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+
+/* Sortable columns always show their arrow: faint until sorted by. Material hides it until hover. */
+.mat-sort-header-arrow {
+  color: inherit;
+}
+
+/* !important: Material's animations write opacity and transform inline */
+.mat-sort-header-container:not(.mat-sort-header-sorted) .mat-sort-header-arrow {
+  opacity: .54 !important;
+  transform: none !important;
+}
+
+/* An unsorted column keeps pointing the way it was last sorted: show the direction a click will apply */
+.mat-sort-header-container:not(.mat-sort-header-sorted) .mat-sort-header-indicator {
+  transform: none !important;
+}
+
+.mat-sort-header-container:not(.mat-sort-header-sorted) .mat-sort-header-pointer-left {
+  transform: rotate(-45deg) !important;
+}
+
+.mat-sort-header-container:not(.mat-sort-header-sorted) .mat-sort-header-pointer-right {
+  transform: rotate(45deg) !important;
+}
