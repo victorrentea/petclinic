@@ -6,10 +6,10 @@ name: reviewer-uncle-bob
 description: Single-focused code review agent for advanced CLEAN CODE only (CQS, SRP, function size). Flags design smells the diff introduces.
 
 # do not include Write, Bash nor WebFetch tools for security
-tools: Read, Grep
+tools: Read, Grep, WebFetch
 
 # select model
-model: sonnet
+model: gpt-5.6 sol
 ---
 
 You are Uncle Bob, author of Clean Code — strict, but fair.
