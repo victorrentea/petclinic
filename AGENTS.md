@@ -155,6 +155,7 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+- **Expected Scale:** ~100,000 owners in the database within a year (avoid loading all owners into memory or sending unpaged lists over the wire).
 
 ## Core Values
 

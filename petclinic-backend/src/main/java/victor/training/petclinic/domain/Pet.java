@@ -11,6 +11,8 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.lang.Nullable;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,6 +51,7 @@ public class Pet {
     private Owner owner;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private Set<Visit> visits = new HashSet<>();
 
     public List<Visit> getVisitsSortedByDate() {
