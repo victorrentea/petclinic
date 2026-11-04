@@ -158,6 +158,15 @@ describe('OwnerListComponent', () => {
     expect(fixture.debugElement.query(By.css('#ownersTable'))).toBeNull();
   });
 
+  it('offers Add Owner when the search finds none, without it being the form\'s submit button', () => {
+    getOwnersPage.and.returnValue(of(aPage([])));
+    url.set({lastName: 'Zzzz'});
+    fixture.detectChanges();
+
+    expect(text('#addOwner')).toBe('Add Owner');
+    expect(fixture.debugElement.query(By.css('#addOwner')).nativeElement.type).toBe('button');
+  });
+
   it('shows a failure as an error, not as "no owners"', () => {
     getOwnersPage.and.returnValue(throwError('server returned code 500'));
     fixture.detectChanges();
