@@ -15,11 +15,13 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
 const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+/** The grid prints "Potter, Harry"; the scenarios and the API speak "Harry Potter". */
+const fullNameIn = (gridCell: string) => gridCell.trim().split(', ').reverse().join(' ');
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  const listed = async () => (await cells.allTextContents()).map(fullNameIn).filter(Boolean).sort();
 
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }
@@ -27,7 +29,7 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
 /** Polls until the table shows exactly `expected`, in that order. */
 async function expectOwnersListedInOrder(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  await expect.poll(async () => (await cells.allTextContents()).map((t) => t.trim()), {timeout: 10_000})
+  await expect.poll(async () => (await cells.allTextContents()).map(fullNameIn), {timeout: 10_000})
     .toEqual(expected);
 }
 

@@ -92,7 +92,7 @@ describe('OwnerListComponent', () => {
   it('shows the full name of every owner on the page', () => {
     fixture.detectChanges();
 
-    expect(text('.ownerFullName')).toBe('George Franklin');
+    expect(text('.ownerFullName')).toBe('Franklin, George');
   });
 
   it('a search goes back to the first page, keeping the sort and size', () => {

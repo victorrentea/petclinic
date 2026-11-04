@@ -27,7 +27,7 @@
 
         <tbody>
         <tr *ngFor="let owner of page.content">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active">{{ owner.firstName }} <strong>{{ owner.lastName }}</strong></a></td>
+          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"><strong>{{ owner.lastName }}</strong>, {{ owner.firstName }}</a></td>
           <td>{{ owner.address }}</td>
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
