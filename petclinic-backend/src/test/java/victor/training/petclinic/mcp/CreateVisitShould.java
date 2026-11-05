@@ -118,6 +118,15 @@ class CreateVisitShould {
         }
 
         @Test
+        void theDateIsMoreThanAYearAhead() {
+            givenThePetExists();
+            LocalDate aYearAndADayAhead = LocalDate.now().plusYears(1).plusDays(1);
+
+            assertThatThrownBy(() -> petClinicMcp.createVisit(PET_ID, aYearAndADayAhead, morning, "Vaccination"))
+                    .hasMessageContaining("more than one year ahead");
+        }
+
+        @Test
         void theTimeHasAlreadyPassedToday() {
             givenThePetExists();
             // today is an allowed date, but midnight is in the past for the whole of it
