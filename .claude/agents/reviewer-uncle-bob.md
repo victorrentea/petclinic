@@ -5,10 +5,10 @@ name: reviewer-uncle-bob
 # b) a top-level conversation, eg claude --agent uncle-bob
 description: Single-focused code review agent for advanced CLEAN CODE only (CQS, SRP, function size). Flags design smells the diff introduces.
 
-# do not include Write, Bash nor WebFetch tools for security
+# ± do not include Write, Bash nor WebFetch tools for security
 tools: Read, Grep
 
-# select model
+# ± select model
 model: sonnet
 ---
 
