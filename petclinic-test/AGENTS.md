@@ -142,6 +142,13 @@
   `1 / 2` — advertising neither that it existed nor what it would do. `SEQ_INTERACTIVE=0`
   bakes the detail back into the picture, which is what `diagram:lean`/`:static`/`:full` do. The ids are **hashes of the detail, never counters** — `.claude/skills/human-review/scripts/puml-diff.sh` diffs the
   `.puml` textually, so a positional id would repaint everything under an inserted query.
+- **A `Browser -> Backend` arrow links to the line that sent that request**, taken from the
+  request's own JS stack, never from a search (README, "A browser request links…"). It needs no
+  application change and no extra build: `src/support/call-sites.ts` wraps XHR and fetch from
+  outside, and the source maps of the `docker` build are served beside the bundles even though
+  they are `hidden`. Both fixtures record it for traced tests only. An arrow without a link is
+  the honest answer, so do not add a fallback: `npm run trace:diagram` logs
+  `n/m browser request(s) traced to their line` per test.
 - The windows file (`test-results/trace-windows.json`) is what a standalone re-render replays,
   so each runner forgets only **its own** entries at start (`*.spec.ts` for Playwright,
   `*.feature` for Cucumber) — wiping it whole would shrink re-renders to the last suite that ran.

@@ -5,6 +5,7 @@ import {DetailCollector, DetailIndex, DetailStep} from './detail-index';
 import {OperationNames, defaultOperations, operationNameOf} from './openapi-operations';
 import {linkedSectionTitle} from './test-location';
 import {linkedMethodLabel} from './code-location';
+import {CALL_SITE_ATTRIBUTE} from './call-site';
 
 export interface NormSpan {
   traceId: string;
@@ -214,6 +215,13 @@ function linkLabel(
   if (steps.length === 0) return label;
   const id = collector.add({title, steps});
   return `[[${MARKER_SCHEME}${id}{${tooltip}} ${label} ${MARKER_GLYPH}]]`;
+}
+
+/** The `⊕` on its own, for a label whose words already link somewhere else. */
+function linkMarker(
+  collector: DetailCollector, title: string, steps: DetailStep[], tooltip: string,
+): string {
+  return `[[${MARKER_SCHEME}${collector.add({title, steps})}{${tooltip}} ${MARKER_GLYPH}]]`;
 }
 
 const SQL_TOOLTIP = 'Click for the statement behind this call';
@@ -520,14 +528,21 @@ function emitTrace(
       // opened is called `SELECT petclinic.owners`.
       const title = p === 'DB' ? text : `${pp} → ${p}: ${span.name}`;
       const tooltip = p === 'DB' ? SQL_TOOLTIP : BODY_TOOLTIP;
-      // PlantUML gives a message label exactly one link, so the two candidates take turns:
-      // the ⊕ that unfolds the SQL or the JSON body wins where there is something to unfold,
-      // and where there is not the slot is free for the code the span was opened on.
+      // The ⊕ that unfolds the SQL or the JSON body wins where there is something to unfold,
+      // and where there is not the words are free for the code the span was opened on.
       // `notify-visit-booked` is that case — a crossing @WithSpan arrow that reveals nothing,
       // and until this it was the only kind of arrow in the picture with no way back to its method.
-      const label = steps.length > 0
-        ? linkLabel(text, collector, title, steps, tooltip)
-        : linkedMethodLabel(text, methodLinks(span));
+      //
+      // A browser request is the exception: its words open the line that sent it, in this run
+      // (genseq/call-site.ts), and a body it carries keeps its ⊕ beside them as a second link.
+      // Each `[[…]]` of a label becomes its own <a> in the SVG. Where that line is unknown the
+      // arrow simply has no such link: the old shape, never a guess.
+      const sentFrom = parent?.attributes[CALL_SITE_ATTRIBUTE] ? methodLinks(parent) : undefined;
+      const label = sentFrom && steps.length > 0
+        ? `${linkedMethodLabel(text, sentFrom)} ${linkMarker(collector, title, steps, tooltip)}`
+        : steps.length > 0
+          ? linkLabel(text, collector, title, steps, tooltip)
+          : linkedMethodLabel(text, sentFrom ?? methodLinks(span));
       out.push(`${pumlName(pp!)} -> ${pumlName(p)}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {

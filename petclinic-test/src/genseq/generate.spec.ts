@@ -397,3 +397,37 @@ test('a petclinic-test source keeps its module-relative title', () => {
   );
   expect(Object.values(written)[0]).toContain('in src/add-visit.spec.ts —');
 });
+
+// The whole join: the request's frames reach the arrow through the span, and through the span
+// cache too, so a replay with nothing running keeps every link.
+test('a recorded call site reaches the arrow, and survives in the span cache', async () => {
+  const written: Record<string, string> = {};
+  const source = 'this.visitService.addVisit(visit).subscribe(';
+  const file = 'src/app/visits/visit-add/visit-add.component.ts';
+  const logged: string[] = [];
+  const spans = JSON.parse(JSON.stringify(fixture));
+  const client = spans.batches[0].scopeSpans[0].spans[1];
+  client.traceId = 'fE7B4usvB9KFqEyldpZ53Q==';
+  client.spanId = 'lrlBhfFN7/8=';
+  spans.batches[1].scopeSpans[0].spans[0].parentSpanId = 'lrlBhfFN7/8=';
+  await generateFromWindows(
+    [{title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000}],
+    '/repo/petclinic-test',
+    {
+      searchTraceIds: async () => ['t1'],
+      getTrace: async () => spans,
+      writeFile: (p, c) => {written[p] = c;},
+      readFile: (p) => (p.endsWith(file) ? `${'\n'.repeat(2)}    ${source}\n` : undefined),
+      log: (m) => logged.push(m),
+      readCallSites: () => [{
+        traceId: '7c4ec1e2eb2f07d285a84ca5769679dd', spanId: '96b94185f14defff',
+        frames: [{file, line: 3, text: source}],
+      }],
+    },
+  );
+  const puml = written['/repo/petclinic-test/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
+  expect(puml).toContain(`[[src://petclinic-frontend/${file}:3{Click to open the line that sent `
+    + 'this request: visit-add.component.ts:3} ');
+  expect(written['/repo/petclinic-test/test-results/trace-spans.json']).toContain('genseq.call-site');
+  expect(logged.join('\n')).toContain('1/1 browser request(s) traced to their line');
+});

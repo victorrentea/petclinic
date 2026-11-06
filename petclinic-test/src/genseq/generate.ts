@@ -1,12 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
+import {readCallSites} from '../support/call-sites';
 import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan,
   PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
 import {methodHandle, overloadOf} from './code-location';
+import {CALL_SITE_ATTRIBUTE, CallSite, callSiteHandle, callSiteIndex, withCallSites} from './call-site';
 import {defaultOperations} from './openapi-operations';
 
 export interface TestWindow {
@@ -37,6 +39,8 @@ export interface GenerateDeps extends RenderDeps {
   searchTraceIds: (traceql: string, startMs: number, endMs: number) => Promise<string[]>;
   getTrace: (traceId: string) => Promise<unknown>;
   sleep?: (ms: number) => Promise<void>;
+  /** Optional: which line sent each request. Without it the request arrows carry no link. */
+  readCallSites?: () => CallSite[];
 }
 
 /** One source file's scenarios, as fetched from Tempo — the input a re-render replays. */
@@ -215,6 +219,7 @@ export async function generateFromWindows(
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
 ): Promise<string[]> {
   const fetched: CachedSource[] = [];
+  const callSites = callSiteIndex(deps.readCallSites?.() ?? []);
   // One diagram per source file, one section per scenario in it — so the picture
   // is filed where its test is, and reads in the order the file does.
   for (const [source, group] of groupBySource(windows)) {
@@ -231,11 +236,11 @@ export async function generateFromWindows(
         }
         const traces: NormSpan[][] = [];
         for (const id of ids) {
-          traces.push(parseTempoTrace(await deps.getTrace(id)));
+          traces.push(withCallSites(parseTempoTrace(await deps.getTrace(id)), callSites));
         }
         scenarios.push({title: w.title, traces: chronological(traces),
           ...(w.selected ? {selected: true} : {})});
-        deps.log(`✅ "${w.title}": ${ids.length} trace(s)`);
+        deps.log(`✅ "${w.title}": ${ids.length} trace(s)${locatedRequests(traces)}`);
       } catch (err) {
         // One scenario's Tempo error must not cost every other diagram — the runner
         // deletes them all up front, so an abort here leaves fewer on disk than it found.
@@ -255,6 +260,15 @@ export async function generateFromWindows(
       JSON.stringify(mergeCachedSources(readSpanCache(spanCachePathFor(rootDir), deps), fetched)));
   }
   return renderScenarios(fetched, rootDir, deps, options);
+}
+
+/** Said out loud, because a request that lost its link does not show up any other way. */
+function locatedRequests(traces: NormSpan[][]): string {
+  const browser = traces.flat().filter(
+    (s) => s.kind === 'CLIENT' && s.serviceName === 'petclinic-frontend');
+  if (browser.length === 0) return '';
+  const located = browser.filter((s) => CALL_SITE_ATTRIBUTE in s.attributes);
+  return `, ${located.length}/${browser.length} browser request(s) traced to their line`;
 }
 
 /**
@@ -304,6 +318,10 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
       return stepHandle(repoRelative(rootDir, source),
         lineOfStep(text, span.name, lineOfHandle(scenario?.link)));
     }
+    // A browser request knows the line that sent it, in this run: no lookup, only a check
+    // that this checkout still has that line.
+    const callSite = span.attributes[CALL_SITE_ATTRIBUTE];
+    if (callSite) return callSiteHandle(callSite, span.serviceName, repoRoot, readFile);
     // One trace draws the same repository method many times over — an N+1 is exactly what
     // these pictures are for — and each hit would otherwise re-read and re-scan the file.
     // The overload is part of the key: `normalize(phone)` and `normalize(phone, country)`
@@ -521,6 +539,7 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
     const deps: GenerateDeps = {
       searchTraceIds: (q, s, e) => searchTraceIds(cfg, q, s, e),
       getTrace: (id) => getTrace(cfg, id),
+      readCallSites: () => readCallSites(path.join(root, 'test-results', 'call-sites')),
       writeFile: writeFileMakingDirs,
       readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
