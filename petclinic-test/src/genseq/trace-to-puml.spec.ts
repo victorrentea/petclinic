@@ -759,7 +759,8 @@ test('a crossing arrow with nothing to reveal links to the method it was opened 
 // ── A browser request links to the line that sent it ─────────────────────────────
 // The link comes from the request's own stack, so it hangs off the browser's CLIENT span
 // (genseq/call-site.ts) while the arrow is drawn from the SERVER span under it.
-const SENT_FROM = 'src://petclinic-frontend/src/app/a.component.ts:22{Click to open the line that sent this request: a.component.ts:22}';
+const SENT_FROM = 'src://petclinic-frontend/src/app/a.component.ts:22'
+  + '{Click to open the line that sent this request: a.component.ts:22}';
 
 function browserRequest(browserAttributes: Record<string, string>): NormSpan[] {
   return [
