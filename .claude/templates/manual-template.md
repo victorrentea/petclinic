@@ -1,5 +1,5 @@
 <!--
-  TEMPLATE — illustration of how user-manual/manual.md must look.
+  TEMPLATE — illustration of how docs/user-manual/manual.md must look.
   This file is read by /regen-user-manual and is NOT the manual itself.
   Replace every <placeholder> with real content captured from the live UI.
   Keep the structure: title → intro → "do not edit" note → Contents →
