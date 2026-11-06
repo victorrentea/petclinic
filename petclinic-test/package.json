@@ -32,6 +32,7 @@
     "@types/node": "^25.5.2",
     "axios": "^1.14.0",
     "concurrently": "^9.2.1",
+    "source-map": "^0.6.1",
     "tree-kill": "^1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2",

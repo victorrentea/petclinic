@@ -12,10 +12,12 @@ import {runGenerate, CUCUMBER_SOURCES} from '../genseq/generate';
 import {startCoverageRun, startTestCoverage, stopTestCoverage} from './coverage';
 import {keepCaptionAcrossLoads, showCaption} from './captions';
 import {fixtureOfTags, resetDatabaseTo} from './db-fixture';
+import {RawCallSite, recordCallSites, saveCallSites} from './call-sites';
 
 setDefaultTimeout(60_000);
 
 const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-windows');
+const CALL_SITES_DIR = path.join(__dirname, '..', '..', 'test-results', 'call-sites');
 
 // Playwright's own recording of each scenario — screenshots, DOM snapshots, console,
 // network — the same zip `trace: 'on'` leaves behind for a *.spec.ts. Cucumber runs
@@ -57,6 +59,8 @@ export class PlaywrightWorld extends World {
   // Named by GENSEQ_SELECT, untagged: the diagram's footer must not claim a tag.
   traceSelected?: boolean;
   traceStartMs?: number;
+  // Which line of the frontend sent each of those requests (support/call-sites.ts).
+  callSites?: RawCallSite[];
   // Set for every scenario when PW_TRACE=on: where its recording lands, and when it began.
   recordingZip?: string;
   recordingStartMs?: number;
@@ -86,6 +90,7 @@ setWorldConstructor(PlaywrightWorld);
 // of its own source files, and the other suite's are none of its business.
 BeforeAll(function () {
   forgetWindowsOf(WINDOWS_DIR, CUCUMBER_SOURCES);
+  forgetWindowsOf(CALL_SITES_DIR, CUCUMBER_SOURCES);
   // Per-test coverage for /human-review (support/coverage.ts): a clean folder per run.
   startCoverageRun('cucumber');
   // A clean slate per run, like the report the Playwright suite rewrites: a recording
@@ -130,6 +135,7 @@ Before(async function (this: PlaywrightWorld, {pickle}: ITestCaseHookParameter) 
     await this.page.addInitScript((name) => {
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, pickle.name);
+    this.callSites = await recordCallSites(this.page);
     this.traceStartMs = Date.now() - PRE_PAD_MS;
   }
 });
@@ -171,6 +177,8 @@ After(async function (this: PlaywrightWorld, {pickle, gherkinDocument, result}: 
   }
   if (this.traceTitle && this.traceStartMs !== undefined) {
     await flushBrowserSpans(this.page);
+    await saveCallSites(CALL_SITES_DIR,
+      {title: this.traceTitle, source: this.traceSource!}, this.callSites ?? []);
     appendWindow(WINDOWS_DIR, {
       title: this.traceTitle,
       source: this.traceSource!,

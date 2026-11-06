@@ -12,6 +12,10 @@ export default async function globalSetup(): Promise<void> {
     path.join(__dirname, '..', '..', 'test-results', 'trace-windows'),
     PLAYWRIGHT_SOURCES,
   );
+  forgetWindowsOf(
+    path.join(__dirname, '..', '..', 'test-results', 'call-sites'),
+    PLAYWRIGHT_SOURCES,
+  );
   // Per-test coverage for /human-review (support/coverage.ts): a clean folder per run.
   startCoverageRun('playwright');
 }
