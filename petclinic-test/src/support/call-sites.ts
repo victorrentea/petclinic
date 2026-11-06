@@ -2,17 +2,23 @@ import {Page} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import {SourceMapConsumer} from 'source-map';
-import {CallSite, applicationFrames, idsOfTraceparent, parseStack} from '../genseq/call-site';
+import {CallSite, idsOfTraceparent, parseStack, requestFrames} from '../genseq/call-site';
 import {TestWindow} from '../genseq/generate';
 import {windowFileName} from './trace-window-store';
 
-/** One request as it left the page: the W3C header it carried and the JS stack that sent it. */
+/**
+ * One request as it left the page: the W3C header it carried, then the JS stacks that explain
+ * it. Its own stack first, then the stack that scheduled each task it ran in, nearest first.
+ */
 export interface RawCallSite {
   traceparent: string;
-  stack: string;
+  stacks: string[];
 }
 
 const BINDING = '__genseqCallSite';
+
+/** Enough for a router hop and a timer or two; a timer rearming itself must not chain for ever. */
+const MAX_CAUSES = 16;
 
 /**
  * Runs in the page before any of its scripts. Serialized by Playwright, so it may only touch
@@ -22,16 +28,62 @@ const BINDING = '__genseqCallSite';
  * same methods on top of this one, so by the time a request reaches `send` here OTel has
  * already called `setRequestHeader('traceparent', …)` — and the stack still has everybody
  * above it, down to the line of application code that started the call.
+ *
+ * Unless that code has already returned. `router.navigate` hops over a `Promise.resolve` in
+ * the router, so the request of a sort or a page change leaves from a stack of 226 frames with
+ * no application frame on it. V8's async stacks cannot help: zone.js drains its own microtask
+ * queue at the end of the click, so to V8 it is one synchronous task (measured with
+ * Debugger.setAsyncCallStackDepth: no async parent at all). The hop is only visible to Zone,
+ * which is why the stack is also taken wherever Zone schedules a task. An Error is cheap until
+ * its `.stack` is read, which happens only for a task a request ran in.
  */
-function wrapRequestSenders(binding: string): void {
+function wrapRequestSenders({binding, maxCauses}: {binding: string; maxCauses: number}): void {
   const page = globalThis as any;
   // The default of 10 frames ends inside rxjs: a subscribe chain alone is deeper than that.
   page.Error.stackTraceLimit = Infinity;
 
+  interface Cause {error: Error; up: Cause | null; depth: number}
+  const causes = new WeakMap<object, Cause>();
+  let running: Cause | null = null;
+
+  // A click is not caused by the code that registered its listener, so an event task has no
+  // cause and starts a chain of its own. Zone is trapped on its way in: it has to be hooked
+  // after polyfills.js defines it and before the app starts scheduling.
+  const followTasks = (Zone: any): void => {
+    const {scheduleTask, runTask} = Zone.prototype;
+    Zone.prototype.scheduleTask = function (this: object, task: any) {
+      if (task.type !== 'eventTask') {
+        const depth = (running?.depth ?? 0) + 1;
+        causes.set(task, {error: new page.Error(), up: depth < maxCauses ? running : null, depth});
+      }
+      return scheduleTask.call(this, task);
+    };
+    Zone.prototype.runTask = function (this: object, task: object, ...args: unknown[]) {
+      const outer = running;
+      running = causes.get(task) ?? null;
+      try {
+        return runTask.call(this, task, ...args);
+      } finally {
+        running = outer;
+      }
+    };
+  };
+  let zone: unknown;
+  Object.defineProperty(page, 'Zone', {
+    configurable: true,
+    get: () => zone,
+    set: (value) => {
+      zone = value;
+      followTasks(value);
+    },
+  });
+
   // From the root zone, or the promise the binding returns would count as Angular work and
   // the app would run an extra change detection for every request it made under test.
-  const report = (traceparent: string, stack: string | undefined): void => {
-    const send = () => page[binding](traceparent, stack ?? '');
+  const report = (traceparent: string): void => {
+    const stacks = [new page.Error().stack ?? ''];
+    for (let cause = running; cause; cause = cause.up) stacks.push(cause.error.stack ?? '');
+    const send = () => page[binding](traceparent, stacks);
     page.Zone?.root ? page.Zone.root.run(send) : send();
   };
 
@@ -45,7 +97,7 @@ function wrapRequestSenders(binding: string): void {
   const send = proto.send;
   proto.send = function (this: object, ...args: unknown[]) {
     const traceparent = parents.get(this);
-    if (traceparent) report(traceparent, new page.Error().stack);
+    if (traceparent) report(traceparent);
     return send.apply(this, args);
   };
 
@@ -53,22 +105,22 @@ function wrapRequestSenders(binding: string): void {
   page.fetch = function (this: unknown, input: any, init?: any) {
     const headers = new page.Headers(init?.headers ?? input?.headers ?? {});
     const traceparent = headers.get('traceparent');
-    if (traceparent) report(traceparent, new page.Error().stack);
+    if (traceparent) report(traceparent);
     return fetch.call(this, input, init);
   };
 }
 
 /**
- * From now on, every traced request this page sends is remembered with the stack that sent
+ * From now on, every traced request this page sends is remembered with the stacks that sent
  * it. A binding rather than an array on `window`: the array would die with the first full
  * navigation, and a test may make several.
  */
 export async function recordCallSites(page: Page): Promise<RawCallSite[]> {
   const sites: RawCallSite[] = [];
-  await page.exposeFunction(BINDING, (traceparent: string, stack: string) => {
-    sites.push({traceparent, stack});
+  await page.exposeFunction(BINDING, (traceparent: string, stacks: string[]) => {
+    sites.push({traceparent, stacks});
   });
-  await page.addInitScript(wrapRequestSenders, BINDING);
+  await page.addInitScript(wrapRequestSenders, {binding: BINDING, maxCauses: MAX_CAUSES});
   return sites;
 }
 
@@ -93,7 +145,8 @@ function mapOf(script: string): Promise<SourceMapConsumer | undefined> {
 }
 
 async function toCallSites(sites: RawCallSite[]): Promise<CallSite[]> {
-  const scripts = [...new Set(sites.flatMap((s) => parseStack(s.stack).map((f) => f.url)))];
+  const stacks = sites.flatMap((s) => s.stacks);
+  const scripts = [...new Set(stacks.flatMap((stack) => parseStack(stack).map((f) => f.url)))];
   const loaded = new Map<string, SourceMapConsumer>();
   for (const script of scripts) {
     const map = await mapOf(script);
@@ -101,7 +154,7 @@ async function toCallSites(sites: RawCallSite[]): Promise<CallSite[]> {
   }
   return sites.flatMap((site) => {
     const ids = idsOfTraceparent(site.traceparent);
-    return ids ? [{...ids, frames: applicationFrames(site.stack, loaded)}] : [];
+    return ids ? [{...ids, frames: requestFrames(site.stacks, loaded)}] : [];
   });
 }
 
