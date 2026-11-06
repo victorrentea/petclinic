@@ -152,8 +152,14 @@ request itself does. No application code changes for it:
 
 The arrow links to the first application frame, normally the component's `.subscribe(`:
 `http.get` is a cold Observable, so the service method has returned and is not on the stack. A
-service above a component yields to the component; the other frames go in the tooltip. The
-line is confirmed against the checkout. No stack, no map or a line that moved means no link on
+service above a component yields to the component; the other frames go in the tooltip.
+
+A request sent after a hop has no application frame at all: `router.navigate` crosses a
+`Promise.resolve`, so sorting the visits table sends `GET /api/visits` from a stack of pure
+rxjs. Chrome's async stacks do not see that hop, because zone.js drains its own microtask queue
+inside the click, so the init script also takes the stack wherever Zone schedules a task. Such
+a request links to the handler the template called (`onSort`, `onPage`), not to the `navigate()`
+helper they share. The line is confirmed against the checkout. No stack, no map or a line that moved means no link on
 that arrow, never a guess. A body keeps its `⊕` as a second link beside the words.
 
 Two files come out of a run, and both belong to the diagram:

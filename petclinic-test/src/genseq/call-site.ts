@@ -13,7 +13,8 @@ import type {ReadSource} from './code-location';
  * Measured on add-visit: the stack is 76–89 frames deep and the application frame sits around
  * the 48th, under rxjs, HttpClient, zone and OTel. `http.get` is a cold Observable, so the
  * service method has already returned: `OwnerService.getOwnerById` is never on the stack, and
- * the top application frame is the component's `.subscribe(`.
+ * the top application frame is the component's `.subscribe(`. A request the router deferred
+ * has no application frame at all, and is explained by what scheduled it (`requestFrames`).
  */
 
 /** Where a browser CLIENT span keeps its frames, as JSON — so a replay of the span cache has them. */
@@ -26,6 +27,8 @@ export interface CallFrame {
   line: number;
   /** That line of the source the bundle was built from, to confirm against the checkout. */
   text?: string;
+  /** Not on the request's own stack: it comes from the code that scheduled the task it left in. */
+  deferred?: boolean;
 }
 
 /** One request, identified the way its spans are: the header it left the page with. */
@@ -87,6 +90,21 @@ export function applicationFrames(
   return frames;
 }
 
+/**
+ * The frames that explain one request: its own stack's, or else those of the nearest stack
+ * that scheduled the task it left in. Causes are a fallback, so a request that was sent from
+ * application code is never told apart from it by something that happened earlier.
+ */
+export function requestFrames(
+  stacks: string[], maps: ReadonlyMap<string, SourceMapConsumer>,
+): CallFrame[] {
+  for (const [hop, stack] of stacks.entries()) {
+    const frames = applicationFrames(stack, maps);
+    if (frames.length > 0) return hop === 0 ? frames : frames.map((f) => ({...f, deferred: true}));
+  }
+  return [];
+}
+
 // Code that passes a request along. Above a component on the stack (a service that subscribes
 // on the component's behalf), it says how the request travelled, not what started it.
 const PASS_THROUGH = /\.(?:service|interceptor)\.ts$/;
@@ -94,8 +112,14 @@ const PASS_THROUGH = /\.(?:service|interceptor)\.ts$/;
 /**
  * The frame an arrow links to: the application frame nearest what started the request.
  * Usually the first frame there is; a service above a component yields to the component.
+ *
+ * A deferred request counts from the other end. Its first frame is whatever handed the work
+ * over, often one helper every caller shares (`navigate()` behind both a sort and a page
+ * change), and the deepest code frame is the handler the template called: `onSort`, `onPage`.
  */
 export function triggerOf(frames: CallFrame[]): CallFrame | undefined {
+  const code = (f: CallFrame) => !PASS_THROUGH.test(f.file) && !f.file.endsWith('.html');
+  if (frames[0]?.deferred) return [...frames].reverse().find(code) ?? frames[0];
   return frames.find((f) => !PASS_THROUGH.test(f.file)) ?? frames[0];
 }
 
