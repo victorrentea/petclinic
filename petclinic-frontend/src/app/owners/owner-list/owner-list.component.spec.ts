@@ -143,7 +143,7 @@ describe('OwnerListComponent', () => {
       older.next(pageOf({...testOwner, id: 2, firstName: 'Betty', lastName: 'Davis'}));
       await settle();
 
-      expect(older.observers.length).toBe(0);
+      expect(older.observers).toHaveSize(0);
       expect(ownerNames()).toEqual(['George Franklin']);
     });
 

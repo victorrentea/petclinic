@@ -48,11 +48,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   onSelect(owner: Owner) {
-    this.router.navigate(['/owners', owner.id]);
+    void this.router.navigate(['/owners', owner.id]);
   }
 
   addOwner() {
-    this.router.navigate(['/owners/add']);
+    void this.router.navigate(['/owners/add']);
   }
 
   searchByLastName(lastName: string) {
@@ -87,6 +87,6 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(queryParams: Params, replaceUrl = false) {
-    this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
+    void this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
   }
 }
