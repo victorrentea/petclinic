@@ -5,7 +5,7 @@ import * as path from 'path';
 import {SourceMapConsumer, SourceMapGenerator} from 'source-map';
 import {
   CALL_SITE_ATTRIBUTE, CallFrame, applicationFrames, callSiteHandle, callSiteIndex,
-  idsOfTraceparent, parseStack, triggerOf, withCallSites,
+  idsOfTraceparent, parseStack, requestFrames, triggerOf, withCallSites,
 } from './call-site';
 import type {NormSpan} from './trace-to-puml';
 import {CUCUMBER_SOURCES} from './generate';
@@ -83,6 +83,27 @@ test('two stack frames on one line are one frame', () => {
   expect(frames).toHaveLength(1);
 });
 
+// The router's hop: a stack of 226 frames with no application frame, and the click that
+// scheduled it one task earlier.
+test('a request sent from application code never looks at what scheduled it', () => {
+  const frames = requestFrames(
+    [stack(`e.ngOnInit (${BUNDLE}:1:100)`), stack(`e.earlier (${BUNDLE}:1:100)`)],
+    new Map([[BUNDLE, bundleMap()]]));
+  expect(frames).toEqual([expect.not.objectContaining({deferred: true})]);
+});
+
+test('a request with no application frame takes the nearest stack that scheduled it', () => {
+  const frames = requestFrames(
+    [stack(`t.subscribe (${BUNDLE}:1:200)`), stack(`e.onSort (${BUNDLE}:1:100)`)],
+    new Map([[BUNDLE, bundleMap()]]));
+  expect(frames).toEqual([expect.objectContaining({file: COMPONENT, line: 3, deferred: true})]);
+});
+
+test('no stack with an application frame means no frames', () => {
+  expect(requestFrames([stack(`t.subscribe (${BUNDLE}:1:200)`), 'Error'],
+    new Map([[BUNDLE, bundleMap()]]))).toEqual([]);
+});
+
 const frame = (file: string, line = 1): CallFrame => ({file, line});
 
 test('the trigger is the first application frame: the component that subscribed', () => {
@@ -94,6 +115,14 @@ test('a service above a component yields to the component that called it', () =>
   const component = frame('src/app/a/a.component.ts');
   expect(triggerOf([frame('src/app/a/a.service.ts'), component])).toBe(component);
   expect(triggerOf([frame('src/app/http-error.interceptor.ts'), component])).toBe(component);
+});
+
+test('a deferred request links to the handler, not the helper every caller shares', () => {
+  const file = 'src/app/visits/visits-page/visits-page.component.ts';
+  const deferred = (f: string, line: number): CallFrame => ({file: f, line, deferred: true});
+  const onSort = deferred(file, 63);
+  expect(triggerOf([deferred(file, 86), onSort,
+    deferred('src/app/visits/visits-page/visits-page.component.html', 15)])).toBe(onSort);
 });
 
 test('a service alone on the stack is still the best there is', () => {
@@ -167,7 +196,7 @@ test('every row of an Outline adds to its file, and a runner forgets only its ow
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'call-sites-'));
   const outline = {title: 'Filter owners', source: 'src/owner-search.feature'};
   const raw = (spanId: string) => ({
-    traceparent: `00-7c4ec1e2eb2f07d285a84ca5769679dd-${spanId}-01`, stack: 'Error',
+    traceparent: `00-7c4ec1e2eb2f07d285a84ca5769679dd-${spanId}-01`, stacks: ['Error'],
   });
   await saveCallSites(dir, outline, [raw('96b94185f14defff')]);
   await saveCallSites(dir, outline, [raw('96b94185f14deffe')]);
