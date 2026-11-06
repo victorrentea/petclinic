@@ -165,10 +165,6 @@ def render_puml(projects: list[Project], edges: list[tuple[str, str]],
         "@startuml",
         "",
         "title Maven Module Graph",
-        # What a reader needs under the picture: where it comes from, and the file it is.
-        # The -Dincludes filter and the script chain are how it is made, not what it says.
-        "caption Diagram generated from `mvn dependency:tree`",
-        "footer petclinic-backend/docs/generated/MavenModules.puml",
         "",
         "skinparam shadowing false",
         "skinparam componentStyle rectangle",
