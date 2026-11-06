@@ -170,6 +170,19 @@
         }
       ]
     },
+    "1hoo8wr": {
+      "title": "select visits",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
+          "alternate": {
+            "label": "",
+            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=33"
+          }
+        }
+      ]
+    },
     "1vijc0e": {
       "title": "select visits",
       "steps": [
@@ -729,19 +742,6 @@
         }
       ]
     },
-    "1hoo8wr": {
-      "title": "select visits",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT v1_0.pet_id, v1_0.id, v1_0.visit_date, v1_0.description, v1_0.visit_time\nFROM visits v1_0\nWHERE v1_0.pet_id=33"
-          }
-        }
-      ]
-    },
     "1tjajq1": {
       "title": "select visits",
       "steps": [
@@ -781,99 +781,12 @@
         }
       ]
     },
-    "1m8kh81": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=28"
-          }
-        }
-      ]
-    },
-    "1klw40a": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=27"
-          }
-        }
-      ]
-    },
-    "0loo58e": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=30"
-          }
-        }
-      ]
-    },
-    "1aa5cr0": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=29"
-          }
-        }
-      ]
-    },
-    "1cgc83v": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=31"
-          }
-        }
-      ]
-    },
-    "0i4db38": {
-      "title": "select pets",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=?",
-          "alternate": {
-            "label": "",
-            "text": "SELECT p1_0.owner_id, p1_0.id, p1_0.birth_date, p1_0.name, t1_0.id, t1_0.name\nFROM pets p1_0\nLEFT JOIN types t1_0\nON t1_0.id=p1_0.type_id\nWHERE p1_0.owner_id=32"
-          }
-        }
-      ]
-    },
-    "06vflj1": {
+    "0ke7864": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": \"0018474461990\",\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600424916\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600404126\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790602734636\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ștefan\",\n    \"lastName\": \"Mureșan\",\n    \"address\": \"Mariahilfer Straße 12\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0043152634418\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Ștefan\",\n            \"ownerLastName\": \"Mureșan\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Łukasz\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"ul. Floriańska 14\",\n    \"city\": \"Kraków\",\n    \"telephone\": \"0048124221357\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Perdita\",\n        \"birthDate\": \"2018-03-07\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 7,\n        \"ownerId\": 5,\n        \"visits\": []\n      },\n      {\n        \"name\": \"Pongo\",\n        \"birthDate\": \"2018-04-17\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 6,\n        \"ownerId\": 5,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Roger\",\n    \"lastName\": \"Radcliff\",\n    \"address\": \"27 Outer Circle\",\n    \"city\": \"London\",\n    \"telephone\": \"0442074860707\",\n    \"id\": 6,\n    \"pets\": [\n      {\n        \"name\": \"Reksio\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 5,\n        \"ownerId\": 6,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Newt\",\n    \"lastName\": \"Scamander\",\n    \"address\": \"Diagon Alley\",\n    \"city\": \"London\",\n    \"telephone\": \"0442079460001\",\n    \"id\": 7,\n    \"pets\": [\n      {\n        \"name\": \"Pickett\",\n        \"birthDate\": \"2020-11-30\",\n        \"type\": {\n          \"name\": \"lizard\",\n          \"id\": 3\n        },\n        \"id\": 8,\n        \"ownerId\": 7,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Alice\",\n    \"lastName\": \"Liddell\",\n    \"address\": \"Christ Church\",\n    \"city\": \"Oxford\",\n    \"telephone\": \"0441865276150\",\n    \"id\": 8,\n    \"pets\": [\n      {\n        \"name\": \"Cheshire\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 10,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 2,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2023-06-04\",\n            \"description\": \"neutered\",\n            \"id\": 3,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Dinah\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 9,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 1,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2022-09-04\",\n            \"description\": \"spayed\",\n            \"id\": 4,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
-        }
-      ]
-    },
-    "00kbib9": {
-      "title": "Backend → Browser: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "[\n  {\n    \"firstName\": \"Kevin\",\n    \"lastName\": \"McCallister\",\n    \"address\": \"671 Lincoln Boulevard\",\n    \"city\": \"Winnetka\",\n    \"telephone\": \"0018474461990\",\n    \"id\": 1,\n    \"pets\": [\n      {\n        \"name\": \"Axel\",\n        \"birthDate\": \"2018-12-24\",\n        \"type\": {\n          \"name\": \"hamster\",\n          \"id\": 6\n        },\n        \"id\": 1,\n        \"ownerId\": 1,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600424916\",\n            \"id\": 33,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790602734636\",\n            \"id\": 34,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          },\n          {\n            \"date\": \"2026-05-12\",\n            \"description\": \"Annual check-up 1790600404126\",\n            \"id\": 32,\n            \"petId\": 1,\n            \"petName\": \"Axel\",\n            \"ownerId\": 1,\n            \"ownerFirstName\": \"Kevin\",\n            \"ownerLastName\": \"McCallister\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Harry\",\n    \"lastName\": \"Potter\",\n    \"address\": \"4 Privet Drive\",\n    \"city\": \"Little Whinging\",\n    \"telephone\": \"0119084455\",\n    \"id\": 2,\n    \"pets\": [\n      {\n        \"name\": \"Hedwig\",\n        \"birthDate\": \"2018-08-06\",\n        \"type\": {\n          \"name\": \"bird\",\n          \"id\": 5\n        },\n        \"id\": 2,\n        \"ownerId\": 2,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Erwin\",\n    \"lastName\": \"Schroedinger\",\n    \"address\": \"Boltzmanngasse 5\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0131914920\",\n    \"id\": 3,\n    \"pets\": [\n      {\n        \"name\": \"Milton\",\n        \"birthDate\": \"2020-09-07\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 3,\n        \"ownerId\": 3,\n        \"visits\": [\n          {\n            \"date\": \"2026-05-03\",\n            \"description\": \"annual general checkup\",\n            \"id\": 25,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-08-21\",\n            \"description\": \"wave function collapsed during auscultation; patient definitively purring\",\n            \"id\": 27,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          },\n          {\n            \"date\": \"2025-06-12\",\n            \"description\": \"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\n            \"id\": 26,\n            \"petId\": 3,\n            \"petName\": \"Milton\",\n            \"ownerId\": 3,\n            \"ownerFirstName\": \"Erwin\",\n            \"ownerLastName\": \"Schroedinger\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Ștefan\",\n    \"lastName\": \"Mureșan\",\n    \"address\": \"Mariahilfer Straße 12\",\n    \"city\": \"Vienna\",\n    \"telephone\": \"0043152634418\",\n    \"id\": 4,\n    \"pets\": [\n      {\n        \"name\": \"Basilisk\",\n        \"birthDate\": \"2022-10-05\",\n        \"type\": {\n          \"name\": \"snake\",\n          \"id\": 4\n        },\n        \"id\": 25,\n        \"ownerId\": 4,\n        \"visits\": [\n          {\n            \"date\": \"2026-02-14\",\n            \"description\": \"habitat check\",\n            \"id\": 15,\n            \"petId\": 25,\n            \"petName\": \"Basilisk\",\n            \"ownerId\": 4,\n            \"ownerFirstName\": \"Ștefan\",\n            \"ownerLastName\": \"Mureșan\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Łukasz\",\n    \"lastName\": \"Śliwiński\",\n    \"address\": \"ul. Floriańska 14\",\n    \"city\": \"Kraków\",\n    \"telephone\": \"0048124221357\",\n    \"id\": 5,\n    \"pets\": [\n      {\n        \"name\": \"Perdita\",\n        \"birthDate\": \"2018-03-07\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 7,\n        \"ownerId\": 5,\n        \"visits\": []\n      },\n      {\n        \"name\": \"Pongo\",\n        \"birthDate\": \"2018-04-17\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 6,\n        \"ownerId\": 5,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Roger\",\n    \"lastName\": \"Radcliff\",\n    \"address\": \"27 Outer Circle\",\n    \"city\": \"London\",\n    \"telephone\": \"0442074860707\",\n    \"id\": 6,\n    \"pets\": [\n      {\n        \"name\": \"Reksio\",\n        \"birthDate\": \"2019-08-06\",\n        \"type\": {\n          \"name\": \"dog\",\n          \"id\": 2\n        },\n        \"id\": 5,\n        \"ownerId\": 6,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Newt\",\n    \"lastName\": \"Scamander\",\n    \"address\": \"Diagon Alley\",\n    \"city\": \"London\",\n    \"telephone\": \"0442079460001\",\n    \"id\": 7,\n    \"pets\": [\n      {\n        \"name\": \"Pickett\",\n        \"birthDate\": \"2020-11-30\",\n        \"type\": {\n          \"name\": \"lizard\",\n          \"id\": 3\n        },\n        \"id\": 8,\n        \"ownerId\": 7,\n        \"visits\": []\n      }\n    ]\n  },\n  {\n    \"firstName\": \"Alice\",\n    \"lastName\": \"Liddell\",\n    \"address\": \"Christ Church\",\n    \"city\": \"Oxford\",\n    \"telephone\": \"0441865276150\",\n    \"id\": 8,\n    \"pets\": [\n      {\n        \"name\": \"Cheshire\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 10,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 2,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2023-06-04\",\n            \"description\": \"neutered\",\n            \"id\": 3,\n            \"petId\": 10,\n            \"petName\": \"Cheshire\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      },\n      {\n        \"name\": \"Dinah\",\n        \"birthDate\": \"2019-09-04\",\n        \"type\": {\n          \"name\": \"cat\",\n          \"id\": 1\n        },\n        \"id\": 9,\n        \"ownerId\": 8,\n        \"visits\": [\n          {\n            \"date\": \"2024-03-04\",\n            \"description\": \"rabies shot\",\n            \"id\": 1,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          },\n          {\n            \"date\": \"2022-09-04\",\n            \"description\": \"spayed\",\n            \"id\": 4,\n            \"petId\": 9,\n            \"petName\": \"Dinah\",\n            \"ownerId\": 8,\n            \"ownerFirstName\": \"Alice\",\n            \"ownerLastName\": \"Liddell\"\n          }\n        ]\n      }\n    ]\n  }\n]\n… clipped by the browser at its 4 KB cap"
+          "text": "[{\"firstName\":\"Kevin\",\"lastName\":\"McCallister\",\"address\":\"671 Lincoln Boulevard\",\"city\":\"Winnetka\",\"telephone\":\"8474461990\",\"id\":1,\"pets\":[{\"name\":\"Axel\",\"birthDate\":\"2018-12-24\",\"type\":{\"name\":\"hamster\",\"id\":6},\"id\":1,\"ownerId\":1,\"visits\":[{\"date\":\"2025-12-27\",\"description\":\"ate the Christmas tinsel; kept under observation\",\"id\":1,\"petId\":1,\"petName\":\"Axel\",\"ownerId\":1,\"ownerFirstName\":\"Kevin\",\"ownerLastName\":\"McCallister\"}]}]},{\"firstName\":\"Harry\",\"lastName\":\"Potter\",\"address\":\"4 Privet Drive\",\"city\":\"Little Whinging\",\"telephone\":\"0119084455\",\"id\":2,\"pets\":[{\"name\":\"Hedwig\",\"birthDate\":\"2018-08-06\",\"type\":{\"name\":\"bird\",\"id\":5},\"id\":2,\"ownerId\":2,\"visits\":[]}]},{\"firstName\":\"Erwin\",\"lastName\":\"Schroedinger\",\"address\":\"Boltzmanngasse 5\",\"city\":\"Vienna\",\"telephone\":\"0131914920\",\"id\":3,\"pets\":[{\"name\":\"Milton\",\"birthDate\":\"2020-09-07\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":3,\"ownerId\":3,\"visits\":[{\"date\":\"2026-05-03\",\"description\":\"annual general checkup\",\"id\":26,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"2025-08-21\",\"description\":\"wave function collapsed during auscultation; patient definitively purring\",\"id\":28,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"},{\"date\":\"2025-06-12\",\"description\":\"patient arrived in sealed box; simultaneously alive and dead — diagnosis deferred until observation\",\"id\":27,\"petId\":3,\"petName\":\"Milton\",\"ownerId\":3,\"ownerFirstName\":\"Erwin\",\"ownerLastName\":\"Schroedinger\"}]}]},{\"firstName\":\"Ștefan\",\"lastName\":\"Mureșan\",\"address\":\"12 Boltzmanngasse\",\"city\":\"Vienna\",\"telephone\":\"(0043)152634418\",\"id\":4,\"pets\":[{\"name\":\"Basilisk\",\"birthDate\":\"2022-10-05\",\"type\":{\"name\":\"snake\",\"id\":4},\"id\":25,\"ownerId\":4,\"visits\":[{\"date\":\"2026-02-14\",\"description\":\"habitat check\",\"id\":16,\"petId\":25,\"petName\":\"Basilisk\",\"ownerId\":4,\"ownerFirstName\":\"Ștefan\",\"ownerLastName\":\"Mureșan\"}]}]},{\"firstName\":\"Łukasz\",\"lastName\":\"Śliwiński\",\"address\":\"ul. Floriańska 14\",\"city\":\"Kraków\",\"telephone\":\"+48124221357\",\"id\":5,\"pets\":[{\"name\":\"Perdita\",\"birthDate\":\"2018-03-07\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":7,\"ownerId\":5,\"visits\":[]},{\"name\":\"Pongo\",\"birthDate\":\"2018-04-17\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":6,\"ownerId\":5,\"visits\":[]}]},{\"firstName\":\"Juan Carlos\",\"lastName\":\"Martín García Lorca\",\"address\":\"Calle de Alcalá 42\",\"city\":\"Madrid\",\"telephone\":\"0034915312233\",\"id\":6,\"pets\":[{\"name\":\"Michi\",\"birthDate\":\"2021-04-23\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":33,\"ownerId\":6,\"visits\":[]},{\"name\":\"Reksio\",\"birthDate\":\"2019-08-06\",\"type\":{\"name\":\"dog\",\"id\":2},\"id\":5,\"ownerId\":6,\"visits\":[]}]},{\"firstName\":\"Newt\",\"lastName\":\"Scamander\",\"address\":\"Diagon Alley\",\"city\":\"London\",\"telephone\":\"(0044)2079460001\",\"id\":7,\"pets\":[{\"name\":\"Pickett\",\"birthDate\":\"2020-11-30\",\"type\":{\"name\":\"lizard\",\"id\":3},\"id\":8,\"ownerId\":7,\"visits\":[]}]},{\"firstName\":\"Alice\",\"lastName\":\"Liddell\",\"address\":\"Christ Church\",\"city\":\"Oxford\",\"telephone\":\"+441865276150\",\"id\":8,\"pets\":[{\"name\":\"Cheshire\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":10,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":3,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2023-06-04\",\"description\":\"neutered\",\"id\":4,\"petId\":10,\"petName\":\"Cheshire\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]},{\"name\":\"Dinah\",\"birthDate\":\"2019-09-04\",\"type\":{\"name\":\"cat\",\"id\":1},\"id\":9,\"ownerId\":8,\"visits\":[{\"date\":\"2024-03-04\",\"description\":\"rabies shot\",\"id\":2,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"},{\"date\":\"2022-09-04\",\"description\":\"spayed\",\"id\":5,\"petId\":9,\"petName\":\"Dinah\",\"ownerId\":8,\"ownerFirstName\":\"Alice\",\"ownerLastName\":\"Liddell\"}]}]},{\"firstName\":\"Henry\",\"lastName\":\"Baskerville\",\"address\":\"Baskerville Hall\",\"city\":\"Dartmoor\",\"telephone\":\"(0044)1626832093\",\"id\":9,\"pets\":[{\"name\":\"Baskerville\",\"birthDate\":\"2017-02-24\",\"type\":{\"name\":\"…"
         }
       ]
     }
