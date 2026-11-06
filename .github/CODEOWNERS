@@ -7,26 +7,26 @@
 #   that run them, agent settings, this file, or the dependency surface those guardrails police)
 
 # API Contracts
-/openapi.yaml                    @victorrentea/tech-leads
+/openapi.yaml                                       @victorrentea/tech-leads
 
 # Persistence
-/petclinic-backend/docs/generated/DB.sql @victorrentea/tech-leads
+/petclinic-backend/docs/generated/DB.sql            @victorrentea/tech-leads
 /petclinic-backend/src/main/resources/db/migration/ @victorrentea/tech-leads
 
 # Domain Model
-/petclinic-backend/docs/generated/DomainModel.puml @victorrentea/tech-leads
+/petclinic-backend/docs/generated/DomainModel.puml  @victorrentea/tech-leads
 
 # Logical Architecture
-/petclinic-backend/docs/packages.puml @victorrentea/tech-leads
-/petclinic-backend/docs/c4model.c1+c2.dsl    @victorrentea/tech-leads
-/petclinic-backend/docs/c4model.c3.dsl @victorrentea/tech-leads
+/petclinic-backend/docs/packages.puml       @victorrentea/tech-leads
+/petclinic-backend/docs/c4model.c1+c2.dsl   @victorrentea/tech-leads
+/petclinic-backend/docs/c4model.c3.dsl      @victorrentea/tech-leads
 
 # GIT + Agent Settings (the guardrail system itself)
-/.github/CODEOWNERS              @victorrentea/elders
-/.claude/settings.json           @victorrentea/elders
-/.github/workflows/*             @victorrentea/elders
-/.github/githooks/*             @victorrentea/elders
-/petclinic-backend/src/test/java/victor/training/petclinic/guardrail/** @victorrentea/elders
+/.github/CODEOWNERS      @victorrentea/elders
+/.claude/settings.json   @victorrentea/elders
+/.github/workflows/*     @victorrentea/elders
+/.github/githooks/*      @victorrentea/elders
+**/guardrail/**          @victorrentea/elders
 
 # Dependencies / SBOM (the surface the guardrail dep-drift check polices)
 **/pom.xml      @victorrentea/elders
