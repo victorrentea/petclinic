@@ -135,6 +135,27 @@ the SVG. Clicking that arrow in `review/review.html` opens a panel beside it —
 
 State is per arrow, not a switch on the page: one arrow open says nothing about the next.
 
+**A browser request links to the line that sent it, in that run.** The same endpoint is
+called from several places (`GET /api/owners/{ownerId}` comes from `owner-detail.component.ts:22`
+and from `visit-add.component.ts:47` in one test), so no scan of the source can say which; the
+request itself does. No application code changes for it:
+
+1. `src/support/call-sites.ts` wraps `XMLHttpRequest` and `fetch` from `page.addInitScript`,
+   before the app loads, so zone.js and OTel wrap on top of it: by the time a request reaches
+   it OTel has set its `traceparent`, and `new Error().stack` still has the whole way down.
+2. At the end of the test each stack goes through the source maps served beside the bundles
+   (`hidden` only drops the `sourceMappingURL` comment; nginx still serves `main.<hash>.js.map`)
+   into `test-results/call-sites/`. `Error.stackTraceLimit` is lifted: the app frame sits
+   about 48 frames down, and the default keeps 10.
+3. `src/genseq/call-site.ts` joins them on the browser's CLIENT span (`traceparent` is its id)
+   and stamps `genseq.call-site` on it, so `trace-spans.json` replays with the links.
+
+The arrow links to the first application frame, normally the component's `.subscribe(`:
+`http.get` is a cold Observable, so the service method has returned and is not on the stack. A
+service above a component yields to the component; the other frames go in the tooltip. The
+line is confirmed against the checkout. No stack, no map or a line that moved means no link on
+that arrow, never a guess. A body keeps its `⊕` as a second link beside the words.
+
 Two files come out of a run, and both belong to the diagram:
 
 | | |

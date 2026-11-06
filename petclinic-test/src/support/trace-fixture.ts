@@ -5,6 +5,7 @@ import {flushBrowserSpans} from './otel-flush';
 import {isTagged, shouldGenerateSequence} from '../genseq/sequence-tag';
 import {startTestCoverage, stopTestCoverage} from './coverage';
 import {DbFixture, resetDatabaseTo} from './db-fixture';
+import {recordCallSites, saveCallSites} from './call-sites';
 
 // The Playwright counterpart of src/glue/world.ts: it honours the very same
 // @generate_sequence opt-in, only read from Playwright's test tags instead of
@@ -13,6 +14,7 @@ import {DbFixture, resetDatabaseTo} from './db-fixture';
 // window, so no .puml is produced for it.
 
 const WINDOWS_DIR = path.join(__dirname, '..', '..', 'test-results', 'trace-windows');
+const CALL_SITES_DIR = path.join(__dirname, '..', '..', 'test-results', 'call-sites');
 
 // Pads the recorded window so the BatchSpanProcessor's async export (and Tempo
 // ingestion lag) still falls inside the search range.
@@ -57,13 +59,18 @@ export const test = base.extend<{dbFixture: DbFixture; database: void}>({
       (globalThis as any).__E2E_TEST_NAME__ = name;
     }, testInfo.title);
 
+    // Which line of the frontend sent each request (support/call-sites.ts).
+    const callSites = await recordCallSites(page);
+    const source = path.relative(path.join(__dirname, '..', '..'), testInfo.file);
+
     const startMs = Date.now() - PRE_PAD_MS;
     await use(page);
     await harvest();
     await flushBrowserSpans(page);
+    await saveCallSites(CALL_SITES_DIR, {title: testInfo.title, source}, callSites);
     appendWindow(WINDOWS_DIR, {
       title: testInfo.title,
-      source: path.relative(path.join(__dirname, '..', '..'), testInfo.file),
+      source,
       startMs,
       endMs: Date.now() + POST_PAD_MS,
       // Named by GENSEQ_SELECT, untagged: the diagram's footer must not claim a tag.

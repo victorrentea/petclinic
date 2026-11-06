@@ -756,6 +756,57 @@ test('a crossing arrow with nothing to reveal links to the method it was opened 
     + '{Click to open Sender.visitBooked} notify-visit-booked \u2197]]');
 });
 
+// ── A browser request links to the line that sent it ─────────────────────────────
+// The link comes from the request's own stack, so it hangs off the browser's CLIENT span
+// (genseq/call-site.ts) while the arrow is drawn from the SERVER span under it.
+const SENT_FROM = 'src://petclinic-frontend/src/app/a.component.ts:22{Click to open the line that sent this request: a.component.ts:22}';
+
+function browserRequest(browserAttributes: Record<string, string>): NormSpan[] {
+  return [
+    {traceId: 'c', spanId: 'c-xhr', parentSpanId: '', name: 'POST', kind: 'CLIENT',
+      serviceName: 'petclinic-frontend', startNano: 1_000 * 1e6, attributes: browserAttributes},
+    {traceId: 'c', spanId: 'c-server', parentSpanId: 'c-xhr', name: 'POST /api/visits',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1_100 * 1e6,
+      attributes: {'http.status_code': '201'}},
+  ];
+}
+
+const located = (span: NormSpan) => (span.spanId === 'c-xhr' ? SENT_FROM : undefined);
+const CALL_SITE = {'genseq.call-site': '[{"file":"src/app/a.component.ts","line":22}]'};
+
+test('a browser request with nothing to reveal links its words to the line that sent it', () => {
+  const puml = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
+    STATIC, new Map(), located).puml;
+  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits \u2197]]`);
+});
+
+test('a body keeps its ⊕, as a link of its own beside the words', () => {
+  const {puml, details} = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest({...CALL_SITE, 'http.request.body': '{"a":1}'})]}],
+    undefined, new Map(), located);
+  const [id] = Object.keys(details.details);
+  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits \u2197]] `
+    + `[[genseq://${id}{Click for this call\u2019s JSON body} \u2295]]`);
+});
+
+test('a request with no known line keeps the arrow it always had', () => {
+  const {puml, details} = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest({'http.request.body': '{"a":1}'})]}],
+    undefined, new Map(), located);
+  const [id] = Object.keys(details.details);
+  expect(puml).toContain(`Browser -> Backend: [[genseq://${id}`
+    + '{Click for this call\u2019s JSON body} POST /api/visits \u2295]]');
+  expect(puml).not.toContain('src://');
+});
+
+test('a call site the checkout could not confirm leaves the arrow plain', () => {
+  const puml = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
+    STATIC, new Map(), () => undefined).puml;
+  expect(puml).toContain('Browser -> Backend: POST /api/visits\n');
+});
+
 // ── A driver call with no statement is not a query ───────────────────────────────
 // The JDBC instrumentation times every call into the driver, so borrowing or validating a
 // pooled connection arrives as a CLIENT span with the whole database semconv on it and
