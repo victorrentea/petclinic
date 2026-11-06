@@ -149,6 +149,26 @@ diacritics, where it used to be a case-sensitive prefix. See VOLUMETRY.md for th
 - **Tests**: `owner-search.feature` pins today's case-sensitive search and an "every owner is
   listed" scenario, so both change; so do the backend tests and Playwright helpers that read the list.
 
+## Measured at 100,000 Owners
+
+Task 7.2, on generated rows in a throwaway schema, `EXPLAIN ANALYZE` with literal values:
+
+| Query | Time | Plan |
+| --- | --- | --- |
+| Default page | 0.04 ms | name index |
+| Name descending | 0.04 ms | name index, backward |
+| City ascending | 0.03 ms | city index |
+| City descending | 0.03 ms | city index, backward |
+| Last page (`OFFSET 99990`) | 16 ms | name index |
+| Search `a`, 25% of owners | 0.2 ms | name index, filtered |
+| Search `potter1`, a rarer prefix | 13 ms | name index, filtered |
+| Count all | 3 ms | sequential scan |
+| Count search `a` | 12 ms | search index |
+
+The planner uses the search index for counts, and for page queries prefers walking the name index
+with a filter, because `LIMIT 10` lets it stop early. A search matching very few owners is the case
+to watch, as that walk is the longest.
+
 ## Migration Plan
 
 1. `V4__owner_listing.sql`: extension, function, collation, indexes. Changing a collation rebuilds

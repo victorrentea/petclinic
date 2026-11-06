@@ -7,3 +7,10 @@ export interface OwnerPage {
   number: number;
   size: number;
 }
+
+export interface OwnerQuery {
+  page?: number;
+  size?: number;
+  sort?: string;
+  lastName?: string;
+}

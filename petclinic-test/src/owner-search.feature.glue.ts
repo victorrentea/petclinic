@@ -16,6 +16,20 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
 
+async function everyOwnerName(): Promise<string[]> {
+  const names: string[] = [];
+  let page = 0;
+  let totalPages = 1;
+  while (page < totalPages) {
+    const params = {page, size: 20};
+    const {data} = await axios.get(`${API_BASE}/owners`, {params, timeout: 10_000});
+    names.push(...data.content.map(fullName));
+    totalPages = data.totalPages;
+    page++;
+  }
+  return names;
+}
+
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
@@ -31,12 +45,11 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const names = await everyOwnerName();
+  if (names.length === 0) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  const names: string[] = data.map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
   this.allOwnerNames = names;
 });
@@ -55,6 +68,9 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
+// The grid shows one page, so "listed" means counted by the paginator and starting at the first.
 Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+  const paginator = this.page.locator('.mat-mdc-paginator-range-label');
+  await expect(paginator).toContainText(`of ${this.requireAllOwnerNames().length}`);
+  await expect(this.page.locator('#ownersTable td.ownerFullName')).toHaveCount(10);
 });
