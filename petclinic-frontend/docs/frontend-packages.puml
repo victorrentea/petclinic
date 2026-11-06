@@ -1,8 +1,6 @@
 @startuml
 
 title Frontend Logical Architecture
-caption All folders and their imports are tested against the code by scripts/packages-arch.test.mjs
-footer petclinic-frontend/docs/frontend-packages.puml
 
 skinparam shadowing false
 ' the review page themes this colour for dark mode (--dgm-link)
