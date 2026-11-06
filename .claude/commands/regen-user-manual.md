@@ -1,10 +1,10 @@
 ---
-description: Regenerate user-manual/manual.md from scratch by crawling the running PetClinic UI in a browser
+description: Regenerate docs/user-manual/manual.md from scratch by crawling the running PetClinic UI in a browser
 ---
 
 # Regenerate the user manual
 
-You are regenerating the end-user manual for the PetClinic application from scratch. Output: `user-manual/manual.md` plus screenshots under `user-manual/screenshots/`.
+You are regenerating the end-user manual for the PetClinic application from scratch. Output: `docs/user-manual/manual.md` plus screenshots under `docs/user-manual/screenshots/`.
 
 This is a full rewrite. Do **not** read the previous `manual.md` and do **not** diff against it — the template is the single source of truth for structure, so just produce the new manual. The only thing you reuse from the existing folder is the `screenshots/` directory, which you overwrite as you recapture.
 
@@ -41,7 +41,7 @@ If the discovered route list looks suspiciously short (fewer than 5 features), f
 For each feature area in route order, walk the happy path: list → detail → create → edit. Aim for 3–5 screenshots per feature, ~30–50 total.
 
 If the `playwright` MCP tools are not available in the session, drive the browser through the
-`browser-cli` skill instead and write the screenshots straight to `user-manual/screenshots/` —
+`browser-cli` skill instead and write the screenshots straight to `docs/user-manual/screenshots/` —
 the output-dir constraint below is the MCP's, not Playwright's.
 
 Use the `playwright` MCP. Call `mcp__playwright__browser_resize` **once** with
@@ -65,15 +65,15 @@ Naming: lowercase, hyphenated, descriptive of the state (`owners-list.png`, `own
 so `filename` is a bare name, not a path. Once the crawl is done, move them across:
 
 ```bash
-mkdir -p user-manual/screenshots
-mv petclinic-test/.playwright-mcp/*.png user-manual/screenshots/
+mkdir -p docs/user-manual/screenshots
+mv petclinic-test/.playwright-mcp/*.png docs/user-manual/screenshots/
 ```
 
 If you create new owners/pets/visits while crawling for screenshots, that test data persists in the running database. That is acceptable — the manual is a screenshot artifact, not a state-restoring test.
 
 ## Step 4 — Write `manual.md`
 
-Write `user-manual/manual.md` from scratch, following the template exactly.
+Write `docs/user-manual/manual.md` from scratch, following the template exactly.
 
 Top of `manual.md` must contain:
 
@@ -87,10 +87,10 @@ Tone: instructional second-person ("Click *Add Owner* to register a new owner...
 
 ## Step 5 — Clean up orphans
 
-Delete any file in `user-manual/screenshots/` that is not referenced from the regenerated `manual.md`. Use:
+Delete any file in `docs/user-manual/screenshots/` that is not referenced from the regenerated `manual.md`. Use:
 
 ```bash
-git status user-manual/screenshots/
+git status docs/user-manual/screenshots/
 ```
 
 to confirm only intended additions/deletions are present.

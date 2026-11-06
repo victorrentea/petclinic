@@ -80,7 +80,7 @@ The tasks below have the pattern: **<description>** – <prompt to paste to agen
 - **⭐BE+FE feature** – Improve the owner search ([Issue #24](https://github.com/victorrentea/petclinic/issues/24)), then optionally review the code
 - **Fix BE+FE bug** – Fix missing visit date validation ([Issue #40](https://github.com/victorrentea/petclinic/issues/40)): reproduce it in a browser, write a failing Playwright e2e test, then fix the bug so the test passes
 - **Fix UI layout** – align the labels and values in the [owner details screen](http://localhost:4200/petclinic/owners/1) via Playwright screenshots
-- **Regenerate the [user manual](user-manual/manual.md)** — `/regen-user-manual`
+- **Regenerate the [user manual](docs/user-manual/manual.md)** — `/regen-user-manual`
 - **Latency study** — break down the time budget of a "search owners" click from recorded Grafana traces - where is most time lost?
 - **SQL** — export an Excel pie chart of the pet types querying `postgres-db`, and open it when ready.
 - **Query tuning** — optimize the "search owners by last name" flow.
@@ -94,15 +94,16 @@ Some tasks above require tools from the project's `.mcp.json`, which should auto
 Start YOUR agent in YOUR🫵 work project and tell it:
 
 "Help me grant you access to:..."
-- **Issues** — fetch the issues assigned to me on this git repo, put a test comment on the last one
-- **CI** — find out how much time the tests took in the last CI run 
-- **Logs** — get the last errors from the dev environment log
-- **Browser** – reproduce a recent FE bug in a browser
-- **DB** - which database tables have the most rows in my dev DB?
-- **Metrics** - What is the endpoint with the highest latency in Grafana?
-- **Token Saving** - Configure me headroom or at least RTK to save tokens.
+- **Issues** — proof: fetch the issues assigned to me on this git repo, put a test comment on the last one
+- **Confluence** — proof: get all pages I've edited/commented / find pages about sick leave procedure
+- **CI** — proof: find out how much time the tests took in the last CI run 
+- **Logs** — proof: get the last errors from the dev/uat environment log
+- **Browser** – proof: reproduce in a browser the latest UI bug in my app / explore my app at localhost:... and find 3 critical flows to test
+- **DB** - proof: which tables have the most rows in my dev DB?
+- **Metrics** - proof: what is the endpoint with the highest latency in Grafana?
 
-Patiently guide the agent through this setup, then tell it: Turn the lessons you learned into a reusable skill, ideally scripting as much work you can. 
+Patiently help the agent through this setup - you might need to provide it with an API key.
+When done, prompt it: Turn the lessons you learned into a reusable skill, scripting as much work you can. 
 
 ### Tools for Agentic Lifestyle
 - [WisprFlow](https://wisprflow.ai) to dictate.
