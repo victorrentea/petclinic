@@ -77,6 +77,8 @@ checks and what each of them asserts are described in [GUARDRAILS.md](GUARDRAILS
 Before changing how the layers, the database or the notification call work, read the decisions
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
+Before designing a list, query or endpoint, read the expected data volumes in [VOLUMETRY.md](VOLUMETRY.md).
+
 ### Frontend UX design system
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
@@ -128,5 +130,6 @@ Core entities and relationships:
 - Don't leave behind CYA comments when deleting or moving stuff
 - Always run tests after any complex refactoring
 - Be brief
+- Before discussing any sort, filter or search, query the actual data first (`.claude/skills/db-cli`)
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
