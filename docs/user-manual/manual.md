@@ -91,7 +91,7 @@ The Visits area gives you a chronological view of every visit across the clinic.
 
 ![](screenshots/visits-list.png)
 
-The list is sorted with the most recent visit first. Each row shows the visit date, the description of what was done, the pet's name, and a link to the owner's record. Click an owner name to jump to their detail page; from there you can see the visit in the context of that pet's history.
+The list opens on the ten most recent visits, latest first. Each row shows the visit date, the description of what was done, the pet's name, and a link to the owner's record. Click any column header to sort by it, and click it again to reverse the order. Below the table, *Items per page* shows 5, 10, or 20 visits at a time, and the arrows move between pages. The page, its size, and the sort stay in the address bar, so *Back*, a refresh, or a bookmarked link bring you to the same view. Click an owner name to jump to their detail page; from there you can see the visit in the context of that pet's history.
 
 ### Adding a visit
 

@@ -1,1 +1,20 @@
-/* intentionally empty - styling inherits from Bootstrap classes */
+/* Fixed widths: auto layout would size the columns to each page's rows, so the headers would jump on every sort. */
+#visitsTable table {
+  table-layout: fixed;
+  margin-bottom: 0;
+}
+
+#visitsTable th:nth-child(1) { width: 15%; }
+#visitsTable th:nth-child(2) { width: 40%; }
+#visitsTable th:nth-child(3) { width: 20%; }
+#visitsTable th:nth-child(4) { width: 25%; }
+
+#visitsTable td {
+  overflow-wrap: anywhere;
+}
+
+/* The paginator reads as the table's footer: no gap, no white panel */
+#visitsTable mat-paginator {
+  border-top: 1px solid #ddd;
+  background: transparent;
+}
