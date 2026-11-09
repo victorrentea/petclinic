@@ -58,6 +58,20 @@ test('sorts by City, then reverses on a second click', async ({page}) => {
   await expectListed(page, 'page=0&size=10&sort=city,desc');
 });
 
+test('columns stay in place when the sort brings other owners on screen', async ({page}) => {
+  const columnEdges = () => page.locator('#ownersTable th').evaluateAll(
+    headers => headers.map(th => Math.round(th.getBoundingClientRect().left)));
+  await openOwners(page, '?size=5&sort=name,asc');
+  await expectListed(page, 'page=0&size=5&sort=name,asc');
+  const edges = await columnEdges();
+
+  for (const sort of ['name,desc', 'city,asc', 'city,desc']) {
+    await openOwners(page, `?size=5&sort=${sort}`);
+    await expectListed(page, `page=0&size=5&sort=${sort}`);
+    expect(await columnEdges(), `columns under sort=${sort}`).toEqual(edges);
+  }
+});
+
 for (const column of ['Address', 'Telephone', 'Pets']) {
   test(`${column} is not sortable`, async ({page}) => {
     await openOwners(page);

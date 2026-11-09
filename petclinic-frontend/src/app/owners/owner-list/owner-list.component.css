@@ -1,3 +1,15 @@
+/* Fixed widths: under auto layout each page's content resizes the columns, so they jump on sort. */
+#ownersTable table {
+  table-layout: fixed;
+  overflow-wrap: anywhere;
+}
+
+#ownersTable th:nth-child(1) { width: 26%; }
+#ownersTable th:nth-child(2) { width: 28%; }
+#ownersTable th:nth-child(3) { width: 15%; }
+#ownersTable th:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5) { width: 13%; }
+
 #ownersByLastName
 {
 display:none;
