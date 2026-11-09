@@ -43,8 +43,8 @@
           <td>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
+        <tr *ngFor="let pet of owner.pets" class="owner-pet">
+          <span role="img" [attr.aria-label]="pet.type">{{ petEmoji(pet.type) }}</span> {{ pet.name }}
         </tr>
         </td>
         </tr>

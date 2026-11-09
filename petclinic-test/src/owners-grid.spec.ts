@@ -76,6 +76,13 @@ test('an owner with several pets has the other cells centered vertically', async
   await expect(namesListed(page).first()).toHaveCSS('vertical-align', 'middle');
 });
 
+test('each pet shows an emoji of its type before its name', async ({page}) => {
+  await openOwners(page, '?lastName=McCallister');
+
+  await expect(page.locator('#ownersTable').getByRole('img', {name: 'hamster'})).toHaveText('🐹');
+  await expect(page.locator('#ownersTable')).toContainText('🐹 Axel');
+});
+
 test('columns stay in place when the sort brings other owners on screen', async ({page}) => {
   const columnEdges = () => page.locator('#ownersTable th').evaluateAll(
     headers => headers.map(th => Math.round(th.getBoundingClientRect().left)));

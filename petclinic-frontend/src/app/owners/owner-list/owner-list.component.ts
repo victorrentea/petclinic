@@ -8,6 +8,9 @@ import {Subscription} from 'rxjs';
 import {switchMap, tap} from 'rxjs/operators';
 
 const DEFAULT_SORT = 'name,asc';
+const PET_EMOJI: Record<string, string> = {
+  bird: '🐦', cat: '🐱', dog: '🐶', hamster: '🐹', horse: '🐴', lizard: '🦎', snake: '🐍'
+};
 
 function optionalNumber(param?: string): number | undefined {
   return param === undefined ? undefined : Number(param);
@@ -83,6 +86,10 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     } else {
       this.page = page;
     }
+  }
+
+  petEmoji(typeName: string): string {
+    return PET_EMOJI[typeName] ?? '🐾';
   }
 
   private navigate(queryParams: Params, replaceUrl = false) {

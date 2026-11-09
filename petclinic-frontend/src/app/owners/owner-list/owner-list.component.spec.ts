@@ -105,6 +105,24 @@ describe('OwnerListComponent', () => {
     await settle();
   }
 
+  describe('the Pets column', () => {
+    const ownerWithPetOf = (type: string): OwnerRow => ({...testOwner, pets: [{name: 'Leo', type}]});
+
+    async function petCellFor(typeName: string): Promise<string> {
+      getOwnersSpy.and.returnValue(of(pageOf(ownerWithPetOf(typeName))));
+      await open('/owners');
+      return page().querySelector<HTMLElement>('.owner-pet').textContent.trim();
+    }
+
+    it('puts an emoji for the type before the pet name', async () => {
+      expect(await petCellFor('hamster')).toBe('🐹 Leo');
+    });
+
+    it('falls back to paw prints for a pet type added later', async () => {
+      expect(await petCellFor('axolotl')).toBe('🐾 Leo');
+    });
+  });
+
   describe('reading the URL', () => {
     it('leaves the defaults to the backend when the URL holds no params', async () => {
       await open('/owners');
