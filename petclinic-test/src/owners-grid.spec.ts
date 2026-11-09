@@ -58,6 +58,18 @@ test('sorts by City, then reverses on a second click', async ({page}) => {
   await expectListed(page, 'page=0&size=10&sort=city,desc');
 });
 
+test('sortable columns show their arrow without hover: white when active, grey otherwise', async ({page}) => {
+  await openOwners(page);
+  const arrow = (column: string) => page.locator('#ownersTable th').filter({hasText: column})
+    .locator('.mat-sort-header-arrow');
+
+  await expect(arrow('Name')).toHaveCSS('opacity', '1');
+  await expect(arrow('Name')).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await expect(arrow('City')).toHaveCSS('opacity', '1');
+  await expect(arrow('City')).toHaveCSS('color', 'rgb(158, 158, 158)');
+  await expect(arrow('Telephone')).toHaveCount(0);
+});
+
 test('an owner with several pets has the other cells centered vertically', async ({page}) => {
   await openOwners(page);
 
