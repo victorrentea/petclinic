@@ -8,13 +8,13 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
-import { OwnerPage } from './owner-page';
+import { OwnerPage, OwnerRow } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
   let ownerService: OwnerService;
 
-  const expectedOwners: Owner[] = [
+  const expectedOwners: OwnerRow[] = [
     {
       id: 1,
       firstName: 'George',
@@ -111,7 +111,7 @@ describe('OwnerService', () => {
 
   it('search the owner by id', () => {
     ownerService.getOwnerById(1).subscribe((owner) => {
-      expect(owner).toEqual(expectedOwners[0]);
+      expect(owner).toEqual(expectedOwners[0] as Owner);
     });
 
     const req = httpTestingController.expectOne(ownerService.entityUrl + '/1');

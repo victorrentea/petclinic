@@ -11,7 +11,7 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {OwnerService} from '../owner.service';
 import {Owner} from '../owner';
-import {OwnerPage, OwnerQuery} from '../owner-page';
+import {OwnerPage, OwnerQuery, OwnerRow} from '../owner-page';
 import {Observable, of, Subject} from 'rxjs';
 import {RouterTestingHarness, RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
@@ -36,7 +36,7 @@ describe('OwnerListComponent', () => {
   let router: Router;
   let getOwnersSpy: Spy;
 
-  const testOwner: Owner = {
+  const testOwner: OwnerRow = {
     id: 1,
     firstName: 'George',
     lastName: 'Franklin',
@@ -45,7 +45,7 @@ describe('OwnerListComponent', () => {
     telephone: '6085551023',
     pets: []
   };
-  const pageOf = (...content: Owner[]): OwnerPage =>
+  const pageOf = (...content: OwnerRow[]): OwnerPage =>
     ({content, totalElements: 28, totalPages: 3, number: 1, size: 10});
   const noMatch: OwnerPage = {content: [], totalElements: 0, totalPages: 0, number: 0, size: 10};
   const pastTheEnd: OwnerPage = {content: [], totalElements: 28, totalPages: 3, number: 9, size: 10};

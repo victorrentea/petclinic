@@ -98,12 +98,13 @@ already turns into a 400 `ProblemDetail`.
 Blank search calls a plain paged query. Non-blank calls the `search_key` query. A single query with
 `:prefix = '' OR …` was rejected because that `OR` stops the planner from using the search index.
 
-### 8. Loading pets
+### 8. A row DTO for the list
 
-`hibernate.default_batch_fetch_size=20`, no fetch join. A collection fetch join with paging makes
-Hibernate page in memory, which at this volume means loading every owner. `OwnerDto` stays as it is
-even though the grid only needs pet names: batch fetching bounds the cost, and a dedicated row DTO
-would change the frontend `Owner` model too.
+`OwnerRowDto` holds only what the grid displays, with each pet reduced to name and type. Reusing
+`OwnerDto` was rejected in review: its nested visits travelled to the browser unused, and loading
+them cost queries on every page. `hibernate.default_batch_fetch_size=20` loads the pets of a page in
+one query, and no fetch join is used, because a collection fetch join with paging makes Hibernate
+page in memory, which at this volume means loading every owner.
 
 ### 9. The URL is the grid's only state
 
@@ -129,7 +130,6 @@ system wraps form inputs only, so no wrapper is added.
   else simply fails to match, as it does today.
 - [Name sort is by first name while search is by last name] → accepted in the design interview;
   search is the route to an owner by surname.
-- [`OwnerDto` still carries visits] → accepted, see decision 8; bounded at 20 owners per page.
 
 ## Technical Impact
 

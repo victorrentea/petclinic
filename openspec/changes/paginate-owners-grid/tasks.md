@@ -15,6 +15,7 @@
 - [x] 2.3 Set `hibernate.default_batch_fetch_size=20` and verify with a query-count test that a page of 20 owners runs a constant number of queries
 - [x] 2.4 Adapt `BasicAuthenticationConfigTest`, `AddVisitApiTest`, `OwnerSteps` and `OwnerSearchThroughLatencyProxyTest` to the page shape and verify `mvn test` has no new failure; `OwnerSearchThroughLatencyProxyTest` was already red before this change
 - [x] 2.5 Update `ApiExamples.OWNERS`, regenerate `openapi.yaml` and `api-types.ts` through `OpenApiExtractorTest`, and verify the generated files show the new contract
+- [x] 2.6 Replace `OwnerDto` in the page with `OwnerRowDto` and verify that a page holds no visits and runs three queries
 
 ## 3. Search API
 

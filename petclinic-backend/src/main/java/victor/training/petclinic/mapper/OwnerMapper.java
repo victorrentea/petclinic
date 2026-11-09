@@ -6,8 +6,9 @@ import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 import victor.training.petclinic.rest.dto.OwnerPageDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto;
+import victor.training.petclinic.rest.dto.OwnerRowDto.PetRowDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -39,23 +40,20 @@ public class OwnerMapper {
         return owner;
     }
 
+    private OwnerRowDto toOwnerRowDto(Owner owner) {
+        List<PetRowDto> pets = owner.getPets().stream()
+                .map(pet -> new PetRowDto(pet.getName(), pet.getType().getName()))
+                .toList();
+        return new OwnerRowDto(owner.getId(), owner.getFirstName(), owner.getLastName(), owner.getAddress(),
+                owner.getCity(), owner.getTelephone(), pets);
+    }
+
     public OwnerPageDto toOwnerPageDto(Page<Owner> page) {
         return new OwnerPageDto()
-                .setContent(toOwnerDtoCollection(page.getContent()))
+                .setContent(page.getContent().stream().map(this::toOwnerRowDto).toList())
                 .setTotalElements(page.getTotalElements())
                 .setTotalPages(page.getTotalPages())
                 .setNumber(page.getNumber())
                 .setSize(page.getSize());
-    }
-
-    public List<OwnerDto> toOwnerDtoCollection(List<Owner> ownerCollection) {
-        if (ownerCollection == null) {
-            return List.of();
-        }
-        List<OwnerDto> dtos = new ArrayList<>(ownerCollection.size());
-        for (Owner owner : ownerCollection) {
-            dtos.add(toOwnerDto(owner));
-        }
-        return dtos;
     }
 }

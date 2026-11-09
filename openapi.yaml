@@ -240,14 +240,8 @@ paths:
                       city: Madison
                       telephone: "6085551023"
                       pets:
-                      - id: 1
-                        name: Leo
-                        birthDate: 2010-09-07
-                        type:
-                          id: 1
-                          name: cat
-                        ownerId: 1
-                        visits: []
+                      - name: Leo
+                        type: cat
                     totalElements: 2
                     totalPages: 1
                     number: 0
@@ -1716,7 +1710,7 @@ components:
           type: array
           description: The owners on this page.
           items:
-            $ref: "#/components/schemas/OwnerDto"
+            $ref: "#/components/schemas/OwnerRowDto"
         number:
           type: integer
           format: int32
@@ -1737,6 +1731,26 @@ components:
           format: int32
           description: How many pages there are.
           example: 3
+    OwnerRowDto:
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        firstName:
+          type: string
+        id:
+          type: integer
+          format: int32
+        lastName:
+          type: string
+        pets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PetRowDto"
+        telephone:
+          type: string
     PetDto:
       type: object
       properties:
@@ -1798,6 +1812,13 @@ components:
       - birthDate
       - name
       - type
+    PetRowDto:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
     PetTypeDto:
       type: object
       properties:

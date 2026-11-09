@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class OwnerPageDto {
 
     @Schema(description = "The owners on this page.")
-    private List<OwnerDto> content;
+    private List<OwnerRowDto> content;
 
     @Schema(example = "28", description = "How many owners match, across all pages.")
     private long totalElements;
@@ -22,11 +22,11 @@ public class OwnerPageDto {
     @Schema(example = "10", description = "The requested page size.")
     private int size;
 
-    public List<OwnerDto> getContent() {
+    public List<OwnerRowDto> getContent() {
         return content;
     }
 
-    public OwnerPageDto setContent(List<OwnerDto> content) {
+    public OwnerPageDto setContent(List<OwnerRowDto> content) {
         this.content = content;
         return this;
     }

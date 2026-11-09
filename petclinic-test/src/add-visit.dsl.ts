@@ -18,7 +18,8 @@ export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWith
   if (!ownerWithPet) {
     throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  const {data: owner} = await axios.get(`${API_BASE}/owners/${ownerWithPet.id}`, {timeout: 10_000});
+  return {ownerId: owner.id, petId: owner.pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

@@ -145,14 +145,29 @@ class OwnerListingTest {
     @Test
     void aFullPageRunsTheSameNumberOfQueriesAsASmallOne() throws Exception {
         givenNumberedOwners(20);
-        jdbc.update("""
-                INSERT INTO pets (name, birth_date, type_id, owner_id)
-                SELECT 'Rex', DATE '2020-01-01', 1, id FROM owners""");
-        jdbc.update("""
-                INSERT INTO visits (pet_id, visit_date, description)
-                SELECT id, DATE '2024-01-01', 'checkup' FROM pets""");
+        givenEveryOwnerHasAPetWithAVisit();
 
         Assertions.assertThat(queriesFor("?size=20")).isEqualTo(queriesFor("?size=5"));
+    }
+
+    @Test
+    void aRowCarriesOnlyWhatTheGridDisplays() throws Exception {
+        givenOwner("Ada", "Byron", "London");
+        givenEveryOwnerHasAPetWithAVisit();
+
+        list("").andExpect(jsonPath("$.content[0].pets[0].name").value("Rex"))
+                .andExpect(jsonPath("$.content[0].pets[0].type").value("cat"))
+                .andExpect(jsonPath("$.content[0].pets[0].visits").doesNotExist())
+                .andExpect(jsonPath("$.content[0].pets[0].birthDate").doesNotExist())
+                .andExpect(jsonPath("$.content[0].pets[0].id").doesNotExist());
+    }
+
+    @Test
+    void aPageNeverQueriesVisits() throws Exception {
+        givenNumberedOwners(28);
+        givenEveryOwnerHasAPetWithAVisit();
+
+        Assertions.assertThat(queriesFor("?size=20")).as("owners, their count, pets").isEqualTo(3);
     }
 
     @Test
@@ -224,6 +239,15 @@ class OwnerListingTest {
 
         list("?lastName=Potter&size=5&sort=name,desc&page=0")
                 .andExpect(jsonPath("$.content[*].firstName", contains("Harry", "Beatrix")));
+    }
+
+    private void givenEveryOwnerHasAPetWithAVisit() {
+        jdbc.update("""
+                INSERT INTO pets (name, birth_date, type_id, owner_id)
+                SELECT 'Rex', DATE '2020-01-01', 1, id FROM owners""");
+        jdbc.update("""
+                INSERT INTO visits (pet_id, visit_date, description)
+                SELECT id, DATE '2024-01-01', 'checkup' FROM pets""");
     }
 
     private void givenTheSearchableOwners() {

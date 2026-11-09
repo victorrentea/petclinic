@@ -129,7 +129,6 @@ class MapperTest {
         assertThat(petMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(petTypeMapper.toPetTypeDtos(null)).isEmpty();
         assertThat(visitMapper.toVisitsDto(null)).isEmpty();
-        assertThat(ownerMapper.toOwnerDtoCollection(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialtyDtos(null)).isEmpty();
         assertThat(specialtyMapper.toSpecialty((List<SpecialtyDto>) null)).isEmpty();
         assertThat(vetMapper.toVetDtos(null)).isEmpty();
@@ -147,7 +146,6 @@ class MapperTest {
         assertThat(dto.getFirstName()).isEqualTo("Sherlock");
         assertThat(dto.getCity()).isEqualTo("London");
         assertThat(dto.getPets()).extracting(PetDto::getName).containsExactly("Leo");
-        assertThat(ownerMapper.toOwnerDtoCollection(List.of(owner))).hasSize(1);
     }
 
     @Test

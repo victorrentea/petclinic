@@ -34,6 +34,13 @@ The system SHALL accept only 5, 10 and 20 as page size, and SHALL refuse any oth
 - **WHEN** a client requests `page=-1`
 - **THEN** the system answers 400
 
+### Requirement: A page carries only what the grid displays
+The system SHALL answer each owner in a page with name, address, city, telephone and id, plus each pet's name and type, and SHALL NOT include visits or any other pet detail.
+
+#### Scenario: An owner with a visited pet
+- **WHEN** a client lists owners and an owner's pet has visits
+- **THEN** the row holds the pet's name and type, with no visits, birth date or pet id
+
 ### Requirement: A page past the end is empty
 The system SHALL answer a page beyond the last one with empty `content` and correct totals.
 

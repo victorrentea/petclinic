@@ -172,7 +172,7 @@ export interface components {
     };
     OwnerPageDto: {
       /** @description The owners on this page. */
-      content?: components["schemas"]["OwnerDto"][];
+      content?: components["schemas"]["OwnerRowDto"][];
       /**
        * Format: int32
        * @description The number of this page, from 0.
@@ -197,6 +197,16 @@ export interface components {
        * @example 3
        */
       totalPages?: number;
+    };
+    OwnerRowDto: {
+      address?: string;
+      city?: string;
+      firstName?: string;
+      /** Format: int32 */
+      id?: number;
+      lastName?: string;
+      pets?: components["schemas"]["PetRowDto"][];
+      telephone?: string;
     };
     PetDto: {
       /**
@@ -238,6 +248,10 @@ export interface components {
        */
       name: string;
       type: components["schemas"]["PetTypeDto"];
+    };
+    PetRowDto: {
+      name?: string;
+      type?: string;
     };
     PetTypeDto: {
       /**

@@ -1,7 +1,9 @@
-import { Owner } from './owner';
+import { components } from '../generated/api-types';
+
+export type OwnerRow = components['schemas']['OwnerRowDto'];
 
 export interface OwnerPage {
-  content: Owner[];
+  content: OwnerRow[];
   totalElements: number;
   totalPages: number;
   number: number;

@@ -1,7 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OwnerService} from '../owner.service';
-import {Owner} from '../owner';
-import {OwnerPage, OwnerQuery} from '../owner-page';
+import {OwnerPage, OwnerQuery, OwnerRow} from '../owner-page';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {PageEvent} from '@angular/material/paginator';
 import {Sort, SortDirection} from '@angular/material/sort';
@@ -47,7 +46,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     this.load.unsubscribe();
   }
 
-  onSelect(owner: Owner) {
+  onSelect(owner: OwnerRow) {
     void this.router.navigate(['/owners', owner.id]);
   }
 
