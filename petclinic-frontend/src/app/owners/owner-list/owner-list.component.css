@@ -4,6 +4,10 @@
   overflow-wrap: anywhere;
 }
 
+#ownersTable td {
+  vertical-align: middle;
+}
+
 #ownersTable th:nth-child(1) { width: 26%; }
 #ownersTable th:nth-child(2) { width: 28%; }
 #ownersTable th:nth-child(3) { width: 15%; }

@@ -58,6 +58,12 @@ test('sorts by City, then reverses on a second click', async ({page}) => {
   await expectListed(page, 'page=0&size=10&sort=city,desc');
 });
 
+test('an owner with several pets has the other cells centered vertically', async ({page}) => {
+  await openOwners(page);
+
+  await expect(namesListed(page).first()).toHaveCSS('vertical-align', 'middle');
+});
+
 test('columns stay in place when the sort brings other owners on screen', async ({page}) => {
   const columnEdges = () => page.locator('#ownersTable th').evaluateAll(
     headers => headers.map(th => Math.round(th.getBoundingClientRect().left)));
