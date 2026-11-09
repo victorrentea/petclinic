@@ -1,11 +1,10 @@
 ---
 name: java-code-style
-description: PetClinic's Java code style — line and method length limits, injection, @Transactional, REST exception handling, validation, equals/hashCode. Use whenever writing, editing or reviewing Java code in this repo (petclinic-backend, notification-service, petclinic-commons).
+description: PetClinic's Java code style — method length limit, injection, @Transactional, REST exception handling, validation, equals/hashCode. Use whenever writing, editing or reviewing Java code in this repo (petclinic-backend, notification-service, petclinic-commons).
 ---
 
 # Java Code Style
 
-- Keep < 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
