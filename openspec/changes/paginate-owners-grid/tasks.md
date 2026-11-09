@@ -4,9 +4,9 @@
 
 - [x] 1.1 Write a failing test that a Flyway-migrated test database sorts `Ștefan` between `Sam` and `Tom`, and that `search_key` reduces `Mureșan`, `Śliwiński` and `POTTER`; add `V4__owner_listing.sql` with the extension, function and collation; verify the test passes, and if `CREATE EXTENSION` is refused stop and raise design's fallback with Victor
 - [x] 1.2 Add the three indexes from design decision 3 to `V4__owner_listing.sql` and verify `pg_indexes` lists them on a freshly migrated database
-- [ ] 1.3 Push the migration and verify with the `ci-watch` skill that the Linux CI run is green; it travels with the rest, since pre-push checks the working tree and refuses it alone
+- [x] 1.3 Push the migration and verify with the `ci-watch` skill that the Linux CI run is green; it travels with the rest, since pre-push checks the working tree and refuses it alone
 - [x] 1.4 Reset the dev database with `./start-database.sh`, restart the backend, and verify `flyway_schema_history` holds V1-V4 from this branch only
-- [ ] 1.5 Regenerate `petclinic-backend/docs/generated/DB.sql` and `DB.puml` by running the backend tests and verify the drift guardrail and the CI `DB.puml` sync check pass
+- [x] 1.5 Regenerate `petclinic-backend/docs/generated/DB.sql` and `DB.puml` by running the backend tests and verify the drift guardrail and the CI `DB.puml` sync check pass
 
 ## 2. Paged, sorted listing API
 
