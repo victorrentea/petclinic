@@ -2,12 +2,12 @@ import {test, expect} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import {NormSpan, parseTempoTrace, renderDiagram, renderPuml, spansToPuml} from './trace-to-puml';
-import {DiagramOptions} from './options';
+import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions} from './options';
 
 // The diagrams are interactive by default now, so every assertion about a *baked in*
 // label has to say so — which is also the regression test that the static path, the
 // one CI and the committed snapshots depend on, still renders exactly what it did.
-const STATIC: DiagramOptions = {sql: 'statement', httpBodies: false, interactive: false};
+const STATIC: DiagramOptions = {sql: 'statement', httpBodies: false, interactive: false, handler: 'line'};
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -253,7 +253,9 @@ const MARKER = /\[\[genseq:\/\/([a-z0-9-]+)\{[^}]*\} [^\]]*\]\]/;
 
 interface Step {label: string; text: string; alternate?: {label: string; text: string}}
 
-const detailOn = (line: string, details: Record<string, {title: string; steps: Step[]}>) =>
+interface Entry {title: string; steps: Step[]; request?: {url: string}}
+
+const detailOn = (line: string, details: Record<string, Entry>) =>
   details[MARKER.exec(line)![1]];
 
 const lineWith = (puml: string, needle: string) =>
@@ -302,12 +304,14 @@ test('a statement with no bound parameters offers only the statement', () => {
 test('the payloads become markers on the request and the response, not notes', () => {
   const {puml, details} = renderDiagram('add-visit.spec.ts',
     [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'statement', httpBodies: true, interactive: true});
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'});
 
   expect(puml).not.toContain('note over');
 
+  // The request as an HTTP message: its request line, then — after a blank line — the body.
   const request = detailOn(lineWith(puml, 'Browser -> Backend:'), details.details);
-  expect(request.steps[0].label).toBe('request body');
+  expect(request.steps[0].label).toBe('request');
+  expect(request.steps[0].text).toMatch(/^POST \/api\/visits\n\n\{\n/);
   expect(request.steps[0].text).toContain('"description": "annual checkup"');
 
   const response = detailOn(lineWith(puml, 'Backend --> Browser:'), details.details);
@@ -333,7 +337,7 @@ test('a body recorded on a SERVER span reveals on its arrow, not on the calls it
     span('r4', 'r3', 'send-sms', 'INTERNAL', 'mailer', {'genseq.participant': 'SMS gateway'}),
   ];
   const {puml, details} = renderDiagram('add-visit.spec.ts', [{title: 'x', traces: [spans]}],
-    {sql: 'statement', httpBodies: true, interactive: true});
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'});
 
   const request = detailOn(lineWith(puml, 'Backend -> mailer:'), details.details);
   expect(request.steps[0].text).toContain('"petName": "Leo"');
@@ -343,19 +347,23 @@ test('a body recorded on a SERVER span reveals on its arrow, not on the calls it
 // Behind a click a payload costs the picture nothing, so an interactive diagram carries
 // it by default; baked in it is a wall of JSON, so a static one still has to ask.
 // Withholding it by default only meant a reviewer clicked a request arrow and found
-// that it had nothing to say.
-test('payloads are revealable by default, and nothing is when there is nothing to reveal', () => {
+// that it had nothing to say. The request itself opens either way: its URL and headers
+// are no payload (Victor, 10 Nov 2026).
+test('payloads are revealable by default, and a request opens without them', () => {
   const plain = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}]);
   expect(lineWith(plain.puml, 'Browser -> Backend:')).toMatch(MARKER);
+  expect(lineWith(plain.puml, 'Backend --> Browser:')).toMatch(MARKER);
 
   const withheld = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'statement', httpBodies: false, interactive: true});
-  expect(lineWith(withheld.puml, 'Browser -> Backend:')).not.toMatch(MARKER);
+    {sql: 'statement', httpBodies: false, interactive: true, handler: 'line'});
+  const request = detailOn(lineWith(withheld.puml, 'Browser -> Backend:'), withheld.details.details);
+  expect(request.steps).toEqual([{label: 'request', text: 'POST /api/visits'}]);
+  expect(lineWith(withheld.puml, 'Backend --> Browser:')).not.toMatch(MARKER);
 
   const none = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'off', httpBodies: false, interactive: true});
-  expect(none.puml).not.toMatch(MARKER);
-  expect(none.details.details).toEqual({});
+    {sql: 'off', httpBodies: false, interactive: true, handler: 'line'});
+  expect(Object.values(none.details.details).map((e) => e.title))
+    .toEqual(['Browser → Backend: POST /api/visits']);
 });
 
 // The review page renders a *textual* diff of the .puml, so an id that moved with
@@ -372,7 +380,7 @@ test('a marker id follows the arrow content, not its position in the file', () =
 
 test('an interactive diagram tones its link markup down', () => {
   const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'values', httpBodies: true, interactive: true});
+    {sql: 'values', httpBodies: true, interactive: true, handler: 'line'});
   expect(puml).toContain('skinparam hyperlinkUnderline false');
   expect(puml).toContain('skinparam hyperlinkColor');
   // The ⊕ on each revealable arrow is the affordance; a paragraph explaining it is not.
@@ -774,30 +782,33 @@ function browserRequest(browserAttributes: Record<string, string>): NormSpan[] {
 
 const located = (span: NormSpan) => (span.spanId === 'c-xhr' ? SENT_FROM : undefined);
 const CALL_SITE = {'genseq.call-site': '[{"file":"src/app/a.component.ts","line":22}]'};
+const REQUEST = '{Click for the request as it was sent}';
 
-test('a browser request with nothing to reveal links its words to the line that sent it', () => {
+test('a baked-in browser request links its words to the line that sent it', () => {
   const puml = renderDiagram('src/add-visit.spec.ts',
     [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
     STATIC, new Map(), located).puml;
-  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits \u2197]]`);
+  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits ↗]]\n`);
 });
 
-test('a body keeps its ⊕, as a link of its own beside the words', () => {
+// The words open the request on every HTTP arrow now (Victor, 10 Nov 2026); a request whose
+// frontend method is unknown has no call arriving from the left to carry the line that sent
+// it, so that line is a bare ↗ beside them.
+test('a request with no known frontend method keeps the line that sent it beside its words', () => {
   const {puml, details} = renderDiagram('src/add-visit.spec.ts',
     [{title: 'books a visit', traces: [browserRequest({...CALL_SITE, 'http.request.body': '{"a":1}'})]}],
     undefined, new Map(), located);
   const [id] = Object.keys(details.details);
-  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits \u2197]] `
-    + `[[genseq://${id}{Click for this call\u2019s JSON body} \u2295]]`);
+  expect(puml).toContain(`Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]] `
+    + `[[${SENT_FROM} ↗]]\n`);
 });
 
-test('a request with no known line keeps the arrow it always had', () => {
+test('a request with no known line opens its request and nothing else', () => {
   const {puml, details} = renderDiagram('src/add-visit.spec.ts',
     [{title: 'books a visit', traces: [browserRequest({'http.request.body': '{"a":1}'})]}],
     undefined, new Map(), located);
   const [id] = Object.keys(details.details);
-  expect(puml).toContain(`Browser -> Backend: [[genseq://${id}`
-    + '{Click for this call\u2019s JSON body} POST /api/visits \u2295]]');
+  expect(puml).toContain(`Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]]\n`);
   expect(puml).not.toContain('src://');
 });
 
@@ -806,6 +817,164 @@ test('a call site the checkout could not confirm leaves the arrow plain', () => 
     [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
     STATIC, new Map(), () => undefined).puml;
   expect(puml).toContain('Browser -> Backend: POST /api/visits\n');
+});
+
+// ── A browser request is drawn as the frontend method it went through ────────────
+// A call arriving on the Browser from the left edge names the service method
+// (genseq/client-method.ts) and opens the line that sent the request; the request leaves from
+// inside its activation, its words open the request as it was sent, and the controller method
+// it landed on (genseq/controller-location.ts) is drawn where SEQ_HANDLER says.
+const LANDED_ON = 'src://petclinic-backend/src/main/java/VisitController.java:30'
+  + '{Click to open VisitController.addVisit}';
+const controller = (span: NormSpan) => (span.kind === 'SERVER'
+  ? {name: 'VisitController.addVisit', handle: LANDED_ON} : undefined);
+const throughVisitService = (span: NormSpan) =>
+  span.spanId === 'c-xhr' ? 'VisitService.addVisit' : undefined;
+const CALL: DiagramOptions = {...DEFAULT_DIAGRAM_OPTIONS, handler: 'call'};
+
+const drawn = (attributes: Record<string, string>, options?: DiagramOptions) => renderDiagram(
+  'src/add-visit.spec.ts', [{title: 'books a visit', traces: [browserRequest(attributes)]}],
+  options, new Map(), located, throughVisitService, controller);
+
+test('a browser request arrives on the Browser from the left, its request sent from inside it', () => {
+  const {puml, details} = drawn(CALL_SITE);
+  const [id] = Object.keys(details.details);
+  const lines = puml.split('\n');
+  const at = lines.indexOf(`[-> Browser: [[${SENT_FROM} VisitService.addVisit ↗]]`);
+  expect(at).toBeGreaterThan(0);
+  expect(lines.slice(at + 1)).toEqual([
+    'activate Browser',
+    `Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]]`
+      + `\\n[[${LANDED_ON} → VisitController.addVisit ↗]]`,
+    'Backend --> Browser: 201',
+    'deactivate Browser',
+    '@enduml',
+    '',
+  ]);
+  expect(puml).not.toContain('Browser -> Browser');
+});
+
+// The panel opens on a GET with no body as on a POST with one: it is the request's URL and
+// headers a reader came for, and what the review page's "Open in Bruno" sends again.
+test('every request arrow opens its request, a GET with no body too', () => {
+  const headers = JSON.stringify({Accept: 'application/json, text/plain, */*'});
+  const spans: NormSpan[] = [
+    {traceId: 'g', spanId: 'g-xhr', parentSpanId: '', name: 'GET', kind: 'CLIENT',
+      serviceName: 'petclinic-frontend', startNano: 1e9, attributes: {
+        'http.method': 'GET', 'http.url': 'http://127.0.0.1:8080/api/owners/1',
+        'genseq.request-headers': headers,
+      }},
+    {traceId: 'g', spanId: 'g-server', parentSpanId: 'g-xhr', name: 'GET /api/owners/{ownerId}',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1.1e9,
+      attributes: {'http.response.status_code': '200'}},
+  ];
+  const {puml, details} = renderDiagram('src/owners.spec.ts', [{title: 'x', traces: [spans]}]);
+  const entry = detailOn(lineWith(puml, 'Browser -> Backend:'), details.details);
+  expect(entry).toEqual({
+    title: 'Browser → Backend: GET /api/owners/{ownerId}',
+    steps: [{label: 'request',
+      text: 'GET http://127.0.0.1:8080/api/owners/1\nAccept: application/json, text/plain, */*'}],
+    request: {method: 'GET', url: 'http://127.0.0.1:8080/api/owners/1',
+      headers: {Accept: 'application/json, text/plain, */*'}},
+  });
+});
+
+test('a request’s body is the raw payload for a replay and pretty-printed for a reader', () => {
+  const {puml, details} = drawn({...CALL_SITE, 'http.method': 'POST',
+    'http.url': 'http://127.0.0.1:8080/api/visits', 'http.request.body': '{"a":1}'});
+  const entry = detailOn(lineWith(puml, 'Browser -> Backend:'), details.details) as any;
+  expect(entry.steps).toEqual([
+    {label: 'request', text: 'POST http://127.0.0.1:8080/api/visits\n\n{\n  "a": 1\n}'}]);
+  expect(entry.request).toEqual({method: 'POST', url: 'http://127.0.0.1:8080/api/visits', body: '{"a":1}'});
+});
+
+test('SEQ_HANDLER=call draws the controller as a call that everything the request did nests in', () => {
+  const {puml, details} = drawn(CALL_SITE, CALL);
+  const [id] = Object.keys(details.details);
+  const lines = puml.split('\n');
+  const at = lines.indexOf(`Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]]`);
+  expect(at).toBeGreaterThan(0);
+  expect(lines.slice(at + 1, at + 6)).toEqual([
+    'activate Backend',
+    `Backend -> Backend: [[${LANDED_ON} VisitController.addVisit ↗]]`,
+    'Backend --> Browser: 201',
+    'deactivate Backend',
+    'deactivate Browser',
+  ]);
+  expect(puml).not.toContain('→ VisitController');
+});
+
+// Any service's controller, and with the request's own work inside its activation — the
+// transaction a @Transactional controller opened included.
+test('the controller call nests the work of the request, on whichever service it landed', () => {
+  const span = (spanId: string, parentSpanId: string, name: string, kind: NormSpan['kind'],
+    serviceName: string, attributes: Record<string, string> = {}): NormSpan => ({
+    traceId: 'n', spanId, parentSpanId, name, kind, serviceName,
+    startNano: Number(spanId.slice(1)) * 1e6, attributes,
+  });
+  const spans = [
+    span('n1', '', 'POST /api/visits', 'SERVER', 'petclinic-backend', {'http.status_code': '201'}),
+    span('n2', 'n1', 'POST', 'CLIENT', 'petclinic-backend',
+      {'url.full': 'http://notification:8090/api/notifications/visit-booked'}),
+    span('n3', 'n2', 'POST /api/notifications/visit-booked', 'SERVER', 'notification-service',
+      {'http.response.status_code': '202', 'transaction.outcome': 'committed'}),
+    span('n4', 'n3', 'send-sms', 'INTERNAL', 'notification-service'),
+  ];
+  const handled = (s: NormSpan) => (s.spanId === 'n3'
+    ? {name: 'NotificationController.visitBooked', handle: 'src://n/C.java:9{Click}'} : undefined);
+  const {puml, details} = renderDiagram('x', [{title: 'x', traces: [spans]}], CALL,
+    new Map(), undefined, undefined, handled);
+  const lines = puml.split('\n');
+  const at = lines.findIndex((l) => l.startsWith('Backend -> NotificationService:'));
+  expect(lines.slice(at + 1, at + 9)).toEqual([
+    'activate NotificationService',
+    'NotificationService -> NotificationService: [[src://n/C.java:9{Click} '
+      + 'NotificationController.visitBooked ↗]]',
+    'activate NotificationService',
+    'group tx [committed]',
+    'NotificationService -> NotificationService: send-sms',
+    'end',
+    'deactivate NotificationService',
+    'NotificationService --> Backend: 202',
+  ]);
+  expect(lines[at + 9]).toBe('deactivate NotificationService');
+  expect(detailOn(lines[at], details.details).request!.url)
+    .toBe('http://notification:8090/api/notifications/visit-booked');
+});
+
+test('a controller call with nothing inside it is a bare arrow, no bar of its own', () => {
+  const spans: NormSpan[] = [
+    {traceId: 'e', spanId: 'e-test', parentSpanId: '', name: 'when', kind: 'INTERNAL',
+      serviceName: 'petclinic-backend', startNano: 1e9, attributes: {'genseq.participant': 'Test'}},
+    {traceId: 'e', spanId: 'e-server', parentSpanId: 'e-test', name: 'POST /api/visits',
+      kind: 'SERVER', serviceName: 'petclinic-backend', startNano: 1.1e9,
+      attributes: {'http.status_code': '201'}},
+  ];
+  const {puml} = renderDiagram('x', [{title: 'x', traces: [spans]}], CALL,
+    new Map(), undefined, undefined, controller);
+  expect(puml).toContain('activate Backend\n'
+    + `Backend -> Backend: [[${LANDED_ON} VisitController.addVisit \u2197]]\n`
+    + 'Backend --> Test: 201\ndeactivate Backend\n');
+  expect(puml.match(/^activate Backend$/gm)).toHaveLength(1);
+});
+
+test('a request whose controller is unknown has neither a third line nor a call', () => {
+  for (const options of [DEFAULT_DIAGRAM_OPTIONS, CALL]) {
+    const {puml} = renderDiagram('src/add-visit.spec.ts',
+      [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
+      options, new Map(), located, throughVisitService);
+    expect(puml).not.toContain('Backend -> Backend');
+    expect(lineWith(puml, 'Browser -> Backend:')).not.toContain('\\n[[');
+  }
+});
+
+test('a baked-in request has no panel, and still names its controller where asked', () => {
+  const line = drawn(CALL_SITE, STATIC).puml;
+  expect(line).toContain(`Browser -> Backend: POST /api/visits\\n[[${LANDED_ON} → VisitController.addVisit ↗]]\n`);
+  expect(line).not.toContain('genseq://');
+  const call = drawn(CALL_SITE, {...STATIC, handler: 'call'}).puml;
+  expect(call).toContain(`Browser -> Backend: POST /api/visits\nactivate Backend\n`
+    + `Backend -> Backend: [[${LANDED_ON} VisitController.addVisit ↗]]\n`);
 });
 
 // ── A driver call with no statement is not a query ───────────────────────────────

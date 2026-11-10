@@ -20,6 +20,13 @@ import type {ReadSource} from './code-location';
 /** Where a browser CLIENT span keeps its frames, as JSON — so a replay of the span cache has them. */
 export const CALL_SITE_ATTRIBUTE = 'genseq.call-site';
 
+/**
+ * Where a browser CLIENT span keeps the headers its request was sent with, as a JSON object.
+ * The browser instrumentation records none, and the request's detail panel shows them and
+ * replays the call with them (Victor, 10 Nov 2026); on the span for the same reason as the frames.
+ */
+export const REQUEST_HEADERS_ATTRIBUTE = 'genseq.request-headers';
+
 /** One application frame of a request's stack, in the original source. */
 export interface CallFrame {
   /** Relative to the frontend module: `src/app/owners/owner.service.ts`. */
@@ -36,6 +43,20 @@ export interface CallSite {
   traceId: string;
   spanId: string;
   frames: CallFrame[];
+  /** Every header the page set on the request, as it set them — less the per-run trace context. */
+  headers?: Record<string, string>;
+}
+
+// The trace context is new on every request of every run: stored, it would repaint each
+// diagram's sidecar on every run, and a replay sent with it would join a trace long closed.
+const PER_RUN_HEADERS = new Set(['traceparent', 'tracestate', 'baggage']);
+
+/** The headers worth keeping, or undefined when none are left. */
+export function replayableHeaders(
+  headers: Record<string, string> | undefined,
+): Record<string, string> | undefined {
+  const kept = Object.entries(headers ?? {}).filter(([name]) => !PER_RUN_HEADERS.has(name.toLowerCase()));
+  return kept.length > 0 ? Object.fromEntries(kept) : undefined;
 }
 
 /** `00-<trace id>-<span id>-01` — the span id in it is the browser's CLIENT span. */
@@ -164,21 +185,29 @@ function joinKey(ids: Pick<CallSite, 'traceId' | 'spanId'>): string {
   return `${hexId(ids.traceId)}/${hexId(ids.spanId)}`;
 }
 
+/** What one recorded request adds to its span. */
+export type RecordedSite = Pick<CallSite, 'frames' | 'headers'>;
+
 /** Every recorded request, by the span it left the browser under. */
-export function callSiteIndex(sites: CallSite[]): Map<string, CallFrame[]> {
-  return new Map(sites.map((site) => [joinKey(site), site.frames]));
+export function callSiteIndex(sites: CallSite[]): Map<string, RecordedSite> {
+  return new Map(sites.map((site) => [joinKey(site), {frames: site.frames, headers: site.headers}]));
 }
 
 /**
- * Stamps each browser CLIENT span with the frames of the request it made.
+ * Stamps each browser CLIENT span with the frames of the request it made, and its headers.
  *
  * On the span rather than beside it, so the span cache carries them: a re-render replays that
  * file with nothing running, long after the recordings and the source maps are gone.
  */
-export function withCallSites(spans: NormSpan[], index: Map<string, CallFrame[]>): NormSpan[] {
+export function withCallSites(spans: NormSpan[], index: Map<string, RecordedSite>): NormSpan[] {
   return spans.map((span) => {
-    const frames = span.kind === 'CLIENT' ? index.get(joinKey(span)) : undefined;
-    if (!frames?.length) return span;
-    return {...span, attributes: {...span.attributes, [CALL_SITE_ATTRIBUTE]: JSON.stringify(frames)}};
+    const site = span.kind === 'CLIENT' ? index.get(joinKey(span)) : undefined;
+    const headers = replayableHeaders(site?.headers);
+    const stamped: Record<string, string> = {
+      ...(site?.frames?.length ? {[CALL_SITE_ATTRIBUTE]: JSON.stringify(site.frames)} : {}),
+      ...(headers ? {[REQUEST_HEADERS_ATTRIBUTE]: JSON.stringify(headers)} : {}),
+    };
+    if (Object.keys(stamped).length === 0) return span;
+    return {...span, attributes: {...span.attributes, ...stamped}};
   });
 }

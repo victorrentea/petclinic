@@ -4,8 +4,8 @@ import * as os from 'os';
 import * as path from 'path';
 import {SourceMapConsumer, SourceMapGenerator} from 'source-map';
 import {
-  CALL_SITE_ATTRIBUTE, CallFrame, applicationFrames, callSiteHandle, callSiteIndex,
-  idsOfTraceparent, parseStack, requestFrames, triggerOf, withCallSites,
+  CALL_SITE_ATTRIBUTE, CallFrame, REQUEST_HEADERS_ATTRIBUTE, applicationFrames, callSiteHandle,
+  callSiteIndex, idsOfTraceparent, parseStack, replayableHeaders, requestFrames, triggerOf, withCallSites,
 } from './call-site';
 import type {NormSpan} from './trace-to-puml';
 import {CUCUMBER_SOURCES} from './generate';
@@ -189,6 +189,35 @@ test('only the request span is stamped, and a request with no frames stays bare'
   const located = callSiteIndex([{...ids, frames: [frame(COMPONENT)]}]);
   expect(withCallSites([span({...ids, kind: 'SERVER'})], located)[0].attributes).toEqual({});
   expect(withCallSites([span(ids)], callSiteIndex([{...ids, frames: []}]))[0].attributes).toEqual({});
+});
+
+// The headers ride on the span like the frames, so a re-render from the span cache has them.
+test('a request’s headers are stamped beside its frames, and with no frames too', () => {
+  const ids = {traceId: '7c4ec1e2eb2f07d285a84ca5769679dd', spanId: '96b94185f14defff'};
+  const headers = {Accept: 'application/json'};
+  const [both] = withCallSites([span(ids)], callSiteIndex([{...ids, frames: [frame(COMPONENT)], headers}]));
+  expect(JSON.parse(both.attributes[REQUEST_HEADERS_ATTRIBUTE])).toEqual(headers);
+  expect(both.attributes[CALL_SITE_ATTRIBUTE]).toBeDefined();
+  const [headersOnly] = withCallSites([span(ids)], callSiteIndex([{...ids, frames: [], headers}]));
+  expect(headersOnly.attributes).toEqual({[REQUEST_HEADERS_ATTRIBUTE]: JSON.stringify(headers)});
+});
+
+// The trace context is new on every request of every run: kept, it would repaint every sidecar.
+test('the per-run trace context is not a header worth keeping', () => {
+  expect(replayableHeaders({traceparent: '00-a-b-01', TraceState: 'x', baggage: 'y', Accept: '*/*'}))
+    .toEqual({Accept: '*/*'});
+  expect(replayableHeaders({traceparent: '00-a-b-01'})).toBeUndefined();
+  expect(replayableHeaders(undefined)).toBeUndefined();
+});
+
+test('a saved request keeps its headers, less the trace context', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'call-sites-'));
+  const traceparent = '00-7c4ec1e2eb2f07d285a84ca5769679dd-96b94185f14defff-01';
+  await saveCallSites(dir, {title: 'Add a visit', source: 'src/add-visit.spec.ts'}, [
+    {traceparent, stacks: ['Error'], headers: {traceparent, 'Content-Type': 'application/json'}},
+    {traceparent: traceparent.replace('ff-01', 'fe-01'), stacks: ['Error'], headers: {traceparent}},
+  ]);
+  expect(readCallSites(dir).map((s) => s.headers)).toEqual([{'Content-Type': 'application/json'}, undefined]);
 });
 
 // A Scenario Outline runs every row under one title, so one test can save twice in a run.

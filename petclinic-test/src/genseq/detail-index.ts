@@ -15,10 +15,25 @@ export interface DetailStep {
   alternate?: DetailStep;
 }
 
+/**
+ * An HTTP request as it was sent, for a panel to offer to send again. The steps already say it
+ * to a reader; this says it to a tool — the review page's "Open in Bruno" replays the call from
+ * it (Victor, 10 Nov 2026), so nothing here is a template: `url` is the absolute URL with the
+ * real ids in it, and `body` the payload exactly as it went out, not pretty-printed.
+ */
+export interface HttpRequest {
+  method: string;
+  url: string;
+  headers?: Record<string, string>;
+  body?: string;
+}
+
 /** Everything one arrow can reveal, in the order the clicks reveal it. */
 export interface DetailEntry {
   title: string;
   steps: DetailStep[];
+  /** On an HTTP request arrow: the request itself, in a shape a client can replay. */
+  request?: HttpRequest;
 }
 
 export interface DetailIndex {
@@ -26,7 +41,9 @@ export interface DetailIndex {
   details: Record<string, DetailEntry>;
 }
 
-export const DETAIL_INDEX_VERSION = 2;  // 2: a step can carry an `alternate` to toggle to
+// 2: a step can carry an `alternate` to toggle to.
+// 3: an HTTP request arrow's entry carries the `request` it sent, for the page to replay.
+export const DETAIL_INDEX_VERSION = 3;
 
 // FNV-1a. The id has to depend on the arrow's *content* alone: a counter would
 // renumber every arrow below an inserted one, and the review page renders a
