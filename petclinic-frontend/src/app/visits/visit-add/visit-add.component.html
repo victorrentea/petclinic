@@ -33,9 +33,7 @@
             <mat-datepicker-toggle matSuffix [for]="visitDateDatepicker"></mat-datepicker-toggle>
             <mat-datepicker #visitDateDatepicker></mat-datepicker>
             <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="date.valid" [class.glyphicon-remove]="!date.valid" aria-hidden="true"></span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('required')">Date is required</span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('matDatepickerMin')">A visit can't predate the pet's birth ({{ currentPet.birthDate }})</span>
-            <span class="help-block" *ngIf="date.dirty && date.hasError('matDatepickerMax')">A visit can be booked at most one year ahead ({{ latestVisitDate }})</span>
+            <app-visit-date-errors [date]="date" [birthDate]="currentPet.birthDate"></app-visit-date-errors>
 
           </div>
         </div>
