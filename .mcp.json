@@ -40,6 +40,8 @@
     "petclinic-mcp": {
       "type": "http",
       "url": "http://localhost:8080/mcp",
+      "//": "Token Exchange (RFC 8693): issued to the claude-code client (client_id + act.sub) ON BEHALF OF Kevin (sub=1). Swap it into Authorization to try it; HS256 key: petclinic-demo-secret",
+      "//Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2F1dGgucGV0Y2xpbmljLmV4YW1wbGUiLCJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImF1ZCI6InBldGNsaW5pYy1tY3AiLCJjbGllbnRfaWQiOiJjbGF1ZGUtY29kZSIsImFjdCI6eyJzdWIiOiJjbGF1ZGUtY29kZSJ9LCJzY29wZSI6InZpc2l0czpyZWFkIHZpc2l0czp3cml0ZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.0FcyR6CfF8-378xvfmtWKo9lbglHBeMGgO6Bq9wdA8k",
       "headers": {
         "X-API-Key": "pc-mcp-7f3a9c2e1b8d4056",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVyIiwiZW1haWwiOiJrZXZpbi5tY2NhbGxpc3RlckBwZXRjbGluaWMuZXhhbXBsZSIsImlhdCI6MTc0OTE2ODAwMCwiZXhwIjoxODEyMjQwMDAwfQ.Xk7mN3qR2vL8pY4sA6dW1eH0fT9bC5jOuQzEiWs"
