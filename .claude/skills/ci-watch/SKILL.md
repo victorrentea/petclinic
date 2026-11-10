@@ -4,7 +4,8 @@ description: Watch the GitHub Actions run for a pushed commit and repair the bui
 allowed-tools: Bash(.claude/skills/ci-watch/scripts/watch-ci.sh:*), Bash(gh:*), Bash(git:*)
 ---
 
-# Watch the CI, and fix it when it breaks
+Work FASTER
+
 
 `scripts/watch-ci.sh [sha]` blocks until the `ci.yml` run for a commit reaches a
 verdict, then **encodes that verdict as its exit status**. The SHA defaults to `HEAD`.

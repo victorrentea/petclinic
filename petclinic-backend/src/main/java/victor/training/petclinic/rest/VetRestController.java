@@ -76,9 +76,7 @@ public class VetRestController {
         currentVet.setFirstName(vetDto.getFirstName());
         currentVet.setLastName(vetDto.getLastName());
         currentVet.clearSpecialties();
-        for (Specialty spec : specialtyMapper.toSpecialty(vetDto.getSpecialties())) {
-            currentVet.addSpecialty(spec);
-        }
+        specialtyMapper.toSpecialty(vetDto.getSpecialties()).forEach(currentVet::addSpecialty);
         updateSpecialties(currentVet);
     }
 
