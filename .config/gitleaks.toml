@@ -16,3 +16,12 @@ description = "Public demo MCP JWT (George Franklin, sub=1, localhost only)"
 regexes = [
   '''eyJzdWIiOiIxIiwibmFtZSI6Ikdlb3JnZSBGcmFua2xpbi[A-Za-z0-9_-]*''',
 ]
+
+# The RFC 8693 token-exchange demo in .mcp.json: {"iss":"https://auth.petclinic.example",
+# "sub":"1","name":"Kevin McCallister",...,"act":{"sub":"claude-code"}}, signed with the
+# published demo key. Scoped to this issuer + subject, like the token above.
+[[allowlists]]
+description = "Public demo token-exchange JWT (Kevin McCallister, sub=1, auth.petclinic.example)"
+regexes = [
+  '''eyJpc3MiOiJodHRwczovL2F1dGgucGV0Y2xpbmljLmV4YW1wbGUiLCJzdWIiOiIxIiwibmFtZSI6IktldmluIE1jQ2FsbGlzdGVy[A-Za-z0-9_-]*''',
+]
