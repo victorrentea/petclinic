@@ -13,8 +13,7 @@
   ffmpeg has no drawtext/subtitles filter to burn one in afterwards.
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
-  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling,
-  `src/demo/` the narrated before/after bug films (`npx ts-node src/demo/bug-40.demo.ts before|after`). Nothing generated
+  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
   lives under `src/`: throwaway run output goes to `test-results/`, and the committed diagrams to
   `generated/`.
 - ⚠️ `generated/*.genseq.puml` and their `generated/*.genseq.json` sidecars are **generated** but

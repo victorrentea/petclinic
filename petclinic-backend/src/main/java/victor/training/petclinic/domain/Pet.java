@@ -1,7 +1,5 @@
 package victor.training.petclinic.domain;
 
-import jakarta.validation.ValidationException;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,20 +82,6 @@ public class Pet {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
-    }
-
-    /** A visit falls between this pet's birth and one year from today. */
-    public void checkCanBeVisitedOn(LocalDate visitDate) {
-        if (visitDate == null) {
-            return;
-        }
-        if (birthDate != null && visitDate.isBefore(birthDate)) {
-            throw new ValidationException("A visit can't predate the pet's birth (" + birthDate + ")");
-        }
-        LocalDate latest = LocalDate.now().plusYears(1);
-        if (visitDate.isAfter(latest)) {
-            throw new ValidationException("A visit can be booked at most one year ahead (" + latest + ")");
-        }
     }
 
     public PetType getType() {

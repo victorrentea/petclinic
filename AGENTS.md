@@ -15,14 +15,6 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
 - `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
-- `petclinic-database/` - embedded Postgres launcher behind `./start-database.sh`
-- `petclinic-test/` - Playwright + Cucumber e2e tests against the running stack (own `AGENTS.md`)
-- `petclinic-chatbot/` - Spring AI triage assistant: RAG picks the specialty, books via the backend's MCP
-- `petclinic-observability/` - Grafana LGTM + OTel collector + Tempo, started by `./start-grafana.sh`
-- `docker/` - the whole stack as one Compose project per branch (`./start-docker.sh`), plus JaCoCo/OTel overlays
-- `refactoring-tools/` - standalone OpenRewrite recipes, run against the backend from the CLI
-- `plugin-marketplace-demo/` - a local Claude Code/Copilot/Codex plugin marketplace (`grill-me` skill)
-- `scripts/` - repo checks (`check-line-length.py`, `preflight.sh`)
 
 ## Common Commands
 
@@ -55,6 +47,27 @@ npm run test-headless               # Headless Chrome tests
 npm run test:arch                   # imports adhere to docs/frontend-packages.puml
 npm run e2e                         # Protractor e2e tests
 ```
+
+## Architecture
+
+### Backend Architecture
+
+**Layered Structure:**
+1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
+2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
+3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
+4. Domain Model (`domain/`) - JPA entities (Owner, Pet, Vet, Visit, Specialty, PetType, User, Role)
+5. Notification (`notification/`) - `NotificationServiceClient`, called after a visit is booked:
+   an HTTP POST to notification-service, best effort (a failure is logged, the booking stands).
+   Takes plain values, never an entity, and reaches no repository
+
+**Data Flow:**
+Request → REST Controller → Repository / Mapper → JPA Entity
+Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
+
+**Key Patterns:**
+- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
+- `/openapi.yaml` is generated (don't edit it!) from Java DTOs & REST Controllers by `OpenApiExtractorTest`
 
 ## Additional Knowledge
 
@@ -142,6 +155,15 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+
+## Java Code Style
+- Keep < 120 chars / line
+- Keep methods under 30 lines
+- Use constructor injection in src/main, `@Autowired` only in tests
+- Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
+- Global REST exception handling is done via `@RestControllerAdvice`
+- Apply `@Validated` on every `@RequestBody`
+- Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
 - Write non-trivial code using TDD
