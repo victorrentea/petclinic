@@ -54,7 +54,7 @@ export function sourcePathOf(serviceName: string, namespace: string): string | u
  * Jars linked into every service. A span opened inside one carries the service that loaded
  * it, so its class is looked for there first and then here.
  */
-const LIBRARY_MODULES = ['petclinic-commons'];
+export const LIBRARY_MODULES = ['petclinic-commons'];
 
 /** A call, not a declaration: `x.foo(`, `y = foo(`, `return foo(`, `foo(bar(`. */
 const CALLED_NOT_DECLARED = /[.=(,]\s*$/;

@@ -413,6 +413,7 @@ function orderedParticipants(present: Set<string>): string[] {
 function emitTrace(
   spans: NormSpan[], lines: string[], present: Set<string>, options: DiagramOptions,
   collector: DetailCollector, operations: OperationNames, methodLinks: MethodLinks,
+  clientMethods: ClientMethods,
 ): void {
   const byId = new Map(spans.map((s) => [s.spanId, s]));
   // Indexed once: filtering the whole span array per span made an N+1-heavy trace
@@ -507,7 +508,17 @@ function emitTrace(
 
     if (!crossing && !selfCustom) {
       present.add(p);
-      out.push(...body);
+      // A browser request is drawn as a call too: the frontend method it went through
+      // (`OwnerService.getOwnerById`, genseq/client-method.ts) as a self-call on the Browser,
+      // and the request leaving from inside its activation — the shape a repository call has
+      // on the Backend. Its words open the line that sent the request, in this run.
+      const via = span.kind === 'CLIENT' && inner.length > 0 ? clientMethods(span) : undefined;
+      if (via) {
+        out.push(`${pumlName(p)} -> ${pumlName(p)}: ${linkedMethodLabel(via, methodLinks(span))}`,
+          `activate ${pumlName(p)}`, ...body, `deactivate ${pumlName(p)}`);
+      } else {
+        out.push(...body);
+      }
       return;
     }
 
@@ -533,16 +544,20 @@ function emitTrace(
       // `notify-visit-booked` is that case — a crossing @WithSpan arrow that reveals nothing,
       // and until this it was the only kind of arrow in the picture with no way back to its method.
       //
-      // A browser request is the exception: its words open the line that sent it, in this run
-      // (genseq/call-site.ts), and a body it carries keeps its ⊕ beside them as a second link.
-      // Each `[[…]]` of a label becomes its own <a> in the SVG. Where that line is unknown the
-      // arrow simply has no such link: the old shape, never a guess.
-      const sentFrom = parent?.attributes[CALL_SITE_ATTRIBUTE] ? methodLinks(parent) : undefined;
-      const label = sentFrom && steps.length > 0
-        ? `${linkedMethodLabel(text, sentFrom)} ${linkMarker(collector, title, steps, tooltip)}`
+      // An HTTP request's words open the method it landed on — the controller, the first
+      // class of the application it reaches (genseq/controller-location.ts) — and a body it
+      // carries keeps its ⊕ beside them as a second link. Each `[[…]]` of a label becomes its
+      // own <a> in the SVG. A browser request whose frontend method is unknown has no
+      // self-call to carry the line that sent it, so that line stays on its words, as before.
+      const drawnAsCall = parent?.kind === 'CLIENT' && clientMethods(parent) !== undefined;
+      const sentFrom = !drawnAsCall && parent?.attributes[CALL_SITE_ATTRIBUTE]
+        ? methodLinks(parent) : undefined;
+      const wordsTo = sentFrom ?? methodLinks(span);
+      const label = wordsTo && steps.length > 0
+        ? `${linkedMethodLabel(text, wordsTo)} ${linkMarker(collector, title, steps, tooltip)}`
         : steps.length > 0
           ? linkLabel(text, collector, title, steps, tooltip)
-          : linkedMethodLabel(text, sentFrom ?? methodLinks(span));
+          : linkedMethodLabel(text, wordsTo);
       out.push(`${pumlName(pp!)} -> ${pumlName(p)}: ${label}`);
       if (bodies) out.push(...jsonNote(bodies, bodyOf(span, parent, 'http.request.body')));
     } else {
@@ -590,6 +605,15 @@ export type MethodLinks = (span: NormSpan, scenario?: DiagramScenario) => string
 
 const NO_METHOD_LINKS: MethodLinks = () => undefined;
 
+/**
+ * The frontend method a browser CLIENT span's request went through, as the self-call that
+ * draws it says it: `OwnerService.getOwnerById` — see client-method.ts. Undefined draws the
+ * request straight off the Browser lifeline, as it always was.
+ */
+export type ClientMethods = (span: NormSpan) => string | undefined;
+
+const NO_CLIENT_METHODS: ClientMethods = () => undefined;
+
 export interface DiagramScenario {
   title: string;
   traces: NormSpan[][];
@@ -611,6 +635,7 @@ export function renderDiagram(
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
   operations: OperationNames = defaultOperations(),
   methodLinks: MethodLinks = NO_METHOD_LINKS,
+  clientMethods: ClientMethods = NO_CLIENT_METHODS,
 ): RenderedDiagram {
   // A trace can carry spans yet draw nothing — a lone browser `click`, say. Render
   // each in isolation and keep only what has content, so an empty trace cannot
@@ -626,7 +651,7 @@ export function renderDiagram(
     for (const spans of scenario.traces) {
       const traceLines: string[] = [];
       const drawn = new Set<string>();
-      emitTrace(spans, traceLines, drawn, options, collector, operations, scoped);
+      emitTrace(spans, traceLines, drawn, options, collector, operations, scoped, clientMethods);
       if (traceLines.length === 0) continue;
       drawn.forEach((p) => present.add(p));
       lines.push(...traceLines);
@@ -701,8 +726,9 @@ export function renderPuml(
   options: DiagramOptions = DEFAULT_DIAGRAM_OPTIONS,
   operations: OperationNames = defaultOperations(),
   methodLinks: MethodLinks = NO_METHOD_LINKS,
+  clientMethods: ClientMethods = NO_CLIENT_METHODS,
 ): string {
-  return renderDiagram(title, scenarios, options, operations, methodLinks).puml;
+  return renderDiagram(title, scenarios, options, operations, methodLinks, clientMethods).puml;
 }
 
 interface DiagramSection {
