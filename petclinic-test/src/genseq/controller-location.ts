@@ -162,11 +162,18 @@ export function routeOf(span: NormSpan): string | undefined {
   return verb && route ? `${verb.toUpperCase()} ${normalizeRoute(route)}` : undefined;
 }
 
-/** The `src://` handle on the method a SERVER span's request landed on, or undefined. */
-export function handlerHandle(span: NormSpan, handlers: Map<string, Handler>): string | undefined {
+/** The method a SERVER span's request landed on — its name and its `src://` handle — or undefined. */
+export function handlerOf(
+  span: NormSpan, handlers: Map<string, Handler>,
+): {name: string; handle: string} | undefined {
   const route = span.kind === 'SERVER' ? routeOf(span) : undefined;
   const hit = route ? handlers.get(route) : undefined;
   if (!hit) return undefined;
   const [cls, fn] = [hit.name.slice(0, hit.name.lastIndexOf('.')), hit.name.split('.').pop()!];
-  return `src://${hit.file}:${hit.line}${methodLinkTooltip(cls, fn)}`;
+  return {name: hit.name, handle: `src://${hit.file}:${hit.line}${methodLinkTooltip(cls, fn)}`};
+}
+
+/** The `src://` handle on the method a SERVER span's request landed on, or undefined. */
+export function handlerHandle(span: NormSpan, handlers: Map<string, Handler>): string | undefined {
+  return handlerOf(span, handlers)?.handle;
 }

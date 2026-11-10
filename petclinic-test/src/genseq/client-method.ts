@@ -5,9 +5,9 @@ import {triggerOf} from './call-site';
 /**
  * Which frontend method a browser request was made through: `OwnerService.getOwnerById`.
  *
- * The diagram draws it as a self-call on the Browser lifeline, the request leaving from
- * inside its activation, the way a repository call on the Backend fires its queries
- * (Victor, 10 Nov 2026). The stack cannot say it: `http.get` is a cold Observable, so the
+ * The diagram draws it as a call arriving on the Browser lifeline from the left edge, the
+ * request leaving from inside its activation, the way a repository call on the Backend fires
+ * its queries (Victor, 10 Nov 2026). The stack cannot say it: `http.get` is a cold Observable, so the
  * service method has returned by the time the request leaves, and the top application frame
  * is the component's `.subscribe(` (see call-site.ts). The source can.
  *
@@ -239,7 +239,7 @@ function enclosingMethod(component: string, line: number): string | undefined {
 }
 
 /**
- * The self-call's label for one browser request, or undefined when it has no call site.
+ * The label of the call that one browser request was made through, or undefined when it has no call site.
  * `frontendRoot` is the frontend module's directory; the frames are relative to it.
  */
 export function clientMethodOf(

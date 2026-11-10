@@ -2,15 +2,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {readCallSites} from '../support/call-sites';
-import {parseTempoTrace, renderDiagram, ClientMethods, DiagramScenario, MethodLinks, NormSpan,
-  PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
+import {parseTempoTrace, renderDiagram, ClientMethods, Controllers, DiagramScenario, MethodLinks,
+  NormSpan, PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
 import {methodHandle, overloadOf} from './code-location';
 import {CALL_SITE_ATTRIBUTE, CallFrame, CallSite, callSiteHandle, callSiteIndex, withCallSites}
   from './call-site';
-import {Handler, WalkFiles, handlerHandle, moduleHandlers} from './controller-location';
+import {Handler, WalkFiles, handlerOf, moduleHandlers} from './controller-location';
 import {clientMethodOf} from './client-method';
 import {defaultOperations} from './openapi-operations';
 
@@ -36,8 +36,7 @@ export interface RenderDeps {
    *  swept rather than left on disk describing a run that no longer happens. */
   listFiles?: (dir: string) => string[];
   /** Optional: every file under a directory, so a request's route can be resolved against
-   *  the controllers of the service it reached. Without it the request arrows keep the
-   *  links they had. */
+   *  the controllers of the service it reached. Without it no request names its controller. */
   walkFiles?: WalkFiles;
   log: (msg: string) => void;
 }
@@ -314,7 +313,6 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
   if (!readFile) return () => undefined;
   const repoRoot = path.dirname(rootDir);
   const cache = new Map<string, string | undefined>();
-  const handlers = new Map<string, Map<string, Handler>>();
   return (span, scenario) => {
     // A step arrow is the test talking about itself. `given("…")` is written in the test
     // file and nowhere else, so there are no `code.*` attributes to follow — the sentence
@@ -330,17 +328,6 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
     // that this checkout still has that line.
     const callSite = span.attributes[CALL_SITE_ATTRIBUTE];
     if (callSite) return callSiteHandle(callSite, span.serviceName, repoRoot, readFile);
-    // A request lands on a controller method the trace never names: resolved by its route
-    // against that service's sources, scanned once per module.
-    if (span.kind === 'SERVER' && deps.walkFiles) {
-      let routes = handlers.get(span.serviceName);
-      if (!routes) {
-        routes = moduleHandlers(span.serviceName, repoRoot, readFile, deps.walkFiles);
-        handlers.set(span.serviceName, routes);
-      }
-      const handle = handlerHandle(span, routes);
-      if (handle) return handle;
-    }
     // One trace draws the same repository method many times over — an N+1 is exactly what
     // these pictures are for — and each hit would otherwise re-read and re-scan the file.
     // The overload is part of the key: `normalize(phone)` and `normalize(phone, country)`
@@ -385,6 +372,28 @@ function clientMethodsFor(rootDir: string, deps: RenderDeps): ClientMethods {
   };
 }
 
+/**
+ * The controller method each request landed on — a method the trace never names, resolved by
+ * the SERVER span's route against that service's sources (controller-location.ts), scanned
+ * once per module. Needs the working tree and a way to walk it; without either, no request
+ * names its controller.
+ */
+function controllersFor(rootDir: string, deps: RenderDeps): Controllers {
+  const {readFile, walkFiles: walk} = deps;
+  if (!readFile || !walk) return () => undefined;
+  const repoRoot = path.dirname(rootDir);
+  const handlers = new Map<string, Map<string, Handler>>();
+  return (span) => {
+    if (span.kind !== 'SERVER') return undefined;
+    let routes = handlers.get(span.serviceName);
+    if (!routes) {
+      routes = moduleHandlers(span.serviceName, repoRoot, readFile, walk);
+      handlers.set(span.serviceName, routes);
+    }
+    return handlerOf(span, routes);
+  };
+}
+
 /** `source` resolved against the repo root — the path the review page can open. */
 function repoRelative(rootDir: string, source: string): string {
   return path.normalize(path.join(path.basename(rootDir), source));
@@ -416,6 +425,7 @@ export function renderScenarios(
 ): string[] {
   const written: string[] = [];
   warnOnCollisions(sources, deps);
+  const controllers = controllersFor(rootDir, deps);
   for (const {source, scenarios} of sources) {
     const linked = linkScenarios(scenarios, rootDir, source, deps);
     const title = titleFor(rootDir, source);
@@ -430,7 +440,7 @@ export function renderScenarios(
       // One scenario per call, so the divider `renderDiagram` draws is this diagram's
       // own header and the picture under it is one test from end to end.
       const {puml, details} = renderDiagram(
-        title, [scenario], options, defaultOperations(), methodLinks, clientMethods);
+        title, [scenario], options, defaultOperations(), methodLinks, clientMethods, controllers);
       // A scenario whose traces draw nothing — a lone click, a run that recorded no
       // server span — used to cost a header inside a shared file and nothing more. On its
       // own it would be a file containing a title and no conversation, which the review

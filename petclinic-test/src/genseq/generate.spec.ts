@@ -59,7 +59,7 @@ test('what the markers reveal is filed beside the diagram, and is not itself a d
     [{source: 'src/add-visit.spec.ts',
       scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
     '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
-    {sql: 'statement', httpBodies: true, interactive: true},
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'},
   );
 
   expect(detailsPathFor('/out', 'src/add-visit.spec.ts', 'add-a-visit'))
@@ -83,7 +83,7 @@ test('the static path writes the picture alone, and drops a sidecar left by an e
       scenarios: [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}]}],
     '/out',
     {writeFile: (p, c) => { written[p] = c; }, removeFile: (p) => removed.push(p), log: () => {}},
-    {sql: 'values', httpBodies: true, interactive: false},
+    {sql: 'values', httpBodies: true, interactive: false, handler: 'line'},
   );
   expect(Object.keys(written)).toEqual(['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml']);
   expect(removed).toEqual(['/out/generated/add-visit.spec.ts.add-a-visit.genseq.json']);
@@ -110,7 +110,7 @@ test('a diagram no scenario draws any more is swept', () => {
       ],
       log: () => {},
     },
-    {sql: 'statement', httpBodies: true, interactive: true},
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'},
   );
   expect(removed).toEqual([
     '/out/generated/add-visit.spec.ts.cancel-a-visit.genseq.puml',
@@ -325,7 +325,7 @@ test('renderScenarios redraws from the cache at another detail level, touching n
   }]));
 
   renderScenarios(cached, '/out', {writeFile: (p, c) => { written[p] = c; }, log: () => {}},
-    {sql: 'off', httpBodies: false, interactive: false});
+    {sql: 'off', httpBodies: false, interactive: false, handler: 'line'});
 
   const puml = written['/out/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
   expect(puml).toContain('title Test: Add a visit');
@@ -430,4 +430,44 @@ test('a recorded call site reaches the arrow, and survives in the span cache', a
     + 'this request: visit-add.component.ts:3} ');
   expect(written['/repo/petclinic-test/test-results/trace-spans.json']).toContain('genseq.call-site');
   expect(logged.join('\n')).toContain('1/1 browser request(s) traced to their line');
+});
+
+// The recorded headers reach the request's panel through the span cache, and the route the
+// SERVER span matched names its controller under the words (Victor, 10 Nov 2026).
+test('a request’s headers reach its panel, and its controller its arrow', async () => {
+  const written: Record<string, string> = {};
+  const controllerFile = '/repo/petclinic-backend/src/main/java/VisitController.java';
+  const controllerSource = [
+    '@RestController', '@RequestMapping("/api")', 'public class VisitController {',
+    '    @PostMapping("/visits")', '    public Visit addVisit(Visit visit) {', '    }', '}',
+  ].join('\n');
+  const spans = JSON.parse(JSON.stringify(fixture));
+  const client = spans.batches[0].scopeSpans[0].spans[1];
+  client.traceId = 'fE7B4usvB9KFqEyldpZ53Q==';
+  client.spanId = 'lrlBhfFN7/8=';
+  spans.batches[1].scopeSpans[0].spans[0].parentSpanId = 'lrlBhfFN7/8=';
+  await generateFromWindows(
+    [{title: 'Add a visit', source: 'src/add-visit.spec.ts', startMs: 0, endMs: 10_000}],
+    '/repo/petclinic-test',
+    {
+      searchTraceIds: async () => ['t1'],
+      getTrace: async () => spans,
+      writeFile: (p, c) => {written[p] = c;},
+      readFile: (p) => (p === controllerFile ? controllerSource : undefined),
+      walkFiles: (dir) => (controllerFile.startsWith(`${dir}/`) ? [controllerFile] : []),
+      log: () => undefined,
+      readCallSites: () => [{
+        traceId: '7c4ec1e2eb2f07d285a84ca5769679dd', spanId: '96b94185f14defff', frames: [],
+        headers: {'Content-Type': 'application/json'},
+      }],
+    },
+  );
+  const puml = written['/repo/petclinic-test/generated/add-visit.spec.ts.add-a-visit.genseq.puml'];
+  expect(puml).toContain('\\n[[src://petclinic-backend/src/main/java/VisitController.java:5'
+    + '{Click to open VisitController.addVisit} \u2192 VisitController.addVisit \u2197]]');
+  const details = JSON.parse(written['/repo/petclinic-test/generated/add-visit.spec.ts.add-a-visit.genseq.json']);
+  const request = Object.values<any>(details.details).find((e) => e.request);
+  expect(request.request.headers).toEqual({'Content-Type': 'application/json'});
+  expect(request.steps[0].text).toMatch(/^POST \/api\/visits\nContent-Type: application\/json\n\n\{/);
+  expect(written['/repo/petclinic-test/test-results/trace-spans.json']).toContain('genseq.request-headers');
 });
