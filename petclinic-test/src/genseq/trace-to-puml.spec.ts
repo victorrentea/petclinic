@@ -7,7 +7,7 @@ import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions} from './options';
 // The diagrams are interactive by default now, so every assertion about a *baked in*
 // label has to say so — which is also the regression test that the static path, the
 // one CI and the committed snapshots depend on, still renders exactly what it did.
-const STATIC: DiagramOptions = {sql: 'statement', httpBodies: false, interactive: false, handler: 'line'};
+const STATIC: DiagramOptions = {sql: 'statement', httpBodies: false, interactive: false, handler: 'panel'};
 
 const fixture = JSON.parse(
   fs.readFileSync(path.join(__dirname, '__fixtures__', 'add-visit-trace.json'), 'utf-8'),
@@ -304,7 +304,7 @@ test('a statement with no bound parameters offers only the statement', () => {
 test('the payloads become markers on the request and the response, not notes', () => {
   const {puml, details} = renderDiagram('add-visit.spec.ts',
     [{title: 'Add a visit', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'});
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'panel'});
 
   expect(puml).not.toContain('note over');
 
@@ -337,7 +337,7 @@ test('a body recorded on a SERVER span reveals on its arrow, not on the calls it
     span('r4', 'r3', 'send-sms', 'INTERNAL', 'mailer', {'genseq.participant': 'SMS gateway'}),
   ];
   const {puml, details} = renderDiagram('add-visit.spec.ts', [{title: 'x', traces: [spans]}],
-    {sql: 'statement', httpBodies: true, interactive: true, handler: 'line'});
+    {sql: 'statement', httpBodies: true, interactive: true, handler: 'panel'});
 
   const request = detailOn(lineWith(puml, 'Backend -> mailer:'), details.details);
   expect(request.steps[0].text).toContain('"petName": "Leo"');
@@ -355,13 +355,13 @@ test('payloads are revealable by default, and a request opens without them', () 
   expect(lineWith(plain.puml, 'Backend --> Browser:')).toMatch(MARKER);
 
   const withheld = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'statement', httpBodies: false, interactive: true, handler: 'line'});
+    {sql: 'statement', httpBodies: false, interactive: true, handler: 'panel'});
   const request = detailOn(lineWith(withheld.puml, 'Browser -> Backend:'), withheld.details.details);
   expect(request.steps).toEqual([{label: 'request', text: 'POST /api/visits'}]);
   expect(lineWith(withheld.puml, 'Backend --> Browser:')).not.toMatch(MARKER);
 
   const none = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'off', httpBodies: false, interactive: true, handler: 'line'});
+    {sql: 'off', httpBodies: false, interactive: true, handler: 'panel'});
   expect(Object.values(none.details.details).map((e) => e.title))
     .toEqual(['Browser → Backend: POST /api/visits']);
 });
@@ -380,7 +380,7 @@ test('a marker id follows the arrow content, not its position in the file', () =
 
 test('an interactive diagram tones its link markup down', () => {
   const {puml} = renderDiagram('x', [{title: 'x', traces: [parseTempoTrace(fixture)]}],
-    {sql: 'values', httpBodies: true, interactive: true, handler: 'line'});
+    {sql: 'values', httpBodies: true, interactive: true, handler: 'panel'});
   expect(puml).toContain('skinparam hyperlinkUnderline false');
   expect(puml).toContain('skinparam hyperlinkColor');
   // The ⊕ on each revealable arrow is the affordance; a paragraph explaining it is not.
@@ -844,8 +844,7 @@ test('a browser request arrives on the Browser from the left, its request sent f
   expect(at).toBeGreaterThan(0);
   expect(lines.slice(at + 1)).toEqual([
     'activate Browser',
-    `Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]]`
-      + `\\n[[${LANDED_ON} → VisitController.addVisit ↗]]`,
+    `Browser -> Backend: [[genseq://${id}${REQUEST} POST /api/visits ⊕]]`,
     'Backend --> Browser: 201',
     'deactivate Browser',
     '@enduml',
@@ -968,10 +967,11 @@ test('a request whose controller is unknown has neither a third line nor a call'
   }
 });
 
-test('a baked-in request has no panel, and still names its controller where asked', () => {
-  const line = drawn(CALL_SITE, STATIC).puml;
-  expect(line).toContain(`Browser -> Backend: POST /api/visits\\n[[${LANDED_ON} → VisitController.addVisit ↗]]\n`);
-  expect(line).not.toContain('genseq://');
+test('a baked-in request has no panel, and names its controller only as a call', () => {
+  const panel = drawn(CALL_SITE, STATIC).puml;
+  expect(panel).toContain('Browser -> Backend: POST /api/visits\n');
+  expect(panel).not.toContain('genseq://');
+  expect(panel).not.toContain('VisitController');
   const call = drawn(CALL_SITE, {...STATIC, handler: 'call'}).puml;
   expect(call).toContain(`Browser -> Backend: POST /api/visits\nactivate Backend\n`
     + `Backend -> Backend: [[${LANDED_ON} VisitController.addVisit ↗]]\n`);

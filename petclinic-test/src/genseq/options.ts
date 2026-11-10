@@ -7,11 +7,15 @@
 export type SqlDetail = 'off' | 'statement' | 'values';
 
 /**
- * Where an HTTP arrow names the controller method its request landed on: `line` — a third line
- * of the arrow's label, a link of its own under the words that open the request; `call` — a
- * self-call on the receiving lifeline, everything the request did nested inside it.
+ * Where an HTTP arrow names the controller method its request landed on: `panel` — only in the
+ * head of the panel the arrow's words open, the review page resolving it from the route; `call`
+ * — a self-call on the receiving lifeline, everything the request did nested inside it.
+ *
+ * There used to be a `line`: a third line under the arrow's words, a link of its own. Two
+ * links on one label, each with its own hover and click, for a name the panel's head already
+ * gives — it read as clutter (Victor, 10 Nov 2026). `line` is still accepted, as `panel`.
  */
-export type HandlerPlacement = 'line' | 'call';
+export type HandlerPlacement = 'panel' | 'call';
 
 export interface DiagramOptions {
   sql: SqlDetail;
@@ -36,7 +40,7 @@ export const DEFAULT_DIAGRAM_OPTIONS: DiagramOptions = {
   sql: 'statement',
   httpBodies: true,
   interactive: true,
-  handler: 'line',
+  handler: 'panel',
 };
 
 // Object.create(null): a plain literal answers to `constructor` and `__proto__`,
@@ -49,7 +53,7 @@ const SQL_ALIASES: Record<string, SqlDetail> = Object.assign(Object.create(null)
 
 // Object.create(null) for the reason SQL_ALIASES gives.
 const HANDLER_ALIASES: Record<string, HandlerPlacement> = Object.assign(Object.create(null), {
-  line: 'line', call: 'call',
+  panel: 'panel', line: 'panel', call: 'call',
 });
 
 const TRUTHY = /^(1|true|yes|on)$/i;
@@ -92,7 +96,7 @@ export function revealable(o: DiagramOptions): string[] {
 }
 
 const HANDLER_PLACES: Record<HandlerPlacement, string> = {
-  line: 'controllers under their request',
+  panel: 'controllers in the request panel',
   call: 'controllers as calls',
 };
 

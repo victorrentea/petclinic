@@ -470,9 +470,8 @@ function emitTrace(
    * The panel keeps the title `Browser → Backend: GET /api/owners/{ownerId}`: the review page
    * reads the route back out of it to name the controller in the panel's head.
    *
-   * Under `handler: 'line'` the controller is a third line, a link of its own: each `[[…]]` of a
-   * label becomes its own <a> in the SVG, and a `\n` between two of them is a line break like
-   * any other (checked against `plantuml -tsvg`).
+   * Under `handler: 'panel'` the controller is named only in that panel's head; under `call`
+   * it is a self-call on the receiving lifeline (below).
    *
    * A browser request whose frontend method is unknown has no call arriving from the left to
    * carry the line that sent it, so that line hangs off the words as a bare `↗` of its own.
@@ -495,9 +494,7 @@ function emitTrace(
     } else {
       words = linkedMethodLabel(text, sentFrom);
     }
-    const handler = landedOn && options.handler === 'line'
-      ? `\\n[[${landedOn.handle} → ${landedOn.name} ${METHOD_LINK_MARKER}]]` : '';
-    return `${words}${handler}`;
+    return words;
   };
 
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
