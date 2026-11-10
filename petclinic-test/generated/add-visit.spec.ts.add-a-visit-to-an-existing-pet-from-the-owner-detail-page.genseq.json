@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "details": {
     "0x8aana": {
       "title": "select owners",
@@ -40,30 +40,28 @@
         }
       ]
     },
+    "18jo62a": {
+      "title": "Browser → Backend: GET /api/owners/{ownerId}",
+      "steps": [
+        {
+          "label": "request",
+          "text": "GET http://127.0.0.1:53290/api/owners/1\nAccept: application/json, text/plain, */*"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:53290/api/owners/1",
+        "headers": {
+          "Accept": "application/json, text/plain, */*"
+        }
+      }
+    },
     "1bhasc1": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
           "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": \"8474461990\",\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2025-12-27\",\n          \"description\": \"ate the Christmas tinsel; kept under observation\",\n          \"id\": 1,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
-        }
-      ]
-    },
-    "0p6yxbc": {
-      "title": "SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties",
-      "steps": [
-        {
-          "label": "",
-          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
-        }
-      ]
-    },
-    "1nmg2oo": {
-      "title": "Backend → Browser: 200",
-      "steps": [
-        {
-          "label": "response body",
-          "text": "[\n  {\n    \"firstName\": \"Rafael\",\n    \"lastName\": \"Ortega\",\n    \"specialties\": [\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 4\n  },\n  {\n    \"firstName\": \"James\",\n    \"lastName\": \"Carter\",\n    \"specialties\": [],\n    \"id\": 1\n  },\n  {\n    \"firstName\": \"Helen\",\n    \"lastName\": \"Leary\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 2\n  },\n  {\n    \"firstName\": \"Linda\",\n    \"lastName\": \"Douglas\",\n    \"specialties\": [\n      {\n        \"id\": 3,\n        \"name\": \"dentistry\",\n        \"description\": \"bad breath, tooth pain, bleeding gums, difficulty eating, dropping food, drooling, broken tooth, loose tooth, pawing at the mouth, reluctance to chew.\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 3\n  },\n  {\n    \"firstName\": \"Sharon\",\n    \"lastName\": \"Jenkins\",\n    \"specialties\": [],\n    \"id\": 6\n  },\n  {\n    \"firstName\": \"Henry\",\n    \"lastName\": \"Stevens\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 5\n  }\n]"
         }
       ]
     },
@@ -80,6 +78,22 @@
         }
       ]
     },
+    "05e03mm": {
+      "title": "Browser → Backend: GET /api/pets/{petId}",
+      "steps": [
+        {
+          "label": "request",
+          "text": "GET http://127.0.0.1:53290/api/pets/1\nAccept: application/json, text/plain, */*"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:53290/api/pets/1",
+        "headers": {
+          "Accept": "application/json, text/plain, */*"
+        }
+      }
+    },
     "0n1gsl8": {
       "title": "Backend → Browser: 200",
       "steps": [
@@ -89,7 +103,41 @@
         }
       ]
     },
-    "07at2sw": {
+    "0p6yxbc": {
+      "title": "SELECT DISTINCT v FROM Vet v LEFT JOIN FETCH v.specialties",
+      "steps": [
+        {
+          "label": "",
+          "text": "SELECT distinct v1_0.id, v1_0.first_name, v1_0.last_name, s1_0.vet_id, s1_1.id, s1_1.description, s1_1.name\nFROM vets v1_0\nLEFT JOIN vet_specialties s1_0\nON v1_0.id=s1_0.vet_id\nLEFT JOIN specialties s1_1\nON s1_1.id=s1_0.specialty_id"
+        }
+      ]
+    },
+    "18kpp45": {
+      "title": "Browser → Backend: GET /api/vets",
+      "steps": [
+        {
+          "label": "request",
+          "text": "GET http://127.0.0.1:53290/api/vets\nAccept: application/json, text/plain, */*"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:53290/api/vets",
+        "headers": {
+          "Accept": "application/json, text/plain, */*"
+        }
+      }
+    },
+    "1nmg2oo": {
+      "title": "Backend → Browser: 200",
+      "steps": [
+        {
+          "label": "response body",
+          "text": "[\n  {\n    \"firstName\": \"Rafael\",\n    \"lastName\": \"Ortega\",\n    \"specialties\": [\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 4\n  },\n  {\n    \"firstName\": \"James\",\n    \"lastName\": \"Carter\",\n    \"specialties\": [],\n    \"id\": 1\n  },\n  {\n    \"firstName\": \"Helen\",\n    \"lastName\": \"Leary\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 2\n  },\n  {\n    \"firstName\": \"Linda\",\n    \"lastName\": \"Douglas\",\n    \"specialties\": [\n      {\n        \"id\": 3,\n        \"name\": \"dentistry\",\n        \"description\": \"bad breath, tooth pain, bleeding gums, difficulty eating, dropping food, drooling, broken tooth, loose tooth, pawing at the mouth, reluctance to chew.\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"surgery\",\n        \"description\": \"skin rash, itching, lump, growth, mass, wound, open wound, cut, laceration, abscess, swelling under the skin, bite wound, non-healing sore.\"\n      }\n    ],\n    \"id\": 3\n  },\n  {\n    \"firstName\": \"Sharon\",\n    \"lastName\": \"Jenkins\",\n    \"specialties\": [],\n    \"id\": 6\n  },\n  {\n    \"firstName\": \"Henry\",\n    \"lastName\": \"Stevens\",\n    \"specialties\": [\n      {\n        \"id\": 1,\n        \"name\": \"radiology\",\n        \"description\": \"limping, limp, broken bone, fracture, suspected fracture, swollen leg, can't bear weight, holding up a paw, joint pain after a fall, suspected internal injury, ingested a foreign object.\"\n      }\n    ],\n    \"id\": 5\n  }\n]"
+        }
+      ]
+    },
+    "14g6ded": {
       "title": "insert for victor.training.petclinic.domain.Visit",
       "steps": [
         {
@@ -97,35 +145,49 @@
           "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES (?, ?, ?, ?, ?)",
           "alternate": {
             "label": "",
-            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1793950993959', 1, ?, ?)"
+            "text": "INSERT INTO visits (visit_date, description, pet_id, visit_time, vet_id)\nVALUES ('2026-05-12', 'Annual check-up 1794322944822', 1, ?, ?)"
           }
         }
       ]
     },
-    "1p4ogm5": {
+    "00gfug0": {
       "title": "Backend → NotificationService: POST /api/notifications/visit-booked",
       "steps": [
         {
-          "label": "request body",
-          "text": "{\n  \"ownerPhone\": \"+18474461990\",\n  \"petName\": \"Axel\",\n  \"visitDate\": \"2026-05-12\"\n}"
+          "label": "request",
+          "text": "POST http://notification:8090/api/notifications/visit-booked\n\n{\n  \"ownerPhone\": \"+18474461990\",\n  \"petName\": \"Axel\",\n  \"visitDate\": \"2026-05-12\"\n}"
         }
-      ]
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://notification:8090/api/notifications/visit-booked",
+        "body": "{\"ownerPhone\":\"+18474461990\",\"petName\":\"Axel\",\"visitDate\":\"2026-05-12\"}"
+      }
     },
-    "0owbiij": {
+    "0jfza5n": {
       "title": "Browser → Backend: POST /api/owners/{ownerId}/pets/{petId}/visits",
       "steps": [
         {
-          "label": "request body",
-          "text": "{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1793950993959\",\n  \"vetId\": null,\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": [\n      {\n        \"date\": \"2025-12-27\",\n        \"description\": \"ate the Christmas tinsel; kept under observation\",\n        \"id\": 1,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": null,\n        \"vetFirstName\": null,\n        \"vetLastName\": null\n      }\n    ]\n  }\n}"
+          "label": "request",
+          "text": "POST http://127.0.0.1:53290/api/owners/1/pets/1/visits\nAccept: application/json, text/plain, */*\nContent-Type: application/json\n\n{\n  \"date\": \"2026-05-12\",\n  \"description\": \"Annual check-up 1794322944822\",\n  \"vetId\": null,\n  \"id\": null,\n  \"pet\": {\n    \"name\": \"Axel\",\n    \"birthDate\": \"2018-12-24\",\n    \"type\": {\n      \"name\": \"hamster\",\n      \"id\": 6\n    },\n    \"id\": 1,\n    \"ownerId\": 1,\n    \"visits\": [\n      {\n        \"date\": \"2025-12-27\",\n        \"description\": \"ate the Christmas tinsel; kept under observation\",\n        \"id\": 1,\n        \"petId\": 1,\n        \"petName\": \"Axel\",\n        \"ownerId\": 1,\n        \"ownerFirstName\": \"Kevin\",\n        \"ownerLastName\": \"McCallister\",\n        \"vetId\": null,\n        \"vetFirstName\": null,\n        \"vetLastName\": null\n      }\n    ]\n  }\n}"
         }
-      ]
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:53290/api/owners/1/pets/1/visits",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json"
+        },
+        "body": "{\"date\":\"2026-05-12\",\"description\":\"Annual check-up 1794322944822\",\"vetId\":null,\"id\":null,\"pet\":{\"name\":\"Axel\",\"birthDate\":\"2018-12-24\",\"type\":{\"name\":\"hamster\",\"id\":6},\"id\":1,\"ownerId\":1,\"visits\":[{\"date\":\"2025-12-27\",\"description\":\"ate the Christmas tinsel; kept under observation\",\"id\":1,\"petId\":1,\"petName\":\"Axel\",\"ownerId\":1,\"ownerFirstName\":\"Kevin\",\"ownerLastName\":\"McCallister\",\"vetId\":null,\"vetFirstName\":null,\"vetLastName\":null}]}}"
+      }
     },
-    "1s8fein": {
+    "11tdoe4": {
       "title": "Backend → Browser: 200",
       "steps": [
         {
           "label": "response body",
-          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": \"8474461990\",\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1793950993959\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2025-12-27\",\n          \"description\": \"ate the Christmas tinsel; kept under observation\",\n          \"id\": 1,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
+          "text": "{\n  \"firstName\": \"Kevin\",\n  \"lastName\": \"McCallister\",\n  \"address\": \"671 Lincoln Boulevard\",\n  \"city\": \"Winnetka\",\n  \"telephone\": \"8474461990\",\n  \"id\": 1,\n  \"pets\": [\n    {\n      \"name\": \"Axel\",\n      \"birthDate\": \"2018-12-24\",\n      \"type\": {\n        \"name\": \"hamster\",\n        \"id\": 6\n      },\n      \"id\": 1,\n      \"ownerId\": 1,\n      \"visits\": [\n        {\n          \"date\": \"2026-05-12\",\n          \"description\": \"Annual check-up 1794322944822\",\n          \"id\": 29,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        },\n        {\n          \"date\": \"2025-12-27\",\n          \"description\": \"ate the Christmas tinsel; kept under observation\",\n          \"id\": 1,\n          \"petId\": 1,\n          \"petName\": \"Axel\",\n          \"ownerId\": 1,\n          \"ownerFirstName\": \"Kevin\",\n          \"ownerLastName\": \"McCallister\",\n          \"vetId\": null,\n          \"vetFirstName\": null,\n          \"vetLastName\": null\n        }\n      ]\n    }\n  ]\n}"
         }
       ]
     }

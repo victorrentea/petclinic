@@ -10,7 +10,9 @@ footer @generate_sequence in src/owner-search.feature — generated from real tr
 participant Browser
 participant Backend
 participant DB
-Browser -> Backend: [[src://petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:30{Click to open the line that sent this request: owner-list.component.ts:30} List owners\nGET /api/owners ↗]]
+[-> Browser: [[src://petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:30{Click to open the line that sent this request: owner-list.component.ts:30} OwnerService.getOwners ↗]]
+activate Browser
+Browser -> Backend: [[genseq://1r6rd4h{Click for the request as it was sent} List owners\nGET /api/owners ⊕]]\n[[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:99{Click to open OwnerRestController.listOwners} → OwnerRestController.listOwners ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:12{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
 activate Backend
@@ -77,7 +79,10 @@ Backend -> DB: [[genseq://0ccg4wn{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: [[genseq://1sp2sda{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
-Browser -> Backend: [[src://petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:48{Click to open the line that sent this request: owner-list.component.ts:48 ← owner-list.component.html:18} List owners\nGET /api/owners ↗]]
+deactivate Browser
+[-> Browser: [[src://petclinic-frontend/src/app/owners/owner-list/owner-list.component.ts:48{Click to open the line that sent this request: owner-list.component.ts:48 ← owner-list.component.html:18} OwnerService.getOwners ↗]]
+activate Browser
+Browser -> Backend: [[genseq://1r6rd4h{Click for the request as it was sent} List owners\nGET /api/owners ⊕]]\n[[src://petclinic-backend/src/main/java/victor/training/petclinic/rest/OwnerRestController.java:99{Click to open OwnerRestController.listOwners} → OwnerRestController.listOwners ↗]]
 activate Backend
 Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:12{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
 activate Backend
@@ -144,4 +149,5 @@ Backend -> DB: [[genseq://0ccg4wn{Click for the statement behind this call} sele
 Backend -> DB: [[genseq://1obsoh2{Click for the statement behind this call} select visits ⊕]]
 Backend --> Browser: [[genseq://1sp2sda{Click for this call’s JSON body} 200 ⊕]]
 deactivate Backend
+deactivate Browser
 @enduml
