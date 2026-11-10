@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test';
 import type {NormSpan} from './trace-to-puml';
-import {handlerHandle, moduleHandlers, routeOf} from './controller-location';
+import {handlerHandle, handlerOf, moduleHandlers, routeOf} from './controller-location';
 
 // A request's arrow opens the controller method it landed on, resolved by its route against
 // the service's sources: the trace carries the route and no code.
@@ -103,4 +103,13 @@ test('the handle opens the declaration and says which method it is', () => {
     + `${lineOf(OWNERS, 'getOwner(@')}{Click to open OwnerRestController.getOwner}`);
   expect(handlerHandle(server({}, 'GET /api/nowhere'), handlers)).toBeUndefined();
   expect(handlerHandle({...server({}), kind: 'CLIENT'}, handlers)).toBeUndefined();
+});
+
+// The arrow names the controller as well as linking it: a third line, or a self-call.
+test('the handler is named as the diagram says it, beside its handle', () => {
+  const handlers = moduleHandlers('petclinic-backend', REPO, read, walk);
+  expect(handlerOf(server({}), handlers)).toEqual({
+    name: 'OwnerRestController.getOwner', handle: handlerHandle(server({}), handlers),
+  });
+  expect(handlerOf(server({}, 'GET /api/nowhere'), handlers)).toBeUndefined();
 });
