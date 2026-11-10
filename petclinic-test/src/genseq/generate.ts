@@ -2,13 +2,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {readWindows} from '../support/trace-window-store';
 import {readCallSites} from '../support/call-sites';
-import {parseTempoTrace, renderDiagram, DiagramScenario, MethodLinks, NormSpan,
+import {parseTempoTrace, renderDiagram, ClientMethods, DiagramScenario, MethodLinks, NormSpan,
   PARTICIPANT_ATTRIBUTE, TEST_PARTICIPANT} from './trace-to-puml';
 import {tempoConfigFromEnv, searchTraceIds, getTrace} from './tempo-client';
 import {DEFAULT_DIAGRAM_OPTIONS, DiagramOptions, describeOptions, optionsFromEnv} from './options';
 import {lineOfHandle, lineOfStep, lineOfTest, stepHandle, testHandle} from './test-location';
 import {methodHandle, overloadOf} from './code-location';
-import {CALL_SITE_ATTRIBUTE, CallSite, callSiteHandle, callSiteIndex, withCallSites} from './call-site';
+import {CALL_SITE_ATTRIBUTE, CallFrame, CallSite, callSiteHandle, callSiteIndex, withCallSites}
+  from './call-site';
+import {Handler, WalkFiles, handlerHandle, moduleHandlers} from './controller-location';
+import {clientMethodOf} from './client-method';
 import {defaultOperations} from './openapi-operations';
 
 export interface TestWindow {
@@ -32,6 +35,10 @@ export interface RenderDeps {
   /** Optional: what a directory holds, so a renamed or deleted scenario's diagram can be
    *  swept rather than left on disk describing a run that no longer happens. */
   listFiles?: (dir: string) => string[];
+  /** Optional: every file under a directory, so a request's route can be resolved against
+   *  the controllers of the service it reached. Without it the request arrows keep the
+   *  links they had. */
+  walkFiles?: WalkFiles;
   log: (msg: string) => void;
 }
 
@@ -307,6 +314,7 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
   if (!readFile) return () => undefined;
   const repoRoot = path.dirname(rootDir);
   const cache = new Map<string, string | undefined>();
+  const handlers = new Map<string, Map<string, Handler>>();
   return (span, scenario) => {
     // A step arrow is the test talking about itself. `given("…")` is written in the test
     // file and nowhere else, so there are no `code.*` attributes to follow — the sentence
@@ -322,6 +330,17 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
     // that this checkout still has that line.
     const callSite = span.attributes[CALL_SITE_ATTRIBUTE];
     if (callSite) return callSiteHandle(callSite, span.serviceName, repoRoot, readFile);
+    // A request lands on a controller method the trace never names: resolved by its route
+    // against that service's sources, scanned once per module.
+    if (span.kind === 'SERVER' && deps.walkFiles) {
+      let routes = handlers.get(span.serviceName);
+      if (!routes) {
+        routes = moduleHandlers(span.serviceName, repoRoot, readFile, deps.walkFiles);
+        handlers.set(span.serviceName, routes);
+      }
+      const handle = handlerHandle(span, routes);
+      if (handle) return handle;
+    }
     // One trace draws the same repository method many times over — an N+1 is exactly what
     // these pictures are for — and each hit would otherwise re-read and re-scan the file.
     // The overload is part of the key: `normalize(phone)` and `normalize(phone, country)`
@@ -330,6 +349,37 @@ function methodLinksFor(rootDir: string, deps: RenderDeps, source: string): Meth
       span.attributes['code.function'], JSON.stringify(overloadOf(span.attributes))].join('#');
     if (!cache.has(key)) {
       cache.set(key, methodHandle(span.attributes, span.serviceName, repoRoot, readFile));
+    }
+    return cache.get(key);
+  };
+}
+
+/**
+ * Name the frontend method each browser request went through — see client-method.ts.
+ * Needs the working tree like the links above; without `readFile` the requests are drawn
+ * straight off the Browser lifeline, as they always were.
+ */
+function clientMethodsFor(rootDir: string, deps: RenderDeps): ClientMethods {
+  const readFile = deps.readFile;
+  if (!readFile) return () => undefined;
+  const repoRoot = path.dirname(rootDir);
+  const cache = new Map<string, string | undefined>();
+  return (span) => {
+    const attribute = span.attributes[CALL_SITE_ATTRIBUTE];
+    if (span.kind !== 'CLIENT' || !attribute) return undefined;
+    const key = `${span.spanId}#${attribute}`;
+    if (!cache.has(key)) {
+      let frames: CallFrame[] = [];
+      try {
+        frames = JSON.parse(attribute);
+      } catch {
+        // an unreadable attribute is a request with no known call site
+      }
+      const request = {
+        verb: span.attributes['http.method'] ?? span.attributes['http.request.method'],
+        url: span.attributes['http.url'] ?? span.attributes['url.full'],
+      };
+      cache.set(key, clientMethodOf(frames, request, `${repoRoot}/${span.serviceName}`, readFile));
     }
     return cache.get(key);
   };
@@ -351,6 +401,14 @@ function titleFor(rootDir: string, source: string): string {
   return source.startsWith('..') ? repoRelative(rootDir, source) : source;
 }
 
+/** Every file under `dir`, absolute; nothing for a directory that is not there. */
+function walkFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, {recursive: true, withFileTypes: true})
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.join(entry.parentPath ?? (entry as any).path, entry.name));
+}
+
 /** Draw the diagrams from spans already in hand — the offline half of the pipeline. */
 export function renderScenarios(
   sources: CachedSource[], rootDir: string, deps: RenderDeps,
@@ -362,6 +420,7 @@ export function renderScenarios(
     const linked = linkScenarios(scenarios, rootDir, source, deps);
     const title = titleFor(rootDir, source);
     const methodLinks = methodLinksFor(rootDir, deps, source);
+    const clientMethods = clientMethodsFor(rootDir, deps);
     const slugs = uniqueSlugs(linked.map((s) => s.title));
     const mine = new Set<string>();
     linked.forEach((scenario, i) => {
@@ -371,7 +430,7 @@ export function renderScenarios(
       // One scenario per call, so the divider `renderDiagram` draws is this diagram's
       // own header and the picture under it is one test from end to end.
       const {puml, details} = renderDiagram(
-        title, [scenario], options, defaultOperations(), methodLinks);
+        title, [scenario], options, defaultOperations(), methodLinks, clientMethods);
       // A scenario whose traces draw nothing — a lone click, a run that recorded no
       // server span — used to cost a header inside a shared file and nothing more. On its
       // own it would be a file containing a title and no conversation, which the review
@@ -510,6 +569,7 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
       listFiles: (d) => (fs.existsSync(d) ? fs.readdirSync(d) : []),
+      walkFiles,
       log: (m) => console.log(m),
     }, options);
     console.log(`📊 Re-rendered ${paths.length} diagram(s) from ${cacheFile} — Grafana not needed`);
@@ -544,6 +604,7 @@ export async function runGenerate(owned?: RegExp): Promise<void> {
       readFile: (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf-8') : undefined),
       removeFile: (p) => fs.rmSync(p, {force: true}),
       listFiles: (d) => (fs.existsSync(d) ? fs.readdirSync(d) : []),
+      walkFiles,
       log: (m) => console.log(m),
     };
 

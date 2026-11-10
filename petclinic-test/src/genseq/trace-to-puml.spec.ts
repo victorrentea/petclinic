@@ -808,6 +808,49 @@ test('a call site the checkout could not confirm leaves the arrow plain', () => 
   expect(puml).toContain('Browser -> Backend: POST /api/visits\n');
 });
 
+// ── A browser request is drawn as the frontend method it went through ────────────
+// A self-call on the Browser names the service method (genseq/client-method.ts) and opens
+// the line that sent the request; the request leaves from inside its activation, and its
+// words open the controller method it landed on (genseq/controller-location.ts).
+const LANDED_ON = 'src://petclinic-backend/src/main/java/VisitController.java:30'
+  + '{Click to open VisitController.addVisit}';
+const bothEnds = (span: NormSpan) =>
+  span.spanId === 'c-xhr' ? SENT_FROM : span.spanId === 'c-server' ? LANDED_ON : undefined;
+const throughVisitService = (span: NormSpan) =>
+  span.spanId === 'c-xhr' ? 'VisitService.addVisit' : undefined;
+
+test('a browser request is a self-call on the Browser, its request sent from inside it', () => {
+  const lines = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
+    STATIC, new Map(), bothEnds, throughVisitService).puml.split('\n');
+  const at = lines.indexOf(`Browser -> Browser: [[${SENT_FROM} VisitService.addVisit \u2197]]`);
+  expect(at).toBeGreaterThan(0);
+  expect(lines.slice(at + 1, at + 4)).toEqual([
+    'activate Browser',
+    `Browser -> Backend: [[${LANDED_ON} POST /api/visits \u2197]]`,
+    'Backend --> Browser: 201',
+  ]);
+  expect(lines[at + 4]).toBe('deactivate Browser');
+});
+
+test('a body keeps its ⊕ beside the words that open the controller', () => {
+  const {puml, details} = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest({...CALL_SITE, 'http.request.body': '{"a":1}'})]}],
+    undefined, new Map(), bothEnds, throughVisitService);
+  const [id] = Object.keys(details.details);
+  expect(puml).toContain(`Browser -> Backend: [[${LANDED_ON} POST /api/visits \u2197]] `
+    + `[[genseq://${id}{Click for this call\u2019s JSON body} \u2295]]`);
+});
+
+test('a request whose frontend method is unknown keeps the line that sent it on its words', () => {
+  const puml = renderDiagram('src/add-visit.spec.ts',
+    [{title: 'books a visit', traces: [browserRequest(CALL_SITE)]}],
+    STATIC, new Map(), bothEnds, () => undefined).puml;
+  expect(puml).not.toContain('Browser -> Browser');
+  expect(puml).not.toContain('activate Browser');
+  expect(puml).toContain(`Browser -> Backend: [[${SENT_FROM} POST /api/visits \u2197]]`);
+});
+
 // ── A driver call with no statement is not a query ───────────────────────────────
 // The JDBC instrumentation times every call into the driver, so borrowing or validating a
 // pooled connection arrives as a CLIENT span with the whole database semconv on it and
