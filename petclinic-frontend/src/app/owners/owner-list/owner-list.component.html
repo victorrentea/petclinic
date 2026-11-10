@@ -15,6 +15,8 @@
                         (pageChange)="onPage($event)"></app-owner-pager>
     </form>
 
+    <div class="alert alert-danger" role="alert" *ngIf="errorMessage">{{ errorMessage }}</div>
+
     <ng-container *ngIf="page">
       <div *ngIf="page.totalElements === 0">No owners with LastName starting with "{{searchedLastName}}"</div>
       <div class="table-responsive" id="ownersTable" *ngIf="page.totalElements > 0">

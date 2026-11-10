@@ -65,6 +65,16 @@ class OwnerSortCollationTest {
                 .containsExactly("Łódź", "Lyon", "Madrid");
     }
 
+    @Test
+    void eachSortChainHasItsIndex() {
+        List<?> indexes = entityManager.createNativeQuery(
+                "select indexdef from pg_indexes where tablename = 'owners'").getResultList();
+
+        assertThat(indexes).asString()
+                .contains("(last_name, first_name, id)")
+                .contains("(city, last_name, first_name, id)");
+    }
+
     private void save(String firstName, String lastName, String city) {
         Owner owner = TestData.anOwner();
         owner.setFirstName(firstName);

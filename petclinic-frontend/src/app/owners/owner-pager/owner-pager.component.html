@@ -1,4 +1,4 @@
-<div class="pager" role="group" aria-label="Pagination">
+<fieldset class="pager" aria-label="Pagination">
   <label [for]="id + '-size'">Items per page:</label>
   <app-combo class="page-size" [inputId]="id + '-size'" [options]="pageSizeOptions"
               [ngModel]="page.size" [ngModelOptions]="{standalone: true}" (ngModelChange)="resize($event)"></app-combo>
@@ -18,4 +18,4 @@
   <button type="button" aria-label="Last page" [disabled]="page.number >= lastIndex" (click)="goTo(lastIndex)">
     <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
   </button>
-</div>
+</fieldset>

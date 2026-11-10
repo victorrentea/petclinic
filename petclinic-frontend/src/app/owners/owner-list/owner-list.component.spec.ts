@@ -197,12 +197,13 @@ describe('OwnerListComponent', () => {
   });
 
   it('changing the page size keeps the first visible owner on screen', async () => {
-    getOwnersSpy.and.returnValue(of(pageOf([kevin], {number: 2, size: 5, totalPages: 6})));
-    await open('/owners?page=3&size=5');
+    getOwnersSpy.and.returnValue(of(pageOf([kevin], {number: 4, size: 5, totalPages: 6})));
+    await open('/owners?page=5&size=5');
 
-    await choose(pageSizeSelect(), '20');
+    await choose(pageSizeSelect(), '10');
 
-    expect(urlQueryParams()).toEqual({page: '1', size: '20'});
+    // owners 21-25 were on screen; at 10 per page owner 21 is on the third page
+    expect(urlQueryParams()).toEqual({page: '3', size: '10'});
   });
 
   it('jumps to the last page and back to the first', async () => {
@@ -326,6 +327,19 @@ describe('OwnerListComponent', () => {
     initialLoad.next(pageOf([kevin, {...kevin, id: 2, lastName: 'Davis'}]));
 
     expect(component.owners).toEqual([kevin]);
+  });
+
+  it('says why when the list cannot be loaded', async () => {
+    getOwnersSpy.and.returnValue(throwError(() => 'Cannot sort by \'telephone\''));
+    await open('/owners?sort=telephone');
+
+    expect(fixture.nativeElement.querySelector('.alert-danger').textContent).toContain('Cannot sort by');
+  });
+
+  it('ignores a page or size in the URL that is not a number', async () => {
+    await open('/owners?page=abc&size=x');
+
+    expect(lastQuery()).toEqual({});
   });
 
   it('keeps listening to the URL after a failed request', async () => {

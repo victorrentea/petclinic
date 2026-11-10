@@ -1,4 +1,4 @@
-import {Component, forwardRef, HostBinding, Input} from '@angular/core';
+import {Component, forwardRef, HostBinding, Input, OnChanges} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 export type ComboCompareFn = (a: any, b: any) => boolean;
@@ -17,7 +17,7 @@ export type ComboCompareFn = (a: any, b: any) => boolean;
   styleUrls: ['./combo.component.css'],
   providers: [{provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => ComboComponent), multi: true}]
 })
-export class ComboComponent implements ControlValueAccessor {
+export class ComboComponent implements ControlValueAccessor, OnChanges {
   /** The design-system marker every standardised combo carries into the DOM. */
   @HostBinding('attr.data-ds') readonly designSystemMarker = 'combo';
 
@@ -35,6 +35,9 @@ export class ComboComponent implements ControlValueAccessor {
 
   value: any = null;
   disabled = false;
+  /** Index of the currently bound value among the options, or -1 for the placeholder. Kept as a
+   *  field: a getter would be evaluated once per option on every change detection, O(n²). */
+  selectedIndex = -1;
 
   private onChange: (value: any) => void = () => undefined;
   private onTouched: () => void = () => undefined;
@@ -47,14 +50,14 @@ export class ComboComponent implements ControlValueAccessor {
     return this.valueKey !== null && option !== null && typeof option === 'object' ? option[this.valueKey] : option;
   }
 
-  /** Index of the currently bound value among the options, or -1 for the placeholder. */
-  get selectedIndex(): number {
-    return this.options.findIndex(option => this.compareWith(this.valueOf(option), this.value));
+  ngOnChanges(): void {
+    this.selectValue();
   }
 
   pick(index: string): void {
     const option = this.options[Number(index)];
     this.value = index === '' ? null : this.valueOf(option);
+    this.selectValue();
     this.onChange(this.value);
   }
 
@@ -64,6 +67,7 @@ export class ComboComponent implements ControlValueAccessor {
 
   writeValue(value: any): void {
     this.value = value;
+    this.selectValue();
   }
 
   registerOnChange(fn: (value: any) => void): void {
@@ -76,5 +80,9 @@ export class ComboComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  private selectValue(): void {
+    this.selectedIndex = this.options.findIndex(option => this.compareWith(this.valueOf(option), this.value));
   }
 }

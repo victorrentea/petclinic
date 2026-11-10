@@ -228,6 +228,13 @@ class OwnerListTest {
                 .andExpect(jsonPath("$.detail", containsString("'" + key + "'")));
     }
 
+    @Test
+    void anUnsupportedSortKeyCannotForgeALogLine() throws Exception {
+        mockMvc.perform(get("/api/owners").param("sort", "x\nINFO forged"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail", containsString("'x?INFO forged'")));
+    }
+
     private void saveOwners(String... firstLastCity) {
         for (String owner : firstLastCity) {
             String[] parts = owner.split(" ");

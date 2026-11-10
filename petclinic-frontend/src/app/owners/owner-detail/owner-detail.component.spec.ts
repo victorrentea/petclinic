@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub, RouterStub } from '../../testing/router-stubs';
 import { Owner } from '../owner';
 import { Observable, of } from 'rxjs';
+import { Location } from '@angular/common';
 
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
@@ -109,4 +110,16 @@ describe('OwnerDetailComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/owners']);
   });
 
+
+  it('Back returns to the grid page the user came from', () => {
+    const location = TestBed.inject(Location);
+    spyOn(location, 'getState').and.returnValue({navigationId: 3});
+    spyOn(location, 'back');
+    spyOn(router, 'navigate');
+
+    component.gotoOwnersList();
+
+    expect(location.back).toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
 });
