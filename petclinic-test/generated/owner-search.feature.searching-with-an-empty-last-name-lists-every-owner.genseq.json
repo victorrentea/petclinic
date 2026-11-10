@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "details": {
     "1aoufu2": {
       "title": "OwnerRepository.findByLastNameStartingWith",
@@ -780,6 +780,22 @@
           }
         }
       ]
+    },
+    "0h0ihxd": {
+      "title": "Browser → Backend: GET /api/owners",
+      "steps": [
+        {
+          "label": "request",
+          "text": "GET http://127.0.0.1:55450/api/owners\nAccept: application/json, text/plain, */*"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:55450/api/owners",
+        "headers": {
+          "Accept": "application/json, text/plain, */*"
+        }
+      }
     },
     "0ke7864": {
       "title": "Backend → Browser: 200",
