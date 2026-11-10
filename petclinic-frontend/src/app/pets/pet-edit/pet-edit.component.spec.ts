@@ -10,6 +10,7 @@ import {OwnerService} from '../../owners/owner.service';
 import {PetTypeService} from '../../pettypes/pettype.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub, RouterStub} from '../../testing/router-stubs';
+import {Location} from '@angular/common';
 import {Pet} from '../pet';
 import {Owner} from '../../owners/owner';
 import {Observable, of} from 'rxjs';
@@ -58,6 +59,7 @@ describe('PetEditComponent', () => {
         {provide: OwnerService, useClass: OwnerServiceStub},
         {provide: PetTypeService, useClass: PetTypeServiceStub},
         {provide: Router, useClass: RouterStub},
+        {provide: Location, useValue: jasmine.createSpyObj<Location>('Location', ['back', 'getState'])},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
     })
@@ -110,6 +112,31 @@ describe('PetEditComponent', () => {
     spyOn(router, 'navigate');
     component.currentOwner = testOwner2;
     component.gotoOwnerDetail();
+    expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('Back returns to the page the user came from, e.g. a page of the owners grid', () => {
+    const location = TestBed.inject(Location) as jasmine.SpyObj<Location>;
+    location.getState.and.returnValue({navigationId: 3});
+    const router = fixture.debugElement.injector.get(Router) as unknown as RouterStub;
+    spyOn(router, 'navigate');
+
+    component.goBack();
+
+    expect(location.back).toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('Back from a pet page opened directly goes to its owner', () => {
+    const location = TestBed.inject(Location) as jasmine.SpyObj<Location>;
+    location.getState.and.returnValue({navigationId: 1});
+    const router = fixture.debugElement.injector.get(Router) as unknown as RouterStub;
+    spyOn(router, 'navigate');
+    component.currentOwner = testOwner2;
+
+    component.goBack();
+
+    expect(location.back).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });
 });

@@ -1,4 +1,5 @@
 import {test, expect, Page} from './support/trace-fixture';
+import {OwnersPage} from './pages/OwnersPage';
 
 // The owner flows that only a browser can walk, and until now none of them did:
 // every other acceptance test READS owners — the list, a detail page, the visit form
@@ -31,17 +32,21 @@ async function addOwnerThroughTheForm(page: Page, lastName: string): Promise<voi
 
   // The form navigates back to the list once the POST returns, so this is also the
   // assertion that the write succeeded rather than the error branch running.
-  await expect(page).toHaveURL(/\/owners$/);
+  await expect(page).toHaveURL(/\/owners(\?.*)?$/);
+}
+
+/** Searches the grid until it lists exactly this one owner, named "Last, First". */
+async function searchForTheOnly(page: Page, lastName: string, firstName: string): Promise<OwnersPage> {
+  const owners = new OwnersPage(page);
+  await owners.search(lastName);
+  await expect.poll(() => owners.names(), {timeout: 10_000}).toEqual([`${lastName}, ${firstName}`]);
+  return owners;
 }
 
 /** Finds the owner just created and opens their page — which is `getOwner` by id. */
 async function openTheOwnerNamed(page: Page, lastName: string): Promise<void> {
-  await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
-  const rows = page.locator('td.ownerFullName');
-  await expect(rows).toHaveCount(1);
-  await rows.first().locator('a').click();
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+  const owners = await searchForTheOnly(page, lastName, 'Ada');
+  await owners.openOwner(`${lastName}, Ada`);
 }
 
 test('adds an owner from the New Owner form and finds them by last name', async ({page}) => {
@@ -49,11 +54,7 @@ test('adds an owner from the New Owner form and finds them by last name', async 
 
   await addOwnerThroughTheForm(page, lastName);
 
-  await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
-  const rows = page.locator('td.ownerFullName');
-  await expect(rows).toHaveCount(1);
-  await expect(rows.first()).toContainText(`Ada ${lastName}`);
+  await searchForTheOnly(page, lastName, 'Ada');
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {

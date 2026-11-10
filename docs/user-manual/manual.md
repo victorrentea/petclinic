@@ -43,13 +43,23 @@ The Owners area is the heart of the application. It holds the contact details of
 
 ![](screenshots/owners-list.png)
 
-Click *Owners* in the navigation bar. The list shows each owner's name, address, city, telephone number and the names of their pets. Click an owner's name to open their record.
+Click *Owners* in the navigation bar. The list shows each owner's name, address, city, telephone number and the names of their pets. Names are shown last name first (*Darling, Wendy*), and the list starts in alphabetical order. Click an owner's name to open their record.
+
+The owners are shown one page at a time, 10 to a page. Below the table:
+
+- the range label tells you which owners you are looking at and how many there are in total, e.g. *1 – 10 of 26*;
+- click the right arrow to go to the next page and the left arrow to go back to the previous one;
+- pick 5, 10 or 20 in *Items per page* to see fewer or more owners on each page.
+
+To change the order, click the *Name* or *City* column heading. Click the same heading again to reverse the order; a small arrow next to the heading shows which way the list is sorted. The *Address*, *Telephone* and *Pets* columns cannot be sorted. Changing the order takes you back to the first page.
+
+The address bar of your browser always remembers the page, page size and order you are looking at. So after opening an owner's record, the browser's *Back* button returns you to the same page of the list, refreshing the browser keeps you where you were, and you can copy the link to show a colleague exactly the same page.
 
 ### Searching by last name
 
 ![](screenshots/owners-search.png)
 
-To find an owner quickly, type all or part of their last name in the *Last name* box at the top of the list and click *Find Owner*. The list narrows down to the matching owners. Clear the box and click *Find Owner* again to see everyone.
+To find an owner quickly, type the first letters of their last name in the *Last name* box at the top of the list and click *Find Owner*. The list narrows down to the matching owners, starting again from the first page and keeping the order you had chosen; the range label shows how many owners match. If nobody matches, a message says so. Clear the box and click *Find Owner* again to see everyone.
 
 ### Creating a new owner
 

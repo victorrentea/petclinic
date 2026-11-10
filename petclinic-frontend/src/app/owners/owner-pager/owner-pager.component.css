@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 12px;
+}
+
+label {
+  margin: 0;
+  font-weight: normal;
+}
+
+.page-size {
+  width: 64px;
+}
+
+.page-picker {
+  width: 100px;
+}
+
+.total {
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #555;
+}
+
+button:disabled {
+  color: #ccc;
+}

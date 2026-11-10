@@ -1,0 +1,21 @@
+<div class="pager" role="group" aria-label="Pagination">
+  <label [for]="id + '-size'">Items per page:</label>
+  <app-combo class="page-size" [inputId]="id + '-size'" [options]="pageSizeOptions"
+              [ngModel]="page.size" [ngModelOptions]="{standalone: true}" (ngModelChange)="resize($event)"></app-combo>
+  <label class="sr-only" [for]="id + '-page'">Page</label>
+  <app-combo class="page-picker" [inputId]="id + '-page'" [options]="ranges" labelKey="label" valueKey="index"
+              [ngModel]="page.number" [ngModelOptions]="{standalone: true}" (ngModelChange)="goTo($event)"></app-combo>
+  <span class="total">of {{ page.totalElements }}</span>
+  <button type="button" aria-label="First page" [disabled]="page.number === 0" (click)="goTo(0)">
+    <span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span>
+  </button>
+  <button type="button" aria-label="Previous page" [disabled]="page.number === 0" (click)="goTo(page.number - 1)">
+    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+  </button>
+  <button type="button" aria-label="Next page" [disabled]="page.number >= lastIndex" (click)="goTo(page.number + 1)">
+    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+  </button>
+  <button type="button" aria-label="Last page" [disabled]="page.number >= lastIndex" (click)="goTo(lastIndex)">
+    <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+  </button>
+</div>

@@ -3,6 +3,12 @@ package victor.training.petclinic.rest;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -20,6 +26,7 @@ import victor.training.petclinic.rest.dto.OwnerFieldsDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.error.UnsupportedSortKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +43,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,15 +88,45 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
-    @ApiResponse(responseCode = "200", description = "OK",
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time",
+            description = "Owners whose last name starts with `lastName`, one page at a time.")
+    @Parameter(name = "page", in = ParameterIn.QUERY, description = "0-based; a page past the last one is empty",
+            schema = @Schema(type = "integer", minimum = "0", defaultValue = "0"))
+    @Parameter(name = "size", in = ParameterIn.QUERY, description = "Owners per page; more than 20 is clamped to 20",
+            schema = @Schema(type = "integer", minimum = "1", maximum = "20", defaultValue = "10"))
+    @Parameter(name = "sort", in = ParameterIn.QUERY,
+            description = "name (last name, then first name) or city, each ,asc or ,desc; ties are broken by id",
+            schema = @Schema(type = "string", defaultValue = "name,asc",
+                    allowableValues = {"name,asc", "name,desc", "city,asc", "city,desc"}))
+    @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true,
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @ApiResponse(responseCode = "400", description = "Unsupported sort key",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public PagedModel<OwnerDto> listOwners(
+            @RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @Parameter(hidden = true) Pageable pageable) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, bySortKey(pageable));
+        return new PagedModel<>(owners.map(ownerMapper::toOwnerDto));
+    }
+
+    // The API sorts by keys, not by entity properties: each key is a fixed chain of columns, in the
+    // requested direction, ending with the id (always ascending) so that no owner lands on two pages
+    private static Pageable bySortKey(Pageable pageable) {
+        List<Sort> requested = pageable.getSort().map(OwnerRestController::columnsOf).toList();
+        Sort columns = requested.isEmpty() ? columnsOf(Sort.Order.asc("name")) : requested.get(0);
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), columns.and(Sort.by("id")));
+    }
+
+    private static Sort columnsOf(Sort.Order sortKey) {
+        String[] columns = switch (sortKey.getProperty()) {
+            case "name" -> new String[]{"lastName", "firstName"};
+            case "city" -> new String[]{"city", "lastName", "firstName"};
+            default -> throw new UnsupportedSortKeyException(sortKey.getProperty(), List.of("name", "city"));
+        };
+        return Sort.by(sortKey.getDirection(), columns);
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

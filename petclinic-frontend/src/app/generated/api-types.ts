@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners, one page at a time
+     * @description Owners whose last name starts with `lastName`, one page at a time.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,20 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    PageMetadata: {
+      /** Format: int64 */
+      number?: number;
+      /** Format: int64 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int64 */
+      totalPages?: number;
+    };
+    PagedModelOwnerDto: {
+      content?: components["schemas"]["OwnerDto"][];
+      page?: components["schemas"]["PageMetadata"];
     };
     PetDto: {
       /**
@@ -553,24 +570,33 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners, one page at a time
+   * @description Owners whose last name starts with `lastName`, one page at a time.
+   */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description 0-based; a page past the last one is empty */
+        page?: number;
+        /** @description Owners per page; more than 20 is clamped to 20 */
+        size?: number;
+        /** @description name (last name, then first name) or city, each ,asc or ,desc; ties are broken by id */
+        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["PagedModelOwnerDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description Unsupported sort key */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/problem+json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */

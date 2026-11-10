@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {Pet} from '../pet';
 import {PetService} from '../pet.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Location} from '@angular/common';
 import {Owner} from '../../owners/owner';
 import {PetType} from '../../pettypes/pettype';
 import {PetTypeService} from '../../pettypes/pettype.service';
@@ -25,7 +26,8 @@ export class PetEditComponent implements OnInit {
               private petTypeService: PetTypeService,
               private ownerService: OwnerService,
               private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private location: Location) {
     this.pet = {} as Pet;
     this.currentOwner = {} as Owner;
     this.currentType = {} as PetType;
@@ -64,6 +66,16 @@ export class PetEditComponent implements OnInit {
       res => this.gotoOwnerDetail(),
       error => this.errorMessage = error as any
     );
+  }
+
+  // back where the user came from (e.g. a page of the owners grid); to the owner when the page was opened directly
+  goBack() {
+    const cameFromInsideTheApp = (this.location.getState() as {navigationId?: number})?.navigationId > 1;
+    if (cameFromInsideTheApp) {
+      this.location.back();
+    } else {
+      this.gotoOwnerDetail();
+    }
   }
 
   gotoOwnerDetail() {

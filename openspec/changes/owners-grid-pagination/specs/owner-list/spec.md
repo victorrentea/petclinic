@@ -146,7 +146,7 @@ from such a URL, on refresh, or on navigating back from an owner's details.
 - **THEN** the grid shows page 3 ordered by city again
 
 #### Scenario: Shared link
-- **WHEN** someone opens `/owners?page=1&size=5&sort=city,desc`
+- **WHEN** someone opens `/owners?page=2&size=5&sort=city,desc`
 - **THEN** the grid shows the second page of 5 owners ordered by city descending
 
 ### Requirement: A new search restarts from the first page

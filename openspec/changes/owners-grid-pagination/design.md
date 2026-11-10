@@ -79,8 +79,9 @@ The current state that shapes the approach:
 ## Decisions
 
 ### D1. The response is Spring Data's `PagedModel`, serialized `VIA_DTO`
-`listOwners` returns `PagedModel<OwnerDto>`; `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)`
-goes on a web config class.
+`listOwners` returns `PagedModel<OwnerDto>`; `spring.data.web.pageable.serialization-mode=via-dto` selects the
+DTO form. Not `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)`: that annotation makes Boot's
+`SpringDataWebAutoConfiguration` back off, and with it the `spring.data.web.pageable.*` limits of D6.
 *Alternatives:* serializing `Page`/`PageImpl` directly (Spring Data warns its JSON is not stable); a
 hand-written `OwnerPageDto` (same shape, one more class); a bare array plus an `X-Total-Count` header
 (invisible to OpenAPI and to the generated TS types, needs a CORS expose).
@@ -117,7 +118,8 @@ are of many nationalities, so no single language's rules fit).
 ### D5. Two composite indexes, created in the same migration as the collation
 `owners (last_name, first_name, id)` and `owners (city, last_name, first_name, id)`. Each matches one
 sort chain from D2 exactly, so `ORDER BY … LIMIT n` reads n index entries. A descending sort scans the
-same index backwards. Created after the collation change so they carry the ICU collation.
+same index backwards, then puts ties in ascending `id` order with a small Incremental Sort (seen in
+EXPLAIN). Created after the collation change so they carry the ICU collation.
 *Alternatives:* one index per column (the planner cannot serve a multi-column order from them);
 no index (a seq scan + sort of 50k rows per click — tens of ms, but it grows with the table).
 
@@ -130,7 +132,8 @@ instead of failing, which is the behavior the spec asks for.
 `switchMap`s each change into `OwnerService.getOwners(query)`, which keeps the "only the latest request
 answers" property the component has today. Paginator, sort header and search form never load data
 themselves: they only `router.navigate([], {queryParams, queryParamsHandling: 'merge'})`. A search
-also sets `page` to 0. The URL's `page` is 0-based, like the API's.
+also sets `page` to 1. The URL's `page` counts from 1, because people read and share it (`page=1` is the first
+page); the grid subtracts 1 before calling the 0-based API.
 The table keeps its Bootstrap markup and gains `matSort` + `mat-sort-header` on the Name and City `<th>`s
 (`disableClear`), with a `mat-paginator` (`[pageSizeOptions]="[5, 10, 20]"`) below it; `MatSortModule`
 and `MatPaginatorModule` are imported in `OwnersModule`.

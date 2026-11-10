@@ -1,79 +1,75 @@
-#ownersByLastName
-{
-display:none;
+/* fixed widths, so the columns do not jump when a sort or a page brings other values;
+    a black line where the grid ends */
+table {
+  table-layout: fixed;
+  border-bottom: 2px solid #000;
 }
 
-#nameGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
+.col-name { width: 20%; }
+.col-address { width: 26%; }
+.col-city { width: 16%; }
+.col-telephone { width: 18%; }
+.col-pets { width: 20%; }
+
+td {
+  overflow-wrap: anywhere;
 }
 
-#addressGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
+
+.pet-type {
+  margin-right: 6px;
 }
 
-.owner-search-label {
-  margin: 0;
-  text-align: left;
-  min-width: 60px;
-}
-
-.owner-search-input {
-  flex: 1;
-}
-
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.owners-page-size {
+/* one row: the field takes whatever the buttons and the pager leave */
+.owner-search {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 16px;
 }
 
-.owners-page-size .form-control {
-  width: auto;
+.owner-search input {
+  flex: 1 1 auto;
+  min-width: 160px;
 }
 
-@media (max-width: 576px) {
-  #nameGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.owner-search button,
+.owner-search app-owner-pager {
+  flex: 0 0 auto;
+}
 
-  #addressGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+/* both arrows, always: hovering never changes them, only the current order is lit */
+th.mat-sort-header ::ng-deep .mat-sort-header-arrow {
+  display: none;
+}
 
-  .owner-search-input {
-    width: 100%;
-  }
+.sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.sort-arrows > span {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.sort-arrows .up {
+  border-bottom: 5px solid #8a8a8a;
+}
+
+.sort-arrows .down {
+  border-top: 5px solid #8a8a8a;
+}
+
+.sort-arrows .up.lit {
+  border-bottom-color: #fff;
+}
+
+.sort-arrows .down.lit {
+  border-top-color: #fff;
 }

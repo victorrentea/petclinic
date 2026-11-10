@@ -79,6 +79,14 @@ public class ExceptionControllerAdvice {
                 .body(buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
     }
 
+    @ExceptionHandler(UnsupportedSortKeyException.class)
+    public ResponseEntity<ProblemDetail> handleUnsupportedSortKey(UnsupportedSortKeyException ex,
+            HttpServletRequest request) {
+        log.warn(ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(buildProblemDetail("Unsupported sort key", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception e, HttpServletRequest request) {

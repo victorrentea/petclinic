@@ -13,6 +13,7 @@ import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = "petclinic.security.enable=true")
@@ -45,6 +46,7 @@ class BasicAuthenticationConfigTest {
         String credentials = Base64.getEncoder().encodeToString("admin:admin".getBytes());
         mockMvc.perform(get("/api/owners")
                 .header("Authorization", "Basic " + credentials))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(26));
     }
 }

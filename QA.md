@@ -16,7 +16,11 @@ Rezultatul unei sesiuni `/grill-me` pe [#25](https://github.com/victorrentea/pet
 | 7 | Cum ordonăm diacriticele? | `COLLATE "und-x-icu"` pe `last_name`, `first_name` și `city`, printr-o migrare Flyway | Cu collation-ul `C.UTF-8`, `Śliwiński` ajunge după `Z…`. Postgres 16.2 din zonky are ICU (785 de collation-uri). |
 | 8 | Ce indexuri adăugăm? | `(last_name, first_name, id)` și `(city, last_name, first_name, id)`, în aceeași migrare. Le verificăm cu EXPLAIN ANALYZE pe 50k de owneri generați local, care nu ajung în seed. | Tabela `owners` are acum doar cheia primară; `id` la final ține paginarea stabilă |
 
-## Propuse, încă neconfirmate
+## Adoptate în change-ul OpenSpec `owners-grid-pagination`
+
+Propuse în sesiune, apoi adoptate ca ipoteze de lucru în
+[`design.md`](openspec/changes/owners-grid-pagination/design.md). La #10, cheile de sortare din API
+au devenit `name` și `city` (D2), nu numele câmpurilor.
 
 | # | Întrebare | Răspunsul propus | De ce |
 |---|---|---|---|

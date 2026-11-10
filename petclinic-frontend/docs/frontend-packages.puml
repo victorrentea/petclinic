@@ -57,6 +57,7 @@ arrow {
 [pettypes] --> [specialties]
 [vets] --> [specialties]
 
+[owners] --> [design-system]
 [pets] --> [design-system]
 [vets] --> [design-system]
 
