@@ -18,6 +18,16 @@ schema: spec-driven
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - The reader is the product owner, who is not technical (does not know what JSON is). Write in plain words about what users see and do, why it matters, and what is left out.
+    - No code, class, file, endpoint, URL parameter, JSON, SQL, database, framework or library names. No HTTP status codes. Use concrete examples from what users see on screen instead.
+    - When the change narrows or rejects part of the request, say so plainly and explain why with examples a non-engineer recognises.
+    - Under Impact, name who is affected (staff, owners, other screens) in business terms, and end with one line pointing engineers to design.md.
+    - The product owner decides from pictures, and a hand-drawn mock-up reads as fake. When the change touches a screen, screenshot the REAL running app (Playwright from petclinic-test) after editing its DOM to show the proposed change, with numbered markers on it; save it as a PNG next to proposal.md, keep the script that made it beside it, embed it in a "What It Will Look Like" section right after Why, and explain each number in a list under it. Look at the PNG before presenting.
+    - Use the words the screen uses ("Last name", "First name", "Owner", "Pet"), never synonyms such as "surname"; in Romanian the business says "nume" for last name and "prenume" for first name.
+  design:
+    - Holds every technical detail the proposal leaves out, grouped part by part (API contract and breaking changes, database, frontend, code touched, tests touched, out of scope), before the decisions.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
