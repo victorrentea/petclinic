@@ -2,7 +2,7 @@ import {test, expect} from '@playwright/test';
 import {DEFAULT_DIAGRAM_OPTIONS, describeOptions, optionsFromEnv} from './options';
 
 test('an empty environment reveals everything the traces carry, a click at a time', () => {
-  expect(optionsFromEnv({})).toEqual({sql: 'statement', httpBodies: true, interactive: true});
+  expect(optionsFromEnv({})).toEqual({sql: 'statement', httpBodies: true, interactive: true, handler: 'line'});
   expect(optionsFromEnv({})).toEqual(DEFAULT_DIAGRAM_OPTIONS);
 });
 
@@ -34,21 +34,34 @@ test('SEQ_INTERACTIVE=0 goes back to baking the detail into the picture', () => 
 });
 
 test('describeOptions states the level a generated file was rendered at', () => {
-  expect(describeOptions({sql: 'values', httpBodies: true, interactive: false}))
-    .toBe('SQL shown, with values · HTTP bodies shown');
-  expect(describeOptions({sql: 'off', httpBodies: false, interactive: false}))
-    .toBe('SQL not shown · HTTP bodies not shown');
+  expect(describeOptions({sql: 'values', httpBodies: true, interactive: false, handler: 'line'}))
+    .toBe('SQL shown, with values · HTTP bodies shown · controllers under their request');
+  expect(describeOptions({sql: 'off', httpBodies: false, interactive: false, handler: 'call'}))
+    .toBe('SQL not shown · HTTP bodies not shown · controllers as calls');
 });
 
 // An interactive diagram shows none of it up front, so naming a level would lie —
-// what the header owes the reader is what a click will bring up.
+// what the header owes the reader is what a click will bring up. An HTTP request always
+// opens, its URL and headers there to show with every payload switched off.
 test('describeOptions names what is revealable rather than what is drawn', () => {
-  expect(describeOptions({sql: 'statement', httpBodies: true, interactive: true}))
-    .toBe('simplified · click an arrow to reveal its SQL / JSON payloads');
-  expect(describeOptions({sql: 'statement', httpBodies: false, interactive: true}))
-    .toBe('simplified · click an arrow to reveal its SQL');
-  expect(describeOptions({sql: 'off', httpBodies: false, interactive: true}))
-    .toBe('simplified · nothing recorded to reveal');
+  expect(describeOptions({sql: 'statement', httpBodies: true, interactive: true, handler: 'line'}))
+    .toBe('simplified · click an arrow to reveal its SQL / HTTP requests / JSON payloads'
+      + ' · controllers under their request');
+  expect(describeOptions({sql: 'statement', httpBodies: false, interactive: true, handler: 'line'}))
+    .toBe('simplified · click an arrow to reveal its SQL / HTTP requests · controllers under their request');
+  expect(describeOptions({sql: 'off', httpBodies: false, interactive: true, handler: 'call'}))
+    .toBe('simplified · click an arrow to reveal its HTTP requests · controllers as calls');
+});
+
+// The request's words open the request now, so the controller needs a place of its own; both
+// shapes are kept to compare on a real diagram (Victor, 10 Nov 2026).
+test('SEQ_HANDLER places the controller on a line of its own or as a call', () => {
+  expect(optionsFromEnv({}).handler).toBe('line');
+  expect(optionsFromEnv({SEQ_HANDLER: 'call'}).handler).toBe('call');
+  expect(optionsFromEnv({SEQ_HANDLER: ' CALL '}).handler).toBe('call');
+  expect(optionsFromEnv({SEQ_HANDLER: 'line'}).handler).toBe('line');
+  expect(optionsFromEnv({SEQ_HANDLER: 'constructor'}).handler).toBe('line');
+  expect(optionsFromEnv({SEQ_HANDLER: 'yolo'}).handler).toBe(DEFAULT_DIAGRAM_OPTIONS.handler);
 });
 
 // Payloads are free behind a click and expensive baked in, so the default follows the

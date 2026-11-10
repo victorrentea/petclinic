@@ -2,7 +2,7 @@ import {Page} from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import {SourceMapConsumer} from 'source-map';
-import {CallSite, idsOfTraceparent, parseStack, requestFrames} from '../genseq/call-site';
+import {CallSite, idsOfTraceparent, parseStack, replayableHeaders, requestFrames} from '../genseq/call-site';
 import {TestWindow} from '../genseq/generate';
 import {windowFileName} from './trace-window-store';
 
@@ -13,6 +13,8 @@ import {windowFileName} from './trace-window-store';
 export interface RawCallSite {
   traceparent: string;
   stacks: string[];
+  /** Every header the page set on the request, the trace context included. */
+  headers?: Record<string, string>;
 }
 
 const BINDING = '__genseqCallSite';
@@ -36,6 +38,10 @@ const MAX_CAUSES = 16;
  * Debugger.setAsyncCallStackDepth: no async parent at all). The hop is only visible to Zone,
  * which is why the stack is also taken wherever Zone schedules a task. An Error is cheap until
  * its `.stack` is read, which happens only for a task a request ran in.
+ *
+ * Every header the page sets is taken on the way too: nothing else records them, and the
+ * request's detail panel shows them and replays the call with them (Victor, 10 Nov 2026).
+ * Taken here whole and filtered in Node (`replayableHeaders`), which a unit test can reach.
  */
 function wrapRequestSenders({binding, maxCauses}: {binding: string; maxCauses: number}): void {
   const page = globalThis as any;
@@ -80,32 +86,46 @@ function wrapRequestSenders({binding, maxCauses}: {binding: string; maxCauses: n
 
   // From the root zone, or the promise the binding returns would count as Angular work and
   // the app would run an extra change detection for every request it made under test.
-  const report = (traceparent: string): void => {
+  const report = (traceparent: string, headers: Record<string, string>): void => {
     const stacks = [new page.Error().stack ?? ''];
     for (let cause = running; cause; cause = cause.up) stacks.push(cause.error.stack ?? '');
-    const send = () => page[binding](traceparent, stacks);
+    const send = () => page[binding](traceparent, stacks, headers);
     page.Zone?.root ? page.Zone.root.run(send) : send();
   };
+  const traceparentOf = (headers: Record<string, string>): string | undefined =>
+    Object.entries(headers).find(([name]) => name.toLowerCase() === 'traceparent')?.[1];
 
   const proto = page.XMLHttpRequest.prototype;
-  const parents = new WeakMap<object, string>();
+  const sent = new WeakMap<object, Record<string, string>>();
+  // `open` starts a new request on the same object, and the spec drops its headers there too.
+  const open = proto.open;
+  proto.open = function (this: object, ...args: unknown[]) {
+    sent.delete(this);
+    return open.apply(this, args);
+  };
   const setRequestHeader = proto.setRequestHeader;
   proto.setRequestHeader = function (this: object, name: string, value: string) {
-    if (String(name).toLowerCase() === 'traceparent') parents.set(this, value);
+    const headers = sent.get(this) ?? {};
+    // A header set twice goes out once, its values joined — the way the browser sends it.
+    headers[name] = Object.hasOwn(headers, name) ? `${headers[name]}, ${value}` : String(value);
+    sent.set(this, headers);
     return setRequestHeader.call(this, name, value);
   };
   const send = proto.send;
   proto.send = function (this: object, ...args: unknown[]) {
-    const traceparent = parents.get(this);
-    if (traceparent) report(traceparent);
+    const headers = sent.get(this) ?? {};
+    const traceparent = traceparentOf(headers);
+    if (traceparent) report(traceparent, headers);
     return send.apply(this, args);
   };
 
   const fetch = page.fetch;
   page.fetch = function (this: unknown, input: any, init?: any) {
-    const headers = new page.Headers(init?.headers ?? input?.headers ?? {});
-    const traceparent = headers.get('traceparent');
-    if (traceparent) report(traceparent);
+    const headers: Record<string, string> = {};
+    new page.Headers(init?.headers ?? input?.headers ?? {})
+      .forEach((value: string, name: string) => {headers[name] = value;});
+    const traceparent = traceparentOf(headers);
+    if (traceparent) report(traceparent, headers);
     return fetch.call(this, input, init);
   };
 }
@@ -117,8 +137,8 @@ function wrapRequestSenders({binding, maxCauses}: {binding: string; maxCauses: n
  */
 export async function recordCallSites(page: Page): Promise<RawCallSite[]> {
   const sites: RawCallSite[] = [];
-  await page.exposeFunction(BINDING, (traceparent: string, stacks: string[]) => {
-    sites.push({traceparent, stacks});
+  await page.exposeFunction(BINDING, (traceparent: string, stacks: string[], headers?: Record<string, string>) => {
+    sites.push({traceparent, stacks, ...(headers ? {headers} : {})});
   });
   await page.addInitScript(wrapRequestSenders, {binding: BINDING, maxCauses: MAX_CAUSES});
   return sites;
@@ -154,7 +174,8 @@ async function toCallSites(sites: RawCallSite[]): Promise<CallSite[]> {
   }
   return sites.flatMap((site) => {
     const ids = idsOfTraceparent(site.traceparent);
-    return ids ? [{...ids, frames: requestFrames(site.stacks, loaded)}] : [];
+    const headers = replayableHeaders(site.headers);
+    return ids ? [{...ids, frames: requestFrames(site.stacks, loaded), ...(headers ? {headers} : {})}] : [];
   });
 }
 

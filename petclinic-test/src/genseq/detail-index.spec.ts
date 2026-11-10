@@ -31,3 +31,12 @@ test('an id is plain lowercase alphanumerics', () => {
   const collector = new DetailCollector();
   expect(collector.add(entry('select 1'))).toMatch(/^[a-z0-9]{7,}$/);
 });
+
+// Version 3: a request arrow's entry carries the request, for the review page to replay.
+test('an entry carries the request it was sent with, through the index', () => {
+  const collector = new DetailCollector();
+  const request = {method: 'POST', url: 'http://h/api/visits', headers: {Accept: '*/*'}, body: '{"a":1}'};
+  const id = collector.add({...entry('POST http://h/api/visits'), request});
+  expect(DETAIL_INDEX_VERSION).toBe(3);
+  expect(collector.toIndex().details[id].request).toEqual(request);
+});
