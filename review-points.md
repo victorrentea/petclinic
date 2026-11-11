@@ -55,7 +55,7 @@ anchors: review-commit
 - source: correctness, security, ticket-fit and tests reviewers
 - severity: low
 - observation: A client that omits vetId wipes the existing vet; "leave unchanged" cannot be told from "clear".
-- why: PUT replaces the whole visit, so clearing persists, as ticket item 2 demands. See the assumption.
+- why: PUT replaces the whole visit, so a clear always sticks (ticket item 2); our form always sends vetId.
 
 ### Unknown vetId answers a bare 404, not a 400
 - file: petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:20
@@ -90,7 +90,7 @@ anchors: review-commit
 - source: ticket-fit reviewer
 - severity: low
 - observation: Bookings made through the chatbot always have no vet.
-- why: the vet is optional at booking; owners rarely know it. Separate ticket if wanted.
+- why: "everywhere" covers display, which list_visits does; booking a vet stays a staff action.
 
 ### Failed vets fetch shows "No vet" for a visit with one
 - file: petclinic-frontend/src/app/visits/visit-edit/visit-edit.component.ts:43
@@ -115,18 +115,6 @@ anchors: review-commit
 
 ## Assumptions
 
-### PUT replaces the visit; a missing vetId means no vet
-- file: petclinic-backend/src/main/java/victor/training/petclinic/rest/VisitRestController.java:85
-- alternative: PATCH-like: absent keeps the vet, explicit null clears it
-- confidence: 0.7
-- why: Ticket item 2 makes "clear must stick" the priority, and full-replace PUT is the simplest rule that guarantees it; the only client, our edit form, always sends the field. Four reviewers flagged the omitted-field case, which pulls confidence down.
-
-### Unknown vetId is a 404
-- file: petclinic-backend/src/main/java/victor/training/petclinic/repository/VetRepository.java:20
-- alternative: 400 naming vetId as the bad field
-- confidence: 0.6
-- why: Matches how unknown pet types are handled. A 400 is more correct HTTP, which is why this is close to a coin flip.
-
 ### Deleting a vet keeps their visits, with no vet
 - file: petclinic-backend/src/main/resources/db/migration/V4__visit_vet.sql:4
 - alternative: refuse deleting a vet who has visits
@@ -145,8 +133,3 @@ anchors: review-commit
 - confidence: 0.65
 - why: The demo should show both states; ticket item 4 is about real legacy rows, not the demo dataset.
 
-### MCP create_visit takes no vet; list_visits shows it
-- file: petclinic-backend/src/main/java/victor/training/petclinic/mcp/PetClinicMcp.java:55
-- alternative: also add a vet parameter to create_visit
-- confidence: 0.7
-- why: "Everywhere" in the ticket covers displaying, which list_visits does; choosing a vet at booking stays a staff action in the UI.
