@@ -138,6 +138,9 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Expected volume:** ~100k owners within a year (Bizu, Nov 2026). Any owner list is paged and sorted
+in the database, never loaded whole into the backend or the browser.
+
 ## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
