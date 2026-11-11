@@ -31,28 +31,24 @@ display:none;
   flex: 1;
 }
 
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.owners-paginator {
+  background: transparent;
   margin-bottom: 16px;
 }
 
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+:host ::ng-deep .mat-sort-header-arrow {
+  color: #2196f3;
 }
 
-.owners-page-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* the unsorted sortable column (City, or Name) hints it can sort, as in the approved mockup */
+:host ::ng-deep th[aria-sort="none"]:not(:hover) .mat-sort-header-container::after {
+  content: '\21C5';
+  margin-left: 6px;
+  opacity: 0.6;
 }
 
-.owners-page-size .form-control {
-  width: auto;
+:host ::ng-deep th[aria-sort="none"]:not(:hover) .mat-sort-header-arrow {
+  display: none;
 }
 
 @media (max-width: 576px) {
@@ -70,10 +66,5 @@ display:none;
 
   .owner-search-input {
     width: 100%;
-  }
-
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
