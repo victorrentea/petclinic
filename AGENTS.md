@@ -30,24 +30,6 @@ Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeou
 by an orphan is reported in < 1s, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
 
-### Backend (petclinic-backend/)
-```sh
-mvn spring-boot:run              # Run backend
-mvn test                         # Run tests
-mvn clean install                # Build
-mvn test -Dtest=ClassName#methodName # Run a single test
-```
-
-### Frontend (petclinic-frontend/)
-```sh
-npm start                           # Dev server on localhost:4200
-npm run build                       # Production build
-npm test                            # Karma tests
-npm run test-headless               # Headless Chrome tests
-npm run test:arch                   # imports adhere to docs/frontend-packages.puml
-npm run e2e                         # Protractor e2e tests
-```
-
 ## Architecture
 
 ### Backend Architecture

@@ -83,7 +83,6 @@ $J label add PET-42 needs-review regression       # tag
 $J label rm  PET-42 regression
 $J label set PET-42 only these                    # replaces the whole list
 $J assign PET-42 victor      # '-' unassigns
-$J transition PET-42 "In Progress"   # by transition name OR target status name
 $J link PET-42 Blocks PET-43         # $J linktypes for the vocabulary
 $J attach PET-42 ./heap-dump.txt
 $J worklog PET-42 2h "pairing on the repository layer"
