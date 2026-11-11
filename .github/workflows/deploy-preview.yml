@@ -1,0 +1,64 @@
+name: Deploy preview
+
+# Every push to claude/** (the Slack bot "Santa Claude" pushes there, and only there) goes to
+# ONE shared preview on Railway: last push wins. Image built by docker/railway/Dockerfile.
+#
+# The runner never executes the branch's code: it uploads the source and Railway builds it, so
+# the branch can't read RAILWAY_TOKEN. That token reaches only the petclinic-preview project's
+# production environment, and the `preview` GitHub environment hands it out to claude/* only.
+# The workflow file itself stays trusted because the bot's GitHub App has no `workflows`
+# permission: GitHub rejects any push of its that touches .github/workflows/.
+
+on:
+  push:
+    branches: ['claude/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-preview
+  cancel-in-progress: true
+
+env:
+  PREVIEW_URL: https://petclinic-production-28f17f61.up.railway.app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ env.PREVIEW_URL }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # `up --ci` returns once the image is built; the deployment is still starting then, and
+      # until it is SUCCESS the URL keeps serving the previous version.
+      - name: Upload to Railway, build, and wait for the deployment
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway() { npx -y @railway/cli@5.71.0 "$@"; }
+          railway up --ci --service petclinic --environment production
+          for i in $(seq 1 60); do
+            status=$(railway service status --service petclinic --environment production --json | jq -r .status)
+            echo "deployment: $status"
+            case "$status" in
+              SUCCESS) break ;;
+              FAILED|CRASHED|REMOVED) exit 1 ;;
+            esac
+            sleep 5
+          done
+          [ "$status" = SUCCESS ]
+
+      - name: Check that it answers
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS "$PREVIEW_URL/actuator/health" | grep -q UP; then break; fi
+            sleep 5
+          done
+          curl -fsS "$PREVIEW_URL/actuator/health"
+          echo "::notice title=preview::${{ github.ref_name }} (${GITHUB_SHA::7}) is live at $PREVIEW_URL"
+          echo "**${{ github.ref_name }}** (\`${GITHUB_SHA::7}\`) is live at $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
