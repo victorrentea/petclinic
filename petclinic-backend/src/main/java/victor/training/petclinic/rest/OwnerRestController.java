@@ -1,8 +1,10 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
@@ -17,6 +19,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,17 +39,21 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 
 @RestController
 @RequestMapping("/api/owners")
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 public class OwnerRestController {
+
+    private static final Set<Integer> PAGE_SIZES = Set.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -80,15 +87,40 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners, one page at a time")
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
+                    schema = @Schema(implementation = OwnerPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+    @Parameter(name = "lastName", in = ParameterIn.QUERY,
+            description = "Case-sensitive last-name prefix; empty matches every owner.")
+    @Parameter(name = "page", in = ParameterIn.QUERY, description = "Zero-based page number.",
+            schema = @Schema(type = "integer", format = "int32", minimum = "0", defaultValue = "0"))
+    @Parameter(name = "size", in = ParameterIn.QUERY,
+            description = "Owners per page: 5, 10 or 20; any other size is refused with 400.",
+            schema = @Schema(type = "integer", format = "int32", defaultValue = "10"))
+    @Parameter(name = "sort", in = ParameterIn.QUERY,
+            description = "`name` (last name, first name) or `city` (city, last name, first name), "
+                    + "optionally followed by `,asc` or `,desc`.",
+            schema = @Schema(type = "string", pattern = "^(name|city)(,(asc|desc))?$", defaultValue = "name,asc",
+                    example = "city,desc"))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "name,asc") String sort) {
+        Page<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName, pageRequest(page, size, sort));
+        return OwnerPageDto.from(owners.map(ownerMapper::toOwnerDto));
+    }
+
+    private static PageRequest pageRequest(int page, int size, String sort) {
+        if (!PAGE_SIZES.contains(size)) {
+            throw new ValidationException("Page size must be 5, 10 or 20, not " + size);
+        }
+        if (page < 0) {
+            throw new ValidationException("Page number must be 0 or more, not " + page);
+        }
+        return PageRequest.of(page, size, OwnerSort.parse(sort));
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

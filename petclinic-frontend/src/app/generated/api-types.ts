@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List owners, one page at a time */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,34 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description The zero-based number of this page.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description The requested page size: 5, 10 or 20.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many owners match the filter, across all pages.
+       * @example 26
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description How many pages of this size the matching owners fill.
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,18 +581,25 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List owners, one page at a time */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Case-sensitive last-name prefix; empty matches every owner. */
         lastName?: string;
+        /** @description Zero-based page number. */
+        page?: number;
+        /** @description Owners per page: 5, 10 or 20; any other size is refused with 400. */
+        size?: number;
+        /** @description `name` (last name, first name) or `city` (city, last name, first name), optionally followed by `,asc` or `,desc`. */
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */
