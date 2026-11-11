@@ -1,0 +1,11 @@
+@media (min-width: 768px) {
+  .dl-horizontal dt {
+    width: 112px;
+    text-align: left;
+    -webkit-text-stroke: 0.5px currentColor;
+  }
+
+  .dl-horizontal dd {
+    margin-left: 120px;
+  }
+}

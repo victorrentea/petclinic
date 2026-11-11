@@ -1,0 +1,10 @@
+.owner-info th {
+  width: 120px;
+  -webkit-text-stroke: 0.5px currentColor;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}

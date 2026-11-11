@@ -1,22 +1,19 @@
-<table [hidden]="noVisits" class=" table table-condensed">
+<table [hidden]="noVisits" class="table table-condensed table-striped">
   <thead>
   <tr>
     <th>Visit Date</th>
     <th>Description</th>
-    <th>Actions</th>
+    <th class="text-right">Actions</th>
   </tr>
   </thead>
+  <tbody>
   <tr *ngFor="let visit of visits">
     <td>{{ visit.date }}</td>
     <td>{{ visit.description }}</td>
-    <td>
+    <td class="text-right">
       <button class="btn btn-default" (click)="editVisit(visit)">Edit Visit</button>
       <button class="btn btn-default" (click)="deleteVisit(visit)">Delete Visit</button>
     </td>
   </tr>
+  </tbody>
 </table>
-
-
-
-
-
