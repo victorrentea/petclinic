@@ -31,10 +31,48 @@ display:none;
   flex: 1;
 }
 
+/* fixed columns: otherwise every page and every sort resizes them to its own content */
+#ownersTable table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable th:nth-child(1) { width: 26%; }
+#ownersTable th:nth-child(2) { width: 24%; }
+#ownersTable th:nth-child(3) { width: 16%; }
+#ownersTable th:nth-child(4) { width: 18%; }
+#ownersTable th:nth-child(5) { width: 16%; }
+
+#ownersTable td {
+  overflow-wrap: anywhere;
+}
+
+/* a thin line between columns, so the eye sees where each one ends */
+#ownersTable td + td { border-left: 2px solid #c8c8c8; }
+#ownersTable th + th { border-left: 2px solid rgba(255, 255, 255, 0.35); }
+
+.owner-actions .btn + .btn {
+  margin-left: 8px;
+}
+
 .owners-paginator {
   background: transparent;
   margin-bottom: 16px;
 }
+
+/* Material right-aligns the paginator; under this table it sits centered */
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-container {
+  justify-content: center;
+}
+
+/* back buttons on the left, forward on the right: |< <  Items per page [5]  1 – 5 of 26  > >| */
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-range-actions { display: contents; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-navigation-first { order: 1; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-navigation-previous { order: 2; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-page-size { order: 3; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-range-label { order: 4; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-navigation-next { order: 5; }
+:host ::ng-deep .owners-paginator .mat-mdc-paginator-navigation-last { order: 6; }
 
 :host ::ng-deep .mat-sort-header-arrow {
   color: #2196f3;
