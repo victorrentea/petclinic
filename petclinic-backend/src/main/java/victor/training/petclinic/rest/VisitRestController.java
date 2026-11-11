@@ -3,18 +3,22 @@ package victor.training.petclinic.rest;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import victor.training.petclinic.mapper.VisitMapper;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
+import victor.training.petclinic.rest.dto.VisitPageDto;
+import victor.training.petclinic.rest.dto.VisitRowDto;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,11 +43,32 @@ public class VisitRestController {
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = VisitDto.class)),
+                    schema = @Schema(implementation = VisitPageDto.class),
                     examples = @ExampleObject(name = "sample", value = ApiExamples.VISITS)))
-    public List<VisitDto> listVisits() {
-        List<Visit> visits = visitRepository.findAllWithPetAndOwner();
-        return visitMapper.toVisitsDto(visits);
+    public VisitPageDto listVisits(
+            @Parameter(description = "0-based, default 0; past the end: the last page",
+                    schema = @Schema(type = "integer")) @RequestParam(required = false) String page,
+            @Parameter(description = "5, 10 (default) or 20; others snap to the nearest",
+                    schema = @Schema(type = "integer")) @RequestParam(required = false) String size,
+            @Parameter(description = "date|description|pet|owner,asc|desc; else date,desc",
+                    schema = @Schema(type = "string")) @RequestParam(required = false) String sort) {
+        VisitGridParams params = VisitGridParams.parse(page, size, sort);
+        Page<VisitRowDto> served = findGridPageWithinBounds(params.pageable());
+        log.info("Visits page {} served: {}", served.getNumber(), ownerNamesOn(served));
+        return VisitPageDto.of(served, params.sort());
+    }
+
+    private Page<VisitRowDto> findGridPageWithinBounds(Pageable pageable) {
+        Page<VisitRowDto> page = visitRepository.findGridPage(pageable);
+        int lastPage = Math.max(page.getTotalPages() - 1, 0);
+        if (page.getNumber() > lastPage) {
+            return visitRepository.findGridPage(pageable.withPage(lastPage));
+        }
+        return page;
+    }
+
+    private static List<String> ownerNamesOn(Page<VisitRowDto> page) {
+        return page.map(row -> row.ownerFirstName() + " " + row.ownerLastName()).getContent();
     }
 
     @GetMapping("{visitId}")

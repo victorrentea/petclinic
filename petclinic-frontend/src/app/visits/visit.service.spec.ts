@@ -4,7 +4,7 @@ import { HttpResponse } from '@angular/common/http';
 
 import { HttpErrorHandler } from '../error.service';
 import { VisitService } from './visit.service';
-import { Visit } from './visit';
+import { Visit, VisitPage } from './visit';
 
 describe('VisitService', () => {
   let httpTestingController: HttpTestingController;
@@ -28,11 +28,17 @@ describe('VisitService', () => {
 
   afterEach(() => httpTestingController.verify());
 
-  it('should return expected visits', () => {
-    visitService.getVisits().subscribe(v => expect(v).toEqual(expectedVisits), fail);
-    const req = httpTestingController.expectOne(baseUrl);
+  it('should get a page of visits, passing only the params given', () => {
+    const served: VisitPage = {content: [], page: 1, size: 5, totalElements: 6, totalPages: 2, sort: 'pet,asc'};
+    visitService.getVisitPage({page: '1', size: '5', sort: 'pet,asc'}).subscribe(p => expect(p).toEqual(served), fail);
+    const req = httpTestingController.expectOne(baseUrl + '?page=1&size=5&sort=pet,asc');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedVisits);
+    req.flush(served);
+  });
+
+  it('should ask for the default page when the URL names none', () => {
+    visitService.getVisitPage({page: undefined}).subscribe();
+    httpTestingController.expectOne(baseUrl).flush({});
   });
 
   it('should get visit by id', () => {

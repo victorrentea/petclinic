@@ -64,6 +64,7 @@ npm run e2e                         # Protractor e2e tests
 **Data Flow:**
 Request → REST Controller → Repository / Mapper → JPA Entity
 Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
+A read-only grid skips the mapper: its JPQL selects straight into the row DTO (`VisitRepository.findGridPage`)
 
 **Key Patterns:**
 - DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
@@ -144,7 +145,7 @@ REST Contract:
 - Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
+- Visits: `/api/visits` (a page: `?page=0&size=5|10|20&sort=date|description|pet|owner,asc|desc`; bad params are corrected, never 400)
 - PetTypes: `/api/pettypes`
 - Specialties: `/api/specialties`
 - Users: `/api/users`
