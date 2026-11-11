@@ -23,13 +23,16 @@ import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -57,12 +60,14 @@ public class VisitTest {
 
     int visitId;
     int petId;
+    int ownerId;
     @Autowired
     private PetTypeRepository petTypeRepository;
 
     @BeforeEach
     final void before() {
         Owner owner = ownerRepository.save(TestData.anOwner());
+        ownerId = owner.getId();
         Pet pet = TestData.aPet();
         pet.setOwner(owner);
         pet.setType(petTypeRepository.save(TestData.aPetType("dog")));
@@ -230,5 +235,77 @@ public class VisitTest {
             assertThat(visit.getPet().getId()).isEqualTo(petId);
             assertThat(visit.getDate()).isNotNull();
         });
+    }
+
+    // #40: a visit is dated between the pet's birth and one year from today, both ends included
+    private static final LocalDate DAY_BEFORE_BIRTH = PetTest.BIRTH_DATE.minusDays(1);
+
+    private static LocalDate dayAfterOneYearFromToday() {
+        return LocalDate.now().plusYears(1).plusDays(1);
+    }
+
+    private ResultActions postVisit(LocalDate date) throws Exception {
+        VisitDto newVisit = new VisitDto().setPetId(petId).setDate(date).setDescription("ate the tinsel");
+        return mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    private ResultActions postVisitToOwnersPet(LocalDate date) throws Exception {
+        VisitFieldsDto newVisit = new VisitFieldsDto().setDate(date).setDescription("ate the tinsel");
+        return mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    private ResultActions putVisit(LocalDate date) throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto().setDate(date).setDescription("ate the tinsel");
+        return mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    @Test
+    void create_beforePetBirth_refused() throws Exception {
+        postVisit(DAY_BEFORE_BIRTH).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void create_onPetBirthDate_ok() throws Exception {
+        postVisit(PetTest.BIRTH_DATE).andExpect(status().isCreated());
+    }
+
+    @Test
+    void create_exactlyOneYearAhead_ok() throws Exception {
+        postVisit(LocalDate.now().plusYears(1)).andExpect(status().isCreated());
+    }
+
+    @Test
+    void create_moreThanOneYearAhead_refused() throws Exception {
+        postVisit(dayAfterOneYearFromToday()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addToOwnersPet_beforePetBirth_refused() throws Exception {
+        postVisitToOwnersPet(DAY_BEFORE_BIRTH)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0]").value(containsString(PetTest.BIRTH_DATE.toString())));
+        assertThat(visitRepository.findByPetId(petId)).hasSize(1);
+    }
+
+    @Test
+    void addToOwnersPet_moreThanOneYearAhead_refused() throws Exception {
+        postVisitToOwnersPet(dayAfterOneYearFromToday()).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void update_beforePetBirth_refused() throws Exception {
+        putVisit(DAY_BEFORE_BIRTH).andExpect(status().isBadRequest());
+        assertThat(visitRepository.findById(visitId).orElseThrow().getDate()).isEqualTo(LocalDate.now());
+    }
+
+    @Test
+    void update_moreThanOneYearAhead_refused() throws Exception {
+        putVisit(dayAfterOneYearFromToday()).andExpect(status().isBadRequest());
     }
 }
