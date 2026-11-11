@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Visit} from './visit';
+import {Visit, VisitPage} from './visit';
 import {environment} from '../../environments/environment';
 import {HandleError, HttpErrorHandler} from '../error.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
 
 @Injectable()
@@ -17,10 +17,16 @@ export class VisitService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getVisits(): Observable<Visit[]> {
-    return this.http.get<Visit[]>(this.entityUrl)
+  /** Without a sort, the server's default order: newest first. */
+  getVisitPage(page: number, size: number, sort?: string, direction?: 'asc' | 'desc'): Observable<VisitPage> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (sort && direction) {
+      params = params.set('sort', sort).set('direction', direction);
+    }
+    const noRows: VisitPage = {content: [], page: {number: page, size, totalElements: 0, totalPages: 0}};
+    return this.http.get<VisitPage>(this.entityUrl, {params})
       .pipe(
-        catchError(this.handlerError('getVisits', []))
+        catchError(this.handlerError('getVisitPage', noRows))
       );
   }
 

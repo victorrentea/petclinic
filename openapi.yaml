@@ -1400,6 +1400,36 @@ paths:
   /api/visits:
     get:
       operationId: listVisits
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - description: "5, 10 or 20"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - description: "date, description, pet or owner"
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+          default: date
+      - description: asc or desc
+        in: query
+        name: direction
+        required: false
+        schema:
+          type: string
+          default: desc
       responses:
         "200":
           content:
@@ -1408,18 +1438,28 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    date: 2013-01-01
-                    description: rabies shot
-                    petId: 7
-                  - id: 2
-                    date: 2013-01-02
-                    description: annual checkup
-                    petId: 8
+                    content:
+                    - id: 2
+                      date: 2013-01-02
+                      description: annual checkup
+                      petName: Basil
+                      ownerId: 2
+                      ownerFirstName: Betty
+                      ownerLastName: Davis
+                    - id: 1
+                      date: 2013-01-01
+                      description: rabies shot
+                      petName: Leo
+                      ownerId: 1
+                      ownerFirstName: George
+                      ownerLastName: Franklin
+                    page:
+                      size: 10
+                      number: 0
+                      totalElements: 2
+                      totalPages: 1
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/VisitDto"
+                $ref: "#/components/schemas/VisitPageDto"
           description: OK
         "400":
           content:
@@ -1686,6 +1726,21 @@ components:
       - firstName
       - lastName
       - telephone
+    PageMetadata:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int64
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
     PetDto:
       type: object
       properties:
@@ -1956,3 +2011,49 @@ components:
           minLength: 1
       required:
       - description
+    VisitPageDto:
+      type: object
+      description: One page of the visits grid.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/VisitRowDto"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+    VisitRowDto:
+      type: object
+      description: One row of the visits grid.
+      properties:
+        date:
+          type: string
+          format: date
+          example: 2013-01-01
+        description:
+          type: string
+          example: rabies shot
+        id:
+          type: integer
+          format: int32
+          example: 1
+        ownerFirstName:
+          type: string
+          example: George
+        ownerId:
+          type: integer
+          format: int32
+          example: 1
+        ownerLastName:
+          type: string
+          example: Franklin
+        petName:
+          type: string
+          example: Leo
+      required:
+      - date
+      - description
+      - id
+      - ownerFirstName
+      - ownerId
+      - ownerLastName
+      - petName

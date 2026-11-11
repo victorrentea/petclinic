@@ -144,7 +144,7 @@ REST Contract:
 - Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
-- Visits: `/api/visits`
+- Visits: `/api/visits` (paged: `page`, `size` 5/10/20, `sort` date/description/pet/owner, `direction`)
 - PetTypes: `/api/pettypes`
 - Specialties: `/api/specialties`
 - Users: `/api/users`

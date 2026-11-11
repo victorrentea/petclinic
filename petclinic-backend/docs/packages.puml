@@ -30,6 +30,7 @@ arrow {
 [..domain] <<..domain>>
 
 [..repository] --> [..domain]
+[..repository] --> [..rest.dto]
 [..mapper] --> [..domain]
 [..mapper] --> [..rest.dto]
 [..rest] --> [..domain]

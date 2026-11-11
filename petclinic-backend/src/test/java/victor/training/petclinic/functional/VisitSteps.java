@@ -53,11 +53,10 @@ public class VisitSteps {
 
     @Then("{string} has {int} visit with description {string}")
     public void petHasVisitsWithDescription(String petName, int expectedCount, String description) {
-        int petId = http.idOf("pet:" + petName);
         var response = RestAssured.given().baseUri(http.baseUri()).get("/api/visits");
         assertThat(response.statusCode()).isEqualTo(200);
         var matching = response.jsonPath().getList(
-                "findAll { it.petId == " + petId + " && it.description == '" + description + "' }");
+                "content.findAll { it.petName == '" + petName + "' && it.description == '" + description + "' }");
         assertThat(matching).hasSize(expectedCount);
     }
 

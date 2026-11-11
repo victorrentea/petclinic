@@ -4,7 +4,6 @@ export interface VisitDto {
   id: number;
   date: string;
   description: string;
-  petId: number;
   petName?: string;
   ownerId?: number;
   ownerFirstName?: string;
@@ -23,9 +22,10 @@ export class ApiClient {
     });
   }
 
+  /** The grid's first page, in its default order. */
   async fetchVisits(): Promise<VisitDto[]> {
-    const response = await this.client.get<VisitDto[]>('/visits');
-    return response.data;
+    const response = await this.client.get<{content: VisitDto[]}>('/visits');
+    return response.data.content;
   }
 
   static sortedByDate<T extends {date: string}>(rows: T[]): T[] {

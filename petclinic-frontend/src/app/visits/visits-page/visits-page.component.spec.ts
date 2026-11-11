@@ -7,10 +7,10 @@ import {By} from '@angular/platform-browser';
 
 import {VisitsPageComponent} from './visits-page.component';
 import {VisitService} from '../visit.service';
-import {Visit} from '../visit';
+import {VisitPage, VisitRow} from '../visit';
 
 class VisitServiceStub {
-  getVisits(): Observable<Visit[]> {
+  getVisitPage(page: number, size: number, sort?: string, direction?: string): Observable<VisitPage> {
     return of();
   }
 }
@@ -20,20 +20,14 @@ describe('VisitsPageComponent', () => {
   let fixture: ComponentFixture<VisitsPageComponent>;
   let visitService: VisitServiceStub;
 
-  const visits: Visit[] = [
-    {
-      id: 1, date: '2024-01-15', description: 'rabies shot', pet: null as any,
-      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
-    },
-    {
-      id: 2, date: '2025-06-04', description: 'checkup', pet: null as any,
-      petId: 8, petName: 'Basil', ownerId: 2, ownerFirstName: 'Betty', ownerLastName: 'Davis',
-    },
-    {
-      id: 3, date: '2023-09-10', description: 'spayed', pet: null as any,
-      petId: 7, petName: 'Leo', ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin',
-    },
+  const visits: VisitRow[] = [
+    {id: 2, date: '2025-06-04', description: 'checkup', petName: 'Basil',
+      ownerId: 2, ownerFirstName: 'Betty', ownerLastName: 'Davis'},
+    {id: 1, date: '2024-01-15', description: 'rabies shot', petName: 'Leo',
+      ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin'},
   ];
+  const pageOf = (content: VisitRow[], totalElements = content.length): VisitPage =>
+    ({content, page: {number: 0, size: 10, totalElements, totalPages: 1}});
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -54,34 +48,57 @@ describe('VisitsPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('loads and sorts visits descending by date', waitForAsync(() => {
-    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
+  it('first asks for 10 visits in the server\'s default order', () => {
+    const spy = spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf(visits, 23)));
     fixture.detectChanges();
-    fixture.whenStable().then(() => {
-      const dates = component.visits.map(v => v.date);
-      expect(dates).toEqual(['2025-06-04', '2024-01-15', '2023-09-10']);
-    });
-  }));
 
-  it('shows "No visits found." when service returns empty list', waitForAsync(() => {
-    spyOn(visitService, 'getVisits').and.returnValue(of([]));
-    fixture.detectChanges();
-    fixture.whenStable().then(() => {
-      fixture.detectChanges();
-      const empty = fixture.debugElement.query(By.css('.no-visits'));
-      expect(empty.nativeElement.textContent).toContain('No visits found.');
-    });
-  }));
+    expect(spy).toHaveBeenCalledOnceWith(0, 10, '', undefined);
+    expect(component.visits).toEqual(visits);
+    expect(component.totalVisits).toBe(23);
+  });
 
-  it('renders owner cell as a link to /owners/{ownerId}', waitForAsync(() => {
-    spyOn(visitService, 'getVisits').and.returnValue(of(visits));
+  it('asks for the first page sorted by the clicked column', () => {
+    const spy = spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf(visits)));
     fixture.detectChanges();
-    fixture.whenStable().then(() => {
-      fixture.detectChanges();
-      const links = fixture.debugElement.queryAll(By.css('a.owner-link'));
-      expect(links.length).toBe(visits.length);
-      expect(links[0].attributes['ng-reflect-router-link'] || links[0].nativeElement.getAttribute('href'))
-        .toContain('/owners/');
-    });
-  }));
+    component.onPage({pageIndex: 2, pageSize: 5, length: 23});
+
+    component.onSort({active: 'owner', direction: 'desc'});
+
+    expect(spy).toHaveBeenCalledWith(0, 5, 'owner', 'desc');
+  });
+
+  it('asks for the default order again once the sort is cleared', () => {
+    const spy = spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf(visits)));
+    fixture.detectChanges();
+
+    component.onSort({active: 'owner', direction: ''});
+
+    expect(spy).toHaveBeenCalledWith(0, 10, 'owner', undefined);
+  });
+
+  it('asks for the page and size picked in the paginator', () => {
+    const spy = spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf(visits)));
+    fixture.detectChanges();
+
+    component.onPage({pageIndex: 1, pageSize: 20, length: 23});
+
+    expect(spy).toHaveBeenCalledWith(1, 20, '', undefined);
+  });
+
+  it('shows "No visits found." when there are none', () => {
+    spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf([])));
+    fixture.detectChanges();
+
+    const empty = fixture.debugElement.query(By.css('.no-visits'));
+    expect(empty.nativeElement.textContent).toContain('No visits found.');
+  });
+
+  it('renders owner cell as a link to /owners/{ownerId}', () => {
+    spyOn(visitService, 'getVisitPage').and.returnValue(of(pageOf(visits)));
+    fixture.detectChanges();
+
+    const links = fixture.debugElement.queryAll(By.css('a.owner-link'));
+    expect(links.length).toBe(visits.length);
+    expect(links[0].nativeElement.getAttribute('href')).toBe('/owners/2');
+  });
 });

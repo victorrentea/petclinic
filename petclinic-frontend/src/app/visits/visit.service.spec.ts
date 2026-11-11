@@ -4,7 +4,7 @@ import { HttpResponse } from '@angular/common/http';
 
 import { HttpErrorHandler } from '../error.service';
 import { VisitService } from './visit.service';
-import { Visit } from './visit';
+import { Visit, VisitPage } from './visit';
 
 describe('VisitService', () => {
   let httpTestingController: HttpTestingController;
@@ -28,11 +28,22 @@ describe('VisitService', () => {
 
   afterEach(() => httpTestingController.verify());
 
-  it('should return expected visits', () => {
-    visitService.getVisits().subscribe(v => expect(v).toEqual(expectedVisits), fail);
-    const req = httpTestingController.expectOne(baseUrl);
+  const visitPage: VisitPage = {
+    content: [{id: 1, date: '2013-01-01', description: 'rabies shot', petName: 'Leo',
+      ownerId: 1, ownerFirstName: 'George', ownerLastName: 'Franklin'}],
+    page: {number: 0, size: 10, totalElements: 1, totalPages: 1},
+  };
+
+  it('asks for a page in the server\'s default order when no sort is chosen', () => {
+    visitService.getVisitPage(0, 10).subscribe(p => expect(p).toEqual(visitPage), fail);
+    const req = httpTestingController.expectOne(baseUrl + '?page=0&size=10');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedVisits);
+    req.flush(visitPage);
+  });
+
+  it('asks for a sorted page', () => {
+    visitService.getVisitPage(2, 5, 'owner', 'desc').subscribe(p => expect(p).toEqual(visitPage), fail);
+    httpTestingController.expectOne(baseUrl + '?page=2&size=5&sort=owner&direction=desc').flush(visitPage);
   });
 
   it('should get visit by id', () => {

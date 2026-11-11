@@ -6,3 +6,6 @@ export type Visit = Omit<components['schemas']['VisitDto'], 'date' | 'petId'> & 
   petId?: number;
   pet: Pet;
 };
+
+export type VisitRow = components['schemas']['VisitRowDto'];
+export type VisitPage = components['schemas']['VisitPageDto'];

@@ -37,6 +37,7 @@ Rel(PetClinic.Backend.RESTLayer, PetClinic.Backend.Notification, "uses", $techn=
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.RESTLayer, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MapperLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
+Rel(PetClinic.Backend.RepositoryLayer, PetClinic.Backend.RESTLayer, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.DomainModel, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.MCP, PetClinic.Backend.RepositoryLayer, "uses", $techn="", $tags="", $link="")
 Rel(PetClinic.Backend.Notification, PetClinic.notificationservice, "POSTs visit-booked notifications", $techn="HTTP/JSON", $tags="", $link="")

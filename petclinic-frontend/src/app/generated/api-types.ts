@@ -170,6 +170,16 @@ export interface components {
        */
       telephone: string;
     };
+    PageMetadata: {
+      /** Format: int64 */
+      number?: number;
+      /** Format: int64 */
+      size?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      /** Format: int64 */
+      totalPages?: number;
+    };
     PetDto: {
       /**
        * Format: date
@@ -356,6 +366,37 @@ export interface components {
        * @example rabies shot
        */
       description: string;
+    };
+    /** @description One page of the visits grid. */
+    VisitPageDto: {
+      content?: components["schemas"]["VisitRowDto"][];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    /** @description One row of the visits grid. */
+    VisitRowDto: {
+      /**
+       * Format: date
+       * @example "2013-01-01T00:00:00.000Z"
+       */
+      date: string;
+      /** @example rabies shot */
+      description: string;
+      /**
+       * Format: int32
+       * @example 1
+       */
+      id: number;
+      /** @example George */
+      ownerFirstName: string;
+      /**
+       * Format: int32
+       * @example 1
+       */
+      ownerId: number;
+      /** @example Franklin */
+      ownerLastName: string;
+      /** @example Leo */
+      petName: string;
     };
   };
   responses: never;
@@ -1571,11 +1612,22 @@ export interface operations {
     };
   };
   listVisits: {
+    parameters: {
+      query?: {
+        page?: number;
+        /** @description 5, 10 or 20 */
+        size?: number;
+        /** @description date, description, pet or owner */
+        sort?: string;
+        /** @description asc or desc */
+        direction?: string;
+      };
+    };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["VisitDto"][];
+          "application/json": components["schemas"]["VisitPageDto"];
         };
       };
       /** @description Bad Request */
