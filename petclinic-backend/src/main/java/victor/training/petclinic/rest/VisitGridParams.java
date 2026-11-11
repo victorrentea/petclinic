@@ -30,13 +30,15 @@ record VisitGridParams(Pageable pageable, String sort) {
 
     static VisitGridParams parse(String page, String size, String sort) {
         String appliedSort = isKnownSort(sort) ? normalize(sort) : DEFAULT_SORT;
-        Pageable pageable = PageRequest.of(pageNumber(page), pageSize(size), orderBy(appliedSort));
+        int pageSize = pageSize(size);
+        Pageable pageable = PageRequest.of(pageNumber(page, pageSize), pageSize, orderBy(appliedSort));
         return new VisitGridParams(pageable, appliedSort);
     }
 
-    private static int pageNumber(String page) {
+    /** At most the page whose offset still fits the int JPA takes; past the end serves the last page anyway. */
+    private static int pageNumber(String page, int pageSize) {
         Long requested = parseLong(page);
-        return requested == null ? 0 : Math.clamp(requested, 0, Integer.MAX_VALUE);
+        return requested == null ? 0 : Math.clamp(requested, 0, Integer.MAX_VALUE / pageSize);
     }
 
     private static int pageSize(String size) {
@@ -44,8 +46,9 @@ record VisitGridParams(Pageable pageable, String sort) {
         if (requested == null) {
             return DEFAULT_PAGE_SIZE;
         }
+        long inRange = Math.clamp(requested, PAGE_SIZES.getFirst(), PAGE_SIZES.getLast());
         return PAGE_SIZES.stream()
-                .min(Comparator.comparingLong(allowed -> Math.abs(allowed - requested)))
+                .min(Comparator.comparingLong(allowed -> Math.abs(allowed - inRange)))
                 .orElseThrow();
     }
 

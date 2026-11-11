@@ -11,7 +11,7 @@ export interface VisitPageQuery {
   sort?: string;
 }
 
-export type Visit =Omit<components['schemas']['VisitDto'], 'date' | 'petId'> & {
+export type Visit = Omit<components['schemas']['VisitDto'], 'date' | 'petId'> & {
   date: string;
   petId?: number;
   pet: Pet;

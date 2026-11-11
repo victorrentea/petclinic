@@ -23,6 +23,7 @@ class VisitGridParamsTest {
 
     @ParameterizedTest
     @CsvSource({"5,5", "10,10", "20,20", "1,5", "7,5", "8,10", "14,10", "15,10", "16,20", "100,20", "99999999999,20",
+            "-9223372036854775808,5",
             "0,5", "-3,5"})
     void snapsSizeToTheNearestAllowedOne(String requested, int served) {
         assertThat(VisitGridParams.parse(null, requested, null).pageable().getPageSize()).isEqualTo(served);
@@ -35,7 +36,7 @@ class VisitGridParamsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,0", "3,3", "-1,0", "abc,0", "'',0", "99999999999," + Integer.MAX_VALUE})
+    @CsvSource({"0,0", "3,3", "-1,0", "abc,0", "'',0", "99999999999," + Integer.MAX_VALUE / 10})
     void readsThePageLeniently(String requested, int served) {
         assertThat(VisitGridParams.parse(requested, null, null).pageable().getPageNumber()).isEqualTo(served);
     }

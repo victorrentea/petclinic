@@ -110,7 +110,7 @@ describe('VisitsPageComponent', () => {
     fixture.detectChanges();
 
     const links = fixture.debugElement.queryAll(By.css('a.owner-link'));
-    expect(links.length).toBe(rows.length);
+    expect(links).toHaveSize(rows.length);
     expect(links[0].nativeElement.getAttribute('href')).toBe('/owners/2');
   });
 });

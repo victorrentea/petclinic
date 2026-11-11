@@ -126,20 +126,20 @@ class VisitGridTest {
 
     @ParameterizedTest
     @CsvSource({
-            "date,asc,          date",
-            "date,desc,         date",
-            "description,asc,   description",
-            "description,desc,  description",
-            "pet,asc,           petName",
-            "pet,desc,          petName",
-            "owner,asc,         ownerFirstName",
-            "owner,desc,        ownerFirstName",
+            "date,asc,          date,           2026-01-01",
+            "date,desc,         date,           2026-01-12",
+            "description,asc,   description,    visit 01",
+            "description,desc,  description,    visit 12",
+            "pet,asc,           petName,        Pet01",
+            "pet,desc,          petName,        Pet12",
+            "owner,asc,         ownerFirstName, Owner01",
+            "owner,desc,        ownerFirstName, Owner12",
     })
-    void sortsByAnyColumn(String column, String direction, String field) throws Exception {
+    void sortsByAnyColumn(String column, String direction, String field, String first) throws Exception {
         List<String> values = column(getVisits("?sort=" + column + "," + direction), field);
 
         Comparator<String> order = direction.equals("asc") ? Comparator.naturalOrder() : Comparator.reverseOrder();
-        assertThat(values).hasSize(10).isSortedAccordingTo(order);
+        assertThat(values).hasSize(10).isSortedAccordingTo(order).first().isEqualTo(first);
     }
 
     @Test
@@ -164,6 +164,14 @@ class VisitGridTest {
 
         assertThat((Integer) JsonPath.read(json, "$.page")).isEqualTo(2);
         assertThat(column(json, "description")).containsExactly("visit 02", "visit 01");
+    }
+
+    @Test
+    void aPageWhoseOffsetOverflowsAnIntServesTheLastPage() throws Exception {
+        String json = getVisits("?page=2147483647&size=20");
+
+        assertThat((Integer) JsonPath.read(json, "$.page")).isZero();
+        assertThat(column(json, "description")).hasSize(VISIT_COUNT);
     }
 
     @Test
