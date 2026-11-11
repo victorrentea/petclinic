@@ -11,15 +11,17 @@ githubCopilot:
 #     Designs and tasks must cover Windows, macOS, and Linux
 #     Write all artifacts in Spanish
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# Per-artifact rules
+rules:
+  proposal:
+    - "Reader: the business owner, not a developer. Write in Romanian, explain it like to a five-year-old"
+    - "Section bodies: no JSON, HTTP verbs or status codes, URLs, class, file or framework names. Name things as the user sees them on screen"
+    - "Why: the problem as an everyday analogy (e.g. pulling every folder out of the cabinet to find one)"
+    - "What Changes: what the user sees and can do, one concrete example per point; say why anything is left out on purpose"
+    - "Always end What Changes with what is NOT included now"
+    - "Impact: plain words only, then point to design.md for the technical details"
+    - "Keep the section headings and the Capabilities section as the schema needs them"
+    - "A change the user can see gets a picture: screenshot the real screen today, draw the change over it (red dashed frames, numbered labels in Romanian), save both PNGs next to proposal.md and embed the mockup at the top of What Changes"
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
