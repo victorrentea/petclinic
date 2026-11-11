@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject, Subscription} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {EMPTY, Subject, Subscription} from 'rxjs';
+import {catchError, switchMap} from 'rxjs/operators';
 import {PageEvent} from '@angular/material/paginator';
 import {Sort} from '@angular/material/sort';
 import {VisitService} from '../visit.service';
@@ -23,13 +23,15 @@ export class VisitsPageComponent implements OnInit, OnDestroy {
   private readonly reload = new Subject<void>();
   private subscription: Subscription;
 
-  constructor(private visitService: VisitService) {}
+  constructor(private readonly visitService: VisitService) {}
 
   ngOnInit(): void {
-    // switchMap: a fast second click drops the first click's late answer
+    // switchMap: a fast second click drops the first click's late answer.
+    // A failed load keeps the page shown, and must not end the stream that serves the next click.
     this.subscription = this.reload.pipe(
       switchMap(() => this.visitService.getVisitPage(
-        this.pageIndex, this.pageSize, this.sort.active, this.sort.direction || undefined)),
+        this.pageIndex, this.pageSize, this.sort.active, this.sort.direction || undefined)
+        .pipe(catchError(() => EMPTY))),
     ).subscribe(page => this.show(page));
     this.reload.next();
   }

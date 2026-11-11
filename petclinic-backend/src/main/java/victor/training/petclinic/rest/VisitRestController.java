@@ -68,28 +68,28 @@ public class VisitRestController {
     }
 
     private static Sort sortOf(String column, String direction) {
-        if (column.equals("date")) {
-            if (direction.equals("asc"))
-                return Sort.by(ASC, "date");
-            if (direction.equals("desc"))
-                return Sort.by(DESC, "date");
-        } else if (column.equals("description")) {
-            if (direction.equals("asc"))
-                return Sort.by(ASC, "description");
-            if (direction.equals("desc"))
-                return Sort.by(DESC, "description");
-        } else if (column.equals("pet")) {
-            if (direction.equals("asc"))
-                return Sort.by(ASC, "pet.name");
-            if (direction.equals("desc"))
-                return Sort.by(DESC, "pet.name");
-        } else if (column.equals("owner")) {
-            if (direction.equals("asc"))
-                return Sort.by(ASC, "pet.owner.firstName", "pet.owner.lastName");
-            if (direction.equals("desc"))
-                return Sort.by(DESC, "pet.owner.firstName", "pet.owner.lastName");
+        if (!direction.equals("asc") && !direction.equals("desc")) {
+            throw new ResponseStatusException(BAD_REQUEST, "Unsupported direction");
         }
-        throw new ResponseStatusException(BAD_REQUEST, "Unsupported sort or direction");
+        boolean asc = direction.equals("asc");
+        if (column.equals("date")) {
+            if (asc)
+                return Sort.by(ASC, "date");
+            return Sort.by(DESC, "date");
+        } else if (column.equals("description")) {
+            if (asc)
+                return Sort.by(ASC, "description");
+            return Sort.by(DESC, "description");
+        } else if (column.equals("pet")) {
+            if (asc)
+                return Sort.by(ASC, "pet.name");
+            return Sort.by(DESC, "pet.name");
+        } else if (column.equals("owner")) {
+            if (asc)
+                return Sort.by(ASC, "pet.owner.firstName", "pet.owner.lastName");
+            return Sort.by(DESC, "pet.owner.firstName", "pet.owner.lastName");
+        }
+        throw new ResponseStatusException(BAD_REQUEST, "Unsupported sort");
     }
 
     private static List<String> ownerNames(Page<VisitRowDto> rows) {

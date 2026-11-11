@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -35,7 +37,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class ExceptionControllerAdvice {
     private static final Logger log = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
-    private ProblemDetail buildProblemDetail(String title, String detail, HttpStatus status,
+    private ProblemDetail buildProblemDetail(String title, String detail, HttpStatusCode status,
             HttpServletRequest request) {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
@@ -74,10 +76,18 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ProblemDetail> handleResponseStatusException(ResponseStatusException ex,
             HttpServletRequest request) {
-        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
-        log.warn("Request refused with {}: {}", status, ex.getReason());
-        ProblemDetail pd = buildProblemDetail(status.getReasonPhrase(), ex.getReason(), status, request);
-        return ResponseEntity.status(status).body(pd);
+        log.warn("Request refused with {}: {}", ex.getStatusCode(), ex.getReason());
+        ProblemDetail pd = buildProblemDetail("Request refused", ex.getReason(), ex.getStatusCode(), request);
+        return ResponseEntity.status(ex.getStatusCode()).body(pd);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        log.warn("Parameter {} has the wrong type", ex.getName());
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+                "Parameter '" + ex.getName() + "' has the wrong type", HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(pd);
     }
 
     @ExceptionHandler(Exception.class)

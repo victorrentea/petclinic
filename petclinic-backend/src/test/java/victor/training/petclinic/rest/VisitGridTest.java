@@ -26,6 +26,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -99,6 +100,24 @@ class VisitGridTest {
         assertThat(column(page, "date")).first().isEqualTo("2020-01-05");
     }
 
+    @Test
+    void pagesThroughTiesWithoutRepeatingOrSkippingAVisit() throws Exception {
+        for (int i = 1; i <= 7; i++) {
+            aVisit(petRepository.findAll().get(0), "2024-01-10", "same day " + i);
+        }
+
+        List<String> ids = new ArrayList<>(column(getPage("?sort=date&direction=asc&size=5"), "id"));
+        ids.addAll(column(getPage("?sort=date&direction=asc&size=5&page=1"), "id"));
+
+        assertThat(ids).hasSize(10).doesNotHaveDuplicates();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"5", "10", "20"})
+    void servesEveryOfferedPageSize(int size) throws Exception {
+        assertThat(getPage("?size=" + size).at("/page/size").asInt()).isEqualTo(size);
+    }
+
     @ParameterizedTest
     @CsvSource({
             "date,        asc,  2023-03-15, 2024-01-10, 2025-05-20",
@@ -135,6 +154,8 @@ class VisitGridTest {
             "?size=7",
             "?size=1000",
             "?page=-1",
+            "?page=abc",
+            "?size=x",
     })
     void rejectsAnythingNotWhitelisted(String query) throws Exception {
         mockMvc.perform(get("/api/visits" + query))

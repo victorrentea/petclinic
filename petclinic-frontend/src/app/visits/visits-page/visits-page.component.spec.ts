@@ -1,6 +1,6 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 import {RouterTestingModule} from '@angular/router/testing';
 import {CommonModule} from '@angular/common';
 import {By} from '@angular/platform-browser';
@@ -83,6 +83,19 @@ describe('VisitsPageComponent', () => {
     component.onPage({pageIndex: 1, pageSize: 20, length: 23});
 
     expect(spy).toHaveBeenCalledWith(1, 20, '', undefined);
+  });
+
+  it('keeps the shown page after a failed load, and still answers the next click', () => {
+    const spy = spyOn(visitService, 'getVisitPage').and.returnValues(
+      of(pageOf(visits, 23)), throwError(() => 'server returned code 500'), of(pageOf([visits[1]], 23)));
+    fixture.detectChanges();
+
+    component.onSort({active: 'pet', direction: 'asc'});
+    expect(component.visits).toEqual(visits);
+
+    component.onSort({active: 'pet', direction: 'desc'});
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(component.visits).toEqual([visits[1]]);
   });
 
   it('shows "No visits found." when there are none', () => {

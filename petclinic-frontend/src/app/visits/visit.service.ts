@@ -23,10 +23,9 @@ export class VisitService {
     if (sort && direction) {
       params = params.set('sort', sort).set('direction', direction);
     }
-    const noRows: VisitPage = {content: [], page: {number: page, size, totalElements: 0, totalPages: 0}};
     return this.http.get<VisitPage>(this.entityUrl, {params})
       .pipe(
-        catchError(this.handlerError('getVisitPage', noRows))
+        catchError(this.handlerError<VisitPage>('getVisitPage'))
       );
   }
 
