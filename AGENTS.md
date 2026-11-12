@@ -1,16 +1,20 @@
 # Project Memory
+
 New conversations in this folder auto-load this file.
 Add to rules here to prevent repeating AI fail/slop.
 Carefully review its contents at every retrospective to remove: obvious, duplication, conflicts, drift, CYA comments.
 
 ## AGENTS.md is the single source of truth
+
 Claude Code: never write rules into `CLAUDE.md`.
 GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
 
 ## Project Overview
+
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
 
 **Structure:**
+
 - `petclinic-backend/` - Spring Boot 3.5 REST API (Java 21), Maven-built
 - `petclinic-frontend/` - Angular 16 SPA (Angular Material + Bootstrap 3), npm built
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
@@ -19,18 +23,22 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 ## Common Commands
 
 ### Helper Scripts
+
 Each script is foreground; run them in separate terminals.
+
 ```sh
 ./start-database.sh        # embedded Postgres on localhost:5432
 ./start-backend.sh         # starts notification-service on :8090 and backend on :8080 (also MCP at /mcp) after installing commons
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
 ```
+
 Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeout. A port held
 by an orphan is reported in < 1s, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
 
 ### Backend (petclinic-backend/)
+
 ```sh
 mvn spring-boot:run              # Run backend
 mvn test                         # Run tests
@@ -39,6 +47,7 @@ mvn test -Dtest=ClassName#methodName # Run a single test
 ```
 
 ### Frontend (petclinic-frontend/)
+
 ```sh
 npm start                           # Dev server on localhost:4200
 npm run build                       # Production build
@@ -53,6 +62,7 @@ npm run e2e                         # Protractor e2e tests
 ### Backend Architecture
 
 **Layered Structure:**
+
 1. REST Controllers (`petclinic-backend/src/main/java/.../rest/`) - expose API endpoints
 2. Mappers (`mapper/`) - hand-written `@Component` entity↔DTO conversion
 3. Repository Layer (`repository/`) - Spring Data JPA interfaces (no service layer!)
@@ -66,7 +76,8 @@ Request → REST Controller → Repository / Mapper → JPA Entity
 Response ← REST Controller ← Mapper (Entity→DTO) ← Repository
 
 **Key Patterns:**
-- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/` 
+
+- DTOs are hand-written (not generated) in `src/main/java/.../rest/dto/`
 - `/openapi.yaml` is generated (don't edit it!) from Java DTOs & REST Controllers by `OpenApiExtractorTest`
 
 ## Additional Knowledge
@@ -78,6 +89,7 @@ Before changing how the layers, the database or the notification call work, read
 and their reasons in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ### Frontend UX design system
+
 `petclinic-frontend/src/app/design-system/` holds the standardised widgets. Every
 single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 `ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
@@ -119,6 +131,7 @@ one. `diagram-preview.yml` still posts a PR comment rendering the branch's own d
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
 ### Database
+
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
 - **Flyway boots from three locations** (`ddl-auto=none`); an empty DB before that is normal.
@@ -139,8 +152,10 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
 
 ## API Endpoints
+
 Backend exposes REST API at http://localhost:8080/api/
-REST Contract: 
+REST Contract:
+
 - Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`
 - Vets: `/api/vets`, `/api/vets/{id}`
@@ -150,15 +165,19 @@ REST Contract:
 - Users: `/api/users`
 
 ## Domain Model
+
 Core entities and relationships:
+
 - **Owner** 1→N **Pet** N→1 **PetType**
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
 ## Java Code Style
+
 - Keep < 120 chars / line
 - Keep methods under 30 lines
+- Prefer stream FP pipelines over for
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
 - Global REST exception handling is done via `@RestControllerAdvice`
@@ -166,6 +185,7 @@ Core entities and relationships:
 - Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
+
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind CYA comments when deleting or moving stuff
