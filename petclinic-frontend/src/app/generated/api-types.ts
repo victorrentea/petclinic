@@ -357,6 +357,87 @@ export interface components {
        */
       description: string;
     };
+    /** @description One page of the visits grid, with the paging and sorting actually applied. */
+    VisitPageDto: {
+      /** @description The visits on this page. */
+      content: components["schemas"]["VisitRowDto"][];
+      /**
+       * Format: int32
+       * @description The page served, 0-based.
+       * @example 0
+       */
+      page: number;
+      /**
+       * Format: int32
+       * @description Rows per page: 5, 10 or 20.
+       * @example 10
+       */
+      size: number;
+      /**
+       * @description The sort applied: date, description, pet or owner, then asc or desc.
+       * @example date,desc
+       */
+      sort: string;
+      /**
+       * Format: int64
+       * @description Visits in the clinic, on all pages.
+       * @example 42
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description Number of pages.
+       * @example 5
+       */
+      totalPages: number;
+    };
+    /** @description One row of the visits grid. */
+    VisitRowDto: {
+      /**
+       * Format: date
+       * @description The visit's date.
+       * @example "2013-01-01T00:00:00.000Z"
+       */
+      date: string;
+      /**
+       * @description The description of the visit.
+       * @example rabies shot
+       */
+      description: string;
+      /**
+       * Format: int32
+       * @description The ID of the visit.
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The first name of the owner.
+       * @example George
+       */
+      ownerFirstName: string;
+      /**
+       * Format: int32
+       * @description The ID of the pet's owner.
+       * @example 1
+       */
+      ownerId: number;
+      /**
+       * @description The last name of the owner.
+       * @example Franklin
+       */
+      ownerLastName: string;
+      /**
+       * Format: int32
+       * @description The ID of the pet.
+       * @example 7
+       */
+      petId: number;
+      /**
+       * @description The name of the pet.
+       * @example Leo
+       */
+      petName: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -1571,11 +1652,21 @@ export interface operations {
     };
   };
   listVisits: {
+    parameters: {
+      query?: {
+        /** @description 0-based, default 0; past the end: the last page */
+        page?: number;
+        /** @description 5, 10 (default) or 20; others snap to the nearest */
+        size?: number;
+        /** @description date|description|pet|owner,asc|desc; else date,desc */
+        sort?: string;
+      };
+    };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["VisitDto"][];
+          "application/json": components["schemas"]["VisitPageDto"];
         };
       };
       /** @description Bad Request */
