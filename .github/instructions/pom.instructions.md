@@ -1,4 +1,5 @@
 ---
+#This is automatically loaded in the conversation every time the harness Copilot touches a file of that path.
 applyTo: "**/pom.xml"
 ---
 

@@ -132,6 +132,10 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
 
 ### Database
 
+- Before discussing or designing any grid/data-table feature, inspect the relevant live
+  database data rather than relying only on code, schema or fixtures.
+- **Planning volume:** expect approximately 50,000 owners within a year. Owner-grid
+  pagination, sorting and filtering must scale without downloading the full owner dataset.
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
 - **Flyway boots from three locations** (`ddl-auto=none`); an empty DB before that is normal.
