@@ -146,7 +146,8 @@ describe('OwnerListComponent', () => {
     queryParams.next({lastName: 'Zzzz'});
     fixture.detectChanges();
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No owners with LastName starting with "Zzzz"');
+    const text = (fixture.nativeElement as HTMLElement).textContent;
+    expect(text).toContain('No owners with LastName starting with "Zzzz"');
     expect(fixture.debugElement.query(By.css('mat-paginator'))).toBeNull();
   });
 
