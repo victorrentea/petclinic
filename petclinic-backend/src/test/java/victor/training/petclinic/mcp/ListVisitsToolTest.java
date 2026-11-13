@@ -16,12 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
 import victor.training.petclinic.domain.PetType;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.repository.OwnerRepository;
 import victor.training.petclinic.repository.PetRepository;
+import victor.training.petclinic.repository.VetRepository;
 import victor.training.petclinic.repository.VisitRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -36,6 +39,8 @@ class ListVisitsToolTest {
     PetRepository petRepository;
     @Autowired
     VisitRepository visitRepository;
+    @Autowired
+    VetRepository vetRepository;
 
     @AfterEach
     void clearAuth() {
@@ -70,6 +75,45 @@ class ListVisitsToolTest {
         assertThat(visits)
                 .extracting(PetClinicMcp.VisitView::description)
                 .contains("Annual checkup");
+    }
+
+    @Test
+    void names_the_vet_of_each_visit_and_none_where_there_is_none() {
+        Vet vet = new Vet();
+        vet.setFirstName("Helen");
+        vet.setLastName("Leary");
+        vetRepository.save(vet);
+        Pet pet = new Pet();
+        pet.setName("Rex");
+        pet.setBirthDate(LocalDate.of(2020, 1, 1));
+        pet.setType(petRepository.findPetTypes().get(0));
+        Owner owner = new Owner();
+        owner.setFirstName("Tdd");
+        owner.setLastName("Tester");
+        owner.setAddress("1 Test Way");
+        owner.setCity("Testville");
+        owner.setTelephone("0000000000");
+        owner.addPet(pet);
+        pet.addVisit(aVisit("seen by Helen", vet));
+        pet.addVisit(aVisit("vet not yet known", null));
+        ownerRepository.save(owner);
+        authenticateAs(owner.getId());
+
+        List<PetClinicMcp.VisitView> visits = petClinicMcp.listVisits();
+
+        assertThat(visits)
+                .extracting(PetClinicMcp.VisitView::description, PetClinicMcp.VisitView::vetName)
+                .containsExactlyInAnyOrder(
+                        tuple("seen by Helen", "Helen Leary"),
+                        tuple("vet not yet known", null));
+    }
+
+    private static Visit aVisit(String description, Vet vet) {
+        Visit visit = new Visit();
+        visit.setDate(LocalDate.of(2026, 5, 24));
+        visit.setDescription(description);
+        visit.setVet(vet);
+        return visit;
     }
 
     private static void authenticateAs(int ownerId) {

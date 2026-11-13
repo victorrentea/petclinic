@@ -16,6 +16,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import Spy = jasmine.Spy;
 import {OwnerService} from '../../owners/owner.service';
 import {Owner} from '../../owners/owner';
+import {VetService} from '../../vets/vet.service';
+import {Vet} from '../../vets/vet';
 
 class PetServiceStub {
   addPet(pet: Pet): Observable<Pet> {
@@ -31,6 +33,12 @@ const visitOwner: Owner = { id: 1, firstName: 'George', lastName: 'Franklin', ad
 class OwnerServiceStub {
   getOwnerById(): Observable<Owner> {
     return of(visitOwner);
+  }
+}
+
+class VetServiceStub {
+  getVets(): Observable<Vet[]> {
+    return of([{id: 2, firstName: 'Helen', lastName: 'Leary', specialties: []}]);
   }
 }
 
@@ -57,6 +65,7 @@ describe('VisitAddComponent', () => {
         {provide: PetService, useClass: PetServiceStub},
         {provide: VisitService, useClass: VisitServiceStub},
         {provide: OwnerService, useClass: OwnerServiceStub},
+        {provide: VetService, useClass: VetServiceStub},
         {provide: Router, useClass: RouterStub},
         {provide: ActivatedRoute, useClass: ActivatedRouteStub}
       ]
@@ -106,6 +115,19 @@ describe('VisitAddComponent', () => {
     expect(visit.id).toBeNull();
     expect(component.addedSuccess).toBeTrue();
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
+  });
+
+  it('offers the vets, starting with no vet chosen', () => {
+    expect(component.vetOptions).toEqual([{id: 2, name: 'Helen Leary'}]);
+    expect(component.visit.vetId).toBeNull();
+  });
+
+  it('books the visit with the chosen vet', () => {
+    spyOn(visitService, 'addVisit').and.callThrough();
+    component.currentOwner = visitOwner;
+    const visit: any = { id: null, date: '2023-05-01', description: 'checkup', pet: testPet, vetId: 2 };
+    component.onSubmit(visit);
+    expect(visitService.addVisit).toHaveBeenCalledWith(jasmine.objectContaining({vetId: 2}));
   });
 
   it('should navigate to owner detail via gotoOwnerDetail', () => {
