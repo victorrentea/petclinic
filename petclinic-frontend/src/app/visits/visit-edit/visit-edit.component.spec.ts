@@ -112,6 +112,13 @@ describe('VisitEditComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/owners', 1]);
   });
 
+  it('should not accept a visit before the pet was born', () => {
+    const petService = fixture.debugElement.injector.get(PetService);
+    spyOn(petService, 'getPetById').and.returnValue(of(testPet));
+    component.ngOnInit();
+    expect(component.minDate.format('YYYY-MM-DD')).toBe(testPet.birthDate);
+  });
+
   it('should navigate to owner detail via gotoOwnerDetail', () => {
     const router = fixture.debugElement.injector.get(Router) as unknown as RouterStub;
     spyOn(router, 'navigate');
