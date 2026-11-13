@@ -156,6 +156,10 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Expected volume:** ~50,000 owners within a year (business forecast, Nov 2026). The seed's
+27 owners are not representative: never load every owner into memory or onto the page; page,
+filter and sort owners in the database.
+
 ## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
