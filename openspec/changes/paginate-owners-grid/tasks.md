@@ -8,7 +8,7 @@
 
 ## 2. Backend: paged, sorted `GET /api/owners`
 
-- [ ] 2.1 Add `OwnerSort` (`name,asc|desc`, `city,asc|desc` → Spring `Sort` ending in `id`) with a unit test of the mapping — verify the test passes
+- [x] 2.1 Add `OwnerSort` (`name,asc|desc`, `city,asc|desc` → Spring `Sort` ending in `id`) with a unit test of the mapping — verify the test passes
 - [x] 2.2 Change `OwnerRepository.findByLastNameStartingWith` to take a `Pageable` and return `Page<Owner>` — verify the repository tests pass
 - [x] 2.3 Add `OwnerPageDto` and its `OwnerMapper` method; make `listOwners` accept `lastName`, `page`, `size` (5/10/20, default 10), `sort` (default `name,asc`) — verify REST tests in `OwnerTest`: default first page with totals, page 3 of 27, size 20, sort by name with the Darlings tie, city descending
 - [x] 2.4 Reject `size` outside {5, 10, 20} and an unknown `sort` with 400 (`ValidationException`, plus a 400 handler for `MethodArgumentTypeMismatchException` in `ExceptionControllerAdvice`) — verify REST tests for `size=50000` and `sort=telephone,asc` return 400 `ProblemDetail`
@@ -27,11 +27,11 @@
 
 ## 4. End-to-end scenarios
 
-- [ ] 4.1 Update `petclinic-test/src/owner-search.feature`: the "every owner" scenario becomes "first page and the total"; the case-sensitive prefix examples stay unchanged — verify the suite passes and regenerate its `@generate_sequence` diagram
-- [ ] 4.2 Add `owner-list.feature` (`@fixture:default`): next page, 20 per page, sort by City then reverse, Back from an owner's details returns to the same page, a shared link opens the page it names, a link past the end lands on the last page — verify it passes against the running stack (`./start-tests.sh`)
+- [x] 4.1 Update `petclinic-test/src/owner-search.feature`: the "every owner" scenario becomes "first page and the total"; the case-sensitive prefix examples stay unchanged — verify the suite passes and regenerate its `@generate_sequence` diagram
+- [x] 4.2 Add `owner-list.feature` (`@fixture:default`): next page, 20 per page, sort by City then reverse, Back from an owner's details returns to the same page, a shared link opens the page it names, a link past the end lands on the last page — verify it passes against the running stack (`./start-tests.sh`)
 
 ## 5. Demo data and docs
 
-- [ ] 5.1 Add a "large" dataset location whose `R__seed.sql` generates ~50,000 owners with `generate_series`, selectable through `spring.flyway.locations` — verify the backend boots on it and page 1 by name answers in < 100 ms
+- [x] 5.1 Add a "large" dataset location whose `R__seed.sql` generates ~50,000 owners with `generate_series`, selectable through `spring.flyway.locations` — verify the backend boots on it and page 1 by name answers in < 100 ms
 - [ ] 5.2 Update `AGENTS.md` (API Endpoints: `/api/owners` params) and `docs/user-manual/manual.md` (paging and sorting) — verify `AGENTS.md` stays under 200 lines
-- [ ] 5.3 File the follow-up issues from `/Q&A.md` (case/accent-insensitive search, E.164 telephones, the test that leaves duplicate owners in the dev DB) — verify three issue links exist
+- [x] 5.3 File the follow-up issues from `/Q&A.md` (case/accent-insensitive search, E.164 telephones, the test that leaves duplicate owners in the dev DB) — verify three issue links exist
