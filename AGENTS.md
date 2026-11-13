@@ -131,6 +131,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   McCallister, pet 3 = Milton). A second dataset = a sibling location reusing the name
   `R__seed.sql`, picked by swapping `spring.flyway.locations`; Flyway refuses to boot on two
   resolved migrations sharing one description, so two can never both apply.
+  The `large` profile instead ADDS `db/seed-large` (50,000 generated owners) on top of Default.
 - **Tests start on an empty database** (schema + reference rows), never on the seed: the tests'
   `src/test/resources/config/application.properties` drops `db/seed` and gives every test method
   a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
