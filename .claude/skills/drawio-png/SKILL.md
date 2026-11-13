@@ -11,10 +11,14 @@ chunk. Read that, never the pixels — labels in the image omit the custom attri
 carry the semantics (e.g. `traced="yes"` on edges, `port`/`tech` on containers).
 
 ```sh
-.claude/skills/drawio-png/drawio.py <file>          # vertices + edges + attributes (graph)
-.claude/skills/drawio-png/drawio.py json <file>     # same, JSON — pipe to jq
+.claude/skills/drawio-png/drawio.py <file>          # vertices + edges + attributes, as TOON
+.claude/skills/drawio-png/drawio.py json <file>     # same data, JSON — pipe to jq
 .claude/skills/drawio-png/drawio.py xml  <file>     # full decoded mxGraph XML (styles, geometry)
 ```
+
+The default output is [TOON](https://toonformat.dev): vertices as one table
+(`vertices[N]{id,label,kind,…}:` then a row each, `null` = attribute not set), edges as one
+`- from: … / to: …` block each, listing only the attributes that edge has.
 
 Diagrams in this repo: `petclinic-backend/docs/Deployment.drawio.png`,
 `petclinic-backend/docs/ConceptualModel.drawio.png`.
@@ -27,8 +31,9 @@ Diagrams in this repo: `petclinic-backend/docs/Deployment.drawio.png`,
 - Custom properties: draw.io wraps the cell in `<object>`/`<UserObject>` and **moves `id` and
   `label` onto the wrapper**; the inner `<mxCell>` has no id. The script merges them.
 - Multi-page files print one block per page.
-- Labels parented to an edge (`*`, `1`, …) are its multiplicities: printed on the edge, at
-  the end they sit at (`Owner --> Pet [*]` = many pets per owner), not as vertices.
+- Labels parented to an edge (`*`, `1`, …) are its multiplicities: printed on the edge as
+  `fromMultiplicity` / `toMultiplicity` (`from: Owner, to: Pet, toMultiplicity: *` = many pets
+  per owner), not as vertices.
 
 ## A diagram is a claim, not evidence
 
@@ -51,3 +56,13 @@ does the same decoding in Java for tests; keep both in step if the format handli
 touching `description`; the bar is 10/10 at 2 reps. It was 9/10 before the 2026-10-15
 rewording ("architecture diagram" without "drawio" went grepping instead).
 Cut from 688 to 320 chars on 2026-10-27: still 10/10 here and 30/30 on three extra tasks, on Sonnet 5.5.
+
+## Comprehension eval
+
+`evals/comprehension_eval.py [reps] [model …]` hands the output of both diagrams, with no word
+about the format, to the cheapest Copilot CLI models (gpt-*-luna, Haiku 4.5, Gemini Flash,
+MAI flash) and grades 10 questions that need a correct reading: edge direction, `null` cells,
+multiplicities (~3 min). `DRAWIO=<other drawio.py>` runs it against another version of the
+script, for an A/B. On 2026-11-13: 148/150. The old `repr` text format scored 97/100, and
+all-tabular TOON (edges as a table too) only 95/100: both Lunas dropped one row from "every
+`traced=no` edge" in 10 of 12 runs, hence the keyed edges.
