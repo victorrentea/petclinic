@@ -24,8 +24,15 @@
 
     <div *ngIf="page && page.totalElements === 0">No owners with LastName starting with "{{lastName}}"</div>
     <div class="table-responsive" id="ownersTable" *ngIf="page && page.totalElements > 0">
-      <table class="table table-striped" matSort matSortDisableClear
+      <table class="table table-striped owners-grid" matSort matSortDisableClear
               [matSortActive]="sortKey" [matSortDirection]="sortDirection" (matSortChange)="sortBy($event)">
+        <colgroup>
+          <col class="col-name">
+          <col class="col-address">
+          <col class="col-city">
+          <col class="col-telephone">
+          <col class="col-pets">
+        </colgroup>
         <thead>
         <tr>
           <th mat-sort-header="name">Name</th>

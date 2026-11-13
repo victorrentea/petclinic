@@ -77,3 +77,20 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Fixed widths: with the default auto layout every page and every sort resized the columns
+  to fit whatever rows it held, so the headers jumped around while paging. */
+.owners-grid {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.owners-grid td {
+  overflow-wrap: anywhere;
+}
+
+.col-name { width: 22%; }
+.col-address { width: 26%; }
+.col-city { width: 16%; }
+.col-telephone { width: 18%; }
+.col-pets { width: 18%; }
