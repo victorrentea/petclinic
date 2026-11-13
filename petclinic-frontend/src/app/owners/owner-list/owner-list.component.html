@@ -54,12 +54,13 @@
         </tr>
         </tbody>
       </table>
-      <mat-paginator [length]="page.totalElements" [pageIndex]="page.number" [pageSize]="query.size"
-                      [pageSizeOptions]="pageSizes" (page)="changePage($event)" showFirstLastButtons>
-      </mat-paginator>
     </div>
-    <div>
-      <button *ngIf="isOwnersDataReceived" class="btn btn-default" (click)="addOwner()">Add Owner</button>
+    <div class="owners-footer" *ngIf="isOwnersDataReceived">
+      <button class="btn btn-default" (click)="addOwner()">Add Owner</button>
+      <mat-paginator *ngIf="page.totalElements > 0" [length]="page.totalElements" [pageIndex]="page.number"
+                      [pageSize]="query.size" [pageSizeOptions]="pageSizes" (page)="changePage($event)"
+                      showFirstLastButtons>
+      </mat-paginator>
     </div>
   </div>
 </div>

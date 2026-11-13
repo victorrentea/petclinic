@@ -114,3 +114,15 @@ display:none;
 :host ::ng-deep .owners-grid th[aria-sort="descending"] .mat-sort-header-arrow {
   color: #ffffff;
 }
+
+/* Add Owner sits in the paginator's white bar, on its left, instead of on a row of its own. */
+.owners-footer {
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  background: #ffffff;
+}
+
+.owners-footer mat-paginator {
+  flex: 1;
+}
