@@ -34,7 +34,8 @@
             <mat-datepicker #visitDateDatepicker></mat-datepicker>
             <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="date.valid" [class.glyphicon-remove]="!date.valid" aria-hidden="true"></span>
             <span class="help-block" *ngIf="date.dirty && date.hasError('required')">Date is required</span>
-            <app-visit-date-errors [date]="date" [birthDate]="currentPet.birthDate" [maxDate]="maxDate"></app-visit-date-errors>
+            <app-visit-date-errors [date]="date" [birthDate]="currentPet.birthDate" [maxDate]="maxDate">
+            </app-visit-date-errors>
 
           </div>
         </div>
