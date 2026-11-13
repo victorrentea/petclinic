@@ -84,6 +84,10 @@ The owners grid SHALL show a paginator offering 5, 10 and 20 rows per page, and 
 the user sort by clicking the Name and City headers. The Address, Telephone and Pets
 headers SHALL NOT be clickable.
 
+#### Scenario: Names read surname first, the order they sort by
+- **WHEN** the grid lists Harry Potter
+- **THEN** his name reads "Potter, Harry"
+
 #### Scenario: Reversing a sort from the header
 - **WHEN** the user clicks the City header twice
 - **THEN** the grid is sorted by city descending

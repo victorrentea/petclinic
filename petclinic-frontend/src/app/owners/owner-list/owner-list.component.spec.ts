@@ -73,11 +73,11 @@ describe('OwnerListComponent', () => {
     expect(getOwnerPageSpy).toHaveBeenCalledWith({lastName: '', page: 1, size: 10, sort: 'name,asc'});
   });
 
-  it('shows the owners full names', () => {
+  it('shows each owner surname first, as the list is sorted', () => {
     fixture.detectChanges();
 
     const name = fixture.debugElement.query(By.css('.ownerFullName')).nativeElement as HTMLElement;
-    expect(name.innerText).toBe('George Franklin');
+    expect(name.innerText).toBe('Franklin, George');
   });
 
   it('lists an owners pets on one line, comma-separated', () => {

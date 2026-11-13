@@ -1,6 +1,6 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import {ApiClient, fullName, OwnerPageQuery} from './support/api-client';
+import {ApiClient, fullName, fullNameOfListed, OwnerPageQuery} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin, bound directly: the steps do the work themselves, with no DSL layer
@@ -29,7 +29,8 @@ async function ownerNames(query: OwnerPageQuery, allPages: boolean): Promise<str
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
   const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  const listed = async () => (await cells.allTextContents())
+    .map((t) => t.trim()).filter(Boolean).map(fullNameOfListed).sort();
 
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }

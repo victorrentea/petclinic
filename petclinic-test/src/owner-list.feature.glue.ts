@@ -1,6 +1,6 @@
 import {Then, When} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import {ApiClient, fullName} from './support/api-client';
+import {ApiClient, listedName} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // The expected rows come from the API asked the same question, not from a list typed here:
@@ -14,7 +14,7 @@ async function expectPageListed(world: PlaywrightWorld, page: number, sort: stri
   const cells = world.page.locator('#ownersTable td.ownerFullName');
   const listed = async () => (await cells.allTextContents()).map((t) => t.trim());
 
-  await expect.poll(listed, {timeout: 10_000}).toEqual(owners.content.map(fullName));
+  await expect.poll(listed, {timeout: 10_000}).toEqual(owners.content.map(listedName));
 }
 
 async function lastPage(size: number): Promise<number> {

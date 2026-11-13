@@ -29,6 +29,15 @@ export interface OwnerPageQuery {
 
 export const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
 
+/** How the owners grid writes a name: surname first, the order it sorts by. */
+export const listedName = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+
+/** A grid cell ("Potter, Harry") back to a plain full name ("Harry Potter"). */
+export const fullNameOfListed = (cell: string) => {
+  const [lastName, firstName] = cell.split(/,\s*(.*)/s);
+  return fullName({firstName, lastName});
+};
+
 export class ApiClient {
   private client: AxiosInstance;
 
