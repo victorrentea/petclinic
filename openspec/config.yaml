@@ -18,6 +18,15 @@ schema: spec-driven
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - The reader is the business, not an engineer. Write in plain language a clinic manager understands
+    - No technical terms - no JSON, endpoints, HTTP methods or status codes, parameters, class, file or table names, frameworks, indexes, collations, migrations
+    - Describe what users see and can do, with concrete examples from the clinic's own data
+    - Mark a change BREAKING only when users notice it; a broken API contract goes to design.md
+    - End with a pointer to design.md for the technical decisions
+  design:
+    - The reader is the engineering team. Open with a "Contract and Impact" section - API contract changes (marked BREAKING), callers checked in code, affected code, contract artefacts, tests, data - everything kept out of the business-facing proposal
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.

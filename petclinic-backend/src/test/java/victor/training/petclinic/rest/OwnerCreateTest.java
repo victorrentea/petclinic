@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
+import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ class OwnerCreateTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
 
-        assertThat(ownerRepository.findByLastNameStartingWith("Tesla")).isNotEmpty();
+        assertThat(ownerRepository.findByLastNameStartingWith("Tesla", Pageable.unpaged())).isNotEmpty();
     }
 
     @Test

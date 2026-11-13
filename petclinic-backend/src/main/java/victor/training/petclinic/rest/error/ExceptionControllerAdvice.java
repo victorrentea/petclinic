@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -78,6 +79,16 @@ public class ExceptionControllerAdvice {
         log.warn("Validation failed: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request));
+    }
+
+    // A query parameter that doesn't parse (?page=abc) is the caller's mistake, not a 500
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+        String detail = "Invalid value '" + ex.getValue() + "' for parameter " + ex.getName();
+        log.warn("Validation failed: {}", detail);
+        return ResponseEntity.badRequest()
+                .body(buildProblemDetail("Validation Error", detail, HttpStatus.BAD_REQUEST, request));
     }
 
     @ExceptionHandler(Exception.class)

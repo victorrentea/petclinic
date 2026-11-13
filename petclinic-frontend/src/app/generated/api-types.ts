@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /** List one page of owners, sorted by name or city */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +169,34 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners, with the totals the paginator needs. */
+    OwnerPageDto: {
+      /** @description The owners on this page. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description This page's index, from 0.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description The requested page size.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many owners match, on all pages.
+       * @example 27
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,18 +581,24 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /** List one page of owners, sorted by name or city */
   listOwners: {
     parameters: {
       query?: {
         lastName?: string;
+        /** @description Page index, from 0 */
+        page?: number;
+        /** @description 5, 10 or 20 */
+        size?: number;
+        /** @description name or city, optionally ,asc or ,desc */
+        sort?: string;
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
       /** @description Bad Request */

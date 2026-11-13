@@ -20,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import org.hibernate.annotations.BatchSize;
 import jakarta.persistence.Table;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotEmpty;
@@ -48,6 +49,7 @@ public class Pet {
     private Owner owner;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.LAZY)
+    @BatchSize(size = 20) // a page of up to 20 rows loads these in one query, not one per row
     private Set<Visit> visits = new HashSet<>();
 
     public List<Visit> getVisitsSortedByDate() {

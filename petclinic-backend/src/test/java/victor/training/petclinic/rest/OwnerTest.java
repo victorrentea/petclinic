@@ -156,8 +156,9 @@ public class OwnerTest {
                 .getResponse()
                 .getContentAsString();
 
-        return mapper.readValue(responseJson, new TypeReference<List<OwnerDto>>() {
-        });
+        return mapper.readValue(mapper.readTree(responseJson).get("content").traverse(),
+                new TypeReference<List<OwnerDto>>() {
+                });
     }
 
     @Test
