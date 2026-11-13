@@ -90,7 +90,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(queryParams: Params, replaceUrl = false) {
-    this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
+    // Fire and forget: the queryParamMap subscription in ngOnInit reacts to the new URL
+    void this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge', replaceUrl});
   }
 }
 
