@@ -1,6 +1,6 @@
 import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
-import axios from 'axios';
+import {ApiClient, fullName, OwnerPageQuery} from './support/api-client';
 import {PlaywrightWorld} from './support/world';
 
 // Gherkin, bound directly: the steps do the work themselves, with no DSL layer
@@ -11,18 +11,16 @@ import {PlaywrightWorld} from './support/world';
 // Nothing below decides anything: the Background states the data, the Examples
 // table states the search term and the expected result set.
 
-const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
-
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
+const api = new ApiClient();
 const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
 
-/** The owners the API lists for `params`: its first page, or (`allPages`) every page in turn. */
-async function ownerNames(params: Record<string, number>, allPages: boolean): Promise<string[]> {
+/** The owners the API lists for `query`: its first page, or (`allPages`) every page in turn. */
+async function ownerNames(query: OwnerPageQuery, allPages: boolean): Promise<string[]> {
   const names: string[] = [];
   for (let page = 0; ; page++) {
-    const {data} = await axios.get(`${API_BASE}/owners`, {params: {...params, page}, timeout: 10_000});
-    names.push(...data.content.map(fullName));
-    if (!allPages || page + 1 >= data.totalPages) {
+    const owners = await api.fetchOwnerPage({...query, page});
+    names.push(...owners.content.map(fullName));
+    if (!allPages || page + 1 >= owners.totalPages) {
       return names;
     }
   }

@@ -11,6 +11,24 @@ export interface VisitDto {
   ownerLastName?: string;
 }
 
+export interface OwnerPageDto {
+  content: {firstName: string; lastName: string}[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+/** Query of GET /owners; `page` counts from 0, as the API does. */
+export interface OwnerPageQuery {
+  lastName?: string;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
+
 export class ApiClient {
   private client: AxiosInstance;
 
@@ -25,6 +43,11 @@ export class ApiClient {
 
   async fetchVisits(): Promise<VisitDto[]> {
     const response = await this.client.get<VisitDto[]>('/visits');
+    return response.data;
+  }
+
+  async fetchOwnerPage(query: OwnerPageQuery = {}): Promise<OwnerPageDto> {
+    const response = await this.client.get<OwnerPageDto>('/owners', {params: query});
     return response.data;
   }
 
