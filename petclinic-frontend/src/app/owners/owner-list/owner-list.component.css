@@ -101,3 +101,16 @@ display:none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Every sortable header always shows its arrow, so nobody has to hover to discover it:
+  grey where it could sort, white on the column it is sorted by. Material fades the arrow
+  in and out with inline animation styles, hence the !important. */
+:host ::ng-deep .owners-grid th.mat-sort-header .mat-sort-header-arrow {
+  opacity: 1 !important;
+  color: #9e9e9e;
+}
+
+:host ::ng-deep .owners-grid th[aria-sort="ascending"] .mat-sort-header-arrow,
+:host ::ng-deep .owners-grid th[aria-sort="descending"] .mat-sort-header-arrow {
+  color: #ffffff;
+}
