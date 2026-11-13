@@ -80,6 +80,15 @@ describe('OwnerListComponent', () => {
     expect(name.innerText).toBe('George Franklin');
   });
 
+  it('lists an owners pets on one line, comma-separated', () => {
+    const pet = (name: string) => ({name} as Owner['pets'][number]);
+    getOwnerPageSpy.and.returnValue(of(pageOf([{...george, pets: [pet('Liza'), pet('Nana')]}])));
+    fixture.detectChanges();
+
+    const pets = fixture.debugElement.query(By.css('.ownerPets')).nativeElement as HTMLElement;
+    expect(pets.textContent.trim()).toBe('Liza, Nana');
+  });
+
   it('a search starts again at page 1', () => {
     queryParams.next({page: '3'});
     fixture.detectChanges();

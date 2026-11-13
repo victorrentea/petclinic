@@ -70,6 +70,11 @@ export class OwnerListComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** On one line, so every row keeps the same height whatever the number of pets. */
+  petNames(owner: Owner): string {
+    return owner.pets.map(pet => pet.name).join(', ');
+  }
+
   onSelect(owner: Owner) {
     this.router.navigate(['/owners', owner.id]);
   }

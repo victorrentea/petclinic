@@ -94,3 +94,10 @@ display:none;
 .col-city { width: 16%; }
 .col-telephone { width: 18%; }
 .col-pets { width: 18%; }
+
+/* One line per owner whatever the number of pets; the full list is in the tooltip. */
+.owners-grid td.ownerPets {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
