@@ -3,11 +3,13 @@
 
 The database has exactly one entry point — the dbhub MCP server declared in
 .mcp.json. This script starts that same server and speaks MCP to it over stdio:
-same tools, same params, same JSON, only the transport differs. For agent
+same tools, same params, same answers, only the transport differs. For agent
 harnesses where MCP servers are disabled by org policy but the shell is available.
+Answers print as TOON (fewer tokens than JSON); --json gives the raw JSON back.
 
     .claude/skills/db-cli/db-cli.py tools
     .claude/skills/db-cli/db-cli.py call execute_sql --params '{"sql":"select 1"}'
+    .claude/skills/db-cli/db-cli.py call execute_sql --json --params '{"sql":"select 1"}'
 
 Needs only python3 and npx. Connection: $DATABASE_URL, defaulting to db-cli.env next to this script.
 """
@@ -16,6 +18,7 @@ import glob
 import json
 import os
 import queue
+import re
 import shutil
 import subprocess
 import sys
@@ -141,19 +144,78 @@ def print_tools(server):
         print(f"{tool['name']}({', '.join(params)})\n     {tool.get('description', '')}\n")
 
 
-def print_call(server, tool, params):
+def print_call(server, tool, params, as_json):
     result = server.request("tools/call", {"name": tool, "arguments": params})
     for item in result.get("content", []):
         if item.get("type") == "text":
-            print(pretty(item["text"]))
+            print(render(item["text"], as_json))
     return 1 if result.get("isError") else 0
 
 
-def pretty(text):
+def render(text, as_json):
+    """dbhub answers with JSON text; TOON drops the repeated keys of every row."""
     try:
-        return json.dumps(json.loads(text), indent=2, ensure_ascii=False)
+        value = json.loads(text)
     except json.JSONDecodeError:
-        return text
+        return text  # a plain-text error, not an answer
+    if as_json:
+        return json.dumps(value, indent=2, ensure_ascii=False)
+    return "\n".join(toon(value))
+
+
+# ---- TOON (Token-Oriented Object Notation, toonformat.dev): JSON's data model. A uniform
+# array of objects is written once as a header `key[N]{col,col}:` plus one CSV-like row each.
+def toon(value, key=None, depth=0) -> list:
+    pad = "  " * depth
+    head = f"{pad}{toon_key(key)}" if key is not None else pad
+    if isinstance(value, dict):
+        lines = [f"{head}:"] if key is not None else []
+        for k, v in value.items():
+            lines += toon(v, k, depth + (key is not None))
+        return lines
+    if isinstance(value, list):
+        if is_table(value):
+            columns = ",".join(toon_key(k) for k in value[0])
+            return [f"{head}[{len(value)}]{{{columns}}}:"] + [
+                f"{pad}  " + ",".join(toon_scalar(v) for v in row.values()) for row in value]
+        if all(map(is_scalar, value)):
+            items = " " + ",".join(map(toon_scalar, value)) if value else ""
+            return [f"{head}[{len(value)}]:{items}"]
+        lines = [f"{head}[{len(value)}]:"]
+        for item in value:
+            body = toon(item, None, depth + 2) if isinstance(item, dict) else [
+                "  " * (depth + 2) + toon_scalar(item)]
+            lines += [f"{pad}  - " + body[0].lstrip()] + body[1:]
+        return lines
+    return [f"{head}: {toon_scalar(value)}"]
+
+
+def is_scalar(value) -> bool:
+    return not isinstance(value, (dict, list))
+
+
+def is_table(rows) -> bool:
+    return bool(rows) and all(
+        isinstance(row, dict) and list(row) == list(rows[0]) and all(map(is_scalar, row.values()))
+        for row in rows)
+
+
+def toon_key(key: str) -> str:
+    return key if re.fullmatch(r"[A-Za-z_][\w.]*", key) else json.dumps(key, ensure_ascii=False)
+
+
+def toon_scalar(value) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, (int, float)):
+        return json.dumps(value)
+    needs_quotes = (
+        value == "" or value != value.strip() or value in ("true", "false", "null")
+        or re.fullmatch(r"-?\d+(\.\d+)?([eE][+-]?\d+)?", value) or value.startswith("-")
+        or re.search(r'[:,"\\\[\]{}\x00-\x1f]', value))
+    return json.dumps(value, ensure_ascii=False) if needs_quotes else value
 
 
 def main():
@@ -164,6 +226,7 @@ def main():
     call = commands.add_parser("call", help="call one tool")
     call.add_argument("tool")
     call.add_argument("--params", default="{}", help="the tool's arguments, as a JSON object")
+    call.add_argument("--json", action="store_true", help="print the raw JSON instead of TOON")
     args = parser.parse_args()
 
     params = json.loads(args.params) if args.command == "call" else None
@@ -172,7 +235,7 @@ def main():
         if args.command == "tools":
             print_tools(server)
             return 0
-        return print_call(server, args.tool, params)
+        return print_call(server, args.tool, params, args.json)
     finally:
         server.close()
 
