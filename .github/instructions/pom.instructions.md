@@ -1,4 +1,6 @@
 ---
+# acest set de instrucțiuni se aplică pentru orice fișierele pom.xml din proiect
+# harnessul (copilotul impinge in conversatie, nu LLM cere)
 applyTo: "**/pom.xml"
 ---
 
