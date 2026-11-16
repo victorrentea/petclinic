@@ -5,7 +5,6 @@ description: Java code style rules for the petclinic backend and notification-se
 
 # Java Code Style
 
-- Keep < 120 chars / line
 - Keep methods under 30 lines
 - Do not add guard clauses to methods unless the call chain can actually bring such data.
 - Use constructor injection in src/main, `@Autowired` only in tests
