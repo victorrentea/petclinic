@@ -59,6 +59,7 @@ arrow {
 
 [pets] --> [design-system]
 [vets] --> [design-system]
+[owners] --> [design-system]
 
 [owners] --> [generated]
 [pets] --> [generated]

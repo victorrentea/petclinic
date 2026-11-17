@@ -2,9 +2,19 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParameterCodec, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+import { OwnerPage, OwnerQuery } from './owner-page';
+import { sortParam } from './owner-query';
+
+/** Plain encodeURIComponent, so that `+`, `&` and `%` typed in a filter reach the server as themselves. */
+const strictCodec: HttpParameterCodec = {
+  encodeKey: encodeURIComponent,
+  encodeValue: encodeURIComponent,
+  decodeKey: decodeURIComponent,
+  decodeValue: decodeURIComponent
+};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +29,15 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  getOwnerPage(query: OwnerQuery): Observable<OwnerPage> {
+    const params = new HttpParams({encoder: strictCodec})
+      .set('page', query.page)
+      .set('size', query.size)
+      .set('sort', sortParam(query))
+      .set('lastName', query.lastName);
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(catchError(this.handlerError<OwnerPage>('getOwnerPage')));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +63,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

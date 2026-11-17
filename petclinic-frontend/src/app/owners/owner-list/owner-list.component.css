@@ -77,3 +77,132 @@ display:none;
     align-items: flex-start;
   }
 }
+
+.sort-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sort-button:focus-visible {
+  outline: 2px solid #34302d;
+  outline-offset: 2px;
+}
+
+.owners-loading {
+  text-align: center;
+  color: #666;
+  padding: 24px 0;
+}
+
+.sort-indicator {
+  display: inline-block;
+  min-width: 2.2em;
+}
+
+/* The active marker's two triangles, side by side and grey: this column can be sorted. */
+.sort-inactive {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 1px;
+  font-size: 0.8em;
+  color: #9a9a9a;
+}
+
+/* Fixed widths: the columns must not move when sorting changes what they contain. */
+.owners-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.owners-table td,
+.owners-table th {
+  overflow-wrap: anywhere;
+}
+
+.col-name { width: 22%; }
+.col-address { width: 26%; }
+.col-city { width: 16%; }
+.col-telephone { width: 18%; }
+.col-pets { width: 18%; }
+
+/* The rows of the previous page stay put, dimmed and inert, until the next page replaces them. */
+.refreshing tbody {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.owners-pagination #ownersLoading {
+  color: #666;
+}
+
+.pet-emoji {
+  margin-right: 4px;
+}
+
+.owners-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-field {
+  position: relative;
+  flex: 1;
+}
+
+.search-field .form-control {
+  width: 100%;
+  padding-right: 32px;
+}
+
+.clear-filter {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: none;
+  padding: 0 4px;
+  font-size: 20px;
+  line-height: 1;
+  color: #999;
+  cursor: pointer;
+}
+
+.clear-filter:disabled {
+  color: #ccc;
+  cursor: default;
+}
+
+.clear-filter:enabled:hover,
+.clear-filter:enabled:focus-visible {
+  color: #34302d;
+}
+
+/* The header stays pinned at the top of the window while the rows scroll under it.
+    Sticky only works when no ancestor clips overflow, hence the override. */
+#ownersTable {
+  overflow: visible;
+}
+
+.owners-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.owners-table thead,
+.owners-table thead th {
+  background-color: #3b3833 !important;
+}
+
+.owners-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* Cells snap to whole pixels, which can leave a 1px light seam between two of them. */
+  box-shadow: 1px 0 0 #3b3833;
+}
