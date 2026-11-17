@@ -1,5 +1,6 @@
 package victor.training.petclinic.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,9 +8,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import victor.training.petclinic.domain.Owner;
 
-public interface OwnerRepository extends Repository<Owner, Integer> {
+public interface OwnerRepository extends Repository<Owner, Integer>, OwnerRepositoryCustom {
 
     List<Owner> findByLastNameStartingWith(String lastName);
+
+    /** The complete graph the list DTO reads, in one statement; never combine with paging. */
+    @Query("""
+            SELECT DISTINCT o FROM Owner o
+            LEFT JOIN FETCH o.pets p
+            LEFT JOIN FETCH p.type
+            LEFT JOIN FETCH p.visits
+            WHERE o.id IN :ids""")
+    List<Owner> findWithPetsAndVisitsByIdIn(Collection<Integer> ids);
 
     Optional<Owner> findById(int id);
 

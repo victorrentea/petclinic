@@ -2,8 +2,14 @@ package victor.training.petclinic.rest;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import victor.training.petclinic.mapper.OwnerMapper;
 import victor.training.petclinic.mapper.PetMapper;
 import victor.training.petclinic.mapper.VisitMapper;
@@ -17,6 +23,7 @@ import victor.training.petclinic.repository.PetTypeRepository;
 import victor.training.petclinic.repository.VisitRepository;
 import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -36,7 +43,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,15 +88,52 @@ public class OwnerRestController {
         this.notificationSender = notificationSender;
     }
 
-    @Operation(operationId = "listOwners", summary = "List owners")
+    @Operation(operationId = "listOwners", summary = "List owners",
+            description = "One page of owners, globally sorted and filtered by last-name prefix "
+                    + "(case-sensitive, wildcard characters taken literally). Names and cities sort "
+                    + "ignoring case in Romanian alphabetical order; ties break by ID. "
+                    + "A valid page beyond the last one returns empty content with accurate totals.",
+            parameters = {
+                    @Parameter(name = "page", in = ParameterIn.QUERY, description = "Zero-based page number.",
+                            schema = @Schema(type = "integer", minimum = "0", defaultValue = "0")),
+                    @Parameter(name = "size", in = ParameterIn.QUERY, description = "Page size; defaults to 10.",
+                            schema = @Schema(type = "integer", allowableValues = {"5", "10", "20"})),
+                    @Parameter(name = "sort", in = ParameterIn.QUERY,
+                            description = "One sort, as <field>,<asc|desc>; field is lastName (then first name) "
+                                    + "or city.",
+                            schema = @Schema(type = "string", defaultValue = "lastName,asc",
+                                    allowableValues = {"lastName,asc", "lastName,desc", "city,asc", "city,desc"})),
+                    @Parameter(name = "lastName", in = ParameterIn.QUERY,
+                            description = "Only owners whose last name starts with this text.",
+                            schema = @Schema(type = "string", defaultValue = ""))})
     @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = OwnerDto.class)),
-                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS)))
+                    schema = @Schema(implementation = OwnerPageDto.class),
+                    examples = @ExampleObject(name = "sample", value = ApiExamples.OWNERS_PAGE)))
+    @ApiResponse(responseCode = "400",
+            description = "A malformed, negative, duplicated or unsupported page, size, sort or direction",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping(produces = "application/json")
-    public List<OwnerDto> listOwners(@RequestParam(name = "lastName", defaultValue = "") String lastName) {
-        List<Owner> owners = ownerRepository.findByLastNameStartingWith(lastName);
-        return ownerMapper.toOwnerDtoCollection(owners);
+    public OwnerPageDto listOwners(@Parameter(hidden = true) @RequestParam MultiValueMap<String, String> params) {
+        OwnerListQuery query = OwnerListQuery.from(params);
+        List<Integer> pageIds = ownerRepository.findIdsPage(
+                query.lastName(), query.sort(), query.size(), query.offset());
+        long totalElements = ownerRepository.countByLastNamePrefix(query.lastName());
+        return new OwnerPageDto()
+                .setContent(ownersInOrder(pageIds))
+                .setTotalElements(totalElements)
+                .setTotalPages((int) ((totalElements + query.size() - 1) / query.size()))
+                .setNumber(query.page())
+                .setSize(query.size());
+    }
+
+    private List<OwnerDto> ownersInOrder(List<Integer> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        Map<Integer, Owner> ownersById = ownerRepository.findWithPetsAndVisitsByIdIn(ids).stream()
+                .collect(Collectors.toMap(Owner::getId, Function.identity()));
+        return ownerMapper.toOwnerDtoCollection(ids.stream().map(ownersById::get).filter(Objects::nonNull).toList());
     }
 
     @Operation(operationId = "countOwners", summary = "Count owners")

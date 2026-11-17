@@ -58,6 +58,8 @@ import victor.training.petclinic.genseq.GenerateSequence;
 class AddVisitApiTest {
 
     private static final String VISIT_DATE = "2026-05-12";
+    /** Kevin McCallister and his pet Axel: named by id because the list is paged, not scanned. */
+    private static final int SEEDED_OWNER_WITH_A_PET = 1;
 
     @Autowired
     MockMvc mockMvc;
@@ -101,12 +103,11 @@ class AddVisitApiTest {
      * wraps the call in the span that carries the JSON payloads onto the diagram.
      */
     private JsonNode anOwnerWithAPet() throws Exception {
-        JsonNode owners = json(call(mockMvc, get("/api/owners")).andExpect(status().isOk()));
-        return StreamSupport.stream(owners.spliterator(), false)
-                .filter(o -> !o.path("pets").isEmpty())
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "No owner with a pet in the seeded data — did db/seed/R__seed.sql change?"));
+        JsonNode owner = json(call(mockMvc, get("/api/owners/{ownerId}", SEEDED_OWNER_WITH_A_PET))
+                .andExpect(status().isOk()));
+        assertThat(owner.path("pets")).as("pets of seeded owner %d — did db/seed/R__seed.sql change?",
+                SEEDED_OWNER_WITH_A_PET).isNotEmpty();
+        return owner;
     }
 
     /** The one visit this scenario booked — never `visits[0]`, whose position the seed data owns. */

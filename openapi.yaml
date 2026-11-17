@@ -189,14 +189,46 @@ paths:
       - root-rest-controller
   /api/owners:
     get:
+      description: "One page of owners, globally sorted and filtered by last-name\
+        \ prefix (case-sensitive, wildcard characters taken literally). Names and\
+        \ cities sort ignoring case in Romanian alphabetical order; ties break by\
+        \ ID. A valid page beyond the last one returns empty content with accurate\
+        \ totals."
       operationId: listOwners
       parameters:
-      - in: query
-        name: lastName
-        required: false
+      - description: Zero-based page number.
+        in: query
+        name: page
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      - description: Page size; defaults to 10.
+        in: query
+        name: size
+        schema:
+          type: integer
+          enum:
+          - "5"
+          - "10"
+          - "20"
+      - description: "One sort, as <field>,<asc|desc>; field is lastName (then first\
+          \ name) or city."
+        in: query
+        name: sort
         schema:
           type: string
-          default: ""
+          default: "lastName,asc"
+          enum:
+          - "lastName,asc"
+          - "lastName,desc"
+          - "city,asc"
+          - "city,desc"
+      - description: Only owners whose last name starts with this text.
+        in: query
+        name: lastName
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -205,39 +237,43 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    firstName: George
-                    lastName: Franklin
-                    address: 110 W. Liberty St.
-                    city: Madison
-                    telephone: "6085551023"
-                    pets:
+                    content:
+                    - id: 2
+                      firstName: Betty
+                      lastName: Davis
+                      address: 638 Cardinal Ave.
+                      city: Sun Prairie
+                      telephone: "6085551749"
+                      pets: []
                     - id: 1
-                      name: Leo
-                      birthDate: 2010-09-07
-                      type:
-                        id: 1
-                        name: cat
-                      ownerId: 1
-                      visits: []
-                  - id: 2
-                    firstName: Betty
-                    lastName: Davis
-                    address: 638 Cardinal Ave.
-                    city: Sun Prairie
-                    telephone: "6085551749"
-                    pets: []
+                      firstName: George
+                      lastName: Franklin
+                      address: 110 W. Liberty St.
+                      city: Madison
+                      telephone: "6085551023"
+                      pets:
+                      - id: 1
+                        name: Leo
+                        birthDate: 2010-09-07
+                        type:
+                          id: 1
+                          name: cat
+                        ownerId: 1
+                        visits: []
+                    totalElements: 23
+                    totalPages: 3
+                    number: 0
+                    size: 10
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OwnerDto"
+                $ref: "#/components/schemas/OwnerPageDto"
           description: OK
         "400":
           content:
-            '*/*':
+            application/json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
-          description: Bad Request
+          description: "A malformed, negative, duplicated or unsupported page, size,\
+            \ sort or direction"
         "404":
           content:
             '*/*':
@@ -1686,6 +1722,41 @@ components:
       - firstName
       - lastName
       - telephone
+    OwnerPageDto:
+      type: object
+      description: One page of owners; the totals describe the whole filtered result.
+      properties:
+        content:
+          type: array
+          description: "The owners on this page, in sort order."
+          items:
+            $ref: "#/components/schemas/OwnerDto"
+        number:
+          type: integer
+          format: int32
+          description: Zero-based page number.
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Requested page size.
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          description: "How many owners match the filter, across all pages."
+          example: 23
+        totalPages:
+          type: integer
+          format: int32
+          description: How many pages the matching owners fill at this page size.
+          example: 3
+      required:
+      - content
+      - number
+      - size
+      - totalElements
+      - totalPages
     PetDto:
       type: object
       properties:

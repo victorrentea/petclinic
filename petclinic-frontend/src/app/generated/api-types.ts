@@ -15,7 +15,10 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List owners */
+    /**
+     * List owners
+     * @description One page of owners, globally sorted and filtered by last-name prefix (case-sensitive, wildcard characters taken literally). Names and cities sort ignoring case in Romanian alphabetical order; ties break by ID. A valid page beyond the last one returns empty content with accurate totals.
+     */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,6 +172,35 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
+    };
+    /** @description One page of owners; the totals describe the whole filtered result. */
+    OwnerPageDto: {
+      /** @description The owners on this page, in sort order. */
+      content: components["schemas"]["OwnerDto"][];
+      /**
+       * Format: int32
+       * @description Zero-based page number.
+       * @example 0
+       */
+      number: number;
+      /**
+       * Format: int32
+       * @description Requested page size.
+       * @example 10
+       */
+      size: number;
+      /**
+       * Format: int64
+       * @description How many owners match the filter, across all pages.
+       * @example 23
+       */
+      totalElements: number;
+      /**
+       * Format: int32
+       * @description How many pages the matching owners fill at this page size.
+       * @example 3
+       */
+      totalPages: number;
     };
     PetDto: {
       /**
@@ -553,10 +585,20 @@ export interface operations {
       };
     };
   };
-  /** List owners */
+  /**
+   * List owners
+   * @description One page of owners, globally sorted and filtered by last-name prefix (case-sensitive, wildcard characters taken literally). Names and cities sort ignoring case in Romanian alphabetical order; ties break by ID. A valid page beyond the last one returns empty content with accurate totals.
+   */
   listOwners: {
     parameters: {
       query?: {
+        /** @description Zero-based page number. */
+        page?: number;
+        /** @description Page size; defaults to 10. */
+        size?: 5 | 10 | 20;
+        /** @description One sort, as <field>,<asc|desc>; field is lastName (then first name) or city. */
+        sort?: "lastName,asc" | "lastName,desc" | "city,asc" | "city,desc";
+        /** @description Only owners whose last name starts with this text. */
         lastName?: string;
       };
     };
@@ -564,13 +606,13 @@ export interface operations {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerDto"][];
+          "application/json": components["schemas"]["OwnerPageDto"];
         };
       };
-      /** @description Bad Request */
+      /** @description A malformed, negative, duplicated or unsupported page, size, sort or direction */
       400: {
         content: {
-          "*/*": components["schemas"]["ProblemDetail"];
+          "application/json": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */
