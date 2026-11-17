@@ -12,13 +12,16 @@ export interface OwnerWithPet {
   petId: number;
 }
 
+// Kevin McCallister and his pet Axel, from db/seed/R__seed.sql: read by id, because the
+// owners list is paged and the needed owner is not necessarily on its first page.
+const SEEDED_OWNER_WITH_A_PET = 1;
+
 export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWithPet> {
-  const {data: owners} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  const ownerWithPet = owners.find((o: any) => Array.isArray(o.pets) && o.pets.length > 0);
-  if (!ownerWithPet) {
-    throw new Error('No owner with a pet found in the system; cannot run add-visit scenario');
+  const {data: owner} = await axios.get(`${API_BASE}/owners/${SEEDED_OWNER_WITH_A_PET}`, {timeout: 10_000});
+  if (!Array.isArray(owner.pets) || owner.pets.length === 0) {
+    throw new Error(`Seeded owner ${SEEDED_OWNER_WITH_A_PET} has no pet — did db/seed/R__seed.sql change?`);
   }
-  return {ownerId: ownerWithPet.id, petId: ownerWithPet.pets[0].id};
+  return {ownerId: owner.id, petId: owner.pets[0].id};
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {

@@ -25,6 +25,24 @@ export async function aDogOf(ownerId: number, name: string): Promise<number> {
   return postForId(`/owners/${ownerId}/pets`, {name, birthDate: '2020-03-15', type: {id: 2, name: 'dog'}});
 }
 
+export async function aPetType(name: string): Promise<number> {
+  return postForId('/pettypes', {name});
+}
+
+export async function aPetOfType(ownerId: number, name: string, type: {id: number, name: string}): Promise<number> {
+  return postForId(`/owners/${ownerId}/pets`, {name, birthDate: '2020-03-15', type});
+}
+
+export async function aSpecialty(name: string): Promise<number> {
+  return postForId('/specialties', {name, description: 'created by an e2e test'});
+}
+
+export async function aVet(firstName: string, lastName: string, specialtyNames: string[]): Promise<number> {
+  const all = await getJson<{id: number, name: string}[]>('/specialties');
+  const specialties = all.filter(s => specialtyNames.includes(s.name));
+  return postForId('/vets', {firstName, lastName, specialties});
+}
+
 export async function aVisitOf(ownerId: number, petId: number, description: string): Promise<number> {
   return postForId(`/owners/${ownerId}/pets/${petId}/visits`, {date: '2026-05-12', description});
 }
