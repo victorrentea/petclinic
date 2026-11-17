@@ -16,6 +16,8 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
 - `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
 
+**Expected scale:** Approximately 100,000 owners within one year (business estimate, November 2026).
+
 ## Common Commands
 
 ### Helper Scripts
