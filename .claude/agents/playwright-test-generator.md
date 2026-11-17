@@ -4,6 +4,7 @@ description: Use this agent when you need to create automated browser tests usin
 model: sonnet
 color: blue
 tools:
+  - Bash
   - search
   - playwright-test/browser_click
   - playwright-test/browser_drag

@@ -1,0 +1,25 @@
+{
+  "//": [
+    "Ring a bell whenever the agent is waiting on the human: its turn ended (agentStop),",
+    "it asks for a tool permission (permission_prompt) or for an answer (elicitation_dialog).",
+    "macOS only: silently skipped where afplay is missing."
+  ],
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "command -v afplay >/dev/null && (afplay /System/Library/Sounds/Glass.aiff &) ; exit 0",
+        "timeoutSec": 5
+      }
+    ],
+    "notification": [
+      {
+        "type": "command",
+        "matcher": "permission_prompt|elicitation_dialog",
+        "bash": "command -v afplay >/dev/null && (afplay /System/Library/Sounds/Ping.aiff &) ; exit 0",
+        "timeoutSec": 5
+      }
+    ]
+  }
+}
