@@ -26,8 +26,3 @@ does not fire `pre-commit` at all, so `.githooks/pre-merge-commit` delegates to 
 
 Every rule must ship with `valid:` / `invalid:` cases in `rule-tests/`.
 An untested rule that silently matches nothing is worse than no rule.
-
-## Not implemented on purpose
-
-"Keep line length ≤ 120 chars" — left as an exercise.
-Note it is a *text* property, while ast-grep matches *syntax trees*.
