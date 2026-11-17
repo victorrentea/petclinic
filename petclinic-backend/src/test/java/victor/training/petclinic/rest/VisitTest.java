@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -210,6 +211,33 @@ public class VisitTest {
 
         Visit updated = visitRepository.findById(visitId).orElseThrow();
         assertThat(updated.getDescription()).isEqualTo("updated description");
+    }
+
+    @Test
+    void create_beforePetBirth_isRejected() throws Exception {
+        VisitDto newVisit = new VisitDto()
+                .setPetId(petId)
+                .setDate(PetTest.BIRTH_DATE.minusDays(1))
+                .setDescription("too early");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(newVisit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("birth date")));
+    }
+
+    @Test
+    void update_moreThanOneYearAhead_isRejected() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(LocalDate.now().plusYears(1).plusDays(1))
+                .setDescription("too late");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("more than one year ahead")));
     }
 
     @Test
