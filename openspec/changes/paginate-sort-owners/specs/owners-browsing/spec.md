@@ -29,13 +29,13 @@ including pets. Totals SHALL describe the complete filtered result.
 
 ### Requirement: Global deterministic sorting
 
-The API and grid SHALL support sorting by Name (`lastName`), Address (`address`),
-City (`city`), and Telephone (`telephone`) in either direction before pagination.
-Names, addresses, and cities SHALL use Romanian alphabetical order ignoring case;
-diacritics SHALL retain their Romanian alphabet positions. Telephone SHALL sort as text.
+The API and grid SHALL support sorting by Name (`lastName`) and City (`city`)
+in either direction before pagination.
+Names and cities SHALL use Romanian alphabetical order ignoring case;
+diacritics SHALL retain their Romanian alphabet positions.
 Name SHALL order by last name then first name in the selected direction.
 ID ascending SHALL break remaining ties. Null values SHALL sort last.
-Pets SHALL not be sortable.
+No other column SHALL be sortable.
 
 #### Scenario: Name sorting spans page boundaries
 - **WHEN** owners with mixed-case and duplicate last names span multiple pages
@@ -43,23 +43,22 @@ Pets SHALL not be sortable.
 - **THEN** all matches are ordered by case-insensitive last name descending,
   then case-insensitive first name descending, then ID ascending before pages are selected
 
-#### Scenario: Other columns and telephone
-- **WHEN** Address, City, or Telephone is selected for sorting
-- **THEN** the selected field determines global order, with ID ascending for ties
-- **AND** telephone prefixes and leading zeroes are retained and compared as text
+#### Scenario: City sorting
+- **WHEN** City is selected for sorting
+- **THEN** the city determines global order, ignoring case, with ID ascending for ties
 
 #### Scenario: Romanian letters across page boundaries
-- **WHEN** a sortable name, address, or city includes the letters
+- **WHEN** a sortable name or city includes the letters
   `a`, `ă`, `â`, `b`, `i`, `î`, `j`, `s`, `ș`, `t`, `ț`, `z`
 - **THEN** ascending sorting follows that Romanian alphabet sequence before pagination
 - **AND** descending sorting reverses that sequence, with the same rules for both parts of Name
 - **AND** case-only differences are resolved by the remaining name key, then ID,
   rather than an uppercase/lowercase preference
 
-#### Scenario: Unsortable pets
+#### Scenario: Only Name and City are sortable
 - **WHEN** the grid is rendered
-- **THEN** Pets has no sorting control
-- **AND** requesting API sort field `pets` returns HTTP 400
+- **THEN** only the Name and City headers have a sorting control
+- **AND** requesting any other API sort field returns HTTP 400
 
 ### Requirement: Explicit prefix search
 
@@ -158,15 +157,16 @@ and size. With zero matches it SHALL use page 0 without repeated recovery reques
 
 ### Requirement: Explicit loading and error feedback
 
-The grid SHALL show loading feedback and only render results for the latest applied
-request. Older responses SHALL NOT overwrite newer state. Failures SHALL show an
+The grid SHALL show loading feedback, keeping the previous rows in place, dimmed and
+inert, so that only the grid area changes and the page does not jump, and only render
+results for the latest applied request. Older responses SHALL NOT overwrite newer state. Failures SHALL show an
 explicit error and retry action preserving criteria, not an empty-results message.
 Zero results SHALL distinguish an empty register from no match for an applied filter.
 
 #### Scenario: Competing requests
 - **WHEN** a search is submitted before an earlier request finishes
 - **THEN** only the latest request can update the results or clear its loading state
-- **AND** old rows are not presented as matching the new criteria
+- **AND** rows of an earlier request are never shown as the result of the latest one once it has loaded
 
 #### Scenario: Failure and retry
 - **WHEN** the current request fails

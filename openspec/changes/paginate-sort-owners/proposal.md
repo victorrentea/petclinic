@@ -9,11 +9,11 @@ lookup easier without losing the user's place.
 ## What Changes
 
 - Show 10 owners at a time by default, with a choice of 5, 10, or 20.
-- Let staff sort the full matching list by Name, Address, City, or Telephone.
+- Let staff sort the full matching list by Name or City.
   Names appear as "Last name, First name", initially in alphabetical order.
-  Pets remain visible but cannot be used for sorting.
-- Use Romanian alphabetical order, including letters with diacritics, for names,
-  addresses, and cities, without distinguishing uppercase from lowercase.
+  The other columns remain visible but cannot be used for sorting.
+- Use Romanian alphabetical order, including letters with diacritics, for names
+  and cities, without distinguishing uppercase from lowercase.
 - Keep the familiar last-name search and Find Owner button. Searching or changing
   the order or page size returns to the first page.
 - Show how many owners match and which ones are currently displayed.

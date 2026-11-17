@@ -42,8 +42,8 @@ not assumptions about production or the future 100,000-owner register.
   whitespace, or a literal `%`/`_`. NULL placement and wildcard escaping are defensive
   behavior, not fixes for observed rows.
 - There are two duplicate full-name groups after case folding, so ID tie-breaking
-  addresses an actual data case. Names, addresses, and cities contain mixed case.
-- Non-ASCII values occur in first names (2), last names (3), addresses (2), and city (1).
+  addresses an actual data case. Names and cities contain mixed case.
+- Non-ASCII values occur in first names (2), last names (3), and city (1).
   One owner has Romanian characters in their name.
 - Database `datcollate` and `datctype` are both `C.UTF-8`. A synthetic ordering probe
   using `lower` put Romanian accented letters after `z`, not beside their base letters.
@@ -54,9 +54,6 @@ not assumptions about production or the future 100,000-owner register.
   This is the verified basis for the planned sort expressions below.
 - A direct LIKE probe confirmed that a lowercase prefix does not match an uppercase
   initial. Preserve this existing search behavior unless separately changed.
-- Eighteen telephone values start with zero; 21 do not match exactly ten ASCII digits.
-  Preserve existing telephone strings and sort as text; do not clean or reject existing
-  records as a side effect of this browsing change.
 
 ## Goals / Non-Goals
 
@@ -108,7 +105,7 @@ Technical scope for engineering review:
 
 Use `GET /api/owners?page=0&size=10&sort=lastName,asc&lastName=Dav`.
 Absent parameters use defaults; explicitly malformed values return 400.
-Accept only one sort expression from `lastName`, `address`, `city`, `telephone`,
+Accept only one sort expression from `lastName`, `city`,
 with direction `asc` or `desc`. No free-form property paths or `firstName`-only sort.
 Page is a nonnegative integer within the supported database offset range;
 size is exactly 5, 10, or 20. Reject duplicate scalar parameters rather than choosing
@@ -148,10 +145,10 @@ or relying on Open Session in View to complete the graph. The bulk-fetch query m
 load nested data in its own result, not depend on entities from the ID query staying managed.
 Use Hibernate's fail-on-pagination-over-collection-fetch setting in the focused test.
 
-For names, addresses, and cities, use `lower(column) COLLATE "ro-RO-x-icu"`.
+For names and cities, use `lower(column) COLLATE "ro-RO-x-icu"`.
 For Name, apply this to both last_name and first_name, with the selected direction
 for both keys; append ID ascending. Use explicit `NULLS LAST` on nullable sort keys
-in both directions. Telephone remains text-ordered under its existing collation.
+in both directions.
 Apply the collation before LIMIT/OFFSET, not in Java or the browser after selecting a page.
 
 The collation is a fixed query expression, not a request option or a global database
@@ -206,14 +203,17 @@ subscriptions. Rejected because history and request races would have multiple ow
 ### 4. Minimal grid controls, existing design-system select
 
 Keep the current table and owner-detail links. Add accessible header buttons for the
-four sortable columns, visible direction markers and `aria-sort`; Pets stays plain text.
+two sortable columns, Name and City, with visible direction markers and `aria-sort`;
+the other headers stay plain text.
 Use `app-combo` with numeric options 5/10/20, importing `DesignSystemModule`.
 Use existing button styling for first/previous/next/last and disable impossible actions.
 No raw form select or new generic paginator component.
 
 Render names as `lastName + ', ' + firstName`. Derive the row range from page metadata;
-show 0-0 of 0 when empty. Render only current successful data, not stale rows under
-new criteria. Provide a loading state, a retryable error state, and distinct empty
+show 0-0 of 0 when empty. While a new page loads, keep the previous rows in place, dimmed and inert, with a
+loading label and disabled paging controls: the grid keeps its height, so the screen
+does not jump or flicker, and only the grid area changes. Only the latest request's
+data replaces them; a failure removes them. Provide a loading state, a retryable error state, and distinct empty
 messages based on whether an applied filter exists. Keep Add Owner outside result-only
 conditional blocks. Preserve draft filter text during paging; route restoration updates
 the field when the applied filter itself changes.
@@ -245,7 +245,7 @@ an empty page-0 response is terminal. Do not alter the API's out-of-range semant
 Use existing backend integration tests with per-test fixtures for metadata, cross-page
 ordering, duplicate/case/null keys, literal prefix search, and parameter rejection.
 Assert the Romanian letter sequence and its reverse across page boundaries for
-Name (including the first-name secondary key), Address, and City; retain case-only
+Name (including the first-name secondary key) and City; retain case-only
 tie tests and prove that prefix search semantics have not changed.
 Use focused component/service tests for serialization, route state, Enter submission,
 sort/page controls, cancellation, retry, and empty/out-of-range states.
