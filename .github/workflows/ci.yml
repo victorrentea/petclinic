@@ -69,10 +69,10 @@ jobs:
             gitleaks git --redact --no-banner -c .config/gitleaks.toml --log-opts="${base}..HEAD" .
           fi
 
-      # ── Hook parity: pre-push rejects added lines over 119 chars (Java + TS).
+      # ── Hook parity: pre-push rejects added lines over 120 chars (Java + TS).
       #    Re-run it here so `git push --no-verify` can't bypass it. Same script,
       #    same range-scoping as the hook: only the lines this push/PR introduces. ──
-      - name: Line length < 120 chars — backstops the pre-push hook
+      - name: Keep <= 120 chars / line — backstops the pre-push hook
         run: |
           zero='0000000000000000000000000000000000000000'
           if [ "${{ github.event_name }}" = "pull_request" ]; then

@@ -71,7 +71,7 @@ Tell an agent running in this repo:
 - **Create a skill** — move `### Java Code Style` from AGENTS.md into a `java-code-style/SKILL.md`. Test it activates ±eval on 3 runs.
 - **Turn skill into rule**: Turn the Java Code Style skill you extracted into a .claude/rules/java-rule.md that is loaded 100% before any .java file is edited.
 - **Hooks** – create a hook that plays a sound when the agent finished its turn or waits for your answer/approval.
-- **Scripted guardrail** – remove the rule about < 120 chars and try to manually violate it
+- **Scripted guardrail** – remove the line-length rule and try to manually violate it
 
 ### Petclinic Tasks
 
