@@ -44,17 +44,21 @@ The Owners area is where most daily work starts. Here you find a pet owner, regi
 ![](screenshots/owners-list.png)
 
 1. Click *Owners* in the top menu.
-2. The table lists every owner with their name, address, city, telephone number and the names of their pets.
+2. The table shows ten owners at a time, each as *Last name, First name*, with address, city, telephone number and the names of their pets.
 3. Click an owner's name to open their record.
-4. The *Add Owner* button at the bottom of the list opens the form for a new owner.
+4. Under the table, *Owners per page* offers 5, 10 or 20. The range (for example *1-10 of 26*) tells you where you are among all owners; use the « ‹ › » buttons to jump to the first, previous, next or last page. Buttons that cannot move you any further are greyed out.
+5. Click *Name* or *City* in the table header to sort **all** owners by that column — not just the page on screen. The grey ⇅ marks a sortable column. The first click sorts A→Z (▲); click again to reverse it (▼). Names and cities follow the Romanian alphabet and ignore capital letters. The other columns cannot be sorted.
+6. The address bar always reflects what you see (page, size, sort and search), so you can bookmark or share a link to a particular view. Opening an owner and clicking the browser's *Back* button brings you back to the same view.
+7. The *Add Owner* button under the table opens the form for a new owner.
 
 ### Finding an owner
 
 ![](screenshots/owners-search.png)
 
-1. Type the owner's last name (or just its first few letters) into the *Last name* box above the table.
-2. Click *Find Owner*. The table now shows only the matching owners.
-3. To see everyone again, empty the box and click *Find Owner* once more.
+1. Type the owner's last name (or just its first few letters) into the *Last name* box above the table. Capital letters matter: *Pot* finds *Potter*, *pot* does not.
+2. Press Enter or click *Find Owner*. The table now shows only the matching owners, from the first page, keeping the sort and page size you chose. Until you press Enter or click the button, nothing changes on screen.
+3. To see everyone again, empty the box and press Enter or click *Find Owner* once more.
+4. If nobody matches, the page says so. If the list cannot be loaded, an error appears with a *Retry* button that asks again with the same search.
 
 ### Creating a new owner
 
