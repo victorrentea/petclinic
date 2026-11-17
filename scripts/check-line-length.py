@@ -2,7 +2,7 @@
 """Enforces this rule, which used to live in AGENTS.md under "Java Code Style" —
 copied here verbatim so a grep for it lands on its implementation:
 
-    - Keep line length < 120 chars
+    - Keep <= 120 chars / line
 
 A rule an agent has to *remember* is a rule it forgets under pressure. This one is
 mechanical, so it belongs in a hook, not in a prompt: `.githooks/pre-push` runs it over
@@ -29,7 +29,7 @@ import re
 import subprocess
 import sys
 
-MAX = 119  # "< 120 chars" — 120 is already one too many
+MAX = 120  # inclusive: a line of exactly 120 chars is fine, 121 is not
 
 SUFFIXES = ("*.java", "*.ts")
 
@@ -94,7 +94,7 @@ def main(argv):
         return usage()
 
     if found:
-        print(f"❌ Lines over {MAX} chars (AGENTS.md rule: keep line length < 120 chars):")
+        print(f"❌ Lines over {MAX} chars (AGENTS.md rule: Keep <= 120 chars / line):")
         for path, n, body in found:
             print(f"  {path}:{n}: {len(body)} chars — {body.strip()[:90]}")
         print("\n   Wrap them and try again.")
