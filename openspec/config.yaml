@@ -2,6 +2,14 @@ schema: spec-driven
 githubCopilot:
   cloudAgent: true
 
+rules:
+  proposal:
+    - Write for the Product Owner in plain business language, focusing on benefits and user-visible behavior.
+    - Keep technical details in design.md; retain only required capability identifiers for spec mapping.
+    - For UI changes, include a compact ASCII preview of the proposed screen.
+  design:
+    - Keep technical scope, implementation details, compatibility, and rollout considerations here for engineering review.
+
 # Project context (optional)
 # Add only constraints that should guide OpenSpec artifacts and workflows.
 # Include constraints an agent cannot infer by reading the code.

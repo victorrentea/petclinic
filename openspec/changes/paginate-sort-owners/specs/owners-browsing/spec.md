@@ -31,7 +31,8 @@ including pets. Totals SHALL describe the complete filtered result.
 
 The API and grid SHALL support sorting by Name (`lastName`), Address (`address`),
 City (`city`), and Telephone (`telephone`) in either direction before pagination.
-Text sorting SHALL ignore case; telephone SHALL sort as text.
+Names, addresses, and cities SHALL use Romanian alphabetical order ignoring case;
+diacritics SHALL retain their Romanian alphabet positions. Telephone SHALL sort as text.
 Name SHALL order by last name then first name in the selected direction.
 ID ascending SHALL break remaining ties. Null values SHALL sort last.
 Pets SHALL not be sortable.
@@ -46,6 +47,14 @@ Pets SHALL not be sortable.
 - **WHEN** Address, City, or Telephone is selected for sorting
 - **THEN** the selected field determines global order, with ID ascending for ties
 - **AND** telephone prefixes and leading zeroes are retained and compared as text
+
+#### Scenario: Romanian letters across page boundaries
+- **WHEN** a sortable name, address, or city includes the letters
+  `a`, `ă`, `â`, `b`, `i`, `î`, `j`, `s`, `ș`, `t`, `ț`, `z`
+- **THEN** ascending sorting follows that Romanian alphabet sequence before pagination
+- **AND** descending sorting reverses that sequence, with the same rules for both parts of Name
+- **AND** case-only differences are resolved by the remaining name key, then ID,
+  rather than an uppercase/lowercase preference
 
 #### Scenario: Unsortable pets
 - **WHEN** the grid is rendered

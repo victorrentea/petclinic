@@ -14,6 +14,7 @@ Nu descrie o implementare deja realizată.
 | Paginarea și sortarea se fac pe server sau în browser? | Pe server. Browserul primește numai pagina cerută; filtrarea și sortarea se aplică întregului rezultat, nu numai rândurilor vizibile. |
 | Cum sortăm coloana Pets? | Nu o sortăm. Excepție explicită de la cerința inițială „orice coloană”. Au fost discutate sortarea alfabetică după primul nume de animal și sortarea după numărul de animale; ambele au fost respinse în favoarea excepției. |
 | Cum afișăm și sortăm coloana Name? | Afișăm „Nume de familie, Prenume” și sortăm după lastName, apoi firstName. Propunerea inițială de a păstra afișarea „Prenume Nume” a fost înlocuită cu această decizie. |
+| Cum ordonăm diacriticele? | Alfabetic românește, fără diferență între majuscule și minuscule, pentru nume, adresă și oraș. Decizie explicită după verificarea bazei: `ș` nu ajunge după `z`. Folosim collation românesc la sortare, fără să schimbăm implicit căutarea. |
 | Care sunt valorile implicite la prima deschidere? | 10 owneri pe pagină, sortați crescător după numele de familie și prenume. Opțiunile de dimensiune sunt 5, 10 și 20. |
 | Cum interacționează căutarea cu paginarea? | Păstrăm căutarea după numele de familie „începe cu”, declanșată prin Find Owner sau Enter. Filtrăm pe server, revenim la prima pagină și păstrăm sortarea și dimensiunea paginii. Căutarea goală revine la toți ownerii. |
 | Unde păstrăm pagina, dimensiunea, sortarea și filtrul aplicat? | În parametrii URL. Refresh-ul și Back din detalii trebuie să refacă aceeași stare a listei; linkul poate fi distribuit. Fără parametri se folosesc valorile implicite. |
@@ -33,15 +34,16 @@ Recomandarea a rămas starea în URL și a fost acceptată.
 ## Întrebări rămase și răspunsuri recomandate
 
 Utilizatorul a cerut oprirea interviului pas cu pas pentru detaliile ușor de ajustat
-și prezentarea lor într-un tabel. Răspunsurile de mai jos sunt recomandări,
-nu decizii confirmate.
+și prezentarea lor într-un tabel. Recomandările de mai jos au fost ulterior adoptate
+explicit la crearea propunerii OpenSpec, pe 17 noiembrie 2026; regula diacriticelor
+a fost completată apoi prin decizia de mai sus.
 
 | Întrebare | Răspuns recomandat |
 |---|---|
 | Schimbăm contractul API existent? | După verificarea consumatorilor, transformăm endpointul existent într-un răspuns paginat și actualizăm frontendul și testele dependente. Nu păstrăm un endpoint ne-paginat separat doar pentru chatbot: acesta nu consumă lista REST de owneri. Vezi verificarea de mai jos. |
 | Ce returnează răspunsul paginat? | Ownerii paginii, numărul total de rezultate filtrate, numărul total de pagini, pagina curentă și dimensiunea ei. Forma exactă a contractului rămâne de stabilit. Există deja un tip [OwnerPage](petclinic-frontend/src/app/owners/owner-page.ts) cu aceste câmpuri. |
 | Cum tratăm egalitățile între valorile sortate? | Adăugăm ID-ul drept ultim criteriu, pentru o ordine deterministă pe un set de date neschimbat. Nu promitem rezultate înghețate dacă datele se modifică între cereri. |
-| Cum sortăm textele? | Fără diferență între majuscule și minuscule; aceleași reguli pentru nume, adresă și oraș. |
+| Cum sortăm textele? | Alfabetic românește, fără diferență între majuscule și minuscule; aceleași reguli pentru nume, adresă și oraș, inclusiv poziția corectă a diacriticelor. |
 | Cum sortăm telefonul? | Ca text, nu ca număr: prefixele și zerourile inițiale sunt semnificative. |
 | Cum funcționează clickul pe antet? | Prima apăsare sortează crescător, următoarele alternează crescător/descrescător, fără o stare „nesortat”. O singură coloană activă; Name reprezintă lastName, apoi firstName. Pets nu are control de sortare. |
 | Ce facem la schimbarea sortării sau dimensiunii paginii? | Revenim la prima pagină și păstrăm filtrul. Această întrebare a fost prezentată separat, dar nu a primit răspuns înainte de trecerea la tabel. |

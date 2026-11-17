@@ -2,48 +2,68 @@
 
 ## Why
 
-The Owners grid currently downloads every matching owner and maps their pets and visits,
-which does not fit the business estimate of 100,000 owners within one year.
-Issue #25 and the decisions in [Q&A.md](../../../Q&A.md) require bounded server-side
-browsing, global sorting, and restorable search context.
+Clinic staff need to find the right owner easily, even as the register grows to an
+estimated 100,000 owners within a year. A manageable, sortable list will make daily
+lookup easier without losing the user's place.
 
 ## What Changes
 
-- Add server-side pagination with page sizes 5, 10, and 20; default to 10.
-- Sort Name, Address, City, and Telephone across the complete filtered result.
-  Display names as "Last name, First name"; Pets remains explicitly unsortable.
-- Preserve explicit last-name prefix search, with page reset on search, sorting,
-  and page-size changes.
-- Store applied browsing state in URL parameters and restore it on refresh and Back/Forward.
-- Show navigation, totals, loading, retryable errors, and distinct empty states.
-- Bound database work to the selected owners and their related data; prevent N+1 queries.
-- **BREAKING**: change `GET /api/owners` from an array to an explicit page envelope.
-  Update known frontend and test consumers and regenerate the API contract and TypeScript types.
-  Do not keep a separate unpaginated compatibility endpoint.
+- Show 10 owners at a time by default, with a choice of 5, 10, or 20.
+- Let staff sort the full matching list by Name, Address, City, or Telephone.
+  Names appear as "Last name, First name", initially in alphabetical order.
+  Pets remain visible but cannot be used for sorting.
+- Use Romanian alphabetical order, including letters with diacritics, for names,
+  addresses, and cities, without distinguishing uppercase from lowercase.
+- Keep the familiar last-name search and Find Owner button. Searching or changing
+  the order or page size returns to the first page.
+- Show how many owners match and which ones are currently displayed.
+- Keep the same list position and search when refreshing, sharing a link,
+  or returning from an owner's details with Back.
+- Clearly distinguish loading, no matches, and a problem that can be retried.
+  Add Owner stays available.
+
+## Screen Preview
+
+Illustrative names and totals; this example shows the first page.
+
+```text
+Owners
+Last name [________________] [Find Owner]
+
++------------------+----------------+----------+------------+------+
+| Name ^           | Address        | City     | Telephone  | Pets |
++------------------+----------------+----------+------------+------+
+| Adams, Alex      | 12 Oak Street  | Madison  | 6085550101 | Max  |
+| Brown, Sam       | 8 Pine Road    | Madison  | 6085550102 | Luna |
+| Clark, Jo        | 3 Elm Lane     | Windsor  | 6085550103 |      |
+| ...              (10 owners on this page)                       |
++----------------------------------------------------------------+
+
+Rows per page [10 v]   1-10 of 100,000
+[First] [Previous]                     [Next] [Last]
+
+[Add Owner]
+```
+
+Click a column heading to change the order; click an owner's name to open their record.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `owners-browsing`: Searching, globally sorting, and paging owners through the API
-  and grid, including URL state, feedback, and bounded retrieval.
+- `owners-browsing`: Find owners, choose their order, move between pages, and
+  return to the same list.
 
 ### Modified Capabilities
 
-None. The OpenSpec capability inventory is currently empty.
+None.
 
 ## Impact
 
-- Backend: `OwnerRestController`, owner repository queries, list mapping/page DTOs,
-  OpenAPI annotations/examples, and focused integration tests.
-- Frontend: Owners service/list/template/styles/module, existing `OwnerPage` type,
-  router state, and related tests. Reuse the design-system combo for page size.
-- Contract: regenerate root `openapi.yaml` with `OpenApiExtractorTest`, then generated
-  frontend types; retain owner detail/write and MCP contracts.
-- Tests: update array-based REST fixtures/assertions in backend functional tests,
-  Playwright/Cucumber setup, and the optional owner latency-proxy performance test.
-- Documentation: update the Owners user-manual section and keep Q&A decision provenance.
-- No new runtime dependency, service layer, deployment connection, or generic grid framework.
-  No index or schema migration is assumed; any later need must follow measurement.
-- The chatbot uses `/mcp` and direct repository-backed tools, not this REST list.
-  Unknown external consumers, if any, must migrate with the breaking contract.
+- Changes are limited to browsing the Owners list. Owner records, pets, visits,
+  and chatbot behavior remain unchanged.
+- The Owners user guide will explain the new controls.
+- No existing owner data needs to be changed.
+
+Technical scope, compatibility, and rollout are covered in [design.md](design.md).
+The agreed business decisions are recorded in [Q&A.md](../../../Q&A.md).

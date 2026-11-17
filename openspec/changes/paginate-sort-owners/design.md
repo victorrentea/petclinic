@@ -6,6 +6,8 @@ See [proposal.md](proposal.md) for motivation and
 [the browsing spec](specs/owners-browsing/spec.md) for acceptance behavior.
 On 17 November 2026 the user approved adopting the previously unconfirmed
 recommendations in [Q&A.md](../../../Q&A.md), including the breaking API migration.
+After live database inspection, the user also required Romanian alphabetical
+ordering rather than retaining the database's default character order.
 
 Observed implementation:
 
@@ -26,6 +28,36 @@ Observed implementation:
 - No OpenSpec main specs currently exist. The deployment has not changed;
   chatbot tools use MCP repositories, not the REST owner collection.
 
+### Live database verification
+
+Read-only inspection through `db-cli` on 17 November 2026 confirmed the following
+in the running `petclinic` database. These are development-data observations,
+not assumptions about production or the future 100,000-owner register.
+
+- There are 50 owners, 54 pets, and 37 visits. Three owners have no pets;
+  the observed maxima are two pets per owner and three visits per pet.
+- All five owner text columns permit NULL and inherit the database collation.
+  The only owner index is `owners_pkey`.
+- None of the five text fields currently contains NULL, an empty string, surrounding
+  whitespace, or a literal `%`/`_`. NULL placement and wildcard escaping are defensive
+  behavior, not fixes for observed rows.
+- There are two duplicate full-name groups after case folding, so ID tie-breaking
+  addresses an actual data case. Names, addresses, and cities contain mixed case.
+- Non-ASCII values occur in first names (2), last names (3), addresses (2), and city (1).
+  One owner has Romanian characters in their name.
+- Database `datcollate` and `datctype` are both `C.UTF-8`. A synthetic ordering probe
+  using `lower` put Romanian accented letters after `z`, not beside their base letters.
+  Ignoring case does not provide Romanian dictionary ordering.
+- The installed PostgreSQL 16.2 exposes deterministic ICU collation `ro-RO-x-icu`.
+  A read-only probe of `lower(value) COLLATE "ro-RO-x-icu"` produced Romanian order
+  `a, ă, â, b, i, î, j, s, ș, t, ț, z` and its exact reverse for descending order.
+  This is the verified basis for the planned sort expressions below.
+- A direct LIKE probe confirmed that a lowercase prefix does not match an uppercase
+  initial. Preserve this existing search behavior unless separately changed.
+- Eighteen telephone values start with zero; 21 do not match exactly ten ASCII digits.
+  Preserve existing telephone strings and sort as text; do not clean or reject existing
+  records as a side effect of this browsing change.
+
 ## Goals / Non-Goals
 
 **Goals**
@@ -40,8 +72,35 @@ Observed implementation:
 
 - No service layer, new grid framework, data reset, dataset migration, or chatbot change.
 - No snapshot pagination under concurrent edits, cursor API, arbitrary multi-sort,
-  full-text search, case-insensitive filtering, or accent/transliteration policy.
+  full-text search, case-insensitive/accent-insensitive filtering, or transliteration.
+- No database-wide collation replacement or column collation change; Romanian
+  collation applies only to the Owners list's text-order expressions.
 - No speculative indexes or performance SLA invented from the 100,000-owner estimate.
+
+## Technical Impact
+
+Technical scope for engineering review:
+
+- **BREAKING**: `GET /api/owners` changes from an array to a page envelope, without
+  a separate unpaginated compatibility endpoint. Known clients migrate together;
+  unknown external consumers, if any, must adapt.
+- Backend changes cover `OwnerRestController`, owner repository queries, list mapping,
+  hand-written page DTOs, OpenAPI annotations/examples, and related integration tests.
+  Pagination and sorting run on the server across all matching owners.
+- Frontend changes cover the Owners service, list component/template/styles/module,
+  existing `OwnerPage` type, route state, and tests. Applied criteria live in URL parameters.
+  Reuse `app-combo` for page size rather than adding a new selection widget.
+- Prevent N+1 retrieval and materialization of the entire register; fetch only selected
+  owners and their related data as detailed below.
+- Regenerate root `openapi.yaml` via `OpenApiExtractorTest` and then the generated
+  TypeScript API types. Preserve owner detail/write/count and MCP contracts.
+- Update backend functional collection assertions, Playwright/Cucumber setup, and
+  the optional owner latency-proxy performance test.
+- Update only the affected Owners user-manual section; retain Q&A as decision provenance.
+- No new runtime dependency, service layer, deployment connection, or generic grid framework.
+  Use the installed Romanian ICU collation in query expressions; no schema migration
+  or speculative index is required by this choice.
+- The chatbot uses `/mcp` and repository-backed tools, not this REST list.
 
 ## Decisions
 
@@ -69,8 +128,11 @@ Alternative: serialize Spring's page directly. Rejected to avoid exposing framew
 ### 2. Page root IDs first, then fetch the complete selected graph
 
 Keep query logic in the repository layer and coordination in the existing controller.
-Add a small repository query implementation/fragment for an ID page plus count,
-using JPA Criteria with fixed allow-listed sort expressions:
+Add a small repository query implementation/fragment for an ID page plus count.
+Use PostgreSQL-native SQL for these two scalar queries so explicit `COLLATE` is
+unambiguous; keep graph fetching and DTO mapping in the existing JPA path.
+Choose ordering fragments only from a fixed internal allow-list, and bind all
+filter, limit, and offset values. Never interpolate caller-provided SQL or identifiers.
 
 1. Select at most `size` owner IDs using database offset/limit, the escaped literal
    last-name prefix predicate, and the complete deterministic ordering.
@@ -86,18 +148,34 @@ or relying on Open Session in View to complete the graph. The bulk-fetch query m
 load nested data in its own result, not depend on entities from the ID query staying managed.
 Use Hibernate's fail-on-pagination-over-collection-fetch setting in the focused test.
 
-Construct case-insensitive sort expressions with `lower` for text fields except telephone.
-Apply the direction to the selected field, and to firstName for Name sorting;
-append ID ascending. Explicit null discriminators place nulls last in both directions
-because schema columns are nullable. Use the same filtering predicate for ID and count
-queries; escape `%`, `_`, and the escape character to preserve literal prefix semantics.
-Do not silently trim or case-fold the filter.
+For names, addresses, and cities, use `lower(column) COLLATE "ro-RO-x-icu"`.
+For Name, apply this to both last_name and first_name, with the selected direction
+for both keys; append ID ascending. Use explicit `NULLS LAST` on nullable sort keys
+in both directions. Telephone remains text-ordered under its existing collation.
+Apply the collation before LIMIT/OFFSET, not in Java or the browser after selecting a page.
+
+The collation is a fixed query expression, not a request option or a global database
+setting. Keep deterministic ICU behavior and case-fold explicitly: a new nondeterministic
+collation is unnecessary and must not change PostgreSQL LIKE behavior.
+Use the same escaped literal prefix predicate for ID and count queries, under the
+existing column collation; escape `%`, `_`, and the escape character. Do not silently
+trim, case-fold, or accent-fold the filter.
+
+Require `ro-RO-x-icu` on every target database, including embedded test Postgres.
+Verify its availability and alphabet behavior in focused integration tests; absence
+is an explicit deployment/test failure, never a fallback to `C.UTF-8`.
+The observed dev installation already has it, so do not issue DDL against that database.
 
 Alternative: collection fetch join with Pageable. Rejected because ORM in-memory
 pagination could load the register and corrupt the scalability promise.
 Alternative: per-owner fetching or global eager mapping. Rejected due to N+1 or
 unrelated read-path changes. Alternative: slim list-only item DTO. Rejected here
 to preserve existing item data and limit the breaking change to the page envelope.
+Alternative: changing the entire database/column collation. Rejected because it
+would affect unrelated queries and filtering. Alternative: only `lower` under
+`C.UTF-8`. Rejected after the verified Romanian-letter ordering failure.
+Native scalar SQL is chosen over provider-specific Criteria collation extensions
+to keep the actual PostgreSQL ordering explicit without adding a dependency.
 
 ### 3. URL state is the request source of truth
 
@@ -166,6 +244,9 @@ an empty page-0 response is terminal. Do not alter the API's out-of-range semant
 
 Use existing backend integration tests with per-test fixtures for metadata, cross-page
 ordering, duplicate/case/null keys, literal prefix search, and parameter rejection.
+Assert the Romanian letter sequence and its reverse across page boundaries for
+Name (including the first-name secondary key), Address, and City; retain case-only
+tie tests and prove that prefix search semantics have not changed.
 Use focused component/service tests for serialization, route state, Enter submission,
 sort/page controls, cancellation, retry, and empty/out-of-range states.
 Use a small browser journey for deep-link -> sort/size/search -> details -> Back/refresh.
@@ -190,14 +271,20 @@ Never populate/reset the running dev database for this check.
   an explicit behavior change, not a hidden shortcut here.
 - [Rows/count can change between queries] -> Deterministic ordering is guaranteed on
   unchanged data, not a snapshot. Empty-page recovery handles a disappearing last page.
-- [Nullable text and locale collation] -> Explicit null placement and lower-case ordering;
-  PostgreSQL collation defines accent behavior, with no new locale promise.
+- [Nullable text] -> The live schema permits NULL but current text data contains
+  none. Keep explicit null placement as defensive behavior.
+- [ICU availability and version differences] -> Require the verified Romanian
+  collation on target databases and test representative alphabet ordering.
+  Do not silently substitute the default collation. Recheck collation versions
+  and relevant indexes when PostgreSQL/ICU is upgraded.
 - [Shared dirty worktree] -> Touch only scoped implementation files when apply is requested;
   integrate rather than discard parallel owner/visit/manual changes.
 
 ## Migration Plan
 
-1. Implement and verify backend page/retrieval behavior and its focused tests.
+1. Verify Romanian ICU collation availability on target databases; implement and
+   verify backend page/retrieval behavior and its focused tests. No database or
+   column collation is altered, so there is no collation data migration or rollback.
 2. Regenerate the API contract/types and migrate UI plus dependent test clients as one change.
 3. Run focused integration/frontend/browser/scale checks and existing relevant contract gates.
 4. Release backend and frontend together; no data migration or backfill is required.
