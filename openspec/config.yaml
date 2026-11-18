@@ -9,15 +9,15 @@ schema: spec-driven
 #     Designs and tasks must cover Windows, macOS, and Linux
 #     Write all artifacts in Spanish
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# Per-artifact rules: injected into `openspec instructions <artifact>` when that artifact is written
+rules:
+  proposal:
+    - >-
+      Write for a product owner or clinic user who has never heard of JSON: it is read
+      in a business meeting. No JSON, DTOs, endpoints, HTTP codes, class/file names,
+      SQL, indexes or framework names; describe what users see and do, with examples
+      from the real data. Technical detail goes to design.md, behaviour to the specs.
+    - Say explicitly what is NOT part of the change.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
