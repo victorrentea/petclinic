@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Visit} from './visit';
+import {Visit, VisitPage, VisitPageQuery} from './visit';
 import {environment} from '../../environments/environment';
 import {HandleError, HttpErrorHandler} from '../error.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError} from 'rxjs/operators';
 
 @Injectable()
@@ -17,10 +17,14 @@ export class VisitService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getVisits(): Observable<Visit[]> {
-    return this.http.get<Visit[]>(this.entityUrl)
+  getVisitPage(query: VisitPageQuery): Observable<VisitPage> {
+    const params = Object.entries(query)
+      .filter(([, value]) => value != null)
+      .reduce((all, [name, value]) => all.set(name, value), new HttpParams());
+    const noVisits: VisitPage = {content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, sort: 'date,desc'};
+    return this.http.get<VisitPage>(this.entityUrl, {params})
       .pipe(
-        catchError(this.handlerError('getVisits', []))
+        catchError(this.handlerError('getVisitPage', noVisits))
       );
   }
 

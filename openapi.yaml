@@ -1400,6 +1400,25 @@ paths:
   /api/visits:
     get:
       operationId: listVisits
+      parameters:
+      - description: "0-based, default 0; past the end: the last page"
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+      - description: "5, 10 (default) or 20; others snap to the nearest"
+        in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+      - description: "date|description|pet|owner,asc|desc; else date,desc"
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -1408,18 +1427,30 @@ paths:
                 sample:
                   description: sample
                   value:
-                  - id: 1
-                    date: 2013-01-01
-                    description: rabies shot
-                    petId: 7
-                  - id: 2
-                    date: 2013-01-02
-                    description: annual checkup
-                    petId: 8
+                    content:
+                    - id: 2
+                      date: 2013-01-02
+                      description: annual checkup
+                      petId: 8
+                      petName: Basil
+                      ownerId: 2
+                      ownerFirstName: Betty
+                      ownerLastName: Davis
+                    - id: 1
+                      date: 2013-01-01
+                      description: rabies shot
+                      petId: 7
+                      petName: Leo
+                      ownerId: 1
+                      ownerFirstName: George
+                      ownerLastName: Franklin
+                    page: 0
+                    size: 10
+                    totalElements: 2
+                    totalPages: 1
+                    sort: "date,desc"
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/VisitDto"
+                $ref: "#/components/schemas/VisitPageDto"
           description: OK
         "400":
           content:
@@ -1956,3 +1987,94 @@ components:
           minLength: 1
       required:
       - description
+    VisitPageDto:
+      type: object
+      description: "One page of the visits grid, with the paging and sorting actually\
+        \ applied."
+      properties:
+        content:
+          type: array
+          description: The visits on this page.
+          items:
+            $ref: "#/components/schemas/VisitRowDto"
+        page:
+          type: integer
+          format: int32
+          description: "The page served, 0-based."
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: "Rows per page: 5, 10 or 20."
+          example: 10
+        sort:
+          type: string
+          description: "The sort applied: date, description, pet or owner, then asc\
+            \ or desc."
+          example: "date,desc"
+        totalElements:
+          type: integer
+          format: int64
+          description: "Visits in the clinic, on all pages."
+          example: 42
+        totalPages:
+          type: integer
+          format: int32
+          description: Number of pages.
+          example: 5
+      required:
+      - content
+      - page
+      - size
+      - sort
+      - totalElements
+      - totalPages
+    VisitRowDto:
+      type: object
+      description: One row of the visits grid.
+      properties:
+        date:
+          type: string
+          format: date
+          description: The visit's date.
+          example: 2013-01-01
+        description:
+          type: string
+          description: The description of the visit.
+          example: rabies shot
+        id:
+          type: integer
+          format: int32
+          description: The ID of the visit.
+          example: 1
+        ownerFirstName:
+          type: string
+          description: The first name of the owner.
+          example: George
+        ownerId:
+          type: integer
+          format: int32
+          description: The ID of the pet's owner.
+          example: 1
+        ownerLastName:
+          type: string
+          description: The last name of the owner.
+          example: Franklin
+        petId:
+          type: integer
+          format: int32
+          description: The ID of the pet.
+          example: 7
+        petName:
+          type: string
+          description: The name of the pet.
+          example: Leo
+      required:
+      - date
+      - description
+      - id
+      - ownerFirstName
+      - ownerId
+      - ownerLastName
+      - petId
+      - petName

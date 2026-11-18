@@ -27,8 +27,8 @@ test.describe('Visits Page', () => {
     console.log(`Screenshot saved: ${screenshotPath}`);
   });
 
-  test('shows all visits on initial load', async ({page}) => {
-    const visits = await apiClient.fetchVisits();
+  test('shows the first page of visits on initial load', async ({page}) => {
+    const visits = await apiClient.fetchFirstVisitPage();
     const expected = visits.map((v: VisitDto) => ({
       date: v.date,
       description: v.description,

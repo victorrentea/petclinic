@@ -23,9 +23,10 @@ export class ApiClient {
     });
   }
 
-  async fetchVisits(): Promise<VisitDto[]> {
-    const response = await this.client.get<VisitDto[]>('/visits');
-    return response.data;
+  /** The visits on the grid's first page, in its default order: newest first, 10 of them. */
+  async fetchFirstVisitPage(): Promise<VisitDto[]> {
+    const response = await this.client.get<{content: VisitDto[]}>('/visits');
+    return response.data.content;
   }
 
   static sortedByDate<T extends {date: string}>(rows: T[]): T[] {
