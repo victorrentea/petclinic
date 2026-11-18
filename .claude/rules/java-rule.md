@@ -1,9 +1,7 @@
 ---
-name: java-code-style
-description: Petclinic's Java coding conventions (dependency injection, @Transactional, REST exception handling, validation, equals/hashCode). Use before writing, editing or reviewing any .java file in this repo.
+# Loaded when Claude reads/edits a matching file (Read/Edit/Write, or cat/head on it) — not on mvn/grep.
+paths: ["**/*.java"]
 ---
-
-# Java Code Style
 
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
