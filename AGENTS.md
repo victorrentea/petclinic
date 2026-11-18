@@ -6,6 +6,8 @@ Carefully review its contents at every retrospective to remove: obvious, duplica
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md`.
 GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
+"Remember X" about this project goes here, never into the private memory under `~/.claude/` —
+the team must see it too.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
