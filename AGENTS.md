@@ -6,6 +6,8 @@ Carefully review its contents at every retrospective to remove: obvious, duplica
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md`.
 GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
+"Remember X" about this project goes here, never into the private memory under `~/.claude/` —
+the team must see it too.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -155,6 +157,9 @@ Core entities and relationships:
 - **Pet** 1→N **Visit**
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
+
+**Expected volume:** ~100,000 owners by late 2027. Never return all owners in one response:
+list screens page and sort on the server, and every column you sort or filter by needs an index.
 
 ## Java Code Style
 - Keep <= 120 chars / line
