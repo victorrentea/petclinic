@@ -1,0 +1,23 @@
+[
+  {
+    "id": "lookup",
+    "kind": "point lookup, one owner",
+    "prompt": "In my local dev database: how many visits has each of Alice Liddell's pets had, and on what date was the most recent one? Answer in 2 lines.",
+    "expect_all": ["Cheshire", "Dinah", "2024-03-04|March 4|4 March|Mar 4"],
+    "trap": {"name": "date shifted by timezone (2024-03-03)", "regex": "2024-03-03|March 3\\b|3 March|Mar 3\\b"}
+  },
+  {
+    "id": "aggregate",
+    "kind": "aggregation over 3 tables; live rows differ from the seed file",
+    "prompt": "Rank the pet types by number of visits in my local dev database, and list the types that have no visits at all. Be brief.",
+    "expect_all": ["cat\\D{0,20}12", "dog\\D{0,20}8", "hamster\\D{0,20}5", "rabbit", "axolotlsmmibgiy"],
+    "trap": {"name": "answered from the seed file (misses the runtime-added type)", "regex": "^(?![\\s\\S]*axolotlsmmibgiy)[\\s\\S]*rabbit"}
+  },
+  {
+    "id": "live-state",
+    "kind": "state that exists only in the running database",
+    "prompt": "The demo seed got re-applied to my local database at some point. How many times has it been applied in total, and when was the last time? One line.",
+    "expect_all": ["\\b(2|two|twice)\\b", "2026-11-18|Nov(ember)? 18|18 Nov"],
+    "trap": null
+  }
+]
