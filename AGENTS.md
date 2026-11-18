@@ -158,6 +158,9 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Expected volume:** ~100,000 owners by late 2027. Never return all owners in one response:
+list screens page and sort on the server, and every column you sort or filter by needs an index.
+
 ## Java Code Style
 - Keep <= 120 chars / line
 - Keep methods under 30 lines
