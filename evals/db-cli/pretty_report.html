@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang=en>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>db-cli skill eval</title>
+<style>
+:root {
+  --bg: #f7f8fa; --card: #fff; --fg: #1b1f24; --mut: #667085; --line: #e3e6ea;
+  --with: #0f9d8a; --without: #e8833a; --ok: #2e9d4f; --bad: #d64545; --warn: #d9a514;
+  --head: #f1f3f6; --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111418; --card: #1a1e24; --fg: #e6e8eb; --mut: #98a2b3; --line: #2c3138;
+    --with: #2dd4bf; --without: #fb923c; --ok: #4cc26a; --bad: #ff6b6b; --warn: #f5c542;
+    --head: #20252c; --shadow: none;
+  }
+}
+* { box-sizing: border-box }
+body {
+  background: var(--bg); color: var(--fg); margin: 0;
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px }
+h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -.02em }
+h2 { font-size: 19px; margin: 44px 0 6px }
+h3 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--mut) }
+p.lead, .mut { color: var(--mut) }
+.meta { color: var(--mut); font-size: 13px; margin-bottom: 24px }
+code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--head); padding: 1px 5px; border-radius: 4px }
+pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; box-shadow: var(--shadow) }
+pre code { background: none; padding: 0 }
+.legend-top { display: flex; gap: 18px; font-size: 13px; margin: 10px 0 0 }
+.legend-top span::before, .dot { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px }
+.lw::before { background: var(--with) } .lwo::before { background: var(--without) }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 20px }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow) }
+.card.warn { border-color: var(--bad) }
+.card .big { font-size: 30px; font-weight: 700; color: var(--with); line-height: 1.15 }
+.card .big small { font-size: 14px; font-weight: 500; color: var(--mut) }
+.card .acc { margin-top: 10px; font-size: 13px; color: var(--mut) }
+.card.warn .acc b:first-child { color: var(--bad) }
+.callout { background: var(--card); border-left: 4px solid var(--bad); border-radius: 8px; padding: 12px 16px; margin: 20px 0; box-shadow: var(--shadow) }
+blockquote { margin: 8px 0 0; padding: 6px 12px; border-left: 3px solid var(--line); color: var(--mut); white-space: pre-wrap; font-size: 13.5px }
+ul.tasks { padding-left: 18px } ul.tasks li { margin-bottom: 10px }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow) }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px }
+@media (max-width: 860px) { .grid3 { grid-template-columns: 1fr } }
+figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 4px; box-shadow: var(--shadow) }
+figcaption { font-size: 13px } figcaption small { font-size: 11.5px }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible }
+svg .axis { stroke: var(--line) } svg .tick { fill: var(--mut); font-size: 10px; text-anchor: middle }
+svg .lbl { fill: var(--fg); font-size: 12px } svg .val { fill: var(--mut); font-size: 12px; font-weight: 600 }
+svg .inbar { fill: #fff; font-size: 11px; text-anchor: middle; font-weight: 600 }
+svg .out { font-size: 10px; text-anchor: end; font-weight: 700 }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.5px; color: var(--mut); margin-top: 6px }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr } }
+.wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow) }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px }
+th, td { padding: 7px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line) }
+th { background: var(--head); font-weight: 600; white-space: nowrap }
+td { font-variant-numeric: tabular-nums }
+tr:last-child td { border-bottom: 0 }
+.ok { color: var(--ok); font-weight: 600 } .bad { color: var(--bad); font-weight: 600 } .warn { color: var(--warn); font-weight: 600 }
+.ans { max-width: 620px; max-height: 9em; overflow: auto; white-space: pre-wrap; font-size: 12.5px }
+details summary { cursor: pointer; font-weight: 600; margin: 8px 0 }
+ol.how li { margin-bottom: 6px }
+</style>
+<main>
+<h1>Does the <code>db-cli</code> skill pay off?</h1>
+<p class=lead>Each task is answered by fresh headless Claude Code agents, in a copy of the repo with the skill and in one without it.
+  Same prompts, same machine, interleaved, so both arms share the load and the rate limits.</p>
+<div class=meta>{{META}}</div>
+<div class=legend-top><span class=lw>with the skill</span><span class=lwo>without the skill</span></div>
+
+<div class=cards>{{CARDS}}</div>
+{{FINDINGS}}
+
+<h2>The tasks</h2>
+<ul class=tasks>{{TASKS}}</ul>
+
+<h2>Distributions</h2>
+<p class=mut>A normal curve per arm, fitted robustly (μ = median, σ = 1.4826 × MAD), so one straggler does not flatten it.
+  The ticks under each curve are the individual runs; a value off the chart is printed at the right edge with ▶.</p>
+<div class=legend-top><span class=lw>with the skill</span><span class=lwo>without the skill</span></div>
+{{GAUSS}}
+
+<div class=two>
+  <div>
+    <h2>Correct answers</h2>
+    <div class=panel>{{CORRECT}}</div>
+  </div>
+  <div>
+    <h2>How the agent reached the database</h2>
+    <div class=panel>{{ROUTES}}</div>
+  </div>
+</div>
+
+<h2>What the skill saves (median, without → with)</h2>
+<div class=panel>{{SAVINGS}}</div>
+
+<h2>How it was run</h2>
+<ol class=how>
+  <li><code>evals/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
+    <code>.claude/skills/db-cli</code>, <b>without</b> deletes it and the hint to it in <code>.mcp.json</code>.
+    Both lose <code>evals/</code> (the expected answers live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
+  <li>Every run is a fresh <code>claude -p</code> in one arm: <code>--setting-sources project</code>, no MCP server at all
+    (<code>--strict-mcp-config</code> with an empty config), <code>bypassPermissions</code>, no session persistence, a $3 budget cap,
+    and the parent's <code>CLAUDE*</code> env vars stripped. The shell is the only way into the local Postgres.</li>
+  <li>Jobs are interleaved (run i of every task, both arms, then run i+1), 6 in parallel. Each writes a stream-json log.</li>
+  <li><code>report.py</code> grades each final answer with the regexes in <code>tasks.json</code> (all expected facts present, trap absent),
+    reads tokens, cost and duration from the result event, and classifies the route from the Bash commands.
+    <code>pretty_report.py</code> renders this page from the same parsing.</li>
+</ol>
+<pre><code>evals/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
+evals/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
+evals/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
+evals/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
+
+<h2>All numbers</h2>
+{{SUMMARY}}
+
+<details>
+  <summary>Every run ({{N}}), with its final answer</summary>
+  {{EVERY}}
+</details>
+</main>
+</html>
