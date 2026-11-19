@@ -1,6 +1,6 @@
 ---
-name: java-code-style
-description: PetClinic's Java code style rules (method length, injection, @Transactional, @Validated, exception handling, equals/hashCode). Use before writing, editing or reviewing any Java code in petclinic-backend, notification-service or petclinic-commons — including when planning a Java change before opening a file.
+# Loaded when Claude reads/edits a matching file (Read/Edit/Write, or cat/head on it) — not on mvn/grep.
+paths: ["**/*.java"]
 ---
 
 # Java Code Style
