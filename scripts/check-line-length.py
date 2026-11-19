@@ -94,7 +94,7 @@ def main(argv):
         return usage()
 
     if found:
-        print(f"❌ Lines over {MAX} chars (AGENTS.md rule: Keep <= 120 chars / line):")
+        print(f"❌ Lines over {MAX} chars (rule: Keep <= 120 chars / line):")
         for path, n, body in found:
             print(f"  {path}:{n}: {len(body)} chars — {body.strip()[:90]}")
         print("\n   Wrap them and try again.")
