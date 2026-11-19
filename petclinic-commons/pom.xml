@@ -76,6 +76,9 @@
                 <configuration>
                     <complianceLevel>21</complianceLevel>
                     <encoding>UTF-8</encoding>
+                    <!-- An IDE build writes unwoven classes into target/classes; without this, ajc
+                        sees no changed source and leaves them unwoven, so the spans silently vanish. -->
+                    <forceAjcCompile>true</forceAjcCompile>
                 </configuration>
                 <executions>
                     <execution>
