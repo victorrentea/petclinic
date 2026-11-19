@@ -31,15 +31,14 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners?size=20`, {timeout: 10_000});
-  if (!Array.isArray(data?.content) || data.content.length === 0) {
+  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
+  if (!Array.isArray(data) || data.length === 0) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  const {data: potters} = await axios.get(`${API_BASE}/owners?lastName=Potter`, {timeout: 10_000});
-  const names: string[] = potters.content.map(fullName);
+  const names: string[] = data.map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
-  this.ownerCount = data.totalElements;
+  this.allOwnerNames = names;
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
@@ -56,9 +55,6 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('the first page lists {int} owners, of every owner in the clinic', async function (
-  this: PlaywrightWorld, perPage: number) {
-  await expect(this.page.locator('#ownersTable td.ownerFullName')).toHaveCount(perPage);
-  await expect(this.page.locator('.mat-mdc-paginator-range-label'))
-    .toHaveText(new RegExp(`of ${this.requireOwnerCount()}\\b`));
+Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
+  await expectOwnersListed(this, this.requireAllOwnerNames());
 });

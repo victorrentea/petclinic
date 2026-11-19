@@ -15,7 +15,7 @@ export interface paths {
     patch: operations["redirectToSwagger_4"];
   };
   "/api/owners": {
-    /** List one page of owners, sorted, optionally by last-name prefix */
+    /** List owners */
     get: operations["listOwners"];
     /** Create an owner */
     post: operations["addOwner"];
@@ -169,29 +169,6 @@ export interface components {
        * @example 6085551023
        */
       telephone: string;
-    };
-    /** @description One page of owners, and how many match across all pages. */
-    OwnerPageDto: {
-      /** @description The owners on this page. */
-      content: components["schemas"]["OwnerDto"][];
-      /**
-       * Format: int32
-       * @description 0-based page number.
-       * @example 0
-       */
-      page: number;
-      /**
-       * Format: int32
-       * @description Page size: 5, 10 or 20.
-       * @example 10
-       */
-      size: number;
-      /**
-       * Format: int64
-       * @description Owners matching the filter, across all pages.
-       * @example 26
-       */
-      totalElements: number;
     };
     PetDto: {
       /**
@@ -576,30 +553,24 @@ export interface operations {
       };
     };
   };
-  /** List one page of owners, sorted, optionally by last-name prefix */
+  /** List owners */
   listOwners: {
     parameters: {
       query?: {
-        /** @description Case-sensitive prefix of the last name */
         lastName?: string;
-        /** @description 0-based page number */
-        page?: number;
-        /** @description Page size: 5, 10 or 20 */
-        size?: number;
-        sort?: "name,asc" | "name,desc" | "city,asc" | "city,desc";
       };
     };
     responses: {
       /** @description OK */
       200: {
         content: {
-          "application/json": components["schemas"]["OwnerPageDto"];
+          "application/json": components["schemas"]["OwnerDto"][];
         };
       };
-      /** @description page < 0, size not 5/10/20, or an unsupported sort */
+      /** @description Bad Request */
       400: {
         content: {
-          "application/problem+json": unknown;
+          "*/*": components["schemas"]["ProblemDetail"];
         };
       };
       /** @description Not Found */
