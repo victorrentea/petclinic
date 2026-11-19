@@ -162,15 +162,6 @@ Core entities and relationships:
 **Expected volume:** ~100,000 owners by late 2027. Never return all owners in one response:
 list screens page and sort on the server, and every column you sort or filter by needs an index.
 
-## Java Code Style
-- Keep <= 120 chars / line
-- Keep methods under 30 lines
-- Use constructor injection in src/main, `@Autowired` only in tests
-- Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
-- Global REST exception handling is done via `@RestControllerAdvice`
-- Apply `@Validated` on every `@RequestBody`
-- Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
-
 ## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
@@ -180,4 +171,3 @@ list screens page and sort on the server, and every column you sort or filter by
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
 - An AI-made commit ends with `Co-Authored-By: <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`
-
