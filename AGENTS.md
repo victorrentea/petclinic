@@ -120,6 +120,7 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
+
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
