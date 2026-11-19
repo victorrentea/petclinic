@@ -16,6 +16,9 @@
     ],
     "ask": [
       "Edit(.claude/settings.json)"
+    ],
+    "allow": [
+      "Bash(mvn test*)"
     ]
   },
   "hooks": {
