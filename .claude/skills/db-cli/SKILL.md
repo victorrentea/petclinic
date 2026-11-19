@@ -60,7 +60,12 @@ data:
 ```
 
 Only the rows matter most of the time: read `rows[N]{...}:` and the lines under it.
-`--json` prints the raw JSON envelope, for `jq` (`| jq -c '.data.statements[0].rows'`).
+
+**Never pass `--json` to get data you will read or reuse yourself**, not even to feed
+it into a script (an Excel, a chart, a report): the same 10-row result is ~540 chars
+as TOON and ~1,460 as JSON. Read the values off the TOON rows and carry them on
+yourself. `--json` is only for piping straight into `jq` in the same shell command
+(`| jq -c '.data.statements[0].rows'`), so the JSON itself never reaches the conversation.
 
 ## When it fails
 
