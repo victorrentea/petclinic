@@ -27,7 +27,10 @@ Each script is foreground; run them in separate terminals.
 ./start-backend.sh         # starts notification-service on :8090 and backend on :8080 (also MCP at /mcp) after installing commons
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
+./stop-app.sh [database|backend|frontend]  # stops this checkout's processes, waits for free ports
 ```
+To restart, run `./stop-app.sh` first. Never kill just the postgres on :5432: its launcher (:15432)
+keeps `data/epg-lock`, and the next start dies with "could not lock".
 Wait for `✅ started <name> on port <n>` or `❌ …`, never for a fixed timeout. A port held
 by an orphan is reported in < 1s, before anything is built or wiped — the script
 prints the squatter's PID and stops; killing it is your call.
