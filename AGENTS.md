@@ -23,7 +23,7 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 ### Helper Scripts
 Each script is foreground; run them in separate terminals.
 ```sh
-./start-database.sh        # embedded Postgres on localhost:5432
+./start-database.sh        # embedded Postgres on localhost:5432 (--keep-data: no wipe)
 ./start-backend.sh         # starts notification-service on :8090 and backend on :8080 (also MCP at /mcp) after installing commons
 ./start-frontend.sh        # Angular dev server on localhost:4200
 ./start-grafana.sh         # Starts grafana on localhost:3300 in a docker container
@@ -139,7 +139,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   a fresh Zonky copy. A test that reads seeded rows declares it — `@DefaultFixture` (Spring),
   `test.use({dbFixture: 'default'})` (Playwright), `@fixture:default` (Cucumber).
 - ⚠️ `./start-database.sh` starts by `rm -rf data`, wiping any rows added at runtime. Use it only
-  for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
+  for a deliberate reset; to keep runtime data, pass `--keep-data`.
 
 ## API Endpoints
 Backend exposes REST API at http://localhost:8080/api/

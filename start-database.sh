@@ -7,6 +7,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DB_DIR="$SCRIPT_DIR/petclinic-database"
 JAR="$DB_DIR/target/petclinic-database.jar"
 
+# --keep-data: restart on the rows added at runtime instead of resetting to the seed.
+KEEP_DATA=false
+[[ "${1:-}" == "--keep-data" ]] && KEEP_DATA=true
+
 source "$SCRIPT_DIR/scripts/preflight.sh"
 # Before the build and, above all, before `rm -rf data` below: wiping the data dir
 # out from under a still-running postmaster is what turns a plain "port busy" into
@@ -18,7 +22,7 @@ if [[ ! -f "$JAR" ]]; then
   (cd "$DB_DIR" && mvn -q -DskipTests package)
 fi
 
-if [[ -d "$DB_DIR/data" ]]; then
+if [[ "$KEEP_DATA" == false && -d "$DB_DIR/data" ]]; then
   echo "🧹 Wiping existing data dir: $DB_DIR/data"
   rm -rf "$DB_DIR/data"
 fi
