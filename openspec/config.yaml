@@ -1,13 +1,12 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+# Project context: applies to every OpenSpec artifact and workflow
+context: |
+  Never ask the user about decisions that are cheap to change after the business sees the
+  demo: UI nitpicks (labels, wording, colours, layout, placement, default page size, icons).
+  Pick a sensible default, note it as an assumption in the artifact, and move on; the user
+  will discover and adjust these in the demo. Ask only about what changes scope, data,
+  compatibility or acceptance criteria.
 
 # Per-artifact rules: injected into `openspec instructions <artifact>` when that artifact is written
 rules:
