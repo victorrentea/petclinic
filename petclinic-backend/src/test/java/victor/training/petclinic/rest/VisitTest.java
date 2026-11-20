@@ -144,6 +144,37 @@ public class VisitTest {
     }
 
     @Test
+    void getAll_returnsVisitsInDateOrder() throws Exception {
+        Pet pet = TestData.aPet();
+        pet.setOwner(ownerRepository.save(TestData.anOwner()));
+        pet.setType(petTypeRepository.save(TestData.aPetType("cat")));
+        petRepository.save(pet);
+        addVisit(pet, LocalDate.of(2026, 1, 12), "first checkup");
+        addVisit(pet, LocalDate.of(2026, 2, 9), "vaccine booster");
+        addVisit(pet, LocalDate.of(2026, 3, 16), "dental cleaning");
+
+        String responseJson = mockMvc.perform(get("/api/visits"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
+
+        assertThat(visits)
+                .filteredOn(v -> v.getPetId() == pet.getId())
+                .extracting(VisitDto::getDescription)
+                .containsExactly("first checkup", "vaccine booster", "dental cleaning");
+    }
+
+    private void addVisit(Pet pet, LocalDate date, String description) {
+        Visit visit = new Visit();
+        visit.setDate(date);
+        visit.setDescription(description);
+        pet.addVisit(visit);
+        visitRepository.save(visit);
+    }
+
+    @Test
     void create_invalid() throws Exception {
         VisitDto newVisit = new VisitDto()
                 .setPetId(petId)
