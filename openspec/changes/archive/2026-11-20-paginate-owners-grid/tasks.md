@@ -34,5 +34,5 @@
 ## 4. End-to-end and volume check
 
 - [x] 4.1 Update `petclinic-test/src/owner-search.feature`: the "lists every owner" scenario becomes "the first page, with the total". Add scenarios for sorting by City, moving to the next page, switching the size to 5, a shared link with `sort=city,desc`, and Back returning to the previous page. Verify that the Playwright suite passes against the local stack
-- [ ] 4.2 Generate 100k owners in a scratch database. For `name,asc`, `city,desc`, and `lastName=Pot` + `name,asc`, capture `EXPLAIN ANALYZE` of the page query and the count. Verify that each one uses the intended index and runs in milliseconds, and save the output for the PR description (not CI)
+- [x] 4.2 Generate 100k owners in a scratch database. For `name,asc`, `city,desc`, and `lastName=Pot` + `name,asc`, capture `EXPLAIN ANALYZE` of the page query and the count. Verify that each one uses the intended index and runs in milliseconds, and save the output for the PR description (not CI)
 - [x] 4.3 Open the running app at `/owners`, page, sort, change the size, refresh, and press Back. Confirm that it matches the `owners-grid` spec

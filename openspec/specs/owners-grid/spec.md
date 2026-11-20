@@ -1,11 +1,11 @@
-# Spec Delta
+# owners-grid Specification
 
 ## Purpose
 
 The Owners screen in the browser lets clinic staff find an owner among ~100,000 by filtering,
 sorting and paging through a grid whose state is kept in the URL.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Grid shows one page with a paginator
 The Owners grid SHALL show one page of owners, plus a paginator that offers page sizes 5, 10 and 20
@@ -85,3 +85,39 @@ When loading owners fails, the grid SHALL not claim that no owners match.
 #### Scenario: Backend down
 - **WHEN** the owners request fails
 - **THEN** the "No owners with last name…" message is not shown
+
+### Requirement: Owner names are shown last name first
+Each row SHALL show the owner as "<last name>, <first name>", the order the Name sort uses.
+
+#### Scenario: Name cell
+- **WHEN** owner Henry Baskerville is listed
+- **THEN** the Name cell reads "Baskerville, Henry"
+
+### Requirement: Columns keep their width and long values end in an ellipsis
+Column widths SHALL not change when the user pages, sorts or changes the page size. A value longer
+than its column SHALL stay on one line and end in "…", so every row has the same height.
+
+#### Scenario: Paging keeps the columns still
+- **WHEN** the user moves from one page to the next, or sorts by City
+- **THEN** every column keeps exactly the width it had before
+
+#### Scenario: Very long surname
+- **WHEN** an owner's last name is longer than the Name column
+- **THEN** the name ends in "…" and its row is as tall as the others
+
+### Requirement: Sortable columns are recognisable without hovering
+The Name and City headers SHALL always show a sort arrow. The arrow SHALL be dimmed while the grid is
+not sorted by that column, and bright, with a bold heading, on the column the grid is sorted by.
+
+#### Scenario: Sorted by name
+- **WHEN** the grid is sorted by name
+- **THEN** the Name heading is bold with a bright arrow, and City shows a dimmed arrow
+
+### Requirement: Search and Add Owner share the search row
+The search row SHALL show the last-name box across the free width, followed by a "Search" button
+with a magnifying-glass icon and an "Add Owner" button with a plus icon, aligned to the grid's right
+edge. Add Owner SHALL stay visible when no owner matches.
+
+#### Scenario: Empty result
+- **WHEN** the user searches for "Zzzz"
+- **THEN** the "No owners…" message is shown and the Add Owner button is still on the search row

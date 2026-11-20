@@ -160,6 +160,12 @@ parameter returns a 500 for `abc`, so this improves them all.
   is meant to use `owners_name_idx` or `owners_city_idx`.
   → Run `EXPLAIN ANALYZE` on 100k generated owners for each sort, with and without a prefix
   (Q&A #17). The output is attached to the PR, not run in CI.
+- **Measured on 100k owners (`explain-100k.md`): a last-name search sorted by name skips
+  `owners_last_name_prefix_idx`.** It walks `owners_name_idx` in ICU order and filters on the way,
+  so it takes 17–35 ms depending on how late the prefix sorts. The prefix index serves only the
+  count. → **Accepted** after the implementation review: it costs the same as a deep page (below).
+  If it grows, add a range predicate (`last_name >= :p AND last_name < :p || U&'\FFFF'`) beside
+  the `LIKE`; it was measured at 0.05–2 ms.
 - **Deep offsets.** `OFFSET 99_980` walks the index, a few milliseconds at 100k.
   → Accepted (Q&A #10). Revisit keyset paging at millions.
 - **Breaking contract.** Any caller outside this repo that reads `/api/owners` as an array breaks.
