@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Renders the db-cli eval as a self-contained HTML page with charts (inline SVG, no deps).
 
-    evals/db-cli/pretty_report.py LOG_DIR [--commit SHA] [--out docs/eval/db-cli-skill.html]
-    evals/db-cli/pretty_report.py docs/eval/db-cli-runs.json
+    docs/eval/db-cli/pretty_report.py LOG_DIR [--commit SHA] [--out docs/eval/db-cli-skill.html]
+    docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json
 
 LOG_DIR is the --out folder of run.py (one stream-json log per run); --commit names the HEAD
 the arms were archived from. From a LOG_DIR it also writes db-cli-runs.json next to the page:
@@ -371,13 +371,22 @@ def page(runs, meta):
         )
     tasks_n, arms_n = len(tasks), len(ARMS)
     meta_html = (
-        f"<b>{len(runs)}</b> headless runs ({tasks_n} tasks × {arms_n} arms × "
-        f'{len(runs) // (tasks_n * arms_n)}), model <code>{meta.get("model")}</code>, '
+        f"<b>{len(runs)}</b> headless runs = <b>{tasks_n}</b> tasks (the cards below) × "
+        f"<b>{arms_n}</b> arms (with / without the skill) × "
+        f"<b>{len(runs) // (tasks_n * arms_n)}</b> runs each, to average out the noise; "
+        f'model <code>{meta.get("model")}</code>, '
         f'Claude Code {meta.get("claude_code")}, repo at <code>{meta.get("commit")}</code>, '
         f'finished {meta.get("finished")} after ~{meta.get("wall_min")} min'
     )
+    cost_total = sum(r["cost"] for r in runs)
+    tok_total = sum(r["in_tok"] + r["out_tok"] for r in runs)
+    cost_html = (
+        f"<b>${cost_total:.2f}</b> at API prices for this one pass "
+        f"({tok_total / 1e6:.1f}M tokens, ~${cost_total / len(runs):.2f} per run)"
+    )
     return (
         tpl.replace("{{META}}", meta_html)
+        .replace("{{COST}}", cost_html)
         .replace("{{FINDINGS}}", "".join(findings))
         .replace("{{CARDS}}", "".join(cards))
         .replace("{{GAUSS}}", "".join(grid))

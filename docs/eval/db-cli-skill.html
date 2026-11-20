@@ -3,6 +3,9 @@
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>db-cli skill eval</title>
+<script>/* opened raw, this is the unfilled template: show the rendered page instead */
+if (location.pathname.endsWith('/docs/eval/db-cli/pretty_report.html'))
+  location.replace('../db-cli-skill.html');</script>
 <style>
 :root {
   --bg: #f7f8fa; --card: #fff; --fg: #1b1f24; --mut: #667085; --line: #e3e6ea;
@@ -75,12 +78,24 @@ tr:last-child td { border-bottom: 0 }
 .ans { max-width: 620px; max-height: 9em; overflow: auto; white-space: pre-wrap; font-size: 12.5px }
 details summary { cursor: pointer; font-weight: 600; margin: 8px 0 }
 ol.how li { margin-bottom: 6px }
+.explain { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 18px; margin: 14px 0 6px; font-size: 13.5px }
+.explain b.t { display: block; margin-bottom: 4px }
+.explain ol { margin: 0; padding-left: 20px } .explain li { margin: 3px 0 }
 </style>
 <main>
 <h1>Does the <code>db-cli</code> skill pay off?</h1>
 <p class=lead>Each task is answered by fresh headless Claude Code agents, in a copy of the repo with the skill and in one without it.
   Same prompts, same machine, interleaved, so both arms share the load and the rate limits.</p>
-<div class=meta><b>42</b> headless runs (3 tasks × 2 arms × 7), model <code>claude-sonnet-5-5</code>, Claude Code 2.1.327, repo at <code>8aa6f8d3</code>, finished 2026-11-18 10:53 after ~2.9 min</div>
+<div class=meta><b>42</b> headless runs = <b>3</b> tasks (the cards below) × <b>2</b> arms (with / without the skill) × <b>7</b> runs each, to average out the noise; model <code>claude-sonnet-5-5</code>, Claude Code 2.1.327, repo at <code>8aa6f8d3</code>, finished 2026-11-18 10:53 after ~2.9 min</div>
+<div class=explain><b class=t>How an eval works</b>
+<ol>
+  <li><b>Task</b> = a prompt with a known right answer, plus a known trap. A script grades every final answer (expected facts present, trap absent), so no human judges it.</li>
+  <li><b>Arm</b> = one variant of the setup. Here two copies of the same repo, identical except that one has the skill deleted. That one difference is the thing being measured: an A/B test.</li>
+  <li><b>Runs</b>: an agent is not deterministic. The same prompt takes a different route, time and cost on every try, so one run proves nothing.
+    Each task is asked 7 times in each arm, and the arms are compared on the median (correct answers, seconds, $, tokens).</li>
+  <li><b>Cost</b>: <b>$1.64</b> at API prices for this one pass (4.8M tokens, ~$0.04 per run). Every agent run is billed, and the bill grows as tasks × arms × runs.
+    One pass is never the last one: every change to the skill, a prompt or a grading regex means running the whole matrix again.</li>
+</ol></div>
 <div class=legend-top><span class=lw>with the skill</span><span class=lwo>without the skill</span></div>
 
 <div class=cards><div class="card flag"><div class=head><h3>lookup</h3><div class=kind>point lookup, one owner</div><div class=prompt title="the exact prompt given to claude -p">In my local dev database: how many visits has each of Alice Liddell&#x27;s pets had, and on what date was the most recent one? Answer in 2 lines.</div></div><div><div class=big>61%<small> faster</small></div><div class=big>77%<small> cheaper</small></div></div><div><div class=acc>correct: <b>0/7</b> with · <b>7/7</b> without</div><div class=trap>Trap: date shifted by timezone (2024-03-03)</div></div></div><div class="card"><div class=head><h3>aggregate</h3><div class=kind>aggregation over 3 tables; live rows differ from the seed file</div><div class=prompt title="the exact prompt given to claude -p">Rank the pet types by number of visits in my local dev database, and list the types that have no visits at all. Be brief.</div></div><div><div class=big>57%<small> faster</small></div><div class=big>74%<small> cheaper</small></div></div><div><div class=acc>correct: <b>7/7</b> with · <b>7/7</b> without</div><div class=trap>Trap: answered from the seed file (misses the runtime-added type)</div></div></div><div class="card"><div class=head><h3>live-state</h3><div class=kind>state that exists only in the running database</div><div class=prompt title="the exact prompt given to claude -p">The demo seed got re-applied to my local database at some point. How many times has it been applied in total, and when was the last time? One line.</div></div><div><div class=big>19%<small> faster</small></div><div class=big>36%<small> cheaper</small></div></div><div><div class=acc>correct: <b>7/7</b> with · <b>4/7</b> without</div></div></div></div>
@@ -109,9 +124,9 @@ The most recent visit for both was on 2024-03-03 (the stored timestamp is 23:00 
 
 <h2>How it was run</h2>
 <ol class=how>
-  <li><code>evals/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
+  <li><code>docs/eval/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
     <code>.claude/skills/db-cli</code>, <b>without</b> deletes it and the hint to it in <code>.mcp.json</code>.
-    Both lose <code>evals/</code> (the expected answers live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
+    Both lose <code>docs/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
   <li>Every run is a fresh <code>claude -p</code> in one arm: <code>--setting-sources project</code>, no MCP server at all
     (<code>--strict-mcp-config</code> with an empty config), <code>bypassPermissions</code>, no session persistence, a $3 budget cap,
     and the parent's <code>CLAUDE*</code> env vars stripped. The shell is the only way into the local Postgres.</li>
@@ -120,10 +135,10 @@ The most recent visit for both was on 2024-03-03 (the stored timestamp is 23:00 
     reads tokens, cost and duration from the result event, and classifies the route from the Bash commands.
     <code>pretty_report.py</code> renders this page from the same parsing.</li>
 </ol>
-<pre><code>evals/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
-evals/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
-evals/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
-evals/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
+<pre><code>docs/eval/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
+docs/eval/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
+docs/eval/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
+docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
 
 <h2>All numbers</h2>
 <div class=wrap><table><tr><th>task</th><th>arm</th><th>n</th><th>skill loaded</th><th>correct</th><th>trap</th><th>time s (med)</th><th>context tok (med)</th><th>output tok (med)</th><th>cost $ (med)</th><th>tool calls (med)</th></tr><tr><td>lookup</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>7/7</td><td>0/7</td><td>17</td><td>148,964</td><td>1,379</td><td>0.051</td><td>6</td></tr><tr><td>lookup</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>7/7</td><td>0/7</td><td>7/7</td><td>7</td><td>60,136</td><td>336</td><td>0.011</td><td>2</td></tr><tr><td>aggregate</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>7/7</td><td>0/7</td><td>17</td><td>144,236</td><td>1,350</td><td>0.044</td><td>6</td></tr><tr><td>aggregate</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>7/7</td><td>7/7</td><td>0/7</td><td>7</td><td>59,984</td><td>386</td><td>0.011</td><td>2</td></tr><tr><td>live-state</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>4/7</td><td>0/7</td><td>14</td><td>137,645</td><td>1,288</td><td>0.053</td><td>5</td></tr><tr><td>live-state</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>5/7</td><td>7/7</td><td>0/7</td><td>11</td><td>85,488</td><td>840</td><td>0.034</td><td>4</td></tr></table></div>

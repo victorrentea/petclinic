@@ -3,6 +3,9 @@
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>db-cli skill eval</title>
+<script>/* opened raw, this is the unfilled template: show the rendered page instead */
+if (location.pathname.endsWith('/docs/eval/db-cli/pretty_report.html'))
+  location.replace('../db-cli-skill.html');</script>
 <style>
 :root {
   --bg: #f7f8fa; --card: #fff; --fg: #1b1f24; --mut: #667085; --line: #e3e6ea;
@@ -75,12 +78,24 @@ tr:last-child td { border-bottom: 0 }
 .ans { max-width: 620px; max-height: 9em; overflow: auto; white-space: pre-wrap; font-size: 12.5px }
 details summary { cursor: pointer; font-weight: 600; margin: 8px 0 }
 ol.how li { margin-bottom: 6px }
+.explain { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 18px; margin: 14px 0 6px; font-size: 13.5px }
+.explain b.t { display: block; margin-bottom: 4px }
+.explain ol { margin: 0; padding-left: 20px } .explain li { margin: 3px 0 }
 </style>
 <main>
 <h1>Does the <code>db-cli</code> skill pay off?</h1>
 <p class=lead>Each task is answered by fresh headless Claude Code agents, in a copy of the repo with the skill and in one without it.
   Same prompts, same machine, interleaved, so both arms share the load and the rate limits.</p>
 <div class=meta>{{META}}</div>
+<div class=explain><b class=t>How an eval works</b>
+<ol>
+  <li><b>Task</b> = a prompt with a known right answer, plus a known trap. A script grades every final answer (expected facts present, trap absent), so no human judges it.</li>
+  <li><b>Arm</b> = one variant of the setup. Here two copies of the same repo, identical except that one has the skill deleted. That one difference is the thing being measured: an A/B test.</li>
+  <li><b>Runs</b>: an agent is not deterministic. The same prompt takes a different route, time and cost on every try, so one run proves nothing.
+    Each task is asked 7 times in each arm, and the arms are compared on the median (correct answers, seconds, $, tokens).</li>
+  <li><b>Cost</b>: {{COST}}. Every agent run is billed, and the bill grows as tasks × arms × runs.
+    One pass is never the last one: every change to the skill, a prompt or a grading regex means running the whole matrix again.</li>
+</ol></div>
 <div class=legend-top><span class=lw>with the skill</span><span class=lwo>without the skill</span></div>
 
 <div class=cards>{{CARDS}}</div>
@@ -108,9 +123,9 @@ ol.how li { margin-bottom: 6px }
 
 <h2>How it was run</h2>
 <ol class=how>
-  <li><code>evals/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
+  <li><code>docs/eval/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
     <code>.claude/skills/db-cli</code>, <b>without</b> deletes it and the hint to it in <code>.mcp.json</code>.
-    Both lose <code>evals/</code> (the expected answers live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
+    Both lose <code>docs/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
   <li>Every run is a fresh <code>claude -p</code> in one arm: <code>--setting-sources project</code>, no MCP server at all
     (<code>--strict-mcp-config</code> with an empty config), <code>bypassPermissions</code>, no session persistence, a $3 budget cap,
     and the parent's <code>CLAUDE*</code> env vars stripped. The shell is the only way into the local Postgres.</li>
@@ -119,10 +134,10 @@ ol.how li { margin-bottom: 6px }
     reads tokens, cost and duration from the result event, and classifies the route from the Bash commands.
     <code>pretty_report.py</code> renders this page from the same parsing.</li>
 </ol>
-<pre><code>evals/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
-evals/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
-evals/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
-evals/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
+<pre><code>docs/eval/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
+docs/eval/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
+docs/eval/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
+docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
 
 <h2>All numbers</h2>
 {{SUMMARY}}
