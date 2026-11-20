@@ -4,6 +4,9 @@
 - Backend: `localhost:8080`, frontend: `localhost:4200` — both must be up before `npm test`.
   Other checkouts of this repo may own those ports: `./test-on-own-stack.sh npm test` runs
   against HEAD's own containers instead (what `/human-review` does).
+- **A selector is written only in a page object** (`src/pages/`, one class per screen). Specs,
+  DSLs and glue call its methods and locators — never `page.locator(...)`, and never a button
+  label passed in as a parameter.
 - `@wip` scenarios state a rule the code does not enforce yet; `cucumber.js` skips them.
 - `npm run test:with-apps` auto-starts both apps, but is experimental; prefer starting apps manually.
 - Screenshots land in `test-results/screenshots/` (git-ignored, auto-generated).
@@ -13,7 +16,7 @@
   ffmpeg has no drawtext/subtitles filter to burn one in afterwards.
 - Docker cleanup when things break: `docker-compose -f docker-compose.test.yml down -v`
 - Layout: `src/` holds the scenarios (`*.spec.ts` + `*.dsl.ts`, `*.feature` + `*.glue.ts`),
-  `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
+  `src/pages/` the page objects, `src/support/` the fixtures/World, `src/genseq/` the Tempo→PlantUML tooling. Nothing generated
   lives under `src/`: throwaway run output goes to `test-results/`, and the committed diagrams to
   `generated/`.
 - ⚠️ `generated/*.genseq.puml` and their `generated/*.genseq.json` sidecars are **generated** but

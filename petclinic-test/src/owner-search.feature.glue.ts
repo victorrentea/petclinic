@@ -2,11 +2,12 @@ import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
 import {PlaywrightWorld} from './support/world';
+import {OwnersPage} from './pages/OwnersPage';
 
-// Gherkin, bound directly: the steps do the work themselves, with no DSL layer
-// underneath — the .feature is the readable artefact here, and a second naming
-// of the same sentences would only add indirection. (add-visit.spec.ts makes the
-// opposite case: no Gherkin, sentences as a DSL in add-visit.dsl.ts.)
+// Gherkin, bound straight to the page objects: no DSL layer in between — the .feature
+// is the readable artefact here, and a second naming of the same sentences would only
+// add indirection. (add-visit.spec.ts makes the opposite case: no Gherkin, sentences as
+// a DSL in add-visit.dsl.ts.)
 //
 // Nothing below decides anything: the Background states the data, the Examples
 // table states the search term and the expected result set.
@@ -18,8 +19,8 @@ const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Bo
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
-  const cells = world.page.locator('#ownersTable td.ownerFullName');
-  const listed = async () => (await cells.allTextContents()).map((t) => t.trim()).filter(Boolean).sort();
+  const owners = new OwnersPage(world.page);
+  const listed = async () => (await owners.listedOwnerNames()).sort();
 
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }
@@ -42,13 +43,11 @@ Given('the clinic has these owners', async function (this: PlaywrightWorld, owne
 });
 
 When('I open the owners page', async function (this: PlaywrightWorld) {
-  await this.page.goto('/owners');
-  await this.page.locator('h2:has-text("Owners")').waitFor({state: 'visible', timeout: 10_000});
+  await OwnersPage.open(this.page);
 });
 
 When('I search owners for {string}', async function (this: PlaywrightWorld, search: string) {
-  await this.page.locator('#lastName').fill(search);
-  await this.page.locator('#search-owner-form button[type="submit"]').click();
+  await new OwnersPage(this.page).searchByLastName(search);
 });
 
 Then('exactly these owners are listed: {string}', async function (this: PlaywrightWorld, owners: string) {
