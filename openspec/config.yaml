@@ -9,6 +9,17 @@ schema: spec-driven
 #     Designs and tasks must cover Windows, macOS, and Linux
 #     Write all artifacts in Spanish
 
+rules:
+  proposal:
+    - "Audience: a non-technical product owner who has never seen code. Write so a 13-year-old understands it."
+    - "No JSON, code, field or parameter names, class or file names, SQL, HTTP status codes or library names. Describe what a user sees or does, with concrete examples (e.g. '11 – 20 of 4,312')."
+    - "Give each technical reason in one everyday sentence about why it matters to users or the business."
+    - "Keep capability ids in backticks (OpenSpec needs them), but describe each in plain words."
+    - "Impact covers users, speed, risk and cost in plain words. The list of affected code, APIs, database and tests goes in design.md, under 'Technical impact'."
+    - "Mark breaking changes **BREAKING** and say in plain words who is affected."
+  design:
+    - "Open with a '## Technical impact' section: the affected code, APIs, database, dependencies and tests (kept out of the proposal)."
+
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
