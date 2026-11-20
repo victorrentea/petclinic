@@ -225,13 +225,18 @@ def page(runs, meta):
     for t in tasks:
         ok = {arm: sum(r["ok"] for r in cells[t][arm]) for arm in ARMS}
         n = len(cells[t]["with"])
-        warn = " warn" if ok["with"] < ok["without"] else ""
+        warn = " flag" if ok["with"] < ok["without"] else ""
+        spec = TASKS[t]
+        trap = f'<div class=trap>Trap: {escape(spec["trap"]["name"])}</div>' if spec["trap"] else ""
         cards.append(
-            f'<div class="card{warn}"><h3>{t}</h3>'
-            f'<div class=big>{saved(t, "secs"):.0%}<small> faster</small></div>'
-            f'<div class=big>{saved(t, "cost"):.0%}<small> cheaper</small></div>'
-            f'<div class=acc>correct: <b>{ok["with"]}/{n}</b> with · '
-            f'<b>{ok["without"]}/{n}</b> without</div></div>'
+            f'<div class="card{warn}"><div class=head><h3>{t}</h3>'
+            f'<div class=kind>{escape(spec["kind"])}</div>'
+            f'<div class=prompt title="the exact prompt given to claude -p">'
+            f'{escape(spec["prompt"])}</div></div>'
+            f'<div><div class=big>{saved(t, "secs"):.0%}<small> faster</small></div>'
+            f'<div class=big>{saved(t, "cost"):.0%}<small> cheaper</small></div></div>'
+            f'<div><div class=acc>correct: <b>{ok["with"]}/{n}</b> with · '
+            f'<b>{ok["without"]}/{n}</b> without</div>{trap}</div></div>'
         )
 
     # Gauss grid
@@ -349,13 +354,6 @@ def page(runs, meta):
             for r in sorted(runs, key=lambda r: (r["task"], r["arm"], r["i"]))
         ],
     )
-    task_list = "".join(
-        f'<li><b>{t["id"]}</b> <span class=mut>({escape(t["kind"])})</span><br>'
-        f'<q>{escape(t["prompt"])}</q>'
-        + (f'<br><span class=mut>Trap: {escape(t["trap"]["name"])}.</span>' if t["trap"] else "")
-        + "</li>"
-        for t in TASKS.values()
-    )
     tpl = (Path(__file__).resolve().parent / "pretty_report.html").read_text()
     findings = []
     for t in tasks:
@@ -382,7 +380,6 @@ def page(runs, meta):
         tpl.replace("{{META}}", meta_html)
         .replace("{{FINDINGS}}", "".join(findings))
         .replace("{{CARDS}}", "".join(cards))
-        .replace("{{TASKS}}", task_list)
         .replace("{{GAUSS}}", "".join(grid))
         .replace("{{CORRECT}}", corr_svg)
         .replace("{{SAVINGS}}", sav_svg)
