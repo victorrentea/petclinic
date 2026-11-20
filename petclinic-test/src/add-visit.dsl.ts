@@ -1,9 +1,11 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {OwnerPage} from './pages/OwnerPage';
+import {VisitForm} from './pages/VisitForm';
 
-// The sentences of add-visit.spec.ts, as plain functions: named for what the
-// reader of a scenario wants to see, not for the widget being clicked. The
-// selectors live here so the spec never mentions one.
+// The sentences of add-visit.spec.ts, as plain functions: named for what the reader of a
+// scenario wants to see. Each one is a line or two over the page objects in pages/, which
+// are the only place a selector is written.
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
@@ -22,34 +24,28 @@ export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWith
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {
-  await page.goto(`/owners/${ownerId}`);
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+  await OwnerPage.open(page, ownerId);
 }
 
-export async function click_add_visit_for_first_pet(page: Page, buttonLabel: string): Promise<void> {
-  await page.locator('app-pet-list').first().locator(`button:has-text("${buttonLabel}")`).click();
-  await page.locator('h2:has-text("New Visit")').waitFor({state: 'visible', timeout: 10_000});
+export async function click_add_visit_for_first_pet(page: Page): Promise<void> {
+  await new OwnerPage(page).pet(0).addVisit();
 }
 
 /** Returns the generated description, so the caller can later assert on that exact row. */
 export async function fill_visit_date_and_unique_description(page: Page, date: string): Promise<string> {
   const description = `Annual check-up ${Date.now()}`;
-  await page.locator('input[name="date"]').fill(date);
-  await page.locator('input#description').fill(description);
+  await new VisitForm(page).fill(date, description);
   return description;
 }
 
 export async function submit_visit_form(page: Page): Promise<void> {
-  await page.locator('button[type="submit"]:has-text("Add Visit")').click();
+  await new VisitForm(page).submit();
 }
 
 export async function expect_back_on_owner_detail_page(page: Page, ownerId: number): Promise<void> {
-  await page.waitForURL(new RegExp(`/owners/${ownerId}$`), {timeout: 10_000});
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+  await OwnerPage.shown(page, ownerId);
 }
 
 export async function expect_pet_visit_list_contains(page: Page, date: string, description: string): Promise<void> {
-  const petBlock = page.locator('app-pet-list').first();
-  const row = petBlock.locator('app-visit-list tr').filter({hasText: date}).filter({hasText: description});
-  await expect(row).toBeVisible({timeout: 10_000});
+  await expect(new OwnerPage(page).pet(0).visit(date, description)).toBeVisible({timeout: 10_000});
 }

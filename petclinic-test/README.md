@@ -36,6 +36,7 @@ Two scenarios sit side by side in `src/`, each written the way its style is mean
 |---|---|---|
 | scenario | `owner-search.feature` | `add-visit.spec.ts` |
 | sentences | `owner-search.glue.ts` (regex → step) | `add-visit.dsl.ts` (functions) |
+| selectors | `pages/` (page objects) | `pages/` (page objects) |
 | state | `support/world.ts` (mutable `this`) | local `const`s |
 | diagram opt-in | `@generate_sequence` scenario tag | `{tag: [GENERATE_SEQUENCE_TAG]}` |
 | run | `npm run test:cucumber` | `npm test` |
@@ -44,12 +45,17 @@ Neither is a translation of the other — pick each for what it is good at:
 
 - **owner-search is Gherkin's case.** Its whole contract is a table of what-you-type /
   who-shows-up, so it is a `Scenario Outline` with `Examples:` — the one thing Gherkin says
-  better than code. Its steps do the work themselves; there is no DSL under them, because a
-  second naming of the same sentences would only add indirection.
+  better than code. Its steps call the page objects directly; there is no DSL under them, because
+  a second naming of the same sentences would only add indirection.
 - **add-visit is the DSL's case.** The scenario is prose, so `add-visit.dsl.ts` names the
   sentences and `add-visit.spec.ts` reads top-to-bottom as the scenario itself — no parser, no
   regex step lookup, no shared mutable World, and every sentence stays ctrl-clickable,
   renameable and type-checked.
+
+Under both sits one layer of **page objects** (`src/pages/`), one class per screen —
+`OwnersPage`, `OwnerPage` (with a `PetCard` per pet), `OwnerForm`, `VisitForm`,
+`VisitsPage`, `AssistantPage`. They are the only place a selector or a button label is
+written, so a step reads `owner.pet(0).addVisit()` and a changed template is fixed in one class.
 
 `@generate_sequence` means the same thing on both sides (`src/genseq/sequence-tag.ts`
 reads Cucumber's `{name}` tags and Playwright's string tags alike): only tagged tests record a
