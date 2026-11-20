@@ -3,13 +3,16 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 # petclinic-commons is a standalone build, passed in as a second build context by compose.
 COPY --from=commons pom.xml /commons/pom.xml
 COPY --from=commons src /commons/src
-RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -q -B -f /commons/pom.xml install
 
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 # A cache mount keeps ~/.m2 across builds, so editing a source file re-resolves nothing.
-RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -q -B clean package -DskipTests
+# Commons is installed in the SAME step that needs it: as a step of its own, its layer was
+# reused while the cache mount it had installed into was pruned, and the build then failed
+# with "petclinic-commons:jar:1.0 was not found in central".
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    mvn -q -B -f /commons/pom.xml install && mvn -q -B clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 
