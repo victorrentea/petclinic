@@ -7,6 +7,11 @@
     "PLAYWRIGHT_MCP_OUTPUT_DIR": "/tmp/playwright-cli"
   },
   "permissions": {
+    "//still allowed" : "git push -s --no-verify😱",
+    "//still allowed3" : "cd .. && git push --no-verify😱",
+    "//still allowed4" : "$G=git && $G push --no-verify😱",
+    "//still allowed5" : "mvn test && rm -rf /",
+    "//does work, but you' cant afford": "deny: Bash",
     "deny": [
       "Bash(git commit --no-verify*)",
       "Bash(git push --no-verify*)",
