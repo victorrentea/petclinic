@@ -8,6 +8,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import * as moment from 'moment';
 import {OwnerService} from '../../owners/owner.service';
+import {VetService} from '../../vets/vet.service';
+import {NO_VET, toVetOptions, VetOption} from '../visit-vet.pipe';
 import {PetService} from '../../pets/pet.service';
 
 @Component({
@@ -25,10 +27,13 @@ export class VisitEditComponent implements OnInit {
   minDate: moment.Moment = null;
   readonly maxDate = moment().add(1, 'year');
   errorMessage: string;
+  vetOptions: VetOption[] = [];
+  readonly noVet = NO_VET;
 
   constructor(private visitService: VisitService,
               private petService: PetService,
               private ownerService: OwnerService,
+              private vetService: VetService,
               private route: ActivatedRoute,
               private router: Router) {
     this.visit = {} as Visit;
@@ -38,6 +43,7 @@ export class VisitEditComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.vetService.getVets().subscribe(vets => this.vetOptions = toVetOptions(vets));
     const visitId = this.route.snapshot.params.id;
     this.visitService.getVisitById(visitId).subscribe(
       visit => {

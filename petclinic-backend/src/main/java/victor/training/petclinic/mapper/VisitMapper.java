@@ -3,6 +3,7 @@ package victor.training.petclinic.mapper;
 import org.springframework.stereotype.Component;
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
+import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
 import victor.training.petclinic.rest.dto.VisitDto;
 import victor.training.petclinic.rest.dto.VisitFieldsDto;
@@ -44,6 +45,12 @@ public class VisitMapper {
             visitDto.setOwnerId(owner.getId())
                     .setOwnerFirstName(owner.getFirstName())
                     .setOwnerLastName(owner.getLastName());
+        }
+        Vet vet = visit.getVet();
+        if (vet != null) {
+            visitDto.setVetId(vet.getId())
+                    .setVetFirstName(vet.getFirstName())
+                    .setVetLastName(vet.getLastName());
         }
         return visitDto;
     }

@@ -18,6 +18,11 @@ public class VetSteps {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Given("a vet {string}")
+    public void aVet(String fullName) {
+        insertVet(fullName);
+    }
+
     @Given("a vet {string} with specialties {string}")
     public void aVetWithSpecialties(String fullName, String specialty1) {
         insertVet(fullName, specialty1);

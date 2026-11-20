@@ -58,4 +58,9 @@ export class PetCard {
   visit(date: string, description: string): Locator {
     return this.root.locator('app-visit-list tr').filter({hasText: date}).filter({hasText: description});
   }
+
+  /** The vet cell of that visit: a name, or "No vet". */
+  vetOfVisit(date: string, description: string): Locator {
+    return this.visit(date, description).locator('td.visit-vet');
+  }
 }

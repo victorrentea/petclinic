@@ -63,6 +63,12 @@ export class VisitsPage {
     return out;
   }
 
+  /** The vet cell of the visit with that (unique) description. */
+  vetOfVisit(description: string): Locator {
+    return this.rows.filter({has: this.page.locator('td.visit-description', {hasText: description})})
+      .locator('td.visit-vet');
+  }
+
   async clickFirstOwnerLink(): Promise<void> {
     await this.rows.first().locator('a.owner-link').click();
   }

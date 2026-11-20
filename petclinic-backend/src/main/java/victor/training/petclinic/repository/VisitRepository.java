@@ -15,7 +15,7 @@ public interface VisitRepository extends Repository<Visit, Integer> {
 
     List<Visit> findAll();
 
-    @Query("SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner ORDER BY v.date")
+    @Query("SELECT v FROM Visit v JOIN FETCH v.pet p JOIN FETCH p.owner LEFT JOIN FETCH v.vet ORDER BY v.date")
     List<Visit> findAllWithPetAndOwner();
 
     void delete(Visit visit);

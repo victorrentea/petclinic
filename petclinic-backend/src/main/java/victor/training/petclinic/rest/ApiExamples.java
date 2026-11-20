@@ -34,7 +34,11 @@ public final class ApiExamples {
               { "id": 1, "firstName": "George", "lastName": "Franklin", "address": "110 W. Liberty St.",
                 "city": "Madison", "telephone": "6085551023",
                 "pets": [ { "id": 1, "name": "Leo", "birthDate": "2010-09-07",
-                            "type": { "id": 1, "name": "cat" }, "ownerId": 1, "visits": [] } ] },
+                            "type": { "id": 1, "name": "cat" }, "ownerId": 1,
+                            "visits": [
+                              { "id": 1, "date": "2013-01-01", "description": "neutered", "petId": 1,
+                                "vetId": 3, "vetFirstName": "Linda", "vetLastName": "Douglas" },
+                              { "id": 2, "date": "2013-01-02", "description": "annual checkup", "petId": 1 } ] } ] },
               { "id": 2, "firstName": "Betty", "lastName": "Davis", "address": "638 Cardinal Ave.",
                 "city": "Sun Prairie", "telephone": "6085551749", "pets": [] }
             ]""";
@@ -45,12 +49,14 @@ public final class ApiExamples {
                 "ownerId": 1, "visits": [] },
               { "id": 2, "name": "Basil", "birthDate": "2012-08-06", "type": { "id": 2, "name": "hamster" },
                 "ownerId": 2,
-                "visits": [ { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 2 } ] }
+                "visits": [ { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 2,
+                              "vetId": 1, "vetFirstName": "James", "vetLastName": "Carter" } ] }
             ]""";
 
     public static final String VISITS = """
             [
-              { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 7 },
+              { "id": 1, "date": "2013-01-01", "description": "rabies shot", "petId": 7,
+                "vetId": 1, "vetFirstName": "James", "vetLastName": "Carter" },
               { "id": 2, "date": "2013-01-02", "description": "annual checkup", "petId": 8 }
             ]""";
 
