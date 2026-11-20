@@ -1,9 +1,9 @@
 package victor.training.petclinic.rest;
 
 import java.net.URI;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +54,7 @@ import jakarta.validation.constraints.Min;
 @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
 @Validated
 public class OwnerRestController {
-    private static final Set<Integer> PAGE_SIZES = new TreeSet<>(Set.of(5, 10, 20));
+    private static final List<Integer> PAGE_SIZES = List.of(5, 10, 20);
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -106,7 +106,11 @@ public class OwnerRestController {
                     defaultValue = OwnerSort.DEFAULT)) @RequestParam(name = "sort",
                             defaultValue = OwnerSort.DEFAULT) String sort) {
         Pageable pageable = PageRequest.of(page, allowedPageSize(size), OwnerSort.parse(sort).sort());
-        return ownerMapper.toOwnerPageDto(ownerRepository.findByLastNameStartingWith(lastName, pageable));
+        // No filter: no LIKE '%', so the count can use an index-only scan
+        Page<Owner> owners = lastName.isEmpty()
+                ? ownerRepository.findAll(pageable)
+                : ownerRepository.findByLastNameStartingWith(lastName, pageable);
+        return ownerMapper.toOwnerPageDto(owners);
     }
 
     private static int allowedPageSize(int size) {

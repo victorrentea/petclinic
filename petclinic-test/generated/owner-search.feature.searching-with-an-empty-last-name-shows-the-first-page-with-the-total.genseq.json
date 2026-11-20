@@ -1,29 +1,25 @@
 {
   "version": 3,
   "details": {
-    "06lhb5c": {
-      "title": "OwnerRepository.findByLastNameStartingWith",
+    "0im5t2n": {
+      "title": "select owners",
       "steps": [
         {
           "label": "",
-          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST ? rows only",
+          "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET ? rows\nFETCH FIRST ? rows only",
           "alternate": {
             "label": "",
-            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nFETCH FIRST 10 rows only"
+            "text": "SELECT o1_0.id, o1_0.address, o1_0.city, o1_0.first_name, o1_0.last_name, o1_0.telephone\nFROM owners o1_0\nORDER BY o1_0.last_name, o1_0.first_name, o1_0.id\nOFFSET 0 rows\nFETCH FIRST 10 rows only"
           }
         }
       ]
     },
-    "0rcs8yy": {
-      "title": "OwnerRepository.findByLastNameStartingWith",
+    "0pmzoo4": {
+      "title": "select owners",
       "steps": [
         {
           "label": "",
-          "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like ? escape '\\'",
-          "alternate": {
-            "label": "",
-            "text": "SELECT count(o1_0.id)\nFROM owners o1_0\nWHERE o1_0.last_name like '%' escape '\\'"
-          }
+          "text": "SELECT count(o1_0.id)\nFROM owners o1_0"
         }
       ]
     },

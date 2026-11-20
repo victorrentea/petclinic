@@ -14,10 +14,12 @@ participant DB
 activate Browser
 Browser -> Backend: [[genseq://0ostuql{Click for the request as it was sent} List owners, one page at a time\nGET /api/owners ⊕]]
 activate Backend
-Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findAll} OwnerRepository.findAll ↗]]
 activate Backend
-Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
-Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+group tx [committed]
+Backend -> DB: [[genseq://0im5t2n{Click for the statement behind this call} select owners ⊕]]
+Backend -> DB: [[genseq://0pmzoo4{Click for the statement behind this call} select owners ⊕]]
+end
 deactivate Backend
 Backend -> DB: [[genseq://1ruk3w0{Click for the statement behind this call} select pets ⊕]]
 Backend --> Browser: [[genseq://0lyxiis{Click for this call’s JSON body} 200 ⊕]]
@@ -27,10 +29,12 @@ deactivate Browser
 activate Browser
 Browser -> Backend: [[genseq://0ostuql{Click for the request as it was sent} List owners, one page at a time\nGET /api/owners ⊕]]
 activate Backend
-Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findByLastNameStartingWith} OwnerRepository.findByLastNameStartingWith ↗]]
+Backend -> Backend: [[src://petclinic-backend/src/main/java/victor/training/petclinic/repository/OwnerRepository.java:13{Click to open OwnerRepository.findAll} OwnerRepository.findAll ↗]]
 activate Backend
-Backend -> DB: [[genseq://06lhb5c{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
-Backend -> DB: [[genseq://0rcs8yy{Click for the statement behind this call} OwnerRepository.findByLastNameStartingWith ⊕]]
+group tx [committed]
+Backend -> DB: [[genseq://0im5t2n{Click for the statement behind this call} select owners ⊕]]
+Backend -> DB: [[genseq://0pmzoo4{Click for the statement behind this call} select owners ⊕]]
+end
 deactivate Backend
 Backend -> DB: [[genseq://1ruk3w0{Click for the statement behind this call} select pets ⊕]]
 Backend --> Browser: [[genseq://0lyxiis{Click for this call’s JSON body} 200 ⊕]]

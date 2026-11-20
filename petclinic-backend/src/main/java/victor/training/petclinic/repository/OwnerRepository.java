@@ -10,6 +10,8 @@ import victor.training.petclinic.domain.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
+    Page<Owner> findAll(Pageable pageable);
+
     Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
 
     Optional<Owner> findById(int id);

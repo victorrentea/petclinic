@@ -51,8 +51,10 @@ export class OwnersPage {
   }
 
   async listedOwners(): Promise<ListedOwner[]> {
-    const names = await this.rows.locator('td.ownerFullName').allTextContents();
-    const cities = await this.rows.locator('td.ownerCity').allTextContents();
+    const [names, cities] = await Promise.all([
+      this.rows.locator('td.ownerFullName').allTextContents(),
+      this.rows.locator('td.ownerCity').allTextContents(),
+    ]);
     return names.map((name, i) => ({name: firstNameFirst(squash(name)), city: squash(cities[i] ?? '')}));
   }
 

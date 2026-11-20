@@ -1,5 +1,7 @@
 package victor.training.petclinic.rest.error;
 
+import java.net.URI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,7 +43,7 @@ public class ExceptionControllerAdvice {
         ProblemDetail pd = ProblemDetail.forStatus(status);
         pd.setTitle(title);
         pd.setDetail(detail);
-        pd.setType(java.net.URI.create(request.getRequestURL().toString()));
+        pd.setType(URI.create(request.getRequestURL().toString()));
         pd.setProperty("timestamp", Instant.now());
         return pd;
     }
@@ -75,10 +77,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ProblemDetail> handleDomainValidation(ValidationException ex,
             HttpServletRequest request) {
-        log.warn("Validation failed: {}", ex.getMessage());
-        ProblemDetail pd = buildProblemDetail("Validation Error", ex.getMessage(), HttpStatus.BAD_REQUEST, request);
-        pd.setProperty("errors", List.of(ex.getMessage()));
-        return ResponseEntity.badRequest().body(pd);
+        return badRequest(ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -86,6 +85,10 @@ public class ExceptionControllerAdvice {
             HttpServletRequest request) {
         String requiredType = ex.getRequiredType() == null ? "?" : ex.getRequiredType().getSimpleName();
         String error = "Parameter '%s' must be of type %s".formatted(ex.getName(), requiredType);
+        return badRequest(error, request);
+    }
+
+    private ResponseEntity<ProblemDetail> badRequest(String error, HttpServletRequest request) {
         log.warn("Validation failed: {}", error);
         ProblemDetail pd = buildProblemDetail("Validation Error", error, HttpStatus.BAD_REQUEST, request);
         pd.setProperty("errors", List.of(error));

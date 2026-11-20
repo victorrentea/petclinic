@@ -22,9 +22,7 @@ export class OwnerService {
 
   getOwners(query: OwnerQuery): Observable<OwnerPage> {
     const {lastName, page, size, sort} = query;
-    const params = new HttpParams({
-      fromObject: lastName ? {lastName, page, size, sort} : {page, size, sort}
-    });
+    const params = new HttpParams({fromObject: {...(lastName && {lastName}), page, size, sort}});
     return this.http
       .get<OwnerPage>(this.entityUrl, {params})
       .pipe(catchError(this.handlerError<OwnerPage>('getOwners')));

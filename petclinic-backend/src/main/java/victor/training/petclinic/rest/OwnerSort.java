@@ -15,35 +15,35 @@ import jakarta.validation.ValidationException;
  * paging is stable, and every column runs in one direction, so a single index serves both ways.
  */
 public enum OwnerSort {
-    NAME_ASC("name", ASC), NAME_DESC("name", DESC), CITY_ASC("city", ASC), CITY_DESC("city", DESC);
+    NAME_ASC("name,asc", byName(ASC)), NAME_DESC("name,desc", byName(DESC)), CITY_ASC("city,asc",
+            Sort.by(ASC, "city").and(byName(ASC))), CITY_DESC("city,desc", Sort.by(DESC, "city").and(byName(DESC)));
 
     public static final String DEFAULT = "name,asc";
 
-    private final String column;
-    private final Sort.Direction direction;
+    private final String param;
+    private final Sort sort;
 
-    OwnerSort(String column, Sort.Direction direction) {
-        this.column = column;
-        this.direction = direction;
+    OwnerSort(String param, Sort sort) {
+        this.param = param;
+        this.sort = sort;
+    }
+
+    private static Sort byName(Sort.Direction direction) {
+        return Sort.by(direction, "lastName", "firstName", "id");
     }
 
     public static OwnerSort parse(String param) {
         return Arrays.stream(values())
-                .filter(value -> value.param().equals(param))
+                .filter(value -> value.param.equals(param))
                 .findFirst()
                 .orElseThrow(() -> new ValidationException("Sort must be one of " + allowed()));
     }
 
     private static String allowed() {
-        return Arrays.stream(values()).map(OwnerSort::param).collect(Collectors.joining(" | "));
-    }
-
-    private String param() {
-        return column + "," + direction.name().toLowerCase();
+        return Arrays.stream(values()).map(value -> value.param).collect(Collectors.joining(" | "));
     }
 
     public Sort sort() {
-        Sort byName = Sort.by(direction, "lastName", "firstName", "id");
-        return column.equals("city") ? Sort.by(direction, "city").and(byName) : byName;
+        return sort;
     }
 }

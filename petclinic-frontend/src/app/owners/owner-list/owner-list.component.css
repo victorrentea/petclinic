@@ -1,89 +1,3 @@
-#ownersByLastName
-{
-display:none;
-}
-
-#nameGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-}
-
-#addressGroup {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-}
-
-.owner-search-label {
-  margin: 0;
-  text-align: left;
-  min-width: 60px;
-}
-
-.owner-search-input {
-  flex: 1;
-}
-
-.owners-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.owners-pagination {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.owners-page-size {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.owners-page-size .form-control {
-  width: auto;
-}
-
-@media (max-width: 576px) {
-  #nameGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  #addressGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .owner-search-input {
-    width: 100%;
-  }
-
-  .owners-controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* Same dark header as the app's other tables (.table > thead > tr > th in petclinic.css). */
-#ownersTable .mat-mdc-header-cell {
-  background-color: #3c3834;
-  color: #f1f1f1;
-}
-
 /* The search box takes all the room the right-aligned buttons leave. */
 .owner-search-row {
   display: flex;
@@ -94,6 +8,18 @@ display:none;
 .owner-search-row .form-control {
   flex: 1;
 }
+
+/* Fixed column widths, so paging or sorting never shifts the columns. */
+#ownersTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+#ownersTable .mat-column-name { width: 22%; }
+#ownersTable .mat-column-address { width: 28%; }
+#ownersTable .mat-column-city { width: 15%; }
+#ownersTable .mat-column-telephone { width: 15%; }
+#ownersTable .mat-column-pets { width: 20%; }
 
 /* Compact rows: Material's default row heights (56px header, 52px rows) plus Bootstrap's cell padding. */
 #ownersTable .mat-mdc-header-row,
@@ -107,10 +33,10 @@ display:none;
   vertical-align: middle;
 }
 
-/* Fixed column widths, so paging or sorting never shifts the columns. */
-#ownersTable {
-  table-layout: fixed;
-  width: 100%;
+/* Same dark header as the app's other tables (.table > thead > tr > th in petclinic.css). */
+#ownersTable .mat-mdc-header-cell {
+  background-color: #3c3834;
+  color: #f1f1f1;
 }
 
 /* A value too long for its column ends in "…" instead of wrapping onto a second line. */
@@ -119,12 +45,6 @@ display:none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-#ownersTable .mat-column-name { width: 22%; }
-#ownersTable .mat-column-address { width: 28%; }
-#ownersTable .mat-column-city { width: 15%; }
-#ownersTable .mat-column-telephone { width: 15%; }
-#ownersTable .mat-column-pets { width: 20%; }
 
 /* Sortable headers always show their arrow: grey until the grid is sorted by them, then white.
   Material hides an idle arrow with an inline opacity animation, hence !important. */
