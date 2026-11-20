@@ -18,6 +18,7 @@
     "src/app/generated/",
     "openapi\\.yaml$",
     "\\.puml$",
+    "\\.(aiff|wav|mp3)$",
     "rest/ApiExamples\\.java$",
     "chatbot/assistant/Assistant\\.java$",
     "chatbot/assistant/JudgeGuard\\.java$",

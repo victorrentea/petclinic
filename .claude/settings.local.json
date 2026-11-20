@@ -5,5 +5,17 @@
     "postgres-db",
     "grafana"
   ],
-  "autoMemoryEnabled": false
+  "autoMemoryEnabled": false,
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true # command -v afplay >/dev/null && afplay -v 0.6 \"$(git rev-parse --show-toplevel)/.claude/hooks/come-back.aiff\" >/dev/null 2>&1 & exit 0"
+          }
+        ]
+      }
+    ]
+  }
 }
