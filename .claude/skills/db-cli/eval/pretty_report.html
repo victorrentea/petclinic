@@ -4,8 +4,8 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>db-cli skill eval</title>
 <script>/* opened raw, this is the unfilled template: show the rendered page instead */
-if (location.pathname.endsWith('/docs/eval/db-cli/pretty_report.html'))
-  location.replace('../db-cli-skill.html');</script>
+if (location.pathname.endsWith('/.claude/skills/db-cli/eval/pretty_report.html'))
+  location.replace('db-cli-skill.html');</script>
 <style>
 :root {
   --bg: #f7f8fa; --card: #fff; --fg: #1b1f24; --mut: #667085; --line: #e3e6ea;
@@ -123,9 +123,9 @@ ol.how li { margin-bottom: 6px }
 
 <h2>How it was run</h2>
 <ol class=how>
-  <li><code>docs/eval/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
+  <li><code>.claude/skills/db-cli/eval/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
     <code>.claude/skills/db-cli</code>, <b>without</b> deletes it and the hint to it in <code>.mcp.json</code>.
-    Both lose <code>docs/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
+    Both lose <code>.claude/skills/db-cli/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
   <li>Every run is a fresh <code>claude -p</code> in one arm: <code>--setting-sources project</code>, no MCP server at all
     (<code>--strict-mcp-config</code> with an empty config), <code>bypassPermissions</code>, no session persistence, a $3 budget cap,
     and the parent's <code>CLAUDE*</code> env vars stripped. The shell is the only way into the local Postgres.</li>
@@ -134,10 +134,10 @@ ol.how li { margin-bottom: 6px }
     reads tokens, cost and duration from the result event, and classifies the route from the Bash commands.
     <code>pretty_report.py</code> renders this page from the same parsing.</li>
 </ol>
-<pre><code>docs/eval/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
-docs/eval/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
-docs/eval/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
-docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
+<pre><code>.claude/skills/db-cli/eval/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
+.claude/skills/db-cli/eval/report.py $OUT --html $OUT/report.html  # the plain tables
+.claude/skills/db-cli/eval/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
+.claude/skills/db-cli/eval/pretty_report.py .claude/skills/db-cli/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
 
 <h2>All numbers</h2>
 {{SUMMARY}}

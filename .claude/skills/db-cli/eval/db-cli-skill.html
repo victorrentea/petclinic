@@ -4,8 +4,8 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>db-cli skill eval</title>
 <script>/* opened raw, this is the unfilled template: show the rendered page instead */
-if (location.pathname.endsWith('/docs/eval/db-cli/pretty_report.html'))
-  location.replace('../db-cli-skill.html');</script>
+if (location.pathname.endsWith('/.claude/skills/db-cli/eval/pretty_report.html'))
+  location.replace('db-cli-skill.html');</script>
 <style>
 :root {
   --bg: #f7f8fa; --card: #fff; --fg: #1b1f24; --mut: #667085; --line: #e3e6ea;
@@ -124,9 +124,9 @@ The most recent visit for both was on 2024-03-03 (the stored timestamp is 23:00 
 
 <h2>How it was run</h2>
 <ol class=how>
-  <li><code>docs/eval/db-cli/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
+  <li><code>.claude/skills/db-cli/eval/run.py</code> builds two throwaway arms from <code>git archive HEAD</code>: <b>with</b> keeps
     <code>.claude/skills/db-cli</code>, <b>without</b> deletes it and the hint to it in <code>.mcp.json</code>.
-    Both lose <code>docs/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
+    Both lose <code>.claude/skills/db-cli/eval/</code> (the expected answers and past ones live there) and become fresh one-commit repos, so the agent can't <code>git show</code> the skill back.</li>
   <li>Every run is a fresh <code>claude -p</code> in one arm: <code>--setting-sources project</code>, no MCP server at all
     (<code>--strict-mcp-config</code> with an empty config), <code>bypassPermissions</code>, no session persistence, a $3 budget cap,
     and the parent's <code>CLAUDE*</code> env vars stripped. The shell is the only way into the local Postgres.</li>
@@ -135,10 +135,10 @@ The most recent visit for both was on 2024-03-03 (the stored timestamp is 23:00 
     reads tokens, cost and duration from the result event, and classifies the route from the Bash commands.
     <code>pretty_report.py</code> renders this page from the same parsing.</li>
 </ol>
-<pre><code>docs/eval/db-cli/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
-docs/eval/db-cli/report.py $OUT --html $OUT/report.html  # the plain tables
-docs/eval/db-cli/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
-docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
+<pre><code>.claude/skills/db-cli/eval/run.py --out $OUT                 # defaults: --runs 7 --model sonnet --parallel 6
+.claude/skills/db-cli/eval/report.py $OUT --html $OUT/report.html  # the plain tables
+.claude/skills/db-cli/eval/pretty_report.py $OUT --commit $(git rev-parse --short HEAD)   # this page + db-cli-runs.json
+.claude/skills/db-cli/eval/pretty_report.py .claude/skills/db-cli/eval/db-cli-runs.json                   # rebuild it without the logs</code></pre>
 
 <h2>All numbers</h2>
 <div class=wrap><table><tr><th>task</th><th>arm</th><th>n</th><th>skill loaded</th><th>correct</th><th>trap</th><th>time s (med)</th><th>context tok (med)</th><th>output tok (med)</th><th>cost $ (med)</th><th>tool calls (med)</th></tr><tr><td>lookup</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>7/7</td><td>0/7</td><td>17</td><td>148,964</td><td>1,379</td><td>0.051</td><td>6</td></tr><tr><td>lookup</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>7/7</td><td>0/7</td><td>7/7</td><td>7</td><td>60,136</td><td>336</td><td>0.011</td><td>2</td></tr><tr><td>aggregate</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>7/7</td><td>0/7</td><td>17</td><td>144,236</td><td>1,350</td><td>0.044</td><td>6</td></tr><tr><td>aggregate</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>7/7</td><td>7/7</td><td>0/7</td><td>7</td><td>59,984</td><td>386</td><td>0.011</td><td>2</td></tr><tr><td>live-state</td><td><span class=dot style="background:var(--without)"></span>without</td><td>7</td><td>0/7</td><td>4/7</td><td>0/7</td><td>14</td><td>137,645</td><td>1,288</td><td>0.053</td><td>5</td></tr><tr><td>live-state</td><td><span class=dot style="background:var(--with)"></span>with</td><td>7</td><td>5/7</td><td>7/7</td><td>0/7</td><td>11</td><td>85,488</td><td>840</td><td>0.034</td><td>4</td></tr></table></div>

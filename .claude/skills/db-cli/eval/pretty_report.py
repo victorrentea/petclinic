@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Renders the db-cli eval as a self-contained HTML page with charts (inline SVG, no deps).
 
-    docs/eval/db-cli/pretty_report.py LOG_DIR [--commit SHA] [--out docs/eval/db-cli-skill.html]
-    docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json
+    .claude/skills/db-cli/eval/pretty_report.py LOG_DIR [--commit SHA]
+        [--out .claude/skills/db-cli/eval/db-cli-skill.html]
+    .claude/skills/db-cli/eval/pretty_report.py .claude/skills/db-cli/eval/db-cli-runs.json
 
 LOG_DIR is the --out folder of run.py (one stream-json log per run); --commit names the HEAD
 the arms were archived from. From a LOG_DIR it also writes db-cli-runs.json next to the page:
@@ -416,7 +417,7 @@ def main():
     out = Path(
         sys.argv[sys.argv.index("--out") + 1]
         if "--out" in sys.argv
-        else "docs/eval/db-cli-skill.html"
+        else ".claude/skills/db-cli/eval/db-cli-skill.html"
     )
     commit = sys.argv[sys.argv.index("--commit") + 1] if "--commit" in sys.argv else "HEAD"
     meta, runs = load(src, commit)
