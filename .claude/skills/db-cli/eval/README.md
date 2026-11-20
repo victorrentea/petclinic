@@ -11,7 +11,7 @@ date wrong in all 7 runs: `db-cli.py` prints the visit timestamp in UTC (`2024-0
 the agent reports that UTC date, while `psql` shows it in the database's timezone (`2024-03-04`).
 Without the skill `live-state` failed 3/7 times: the agent never reached the database.
 
-Open the HTML in a browser (`open docs/eval/db-cli-skill.html`): tasks, a Gauss curve per arm for
+Open the HTML in a browser (`open .claude/skills/db-cli/eval/db-cli-skill.html`): tasks, a Gauss curve per arm for
 time, cost and context tokens, correctness, the route each run took, and every final answer.
 
 ### How it was run
@@ -20,12 +20,12 @@ On 18 Nov 2026, 10:50–10:53, from `main` at `8aa6f8d3`, with Claude Code 2.1.3
 
 ```sh
 S=<a scratch dir>
-docs/eval/db-cli/run.py --out $S/full          # defaults: --runs 7 --model sonnet --parallel 6
-docs/eval/db-cli/report.py $S/full --html $S/full/report.html
+.claude/skills/db-cli/eval/run.py --out $S/full          # defaults: --runs 7 --model sonnet --parallel 6
+.claude/skills/db-cli/eval/report.py $S/full --html $S/full/report.html
 ```
 
 - `run.py` makes two throwaway arms from `git archive HEAD`: **with** keeps the skill, **without**
-  deletes `.claude/skills/db-cli` and its hint in `.mcp.json`. Both drop `docs/eval/` (it holds the
+  deletes `.claude/skills/db-cli` and its hint in `.mcp.json`. Both drop `.claude/skills/db-cli/eval/` (it holds the
   expected answers and past ones) and become fresh one-commit repos, so the agent can't `git show`
   the skill back.
 - Each of the 3 tasks × 2 arms × 7 runs is a fresh `claude -p "<prompt>"` in its arm:
@@ -40,8 +40,8 @@ docs/eval/db-cli/report.py $S/full --html $S/full/report.html
 This page was rendered afterwards from the same logs:
 
 ```sh
-docs/eval/db-cli/pretty_report.py $S/full --commit 8aa6f8d3   # writes db-cli-skill.html + db-cli-runs.json
-docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json  # rebuilds the page without the raw logs
+.claude/skills/db-cli/eval/pretty_report.py $S/full --commit 8aa6f8d3   # writes db-cli-skill.html + db-cli-runs.json
+.claude/skills/db-cli/eval/pretty_report.py .claude/skills/db-cli/eval/db-cli-runs.json  # rebuilds the page without the raw logs
 ```
 
 `db-cli-runs.json` holds the parsed metrics and final answer of every run; the 31 MB of raw logs

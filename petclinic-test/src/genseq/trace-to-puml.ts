@@ -497,6 +497,23 @@ function emitTrace(
     return words;
   };
 
+  /**
+   * The Browser, for a request whose span on the Browser never reached the collector.
+   *
+   * The backend's SERVER span still names its parent, and that parent is nowhere in the
+   * trace: the frontend sent the request and then navigated away before its exporter
+   * flushed (the visit form does, back to the owner page). Left as a root, the request lost
+   * its arrow and the diagram opened on the Backend calling itself out of nowhere. The
+   * request did come from a browser — its user agent says so — so it is drawn as one
+   * (Victor, 20 Nov 2026), only without the frontend method, which was on the lost span.
+   * A SERVER span with no parent at all is a test calling the API itself, and stays a root.
+   */
+  const lostBrowserCaller = (span: NormSpan): string | undefined => {
+    if (span.kind !== 'SERVER' || !span.parentSpanId || byId.has(span.parentSpanId)) return undefined;
+    const agent = span.attributes['user_agent.original'] ?? span.attributes['http.user_agent'] ?? '';
+    return /\bMozilla\//.test(agent) ? 'Browser' : undefined;
+  };
+
   const walk = (span: NormSpan, out: string[], parentParticipant?: string): void => {
     // Whatever the driver does inside a query is the database's business: drawing a
     // child of a DB span would put an arrow *out* of the DB lifeline, as if the
@@ -513,7 +530,7 @@ function emitTrace(
     // `isStatementlessDbSpan`. Dropped whole: no arrow, no activation, no note.
     if (p === 'DB' && isStatementlessDbSpan(span)) return;
     const parent = parentSpan;
-    const pp = parent ? participantOf(parent) : undefined;
+    const pp = parent ? participantOf(parent) : lostBrowserCaller(span);
     const crossing = pp !== undefined && pp !== p;
     // A repository call is drawn as a call: a self-hop, an activation, and its statements
     // fired from inside it. That is the shape a reader expects of a method that queries,
