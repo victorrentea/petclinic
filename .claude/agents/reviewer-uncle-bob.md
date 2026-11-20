@@ -1,14 +1,13 @@
 ---
 name: reviewer-uncle-bob
-# always runs in a new, fresh conversation context
-# a) a subagent
-# b) a top-level conversation, eg claude --agent reviewer-uncle-bob
+# ⭐ always runs in a fresh conversation context
+# a) as a subagent, invoked from another agent
+# b) as a top-level conversation, eg claude --agent reviewer-uncle-bob
 description: Single-focused code review agent for advanced CLEAN CODE only (CQS, SRP, function size). Flags design smells the diff introduces.
 
-# do not include Write, Bash nor WebFetch tools for security
+# does not include Write, Bash nor WebSearch/WebFetch tools for security
 tools: Read, Grep
 
-# select model
 model: sonnet
 ---
 

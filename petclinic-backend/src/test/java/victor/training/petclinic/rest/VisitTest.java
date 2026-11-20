@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -163,6 +164,37 @@ public class VisitTest {
     }
 
     @Test
+    void getAll_returnsVisitsInDateOrder() throws Exception {
+        Pet pet = TestData.aPet();
+        pet.setOwner(ownerRepository.save(TestData.anOwner()));
+        pet.setType(petTypeRepository.save(TestData.aPetType("cat")));
+        petRepository.save(pet);
+        addVisit(pet, LocalDate.of(2026, 1, 12), "first checkup");
+        addVisit(pet, LocalDate.of(2026, 2, 9), "vaccine booster");
+        addVisit(pet, LocalDate.of(2026, 3, 16), "dental cleaning");
+
+        String responseJson = mockMvc.perform(get("/api/visits"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        VisitDto[] visits = mapper.readValue(responseJson, VisitDto[].class);
+
+        assertThat(visits)
+                .filteredOn(v -> v.getPetId() == pet.getId())
+                .extracting(VisitDto::getDescription)
+                .containsExactly("first checkup", "vaccine booster", "dental cleaning");
+    }
+
+    private void addVisit(Pet pet, LocalDate date, String description) {
+        Visit visit = new Visit();
+        visit.setDate(date);
+        visit.setDescription(description);
+        pet.addVisit(visit);
+        visitRepository.save(visit);
+    }
+
+    @Test
     void create_invalid() throws Exception {
         VisitDto newVisit = new VisitDto()
                 .setPetId(petId)
@@ -215,6 +247,64 @@ public class VisitTest {
 
         assertThat(visitRepository.findAll())
                 .anyMatch(v -> "annual checkup".equals(v.getDescription()));
+    }
+
+    @Test
+    void create_refusesADateBeforeThePetsBirth() throws Exception {
+        assertCreateRefused(PetTest.BIRTH_DATE.minusDays(1));
+    }
+
+    @Test
+    void create_refusesADateMoreThanOneYearAhead() throws Exception {
+        assertCreateRefused(LocalDate.now().plusYears(1).plusDays(1));
+    }
+
+    @Test
+    void create_acceptsBothEdgesOfTheRange() throws Exception {
+        for (LocalDate edge : List.of(PetTest.BIRTH_DATE, LocalDate.now().plusYears(1))) {
+            VisitDto visit = new VisitDto().setPetId(petId).setDate(edge).setDescription("edge");
+            mockMvc.perform(post("/api/visits")
+                    .content(mapper.writeValueAsString(visit))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(status().isCreated());
+        }
+    }
+
+    @Test
+    void createForOwnersPet_refusesADateBeforeThePetsBirth() throws Exception {
+        int ownerId = petRepository.findById(petId).orElseThrow().getOwner().getId();
+        VisitFieldsDto visit = new VisitFieldsDto().setDate(LocalDate.of(9, 7, 20)).setDescription("tinsel");
+
+        mockMvc.perform(post("/api/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .content(mapper.writeValueAsString(visit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findByPetId(petId)).extracting(Visit::getDescription).doesNotContain("tinsel");
+    }
+
+    @Test
+    void update_refusesADateOutOfRange() throws Exception {
+        VisitFieldsDto update = new VisitFieldsDto()
+                .setDate(PetTest.BIRTH_DATE.minusDays(1))
+                .setDescription("rabies shot");
+
+        mockMvc.perform(put("/api/visits/" + visitId)
+                .content(mapper.writeValueAsString(update))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+    }
+
+    private void assertCreateRefused(LocalDate date) throws Exception {
+        VisitDto visit = new VisitDto().setPetId(petId).setDate(date).setDescription("out of range");
+
+        mockMvc.perform(post("/api/visits")
+                .content(mapper.writeValueAsString(visit))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        assertThat(visitRepository.findByPetId(petId))
+                .extracting(Visit::getDescription).doesNotContain("out of range");
     }
 
     @Test

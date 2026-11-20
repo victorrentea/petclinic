@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Read the draw.io diagram hidden inside a *.drawio.png (or .drawio / .drawio.svg).
 
-    drawio.py graph <file>   vertices + edges, with every custom attribute (default)
-    drawio.py json  <file>   same, as JSON
-    drawio.py xml   <file>   the decoded mxGraph XML, pretty-printed
+    drawio.py toon <file>   vertices + edges, with every custom attribute, as TOON (default)
+    drawio.py json <file>   same data, as JSON
+    drawio.py xml  <file>   the decoded mxGraph XML, pretty-printed
 
 Stdlib only.
 """
@@ -131,44 +131,99 @@ def end_labels(edge_id: str, cells: list) -> dict:
     return ends
 
 
-def graph(root: ET.Element) -> list:
+def graph(root: ET.Element) -> dict:
     pages = []
     for diagram in root.iter("diagram"):
         cells = cells_of(diagram)
         by_id = {c["id"]: c for c in cells}
         on_edge = lambda c: c["parent"] in by_id and by_id[c["parent"]]["edge"]
         name = lambda cid: (by_id[cid]["label"] or cid) if cid in by_id else f"<{cid}>"
-        pages.append({
-            "page": diagram.get("name"),
-            "vertices": [
-                {k: c[k] for k in ("id", "label", "attrs", "parent")}
-                for c in cells if c["vertex"] and not on_edge(c)
-            ],
-            "edges": [
-                {"id": c["id"], "label": c["label"], "attrs": c["attrs"], "from": name(c["source"]),
-                    "to": name(c["target"]), "ends": end_labels(c["id"], cells)}
-                for c in cells if c["edge"]
-            ],
-        })
-    return pages
+        vertices = [
+            {"id": c["id"], "label": c["label"],
+                "insideOf": c["parent"] if c["parent"] in by_id else None, **typed(c["attrs"])}
+            for c in cells if c["vertex"] and not on_edge(c)]
+        edges = []
+        for c in cells:
+            if c["edge"]:
+                ends = end_labels(c["id"], cells)
+                edges.append({
+                    "from": name(c["source"]), "to": name(c["target"]), "label": c["label"],
+                    "fromMultiplicity": ends.get("source"), "toMultiplicity": ends.get("target"),
+                    "midLabel": ends.get("middle"), **typed(c["attrs"])})
+        edges = [{k: v for k, v in e.items() if v not in (None, "")} for e in edges]
+        pages.append({"page": diagram.get("name"), "vertices": table(vertices), "edges": edges})
+    return pages[0] if len(pages) == 1 else {"pages": pages}
 
 
-def print_graph(pages: list) -> None:
-    for page in pages:
-        print(f"=== page: {page['page']}")
-        print("--- vertices")
-        for v in page["vertices"]:
-            attrs = f"  {v['attrs']}" if v["attrs"] else ""
-            print(f"[{v['id']}] {v['label']}{attrs}")
-        print("--- edges")
-        for e in page["edges"]:
-            label = f" [{e['label']}]" if e["label"] else ""
-            attrs = f"  {e['attrs']}" if e["attrs"] else ""
-            ends = e["ends"]
-            src = f"[{ends['source']}] " if "source" in ends else ""
-            tgt = f" [{ends['target']}]" if "target" in ends else ""
-            mid = f" ({ends['middle']})" if "middle" in ends else ""
-            print(f"{src}{e['from']} --{label}--> {e['to']}{tgt}{mid}{attrs}")
+def typed(attrs: dict) -> dict:
+    return {k: int(v) if re.fullmatch(r"[1-9]\d*", v) else v for k, v in attrs.items()}
+
+
+def table(rows: list) -> list:
+    """Same columns in every row (absent = None), minus the columns empty in all of them."""
+    columns = list(dict.fromkeys(k for row in rows for k in row))
+    columns = [k for k in columns if any(row.get(k) not in (None, "") for row in rows)]
+    return [{k: row.get(k) for k in columns} for row in rows]
+
+
+# ---- TOON (Token-Oriented Object Notation, toonformat.dev): JSON's data model, with a
+# uniform array of objects written once as a header `key[N]{col,col}:` plus one CSV-like row each.
+# Edges stay one `- key: value` block each: in a table, gpt-*-luna dropped the Chatbot -> Backend
+# row from "every traced=no edge" in 10 of 12 runs; written this way, in 2 of 14 (evals/).
+KEYED_ROWS = {"edges"}
+
+
+def is_scalar(value) -> bool:
+    return not isinstance(value, (dict, list))
+
+
+def is_table(key, rows: list) -> bool:
+    return bool(rows) and key not in KEYED_ROWS and all(
+        isinstance(r, dict) and list(r) == list(rows[0]) and all(map(is_scalar, r.values()))
+        for r in rows)
+
+
+def toon(value, key=None, depth=0) -> list:
+    pad = "  " * depth
+    head = f"{pad}{toon_key(key)}" if key is not None else pad
+    if isinstance(value, dict):
+        lines = [f"{head}:"] if key is not None else []
+        for k, v in value.items():
+            lines += toon(v, k, depth + (key is not None))
+        return lines
+    if isinstance(value, list):
+        if is_table(key, value):
+            columns = ",".join(toon_key(k) for k in value[0])
+            return [f"{head}[{len(value)}]{{{columns}}}:"] + [
+                f"{pad}  " + ",".join(toon_scalar(v) for v in r.values()) for r in value]
+        if all(map(is_scalar, value)):
+            items = " " + ",".join(map(toon_scalar, value)) if value else ""
+            return [f"{head}[{len(value)}]:{items}"]
+        lines = [f"{head}[{len(value)}]:"]
+        for item in value:
+            body = toon(item, None, depth + 2) if isinstance(item, dict) else [
+                "  " * (depth + 2) + toon_scalar(item)]
+            lines += [f"{pad}  - " + body[0].lstrip()] + body[1:]
+        return lines
+    return [f"{head}: {toon_scalar(value)}"]
+
+
+def toon_key(key: str) -> str:
+    return key if re.fullmatch(r"[A-Za-z_][\w.]*", key) else json.dumps(key, ensure_ascii=False)
+
+
+def toon_scalar(value) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, (int, float)):
+        return json.dumps(value)
+    needs_quotes = (
+        value == "" or value != value.strip() or value in ("true", "false", "null")
+        or re.fullmatch(r"-?\d+(\.\d+)?([eE][+-]?\d+)?", value) or value.startswith("-")
+        or re.search(r'[:,"\\\[\]{}\x00-\x1f]', value))
+    return json.dumps(value, ensure_ascii=False) if needs_quotes else value
 
 
 def main() -> None:
@@ -176,16 +231,16 @@ def main() -> None:
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
         return
-    mode, path = (args[0], args[1]) if len(args) > 1 else ("graph", args[0])
+    mode, path = (args[0], args[1]) if len(args) > 1 else ("toon", args[0])
     root = inflate_diagrams(mxfile_of(path))
     if mode == "xml":
         print(xml.dom.minidom.parseString(ET.tostring(root)).toprettyxml(indent="  "))
     elif mode == "json":
         print(json.dumps(graph(root), indent=2, ensure_ascii=False))
-    elif mode == "graph":
-        print_graph(graph(root))
+    elif mode == "toon":
+        print("\n".join(toon(graph(root))))
     else:
-        raise SystemExit(f"unknown mode {mode!r}: use graph | json | xml")
+        raise SystemExit(f"unknown mode {mode!r}: use toon | json | xml")
 
 
 if __name__ == "__main__":

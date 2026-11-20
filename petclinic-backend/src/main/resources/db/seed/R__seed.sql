@@ -100,7 +100,7 @@ INSERT INTO pets (name, birth_date, type_id, owner_id) VALUES
   ('Toby',            DATE '2020-09-14', 2, 17),  -- Wendy's neighbourhood dog
   ('Norbert',         DATE '2021-07-22', 3, 18),  -- Hagrid's Norwegian Ridgeback
   ('Crookshanks',     DATE '2019-03-15', 1, 19),  -- Hermione's half-Kneazle
-  ('Basilisk',        DATE '2022-10-05', 4, 4),   -- Ștefan's basilisk
+  ('Șarpe',           DATE '2022-10-05', 4, 4),   -- Ștefan's snake, named after its species
   ('Snowy',           DATE '2018-06-20', 2, 21),  -- Tintin's Milou
   ('Lucifer',         DATE '2021-12-01', 1, 22),  -- Lady Tremaine's cat
   ('Jaq',             DATE '2024-02-11', 6, 22),  -- Cinderella's mouse friend

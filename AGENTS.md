@@ -6,6 +6,8 @@ Carefully review its contents at every retrospective to remove: obvious, duplica
 ## AGENTS.md is the single source of truth
 Claude Code: never write rules into `CLAUDE.md`.
 GitHub Copilot: never write rules into `.github/copilot-instructions.md`.
+"Remember X" about this project goes here, never into the private memory under `~/.claude/` —
+the team must see it too.
 
 ## Project Overview
 Full-stack PetClinic application, managing veterinary clinic operations (owners, pets, vets, visits, specialties)
@@ -118,6 +120,7 @@ there is no online version and no PR automation for it. Run `/human-review` when
 one. `diagram-preview.yml` still posts a PR comment rendering the branch's own diagrams,
 which is a different and much cheaper thing: proxy URLs, no runner render, no publishing.
 
+
 ### Database
 - **Dev:** Embedded PostgreSQL via `./start-database.sh` (Java jar, localhost:5432)
 - **Tests:** Embedded PostgreSQL (auto-started in-process, no setup needed)
@@ -157,7 +160,7 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep < 120 chars / line
+- Keep <= 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
@@ -173,4 +176,5 @@ Core entities and relationships:
 - Be brief
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
-- An AI-made commit ends with `Co-Authored-By: Claude <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`
+- An AI-made commit ends with `Co-Authored-By: <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`
+

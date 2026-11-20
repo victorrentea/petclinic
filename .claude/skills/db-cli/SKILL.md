@@ -9,8 +9,9 @@ allowed-tools: Bash(.claude/skills/db-cli/db-cli.py:*), Bash(jq:*)
 The `postgres-db` MCP server declared in `.mcp.json` is not connected in this
 session. The **same server** is still reachable from the shell: `db-cli.py` starts
 it and speaks MCP to it over stdio (stdlib-only Python, needs just `python3` and
-`npx`). Same tools, same parameters, same JSON responses — only the transport
-differs, and nothing about the server changes once MCP access is restored.
+`npx`). Same tools, same parameters, same answers — only the transport differs,
+and nothing about the server changes once MCP access is restored. The answers
+print as TOON, not JSON, to spend fewer tokens on repeated row keys.
 
 Run everything below from the repo root.
 
@@ -42,14 +43,29 @@ The two tools this server exposes:
   --params '{"object_type":"table"}'
 ```
 
-## 3. Keep the output small
+## 3. Read the output
 
-The JSON envelope is verbose. Take only the rows:
+The default output is TOON. A result set is one header plus one line per row:
 
-```bash
-.claude/skills/db-cli/db-cli.py call execute_sql \
-  --params '{"sql":"select name from types"}' | jq -c '.data.statements[0].rows'
 ```
+success: true
+data:
+  statements[1]:
+    - sql: select name from types
+      rows[2]{name}:
+        dog
+        cat
+      count: 2
+  source_id: default
+```
+
+Only the rows matter most of the time: read `rows[N]{...}:` and the lines under it.
+
+**Never pass `--json` to get data you will read or reuse yourself**, not even to feed
+it into a script (an Excel, a chart, a report): the same 10-row result is ~540 chars
+as TOON and ~1,460 as JSON. Read the values off the TOON rows and carry them on
+yourself. `--json` is only for piping straight into `jq` in the same shell command
+(`| jq -c '.data.statements[0].rows'`), so the JSON itself never reaches the conversation.
 
 ## When it fails
 
