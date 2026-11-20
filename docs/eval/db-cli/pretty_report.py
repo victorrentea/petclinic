@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Renders the db-cli eval as a self-contained HTML page with charts (inline SVG, no deps).
 
-    evals/db-cli/pretty_report.py LOG_DIR [--commit SHA] [--out docs/eval/db-cli-skill.html]
-    evals/db-cli/pretty_report.py docs/eval/db-cli-runs.json
+    docs/eval/db-cli/pretty_report.py LOG_DIR [--commit SHA] [--out docs/eval/db-cli-skill.html]
+    docs/eval/db-cli/pretty_report.py docs/eval/db-cli-runs.json
 
 LOG_DIR is the --out folder of run.py (one stream-json log per run); --commit names the HEAD
 the arms were archived from. From a LOG_DIR it also writes db-cli-runs.json next to the page:
