@@ -37,7 +37,7 @@ async function addOwnerThroughTheForm(page: Page, lastName: string): Promise<voi
 /** Finds the owner just created and opens their page — which is `getOwner` by id. */
 async function openTheOwnerNamed(page: Page, lastName: string): Promise<void> {
   await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
+  await page.locator('button:has-text("Search")').click();
   const rows = page.locator('td.ownerFullName');
   await expect(rows).toHaveCount(1);
   await rows.first().locator('a').click();
@@ -50,10 +50,10 @@ test('adds an owner from the New Owner form and finds them by last name', async 
   await addOwnerThroughTheForm(page, lastName);
 
   await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
+  await page.locator('button:has-text("Search")').click();
   const rows = page.locator('td.ownerFullName');
   await expect(rows).toHaveCount(1);
-  await expect(rows.first()).toContainText(`Ada ${lastName}`);
+  await expect(rows.first()).toContainText(`${lastName}, Ada`);
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {

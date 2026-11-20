@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class OwnerSteps {
                 .baseUri(http.baseUri())
                 .get("/api/owners?lastName=" + lastName);
         assertThat(response.statusCode()).isEqualTo(200);
-        List<String> lastNames = response.jsonPath().getList("lastName", String.class);
+        List<String> lastNames = response.jsonPath().getList("content.lastName", String.class);
         assertThat(lastNames).contains(lastName);
     }
 
@@ -64,16 +65,30 @@ public class OwnerSteps {
         }
     }
 
-    @Then("the response JSON array has size {int}")
-    public void theResponseJsonArrayHasSize(int expected) {
-        assertThat(http.getLastResponse().jsonPath().getList("$").size()).isEqualTo(expected);
+    @Then("the response page holds {int} owner(s) out of {int}")
+    public void theResponsePageHolds(int onPage, int total) {
+        var json = http.getLastResponse().jsonPath();
+        assertThat(json.getList("content")).hasSize(onPage);
+        assertThat(json.getLong("totalElements")).isEqualTo(total);
     }
 
-    @Then("every item in the response has {string} equal to {string}")
-    public void everyItemInTheResponseHasFieldEqualTo(String field, String value) {
-        List<String> values = http.getLastResponse().jsonPath().getList(field, String.class);
+    @Then("every owner on the page has {string} equal to {string}")
+    public void everyOwnerOnThePageHasFieldEqualTo(String field, String value) {
+        List<String> values = http.getLastResponse().jsonPath().getList("content." + field, String.class);
         assertThat(values).isNotEmpty();
         assertThat(values).allMatch(v -> v.equals(value));
+    }
+
+    @Then("the owners on the page are {string}")
+    public void theOwnersOnThePageAre(String fullNames) {
+        var json = http.getLastResponse().jsonPath();
+        List<String> firstNames = json.getList("content.firstName", String.class);
+        List<String> lastNames = json.getList("content.lastName", String.class);
+        List<String> actual = new ArrayList<>();
+        for (int i = 0; i < firstNames.size(); i++) {
+            actual.add(firstNames.get(i) + " " + lastNames.get(i));
+        }
+        assertThat(actual).containsExactly(fullNames.split(", "));
     }
 
     @Given("an owner {string} with a {string} pet named {string} born on {string}")

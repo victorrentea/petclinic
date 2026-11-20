@@ -77,3 +77,67 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* Same dark header as the app's other tables (.table > thead > tr > th in petclinic.css). */
+#ownersTable .mat-mdc-header-cell {
+  background-color: #3c3834;
+  color: #f1f1f1;
+}
+
+/* The search box takes all the room the right-aligned buttons leave. */
+.owner-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-search-row .form-control {
+  flex: 1;
+}
+
+/* Compact rows: Material's default row heights (56px header, 52px rows) plus Bootstrap's cell padding. */
+#ownersTable .mat-mdc-header-row,
+#ownersTable .mat-mdc-row {
+  height: auto;
+}
+
+#ownersTable .mat-mdc-header-cell,
+#ownersTable .mat-mdc-cell {
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+
+/* Fixed column widths, so paging or sorting never shifts the columns. */
+#ownersTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* A value too long for its column ends in "…" instead of wrapping onto a second line. */
+#ownersTable .mat-mdc-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#ownersTable .mat-column-name { width: 22%; }
+#ownersTable .mat-column-address { width: 28%; }
+#ownersTable .mat-column-city { width: 15%; }
+#ownersTable .mat-column-telephone { width: 15%; }
+#ownersTable .mat-column-pets { width: 20%; }
+
+/* Sortable headers always show their arrow: grey until the grid is sorted by them, then white.
+  Material hides an idle arrow with an inline opacity animation, hence !important. */
+#ownersTable ::ng-deep .mat-sort-header-arrow {
+  opacity: 1 !important;
+  color: #9a948f;
+}
+
+#ownersTable ::ng-deep .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #ffffff;
+}
+
+#ownersTable ::ng-deep .mat-sort-header-sorted .mat-sort-header-content {
+  color: #ffffff;
+  font-weight: bold;
+}

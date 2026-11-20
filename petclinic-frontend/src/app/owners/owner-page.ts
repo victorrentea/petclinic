@@ -1,9 +1,13 @@
+import { components } from '../generated/api-types';
 import { Owner } from './owner';
 
-export interface OwnerPage {
+export type OwnerPage = Omit<components['schemas']['OwnerPageDto'], 'content'> & {
   content: Owner[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
+};
+
+export interface OwnerQuery {
+  lastName: string;
+  page: number;
   size: number;
+  sort: string;
 }

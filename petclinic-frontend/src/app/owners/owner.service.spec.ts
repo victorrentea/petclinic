@@ -8,6 +8,7 @@ import { HttpResponse } from '@angular/common/http';
 import { HttpErrorHandler } from '../error.service';
 import { OwnerService } from './owner.service';
 import { Owner } from './owner';
+import { OwnerPage } from './owner-page';
 
 describe('OwnerService', () => {
   let httpTestingController: HttpTestingController;
@@ -48,14 +49,25 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
-    ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+  it('getOwners sends lastName, page, size and sort, and returns the page envelope', () => {
+    const expectedPage: OwnerPage = {content: expectedOwners, page: 2, size: 5, totalElements: 12};
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    ownerService
+      .getOwners({lastName: 'Fr', page: 2, size: 5, sort: 'city,desc'})
+      .subscribe((page) => expect(page).toEqual(expectedPage), fail);
+
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?lastName=Fr&page=2&size=5&sort=city,desc'
+    );
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(expectedPage);
+  });
+
+  it('getOwners leaves out an empty lastName', () => {
+    ownerService.getOwners({lastName: '', page: 0, size: 10, sort: 'name,asc'}).subscribe();
+
+    const req = httpTestingController.expectOne(ownerService.entityUrl + '?page=0&size=10&sort=name,asc');
+    expect(req.request.method).toEqual('GET');
   });
 
   it('search the owner by id', () => {
@@ -131,15 +143,4 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
-  });
 });

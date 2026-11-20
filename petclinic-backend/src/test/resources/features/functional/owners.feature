@@ -13,8 +13,23 @@ Feature: Owner management
       | Harold    | Davis     |
     When I GET "/api/owners?lastName=Dav"
     Then the response status is 200
-    And the response JSON array has size 2
-    And every item in the response has "lastName" equal to "Davis"
+    And the response page holds 2 owners out of 2
+    And every owner on the page has "lastName" equal to "Davis"
+
+  Scenario: Owners are listed one sorted page at a time
+    Given the following owners exist:
+      | firstName | lastName  |
+      | George    | Franklin  |
+      | Betty     | Davis     |
+      | Harold    | Davis     |
+    When I GET "/api/owners?size=5&sort=name,desc&page=0"
+    Then the response status is 200
+    And the response page holds 3 owners out of 3
+    And the owners on the page are "George Franklin, Harold Davis, Betty Davis"
+
+  Scenario: An unknown sort is rejected
+    When I GET "/api/owners?sort=telephone,asc"
+    Then the response status is 400
 
   Scenario: Owner profile includes pets with their type
     Given an owner "Jean Coleman" with a "dog" pet named "Samantha" born on "2020-03-15"

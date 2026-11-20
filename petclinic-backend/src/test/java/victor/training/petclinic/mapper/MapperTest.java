@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import victor.training.petclinic.domain.Owner;
 import victor.training.petclinic.domain.Pet;
@@ -13,7 +16,9 @@ import victor.training.petclinic.domain.Specialty;
 import victor.training.petclinic.domain.User;
 import victor.training.petclinic.domain.Vet;
 import victor.training.petclinic.domain.Visit;
+import victor.training.petclinic.rest.dto.OwnerDto;
 import victor.training.petclinic.rest.dto.OwnerFieldsDto;
+import victor.training.petclinic.rest.dto.OwnerPageDto;
 import victor.training.petclinic.rest.dto.PetDto;
 import victor.training.petclinic.rest.dto.PetFieldsDto;
 import victor.training.petclinic.rest.dto.PetTypeDto;
@@ -148,6 +153,21 @@ class MapperTest {
         assertThat(dto.getCity()).isEqualTo("London");
         assertThat(dto.getPets()).extracting(PetDto::getName).containsExactly("Leo");
         assertThat(ownerMapper.toOwnerDtoCollection(List.of(owner))).hasSize(1);
+    }
+
+    @Test
+    void ownerPage_carries_its_owners_and_the_paging_numbers() {
+        Owner owner = anOwner();
+        owner.addPet(aPet());
+        Page<Owner> page = new PageImpl<>(List.of(owner), PageRequest.of(2, 5), 42);
+
+        OwnerPageDto dto = ownerMapper.toOwnerPageDto(page);
+
+        assertThat(dto.getContent()).extracting(OwnerDto::getLastName).containsExactly("Holmes");
+        assertThat(dto.getContent().get(0).getPets()).extracting(PetDto::getName).containsExactly("Leo");
+        assertThat(dto.getPage()).isEqualTo(2);
+        assertThat(dto.getSize()).isEqualTo(5);
+        assertThat(dto.getTotalElements()).isEqualTo(42);
     }
 
     @Test

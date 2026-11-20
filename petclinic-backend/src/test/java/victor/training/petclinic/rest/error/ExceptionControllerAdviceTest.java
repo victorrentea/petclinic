@@ -5,9 +5,11 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Set;
@@ -41,6 +43,21 @@ class ExceptionControllerAdviceTest {
         assertThat(pd.getProperties()).containsKey("timestamp");
         assertThat(pd.getProperties()).extracting("errors")
                 .isEqualTo(List.of("Telephone must be numeric (value: abc)"));
+    }
+
+    @Test
+    void handleTypeMismatch_rendersA400NamingTheParameterAndItsType() {
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
+                "abc", int.class, "page", mock(MethodParameter.class), new NumberFormatException("abc"));
+
+        ResponseEntity<ProblemDetail> response = advice.handleTypeMismatch(ex, requestTo("/api/owners"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        ProblemDetail pd = response.getBody();
+        assertThat(pd).isNotNull();
+        assertThat(pd.getTitle()).isEqualTo("Validation Error");
+        assertThat(pd.getProperties()).extracting("errors")
+                .isEqualTo(List.of("Parameter 'page' must be of type int"));
     }
 
     private HttpServletRequest requestTo(String uri) {
