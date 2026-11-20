@@ -1041,3 +1041,34 @@ test('a lifeline declared with a stereotype names its kind above it', () => {
   expect(puml).toContain('Backend -> Commons: PhoneNumbers.normalize');
   expect(puml).toContain('Commons -> Backend: NotificationServiceClient.homeDialCode');
 });
+
+
+// The visit form posts and then navigates back to the owner page, and the Browser's span
+// for that POST can be lost on the way: the Backend's span still names it as its parent.
+test('a request whose browser span was lost is still drawn from the Browser', () => {
+  const span = (spanId: string, parentSpanId: string, name: string, kind: string,
+    serviceName: string, startNano: number, attributes: Record<string, string> = {}): NormSpan =>
+    ({traceId: 't', spanId, parentSpanId, name, kind, serviceName, startNano, attributes});
+  const server = (parent: string, agent: string) => [
+    span('s1', parent, 'POST /api/owners/{ownerId}/pets/{petId}/visits', 'SERVER', 'petclinic-backend', 1,
+      {'http.request.method': 'POST', 'http.route': '/api/owners/{ownerId}/pets/{petId}/visits',
+        'http.response.status_code': '201', 'user_agent.original': agent}),
+    span('s2', 's1', 'book-visit', 'INTERNAL', 'petclinic-backend', 2),
+    span('s3', 's2', 'INSERT petclinic.visits', 'CLIENT', 'petclinic-backend', 3,
+      {'db.system': 'postgresql', 'db.statement': 'insert into visits values (?)'}),
+  ];
+  const chrome = 'Mozilla/5.0 (Macintosh) HeadlessChrome/147.0 Safari/537.36';
+
+  const lost = spansToPuml(server('lostBrowserSpan', chrome), 'book', STATIC);
+  expect(lost).toContain('participant Browser');
+  expect(lost).toMatch(/^Browser -> Backend: .*POST/m);
+  expect(lost).toContain('Backend --> Browser: 201');
+  expect(lost.indexOf('Browser -> Backend')).toBeLessThan(lost.indexOf('Backend -> Backend: book-visit'));
+
+  // No parent at all is a test calling the API itself; a lost parent from a non-browser
+  // client is not a Browser's either.
+  for (const [parent, agent] of [['', chrome], ['lostSpan', 'Java-http-client/21']]) {
+    const puml = spansToPuml(server(parent, agent), 'book', STATIC);
+    expect(puml).not.toContain('Browser -> Backend');
+  }
+});
