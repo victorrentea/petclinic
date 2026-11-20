@@ -162,6 +162,9 @@ Core entities and relationships:
 - **Vet** N→N **Specialty** (via `vet_specialties` join table)
 - **User** 1→N **Role**
 
+**Expected volume:** the product owner targets ~100,000 owners (call, Nov 2026). Nothing that lists
+owners may load them all: filter, sort and page in the database.
+
 ## Core Values
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
