@@ -7,6 +7,16 @@ export interface VisitRow {
   ownerFullName: string;
 }
 
+/** The grid's sortable columns, as their headers read. */
+export type VisitColumn = 'Date' | 'Description' | 'Pet' | 'Owner';
+
+const CELL_OF: Record<VisitColumn, string> = {
+  Date: 'td.visit-date',
+  Description: 'td.visit-description',
+  Pet: 'td.visit-pet',
+  Owner: 'td.visit-owner',
+};
+
 export class VisitsPage {
   readonly page: Page;
   readonly pageTitle: Locator;
@@ -61,6 +71,29 @@ export class VisitsPage {
       out.push(((await this.rows.nth(i).locator('td.visit-date').textContent()) || '').trim());
     }
     return out;
+  }
+
+  /** Waits for the first page of visits, not only for the title above them. */
+  async openGrid(): Promise<void> {
+    await this.page.goto('/visits');
+    await this.rows.first().waitFor({state: 'visible', timeout: 10_000});
+  }
+
+  /**
+   * Each click re-queries the backend; waiting for that answer is what keeps a later read
+   * from seeing the page the previous sort left on screen.
+   */
+  async clickHeader(column: VisitColumn): Promise<void> {
+    const served = this.page.waitForResponse(
+      (r) => r.url().includes('/api/visits?') && r.request().method() === 'GET');
+    await this.visitsTable.locator('th', {hasText: column}).click();
+    await served;
+  }
+
+  /** What the column shows on the current page, top to bottom, whitespace folded. */
+  async columnValues(column: VisitColumn): Promise<string[]> {
+    return (await this.rows.locator(CELL_OF[column]).allTextContents())
+      .map((t) => t.trim().replace(/\s+/g, ' '));
   }
 
   async clickFirstOwnerLink(): Promise<void> {
