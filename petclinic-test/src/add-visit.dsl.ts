@@ -1,9 +1,12 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {OwnerPage} from './pages/OwnerPage';
+import {VisitForm} from './pages/VisitForm';
+import {VisitsPage} from './pages/VisitsPage';
 
 // The sentences of add-visit.spec.ts and of visit-vet.feature's glue, as plain functions:
-// named for what the reader of a scenario wants to see, not for the widget being clicked.
-// The selectors live here so neither the spec nor the glue mentions one.
+// named for what the reader of a scenario wants to see. Each one is a line or two over the
+// page objects in pages/, which are the only place a selector is written.
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
@@ -25,20 +28,17 @@ export async function an_owner_with_at_least_one_pet_exists(): Promise<OwnerWith
 }
 
 export async function open_owner_detail_page(page: Page, ownerId: number): Promise<void> {
-  await page.goto(`/owners/${ownerId}`);
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+  await OwnerPage.open(page, ownerId);
 }
 
-export async function click_add_visit_for_first_pet(page: Page, buttonLabel: string): Promise<void> {
-  await page.locator('app-pet-list').first().locator(`button:has-text("${buttonLabel}")`).click();
-  await page.locator('h2:has-text("New Visit")').waitFor({state: 'visible', timeout: 10_000});
+export async function click_add_visit_for_first_pet(page: Page): Promise<void> {
+  await new OwnerPage(page).pet(0).addVisit();
 }
 
 /** Returns the generated description, so the caller can later assert on that exact row. */
 export async function fill_visit_date_and_unique_description(page: Page, date: string): Promise<string> {
   const description = `Annual check-up ${Date.now()}`;
-  await page.locator('input[name="date"]').fill(date);
-  await page.locator('input#description').fill(description);
+  await new VisitForm(page).fill(date, description);
   return description;
 }
 
@@ -48,59 +48,38 @@ export async function fill_visit_date_and_unique_description(page: Page, date: s
  * (NO_VET) gives the empty choice, so the booking form and the visit lists use one word.
  */
 export async function expect_visit_form_offers_nobody_yet(page: Page): Promise<void> {
-  await expect(vetField(page).locator('option:checked')).toHaveText(NO_VET);
+  await expect(new VisitForm(page).chosenVet).toHaveText(NO_VET);
 }
 
-/**
- * Picks the first real vet the form offers and returns the name it showed. "Real" is the
- * first option after the empty one: `<app-combo>` binds its options by *index*, so the
- * option values say nothing about which vet is which — the label is the only handle.
- */
+/** Picks the first real vet the form offers and returns the name it showed. */
 export async function select_first_vet_in_visit_form(page: Page): Promise<string> {
-  const firstVet = vetField(page).locator('option:not([value=""])').first();
-  const vetName = ((await firstVet.textContent()) || '').trim();
-  expect(vetName, 'the booking form offers no vet to choose').not.toEqual('');
-  await vetField(page).selectOption({label: vetName});
-  return vetName;
+  return new VisitForm(page).chooseFirstVet();
 }
 
 export async function submit_visit_form(page: Page): Promise<void> {
-  await page.locator('button[type="submit"]:has-text("Add Visit")').click();
+  await new VisitForm(page).submit();
 }
 
 export async function expect_back_on_owner_detail_page(page: Page, ownerId: number): Promise<void> {
-  await page.waitForURL(new RegExp(`/owners/${ownerId}$`), {timeout: 10_000});
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+  await OwnerPage.shown(page, ownerId);
 }
 
 export async function expect_pet_visit_list_contains(page: Page, date: string, description: string): Promise<void> {
-  await expect(petVisitRow(page, date, description)).toBeVisible({timeout: 10_000});
+  await expect(new OwnerPage(page).pet(0).visit(date, description)).toBeVisible({timeout: 10_000});
 }
 
 /** The owner's page names the vet on the visit's row — or says `No vet`, never a blank. */
 export async function expect_pet_visit_list_shows_vet(
   page: Page, date: string, description: string, vet: string): Promise<void> {
-  await expect(petVisitRow(page, date, description).locator('td.visit-vet')).toHaveText(vet, {timeout: 10_000});
+  await expect(new OwnerPage(page).pet(0).vetOfVisit(date, description)).toHaveText(vet, {timeout: 10_000});
 }
 
 export async function open_all_visits_screen(page: Page): Promise<void> {
-  await page.goto('/visits');
-  await page.locator('h2:has-text("Visits")').waitFor({state: 'visible', timeout: 10_000});
+  await new VisitsPage(page).open();
 }
 
 /** The all-visits screen names the same vet on the same visit (found by its unique description). */
 export async function expect_all_visits_screen_shows_vet(
   page: Page, description: string, vet: string): Promise<void> {
-  const row = page.locator('#visitsTable tbody tr')
-    .filter({has: page.locator('td.visit-description', {hasText: description})});
-  await expect(row.locator('td.visit-vet')).toHaveText(vet, {timeout: 10_000});
-}
-
-function vetField(page: Page) {
-  return page.locator('select#vet');
-}
-
-function petVisitRow(page: Page, date: string, description: string) {
-  const petBlock = page.locator('app-pet-list').first();
-  return petBlock.locator('app-visit-list tr').filter({hasText: date}).filter({hasText: description});
+  await expect(new VisitsPage(page).vetOfVisit(description)).toHaveText(vet, {timeout: 10_000});
 }

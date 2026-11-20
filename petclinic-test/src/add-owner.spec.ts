@@ -1,4 +1,6 @@
 import {test, expect, Page} from './support/trace-fixture';
+import {OwnerDetails, OwnerForm} from './pages/OwnerForm';
+import {OwnersPage} from './pages/OwnersPage';
 
 // The owner flows that only a browser can walk, and until now none of them did:
 // every other acceptance test READS owners — the list, a detail page, the visit form
@@ -18,62 +20,47 @@ function uniqueLastName(): string {
   return `Acceptance${suffix}`;
 }
 
-async function addOwnerThroughTheForm(page: Page, lastName: string): Promise<void> {
-  await page.goto('/owners/add');
-  await page.locator('h2:has-text("New Owner")').waitFor({state: 'visible', timeout: 10_000});
+const ADA: Omit<OwnerDetails, 'lastName'> = {
+  firstName: 'Ada',
+  address: '110 Analytical Engine Way',
+  city: 'London',
+  telephone: '6085551023',
+};
 
-  await page.fill('#firstName', 'Ada');
-  await page.fill('#lastName', lastName);
-  await page.fill('#address', '110 Analytical Engine Way');
-  await page.fill('#city', 'London');
-  await page.fill('#telephone', '6085551023');
-  await page.locator('button:has-text("Add Owner")').click();
-
-  // The form navigates back to the list once the POST returns, so this is also the
-  // assertion that the write succeeded rather than the error branch running.
-  await expect(page).toHaveURL(/\/owners$/);
-}
-
-/** Finds the owner just created and opens their page — which is `getOwner` by id. */
-async function openTheOwnerNamed(page: Page, lastName: string): Promise<void> {
-  await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
-  const rows = page.locator('td.ownerFullName');
-  await expect(rows).toHaveCount(1);
-  await rows.first().locator('a').click();
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
+/** Landing back on the list is also the proof the POST succeeded, not its error branch. */
+async function addOwner(page: Page, lastName: string): Promise<OwnersPage> {
+  const form = await OwnerForm.openNew(page);
+  await form.fill({...ADA, lastName});
+  await form.save();
+  return OwnersPage.shown(page);
 }
 
 test('adds an owner from the New Owner form and finds them by last name', async ({page}) => {
   const lastName = uniqueLastName();
 
-  await addOwnerThroughTheForm(page, lastName);
+  const owners = await addOwner(page, lastName);
+  await owners.searchByLastName(lastName);
 
-  await page.fill('#lastName', lastName);
-  await page.locator('button:has-text("Find Owner")').click();
-  const rows = page.locator('td.ownerFullName');
-  await expect(rows).toHaveCount(1);
-  await expect(rows.first()).toContainText(`Ada ${lastName}`);
+  await expect(owners.ownerNames).toHaveText([`Ada ${lastName}`]);
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {
   const lastName = uniqueLastName();
+  const owners = await addOwner(page, lastName);
+  await owners.searchByLastName(lastName);
+  const ada = await owners.openOwner(`Ada ${lastName}`);
 
-  await addOwnerThroughTheForm(page, lastName);
-  await openTheOwnerNamed(page, lastName);
-
-  await page.locator('button:has-text("Edit Owner")').click();
-  await page.locator('h2:has-text("Owner")').first().waitFor({state: 'visible', timeout: 10_000});
+  const form = await ada.editOwner();
   // The form renders empty and is filled when the owner arrives; typing before that is
   // overwritten by the load, and the PUT then sends London back.
-  await expect(page.locator('#city')).toHaveValue('London');
-  await page.fill('#city', 'Turin');
-  await page.locator('button:has-text("Update Owner")').click();
+  await expect(form.city).toHaveValue('London');
+  await form.fill({city: 'Turin'});
+  await form.save();
 
   // Back on the owner's own page, read from the server rather than from the form we
   // just filled: the PUT is only proven by what the next GET says.
-  await page.locator('h2:has-text("Owner Information")').waitFor({state: 'visible', timeout: 10_000});
-  await expect(page.locator('table.table').first()).toContainText('Turin');
+  await expect(ada.heading).toBeVisible({timeout: 10_000});
+  await expect(ada.details).toContainText('Turin');
   await page.reload();
-  await expect(page.locator('table.table').first()).toContainText('Turin');
+  await expect(ada.details).toContainText('Turin');
 });

@@ -42,7 +42,7 @@ When('I open that owner\'s page', async function (this: VisitWorld) {
 });
 
 When('I start a new visit for their first pet', async function (this: VisitWorld) {
-  await click_add_visit_for_first_pet(this.page, 'Add Visit');
+  await click_add_visit_for_first_pet(this.page);
 });
 
 When('I date the visit {string} and describe it uniquely', async function (this: VisitWorld, date: string) {

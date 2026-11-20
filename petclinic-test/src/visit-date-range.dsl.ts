@@ -1,5 +1,6 @@
 import {expect, Page} from '@playwright/test';
 import axios from 'axios';
+import {VisitForm} from './pages/VisitForm';
 
 // The sentences of visit-date-range.spec.ts (issue #40): a visit is dated between the
 // pet's birth and one year from today — refused by the form AND by the API.
@@ -29,24 +30,22 @@ export async function a_dog_born_on(birthDate: string): Promise<OwnerWithPet> {
 }
 
 export async function open_new_visit_form(page: Page, petId: number): Promise<void> {
-  await page.goto(`/pets/${petId}/visits/add`);
-  await expect(page.locator('h2:has-text("New Visit")')).toBeVisible();
-  await expect(page.getByRole('cell', {name: 'Axel'})).toBeVisible();
+  const form = await VisitForm.open(page, petId);
+  await expect(form.pet('Axel')).toBeVisible();
 }
 
 export async function type_visit(page: Page, date: string, description: string): Promise<void> {
-  await page.locator('input[name="date"]').fill(date);
-  await page.locator('input#description').fill(description);
-  await page.locator('input#description').press('Tab');
+  await new VisitForm(page).fill(date, description);
 }
 
 export async function expect_form_refuses_date_with(page: Page, message: string): Promise<void> {
-  await expect(page.locator('.help-block', {hasText: message})).toBeVisible();
-  await expect(page.locator('button[type="submit"]:has-text("Add Visit")')).toBeDisabled();
+  const form = new VisitForm(page);
+  await expect(form.error(message)).toBeVisible();
+  await expect(form.addVisitButton).toBeDisabled();
 }
 
 export async function expect_form_accepts_date(page: Page): Promise<void> {
-  await expect(page.locator('button[type="submit"]:has-text("Add Visit")')).toBeEnabled();
+  await expect(new VisitForm(page).addVisitButton).toBeEnabled();
 }
 
 /** Bypasses the form: the API must refuse on its own, whoever calls it. */

@@ -37,7 +37,7 @@ test('Add a visit to an existing pet from the owner detail page',
     const {ownerId} = await an_owner_with_at_least_one_pet_exists();
 
     await open_owner_detail_page(page, ownerId);
-    await click_add_visit_for_first_pet(page, 'Add Visit');
+    await click_add_visit_for_first_pet(page);
     const description = await fill_visit_date_and_unique_description(page, VISIT_DATE);
     await submit_visit_form(page);
 
