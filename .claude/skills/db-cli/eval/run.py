@@ -5,15 +5,15 @@ Every task runs N times in two throwaway clones of HEAD: `with` (skill present) 
 `without` (skill directory and every hint to it removed). Each run is a fresh headless
 `claude -p` with no MCP server at all, so the only way to the database is the shell.
 
-    docs/eval/db-cli/run.py [--runs 7] [--model sonnet] [--parallel 6] [--out DIR]
-    docs/eval/db-cli/report.py DIR
+    .claude/skills/db-cli/eval/run.py [--runs 7] [--model sonnet] [--parallel 6] [--out DIR]
+    .claude/skills/db-cli/eval/report.py DIR
 """
 import argparse, json, os, re, shutil, subprocess, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
+REPO = HERE.parents[3]
 SKILL = ".claude/skills/db-cli"
 
 
@@ -23,7 +23,7 @@ def make_arm(root: Path, arm: str) -> Path:
     archive = ["git", "archive", "HEAD"]
     tar = subprocess.run(archive, cwd=REPO, check=True, capture_output=True).stdout
     subprocess.run(["tar", "-x", "-C", str(dst)], input=tar, check=True)
-    shutil.rmtree(dst / "docs" / "eval", ignore_errors=True)  # expected and past answers
+    shutil.rmtree(dst / SKILL / "eval", ignore_errors=True)  # expected and past answers
     if arm == "without":
         shutil.rmtree(dst / SKILL)
         mcp = dst / ".mcp.json"
