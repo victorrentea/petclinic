@@ -91,6 +91,6 @@ export class OwnerListComponent implements OnInit {
   }
 
   private navigate(queryParams: Params) {
-    this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge'});
+    void this.router.navigate([], {relativeTo: this.route, queryParams, queryParamsHandling: 'merge'});
   }
 }
