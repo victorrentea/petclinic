@@ -366,7 +366,7 @@ public class OwnerTest {
     @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
             "size | 1000", "size | 0", "size | abc",
-            "page | -1", "page | abc",
+            "size | 7", "page | -1", "page | abc", "page | 107374183",
             "sort | telephone,asc", "sort | name", "sort | name,up", "sort | name;drop table owners"})
     void list_rejectsAnInvalidParameter(String name, String value) throws Exception {
         long ownersBefore = ownerRepository.count();

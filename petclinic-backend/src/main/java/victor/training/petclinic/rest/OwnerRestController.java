@@ -47,6 +47,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 @RestController
@@ -55,6 +56,8 @@ import jakarta.validation.constraints.Min;
 @Validated
 public class OwnerRestController {
     private static final List<Integer> PAGE_SIZES = List.of(5, 10, 20);
+    // The last page whose row offset still fits in an int at the largest size: Spring Data refuses beyond.
+    private static final int MAX_PAGE = Integer.MAX_VALUE / 20;
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -98,7 +101,7 @@ public class OwnerRestController {
             @Parameter(description = "Case-sensitive prefix of the last name") @RequestParam(name = "lastName",
                     defaultValue = "") String lastName,
             @Parameter(description = "0-based page index") @RequestParam(name = "page",
-                    defaultValue = "0") @Min(0) int page,
+                    defaultValue = "0") @Min(0) @Max(MAX_PAGE) int page,
             @Parameter(description = "Page size: 5, 10 or 20") @RequestParam(name = "size",
                     defaultValue = "10") int size,
             @Parameter(schema = @Schema(implementation = String.class,

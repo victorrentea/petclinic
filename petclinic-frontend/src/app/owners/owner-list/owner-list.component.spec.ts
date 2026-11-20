@@ -109,7 +109,47 @@ describe('OwnerListComponent', () => {
     expect(navigatedTo()).toEqual({lastName: 'Fr', page: 0});
   });
 
+  it('searching again for what is already shown reloads it, though the URL does not change', () => {
+    queryParams.next({lastName: 'Pot'});
+    render();
+    getOwnersSpy.calls.reset();
+    component.searchByLastName('Pot');
+    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(getOwnersSpy).toHaveBeenCalledWith({lastName: 'Pot', page: 0, size: 10, sort: 'name,asc'});
+  });
+
+  it('a page past the last one moves to the last page, replacing the URL', () => {
+    queryParams.next({page: '99'});
+    getOwnersSpy.and.returnValue(of({content: [], page: 99, size: 10, totalElements: 12}));
+    render();
+    expect(navigateSpy).toHaveBeenCalledWith([], jasmine.objectContaining({replaceUrl: true}));
+    expect(navigatedTo()).toEqual({page: 1});
+  });
+
+  it('a sort or page click keeps the text typed in the search box but not searched yet', () => {
+    render();
+    component.lastName = 'Pot';
+    queryParams.next({sort: 'city,asc', page: '0'});
+    expect(component.lastName).toBe('Pot');
+  });
+
+  it('the empty message names the search it answers, not the one still loading', () => {
+    queryParams.next({lastName: 'Zzzz'});
+    getOwnersSpy.and.returnValues(of(pageOf([], 0)), NEVER);
+    render();
+    queryParams.next({lastName: 'Pot'});
+    fixture.detectChanges();
+    expect(query('#noOwners').nativeElement.innerText).toBe('No owners with last name starting with "Zzzz"');
+  });
+
+  it('a page-size change forwards the page the paginator computed to keep the first owner on screen', () => {
+    render();
+    component.onPage({pageIndex: 1, pageSize: 20, previousPageIndex: 5, length: 100});
+    expect(navigatedTo()).toEqual({page: 1, size: 20});
+  });
+
   it('a search for an empty lastName drops it from the URL', () => {
+    queryParams.next({lastName: 'Pot'});
     render();
     component.searchByLastName('');
     expect(navigatedTo()).toEqual({lastName: null, page: 0});

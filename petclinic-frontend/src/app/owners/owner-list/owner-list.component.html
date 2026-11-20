@@ -19,7 +19,7 @@
     </form>
 
     <div *ngIf="errorMessage" id="ownersError" class="alert alert-danger">{{ errorMessage }}</div>
-    <div *ngIf="isEmpty" id="noOwners">No owners with last name starting with "{{ query.lastName }}"</div>
+    <div *ngIf="isEmpty" id="noOwners">No owners with last name starting with "{{ shownLastName }}"</div>
 
     <div *ngIf="hasOwners" class="table-responsive">
       <table mat-table id="ownersTable" class="table table-striped" [dataSource]="ownerPage.content"

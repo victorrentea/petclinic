@@ -2,13 +2,13 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Params, Router} from '@angular/router';
 import {PageEvent} from '@angular/material/paginator';
 import {Sort, SortDirection} from '@angular/material/sort';
-import {EMPTY} from 'rxjs';
+import {BehaviorSubject, combineLatest, EMPTY} from 'rxjs';
 import {catchError, map, switchMap, tap} from 'rxjs/operators';
 import {OwnerService} from '../owner.service';
 import {OwnerPage, OwnerQuery} from '../owner-page';
 
 const PAGE_SIZES = [5, 10, 20];
-const SORTS = ['name,asc', 'name,desc', 'city,asc', 'city,desc'];
+const SORTS = new Set(['name,asc', 'name,desc', 'city,asc', 'city,desc']);
 const DEFAULT_QUERY: OwnerQuery = {lastName: '', page: 0, size: 10, sort: 'name,asc'};
 
 function toOwnerQuery(params: ParamMap): OwnerQuery {
@@ -19,7 +19,7 @@ function toOwnerQuery(params: ParamMap): OwnerQuery {
     lastName: params.get('lastName') ?? DEFAULT_QUERY.lastName,
     page: Number.isInteger(page) && page >= 0 ? page : DEFAULT_QUERY.page,
     size: PAGE_SIZES.includes(size) ? size : DEFAULT_QUERY.size,
-    sort: SORTS.includes(sort) ? sort : DEFAULT_QUERY.sort
+    sort: SORTS.has(sort) ? sort : DEFAULT_QUERY.sort
   };
 }
 
@@ -34,14 +34,18 @@ export class OwnerListComponent implements OnInit {
   query: OwnerQuery = DEFAULT_QUERY;
   lastName = '';
   ownerPage: OwnerPage;
+  /** The search the shown page answers, which differs from query.lastName while the next one loads. */
+  shownLastName = '';
   errorMessage: string;
+  /** Re-runs the current query: the router ignores a navigation to the URL already shown. */
+  private readonly reload$ = new BehaviorSubject<void>(undefined);
 
   constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
   }
 
   ngOnInit() {
-    this.route.queryParamMap.pipe(
-      map(toOwnerQuery),
+    combineLatest([this.route.queryParamMap, this.reload$]).pipe(
+      map(([params]) => toOwnerQuery(params)),
       tap(query => this.startLoading(query)),
       switchMap(query => this.ownerService.getOwners(query).pipe(
         catchError(error => {
@@ -49,7 +53,7 @@ export class OwnerListComponent implements OnInit {
           this.errorMessage = error;
           return EMPTY;
         })))
-    ).subscribe(ownerPage => this.ownerPage = ownerPage);
+    ).subscribe(ownerPage => this.show(ownerPage));
   }
 
   get hasOwners(): boolean {
@@ -69,6 +73,10 @@ export class OwnerListComponent implements OnInit {
   }
 
   searchByLastName(lastName: string) {
+    if ((lastName || '') === this.query.lastName && this.query.page === 0) {
+      this.reload$.next();
+      return;
+    }
     this.navigate({lastName: lastName || null, page: 0});
   }
 
@@ -85,9 +93,23 @@ export class OwnerListComponent implements OnInit {
   }
 
   private startLoading(query: OwnerQuery) {
+    if (query.lastName !== this.query.lastName) {
+      this.lastName = query.lastName; // a sort or page click keeps what the user typed but did not search yet
+    }
     this.query = query;
-    this.lastName = query.lastName;
     this.errorMessage = null;
+  }
+
+  private show(ownerPage: OwnerPage) {
+    const lastPage = Math.ceil(ownerPage.totalElements / this.query.size) - 1;
+    if (ownerPage.content.length === 0 && this.query.page > lastPage && lastPage >= 0) {
+      // a stale link past the end: go to the last page instead of an empty table
+      void this.router.navigate([], {relativeTo: this.route, queryParams: {page: lastPage},
+        queryParamsHandling: 'merge', replaceUrl: true});
+      return;
+    }
+    this.ownerPage = ownerPage;
+    this.shownLastName = this.query.lastName;
   }
 
   private navigate(queryParams: Params) {

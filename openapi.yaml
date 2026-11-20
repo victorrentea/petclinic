@@ -206,6 +206,7 @@ paths:
           type: integer
           format: int32
           default: 0
+          maximum: 107374182
           minimum: 0
       - description: "Page size: 5, 10 or 20"
         in: query
