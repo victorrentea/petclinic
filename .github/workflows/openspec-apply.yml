@@ -100,3 +100,12 @@ jobs:
                 test results, decisions you took alone, anything left unchecked>"
             If the gate is still red after reasonable effort, open it with --draft and put
             the failing test output tail in the body. Do NOT run `openspec archive`.
+
+      # The action hides Claude's output (public repo); on failure print just its final message,
+      # which is where an expired token or an API error shows up.
+      - name: Why Claude failed
+        if: failure()
+        run: |
+          f="$RUNNER_TEMP/claude-execution-output.json"
+          [ -f "$f" ] || { echo "no execution file"; exit 0; }
+          jq -r '.. | objects | select(.type=="result") | .result? // empty' "$f" | tail -c 2000
