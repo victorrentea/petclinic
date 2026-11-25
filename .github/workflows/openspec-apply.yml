@@ -1,0 +1,102 @@
+name: OpenSpec apply (Claude, unattended)
+
+# Claude implements a whole OpenSpec change in one session, on GitHub's runner, while you're AFK.
+# Trigger:  gh workflow run openspec-apply.yml -f branch=<branch-with-the-change> [-f change=<name>]
+# It works on a fresh branch claude/<change>-<run> and opens a PR into <branch>; it never pushes
+# to <branch> or main. Pushes made with GITHUB_TOKEN don't start ci.yml, so the PR has no CI run
+# until someone pushes to it: the tests Claude runs here are the gate.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch that holds openspec/changes/<change> (the PR targets it)
+        required: true
+      change:
+        description: Change folder name under openspec/changes/ (empty = the one with unchecked tasks)
+        required: false
+        default: ''
+      model:
+        description: Claude model
+        required: false
+        default: claude-opus-5-5
+
+concurrency:
+  group: openspec-apply-${{ inputs.branch }}-${{ inputs.change }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: petclinic-frontend/package-lock.json
+
+      - name: Work branch
+        run: |
+          git config user.name  "claude[bot]"
+          git config user.email "claude[bot]@users.noreply.github.com"
+          git switch -c "claude/${{ inputs.change || 'openspec' }}-${{ github.run_number }}"
+          echo "WORK_BRANCH=$(git branch --show-current)" >> "$GITHUB_ENV"
+
+      - name: Claude implements the change
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --model ${{ inputs.model }}
+            --dangerously-skip-permissions
+          prompt: |
+            You run unattended on a throwaway GitHub Actions runner (Ubuntu, Java 21, Node 20,
+            Docker + docker compose available). Nobody will answer questions: decide and go on.
+
+            GOAL: implement the WHOLE OpenSpec change in one go.
+            Change: "${{ inputs.change }}" — if empty, take the single folder under
+            openspec/changes/ (excluding archive/) whose tasks.md still has "- [ ]" tasks;
+            if there are several, take the first alphabetically and say so in the PR.
+
+            Read proposal.md, design.md, specs/ and tasks.md of that change, plus AGENTS.md
+            (repo rules, incl. red-green TDD) before coding.
+
+            Work chapter by chapter ("## N. ..." in tasks.md). After each chapter:
+              - tick its tasks "- [ ]" → "- [x]" in tasks.md,
+              - run that layer's tests (backend: cd petclinic-backend && mvn -B -ntp test;
+                frontend: cd petclinic-frontend && npm ci (once) && npm run test-headless),
+              - when green, commit with message "openspec(<change>): <chapter title>" and
+                `git push -u origin "$WORK_BRANCH"` — so a crashed run can be resumed.
+            You're on branch $WORK_BRANCH already. Never push to ${{ inputs.branch }} or main.
+
+            At the end run the full gate: backend `mvn -B -ntp spotless:apply test`
+            and frontend `npm run test:arch && npm run test-headless && npm run build`.
+            Docker is allowed (./start-docker.sh up) if you need the full stack for a check.
+
+            Then open the PR:
+              gh pr create --base "${{ inputs.branch }}" --head "$WORK_BRANCH" \
+                --title "openspec: <change>" --body "<what was done, chapter by chapter,
+                test results, decisions you took alone, anything left unchecked>"
+            If the gate is still red after reasonable effort, open it with --draft and put
+            the failing test output tail in the body. Do NOT run `openspec archive`.
