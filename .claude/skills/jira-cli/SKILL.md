@@ -1,6 +1,6 @@
 ---
 name: jira-cli
-description: Read and write JIRA issues from the shell — get/search issues, create, update, comment, label (tag), assign, transition, link, attach, log work — against a local or corporate JIRA Server/Data Center using a Personal Access Token (or JIRA Cloud with an API token). Use whenever a task needs JIRA AND no JIRA MCP tools are available (no mcp__atlassian__*, no mcp__jira__*), which is the normal situation when corporate policy disables MCP servers. Also use when explicitly asked to "use the jira-cli skill".
+description: Read and write JIRA issues.
 allowed-tools: Bash(.claude/skills/jira-cli/jira.py:*), Bash(python3 .claude/skills/jira-cli/jira.py:*), Bash(python .claude/skills/jira-cli/jira.py:*), Bash(py .claude/skills/jira-cli/jira.py:*), Bash(jq:*)
 ---
 
