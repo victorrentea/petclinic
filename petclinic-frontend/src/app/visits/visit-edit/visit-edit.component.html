@@ -34,8 +34,7 @@
             <mat-datepicker #visitDateDatepicker></mat-datepicker>
             <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="date.valid" [class.glyphicon-remove]="!date.valid" aria-hidden="true"></span>
             <span class="help-block" *ngIf="date.dirty && date.hasError('required')">Date is required</span>
-            <span class="help-block" *ngIf="date.hasError('matDatepickerMin')">Visit can't predate the pet's birth ({{ minDate.format('YYYY/MM/DD') }})</span>
-            <span class="help-block" *ngIf="date.hasError('matDatepickerMax')">Visit must be within one year from today ({{ maxDate.format('YYYY/MM/DD') }})</span>
+            <app-visit-date-errors [ctrl]="date" [minDate]="minDate" [maxDate]="maxDate"></app-visit-date-errors>
           </div>
         </div>
         <div class="form-group has-feedback " [class.has-success]="description.dirty && description.valid" [class.has-error]="description.dirty && !description.valid">
@@ -45,8 +44,8 @@
                   [(ngModel)]="visit.description" #description="ngModel"/>
             <span class="glyphicon form-control-feedback" [class.glyphicon-ok]="description.valid" [class.glyphicon-remove]="!description.valid" aria-hidden="true"></span>
             <span class="help-block" *ngIf="description.dirty && description.hasError('required')">Description is required</span>
-            <span class="help-block" *ngIf="description.dirty && description.hasError('minlength')">Description must be at least 1 characters long</span>           <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 charaters long</span>
-            <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 characters long</span>           <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 charaters long</span>
+            <span class="help-block" *ngIf="description.dirty && description.hasError('minlength')">Description must be at least 1 characters long</span>
+            <span class="help-block" *ngIf="description.dirty && description.hasError('maxlength')">Description may be at most 255 characters long</span>
         </div>
         </div>
 
