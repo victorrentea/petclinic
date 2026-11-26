@@ -1,0 +1,2 @@
+<span class="help-block" *ngIf="ctrl.hasError('matDatepickerMin')">Visit can't predate the pet's birth ({{ minDate.format('YYYY/MM/DD') }})</span>
+<span class="help-block" *ngIf="ctrl.hasError('matDatepickerMax')">Visit must be within one year from today ({{ maxDate.format('YYYY/MM/DD') }})</span>
