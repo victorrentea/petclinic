@@ -159,7 +159,7 @@ if [ -n "$STAGED_ALL" ]; then
 fi
 if [ -n "$STAGED_ALL" ]; then
   if command -v editorconfig-checker >/dev/null 2>&1; then
-    if ! EC_OUT=$(echo "$STAGED_ALL" | xargs editorconfig-checker -no-color -config "$ROOT/.config/editorconfig-checker.json" 2>&1); then
+    if ! EC_OUT=$(printf '%s\n' "$STAGED_ALL" | tr '\n' '\0' | xargs -0 editorconfig-checker -no-color -config "$ROOT/.config/editorconfig-checker.json" 2>&1); then
       echo "$EC_OUT"
       echo "[pre-commit] ❌ .editorconfig violated — commit blocked."
       exit 1
