@@ -7,6 +7,7 @@ import {VisitService} from './visit.service';
 import {VisitAddComponent} from './visit-add/visit-add.component';
 import {VisitsPageComponent} from './visits-page/visits-page.component';
 import {VisitDateErrorsComponent} from './visit-date-errors/visit-date-errors.component';
+import {VisitFormComponent} from './visit-form/visit-form.component';
 import {FormsModule} from '@angular/forms';
 import {PetsRoutingModule} from '../pets/pets-routing.module';
 import {MatMomentDateModule, MomentDateAdapter} from '@angular/material-moment-adapter';
@@ -39,7 +40,8 @@ export const MY_DATE_FORMATS = {
     VisitEditComponent,
     VisitAddComponent,
     VisitsPageComponent,
-    VisitDateErrorsComponent
+    VisitDateErrorsComponent,
+    VisitFormComponent
   ],
   exports: [
     VisitListComponent,
