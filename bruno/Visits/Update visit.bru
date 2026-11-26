@@ -1,0 +1,18 @@
+meta {
+  name: Update visit
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/visits/{{visitId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "date": "2026-12-02",
+    "description": "rabies shot (moved)"
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Firefighter
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{chatbotUrl}}/firefighter?incident=Routine health sweep of PetClinic services
+  body: none
+  auth: inherit
+}
+
+params:query {
+  incident: Routine health sweep of PetClinic services
+}

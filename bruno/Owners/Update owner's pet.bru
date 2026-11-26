@@ -1,0 +1,22 @@
+meta {
+  name: Update owner's pet
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{baseUrl}}/api/owners/{{ownerId}}/pets/{{petId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Leo II",
+    "birthDate": "2010-09-07",
+    "type": {
+      "id": 1,
+      "name": "cat"
+    }
+  }
+}

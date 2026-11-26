@@ -1,0 +1,31 @@
+meta {
+  name: Add pet to owner
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/owners/{{ownerId}}/pets
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Leo",
+    "birthDate": "2010-09-07",
+    "type": {
+      "id": 1,
+      "name": "cat"
+    }
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('petId', loc.split('/').pop());
+}
+
+docs {
+  Stores the new id in {{petId}}.
+}

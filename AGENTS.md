@@ -142,7 +142,7 @@ which is a different and much cheaper thing: proxy URLs, no runner render, no pu
   for a deliberate reset; to keep runtime data, start Postgres from the jar directly.
 
 ## API Endpoints
-Backend exposes REST API at http://localhost:8080/api/
+Backend exposes REST API at http://localhost:8080/api/ — every call is ready to run in the Bruno collection `bruno/` (env `local`)
 REST Contract: 
 - Owners: `/api/owners`, `/api/owners/{id}`
 - Pets: `/api/pets`, `/api/pets/{id}`

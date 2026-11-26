@@ -1,0 +1,23 @@
+meta {
+  name: Add specialty
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/specialties
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "dermatology",
+    "description": "itching, hair loss, rash, hot spots"
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('specialtyId', loc.split('/').pop());
+}

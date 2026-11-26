@@ -1,0 +1,21 @@
+meta {
+  name: Update owner
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/owners/{{ownerId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "George",
+    "lastName": "Franklin",
+    "address": "110 W. Liberty St.",
+    "city": "Sun Prairie",
+    "telephone": "6085551023"
+  }
+}

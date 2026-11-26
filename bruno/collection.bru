@@ -1,0 +1,18 @@
+auth {
+  mode: basic
+}
+
+auth:basic {
+  username: {{username}}
+  password: {{password}}
+}
+
+docs {
+  # PetClinic API
+
+  Every request inherits Basic auth (`{{username}}`/`{{password}}`, admin/admin from the seed).
+  It only matters with `petclinic.security.enable=true`; by default security is off and it is ignored.
+
+  The POSTs store the id from the `Location` header (`ownerId`, `petId`, `visitId`, …),
+  so running **Add owner → Add pet to owner → Add visit to owner's pet** chains by itself.
+}

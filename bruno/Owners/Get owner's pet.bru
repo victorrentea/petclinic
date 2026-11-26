@@ -1,0 +1,11 @@
+meta {
+  name: Get owner's pet
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/owners/{{ownerId}}/pets/{{petId}}
+  body: none
+  auth: inherit
+}

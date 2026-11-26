@@ -1,0 +1,26 @@
+meta {
+  name: Add pet type
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/pettypes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "ferret"
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('petTypeId', loc.split('/').pop());
+}
+
+docs {
+  Requires VET_ADMIN.
+}

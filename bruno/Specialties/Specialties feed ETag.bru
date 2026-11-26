@@ -1,0 +1,19 @@
+meta {
+  name: Specialties feed (ETag)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/specialties/feed
+  body: none
+  auth: inherit
+}
+
+headers {
+  ~If-None-Match: "paste-etag-here"
+}
+
+docs {
+  Answers 304 when If-None-Match equals the current ETag. Enable the header and paste the ETag of a previous response.
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Add user
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "john.doe",
+    "password": "1234abc",
+    "enabled": true,
+    "roles": [
+      {
+        "name": "OWNER_ADMIN"
+      }
+    ]
+  }
+}
+
+docs {
+  Requires ADMIN.
+}

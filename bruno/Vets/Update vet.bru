@@ -1,0 +1,28 @@
+meta {
+  name: Update vet
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/vets/{{vetId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "James",
+    "lastName": "Carter",
+    "specialties": [
+      {
+        "id": 1,
+        "name": "radiology"
+      },
+      {
+        "id": 2,
+        "name": "surgery"
+      }
+    ]
+  }
+}

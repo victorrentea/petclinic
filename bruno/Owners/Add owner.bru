@@ -1,0 +1,30 @@
+meta {
+  name: Add owner
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/owners
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "George",
+    "lastName": "Franklin",
+    "address": "110 W. Liberty St.",
+    "city": "Madison",
+    "telephone": "6085551023"
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('ownerId', loc.split('/').pop());
+}
+
+docs {
+  Stores the new id in {{ownerId}}.
+}

@@ -1,0 +1,19 @@
+meta {
+  name: List owners
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/owners?lastName=
+  body: none
+  auth: inherit
+}
+
+params:query {
+  lastName:
+}
+
+docs {
+  Filter by lastName prefix; empty = all.
+}

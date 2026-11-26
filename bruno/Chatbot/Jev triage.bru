@@ -1,0 +1,15 @@
+meta {
+  name: Jev triage
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{chatbotUrl}}/jev?symptom=my cat keeps scratching its ears
+  body: none
+  auth: inherit
+}
+
+params:query {
+  symptom: my cat keeps scratching its ears
+}

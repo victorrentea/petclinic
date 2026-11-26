@@ -1,0 +1,11 @@
+meta {
+  name: Delete specialty
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/specialties/{{specialtyId}}
+  body: none
+  auth: inherit
+}

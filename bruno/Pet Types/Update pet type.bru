@@ -1,0 +1,22 @@
+meta {
+  name: Update pet type
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/pettypes/{{petTypeId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": {{petTypeId}},
+    "name": "ferret"
+  }
+}
+
+docs {
+  Requires VET_ADMIN.
+}

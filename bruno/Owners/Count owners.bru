@@ -1,0 +1,15 @@
+meta {
+  name: Count owners
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/owners/count
+  body: none
+  auth: inherit
+}
+
+docs {
+  permitAll — works without credentials.
+}

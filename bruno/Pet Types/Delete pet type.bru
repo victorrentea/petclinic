@@ -1,0 +1,15 @@
+meta {
+  name: Delete pet type
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/pettypes/{{petTypeId}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  Requires VET_ADMIN.
+}

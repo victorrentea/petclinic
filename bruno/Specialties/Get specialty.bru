@@ -1,0 +1,11 @@
+meta {
+  name: Get specialty
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/specialties/{{specialtyId}}
+  body: none
+  auth: inherit
+}

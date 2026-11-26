@@ -1,0 +1,29 @@
+meta {
+  name: Add vet
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/vets
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "firstName": "James",
+    "lastName": "Carter",
+    "specialties": [
+      {
+        "id": 1,
+        "name": "radiology"
+      }
+    ]
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('vetId', loc.split('/').pop());
+}

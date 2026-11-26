@@ -1,0 +1,11 @@
+meta {
+  name: Delete owner
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/owners/{{ownerId}}
+  body: none
+  auth: inherit
+}

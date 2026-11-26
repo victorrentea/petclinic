@@ -1,0 +1,27 @@
+meta {
+  name: Add visit to owner's pet
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/owners/{{ownerId}}/pets/{{petId}}/visits
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "date": "2026-12-01",
+    "description": "rabies shot"
+  }
+}
+
+script:post-response {
+  const loc = res.getHeader('location');
+  if (loc) bru.setVar('visitId', loc.split('/').pop());
+}
+
+docs {
+  Books a visit; the backend then notifies notification-service (:8090).
+}

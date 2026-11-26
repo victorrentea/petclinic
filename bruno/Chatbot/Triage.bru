@@ -1,0 +1,19 @@
+meta {
+  name: Triage
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{chatbotUrl}}/triage?symptom=my dog is limping
+  body: none
+  auth: inherit
+}
+
+params:query {
+  symptom: my dog is limping
+}
+
+docs {
+  petclinic-chatbot on :8082 — answers markdown.
+}

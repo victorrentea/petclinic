@@ -1,0 +1,11 @@
+meta {
+  name: Delete visit
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/visits/{{visitId}}
+  body: none
+  auth: inherit
+}

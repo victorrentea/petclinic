@@ -1,0 +1,23 @@
+meta {
+  name: Visit booked
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{notificationUrl}}/api/notifications/visit-booked
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "ownerPhone": "6085551023",
+    "petName": "Leo",
+    "visitDate": "2026-12-01"
+  }
+}
+
+docs {
+  notification-service on :8090 — normally called by the backend after a visit is booked.
+}

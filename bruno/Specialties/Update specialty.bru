@@ -1,0 +1,18 @@
+meta {
+  name: Update specialty
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/specialties/{{specialtyId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "dermatology",
+    "description": "itching, hair loss, rash, hot spots, ear infection"
+  }
+}

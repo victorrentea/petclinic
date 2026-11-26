@@ -1,0 +1,11 @@
+meta {
+  name: List pets
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/pets
+  body: none
+  auth: inherit
+}
