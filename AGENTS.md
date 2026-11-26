@@ -86,6 +86,10 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
 
+### /grill-me is a plugin too
+It lives in `victorrentea/petclinic-plugins` (Claude Code + Copilot CLI):
+`/plugin marketplace add victorrentea/petclinic-plugins`, then `/plugin install grill-me@petclinic-plugins`.
+
 ### /human-review is a plugin, and nothing of it lives in this repo
 
 It is installed, not vendored:
