@@ -160,7 +160,6 @@ Core entities and relationships:
 - **User** 1→N **Role**
 
 ## Java Code Style
-- Keep <= 120 chars / line
 - Keep methods under 30 lines
 - Use constructor injection in src/main, `@Autowired` only in tests
 - Use `@Transactional` only when strictly necessary to wrap 2+ DB updates
@@ -177,4 +176,5 @@ Core entities and relationships:
 - Challenge my prompts - I love hearing I'm wrong! Be a thinking partener, not a sycophantic yes-man.
 - Before any git commit, make sure to update any drifted knowledge in AGENTS.md, keeping it under 200 lines: move details into separate docs that AGENTS.md links to (progressive disclosure)
 - An AI-made commit ends with `Co-Authored-By: <Model> (effort: <level>, context: <window>)`, e.g. `Co-Authored-By: Claude Opus 5.5 (effort: high, context: 1M)` — no `<noreply@anthropic.com>`
+- At the beginning of a very new conversation, say, "Hi, Neo🥷."
 
