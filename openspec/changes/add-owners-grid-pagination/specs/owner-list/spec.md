@@ -117,3 +117,32 @@ sort SHALL return to the first page. Opening a URL whose page is past the end SH
 #### Scenario: No match
 - **WHEN** a user searches for a last-name prefix no owner has
 - **THEN** the grid says no owners have a last name starting with that text and shows no pager
+
+### Requirement: The Owners grid leads with what it sorts by
+Each owner SHALL be named last name first ("Potter, Harry"), and each sortable header SHALL always show its
+arrow: gray while another column is the sort, bright white on the sort column. Columns SHALL keep their width
+whatever page or sort is shown.
+
+#### Scenario: Reading the grid
+- **WHEN** a user opens the Owners grid sorted by name
+- **THEN** owners read "Potter, Harry" and the Name arrow is white while the City arrow is gray
+
+#### Scenario: Changing the sort
+- **WHEN** a user sorts by City
+- **THEN** no column header moves sideways
+
+### Requirement: Long values stay on one line
+A name, address or city too long for its column SHALL be cut with an ellipsis on a single line, and hovering it
+SHALL show the whole value.
+
+#### Scenario: A very long Welsh city
+- **WHEN** an owner lives in Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch
+- **THEN** the City cell shows the beginning followed by "…", and hovering it shows the full name
+
+### Requirement: Pets show their type
+Each pet in the grid SHALL be preceded by an emoji of its type, and hovering the emoji SHALL name the type.
+
+#### Scenario: A cat
+- **WHEN** an owner has a cat named Leo
+- **THEN** the Pets cell reads "🐱 Leo"
+

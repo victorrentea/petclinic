@@ -20,6 +20,11 @@ after Wensleydale instead of right after Silver.
     different places of the list;
   - every owner has 1 or 2 pets, so sorting by them barely changes the order.
 - Names with accents are sorted the way people read them (Śliwiński next to Silver).
+- Owners are written last name first ("Potter, Harry"), since that is what the list is sorted by; the
+  arrows on Name and City are always visible, white on the column currently sorted.
+- Text too long for its column ends with "…"; pointing at it shows the whole text.
+- Each pet shows a small picture of its kind (🐱 cat, 🐶 dog…).
+- The search box, Find Owner and Add Owner sit on one line above the list.
 - Searching by last name keeps working and its results are paged and sorted the same way.
 - After opening an owner and pressing Back, the user lands on the same page, with the same sorting and search.
   A link to that page can be shared with a colleague.
