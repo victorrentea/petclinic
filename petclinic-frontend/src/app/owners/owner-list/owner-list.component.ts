@@ -26,7 +26,8 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   page: OwnerPage;
   private load: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private ownerService: OwnerService) {
+  constructor(private readonly router: Router, private readonly route: ActivatedRoute,
+              private readonly ownerService: OwnerService) {
   }
 
   get sortActive(): string {
@@ -82,7 +83,7 @@ export class OwnerListComponent implements OnInit, OnDestroy {
   }
 
   private navigate(changes: Partial<OwnerQuery>, replaceUrl = false) {
-    this.router.navigate([], {relativeTo: this.route, queryParams: {...this.query, ...changes}, replaceUrl});
+    void this.router.navigate([], {relativeTo: this.route, queryParams: {...this.query, ...changes}, replaceUrl});
   }
 }
 
