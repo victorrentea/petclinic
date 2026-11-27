@@ -109,3 +109,15 @@ display:none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* One row: the search box (its label is the ghost text) takes the room, its buttons sit right of it. */
+.owner-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.owner-search input {
+  flex: 1;
+}
