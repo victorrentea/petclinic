@@ -22,7 +22,7 @@
 
     </table>
 
-    <app-visit-form [visit]="visit" submitLabel="Add Visit" (submitted)="onSubmit($event)" (back)="gotoOwnerDetail()"></app-visit-form>
+    <app-visit-form [visit]="visit" [minDate]="minDate" [maxDate]="maxDate" submitLabel="Add Visit" (submitted)="onSubmit($event)" (back)="gotoOwnerDetail()"></app-visit-form>
 
     <br/>
     <div class="col-12 text-left">

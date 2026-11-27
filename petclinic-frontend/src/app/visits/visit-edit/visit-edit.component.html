@@ -22,6 +22,6 @@
 
     </table>
 
-    <app-visit-form [visit]="visit" submitLabel="Update Visit" (submitted)="onSubmit($event)" (back)="gotoOwnerDetail()"></app-visit-form>
+    <app-visit-form [visit]="visit" [minDate]="minDate" [maxDate]="maxDate" submitLabel="Update Visit" (submitted)="onSubmit($event)" (back)="gotoOwnerDetail()"></app-visit-form>
   </div>
 </div>
