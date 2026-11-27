@@ -29,6 +29,13 @@
     <div class="table-responsive" id="ownersTable" *ngIf="page && page.totalElements > 0">
       <table class="table table-striped" matSort [matSortActive]="sortActive" [matSortDirection]="sortDirection"
         matSortDisableClear (matSortChange)="onSort($event)">
+        <colgroup>
+          <col class="col-name">
+          <col class="col-address">
+          <col class="col-city">
+          <col class="col-telephone">
+          <col class="col-pets">
+        </colgroup>
         <thead>
         <tr>
           <th mat-sort-header="name">Name</th>
@@ -41,16 +48,16 @@
 
         <tbody>
         <tr *ngFor="let owner of page.content">
-          <td class="ownerFullName"><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+          <td class="ownerFullName truncated" data-tip-truncated><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
-          <td>{{ owner.address }}</td>
-          <td>{{ owner.city }}</td>
+          <td class="truncated" data-tip-truncated>{{ owner.address }}</td>
+          <td class="truncated" data-tip-truncated>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
-        <tr *ngFor="let pet of owner.pets">
-          {{ pet.name }}
-        </tr>
-        </td>
+            <div *ngFor="let pet of owner.pets">
+              <span [attr.data-tip]="pet.type?.name">{{ pet.type?.name | petTypeEmoji }}</span> {{ pet.name }}
+            </div>
+          </td>
         </tr>
         </tbody>
       </table>

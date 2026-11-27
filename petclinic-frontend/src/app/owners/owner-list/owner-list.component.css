@@ -90,3 +90,22 @@ display:none;
 :host ::ng-deep #ownersTable .mat-sort-header-sorted .mat-sort-header-arrow {
   color: #ffffff;
 }
+
+/* Fixed column widths: with automatic layout every new page or sort resized the columns,
+  so the headers jumped sideways each time the content changed. */
+#ownersTable table {
+  table-layout: fixed;
+}
+
+.col-name { width: 24%; }
+.col-address { width: 26%; }
+.col-city { width: 16%; }
+.col-telephone { width: 18%; }
+.col-pets { width: 16%; }
+
+/* Long names, addresses and cities stay on one line, cut with "…"; the tooltip shows them whole. */
+.truncated {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

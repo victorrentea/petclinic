@@ -12,6 +12,7 @@ import {OwnerListComponent} from './owner-list.component';
 import {OwnerQuery, OwnerService} from '../owner.service';
 import {OwnerPage} from '../owner-page';
 import {Owner} from '../owner';
+import {PetTypeEmojiPipe} from '../../pets/pet-type-emoji.pipe';
 
 describe('OwnerListComponent', () => {
   const george: Owner = {
@@ -31,7 +32,7 @@ describe('OwnerListComponent', () => {
     getOwners = jasmine.createSpy('getOwners').and.returnValue(of(onePage));
     navigate = jasmine.createSpy('navigate');
     TestBed.configureTestingModule({
-      declarations: [OwnerListComponent],
+      declarations: [OwnerListComponent, PetTypeEmojiPipe],
       imports: [FormsModule, MatPaginatorModule, MatSortModule, NoopAnimationsModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
@@ -119,6 +120,16 @@ describe('OwnerListComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('No owners with LastName starting with "Zz"');
     expect(fixture.nativeElement.querySelector('mat-paginator')).toBeNull();
+  });
+
+  it('shows each pet with the emoji of its type', () => {
+    getOwners.and.returnValue(of({...onePage, content: [{...george, pets: [
+      {id: 7, name: 'Leo', birthDate: '2010-09-07', type: {id: 1, name: 'cat'}} as Owner['pets'][number]
+    ]}]}));
+    fixture.detectChanges();
+
+    const pets = fixture.nativeElement.querySelector('#ownersTable tbody td:last-child').textContent;
+    expect(pets.trim()).toBe('🐱 Leo');
   });
 
   it('only Name and City can be sorted', () => {
