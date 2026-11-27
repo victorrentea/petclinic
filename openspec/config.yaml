@@ -18,6 +18,17 @@ schema: spec-driven
 #       - Always state what is out of scope
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - The reader is the product owner, who does not code. Write in plain business language
+    - Never name code, classes, tables, columns, endpoints, URLs, HTTP methods or status codes, JSON, frameworks,
+      libraries, migrations or tests; no technical jargon (pagination contract, index, collation, DTO, API)
+    - Describe what users see and can do, with examples taken from the real data
+    - A deliberate departure from what was requested is stated plainly, with the reason in business terms
+    - Impact says who notices the change and what is left out; for technical impact it only points to design.md
+  design:
+    - Holds every technical detail kept out of proposal.md - the API contract (parameters, defaults, error answers,
+      BREAKING changes), database and migration changes, the code touched and every consumer that must move with it
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.
