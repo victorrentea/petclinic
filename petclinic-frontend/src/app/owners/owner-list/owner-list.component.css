@@ -77,3 +77,16 @@ display:none;
     align-items: flex-start;
   }
 }
+
+/* GH #25: a sortable header always shows its arrow - gray until it is the sort column, then bright white.
+  Material hides the arrow until hover, parking it lower and sliding it up on hover, all through
+  animated inline styles: !important pins it visible and in place, so it no longer jumps. */
+:host ::ng-deep #ownersTable .mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: none !important;
+  color: #9e9e9e;
+}
+
+:host ::ng-deep #ownersTable .mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #ffffff;
+}
