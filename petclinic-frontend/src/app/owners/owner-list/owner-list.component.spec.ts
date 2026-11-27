@@ -61,11 +61,11 @@ describe('OwnerListComponent', () => {
     expect(getOwners).toHaveBeenCalledWith({lastName: 'Po', page: 2, size: 20, sort: 'city,desc'});
   });
 
-  it('shows the owners of the page', () => {
+  it('shows the owners of the page, last name first: the sort key leads', () => {
     fixture.detectChanges();
 
     const name = fixture.debugElement.query(By.css('.ownerFullName')).nativeElement;
-    expect(name.innerText).toBe('George Franklin');
+    expect(name.innerText).toBe('Franklin, George');
   });
 
   it('a new search goes back to the first page', () => {

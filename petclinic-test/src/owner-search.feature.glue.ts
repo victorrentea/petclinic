@@ -2,7 +2,7 @@ import {DataTable, Given, When, Then} from '@cucumber/cucumber';
 import {expect} from '@playwright/test';
 import axios from 'axios';
 import {PlaywrightWorld} from './support/world';
-import {OwnersPage} from './pages/OwnersPage';
+import {asListed, OwnersPage} from './pages/OwnersPage';
 
 // Gherkin, bound straight to the page objects: no DSL layer in between — the .feature
 // is the readable artefact here, and a second naming of the same sentences would only
@@ -14,8 +14,12 @@ import {OwnersPage} from './pages/OwnersPage';
 
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-const fullName = (o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`;
-const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean);
+/** The feature speaks of people as "Harry Potter"; the grid lists them as "Potter, Harry". */
+const listedFromFeature = (name: string) => {
+  const words = name.trim().split(/\s+/);
+  return asListed({firstName: words.slice(0, -1).join(' '), lastName: words[words.length - 1]});
+};
+const namesIn = (cell: string) => cell.split(',').map((n) => n.trim()).filter(Boolean).map(listedFromFeature);
 
 /** Polls until the table has settled on exactly `expected` — order-insensitive. */
 async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): Promise<void> {
@@ -30,7 +34,7 @@ async function everyOwnerByName(): Promise<string[]> {
   const names: string[] = [];
   for (let page = 0; ; page++) {
     const {data} = await axios.get(`${API_BASE}/owners?size=20&sort=name&page=${page}`, {timeout: 10_000});
-    names.push(...data.content.map(fullName));
+    names.push(...data.content.map(asListed));
     if (page + 1 >= data.totalPages) {
       return names;
     }
@@ -49,7 +53,7 @@ Given('the clinic has these owners', async function (this: PlaywrightWorld, owne
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
+  expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => listedFromFeature(name))));
   this.allOwnerNames = names;
 });
 

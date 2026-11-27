@@ -41,14 +41,14 @@ test('adds an owner from the New Owner form and finds them by last name', async 
   const owners = await addOwner(page, lastName);
   await owners.searchByLastName(lastName);
 
-  await expect(owners.ownerNames).toHaveText([`Ada ${lastName}`]);
+  await expect(owners.ownerNames).toHaveText([`${lastName}, Ada`]);
 });
 
 test('edits an owner from their own page and the change sticks', async ({page}) => {
   const lastName = uniqueLastName();
   const owners = await addOwner(page, lastName);
   await owners.searchByLastName(lastName);
-  const ada = await owners.openOwner(`Ada ${lastName}`);
+  const ada = await owners.openOwner(`${lastName}, Ada`);
 
   const form = await ada.editOwner();
   // The form renders empty and is filled when the owner arrives; typing before that is

@@ -1,6 +1,6 @@
 import {test, expect} from './support/trace-fixture';
 import axios from 'axios';
-import {OwnersPage} from './pages/OwnersPage';
+import {asListed, OwnersPage} from './pages/OwnersPage';
 
 // GH #25: the Owners grid shows one page at a time and sorts by Name or City only.
 // Expectations come from the API itself, so the seed can change without touching this file.
@@ -11,7 +11,7 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
 async function ownersFromApi(query: string): Promise<string[]> {
   const {data} = await axios.get(`${API_BASE}/owners?${query}`, {timeout: 10_000});
-  return data.content.map((o: {firstName: string; lastName: string}) => `${o.firstName} ${o.lastName}`);
+  return data.content.map(asListed);
 }
 
 test('shows 10 owners by name, then 20 when asked', async ({page}) => {

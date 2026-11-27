@@ -1,12 +1,15 @@
 import {expect, Locator, Page} from '@playwright/test';
 import {OwnerPage} from './OwnerPage';
 
+/** How the grid names an owner: last name first, since it is the sort key (GH #25). */
+export const asListed = (o: {firstName: string; lastName: string}) => `${o.lastName}, ${o.firstName}`;
+
 /** /owners: the search form and one page of the owners it found (GH #25), with its pager. */
 export class OwnersPage {
   readonly heading: Locator;
   readonly lastNameSearch: Locator;
   readonly findOwnerButton: Locator;
-  /** One cell per owner listed, reading "First Last". */
+  /** One cell per owner listed, reading "Last, First" (see asListed). */
   readonly ownerNames: Locator;
   /** "1 – 10 of 26" */
   readonly rangeLabel: Locator;
@@ -59,8 +62,9 @@ export class OwnersPage {
     return (await this.page.locator('#ownersTable th[mat-sort-header]').allTextContents()).map((t) => t.trim());
   }
 
-  async openOwner(fullName: string): Promise<OwnerPage> {
-    await this.ownerNames.getByRole('link', {name: fullName}).click();
+  /** @param listedName as the grid shows it, see {@link asListed} */
+  async openOwner(listedName: string): Promise<OwnerPage> {
+    await this.ownerNames.getByRole('link', {name: listedName}).click();
     return OwnerPage.shown(this.page);
   }
 }
