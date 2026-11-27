@@ -2,9 +2,20 @@ import { Injectable } from '@angular/core';
 import { Owner } from './owner';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { OwnerPage } from './owner-page';
 import { catchError } from 'rxjs/operators';
 import { HandleError, HttpErrorHandler } from '../error.service';
+
+/** What the Owners grid asks for; `sort` is `name|city`, optionally followed by `,asc|,desc`. */
+export interface OwnerQuery {
+  lastName: string;
+  page: number;
+  size: number;
+  sort: string;
+}
+
+const NO_OWNERS: OwnerPage = {content: [], totalElements: 0, totalPages: 0, number: 0, size: 0};
 
 @Injectable()
 export class OwnerService {
@@ -19,10 +30,12 @@ export class OwnerService {
     this.handlerError = httpErrorHandler.createHandleError('OwnerService');
   }
 
-  getOwners(): Observable<Owner[]> {
+  /** One page of owners (GH #25): never the full list, which reaches 100k. */
+  getOwners(query: OwnerQuery): Observable<OwnerPage> {
+    const params = new HttpParams({fromObject: {...query}});
     return this.http
-      .get<Owner[]>(this.entityUrl)
-      .pipe(catchError(this.handlerError('getOwners', [])));
+      .get<OwnerPage>(this.entityUrl, {params})
+      .pipe(catchError(this.handlerError('getOwners', NO_OWNERS)));
   }
 
   getOwnerById(ownerId: number): Observable<Owner> {
@@ -48,15 +61,5 @@ export class OwnerService {
     return this.http
       .delete<Owner>(this.entityUrl + '/' + ownerId)
       .pipe(catchError(this.handlerError('deleteOwner', [ownerId])));
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    let url = this.entityUrl;
-    if (lastName !== undefined) {
-      url += '?lastName=' + lastName;
-    }
-    return this.http
-      .get<Owner[]>(url)
-      .pipe(catchError(this.handlerError('searchOwners', [])));
   }
 }

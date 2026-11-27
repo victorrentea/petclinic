@@ -25,6 +25,18 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
   await expect.poll(listed, {timeout: 10_000}).toEqual([...expected].sort());
 }
 
+/** The API answers one page at a time (GH #25): walk them all, 20 by 20, in the grid's default order. */
+async function everyOwnerByName(): Promise<string[]> {
+  const names: string[] = [];
+  for (let page = 0; ; page++) {
+    const {data} = await axios.get(`${API_BASE}/owners?size=20&sort=name&page=${page}`, {timeout: 10_000});
+    names.push(...data.content.map(fullName));
+    if (page + 1 >= data.totalPages) {
+      return names;
+    }
+  }
+}
+
 /**
  * Remembers every owner the clinic holds, after checking that the ones the
  * Background names are among them — so a changed seed (Flyway's
@@ -32,12 +44,11 @@ async function expectOwnersListed(world: PlaywrightWorld, expected: string[]): P
  * the Given instead of looking like a broken search.
  */
 Given('the clinic has these owners', async function (this: PlaywrightWorld, owners: DataTable) {
-  const {data} = await axios.get(`${API_BASE}/owners`, {timeout: 10_000});
-  if (!Array.isArray(data) || data.length === 0) {
+  const names = await everyOwnerByName();
+  if (names.length === 0) {
     throw new Error('The API returned no owners — is the backend up, and was the DB reset to ' +
       'the @fixture:default this feature declares?');
   }
-  const names: string[] = data.map(fullName);
   expect(names).toEqual(expect.arrayContaining(owners.raw().map(([name]) => name.trim())));
   this.allOwnerNames = names;
 });
@@ -54,6 +65,8 @@ Then('exactly these owners are listed: {string}', async function (this: Playwrig
   await expectOwnersListed(this, namesIn(owners));
 });
 
-Then('every owner in the clinic is listed', async function (this: PlaywrightWorld) {
-  await expectOwnersListed(this, this.requireAllOwnerNames());
+Then('the first 10 owners by name are listed, out of all of them', async function (this: PlaywrightWorld) {
+  const all = this.requireAllOwnerNames();
+  await expectOwnersListed(this, all.slice(0, 10));
+  await expect(new OwnersPage(this.page).rangeLabel).toHaveText(`1 – ${Math.min(10, all.length)} of ${all.length}`);
 });

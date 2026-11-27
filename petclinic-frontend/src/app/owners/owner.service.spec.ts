@@ -48,14 +48,16 @@ describe('OwnerService', () => {
     httpTestingController.verify();
   });
 
-  it('should return expected owners (called once)', () => {
+  it('asks the API for one page with the search, page, size and sort', () => {
+    const page = {content: expectedOwners, totalElements: 2, totalPages: 1, number: 0, size: 10};
     ownerService
-      .getOwners()
-      .subscribe((owners) => expect(owners).toEqual(expectedOwners), fail);
+      .getOwners({lastName: 'Fr', page: 0, size: 10, sort: 'city,desc'})
+      .subscribe((answer) => expect(answer).toEqual(page), fail);
 
-    const req = httpTestingController.expectOne(ownerService.entityUrl);
+    const req = httpTestingController.expectOne(
+      ownerService.entityUrl + '?lastName=Fr&page=0&size=10&sort=city,desc');
     expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
+    req.flush(page);
   });
 
   it('search the owner by id', () => {
@@ -131,15 +133,4 @@ describe('OwnerService', () => {
     req.flush(null);
   });
 
-  it('search owners by last name prefix', () => {
-    ownerService.searchOwners('Fr').subscribe((owners) => {
-      expect(owners).toEqual(expectedOwners);
-    });
-
-    const req = httpTestingController.expectOne(
-      ownerService.entityUrl + '?lastName=Fr'
-    );
-    expect(req.request.method).toEqual('GET');
-    req.flush(expectedOwners);
-  });
 });

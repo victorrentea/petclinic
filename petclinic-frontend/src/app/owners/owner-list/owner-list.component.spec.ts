@@ -1,142 +1,142 @@
-/* tslint:disable:no-unused-variable */
-
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {DebugElement, NO_ERRORS_SCHEMA} from '@angular/core';
-
-import {OwnerListComponent} from './owner-list.component';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import { OwnerService } from '../owner.service';
+import {ActivatedRoute, convertToParamMap, Params, Router} from '@angular/router';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatSortModule} from '@angular/material/sort';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {OwnerListComponent} from './owner-list.component';
+import {OwnerQuery, OwnerService} from '../owner.service';
+import {OwnerPage} from '../owner-page';
 import {Owner} from '../owner';
-import {Observable, of, Subject} from 'rxjs';
-import {RouterTestingModule} from '@angular/router/testing';
-import {CommonModule} from '@angular/common';
-import {PartsModule} from '../../parts/parts.module';
-import {ActivatedRouteStub} from '../../testing/router-stubs';
-import {OwnerDetailComponent} from '../owner-detail/owner-detail.component';
-import {OwnersModule} from '../owners.module';
-import {DummyComponent} from '../../testing/dummy.component';
-import {OwnerAddComponent} from '../owner-add/owner-add.component';
-import {OwnerEditComponent} from '../owner-edit/owner-edit.component';
-import Spy = jasmine.Spy;
-
-
-class OwnerServiceStub {
-  getOwners(): Observable<Owner[]> {
-    return of();
-  }
-
-  searchOwners(lastName: string): Observable<Owner[]> {
-    return of();
-  }
-}
 
 describe('OwnerListComponent', () => {
-
-  let component: OwnerListComponent;
-  let fixture: ComponentFixture<OwnerListComponent>;
-  let ownerService = new OwnerServiceStub();
-  let getOwnersSpy: Spy;
-  let searchOwnersSpy: Spy;
-  let de: DebugElement;
-  let el: HTMLElement;
-
-
-  const testOwner: Owner = {
-    id: 1,
-    firstName: 'George',
-    lastName: 'Franklin',
-    address: '110 W. Liberty St.',
-    city: 'Madison',
-    telephone: '6085551023',
-    pets: []
+  const george: Owner = {
+    id: 1, firstName: 'George', lastName: 'Franklin', address: '110 W. Liberty St.',
+    city: 'Madison', telephone: '6085551023', pets: []
   };
-  let testOwners: Owner[];
+  const onePage: OwnerPage = {content: [george], totalElements: 26, totalPages: 3, number: 0, size: 10};
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DummyComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      imports: [CommonModule, FormsModule, PartsModule, OwnersModule,
-        RouterTestingModule.withRoutes(
-          [{path: 'owners', component: OwnerListComponent},
-            {path: 'owners/add', component: OwnerAddComponent},
-            {path: 'owners/:id', component: OwnerDetailComponent},
-            {path: 'owners/:id/edit', component: OwnerEditComponent}
-          ])],
-      providers: [
-        {provide: OwnerService, useValue: ownerService},
-        {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-      ]
-    })
-      .compileComponents();
-  }));
+  let fixture: ComponentFixture<OwnerListComponent>;
+  let component: OwnerListComponent;
+  let queryParams: BehaviorSubject<Params>;
+  let getOwners: jasmine.Spy<(query: OwnerQuery) => Observable<OwnerPage>>;
+  let navigate: jasmine.Spy;
 
   beforeEach(() => {
-    testOwners = [testOwner];
-
+    queryParams = new BehaviorSubject<Params>({});
+    getOwners = jasmine.createSpy('getOwners').and.returnValue(of(onePage));
+    navigate = jasmine.createSpy('navigate');
+    TestBed.configureTestingModule({
+      declarations: [OwnerListComponent],
+      imports: [FormsModule, MatPaginatorModule, MatSortModule, NoopAnimationsModule],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        {provide: OwnerService, useValue: {getOwners}},
+        {provide: ActivatedRoute, useValue: {queryParamMap: queryParams.pipe(map(convertToParamMap))}},
+        {provide: Router, useValue: {navigate}}
+      ]
+    });
     fixture = TestBed.createComponent(OwnerListComponent);
     component = fixture.componentInstance;
-    ownerService = fixture.debugElement.injector.get(OwnerService);
-    getOwnersSpy = spyOn(ownerService, 'getOwners')
-      .and.returnValue(of(testOwners));
-    searchOwnersSpy = spyOn(ownerService, 'searchOwners')
-      .and.returnValue(of(testOwners));
-
   });
 
-  it('should create OwnerListComponent', () => {
-    expect(component).toBeTruthy();
-  });
+  function lastNavigation(): Params {
+    return navigate.calls.mostRecent().args[1].queryParams;
+  }
 
-  it('should call ngOnInit() method', () => {
-    fixture.detectChanges();
-    expect(getOwnersSpy.calls.any()).toBe(true, 'getOwners called');
-  });
-
-
-  it(' should show full name after getOwners observable (async) ', waitForAsync(() => {
-    fixture.detectChanges();
-    fixture.whenStable().then(() => { // wait for async getOwners
-      fixture.detectChanges();        // update view with name
-      de = fixture.debugElement.query(By.css('.ownerFullName'));
-      el = de.nativeElement;
-      expect(el.innerText).toBe((testOwner.firstName.toString() + ' ' + testOwner.lastName.toString()));
-    });
-  }));
-
-  it('searchByLastName should call getOwners for empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('');
-
-    expect(getOwnersSpy).toHaveBeenCalled();
-    expect(searchOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  it('searchByLastName should call searchOwners for non-empty term', () => {
-    getOwnersSpy.calls.reset();
-    searchOwnersSpy.calls.reset();
-
-    component.searchByLastName('Fr');
-
-    expect(searchOwnersSpy).toHaveBeenCalledWith('Fr');
-    expect(getOwnersSpy).not.toHaveBeenCalled();
-  });
-
-  // The page loads every owner on open; a search typed before that answer arrives must
-  // not be overwritten by it when it finally does.
-  it('a search is not overwritten by the initial load answering late', () => {
-    const initialLoad = new Subject<Owner[]>();
-    getOwnersSpy.and.returnValue(initialLoad);
+  it('asks for the first 10 owners by name when the URL says nothing', () => {
     fixture.detectChanges();
 
-    component.searchByLastName('Franklin');
-    initialLoad.next([testOwner, {...testOwner, id: 2, lastName: 'Davis'}]);
-
-    expect(component.owners).toEqual([testOwner]);
+    expect(getOwners).toHaveBeenCalledWith({lastName: '', page: 0, size: 10, sort: 'name,asc'});
   });
 
+  it('asks for what the URL says', () => {
+    queryParams.next({lastName: 'Po', page: '2', size: '20', sort: 'city,desc'});
+    fixture.detectChanges();
+
+    expect(getOwners).toHaveBeenCalledWith({lastName: 'Po', page: 2, size: 20, sort: 'city,desc'});
+  });
+
+  it('shows the owners of the page', () => {
+    fixture.detectChanges();
+
+    const name = fixture.debugElement.query(By.css('.ownerFullName')).nativeElement;
+    expect(name.innerText).toBe('George Franklin');
+  });
+
+  it('a new search goes back to the first page', () => {
+    queryParams.next({page: '3', sort: 'city,asc'});
+    fixture.detectChanges();
+
+    component.searchByLastName('Po');
+
+    expect(lastNavigation()).toEqual({lastName: 'Po', page: 0, size: 10, sort: 'city,asc'});
+  });
+
+  it('changing the page size goes back to the first page', () => {
+    queryParams.next({page: '2'});
+    fixture.detectChanges();
+
+    component.onPage({pageIndex: 1, pageSize: 20, length: 26});
+
+    expect(lastNavigation()).toEqual(jasmine.objectContaining({page: 0, size: 20}));
+  });
+
+  it('moving to the next page keeps the size', () => {
+    fixture.detectChanges();
+
+    component.onPage({pageIndex: 1, pageSize: 10, length: 26});
+
+    expect(lastNavigation()).toEqual(jasmine.objectContaining({page: 1, size: 10}));
+  });
+
+  it('a new sort goes back to the first page', () => {
+    queryParams.next({page: '2'});
+    fixture.detectChanges();
+
+    component.onSort({active: 'city', direction: 'desc'});
+
+    expect(lastNavigation()).toEqual(jasmine.objectContaining({page: 0, sort: 'city,desc'}));
+  });
+
+  it('a page past the end moves to the last page, replacing the URL', () => {
+    getOwners.and.returnValue(of({content: [], totalElements: 26, totalPages: 3, number: 99, size: 10}));
+    queryParams.next({page: '99'});
+    fixture.detectChanges();
+
+    expect(lastNavigation()).toEqual(jasmine.objectContaining({page: 2}));
+    expect(navigate.calls.mostRecent().args[1].replaceUrl).toBeTrue();
+  });
+
+  it('no match shows a message and no pager', () => {
+    getOwners.and.returnValue(of({content: [], totalElements: 0, totalPages: 0, number: 0, size: 10}));
+    queryParams.next({lastName: 'Zz'});
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No owners with LastName starting with "Zz"');
+    expect(fixture.nativeElement.querySelector('mat-paginator')).toBeNull();
+  });
+
+  it('only Name and City can be sorted', () => {
+    fixture.detectChanges();
+
+    const sortable = fixture.debugElement.queryAll(By.css('th[mat-sort-header]'))
+      .map(th => th.nativeElement.textContent.trim());
+    expect(sortable).toEqual(['Name', 'City']);
+  });
+
+  it('an earlier query answering late is dropped', () => {
+    const slow = new Subject<OwnerPage>();
+    getOwners.and.returnValues(slow, of(onePage));
+    fixture.detectChanges();
+
+    queryParams.next({lastName: 'Franklin'});
+    slow.next({...onePage, content: [{...george, id: 2, lastName: 'Davis'}]});
+
+    expect(component.page.content).toEqual([george]);
+  });
 });
