@@ -2,44 +2,39 @@
 
 ## Why
 
-GH #25 asks for an Owners grid that is paged (5, 10 or 20 rows) and sortable. The product owner expects
-~100,000 owners in production within a year; today `GET /api/owners` returns every owner with their pets in one
-response and the grid renders them all, which will not survive that volume. Looking at the data also showed that
-the current alphabetical order is wrong for names with diacritics (`Śliwiński` sorts after `Wensleydale`).
+We expect around 100,000 pet owners within a year. Today the Owners screen loads every owner at once: fine for
+26, unusable for 100,000. GH #25 asks for an Owners list that shows a few rows at a time and can be sorted.
+
+While looking at the real data we also found that names with accents are sorted wrongly today: Śliwiński comes
+after Wensleydale instead of right after Silver.
 
 ## What Changes
 
-- **BREAKING** `GET /api/owners` always returns one page (`content`, `totalElements`, `totalPages`, `number`,
-  `size`) instead of the full list. New query parameters `page` (0-based), `size` (1–20, default 10) and
-  `sort` (`name` or `city`, `,asc`/`,desc`, default `name,asc`); `lastName` prefix search is kept.
-  Out-of-range `size` or an unknown `sort` key answers 400.
-- The Owners grid gets a pager (page sizes 5 / 10 / 20, first/previous/next/last, "1–10 of N") and sort arrows on
-  **Name** and **City** only. Address, Telephone and Pets stay unsortable: the data shows free-text addresses,
-  three phone formats for the same country and 1–2 pets per owner, so sorting them means nothing.
-  This narrows the issue's "any column"; the product owner is told why on GH #25.
-- Search, page, size and sort live in the URL, so Back from an owner's page returns to the same page.
-- Name and city sort by human (ICU) alphabetical order, so names with diacritics land where readers expect.
-- Every consumer of the old list (Angular service, Cucumber, MockMvc tests, the latency-proxy perf test,
-  Playwright page object, JMeter plan) moves to the paged contract in the same change.
+- The Owners screen shows **10 owners at a time**, with a choice of 5, 10 or 20, buttons for first / previous /
+  next / last page, and a counter such as "1 – 10 of 26".
+- Owners can be sorted by **Name** or by **City**, A→Z or Z→A. By default they are sorted by name.
+- **Address, Telephone and Pets cannot be sorted** — a deliberate change from "any column" in the request:
+  - addresses are written freely ("671 Lincoln Boulevard", "ul. Floriańska 14", "Calle de Alcalá 42"), so an
+    alphabetical order of them means nothing;
+  - the same phone country is written three ways (+44…, (0044)…, 0044…), so British numbers would end up in three
+    different places of the list;
+  - every owner has 1 or 2 pets, so sorting by them barely changes the order.
+- Names with accents are sorted the way people read them (Śliwiński next to Silver).
+- Searching by last name keeps working and its results are paged and sorted the same way.
+- After opening an owner and pressing Back, the user lands on the same page, with the same sorting and search.
+  A link to that page can be shared with a colleague.
+- Changing the search, the page size or the sorting starts again from the first page.
 
 ## Capabilities
 
 ### New Capabilities
-- `owner-list`: browsing and searching owners as a paged, sortable list, over the REST API and in the Owners grid.
+- `owner-list`: finding an owner by browsing, sorting and searching the list of owners.
 
 ### Modified Capabilities
-<!-- none: openspec/specs/ is empty -->
+<!-- none -->
 
 ## Impact
 
-- **API**: `GET /api/owners` response shape and parameters (OpenAPI regenerated, `api-types.ts` regenerated).
-- **Database**: new migration changing the collation of `owners.first_name`, `last_name`, `city` and adding the
-  sort and prefix-search indexes.
-- **Backend**: `OwnerRestController.listOwners`, `OwnerRepository`, a new page DTO, error handling for bad paging
-  parameters, pets loaded per page.
-- **Frontend**: `OwnerListComponent`, `OwnerService`, `owners.module.ts` (Material paginator and sort),
-  the already-present but unused `owner-page.ts`.
-- **Tests and tools**: `OwnerTest`, `AddVisitApiTest`, `BasicAuthenticationConfigTest`,
-  `OwnerSearchThroughLatencyProxyTest`, `owners.feature` + `OwnerSteps`, `petclinic-test` `OwnersPage`,
-  JMeter CRUD plan.
-- Out of scope: case-insensitive search (`po` finds nothing today) is a separate issue.
+- **Who notices**: everyone using the Owners screen; nothing changes on the other screens.
+- **Not included**: search ignoring upper/lower case ("po" does not find "Potter" today) — a separate request.
+- Technical impact (API, database, tests) is described in `design.md`.
