@@ -18,6 +18,9 @@ Full-stack PetClinic application, managing veterinary clinic operations (owners,
 - `notification-service/` - Spring Boot app on :8090 that texts owners; the backend POSTs to it after every booked visit
 - `petclinic-commons/` - jar both apps depend on, `mvn install`ed first; every call crossing it is traced (AspectJ)
 
+**Scale target (product owner, 2026-11-27):** ~100,000 owners in production within a year — size every list,
+query and screen touching owners for that, never for the 26 seeded ones.
+
 ## Common Commands
 
 ### Helper Scripts
@@ -169,6 +172,8 @@ Core entities and relationships:
 - Write `equals`/`hashCode`/`toString` to a class only if it actually needs it
 
 ## Core Values
+- Discussing anything that touches data (sorting, filtering, validation, formats, volumes)? Look at the real rows
+  first (`.claude/skills/db-cli/db-cli.py call execute_sql ...`); never reason from the column names alone
 - Write non-trivial code using TDD
 - Keep comments concise, prefer explanatory variable/method names
 - Don't leave behind CYA comments when deleting or moving stuff
