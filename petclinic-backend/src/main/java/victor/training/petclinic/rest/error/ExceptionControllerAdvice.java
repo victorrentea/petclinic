@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.context.MessageSourceResolvable;
 
 import java.time.Instant;
 import java.util.List;
@@ -63,6 +65,18 @@ public class ExceptionControllerAdvice {
         BindingResult bindingResult = ex.getBindingResult();
         // reuse ValidationErrorExtractor style: build list of readable messages
         List<String> errors = ValidationErrorFieldExtractor.extract(bindingResult);
+        log.warn("Validation failed: {}", errors);
+        ProblemDetail pd = buildProblemDetail("Validation Error",
+                "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
+        pd.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(pd);
+    }
+
+    /** A constraint on a @RequestParam (e.g. page size out of range) failed. */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ProblemDetail> handleHandlerMethodValidation(HandlerMethodValidationException ex,
+            HttpServletRequest request) {
+        List<String> errors = ex.getAllErrors().stream().map(MessageSourceResolvable::getDefaultMessage).toList();
         log.warn("Validation failed: {}", errors);
         ProblemDetail pd = buildProblemDetail("Validation Error",
                 "Validation failed for request. See 'errors' for details.", HttpStatus.BAD_REQUEST, request);
