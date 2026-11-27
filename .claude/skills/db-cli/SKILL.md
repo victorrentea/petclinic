@@ -2,6 +2,7 @@
 name: db-cli
 description: Query the petclinic Postgres database (owners, pets, vets, visits, types, specialties) by calling the project's Postgres MCP server as a shell command. Use whenever a task needs to read or inspect petclinic data or schema AND no database MCP tools are available (no mcp__postgres-db__* tools). Also use when explicitly asked to "use the db-cli skill".
 allowed-tools: Bash(.claude/skills/db-cli/db-cli.py:*), Bash(jq:*)
+disable-model-invocation: true
 ---
 
 # Database access when MCP servers are disabled
