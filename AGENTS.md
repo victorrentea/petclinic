@@ -88,8 +88,8 @@ single-select in a form goes through `<app-combo>` (`ComboComponent`), a
 `ControlValueAccessor` that drops in where a `<select>` was — a raw `<select>` in a form
 template is a bug, not a shortcut. Vet-edit's multi-select is still a `mat-select`; the
 design system has no multi-select yet.
-Tooltips go through `design-system/tooltip.ts`: `data-tip="…"`, or `data-tip-truncated` on a cell cut with
-an ellipsis (shows its text only while cut off). A native `title` fails `npm run test:arch`.
+Tooltips go through `design-system/tooltip.ts`: `data-tip="…"`, or `data-tip-truncated` on a cell, which also cuts it
+to one line with an ellipsis and shows its text only while cut off. A native `title` fails `npm run test:arch`.
 
 ### /human-review is a plugin, and nothing of it lives in this repo
 

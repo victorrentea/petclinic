@@ -30,19 +30,15 @@ export class OwnerListComponent implements OnInit, OnDestroy {
               private readonly ownerService: OwnerService) {
   }
 
-  get sortActive(): string {
-    return this.query.sort.split(',')[0];
-  }
-
-  get sortDirection(): SortDirection {
-    return (this.query.sort.split(',')[1] || 'asc') as SortDirection;
-  }
+  sortActive = 'name';
+  sortDirection: SortDirection = 'asc';
 
   ngOnInit() {
     // switchMap: only the latest query may answer, a slow earlier one is dropped
     this.load = this.route.queryParamMap.pipe(
       map(toQuery),
       tap(query => this.query = query),
+      tap(query => [this.sortActive, this.sortDirection] = splitSort(query.sort)),
       tap(query => this.lastName = query.lastName),
       switchMap(query => this.ownerService.getOwners(query))
     ).subscribe(page => this.show(page));
@@ -94,4 +90,9 @@ function toQuery(params: ParamMap): OwnerQuery {
     size: Number(params.get('size') ?? DEFAULT_QUERY.size),
     sort: params.get('sort') ?? DEFAULT_QUERY.sort
   };
+}
+
+function splitSort(sort: string): [string, SortDirection] {
+  const [active, direction] = sort.split(',');
+  return [active, (direction || 'asc') as SortDirection];
 }

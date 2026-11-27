@@ -1,6 +1,5 @@
 package victor.training.petclinic.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,8 +9,6 @@ import org.springframework.data.repository.Repository;
 import victor.training.petclinic.domain.Owner;
 
 public interface OwnerRepository extends Repository<Owner, Integer> {
-
-    List<Owner> findByLastNameStartingWith(String lastName);
 
     Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
 

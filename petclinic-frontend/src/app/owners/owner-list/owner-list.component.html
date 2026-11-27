@@ -32,10 +32,10 @@
 
         <tbody>
         <tr *ngFor="let owner of page.content">
-          <td class="ownerFullName truncated" data-tip-truncated><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
+          <td class="ownerFullName" data-tip-truncated><a routerLink="/owners/{{owner.id}}" routerLinkActive="active"
             (click)="onSelect(owner)">{{ owner.lastName }}, {{ owner.firstName }}</a></td>
-          <td class="truncated" data-tip-truncated>{{ owner.address }}</td>
-          <td class="truncated" data-tip-truncated>{{ owner.city }}</td>
+          <td data-tip-truncated>{{ owner.address }}</td>
+          <td data-tip-truncated>{{ owner.city }}</td>
           <td>{{ owner.telephone }}</td>
           <td>
             <div *ngFor="let pet of owner.pets">

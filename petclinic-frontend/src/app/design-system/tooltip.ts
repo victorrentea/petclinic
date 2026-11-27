@@ -2,7 +2,8 @@
  * The app's one tooltip. Two declarative attributes, listeners delegated on the document so markup
  * rendered at any time needs no registration:
  * - `data-tip="text"`: always shows that text (an empty value shows nothing);
- * - `data-tip-truncated`: shows the element's own text, only while it is cut off by an ellipsis.
+ * - `data-tip-truncated`: keeps the element on one line cut with an ellipsis, and shows its whole text
+ *   only while it is cut off.
  * Never use a native `title`: it cannot be styled and shows after ~500ms.
  */
 const STYLE = `
@@ -12,7 +13,8 @@ const STYLE = `
   padding: 0.6rem 0.9rem; border-radius: 0.6rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   opacity: 0; transform: translateY(4px); transition: opacity 120ms ease, transform 120ms ease;
 }
-.app-tooltip.visible { opacity: 1; transform: translateY(0); }`;
+.app-tooltip.visible { opacity: 1; transform: translateY(0); }
+[data-tip-truncated] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }`;
 const DELAY_MS = 150;
 const GAP_PX = 10;
 const EDGE_PX = 8;

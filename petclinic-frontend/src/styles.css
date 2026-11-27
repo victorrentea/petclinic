@@ -2,3 +2,15 @@
 @import url('./assets/css/petclinic.css');
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 
+/* Every sortable header always shows its arrow - gray until it is the sort column, then bright white.
+  Material hides it until hover, parked lower and sliding up, through animated inline styles:
+  !important pins it visible and in place, so it never jumps. */
+.mat-sort-header-arrow {
+  opacity: 1 !important;
+  transform: none !important;
+  color: #9e9e9e;
+}
+
+.mat-sort-header-sorted .mat-sort-header-arrow {
+  color: #ffffff;
+}

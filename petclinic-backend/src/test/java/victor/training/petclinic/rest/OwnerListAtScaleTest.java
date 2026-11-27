@@ -7,10 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.List;
 
+import org.assertj.core.api.SoftAssertions;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,23 +39,23 @@ class OwnerListAtScaleTest {
     @Autowired
     EntityManagerFactory entityManagerFactory;
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "ORDER BY last_name, first_name, id LIMIT 20 OFFSET 20000",
-            "ORDER BY city DESC, last_name DESC, first_name DESC, id DESC LIMIT 20 OFFSET 20000",
-            "WHERE last_name LIKE 'Lab%' ORDER BY last_name, first_name, id LIMIT 20",
-            "WHERE last_name LIKE 'Lab%' ORDER BY city, last_name, first_name, id LIMIT 20",
-    })
-    void everyPageQueryUsesAnIndex_with100kOwners(String pageQuery) {
+    /** Seeded once: each test method gets a fresh database copy, so 100k inserts per query would be waste. */
+    @Test
+    void everyPageQueryUsesAnIndex_with100kOwners() {
         jdbc.execute("""
                 INSERT INTO owners (first_name, last_name, address, city, telephone)
                 SELECT 'First' || g, 'L' || md5(g::text), 'Street ' || g, 'City ' || (g % 700), '0123456789'
                 FROM generate_series(1, 100000) g""");
         jdbc.execute("ANALYZE owners");
 
-        List<String> plan = jdbc.queryForList("EXPLAIN SELECT * FROM owners " + pageQuery, String.class);
-
-        assertThat(String.join("\n", plan)).doesNotContain("Seq Scan on owners");
+        SoftAssertions.assertSoftly(softly -> List.of(
+                "ORDER BY last_name, first_name, id LIMIT 20 OFFSET 20000",
+                "ORDER BY city DESC, last_name DESC, first_name DESC, id DESC LIMIT 20 OFFSET 20000",
+                "WHERE last_name LIKE 'Lab%' ORDER BY last_name, first_name, id LIMIT 20",
+                "WHERE last_name LIKE 'Lab%' ORDER BY city, last_name, first_name, id LIMIT 20").forEach(pageQuery -> {
+                    List<String> plan = jdbc.queryForList("EXPLAIN SELECT * FROM owners " + pageQuery, String.class);
+                    softly.assertThat(String.join("\n", plan)).as(pageQuery).doesNotContain("Seq Scan on owners");
+                }));
     }
 
     @Test
